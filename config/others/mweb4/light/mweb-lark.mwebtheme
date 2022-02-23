@@ -1,0 +1,733 @@
+{
+  "blockCode" : {
+    "isBold" : false,
+    "isItalic" : false,
+    "isStrikethrough" : false,
+    "isUnderline" : false,
+    "color" : "1f2329"
+  },
+  "footnoteDef" : {
+    "isBold" : false,
+    "isItalic" : false,
+    "isStrikethrough" : false,
+    "isUnderline" : false,
+    "color" : "000000"
+  },
+  "linkLink" : {
+    "isBold" : false,
+    "isItalic" : false,
+    "isStrikethrough" : false,
+    "isUnderline" : false,
+    "color" : "3370ff"
+  },
+  "ol" : {
+    "isBold" : false,
+    "isItalic" : false,
+    "isStrikethrough" : false,
+    "isUnderline" : false,
+    "color" : "3370ff"
+  },
+  "editor" : {
+    "app-row-content-color" : "4c4c4c",
+    "app-row-icon-color" : "1996bc",
+    "app-row-separator-color" : "e0e0e2",
+    "currentLineBgColor" : "f5f5f5",
+    "bgColor" : "ffffff",
+    "caretColor" : "1f2329",
+    "color" : "1f2329",
+    "app-row-selected-bgColor" : "1996bc",
+    "app-row-info-color" : "333333",
+    "selectionColor" : "",
+    "selectionBgColor" : "",
+    "app-icon-color" : "1996bc",
+    "app-group-color" : "7f7f7f",
+    "app-group-bgColor" : "efeff4",
+    "app-row-bgColor" : "ffffff",
+    "app-row-title-color" : "333333"
+  },
+  "h1" : {
+    "isBold" : false,
+    "isItalic" : false,
+    "isStrikethrough" : false,
+    "isUnderline" : false,
+    "color" : "245bdb"
+  },
+  "inlineCode" : {
+    "isBold" : false,
+    "isItalic" : false,
+    "isStrikethrough" : false,
+    "isUnderline" : false,
+    "color" : "1f2329"
+  },
+  "image" : {
+    "isBold" : false,
+    "isItalic" : false,
+    "isStrikethrough" : false,
+    "isUnderline" : false,
+    "color" : "3370ff"
+  },
+  "h2" : {
+    "isBold" : false,
+    "isItalic" : false,
+    "isStrikethrough" : false,
+    "isUnderline" : false,
+    "color" : "245bdb"
+  },
+  "table" : {
+    "isBold" : false,
+    "isItalic" : false,
+    "isStrikethrough" : false,
+    "isUnderline" : false,
+    "color" : "1f2329"
+  },
+  "h3" : {
+    "isBold" : false,
+    "isItalic" : false,
+    "isStrikethrough" : false,
+    "isUnderline" : false,
+    "color" : "245bdb"
+  },
+  "link" : {
+    "isBold" : false,
+    "isItalic" : false,
+    "isStrikethrough" : false,
+    "isUnderline" : false,
+    "color" : "3370ff"
+  },
+  "strikethrough" : {
+    "isBold" : false,
+    "isItalic" : false,
+    "isStrikethrough" : true,
+    "isUnderline" : false,
+    "color" : "1f2329"
+  },
+  "h4" : {
+    "isBold" : false,
+    "isItalic" : false,
+    "isStrikethrough" : false,
+    "isUnderline" : false,
+    "color" : "245bdb"
+  },
+  "footnoteRef" : {
+    "isBold" : false,
+    "isItalic" : false,
+    "isStrikethrough" : false,
+    "isUnderline" : false,
+    "color" : "3370ff"
+  },
+  "isAutoGenCSS" : false,
+  "codeblock-string" : {
+    "isBold" : false,
+    "isItalic" : false,
+    "isStrikethrough" : false,
+    "isUnderline" : false,
+    "color" : "669900"
+  },
+  "codeblock-preprocessor" : {
+    "isBold" : false,
+    "isItalic" : false,
+    "isStrikethrough" : false,
+    "isUnderline" : false,
+    "color" : "669900"
+  },
+  "h5" : {
+    "isBold" : false,
+    "isItalic" : false,
+    "isStrikethrough" : false,
+    "isUnderline" : false,
+    "color" : "245bdb"
+  },
+  "underline" : {
+    "isBold" : false,
+    "isItalic" : false,
+    "isStrikethrough" : false,
+    "isUnderline" : true,
+    "color" : "1a1a1a"
+  },
+  "inlineHTML" : {
+    "isBold" : false,
+    "isItalic" : false,
+    "isStrikethrough" : false,
+    "isUnderline" : false,
+    "color" : "000000"
+  },
+  "strong" : {
+    "isBold" : true,
+    "isItalic" : false,
+    "isStrikethrough" : false,
+    "isUnderline" : false,
+    "color" : "245bdb"
+  },
+  "blockHTML" : {
+    "isBold" : false,
+    "isItalic" : false,
+    "isStrikethrough" : false,
+    "isUnderline" : false,
+    "color" : "000000"
+  },
+  "codeblock-attribute" : {
+    "isBold" : false,
+    "isItalic" : false,
+    "isStrikethrough" : false,
+    "isUnderline" : false,
+    "color" : "669900"
+  },
+  "h6" : {
+    "isBold" : false,
+    "isItalic" : false,
+    "isStrikethrough" : false,
+    "isUnderline" : false,
+    "color" : "245bdb"
+  },
+  "quote" : {
+    "isBold" : false,
+    "isItalic" : false,
+    "isStrikethrough" : false,
+    "isUnderline" : false,
+    "color" : "3370ff"
+  },
+  "codeblock-keyword" : {
+    "isBold" : false,
+    "isItalic" : false,
+    "isStrikethrough" : false,
+    "isUnderline" : false,
+    "color" : "0077aa"
+  },
+  "ul" : {
+    "isBold" : false,
+    "isItalic" : false,
+    "isStrikethrough" : false,
+    "isUnderline" : false,
+    "color" : "3370ff"
+  },
+  "codeblock-comment" : {
+    "isBold" : false,
+    "isItalic" : false,
+    "isStrikethrough" : false,
+    "isUnderline" : false,
+    "color" : "708090"
+  },
+  "emph" : {
+    "isBold" : false,
+    "isItalic" : true,
+    "isStrikethrough" : false,
+    "isUnderline" : false,
+    "color" : "245bdb"
+  },
+  "codeblock-character" : {
+    "isBold" : false,
+    "isItalic" : false,
+    "isStrikethrough" : false,
+    "isUnderline" : false,
+    "color" : "669900"
+  },
+  "codeblock-number" : {
+    "isBold" : false,
+    "isItalic" : false,
+    "isStrikethrough" : false,
+    "isUnderline" : false,
+    "color" : "990055"
+  },
+  "hr" : {
+    "isBold" : false,
+    "isItalic" : false,
+    "isStrikethrough" : false,
+    "isUnderline" : false,
+    "color" : "dee0e3"
+  }
+}
+
+
+
+=============================================
+
+
+
+@charset "UTF-8";
+/*
+ * PrismJS default theme
+ * 这个文件只应该包含变量
+ */
+/*
+ * Default theme，适用于 core/mweb-base.scss。
+ * 取值参考 chrome 默认样式：
+ * https://chromium.googlesource.com/chromium/blink/+/refs/heads/main/Source/core/css/html.css
+ * 所有 import "core/mweb-base.scss" 的文件都应该同时导入此变量文件。
+ */
+/* color */
+/* font & line */
+/* boxing */
+/* elememts */
+/* color */
+/* prism & pre */
+/* font */
+/* header */
+/* spacing */
+/* table */
+/*
+ * 基准样式，相当于 reset.css，使主题在不同平台下有统一的表现。
+ * 各个属性的默认值为 chrome 的默认样式，见 variables/default.scss。
+ */
+/**
+ * PrismJS 的样式表。颜色全部用变量表示，方便后续切换不同的配色方案。
+ */
+/* PrismJS 1.23.0
+https://prismjs.com/download.html#themes=prism&languages=markup+css+clike+javascript */
+/**
+ * prism.js default theme for JavaScript, CSS and HTML
+ * Based on dabblet (http://dabblet.com)
+ * @author Lea Verou
+ */
+.markdown-body {
+  /* Code blocks */
+  /* Inline code */
+}
+.markdown-body code[class*=language-],
+.markdown-body pre[class*=language-] {
+  color: black;
+  background: none;
+  font-family: monospace, Menlo-Regular, Menlo, Monaco, Consolas, "Courier New";
+  font-size: 14px;
+  text-align: left;
+  white-space: pre;
+  word-spacing: normal;
+  word-break: normal;
+  word-wrap: normal;
+  line-height: 1.6em;
+  -moz-tab-size: 4;
+  -o-tab-size: 4;
+  tab-size: 4;
+  -webkit-hyphens: none;
+  -moz-hyphens: none;
+  -ms-hyphens: none;
+  hyphens: none;
+}
+.markdown-body pre[class*=language-]::-moz-selection, .markdown-body pre[class*=language-] ::-moz-selection,
+.markdown-body code[class*=language-]::-moz-selection, .markdown-body code[class*=language-] ::-moz-selection {
+  text-shadow: none;
+  background: #b3d4fc;
+}
+.markdown-body pre[class*=language-]::selection, .markdown-body pre[class*=language-] ::selection,
+.markdown-body code[class*=language-]::selection, .markdown-body code[class*=language-] ::selection {
+  text-shadow: none;
+  background: #b3d4fc;
+}
+@media print {
+  .markdown-body code[class*=language-],
+.markdown-body pre[class*=language-] {
+    text-shadow: none;
+  }
+}
+.markdown-body pre[class*=language-] {
+  padding: 10px;
+  margin: 0.5em 0;
+  overflow: auto;
+}
+.markdown-body :not(pre) > code[class*=language-],
+.markdown-body pre[class*=language-] {
+  background: #f5f6f7;
+}
+.markdown-body :not(pre) > code[class*=language-] {
+  padding: 0.1em;
+  border-radius: 0.3em;
+  white-space: normal;
+}
+.markdown-body .token.comment,
+.markdown-body .token.prolog,
+.markdown-body .token.doctype,
+.markdown-body .token.cdata {
+  color: slategray;
+}
+.markdown-body .token.punctuation {
+  color: #999;
+}
+.markdown-body .token.namespace {
+  opacity: 0.7;
+}
+.markdown-body .token.number,
+.markdown-body .token.boolean {
+  color: #905;
+}
+.markdown-body .token.property,
+.markdown-body .token.tag,
+.markdown-body .token.constant,
+.markdown-body .token.symbol,
+.markdown-body .token.deleted {
+  color: #905;
+}
+.markdown-body .token.selector,
+.markdown-body .token.string,
+.markdown-body .token.char,
+.markdown-body .token.builtin,
+.markdown-body .token.inserted {
+  color: #690;
+}
+.markdown-body .token.attr-name {
+  color: #690;
+}
+.markdown-body .token.char {
+  color: #690;
+}
+.markdown-body .token.operator,
+.markdown-body .token.entity,
+.markdown-body .token.url,
+.markdown-body .language-css .token.string,
+.markdown-body .style .token.string {
+  color: #9a6e3a;
+  background: none;
+}
+.markdown-body .token.atrule,
+.markdown-body .token.attr-value,
+.markdown-body .token.keyword {
+  color: #07a;
+}
+.markdown-body .token.function,
+.markdown-body .token.class-name {
+  color: #DD4A68;
+}
+.markdown-body .token.regex,
+.markdown-body .token.important,
+.markdown-body .token.variable {
+  color: #e90;
+}
+.markdown-body .token.important,
+.markdown-body .token.bold {
+  font-weight: bold;
+}
+.markdown-body .token.italic {
+  font-style: italic;
+}
+.markdown-body .token.entity {
+  cursor: help;
+}
+
+/**
+ * html、body 标签仅适用于 MWeb
+ * 在用于 juejin 等平台时，需要转为 .markdown-body，防止污染全局样式
+ */
+html {
+  font-family: -apple-system, BlinkMacSystemFont, Helvetica Neue, Arial, Segoe UI, PingFang SC, Microsoft Yahei, Hiragino Sans GB, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+  font-size: 16px;
+  color: #1f2329;
+}
+
+body {
+  background-color: white;
+}
+
+/**
+ * MWeb 包裹 markdown 的容器是 .markdown-body
+ * Typora 中是 #write
+ */
+.markdown-body {
+  line-height: 1.68;
+  -webkit-text-size-adjust: 100%;
+  max-width: 46rem;
+  margin: 0px auto;
+  padding: 1.6rem 3.2rem;
+  /* spacing */
+  /* block */
+  /* list */
+  /* inline */
+  /* table */
+  /* svg */
+}
+.markdown-body * {
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+}
+.markdown-body > *:first-child {
+  margin-top: 0 !important;
+}
+.markdown-body > *:last-child {
+  margin-top: 0 !important;
+}
+.markdown-body p, .markdown-body details, .markdown-body dl, .markdown-body ol, .markdown-body ul, .markdown-body pre, .markdown-body xmp, .markdown-body plaintext, .markdown-body listing, .markdown-body blockquote, .markdown-body table, .markdown-body figure, .markdown-body hr {
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+.markdown-body h1 {
+  font-size: 26px;
+  font-weight: bold;
+  margin-top: 26px;
+  margin-bottom: 10px;
+  margin-left: 0;
+  margin-right: 0;
+}
+.markdown-body h2 {
+  font-size: 22px;
+  font-weight: bold;
+  margin-top: 22px;
+  margin-bottom: 8px;
+  margin-left: 0;
+  margin-right: 0;
+}
+.markdown-body h3 {
+  font-size: 20px;
+  font-weight: bold;
+  margin-top: 20px;
+  margin-bottom: 8px;
+  margin-left: 0;
+  margin-right: 0;
+}
+.markdown-body h4 {
+  font-size: 18px;
+  font-weight: bold;
+  margin-top: 18px;
+  margin-bottom: 8px;
+  margin-left: 0;
+  margin-right: 0;
+}
+.markdown-body h5 {
+  font-size: 16px;
+  font-weight: bold;
+  margin-top: 16px;
+  margin-bottom: 8px;
+  margin-left: 0;
+  margin-right: 0;
+}
+.markdown-body h6 {
+  font-size: 16px;
+  font-weight: bold;
+  margin-top: 16px;
+  margin-bottom: 8px;
+  margin-left: 0;
+  margin-right: 0;
+}
+.markdown-body p {
+  margin-left: 0;
+  margin-right: 0;
+}
+.markdown-body pre, .markdown-body xmp, .markdown-body plaintext, .markdown-body listing {
+  font-family: monospace, Menlo-Regular, Menlo, Monaco, Consolas, "Courier New";
+}
+.markdown-body blockquote > :first-child {
+  margin-top: 0;
+}
+.markdown-body blockquote > :last-child {
+  margin-bottom: 0;
+}
+.markdown-body hr {
+  border-style: inset;
+  border-width: 1px;
+}
+.markdown-body img {
+  max-width: 100%;
+  height: auto;
+}
+.markdown-body li {
+  word-wrap: break-all;
+}
+.markdown-body li + li {
+  margin-top: 4px;
+}
+.markdown-body ul ul, .markdown-body ol ul, .markdown-body ul ol, .markdown-body ol ol {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+.markdown-body .task-list-item {
+  list-style-type: none;
+}
+.markdown-body a {
+  color: #3370ff;
+  text-decoration: underline;
+}
+.markdown-body a img {
+  border: none;
+}
+.markdown-body b, .markdown-body strong {
+  font-weight: bold;
+}
+.markdown-body i, .markdown-body cite, .markdown-body em, .markdown-body var, .markdown-body address, .markdown-body dfn {
+  font-style: italic;
+}
+.markdown-body code, .markdown-body kbd, .markdown-body tt, .markdown-body samp {
+  font-family: monospace, Menlo-Regular, Menlo, Monaco, Consolas, "Courier New";
+}
+.markdown-body mark {
+  padding: 0.2em 0;
+  background-color: rgba(255, 246, 122, 0.8);
+}
+.markdown-body del, .markdown-body s {
+  color: inherit;
+}
+.markdown-body table {
+  color: black;
+  border-collapse: collapse;
+  background-color: white;
+  border-spacing: 2px;
+  font-size: 1em;
+}
+.markdown-body th, .markdown-body td {
+  border-color: #dee0e3;
+  border-width: 1px;
+  border-style: solid;
+}
+.markdown-body th {
+  padding: 8px 8px;
+  font-size: 1em;
+  font-weight: 500;
+}
+.markdown-body td {
+  padding: 8px 8px;
+  font-size: 1em;
+  font-weight: normal;
+}
+.markdown-body div[id^=mweb-chart-ele] svg {
+  background-color: white;
+}
+
+.markdown-body * {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+.markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4, .markdown-body h5, .markdown-body h6 {
+  line-height: 1.4;
+  font-weight: 500;
+  margin-top: 1em;
+  margin-bottom: 0.37em;
+}
+.markdown-body blockquote {
+  display: block;
+  margin-left: 0;
+  padding-left: 14px;
+  border-left: 2px solid #3370ff;
+  color: rgba(31, 35, 41, 0.7);
+}
+.markdown-body code {
+  border-radius: 4px;
+  margin-left: 2px;
+  margin-right: 2px;
+  border: 1px solid #dee0e3;
+  background-color: #f5f6f7;
+  word-spacing: normal;
+  line-height: 1.6;
+  padding: 0 2px;
+}
+.markdown-body pre {
+  border-radius: 0px;
+  display: block;
+  border: solid 1px #dee0e3;
+  background-color: #f5f6f7;
+  padding: 10px;
+  font-size: 14px;
+  overflow-x: auto;
+}
+.markdown-body pre code {
+  border: none;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+.markdown-body a {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  hyphens: auto;
+  word-break: break-word;
+  color: #3370ff;
+  text-decoration: none;
+}
+.markdown-body a:hover {
+  text-decoration: underline;
+}
+.markdown-body hr {
+  margin: 13px 0 12px;
+  border: 0px;
+  height: 1px;
+  background-origin: content-box;
+  background-image: linear-gradient(90deg, #bbbfc4, #bbbfc4);
+  background-repeat: no-repeat;
+}
+.markdown-body ul {
+  margin-left: 0;
+  padding: 0px;
+  list-style: none;
+}
+.markdown-body ul > li:not([class*=task-list-item]) {
+  word-wrap: break-all;
+  padding-left: 22px;
+}
+.markdown-body ul > li:not([class*=task-list-item]):before {
+  content: "•";
+  color: #3370ff;
+  display: inline-block;
+  margin-left: -20px;
+  margin-right: 20px;
+  width: 0px;
+  font-size: 0.8em;
+  transform: scale(1.25);
+  font-family: PingFangSC-Regular, PingFang SC;
+}
+.markdown-body ul > li:not([class*=task-list-item]) ul > li:not([class*=task-list-item])::before {
+  content: "◦";
+  transform: scale(1);
+  font-weight: 700;
+}
+.markdown-body ul > li:not([class*=task-list-item]) ul > li:not([class*=task-list-item]) ul > li:not([class*=task-list-item])::before {
+  content: "▪";
+  transform: scale(1.25);
+  font-weight: normal;
+}
+.markdown-body ol {
+  counter-reset: ol_counter;
+  margin-left: 0;
+  padding: 0px;
+  list-style: none;
+}
+.markdown-body ol > li:not([class*=task-list-item]) {
+  word-wrap: break-all;
+  padding-left: 22px;
+  position: relative;
+}
+.markdown-body ol > li:not([class*=task-list-item]):before {
+  content: counter(ol_counter) ".";
+  counter-increment: ol_counter;
+  color: #3370ff;
+  position: absolute;
+  margin-left: -22px;
+  margin-right: 4px;
+  padding-left: 2px;
+  padding-right: 2px;
+  text-align: left;
+  white-space: nowrap;
+  overflow: visible;
+  min-width: 18px;
+  border-radius: 2px;
+  transform: translateX(-2px);
+  font-family: Helvetica Neue, Consolas;
+}
+.markdown-body li + li, .markdown-body ul ul, .markdown-body ol ul, .markdown-body ul ol, .markdown-body ol ol, .markdown-body li ul, .markdown-body li ol {
+  margin-top: 4px;
+}
+.markdown-body .task-list-item {
+  padding-left: 28px;
+  margin-left: -6px;
+  list-style: none;
+  word-wrap: break-all;
+}
+.markdown-body .task-list-item input {
+  margin: 0 !important;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.markdown-body .task-list-item input:before {
+  content: " ";
+  display: inline-block;
+  position: relative;
+  line-height: normal;
+  font-size: 16px;
+  top: 2px;
+  border-radius: 2px;
+  border: 1px solid #2b2f36;
+  background-position: 50%;
+  white-space: normal;
+  width: 14px;
+  height: 14px;
+  margin-left: -22px;
+  margin-right: 6px;
+}
+.markdown-body .task-list-item input:checked:before {
+  background-image: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTQiIGhlaWdodD0iMTQiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEwLjU4OSAzLjkwM2wuODA4LjgwOGEuMzUuMzUgMCAwIDEgMCAuNDk1TDYuMTggMTAuNDI1YS4zNS4zNSAwIDAgMS0uNDk1IDBMMi43MDMgNy40NDRhLjM1LjM1IDAgMCAxIDAtLjQ5NWwuODA4LS44MDhhLjM1LjM1IDAgMCAxIC40OTUgMGwxLjkyNSAxLjkyNCA0LjE2My00LjE2M2EuMzUuMzUgMCAwIDEgLjQ5NSAweiIgZmlsbD0iIzMzNzBGRiIvPjwvc3ZnPg==);
+  background-size: contain;
+}
