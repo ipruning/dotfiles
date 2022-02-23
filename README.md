@@ -10,13 +10,14 @@ My dotfiles
 - 取消自动重新排列空间；
 - 启用 Tab 键移动焦点；
 - 修改共享电脑名称；
+- 手动配置 [/config](config) 中的软件自定义设置；
 
-## 软件
+## 软件配置
 
 ```Shell
 # Install Homebrew
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
 # espanso
-ln -sf Dotfiles/.config/espanso /Users/alex/Library/Preferences/espanso
+ln -s Dotfiles/.config/espanso /Users/alex/Library/Preferences/espanso
 ```
