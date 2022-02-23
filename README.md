@@ -16,4 +16,7 @@ My dotfiles
 ```Shell
 # Install Homebrew
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# espanso
+ln -sf Dotfiles/.config/espanso /Users/alex/Library/Preferences/espanso
 ```
