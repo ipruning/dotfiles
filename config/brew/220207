@@ -1,0 +1,132 @@
+tap "1history/onehistory"
+tap "buo/cask-upgrade"
+tap "homebrew/bundle"
+tap "homebrew/cask"
+tap "homebrew/cask-fonts"
+tap "homebrew/cask-versions"
+tap "homebrew/command-not-found"
+tap "homebrew/core"
+tap "oh-my-home/fonts"
+tap "sunnyyoung/repo"
+tap "timothyye/tap"
+brew "asdf"
+brew "bandwhich"
+brew "bat"
+brew "bottom"
+brew "cmake"
+brew "dasel"
+brew "diff-so-fancy"
+brew "dog"
+brew "duf"
+brew "dust"
+brew "extra-cmake-modules"
+brew "fd"
+brew "ffmpeg"
+brew "fzf"
+brew "gh"
+brew "git"
+brew "git-extras"
+brew "git-lfs"
+brew "gitui"
+brew "gnupg"
+brew "gping"
+brew "htop"
+brew "hugo"
+brew "hyperfine"
+brew "iperf"
+brew "jq"
+brew "lazydocker"
+brew "lsd"
+brew "mackup"
+brew "mas"
+brew "mosh"
+brew "neovim"
+brew "nmap"
+brew "pandoc"
+brew "pandoc-crossref"
+brew "pipx"
+brew "platformio"
+brew "procs"
+brew "pyenv"
+brew "qt"
+brew "qt@5"
+brew "ripgrep"
+brew "rm-improved"
+brew "sd"
+brew "shellcheck"
+brew "smartmontools"
+brew "subversion"
+brew "tealdeer"
+brew "thefuck"
+brew "tmux"
+brew "tokei"
+brew "wget"
+brew "yq"
+brew "zoxide"
+brew "1history/onehistory/onehistory"
+brew "timothyye/tap/skm"
+cask "1password-cli"
+cask "cakebrew"
+cask "clashx-pro"
+cask "docker"
+cask "font-caskaydia-cove-nerd-font"
+cask "font-sauce-code-pro-nerd-font"
+cask "font-source-code-pro"
+cask "font-source-code-pro-for-powerline"
+cask "logseq"
+cask "miniforge"
+cask "obsidian"
+cask "openemu"
+cask "wechattweak-cli"
+cask "xld"
+cask "zulu"
+cask "zulu11"
+cask "zulu8"
+mas "Compressor", id: 424390742
+mas "Day One", id: 1055511498
+mas "Developer", id: 640199958
+mas "Drafts", id: 1435957248
+mas "Eagle for Safari", id: 1526651672
+mas "Equinox", id: 1591510203
+mas "Final Cut Pro", id: 424389933
+mas "GarageBand", id: 682658836
+mas "GoodNotes", id: 1444383602
+mas "iMovie", id: 408981434
+mas "iPreview", id: 1519213509
+mas "Keynote", id: 409183694
+mas "Logic Pro", id: 634148309
+mas "LyricsX", id: 1254743014
+mas "Magnet", id: 441258766
+mas "MainStage", id: 634159523
+mas "Maipo", id: 789066512
+mas "MenubarX", id: 1575588022
+mas "Microsoft Excel", id: 462058435
+mas "Microsoft PowerPoint", id: 462062816
+mas "Microsoft Remote Desktop", id: 1295203466
+mas "Microsoft Word", id: 462054704
+mas "Mini Motorways", id: 1456188526
+mas "Motion", id: 434290957
+mas "MusicHarbor", id: 1440405750
+mas "Numbers", id: 409203825
+mas "Octotree", id: 1457450145
+mas "Pages", id: 409201541
+mas "PasteNow", id: 1552536109
+mas "Picsee", id: 1454805783
+mas "Pixea", id: 1507782672
+mas "Plash", id: 1494023538
+mas "QQ", id: 451108668
+mas "Refined GitHub", id: 1519867270
+mas "Shapr3D", id: 1091675654
+mas "Simplified for Twitter", id: 1479307973
+mas "Spark", id: 1176895641
+mas "Take a Break", id: 1457158844
+mas "Tampermonkey", id: 1482490089
+mas "TestFlight", id: 899247664
+mas "Tweetbot", id: 1384080005
+mas "uBlacklist for Safari", id: 1547912640
+mas "uPic", id: 1549159979
+mas "waifu2x", id: 1286485858
+mas "WeChat", id: 836500024
+mas "Xcode", id: 497799835
+mas "Xnip", id: 1221250572
+mas "讯飞语音输入", id: 1243368435
