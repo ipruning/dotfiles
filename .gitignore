@@ -1,3 +1,10 @@
-/bin
-/playground
 /.vscode
+
+/bin
+
+/config/iterm2
+/config/alfred
+/config/hook
+/config/torrent
+
+/playground
