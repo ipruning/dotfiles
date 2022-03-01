@@ -1,0 +1,14 @@
+@argdown/cli
+@lint-md/cli
+@marp-team/marp-cli
+@squoosh/cli
+cnpm
+doctor-jones
+gatsby-cli
+ghost-cli
+jshint
+markdownlint-cli
+picgo
+pnpm
+yarn
+zhlint
