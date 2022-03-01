@@ -23,8 +23,8 @@ ln -s Dotfiles/.config/espanso /Users/alex/Library/Preferences/espanso
 
 # npm
 asdf install nodejs lts
-xargs npm install --global < $HOME/Dotfiles/config/npm/npm
+xargs npm install --global < $HOME/Dotfiles/config/npm/npm.txt
 
 # pipx
-xargs pipx install < $HOME/Dotfiles/config/pipx/pipx
+xargs pipx install < $HOME/Dotfiles/config/pipx/npm.txt
 ```
