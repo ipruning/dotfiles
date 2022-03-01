@@ -15,20 +15,28 @@ My dotfiles
 ## 软件配置
 
 ```Shell
-# Install Homebrew
+# install Homebrew
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-# Install AutoCorrrect
+# install Homebrew packages
+brew bundle --file=$HOME/dotfiles/config/brew/Brewfile
+
+# install AutoCorrrect
 curl -sSL https://git.io/JcGER | bash
 
-# espanso
-ln -s Dotfiles/.config/espanso /Users/alex/Library/Preferences/espanso
-
-# npm
+# install npm packages
 asdf install nodejs lts
-xargs npm install --global < $HOME/Dotfiles/config/npm/npm.txt
+asdf global nodejs lts
+xargs npm install --global < $HOME/dotfiles/config/npm/npm.txt
 
-# pipx
-xargs pipx install < $HOME/Dotfiles/config/pipx/npm.txt
+# install pipx packages
+xargs pipx install < $HOME/dotfiles/config/pipx/npm.txt
+```
 
+```Shell
+# init
+git clone https://github.com/Spehhhhh/dotfiles.git $HOME/dotfiles
+
+# espanso
+ln -s $HOME/dotfiles/.config/espanso $HOME/Library/Preferences/espanso
 ```
