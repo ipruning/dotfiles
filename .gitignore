@@ -1,7 +1,5 @@
 /.vscode
 
-/bin
-
 /config/iterm2
 /config/alfred
 /config/hook
