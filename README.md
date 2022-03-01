@@ -18,6 +18,9 @@ My dotfiles
 # Install Homebrew
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
+# Install AutoCorrrect
+curl -sSL https://git.io/JcGER | bash
+
 # espanso
 ln -s Dotfiles/.config/espanso /Users/alex/Library/Preferences/espanso
 
@@ -27,4 +30,5 @@ xargs npm install --global < $HOME/Dotfiles/config/npm/npm.txt
 
 # pipx
 xargs pipx install < $HOME/Dotfiles/config/pipx/npm.txt
+
 ```
