@@ -25,10 +25,10 @@ curl -sSL https://git.io/JcGER | bash
 # install npm packages
 asdf install nodejs lts
 asdf global nodejs lts
-xargs npm install --global < $HOME/dotfiles/config/npm/npm.txt
+xargs npm install --global < $HOME/dotfiles/assets/npm/npm.txt
 
 # install pipx packages
-xargs pipx install < $HOME/dotfiles/config/pipx/npm.txt
+xargs pipx install < $HOME/dotfiles/assets/pipx/npm.txt
 ```
 
 ```Shell
@@ -36,5 +36,5 @@ xargs pipx install < $HOME/dotfiles/config/pipx/npm.txt
 git clone https://github.com/Spehhhhh/dotfiles.git $HOME/dotfiles
 
 # espanso
-ln -s $HOME/dotfiles/.config/espanso $HOME/Library/Preferences/espanso
+ln -sf $HOME/dotfiles/config/espanso $HOME/Library/Preferences/espanso
 ```

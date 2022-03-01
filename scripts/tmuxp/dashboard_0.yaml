@@ -1,0 +1,9 @@
+session_name: dashboard_0
+windows:
+  - window_name: Dashboard
+    layout: tiled
+    panes:
+      - runUnblockNeteaseMusic
+      - runfava
+      - yacron -c .my_jobs_crontab.yaml
+      - echo hello
