@@ -1,6 +1,4 @@
-# dotfiles
-
-My dotfiles
+# My dotfiles
 
 ## 系统配置
 
