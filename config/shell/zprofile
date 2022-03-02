@@ -1,0 +1,5 @@
+# homebrew shell env
+eval "$(/opt/homebrew/bin/brew shellenv)" 
+
+# homebrew & pipx binaries
+export PATH="$PATH:${HOME}/.local/bin"
