@@ -1,18 +1,17 @@
 #!/bin/bash
 
 # homebrew shell env
-arch_check=$(/usr/bin/arch)
-case $arch_check in
-  arm64*)
-    eval "$(/opt/homebrew/bin/brew shellenv)" 
+case $(uname -m) in
+arm64*)
+  eval "$(/opt/homebrew/bin/brew shellenv)"
   ;;
-  i386*)
-    echo "TODO"
+x86_64*)
+  eval "$(/usr/local/homebrew/bin/brew shellenv)"
   ;;
-  *)
-    echo "TODO"
+*)
+  echo "unknown: $(uname -m)"
   ;;
 esac
 
-# homebrew & pipx binaries
+# homebrew & pipx & other binaries
 export PATH="$PATH:${HOME}/.local/bin"
