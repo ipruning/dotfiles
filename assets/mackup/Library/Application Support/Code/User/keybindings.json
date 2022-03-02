@@ -1,0 +1,7 @@
+// Empty
+[
+    {
+        "key": "cmd+[Comma]",
+        "command": "workbench.action.openGlobalSettings"
+    }
+]

@@ -1,0 +1,9 @@
+# Git
+.git
+
+# Node
+node_modules
+.node_modules
+
+# Python
+site-packages

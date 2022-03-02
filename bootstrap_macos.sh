@@ -28,6 +28,11 @@ function main_arm64 {
   source $HOME/.zshrc
   brew bundle --file="$HOME"/dotfiles/assets/brew/Brewfile
 
+  # install mackup
+  ln -sf "$HOME"/dotfiles/config/mackup/.mackup.cfg "$HOME"/.mackup.cfg
+  ln -sf "$HOME"/dotfiles/config/mackup/.mackup "$HOME"/.mackup
+  mackup restore
+
   # install asdf
   asdf plugin add clojure https://github.com/asdf-community/asdf-clojure.git
   asdf plugin-add golang https://github.com/kennyp/asdf-golang.git
@@ -48,11 +53,6 @@ function main_arm64 {
 
   # install other packages
   curl -sSL https://git.io/JcGER | bash # AutoCorrect
-
-  # install mackup
-  ln -sf "$HOME"/dotfiles/config/mackup/.mackup.cfg "$HOME"/.mackup.cfg
-  ln -sf "$HOME"/dotfiles/config/mackup/.mackup "$HOME"/.mackup
-  mackup restore
 
   # install oh-my-tmux
   git clone https://github.com/gpakosz/.tmux.git "$HOME"/.tmux
