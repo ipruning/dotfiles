@@ -58,6 +58,13 @@ function main_arm64 {
   # install oh-my-tmux
   git clone https://github.com/gpakosz/.tmux.git "$HOME"/.tmux
   ln -sf "$HOME"/.tmux/.tmux.conf "$HOME"/.tmux.conf
+
+  # install SpaceVim
+  curl -sLf https://spacevim.org/install.sh | bash
+
+  # install doom-emacs
+  git clone --depth 1 https://github.com/hlissner/doom-emacs ~/.emacs.d
+  ~/.emacs.d/bin/doom install
 }
 
 # init
