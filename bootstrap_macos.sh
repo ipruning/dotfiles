@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/bin/bash
 
 RED="$(tput setaf 1)"
 GREEN="$(tput setaf 2)"
@@ -6,50 +6,65 @@ YELLOW="$(tput setaf 3)"
 BLUE="$(tput setaf 4)"
 NORMAL="$(tput sgr0)"
 
-# main_arm64
-function main_arm64 {
-  echo "${BLUE}Installing dotfiles for arm64${NORMAL}"
-  
-  # install oh-my-zsh
+SYSTEM_ARCH=$(uname -m)
+
+function main {
+  case $SYSTEM_ARCH in
+  arm64*)
+    echo "${BLUE}Installing dotfiles for macOS (Apple chips)${NORMAL}"
+    ;;
+  x86_64*)
+    echo "${BLUE}Installing dotfiles for macOS (Intel chips)${NORMAL}"
+    ;;
+  *)
+    echo "unknown $SYSTEM_ARCH"
+    ;;
+  esac
+
   echo "${BLUE}Installing oh-my-zsh${NORMAL}"
   export CHSH=no
   export RUNZSH=no
   export KEEP_ZSHRC=yes
   sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" --unattended --keep-zshrc
 
-  # install zsh
-  echo "${BLUE}Installing zsh${NORMAL}"
-  grep --fixed-strings "dotfiles/config/shell/init.sh" ~/.zshrc || mv "$HOME"/.zshrc "$HOME"/.zshrc.bak
-  touch "$HOME"/.zshrc && echo "source $HOME/dotfiles/config/shell/init.sh" >> "$HOME"/.zshrc
+  echo "${BLUE}Installing zsh dotiles${NORMAL}"
+  grep --fixed-strings "dotfiles/config/shell/init.sh" "$HOME"/.zshrc || mv "$HOME"/.zshrc "$HOME"/.zshrc.bak
+  touch "$HOME"/.zshrc && echo "source $HOME/dotfiles/config/shell/init.sh" >>"$HOME"/.zshrc
   mv "$HOME"/.zprofile "$HOME"/.zprofile.bak
   cp "$HOME"/dotfiles/config/shell/macos/zprofile.sh "$HOME"/.zprofile
-  
-  # install zsh plugins
-  echo "${BLUE}Installing zsh plugins${NORMAL}"
-  git clone https://github.com/Aloxaf/fzf-tab ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/fzf-tab
-  git clone https://github.com/paulirish/git-open.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/git-open
-  git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
-  git clone https://github.com/zsh-users/zsh-completions ${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-completions
-  git clone https://github.com/sukkaw/zsh-osx-autoproxy ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-osx-autoproxy
-  git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
 
-  # install Homebrew
+  echo "${BLUE}Installing zsh plugins${NORMAL}"
+  git clone https://github.com/Aloxaf/fzf-tab "${ZSH_CUSTOM:-~/.oh-my-zsh/custom}"/plugins/fzf-tab
+  git clone https://github.com/paulirish/git-open.git "${ZSH_CUSTOM:-~/.oh-my-zsh/custom}"/plugins/git-open
+  git clone https://github.com/zsh-users/zsh-autosuggestions "${ZSH_CUSTOM:-~/.oh-my-zsh/custom}"/plugins/zsh-autosuggestions
+  git clone https://github.com/zsh-users/zsh-completions "${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}"/plugins/zsh-completions
+  git clone https://github.com/sukkaw/zsh-osx-autoproxy "${ZSH_CUSTOM:-~/.oh-my-zsh/custom}"/plugins/zsh-osx-autoproxy
+  git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "${ZSH_CUSTOM:-~/.oh-my-zsh/custom}"/plugins/zsh-syntax-highlighting
+
   echo "${BLUE}Installing Homebrew${NORMAL}"
   which brew || /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-  # install Homebrew packages
   echo "${BLUE}Installing Homebrew packages${NORMAL}"
-  eval "$(/opt/homebrew/bin/brew shellenv)"
-  source $HOME/.zshrc
+  case $SYSTEM_ARCH in
+  arm64*)
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+    ;;
+  x86_64*)
+    eval "$(/usr/local/homebrew/bin/brew shellenv)"
+    ;;
+  *)
+    echo "unknown: $SYSTEM_ARCH"
+    ;;
+  esac
   brew bundle --file="$HOME"/dotfiles/assets/brew/brew_dev.txt
 
-  # install mackup
   echo "${BLUE}Installing mackup${NORMAL}"
   ln -sf "$HOME"/dotfiles/config/mackup/.mackup.cfg "$HOME"/.mackup.cfg
   ln -sf "$HOME"/dotfiles/config/mackup/.mackup "$HOME"/.mackup
+
+  echo "${BLUE}Restoring dotfiles${NORMAL}"
   mackup restore
 
-  # install asdf
   echo "${BLUE}Installing asdf${NORMAL}"
   asdf plugin-add clojure https://github.com/asdf-community/asdf-clojure.git
   asdf plugin-add golang https://github.com/kennyp/asdf-golang.git
@@ -60,43 +75,39 @@ function main_arm64 {
   asdf plugin-add rust https://github.com/asdf-community/asdf-rust.git
   asdf install
 
-  # install npm packages
   echo "${BLUE}Installing npm packages${NORMAL}"
-  xargs npm install --global < "$HOME"/dotfiles/assets/npm/npm_dev.txt
+  xargs npm install --global <"$HOME"/dotfiles/assets/npm/npm_dev.txt
 
-  # install pipx packages
   echo "${BLUE}Installing pipx packages${NORMAL}"
-  cat "$HOME"/dotfiles/assets/pipx/pipx_dev.txt | xargs -n 1 pipx install
+  xargs <"$HOME"/dotfiles/assets/pipx/pipx_dev.txt -n 1 pipx install
 
-  # install other packages
   echo "${BLUE}Installing other packages${NORMAL}"
   where autocorrect || curl -sSL https://git.io/JcGER | bash # AutoCorrect
 
-  # install oh-my-tmux
   echo "${BLUE}Installing oh-my-tmux${NORMAL}"
   git clone https://github.com/gpakosz/.tmux.git "$HOME"/.tmux
   ln -sf "$HOME"/.tmux/.tmux.conf "$HOME"/.tmux.conf
 
-  # install SpaceVim
   echo "${BLUE}Installing SpaceVim${NORMAL}"
   curl -sLf https://spacevim.org/install.sh | bash
 
-  # install doom-emacs
-  # git clone --depth 1 https://github.com/hlissner/doom-emacs ~/.emacs.d
-  # ~/.emacs.d/bin/doom install
+  echo "${BLUE}Installing doom-emacs${NORMAL}"
+  git clone --depth 1 https://github.com/hlissner/doom-emacs "$HOME"/.emacs.d
+  "$HOME"/.emacs.d/bin/doom install
 }
 
 # init
-arch_check=$(/usr/bin/arch)
-case $arch_check in
-  arm64*)
-    main_arm64
-    echo "Done"
+case $(uname -m) in
+arm64*)
+  main
+  echo "${GREEN}Done${NORMAL}"
   ;;
-  i386*)
-    echo "Please check the path to miniforge in init.sh"
+x86_64*)
+  main
+  echo "${GREEN}Done${NORMAL}"
+  echo "${YELLOW}Please check the path to miniforge in init.sh${NORMAL}"
   ;;
-  *)
-    echo "unknown: $arch_check"
+*)
+  echo "${RED}unknown: $(uname -m)${NORMAL}"
   ;;
 esac
