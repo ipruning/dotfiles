@@ -1,0 +1,5 @@
+nox
+poetry
+pre-commit
+speedtest-cli
+yacron
