@@ -3,13 +3,12 @@
 # main_arm64
 function main_arm64 {
   echo "Installing dotfiles for arm64"
-  # install oh-my-zsh
-  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
   # install Homebrew
   which brew || /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
   # install Homebrew packages
+  source $HOME/.zshrc
   brew bundle --file="$HOME"/dotfiles/config/brew/Brewfile
 
   # install npm packages
