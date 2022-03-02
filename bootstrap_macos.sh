@@ -45,12 +45,10 @@ function main_arm64 {
   asdf install
 
   # install npm packages
-  # asdf install nodejs lts
-  # asdf global nodejs lts
   xargs npm install --global < "$HOME"/dotfiles/assets/npm/npm.txt
 
   # install pipx packages
-  xargs pipx install < "$HOME"/dotfiles/assets/pipx/pipx.txt
+  cat "$HOME"/dotfiles/assets/pipx/pipx.txt | xargs -n 1 pip install
 
   # install other packages
   curl -sSL https://git.io/JcGER | bash # AutoCorrect
@@ -63,8 +61,8 @@ function main_arm64 {
   curl -sLf https://spacevim.org/install.sh | bash
 
   # install doom-emacs
-  git clone --depth 1 https://github.com/hlissner/doom-emacs ~/.emacs.d
-  ~/.emacs.d/bin/doom install
+  # git clone --depth 1 https://github.com/hlissner/doom-emacs ~/.emacs.d
+  # ~/.emacs.d/bin/doom install
 }
 
 # init
