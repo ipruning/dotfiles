@@ -23,11 +23,17 @@ function main_arm64 {
   # install other packages
   curl -sSL https://git.io/JcGER | bash # AutoCorrect
 
-  echo "source $HOME/dotfiles/config/shell/init.sh" >> "$HOME"/.zshrc
+  # install zsh
+  grep --fixed-strings "dotfiles/config/shell/init.sh" ~/.zshrc || echo "source $HOME/dotfiles/config/shell/init.sh" >> "$HOME"/.zshrc
+  
+  # install zsh plugins
+
+  # install mackup
   ln -sf "$HOME"/dotfiles/config/mackup/.mackup.cfg "$HOME"/.mackup.cfg
   ln -sf "$HOME"/dotfiles/config/mackup/.mackup "$HOME"/.mackup
   mackup restore
 
+  # install oh-my-tmux
   git clone https://github.com/gpakosz/.tmux.git "$HOME"/.tmux
   ln -sf "$HOME"/.tmux/.tmux.conf "$HOME"/.tmux.conf
 }
