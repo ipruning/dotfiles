@@ -1,0 +1,5 @@
+auto_activate_base: false
+channels:
+  - conda-forge
+envs_dirs:
+  - ~/.conda/envs

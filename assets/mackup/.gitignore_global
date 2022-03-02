@@ -1,0 +1,34 @@
+# macOS
+._*
+.AppleDouble
+.DS_Store
+.localized
+.LSOverride
+.Spotlight-V100
+.Trashes
+
+# Windows
+Desktop.ini
+ehthumbs.db
+Thumbs.db
+
+# Node.js
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Python
+venv
+.venv
+env
+.env
+site-packages
+.ipynb_checkpoints
+
+# VS Code
+.vscode
+
+# Playground
+playground
+Playground

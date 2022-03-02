@@ -1,0 +1,185 @@
+{
+  "editor.fontLigatures": true,
+  "editor.minimap.enabled": false,
+  "editor.fontSize": 12,
+  "editor.fontFamily": "'CaskaydiaCove Nerd Font'",
+  "editor.formatOnSave": true,
+  "editor.tabSize": 4,
+  "editor.inlineSuggest.enabled": true,
+  "editor.cursorBlinking": "phase",
+  "editor.bracketPairColorization.enabled": true,
+  "editor.linkedEditing": true,
+  "editor.suggestSelection": "first",
+  "github.copilot.enable": {
+    "*": true,
+    "yaml": false,
+    "plaintext": false,
+    "markdown": false
+  },
+  "terminal.integrated.fontFamily": "'CaskaydiaCove Nerd Font'",
+  "terminal.integrated.fontSize": 12,
+  "terminal.integrated.inheritEnv": false,
+  "terminal.integrated.confirmOnExit": "hasChildProcesses",
+  "terminal.integrated.defaultProfile.osx": "zsh",
+  "terminal.external.osxExec": "/Applications/iTerm.app/Contents/MacOS/iTerm2",
+  "code-runner.preserveFocus": false,
+  "code-runner.runInTerminal": true,
+  "code-runner.executorMap": {
+    "beancount": "fava $fullFileName -p 4000",
+    "markdown": "cd $dir && ~/Dropbox/Apps/Scripts/md-formatter.sh -a $fullFileName",
+    "python": "$pythonPath -u $fullFileName"
+  },
+  "code-runner.clearPreviousOutput": true,
+  "code-runner.ignoreSelection": true,
+  "git.autofetch": true,
+  "git.confirmSync": false,
+  "git.enableSmartCommit": true,
+  "gitlens.views.repositories.files.layout": "list",
+  "gitlens.codeLens.scopes": ["document"],
+  "gitProjectManager.baseProjectsFolders": ["~/Coding", "~/Desktop"],
+  "diffEditor.renderSideBySide": true,
+  "workbench.activityBar.visible": true,
+  "workbench.iconTheme": "material-icon-theme",
+  "workbench.colorTheme": "One Dark Pro Darker",
+  // "workbench.settings.useSplitJSON": true,
+  // editor
+  // open files as tabs
+  "workbench.editor.enablePreview": false,
+  // reveal existing files if they are open (avoids tons of tabs)
+  "workbench.editor.revealIfOpen": true,
+  // open files from quick open as tabs
+  "workbench.editor.enablePreviewFromQuickOpen": false,
+  "workbench.startupEditor": "none",
+  "workbench.editorAssociations": {
+    "*.ipynb": "jupyter-notebook",
+    "*.pdf": "pdf.preview"
+  },
+  // "http.proxySupport": "off",
+  "remote.SSH.connectTimeout": 1000,
+  "todo-tree.general.tags": [
+    "BUG",
+    "HACK",
+    "FIXME",
+    "#Todo",
+    "#TODO",
+    "[ ]",
+    "[x]"
+  ],
+  "todo-tree.highlights.customHighlight": {
+    "#Todo": {
+      "foreground": "green",
+      "iconColour": "green",
+      "gutterIcon": true
+    },
+    "#TODO": {
+      "foreground": "green",
+      "iconColour": "green",
+      "gutterIcon": true
+    },
+    "BUG": {
+      "foreground": "red",
+      "iconColour": "red"
+    }
+  },
+  "todo-tree.regex.regex": "(//|#|<!--|;|/\\*|^|^\\s*(-|\\d+.))\\s*($TAGS)",
+  // Python
+  "python.formatting.provider": "black",
+  "python.languageServer": "Pylance",
+  // Markdown
+  "markdownlint.config": {
+    "MD004": false, // Unordered list style
+    "MD007": false, // Unordered list indentation
+    "MD018": false, // No space after hash on atx style heading
+    "MD025": false, // Multiple top-level headings in the same document
+    "MD026": false, // Trailing punctuation in heading
+    "MD033": false, // Inline HTML
+    "MD034": false, // Bare URL used
+    "MD045": false // Images should have alternate text (alt text)
+  },
+  "markdown.marp.exportType": "html",
+  "markdown.marp.enableHtml": true,
+  "markdownFormatter.formatOpt": {
+    "indent_size": 4
+  },
+  "markdownFormatter.formatULSymbol": false,
+  "markdown.extension.italic.indicator": "_",
+  "projectManager.git.baseFolders": ["~/Desktop"],
+  "hediet.vscode-drawio.local-storage": "eyIuZHJhd2lvLWNvbmZpZyI6IntcImxhbmd1YWdlXCI6XCJcIixcImN1c3RvbUZvbnRzXCI6W10sXCJsaWJyYXJpZXNcIjpcImdlbmVyYWxcIixcImN1c3RvbUxpYnJhcmllc1wiOltcIkwuc2NyYXRjaHBhZFwiXSxcInBsdWdpbnNcIjpbXSxcInJlY2VudENvbG9yc1wiOltdLFwiZm9ybWF0V2lkdGhcIjpcIjI0MFwiLFwiY3JlYXRlVGFyZ2V0XCI6ZmFsc2UsXCJwYWdlRm9ybWF0XCI6e1wieFwiOjAsXCJ5XCI6MCxcIndpZHRoXCI6ODUwLFwiaGVpZ2h0XCI6MTEwMH0sXCJzZWFyY2hcIjp0cnVlLFwic2hvd1N0YXJ0U2NyZWVuXCI6dHJ1ZSxcImdyaWRDb2xvclwiOlwiI2QwZDBkMFwiLFwiZGFya0dyaWRDb2xvclwiOlwiIzZlNmU2ZVwiLFwiYXV0b3NhdmVcIjp0cnVlLFwicmVzaXplSW1hZ2VzXCI6bnVsbCxcIm9wZW5Db3VudGVyXCI6MCxcInZlcnNpb25cIjoxOCxcInVuaXRcIjoxLFwiaXNSdWxlck9uXCI6ZmFsc2UsXCJ1aVwiOlwiXCJ9In0=",
+  "diffEditor.ignoreTrimWhitespace": false,
+  "indentRainbow.ignoreLinePatterns": [
+    "/[ \t]* [*]/g", // lines begining with <whitespace><space>*
+    "/[ \t]+[/]{2}/g" // lines begininning with <whitespace>//
+  ],
+  "indentRainbow.ignoreErrorLanguages": [
+    "markdown",
+    "python",
+    "clojure",
+    "log",
+    "json",
+    "rust"
+  ],
+  "indentRainbow.colorOnWhiteSpaceOnly": true,
+  "notebook.cellToolbarLocation": {
+    "default": "right",
+    "jupyter-notebook": "left"
+  },
+  "redhat.telemetry.enabled": false,
+  "explorer.confirmDelete": false,
+  "liveServer.settings.donotShowInfoMsg": true,
+  // Language
+  "[markdown]": {
+    "editor.defaultFormatter": "mervin.markdown-formatter",
+    "editor.quickSuggestions": true,
+    "editor.formatOnSave": false,
+    "editor.tabSize": 4
+  },
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.python",
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": true
+    },
+    "editor.tabSize": 4
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.tabSize": 2
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.tabSize": 2
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.tabSize": 2
+  },
+  "[yaml]": {
+    "editor.defaultFormatter": "redhat.vscode-yaml",
+    "editor.tabSize": 4
+  },
+  "prettier.tabWidth": 2,
+  // Beancount
+  "material-icon-theme.languages.associations": {
+    "beancount": "log",
+    "qalc": "log"
+  },
+  "beancount.fixedCJKWidth": true,
+  "beancountFormatter.fixedCJKWidth": true,
+  "beancountFormatter.currencyColumn": 72,
+  "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
+  "platformio-ide.activateOnlyOnPlatformIOProject": true,
+  "platformio-ide.useBuiltinPython": false,
+  "go.toolsManagement.autoUpdate": true,
+  "autocorrect.formatOnSave": false,
+  // Path
+  "python.defaultInterpreterPath": "/Users/alex/.asdf/shims/python",
+  // "python.defaultInterpreterPath": "${workspaceFolder}/.venv",
+  "go.gopath": "/Users/alex/.asdf/installs/go/1.17.6/bin/go",
+  "matlab.matlabpath": "/Applications/MATLAB_R2022a.app/bin",
+  "matlab.mlintpath": "/Applications/MATLAB_R2022a.app/bin/maci64/mlint",
+  "json.maxItemsComputed": 10000,
+  "vscode-neovim.neovimExecutablePaths.darwin": "/opt/homebrew/bin/nvim",
+  "markdown-preview-enhanced.previewTheme": "one-dark.css",
+  "terminal.integrated.tabs.location": "left",
+  "terminal.integrated.tabs.enabled": false,
+  "Lua.telemetry.enable": false
+}
