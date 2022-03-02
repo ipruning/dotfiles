@@ -27,7 +27,7 @@ function main_arm64 {
 
   # install Homebrew packages
   source $HOME/.zshrc
-  brew bundle --file="$HOME"/dotfiles/assets/brew/Brewfile
+  brew bundle --file="$HOME"/dotfiles/assets/brew/BrewfileDev
 
   # install mackup
   ln -sf "$HOME"/dotfiles/config/mackup/.mackup.cfg "$HOME"/.mackup.cfg
