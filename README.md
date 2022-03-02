@@ -21,10 +21,12 @@
 > ⚠️ If you don't fully understand what this script does, don't run it!
 
 ```shell
-# bootstrap
+# 执行 bootstrap 脚本
+# Execute the bootstrap script
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Spehhhhh/dotfiles/master/bootstrap.sh)"
 
-# 如果你是 macOS 则需要安装 xcode
+# 如果你是 macOS 用户则需要先安装 xcode
+# If you are a macOS user you will need to install xcode first
 xcode-select --install
 ```
 
