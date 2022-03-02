@@ -20,8 +20,8 @@ fi
 if [ -n "$BASH_VERSION" ] || [ -n "$ZSH_VERSION" ]; then
     # run script for interactive mode of bash/zsh
     if [[ $- == *i* ]] && [ -z "$_INIT_SH_NOFUN" ]; then
-        if [ -f "$HOME/dotfiles/config/shell/zsh_env" ]; then
-            . "$HOME/dotfiles/config/shell/zsh_env"
+        if [ -f "$HOME/dotfiles/config/shell/zsh_env.sh" ]; then
+            . "$HOME/dotfiles/config/shell/zsh_env.sh"
         fi
     fi
 fi
@@ -32,8 +32,8 @@ fi
 if [ -n "$BASH_VERSION" ] || [ -n "$ZSH_VERSION" ]; then
     # run script for interactive mode of bash/zsh
     if [[ $- == *i* ]] && [ -z "$_INIT_SH_NOFUN" ]; then
-        if [ -f "$HOME/dotfiles/config/shell/zsh_functions" ]; then
-            . "$HOME/dotfiles/config/shell/zsh_functions"
+        if [ -f "$HOME/dotfiles/config/shell/zsh_functions.sh" ]; then
+            . "$HOME/dotfiles/config/shell/zsh_functions.sh"
         fi
     fi
 fi
@@ -44,8 +44,8 @@ fi
 if [ -n "$BASH_VERSION" ] || [ -n "$ZSH_VERSION" ]; then
     # run script for interactive mode of bash/zsh
     if [[ $- == *i* ]] && [ -z "$_INIT_SH_NOFUN" ]; then
-        if [ -f "$HOME/dotfiles/config/shell/zsh_aliases" ]; then
-            . "$HOME/dotfiles/config/shell/zsh_aliases"
+        if [ -f "$HOME/dotfiles/config/shell/zsh_aliases.sh" ]; then
+            . "$HOME/dotfiles/config/shell/zsh_aliases.sh"
         fi
     fi
 fi
@@ -56,8 +56,8 @@ fi
 if [ -n "$BASH_VERSION" ] || [ -n "$ZSH_VERSION" ]; then
     # run script for interactive mode of bash/zsh
     if [[ $- == *i* ]] && [ -z "$_INIT_SH_NOFUN" ]; then
-        if [ -f "$HOME/dotfiles/config/shell/zsh_completion" ]; then
-            . "$HOME/dotfiles/config/shell/zsh_completion"
+        if [ -f "$HOME/dotfiles/config/shell/zsh_completion.sh" ]; then
+            . "$HOME/dotfiles/config/shell/zsh_completion.sh"
         fi
     fi
 fi
