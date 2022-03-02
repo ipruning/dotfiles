@@ -11,7 +11,7 @@ function main_arm64 {
   mv "$HOME"/.zshrc "$HOME"/.zshrc.bak && touch "$HOME"/.zshrc
   grep --fixed-strings "dotfiles/config/shell/init.sh" ~/.zshrc || echo "source $HOME/dotfiles/config/shell/init.sh" >> "$HOME"/.zshrc
   mv "$HOME"/.zprofile "$HOME"/.zprofile.bak && touch "$HOME"/.zprofile
-  ln -sf "$HOME"/dotfiles/config/shell/macos/zprofile_arm.sh "$HOME"/.zprofile
+  ln -sf "$HOME"/dotfiles/config/shell/macos/zprofile.sh "$HOME"/.zprofile
 
   # install zsh plugins
   git clone https://github.com/Aloxaf/fzf-tab ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/fzf-tab
