@@ -1,12 +1,4 @@
 # gitignore
+
 *.log
-/assets/torrent
-
-# Alfred
-/assets/alfred
-
-# Hook
-/assets/hook
-
-# karabiner
 automatic_backups
