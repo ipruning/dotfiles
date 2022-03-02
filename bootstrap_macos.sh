@@ -10,6 +10,7 @@ function main_arm64 {
   # install zsh
   mv "$HOME"/.zshrc "$HOME"/.zshrc.bak && touch "$HOME"/.zshrc
   grep --fixed-strings "dotfiles/config/shell/init.sh" ~/.zshrc || echo "source $HOME/dotfiles/config/shell/init.sh" >> "$HOME"/.zshrc
+  mv "$HOME"/.zshrc "$HOME"/.zprofile.bak && touch "$HOME"/.zprofile
   echo "eval "$(/opt/homebrew/bin/brew shellenv)"" >> "$HOME"/.zprofile
   echo "export PATH="$PATH:${HOME}/.local/bin"" >> "$HOME"/.zprofile
 
