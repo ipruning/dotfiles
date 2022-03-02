@@ -1,5 +1,9 @@
 # My dotfiles
 
+## TODO
+
+- [ ] 重构脚本使其尽可能幂等；
+
 ## Setup
 
 ```shell
