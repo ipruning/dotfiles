@@ -70,7 +70,7 @@ function main_arm64 {
 
   # install other packages
   echo "${BLUE}Installing other packages${NORMAL}"
-  curl -sSL https://git.io/JcGER | bash # AutoCorrect
+  where autocorrect || curl -sSL https://git.io/JcGER | bash # AutoCorrect
 
   # install oh-my-tmux
   echo "${BLUE}Installing oh-my-tmux${NORMAL}"
