@@ -22,6 +22,12 @@
 
 ```shell
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Spehhhhh/dotfiles/master/bootstrap.sh)"
+
+# install oh-my-zsh
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+
+# 如果你是 macOS 则需要安装 xcode
+xcode-select --install
 ```
 
 脚本会执行以下步骤：

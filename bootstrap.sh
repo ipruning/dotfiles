@@ -13,7 +13,7 @@ function main {
 
   # init
   case "$OSTYPE" in
-    darwin*)  sh ./bootstrap_macos.sh ;;
+    darwin*)  sh "$HOME"/dotfiles/bootstrap_macos.sh ;;
     linux*)   echo "TODO" ;;
     msys*)    echo "TODO" ;;
     *)        echo "unknown: $OSTYPE" ;;
