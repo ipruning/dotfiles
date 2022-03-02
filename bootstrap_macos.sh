@@ -5,7 +5,10 @@ function main_arm64 {
   echo "Installing dotfiles for arm64"
   
   # install oh-my-zsh
-  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"  --unattended --keep-zshrc
+  export CHSH=no
+  export RUNZSH=no
+  export KEEP_ZSHRC=yes
+  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" --unattended --keep-zshrc
 
   # install zsh
   grep --fixed-strings "dotfiles/config/shell/init.sh" ~/.zshrc || mv "$HOME"/.zshrc "$HOME"/.zshrc.bak && touch "$HOME"/.zshrc && echo "source $HOME/dotfiles/config/shell/init.sh" >> "$HOME"/.zshrc
