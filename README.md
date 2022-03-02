@@ -20,19 +20,22 @@
 > ⚠️ 如果你不完全理解这个脚本的作用，就不要运行它！
 > ⚠️ If you don't fully understand what this script does, don't run it!
 
-```shell
-# 执行 bootstrap 脚本
-# Execute the bootstrap script
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Spehhhhh/dotfiles/master/bootstrap.sh)"
+Execute the bootstrap script（执行 bootstrap 脚本）
 
-# 如果你是 macOS 用户则需要先安装 xcode
-# If you are a macOS user you will need to install xcode first
+```shell
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Spehhhhh/dotfiles/master/bootstrap.sh)"
+```
+
+If you are a macOS user you will need to install xcode first（如果你是 macOS 用户则需要先安装 xcode）
+
+```shell
 xcode-select --install
 ```
 
 脚本会执行以下步骤：
 
 1. 将仓库 Clone 至 `$HOME/dotfiles`，如果本地不存在的话；
+2. TODO
 
 ## Customize
 
