@@ -9,7 +9,7 @@ NORMAL="$(tput sgr0)"
 # main
 function main {
   # init dotfiles
-  git clone https://github.com/Spehhhhh/dotfiles.git "$HOME"/dotfiles
+  git clone --depth 1 https://github.com/Spehhhhh/dotfiles.git "$HOME"/dotfiles
 
   # init
   case "$OSTYPE" in
