@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/env
 
 # main_arm64
 function main_arm64 {
