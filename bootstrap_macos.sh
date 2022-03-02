@@ -1,4 +1,4 @@
-#!/bin/env
+#!/bin/zsh
 
 # main_arm64
 function main_arm64 {
