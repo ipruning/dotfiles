@@ -26,7 +26,7 @@ function main_arm64 {
 
   # install Homebrew packages
   source $HOME/.zshrc
-  brew bundle --file="$HOME"/dotfiles/config/brew/Brewfile
+  brew bundle --file="$HOME"/dotfiles/assets/brew/Brewfile
 
   # install npm packages
   asdf install nodejs lts
