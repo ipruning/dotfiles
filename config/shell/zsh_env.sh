@@ -1,3 +1,4 @@
+#!/bin/bash
 
 #===============================================================================
 # 👇 Powerlevel10k
@@ -58,7 +59,7 @@ export plugins=(
   macos
   yarn
   poetry
-  ripgrep 
+  ripgrep
   magic-enter
   zbell
   command-not-found
@@ -89,7 +90,7 @@ export PATH="${HOME}/dotfiles/bin:$PATH"
 #===============================================================================
 # 👇 Language environment
 #===============================================================================
-export LC_ALL=en_US.UTF-8  
+export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
 
 #===============================================================================
@@ -109,7 +110,7 @@ test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell
 #===============================================================================
 # 👇 qt5
 #===============================================================================
-# export PATH="$(brew --prefix qt@5)/bin:$PATH" 
+# export PATH="$(brew --prefix qt@5)/bin:$PATH"
 # export LDFLAGS="-L$(brew --prefix qt@5)/lib"
 # export CPPFLAGS="-I$(brew --prefix qt@5)/include"
 # export PKG_CONFIG_PATH="$(brew --prefix qt@5)/lib/pkgconfig"
@@ -139,61 +140,45 @@ export FZF_DEFAULT_COMMAND="fd --ignore-file ~/.rgignore --hidden --follow --ign
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 
 #===============================================================================
-# 👇 conda
-#===============================================================================
-# >>> conda initialize >>>
-# !! Contents within this block are managed by 'conda init' !!
-__conda_setup="$('/opt/homebrew/Caskroom/miniforge/base/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
-if [ $? -eq 0 ]; then
-    eval "$__conda_setup"
-else
-    if [ -f "/opt/homebrew/Caskroom/miniforge/base/etc/profile.d/conda.sh" ]; then
-        . "/opt/homebrew/Caskroom/miniforge/base/etc/profile.d/conda.sh"
-    else
-        export PATH="/opt/homebrew/Caskroom/miniforge/base/bin:$PATH"
-    fi
-fi
-unset __conda_setup
-# <<< conda initialize <<<
-
-#===============================================================================
 # 👇 Autodetect architecture (and set `brew` path) (and set `python` path)
 #===============================================================================
-if [[ "$(sysctl -a | grep machdep.cpu.brand_string)" == *Apple* ]]; then
-  arch_check=$(/usr/bin/arch)
-  # arch_name=$(uname -m)
-  typeset -g arch_check
-  case $arch_check in
-    arm64)
-      # arch_name=' '
-      # arch_name+=$(uname -m)
-      # Python
-      alias 'cvenv'='python3 -m venv .venv && source .venv/bin/activate && pip install --upgrade pip setuptools wheel'
-      alias 'svenv'='source .venv/bin/activate'
-      alias 'cenv'='conda create --prefix ./.env && conda activate ./.env'
-      alias 'senv'='conda activate ./.env'
-      # Java
-      export JAVA_HOME=/Library/Java/JavaVirtualMachines/zulu-17.jdk/Contents/Home
-    ;;
-    i386|x86_64)
-      # arch_name=' '
-      # arch_name+=$(uname -m)
-      if [[ -f /usr/local/homebrew/bin/brew ]]; then
-        eval "$(/usr/local/homebrew/bin/brew shellenv)" # homebrew intel shell env
-      fi
-      # Python
-      eval "$(pyenv init --path)" # pyenv intel shell env
-      eval "$(pyenv init -)" # pyenv intel shell env
-      alias 'cvenv'='python3 -m venv .venv && source .venv/bin/activate && pip install --upgrade pip setuptools wheel'
-      alias 'svenv'='source .venv/bin/activate'
-    ;;
-    *)
-      arch_check+=' (Unknown)'
-    ;;
-  esac
-  # add arch to p10k
-  # function prompt_my_arch() {
-  #   p10k segment -f 250 -i '' -t "${arch_name//\%/%%}"
-  # }
-  # POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS+=my_arch  # to specify location, modify ~/.p10k.zsh
-fi
+case $SYSTEM_ARCH in
+arm64)
+  # Python
+  alias 'cvenv'='python3 -m venv .venv && source .venv/bin/activate && pip install --upgrade pip setuptools wheel'
+  alias 'svenv'='source .venv/bin/activate'
+  alias 'cenv'='conda create --prefix ./.env && conda activate ./.env'
+  alias 'senv'='conda activate ./.env'
+  # Python Miniforge
+  # >>> conda initialize >>>
+  # !! Contents within this block are managed by 'conda init' !!
+  __conda_setup="$('/opt/homebrew/Caskroom/miniforge/base/bin/conda' 'shell.zsh' 'hook' 2>/dev/null)"
+  if [ $? -eq 0 ]; then
+    eval "$__conda_setup"
+  else
+    if [ -f "/opt/homebrew/Caskroom/miniforge/base/etc/profile.d/conda.sh" ]; then
+      . "/opt/homebrew/Caskroom/miniforge/base/etc/profile.d/conda.sh"
+    else
+      export PATH="/opt/homebrew/Caskroom/miniforge/base/bin:$PATH"
+    fi
+  fi
+  unset __conda_setup
+  # <<< conda initialize <<<
+  # Java
+  export JAVA_HOME=/Library/Java/JavaVirtualMachines/zulu-17.jdk/Contents/Home
+  ;;
+i386 | x86_64)
+  # Brew
+  if [[ -f /usr/local/homebrew/bin/brew ]]; then
+    eval "$(/usr/local/homebrew/bin/brew shellenv)" # homebrew intel shell env
+  fi
+  # Python
+  eval "$(pyenv init --path)" # pyenv intel shell env
+  eval "$(pyenv init -)"      # pyenv intel shell env
+  alias 'cvenv'='python3 -m venv .venv && source .venv/bin/activate && pip install --upgrade pip setuptools wheel'
+  alias 'svenv'='source .venv/bin/activate'
+  ;;
+*)
+  echo "System architecture: $SYSTEM_ARCH"
+  ;;
+esac

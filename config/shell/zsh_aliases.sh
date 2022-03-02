@@ -2,26 +2,18 @@
 
 #===============================================================================
 # 👇 Aliases
+# 👇 For a full list of active aliases, run `alias`.
 #===============================================================================
-# Set personal aliases, overriding those provided by oh-my-zsh libs,
-# plugins, and themes. Aliases can be placed here, though oh-my-zsh
-# users are encouraged to define aliases within the ZSH_CUSTOM folder.
-# For a full list of active aliases, run `alias`.
-alias x86_64='arch -x86_64 zsh --login'
-alias x86_64_run='arch -x86_64 zsh -c'
-alias brow='/usr/local/homebrew/bin/brew'
-alias rip='rip -i' # A safe and ergonomic alternative to rm
-alias cwd='printf "%q\n" "$(pwd)" | pbcopy' # Copy current working directory to clipboard
 
-alias rmi='rm -i'
-alias cpi='cp -i'
-alias mvi='mv -i'
-alias ehost='${=EDITOR} /etc/hosts'
-alias eohmyzsh='${=EDITOR} ~/.oh-my-zsh'
-alias ezshrc='${=EDITOR} ~/.zshrc'
-alias szshrc='source ~/.zshrc'
-alias ip='curl -4 ip.sb'
-alias ipv6='curl -6 ip.sb'
+case $(uname -m) in
+arm64*)
+  alias x86_64='arch -x86_64 zsh --login'
+  alias x86_64_run='arch -x86_64 zsh -c'
+  alias brow='/usr/local/homebrew/bin/brew'
+  ;;
+x86_64*) ;;
+esac
+
 if [[ -n $SSH_CONNECTION ]]; then
   alias l='lsd -l --icon never'
   alias la='lsd -a --icon never'
@@ -36,6 +28,20 @@ else
   alias runUnblockNeteaseMusic='node ${HOME}/Database/App/UnblockNeteaseMusic/app.js -p 80:443 -f 103.126.92.132'
   alias runfava='fava ${HOME}/Database/Ledger/main.bean -p 4000'
 fi
+
+alias rip='rip -i'                          # A safe and ergonomic alternative to rm
+alias cwd='printf "%q\n" "$(pwd)" | pbcopy' # Copy current working directory to clipboard
+
+alias rmi='rm -i'
+alias cpi='cp -i'
+alias mvi='mv -i'
+alias ehost='${=EDITOR} /etc/hosts'
+alias eohmyzsh='${=EDITOR} ~/.oh-my-zsh'
+alias ezshrc='${=EDITOR} ~/.zshrc'
+alias szshrc='source ~/.zshrc'
+alias ip='curl -4 ip.sb'
+alias ipv6='curl -6 ip.sb'
+
 # alias cat='bat'
 # alias df='duf'
 # alias dig='dog'
