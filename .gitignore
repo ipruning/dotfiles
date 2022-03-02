@@ -1,4 +1,5 @@
+*.log
+
 /assets/alfred
-/assets/iterm2
 /assets/hook
 /assets/torrent
