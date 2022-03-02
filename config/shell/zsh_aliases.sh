@@ -10,20 +10,9 @@
 alias x86_64='arch -x86_64 zsh --login'
 alias x86_64_run='arch -x86_64 zsh -c'
 alias brow='/usr/local/homebrew/bin/brew'
-alias cat='bat'
-alias top='btm' # htop
-alias vi='nvim'
-alias vim='nvim'
-alias ps='procs'
-alias ping='gping'
-alias dig='dog'
-alias df='duf'
-alias du='dust' # ncdu
 alias rip='rip -i' # A safe and ergonomic alternative to rm
 alias cwd='printf "%q\n" "$(pwd)" | pbcopy' # Copy current working directory to clipboard
-# alias sed="sd"
-# alias find='fd'
-# alias grep='rg'
+
 alias rmi='rm -i'
 alias cpi='cp -i'
 alias mvi='mv -i'
@@ -47,3 +36,15 @@ else
   alias runUnblockNeteaseMusic='node ${HOME}/Database/App/UnblockNeteaseMusic/app.js -p 80:443 -f 103.126.92.132'
   alias runfava='fava ${HOME}/Database/Ledger/main.bean -p 4000'
 fi
+alias cat='bat'
+alias df='duf'
+alias dig='dog'
+alias du='dust'
+# alias find='fd'
+# alias grep='rg'
+alias ping='gping'
+alias ps='procs'
+# alias sed="sd"
+alias top='htop'
+alias vi='nvim'
+alias vim='nvim'
