@@ -7,6 +7,13 @@ function main_arm64 {
   # install oh-my-zsh
   sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
+  # install zsh
+  grep --fixed-strings "dotfiles/config/shell/init.sh" ~/.zshrc || echo "source $HOME/dotfiles/config/shell/init.sh" >> "$HOME"/.zshrc
+  echo "eval "$(/opt/homebrew/bin/brew shellenv)"" >> "$HOME"/.zprofile
+  echo "export PATH="$PATH:${HOME}/.local/bin"" >> "$HOME"/.zprofile
+
+  # install zsh plugins
+
   # install Homebrew
   which brew || /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
@@ -24,13 +31,6 @@ function main_arm64 {
 
   # install other packages
   curl -sSL https://git.io/JcGER | bash # AutoCorrect
-
-  # install zsh
-  grep --fixed-strings "dotfiles/config/shell/init.sh" ~/.zshrc || echo "source $HOME/dotfiles/config/shell/init.sh" >> "$HOME"/.zshrc
-  echo "eval "$(/opt/homebrew/bin/brew shellenv)"" >> "$HOME"/.zprofile
-  echo "export PATH="$PATH:${HOME}/.local/bin"" >> "$HOME"/.zprofile
-  
-  # install zsh plugins
 
   # install mackup
   ln -sf "$HOME"/dotfiles/config/mackup/.mackup.cfg "$HOME"/.mackup.cfg
