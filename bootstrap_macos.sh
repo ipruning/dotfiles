@@ -50,7 +50,7 @@ function main_arm64 {
   xargs npm install --global < "$HOME"/dotfiles/assets/npm/npm.txt
 
   # install pipx packages
-  xargs pipx install < "$HOME"/dotfiles/assets/pipx/npm.txt
+  xargs pipx install < "$HOME"/dotfiles/assets/pipx/pipx.txt
 
   # install other packages
   curl -sSL https://git.io/JcGER | bash # AutoCorrect
