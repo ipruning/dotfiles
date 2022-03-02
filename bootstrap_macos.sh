@@ -13,8 +13,10 @@ function main_arm64 {
 
   # install zsh
   echo "${BLUE}Installing zsh"
-  grep --fixed-strings "dotfiles/config/shell/init.sh" ~/.zshrc || mv "$HOME"/.zshrc "$HOME"/.zshrc.bak && touch "$HOME"/.zshrc && echo "source $HOME/dotfiles/config/shell/init.sh" >> "$HOME"/.zshrc
-  mv "$HOME"/.zprofile "$HOME"/.zprofile.bak && touch "$HOME"/.zprofile && cp "$HOME"/dotfiles/config/shell/macos/zprofile.sh "$HOME"/.zprofile
+  grep --fixed-strings "dotfiles/config/shell/init.sh" ~/.zshrc || mv "$HOME"/.zshrc "$HOME"/.zshrc.bak
+  touch "$HOME"/.zshrc && echo "source $HOME/dotfiles/config/shell/init.sh" >> "$HOME"/.zshrc
+  mv "$HOME"/.zprofile "$HOME"/.zprofile.bak
+  cp "$HOME"/dotfiles/config/shell/macos/zprofile.sh "$HOME"/.zprofile
   
   # install zsh plugins
   echo "${BLUE}Installing zsh plugins"
