@@ -21,10 +21,8 @@
 > ⚠️ If you don't fully understand what this script does, don't run it!
 
 ```shell
+# bootstrap
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Spehhhhh/dotfiles/master/bootstrap.sh)"
-
-# install oh-my-zsh
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
 # 如果你是 macOS 则需要安装 xcode
 xcode-select --install
