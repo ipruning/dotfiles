@@ -8,6 +8,7 @@ function main_arm64 {
   sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
   # install zsh
+  mv "$HOME"/.zshrc "$HOME"/.zshrc.bak && touch "$HOME"/.zshrc
   grep --fixed-strings "dotfiles/config/shell/init.sh" ~/.zshrc || echo "source $HOME/dotfiles/config/shell/init.sh" >> "$HOME"/.zshrc
   echo "eval "$(/opt/homebrew/bin/brew shellenv)"" >> "$HOME"/.zprofile
   echo "export PATH="$PATH:${HOME}/.local/bin"" >> "$HOME"/.zprofile
