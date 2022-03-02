@@ -22,12 +22,12 @@ function main {
 
 # Checking the environment
 if [ -d "$HOME"/dotfiles ]; then
-	echo "${YELLOW}You already have dotfiles installed."
-	echo "${GREEN}Please remove $HOME/dotfiles if you want to re-install."
+	echo "${YELLOW}You already have dotfiles installed.${NORMAL}"
+	echo "${GREEN}Please remove $HOME/dotfiles if you want to re-install.${NORMAL}"
 	exit
 fi
 
-echo "${RED}This will overwrite existing files in your home directory. Are you sure? (y/n) "
+echo "${RED}This will overwrite existing files in your home directory. Are you sure? (y/n)${NORMAL}"
 read -r
 
 if [[ $REPLY =~ ^[Yy] ]]; then
