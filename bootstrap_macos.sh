@@ -33,7 +33,7 @@ function main_arm64 {
   echo "${BLUE}Installing Homebrew packages"
   eval "$(/opt/homebrew/bin/brew shellenv)"
   source $HOME/.zshrc
-  brew bundle --file="$HOME"/dotfiles/assets/brew/BrewfileDev
+  brew bundle --file="$HOME"/dotfiles/assets/brew/brew_dev.txt
 
   # install mackup
   echo "${BLUE}Installing mackup"
@@ -54,11 +54,11 @@ function main_arm64 {
 
   # install npm packages
   echo "${BLUE}Installing npm packages"
-  xargs npm install --global < "$HOME"/dotfiles/assets/npm/npm.txt
+  xargs npm install --global < "$HOME"/dotfiles/assets/npm/npm_dev.txt
 
   # install pipx packages
   echo "${BLUE}Installing pipx packages"
-  cat "$HOME"/dotfiles/assets/pipx/pipx.txt | xargs -n 1 pipx install
+  cat "$HOME"/dotfiles/assets/pipx/pipx_dev.txt | xargs -n 1 pipx install
 
   # install other packages
   echo "${BLUE}Installing other packages"
