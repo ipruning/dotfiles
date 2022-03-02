@@ -8,6 +8,7 @@ gatsby-cli
 ghost-cli
 jshint
 markdownlint-cli
+parrotsay
 picgo
 pnpm
 yarn
