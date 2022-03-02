@@ -28,9 +28,19 @@ function main_arm64 {
   source $HOME/.zshrc
   brew bundle --file="$HOME"/dotfiles/assets/brew/Brewfile
 
+  # install asdf
+  asdf plugin add clojure https://github.com/asdf-community/asdf-clojure.git
+  asdf plugin-add golang https://github.com/kennyp/asdf-golang.git
+  asdf plugin add nodejs https://github.com/asdf-vm/asdf-nodejs.git
+  asdf plugin-add php https://github.com/asdf-community/asdf-php.git
+  asdf plugin-add python
+  asdf plugin add ruby https://github.com/asdf-vm/asdf-ruby.git
+  asdf plugin-add rust https://github.com/asdf-community/asdf-rust.git
+  asdf install
+
   # install npm packages
-  asdf install nodejs lts
-  asdf global nodejs lts
+  # asdf install nodejs lts
+  # asdf global nodejs lts
   xargs npm install --global < "$HOME"/dotfiles/assets/npm/npm.txt
 
   # install pipx packages
