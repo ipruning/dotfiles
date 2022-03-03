@@ -28,10 +28,8 @@ function main {
   sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" --unattended --keep-zshrc
 
   echo "${BLUE}Installing zsh dotiles${NORMAL}"
-  grep --fixed-strings "dotfiles/config/shell/init.sh" "$HOME"/.zshrc || mv "$HOME"/.zshrc "$HOME"/.zshrc.bak
-  touch "$HOME"/.zshrc && echo "source $HOME/dotfiles/config/shell/init.sh" >>"$HOME"/.zshrc
-  mv "$HOME"/.zprofile "$HOME"/.zprofile.bak
-  cp "$HOME"/dotfiles/config/shell/macos/zprofile.sh "$HOME"/.zprofile
+  grep --fixed-strings "dotfiles/config/shell/init.sh" "$HOME"/.zshrc || mv "$HOME"/.zshrc "$HOME"/.zshrc.bak && cp "$HOME"/dotfiles/config/shell/macos/zshrc.sh "$HOME"/.zshrc
+  mv "$HOME"/.zprofile "$HOME"/.zprofile.bak && cp "$HOME"/dotfiles/config/shell/macos/zprofile.sh "$HOME"/.zprofile
 
   echo "${BLUE}Installing zsh plugins${NORMAL}"
   git clone https://github.com/Aloxaf/fzf-tab "${ZSH_CUSTOM:-~/.oh-my-zsh/custom}"/plugins/fzf-tab
