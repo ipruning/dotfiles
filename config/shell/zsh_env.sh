@@ -113,8 +113,15 @@ export DISABLE_AUTO_TITLE='true'
 #===============================================================================
 # 👇 fzf
 #===============================================================================
-source "$(brew --prefix fzf)/shell/completion.zsh"
-source "$(brew --prefix fzf)/shell/key-bindings.zsh"
+case $SYSTEM_TYPE in
+macOS_arm64 | macOS_x86_64*)
+  source "$(brew --prefix fzf)/shell/completion.zsh"
+  source "$(brew --prefix fzf)/shell/key-bindings.zsh"
+  ;;
+raspberry) ;;
+
+esac
+
 #===============================================================================
 # 👇 fzf CTRL-T to fuzzily search for a file or directory in your home directory then insert its path at the cursor
 #===============================================================================
