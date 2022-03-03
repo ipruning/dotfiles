@@ -1,16 +1,6 @@
 #!/bin/bash
 
 #===============================================================================
-# 👇 Powerlevel10k
-# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
-# Initialization code that may require console input (password prompts, [y/n]
-# confirmations, etc.) must go above this block; everything else may go below.
-#===============================================================================
-# if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
-#   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
-# fi
-
-#===============================================================================
 # 👇 GPG 签名
 #===============================================================================
 # if [ -r ~/.zshrc ]; then echo 'export GPG_TTY=$(tty)' >> ~/.zshrc; \
@@ -28,7 +18,6 @@ if [[ -n $SSH_CONNECTION ]]; then
   eval "$(starship init zsh)"
 else
   eval "$(starship init zsh)"
-  # ZSH_THEME="powerlevel10k/powerlevel10k"
 fi
 
 #===============================================================================
@@ -72,12 +61,6 @@ export plugins=(
 source $ZSH/oh-my-zsh.sh
 
 #===============================================================================
-# 👇 Powerlevel10k
-# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
-#===============================================================================
-# [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-
-#===============================================================================
 # 👇 GFW Proxy
 #===============================================================================
 # export https_proxy=http://127.0.0.1:7890 http_proxy=http://127.0.0.1:7890 all_proxy=socks5://127.0.0.1:7890
@@ -118,9 +101,9 @@ test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell
 #===============================================================================
 # 👇 puppeteer
 #===============================================================================
-export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-PUPPETEER_EXECUTABLE_PATH=$(brew --prefix)/bin/chromium
-export PUPPETEER_EXECUTABLE_PATH
+# export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+# PUPPETEER_EXECUTABLE_PATH=$(brew --prefix)/bin/chromium
+# export PUPPETEER_EXECUTABLE_PATH
 
 #===============================================================================
 # 👇 tumxp
@@ -135,7 +118,7 @@ source "$(brew --prefix fzf)/shell/key-bindings.zsh"
 #===============================================================================
 # 👇 fzf CTRL-T to fuzzily search for a file or directory in your home directory then insert its path at the cursor
 #===============================================================================
-export FZF_DEFAULT_OPTS="--height=80% --layout=reverse --info=inline --border --margin=1 --padding=1"
+export FZF_DEFAULT_OPTS="--height=100% --layout=reverse --info=inline --border --margin=1 --padding=1"
 export FZF_DEFAULT_COMMAND="fd --ignore-file ~/.rgignore --hidden --follow --ignore-case . /etc $HOME"
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 
@@ -167,7 +150,7 @@ arm64)
   # Java
   export JAVA_HOME=/Library/Java/JavaVirtualMachines/zulu-17.jdk/Contents/Home
   ;;
-i386 | x86_64)
+x86_64 | i386)
   # Brew
   if [[ -f /usr/local/homebrew/bin/brew ]]; then
     eval "$(/usr/local/homebrew/bin/brew shellenv)" # homebrew intel shell env
