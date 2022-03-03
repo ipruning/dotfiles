@@ -91,9 +91,9 @@ function main {
   echo "${BLUE}Installing SpaceVim${NORMAL}"
   curl -sLf https://spacevim.org/install.sh | bash
 
-  echo "${BLUE}Installing doom-emacs${NORMAL}"
-  git clone --depth 1 https://github.com/hlissner/doom-emacs "$HOME"/.emacs.d
-  "$HOME"/.emacs.d/bin/doom install
+  # echo "${BLUE}Installing doom-emacs${NORMAL}"
+  # git clone --depth 1 https://github.com/hlissner/doom-emacs "$HOME"/.emacs.d
+  # "$HOME"/.emacs.d/bin/doom install
 }
 
 # init
