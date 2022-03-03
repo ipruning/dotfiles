@@ -35,7 +35,7 @@ sudo-command-line() {
   local cmd="sudo "
   if [[ ${BUFFER} == ${cmd}* ]]; then
     CURSOR=$(( CURSOR-${#cmd} ))
-    BUFFER="${BUFFER#$cmd}"
+    BUFFER="${BUFFER#"$cmd"}"
   else
     BUFFER="${cmd}${BUFFER}"
     CURSOR=$(( CURSOR+${#cmd} ))
@@ -155,57 +155,22 @@ fkill() {
 }
 
 #===============================================================================
-# 👇 j
+# 👇 fzf z
 #===============================================================================
-# j() {
-#     if [[ "$#" -ne 0 ]]; then
-#         cd $(autojump $@)
-#         return
-#     fi
-#     cd "$(autojump -s | sort -k1gr | awk '$1 ~ /[0-9]:/ && $2 ~ /^\// { for (i=2; i<=NF; i++) { print $(i) } }' |  fzf --height 80% --reverse --inline-info)" 
-# }
+# z foo<tab> # shows the same completions as cd
+# z foo<space><tab> # shows interactive completions via zoxide
 
 #===============================================================================
 # 👇 asdf
 #===============================================================================
-# asdfinstall() {
-#   local lang=${1}
-
-#   if [[ ! $lang ]]; then
-#     lang=$(asdf plugin-list | fzf)
-#   fi
-
-#   if [[ $lang ]]; then
-#     versions=$(asdf list-all "$lang" | fzf --tac --no-sort --multi)
-#     local versions
-#     if [[ $versions ]]; then
-#       for version in $versions;
-#       do; asdf install "$lang" "$version"; done;
-#     fi
-#   fi
-# }
-# asdfremove() {
-#   local lang=${1}
-
-#   if [[ ! $lang ]]; then
-#     lang=$(asdf plugin-list | fzf)
-#   fi
-
-#   if [[ $lang ]]; then
-#     local versions=$(asdf list $lang | fzf -m)
-#     if [[ $versions ]]; then
-#       for version in $(echo $versions);
-#       do; asdf uninstall $lang $version; done;
-#     fi
-#   fi
-# }
+# ref asdfzf()
 
 #===============================================================================
 # 👇 tmux
 #===============================================================================
 tm() {
   [[ -n "$TMUX" ]] && change="switch-client" || change="attach-session"
-  if [ $1 ]; then
+  if [ "$1" ]; then
     tmux $change -t "$1" 2>/dev/null || (tmux new-session -d -s $1 && tmux $change -t "$1"); return
   fi
   session=$(tmux list-sessions -F "#{session_name}" 2>/dev/null | fzf --exit-0) &&  tmux $change -t "$session" || echo "No sessions found."
