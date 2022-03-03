@@ -50,10 +50,17 @@ xcode-select --install
 - 修改用户名；
 - 修改共享电脑名称；
 - 启用触摸板轻触；
-- 启用三指拖移；
+- 辅助功能 - 指针控制（或鼠标与触控板）- 触控板选项：启动拖移 (三指拖移)；
 - 关闭自动重新排列空间；
 - 启用 Tab 键移动焦点；
 - 修改共享电脑名称；
+- 设置触发角；
+- Dock
+  - 添加空白格： `defaults write com.apple.dock persistent-apps -array-add '{"tile-type"="spacer-tile";}'; Killall Dock`
+- Finder
+  - 显示拓展名；
+  - 标题栏显示完整路径；
+  - 显示隐藏文件；
 
 ### Arch
 
