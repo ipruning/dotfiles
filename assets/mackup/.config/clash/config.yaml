@@ -1,12 +1,3 @@
----
-#---------------------------------------------------#
-## 配置文件需要放置在 $HOME/.config/clash/*.yaml
-## 这份文件是 clashX 的基础配置文件，请尽量新建配置文件进行修改。
-## ！！！只有这份文件的端口设置会随 ClashX 启动生效
-
-## 如果您不知道如何操作，请参阅 官方 Github 文档 https://github.com/Dreamacro/clash/blob/dev/README.md
-#---------------------------------------------------#
-
 # (HTTP and SOCKS5 in one port)
 mixed-port: 7890
 # RESTful API for clash
