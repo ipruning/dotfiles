@@ -15,6 +15,7 @@ jobs:
       brew bundle dump --file=$HOME/dotfiles/assets/brew/Brewfile --force
       pipx list --json | jq ".venvs | .[] | .metadata.main_package.package" -r > $HOME/dotfiles/assets/pipx/pipx.txt
       npm list --global --depth=0 --json | jq ".dependencies | keys[]" -r > $HOME/dotfiles/assets/npm/npm.txt
+      code --list-extensions > $HOME/dotfiles/assets/vscode/vscode.txt
     shell: /bin/zsh
     schedule: "0 1,13,20 * * *"
     captureStderr: true

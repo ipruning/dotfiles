@@ -82,6 +82,9 @@ function main {
   echo "${BLUE}Installing other packages${NORMAL}"
   where autocorrect || curl -sSL https://git.io/JcGER | bash # AutoCorrect
 
+  echo "${BLUE}Installing VS Code extenstions${NORMAL}"
+  xargs <"$HOME"/dotfiles/assets/vscode/vscode.txt -n 1 code --install-extension
+
   echo "${BLUE}Installing oh-my-tmux${NORMAL}"
   git clone https://github.com/gpakosz/.tmux.git "$HOME"/.tmux
   ln -sf "$HOME"/.tmux/.tmux.conf "$HOME"/.tmux.conf
