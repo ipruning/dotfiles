@@ -1,32 +1,50 @@
 #!/bin/bash
 
 #===============================================================================
-# 👇 _INIT_SH_LOADED
+# 👇 INIT
 #===============================================================================
+RED="$(tput setaf 1)"
+
 if [ -z "$_INIT_SH_LOADED" ]; then
   _INIT_SH_LOADED=1
 else
   return
 fi
 
-#===============================================================================
-# 👇 Check system architecture
-#===============================================================================
 # if [[ "$(sysctl -a | grep machdep.cpu.brand_string)" == *Apple* ]]; then
 #   echo test
 # fi
 
 SYSTEM_ARCH=$(uname -m)
 
-case $SYSTEM_ARCH in
-arm64*)
-  # echo "arm64"
+case "$OSTYPE" in
+darwin*)
+  case $SYSTEM_ARCH in
+  arm64*)
+    SYSTEM_TYPE="macOS_arm64"
+    ;;
+  x86_64*)
+    SYSTEM_TYPE="macOS_x86_64"
+    ;;
+  *)
+    echo "${RED}Unsupported system architecture.${NORMAL}"
+    ;;
+  esac
   ;;
-x86_64*)
-  # echo "x86_64"
+linux*)
+  if [[ "$(uname -m)" == *armv7l* ]]; then
+    SYSTEM_TYPE="raspberry"
+  else
+    echo "${RED}Unsupported system architecture.${NORMAL}"
+    SYSTEM_TYPE="unknown"
+  fi
+  ;;
+msys*)
+  echo "${RED}Unsupported system architecture.${NORMAL}"
   ;;
 *)
-  echo "unknown: $(uname -m)"
+  echo "${RED}unknown: $OSTYPE${NORMAL}"
+  SYSTEM_TYPE="unknown"
   ;;
 esac
 
