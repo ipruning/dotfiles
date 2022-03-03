@@ -15,6 +15,17 @@ fi
 #   echo test
 # fi
 
+# if [[ $(uname) == 'Darwin' ]]; then
+#   platform='darwin'
+# else
+#   platform='linux'
+# fi
+# if [[ $(arch) == 'arm64' ]]; then
+#   arch='arm64'
+# else
+#   arch='amd64'
+# fi
+
 SYSTEM_ARCH=$(uname -m)
 
 case "$OSTYPE" in
