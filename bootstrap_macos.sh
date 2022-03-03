@@ -32,12 +32,13 @@ function main {
   mv "$HOME"/.zprofile "$HOME"/.zprofile.bak && cp "$HOME"/dotfiles/config/shell/macos/zprofile.sh "$HOME"/.zprofile
 
   echo "${BLUE}Installing zsh plugins${NORMAL}"
-  git clone https://github.com/Aloxaf/fzf-tab "${ZSH_CUSTOM:-~/.oh-my-zsh/custom}"/plugins/fzf-tab
-  git clone https://github.com/paulirish/git-open.git "${ZSH_CUSTOM:-~/.oh-my-zsh/custom}"/plugins/git-open
-  git clone https://github.com/zsh-users/zsh-autosuggestions "${ZSH_CUSTOM:-~/.oh-my-zsh/custom}"/plugins/zsh-autosuggestions
-  git clone https://github.com/zsh-users/zsh-completions "${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}"/plugins/zsh-completions
-  git clone https://github.com/sukkaw/zsh-osx-autoproxy "${ZSH_CUSTOM:-~/.oh-my-zsh/custom}"/plugins/zsh-osx-autoproxy
-  git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "${ZSH_CUSTOM:-~/.oh-my-zsh/custom}"/plugins/zsh-syntax-highlighting
+  ZSH_CUSTOM=${ZSH_CUSTOM:-~/.oh-my-zsh/custom}
+  git clone https://github.com/Aloxaf/fzf-tab "$ZSH_CUSTOM"/plugins/fzf-tab
+  git clone https://github.com/paulirish/git-open.git "$ZSH_CUSTOM"/plugins/git-open
+  git clone https://github.com/zsh-users/zsh-autosuggestions "$ZSH_CUSTOM"/plugins/zsh-autosuggestions
+  git clone https://github.com/zsh-users/zsh-completions "$ZSH_CUSTOM"/plugins/zsh-completions
+  git clone https://github.com/sukkaw/zsh-osx-autoproxy "$ZSH_CUSTOM"/plugins/zsh-osx-autoproxy
+  git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "$ZSH_CUSTOM"/plugins/zsh-syntax-highlighting
 
   echo "${BLUE}Installing Homebrew${NORMAL}"
   which brew || /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
