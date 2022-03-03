@@ -43,10 +43,11 @@ export plugins=(
   zsh-autosuggestions
   zsh-completions
   zsh-interactive-cd
-  zsh-osx-autoproxy
+  zsh-osx-autoproxy # export https_proxy=http://127.0.0.1:7890 http_proxy=http://127.0.0.1:7890 all_proxy=socks5://127.0.0.1:7890
   zsh-syntax-highlighting
-  macos
-  yarn
+  macos # showfiles hidefiles
+  # npm
+  # yarn
   poetry
   ripgrep
   magic-enter
@@ -59,11 +60,6 @@ export plugins=(
 # 👇 ZSH Source
 #===============================================================================
 source $ZSH/oh-my-zsh.sh
-
-#===============================================================================
-# 👇 GFW Proxy
-#===============================================================================
-# export https_proxy=http://127.0.0.1:7890 http_proxy=http://127.0.0.1:7890 all_proxy=socks5://127.0.0.1:7890
 
 #===============================================================================
 # 👇 Custom Binary
