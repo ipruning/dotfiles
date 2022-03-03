@@ -5,7 +5,7 @@
 # 👇 For a full list of active aliases, run `alias`.
 #===============================================================================
 
-case $(uname -m) in
+case $SYSTEM_ARCH in
 arm64*)
   alias x86_64='arch -x86_64 zsh --login'
   alias x86_64_run='arch -x86_64 zsh -c'
