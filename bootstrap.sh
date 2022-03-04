@@ -38,7 +38,7 @@ MODE="$1"
 
 if [[ $MODE == "--force" ]]; then
   rm -rf "$HOME"/dotfiles
-  main
+  bootstrap
 else
   echo "${RED}This will overwrite existing files in your home directory. Are you sure? (y/n)${NORMAL}"
   read -r
