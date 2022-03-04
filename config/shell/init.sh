@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 #===============================================================================
 # 👇 INIT
@@ -32,10 +32,10 @@ case "$OSTYPE" in
 darwin*)
   case $SYSTEM_ARCH in
   arm64*)
-    SYSTEM_TYPE="macOS_arm64"
+    SYSTEM_TYPE="mac_arm64"
     ;;
   x86_64*)
-    SYSTEM_TYPE="macOS_x86_64"
+    SYSTEM_TYPE="mac_x86_64"
     ;;
   *)
     echo "${RED}Unsupported system architecture.${NORMAL}"

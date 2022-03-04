@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 #===============================================================================
 # 👇 GPG 签名
@@ -110,7 +110,7 @@ export DISABLE_AUTO_TITLE='true'
 # 👇 fzf
 #===============================================================================
 case $SYSTEM_TYPE in
-macOS_arm64 | macOS_x86_64*)
+mac_arm64 | mac_x86_64*)
   source "$(brew --prefix fzf)/shell/completion.zsh"
   source "$(brew --prefix fzf)/shell/key-bindings.zsh"
   ;;
@@ -131,7 +131,7 @@ export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 case $SYSTEM_ARCH in
 arm64)
   # Python
-  alias 'cvenv'='python3 -m venv .venv && source .venv/bin/activate && pip install --upgrade pip setuptools wheel'
+  alias 'cvenv'='python3 -m venv .venv && source .venv/bin/activate && python3 -m pip install --upgrade -r $HOME/.requirements.txt'
   alias 'svenv'='source .venv/bin/activate'
   alias 'cenv'='conda create --prefix ./.env && conda activate ./.env'
   alias 'senv'='conda activate ./.env'
@@ -161,7 +161,7 @@ x86_64 | i386)
   # Python
   eval "$(pyenv init --path)" # pyenv intel shell env
   eval "$(pyenv init -)"      # pyenv intel shell env
-  alias 'cvenv'='python3 -m venv .venv && source .venv/bin/activate && pip install --upgrade pip setuptools wheel'
+  alias 'cvenv'='python3 -m venv .venv && source .venv/bin/activate && python3 -m pip install --upgrade -r $HOME/.requirements.txt'
   alias 'svenv'='source .venv/bin/activate'
   ;;
 *)
