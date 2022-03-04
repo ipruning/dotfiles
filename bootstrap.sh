@@ -6,11 +6,13 @@ YELLOW="$(tput setaf 3)"
 BLUE="$(tput setaf 4)"
 NORMAL="$(tput sgr0)"
 
-# main
-function main {
+function setup_dotfiles() {
   echo "${BLUE}Cloning dotfiles...${NORMAL}"
   git clone --depth 1 https://github.com/Spehhhhh/dotfiles.git "$HOME"/dotfiles
-  echo "${BLUE}Runing the bootstrap script...${NORMAL}"
+}
+
+function bootstrap() {
+  echo "${BLUE}Setting up dotfiles...${NORMAL}"
   source "$HOME"/dotfiles/bin/csys # check SYSTEM_OS, SYSTEM_ARCH
   case "$OSTYPE" in
   darwin*)
@@ -46,7 +48,8 @@ else
       echo "${GREEN}Please remove $HOME/dotfiles if you want to re-install.${NORMAL}"
       exit
     else
-      main
+      setup_dotfiles
+      bootstrap
     fi
   else
     echo ""
