@@ -1,15 +1,17 @@
-#!/usr/bin/env bash
+#!/bin/zsh
 
 set -e
 
-echo "Testing"
+test -d "$HOME"/dotfiles
 
+echo "Testing"
+echo "Testing Git"
 test -x "$(which git)"
+echo "Testing VS Code"
 test -x "$(which code)"
+echo "Testing Python"
 python --version | rg "Python 3.10.2"
 which python | rg "shims"
-
-test -d "$HOME"/dotfiles
 echo "Testing ZSH"
 test -x "$(which zsh)"
 test -d "$HOME"/.oh-my-zsh

@@ -18,7 +18,7 @@ mackup restore
 
 echo "${BLUE}Installing rust${NORMAL}"
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-source $HOME/.cargo/env
+source "$HOME"/.cargo/env
 
 echo "${BLUE}Installing oh-my-zsh${NORMAL}"
 export CHSH=no
