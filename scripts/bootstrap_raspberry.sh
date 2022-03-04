@@ -67,7 +67,7 @@ echo "${BLUE}Installing pipx packages${NORMAL}"
 xargs <"$HOME"/dotfiles/assets/pipx/pipx_dev.txt -n 1 pipx install
 
 echo "${BLUE}Installing other packages${NORMAL}"
-where autocorrect || curl -sSL https://git.io/JcGER | bash # AutoCorrect
+which autocorrect || curl -sSL https://git.io/JcGER | bash # AutoCorrect
 
 echo "${BLUE}Installing oh-my-tmux${NORMAL}"
 git clone https://github.com/gpakosz/.tmux.git "$HOME"/.tmux

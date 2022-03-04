@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/zsh
 
 set -e
 
@@ -11,4 +11,4 @@ test -x "$(which code)" # VSCode
 
 echo "Testing oh-my-zsh"
 test -x "$(which zsh)"
-test -d ~/.oh-my-zsh
+test -d "$HOME"/.oh-my-zsh

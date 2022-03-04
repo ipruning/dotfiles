@@ -81,7 +81,7 @@ function main {
   xargs <"$HOME"/dotfiles/assets/pipx/pipx_dev.txt -n 1 pipx install
 
   echo "${BLUE}Installing other packages${NORMAL}"
-  where autocorrect || curl -sSL https://git.io/JcGER | bash # AutoCorrect
+  which autocorrect || curl -sSL https://git.io/JcGER | bash # AutoCorrect
 
   echo "${BLUE}Installing VS Code extenstions${NORMAL}"
   xargs <"$HOME"/dotfiles/assets/vscode/vscode.txt -n 1 code --install-extension
