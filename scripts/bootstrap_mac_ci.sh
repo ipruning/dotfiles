@@ -34,5 +34,6 @@ ln -sf "$HOME"/dotfiles/config/mackup/.mackup "$HOME"/.mackup
 mackup --force restore
 
 echo "${BLUE}Installing asdf${NORMAL}"
+brew install asdf
 asdf plugin-add python
 asdf install python 3.10.2
