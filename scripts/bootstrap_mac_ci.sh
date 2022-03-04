@@ -12,8 +12,6 @@ mv "$HOME"/.zprofile "$HOME"/.zprofile.bak && cp "$HOME"/dotfiles/config/shell/m
 
 echo "${BLUE}Installing Homebrew${NORMAL}"
 which brew || /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
-echo "${BLUE}Installing Homebrew packages${NORMAL}"
 case $SYSTEM_ARCH in
 arm64*)
   eval "$(/opt/homebrew/bin/brew shellenv)"
@@ -25,12 +23,11 @@ x86_64*)
   echo "unknown: $SYSTEM_ARCH"
   ;;
 esac
-brew install mackup
 
 echo "${BLUE}Installing mackup${NORMAL}"
+brew install mackup
 ln -sf "$HOME"/dotfiles/config/mackup/.mackup.cfg "$HOME"/.mackup.cfg
 ln -sf "$HOME"/dotfiles/config/mackup/.mackup "$HOME"/.mackup
-
 mackup --force restore
 
 echo "${BLUE}Installing asdf${NORMAL}"
