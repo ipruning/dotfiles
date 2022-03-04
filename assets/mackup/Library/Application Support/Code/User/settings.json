@@ -2,7 +2,7 @@
   "editor.fontLigatures": true,
   "editor.minimap.enabled": false,
   "editor.fontSize": 12,
-  "editor.fontFamily": "'CaskaydiaCove Nerd Font'",
+  "editor.fontFamily": "'CaskaydiaCove Nerd Font', 'Source Han Sans SC'",
   "editor.formatOnSave": true,
   "editor.tabSize": 4,
   "editor.inlineSuggest.enabled": true,
@@ -67,18 +67,18 @@
   ],
   "todo-tree.highlights.customHighlight": {
     "#Todo": {
-      "foreground": "green",
-      "iconColour": "green",
+      "foreground": "#00FF00",
+      "iconColour": "#00FF00",
       "gutterIcon": true
     },
     "#TODO": {
-      "foreground": "green",
-      "iconColour": "green",
+      "foreground": "#00FF00",
+      "iconColour": "#00FF00",
       "gutterIcon": true
     },
     "BUG": {
-      "foreground": "red",
-      "iconColour": "red"
+      "foreground": "#FF0000",
+      "iconColour": "#FF0000"
     }
   },
   "todo-tree.regex.regex": "(//|#|<!--|;|/\\*|^|^\\s*(-|\\d+.))\\s*($TAGS)",
@@ -107,8 +107,8 @@
   "hediet.vscode-drawio.local-storage": "eyIuZHJhd2lvLWNvbmZpZyI6IntcImxhbmd1YWdlXCI6XCJcIixcImN1c3RvbUZvbnRzXCI6W10sXCJsaWJyYXJpZXNcIjpcImdlbmVyYWxcIixcImN1c3RvbUxpYnJhcmllc1wiOltcIkwuc2NyYXRjaHBhZFwiXSxcInBsdWdpbnNcIjpbXSxcInJlY2VudENvbG9yc1wiOltdLFwiZm9ybWF0V2lkdGhcIjpcIjI0MFwiLFwiY3JlYXRlVGFyZ2V0XCI6ZmFsc2UsXCJwYWdlRm9ybWF0XCI6e1wieFwiOjAsXCJ5XCI6MCxcIndpZHRoXCI6ODUwLFwiaGVpZ2h0XCI6MTEwMH0sXCJzZWFyY2hcIjp0cnVlLFwic2hvd1N0YXJ0U2NyZWVuXCI6dHJ1ZSxcImdyaWRDb2xvclwiOlwiI2QwZDBkMFwiLFwiZGFya0dyaWRDb2xvclwiOlwiIzZlNmU2ZVwiLFwiYXV0b3NhdmVcIjp0cnVlLFwicmVzaXplSW1hZ2VzXCI6bnVsbCxcIm9wZW5Db3VudGVyXCI6MCxcInZlcnNpb25cIjoxOCxcInVuaXRcIjoxLFwiaXNSdWxlck9uXCI6ZmFsc2UsXCJ1aVwiOlwiXCJ9In0=",
   "diffEditor.ignoreTrimWhitespace": false,
   "indentRainbow.ignoreLinePatterns": [
-    "/[ \t]* [*]/g", // lines begining with <whitespace><space>*
-    "/[ \t]+[/]{2}/g" // lines begininning with <whitespace>//
+    "/[ \t]* [*]/g", // lines beginning with <whitespace><space>*
+    "/[ \t]+[/]{2}/g" // lines beginning with <whitespace>//
   ],
   "indentRainbow.ignoreErrorLanguages": [
     "markdown",
@@ -129,8 +129,8 @@
   // Language
   "[markdown]": {
     "editor.defaultFormatter": "mervin.markdown-formatter",
-    "editor.quickSuggestions": true,
     "editor.formatOnSave": false,
+    "editor.quickSuggestions": true,
     "editor.tabSize": 4
   },
   "[python]": {
@@ -154,14 +154,14 @@
   },
   "[yaml]": {
     "editor.defaultFormatter": "redhat.vscode-yaml",
-    "editor.tabSize": 4
+    "editor.tabSize": 2
   },
   "prettier.tabWidth": 2,
-  // Beancount
   "material-icon-theme.languages.associations": {
     "beancount": "log",
     "qalc": "log"
   },
+  // Beancount
   "beancount.fixedCJKWidth": true,
   "beancountFormatter.fixedCJKWidth": true,
   "beancountFormatter.currencyColumn": 72,
@@ -170,10 +170,8 @@
   "platformio-ide.useBuiltinPython": false,
   "go.toolsManagement.autoUpdate": true,
   "autocorrect.formatOnSave": false,
-  // Path
-  "python.defaultInterpreterPath": "/Users/alex/.asdf/shims/python",
-  // "python.defaultInterpreterPath": "${workspaceFolder}/.venv",
-  "go.gopath": "/Users/alex/.asdf/installs/go/1.17.6/bin/go",
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv",
+  "go.gopath": "~/.asdf/installs/go/1.17.6/bin/go",
   "matlab.matlabpath": "/Applications/MATLAB_R2022a.app/bin",
   "matlab.mlintpath": "/Applications/MATLAB_R2022a.app/bin/maci64/mlint",
   "json.maxItemsComputed": 10000,
@@ -181,5 +179,35 @@
   "markdown-preview-enhanced.previewTheme": "one-dark.css",
   "terminal.integrated.tabs.location": "left",
   "terminal.integrated.tabs.enabled": false,
-  "Lua.telemetry.enable": false
+  "Lua.telemetry.enable": false,
+  "cSpell.userWords": [
+    "autocorrect",
+    "autofetch",
+    "beancount",
+    "Brewfile",
+    "Caskaydia",
+    "donot",
+    "dotfiles",
+    "drawio",
+    "esbenp",
+    "fava",
+    "gitconfiglocal",
+    "gopath",
+    "hediet",
+    "ipynb",
+    "Killall",
+    "maci",
+    "marp",
+    "matlabpath",
+    "mlint",
+    "mlintpath",
+    "neovim",
+    "nvim",
+    "platformio",
+    "Pylance",
+    "qalc",
+    "venv",
+    "vsintellicode"
+  ],
+  "explorer.confirmDragAndDrop": false
 }
