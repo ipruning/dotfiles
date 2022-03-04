@@ -8,12 +8,8 @@ NORMAL="$(tput sgr0)"
 
 # main
 function main {
-  echo "${BLUE}Cloning dotfiles...${NORMAL}"
-  git clone --depth 1 https://github.com/Spehhhhh/dotfiles.git "$HOME"/dotfiles
-  source "$HOME"/dotfiles/bin/csys # check SYSTEM_OS, SYSTEM_ARCH
-
-  # init
   echo "${BLUE}Runing the bootstrap script...${NORMAL}"
+  source "$HOME"/dotfiles/bin/csys # check SYSTEM_OS, SYSTEM_ARCH
   case "$OSTYPE" in
   darwin*)
     source "$HOME"/dotfiles/scripts/bootstrap_mac.sh
@@ -50,6 +46,8 @@ else
   echo "${RED}This will overwrite existing files in your home directory. Are you sure? (y/n)${NORMAL}"
   read -r
   if [[ $REPLY =~ ^[Yy] ]]; then
+    echo "${BLUE}Cloning dotfiles...${NORMAL}"
+    git clone --depth 1 https://github.com/Spehhhhh/dotfiles.git "$HOME"/dotfiles
     main
   else
     echo ""
