@@ -26,11 +26,13 @@ Execute the bootstrap script（执行 bootstrap 脚本）
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Spehhhhh/dotfiles/master/bootstrap.sh)"
 ```
 
-If you are a macOS user you will need to install xcode first（如果你是 macOS 用户则需要先安装 xcode）
+If you are a macOS user, you will need to install xcode first or download it here  <https://developer.apple.com/download/more/>.
 
 ```shell
 xcode-select --install
 ```
+
+In addition, you will need to sign into the AppStore with your Apple ID as the MAS app is available in the Brewfile.
 
 脚本会执行以下步骤：
 
@@ -48,7 +50,7 @@ xcode-select --install
 ### macOS
 
 - 修改用户名；
-- 修改共享电脑名称；
+- 修改共享电脑名称 `sudo scutil --set HostName mac`；
 - 启用触摸板轻触；
 - 辅助功能 - 指针控制（或鼠标与触控板）- 触控板选项：启动拖移 (三指拖移)；
 - 关闭自动重新排列空间；
