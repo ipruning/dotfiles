@@ -34,8 +34,9 @@ function main {
   esac
 }
 
-if [[ $1 == "--force" ]]; then
-  MODE="$1"
+MODE="$1"
+
+if [[ $MODE == "--force" ]]; then
   main
 else
   echo "${RED}This will overwrite existing files in your home directory. Are you sure? (y/n)${NORMAL}"
