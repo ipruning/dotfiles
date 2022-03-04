@@ -1,10 +1,13 @@
 name: build
 on: [push, pull_request]
 jobs:
-  ci:
-    name: run
-    runs-on: macos-latest
-    if: "!contains(github.event.head_commit.message, '[ci skip]')"
+  default-version:
+    name: Run CI
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, ubuntu-latest]
     steps:
       - uses: actions/checkout@v2
       - name: Set up macOS
@@ -14,4 +17,4 @@ jobs:
           ./scripts/bootstrap_mac_ci.sh
       - name: Run test
         run: |
-          ./test/test_mac.sh
+          ./test/test_ci.sh
