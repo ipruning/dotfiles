@@ -11,4 +11,4 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/Spehhhhh/dotfiles.git "$HOME"/dotfiles
           cd "$HOME"/dotfiles
-          sh ./bootstrap.sh --force
+          ./bootstrap.sh --force
