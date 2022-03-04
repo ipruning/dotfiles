@@ -15,11 +15,11 @@ function main {
   echo "${BLUE}Runing the bootstrap script...${NORMAL}"
   case "$OSTYPE" in
   darwin*)
-    sh "$HOME"/dotfiles/bootstrap_mac.sh
+    sh "$HOME"/dotfiles/scripts/bootstrap_mac.sh
     ;;
   linux*)
     if [[ "$(uname -m)" == *armv7l* ]]; then
-      sh "$HOME"/dotfiles/bootstrap_raspberry.sh
+      sh "$HOME"/dotfiles/scripts/bootstrap_raspberry.sh
     else
       echo "${RED}Unsupported system architecture.${NORMAL}"
     fi
