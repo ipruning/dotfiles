@@ -12,17 +12,7 @@ mv "$HOME"/.zprofile "$HOME"/.zprofile.bak && cp "$HOME"/dotfiles/config/shell/m
 
 echo "${BLUE}Installing Homebrew${NORMAL}"
 which brew || /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-case $SYSTEM_ARCH in
-arm64*)
-  eval "$(/opt/homebrew/bin/brew shellenv)"
-  ;;
-x86_64*)
-  eval "$(/usr/local/homebrew/bin/brew shellenv)"
-  ;;
-*)
-  echo "unknown: $SYSTEM_ARCH"
-  ;;
-esac
+eval "$(/usr/local/homebrew/bin/brew shellenv)"
 
 echo "${BLUE}Installing mackup${NORMAL}"
 brew install mackup
@@ -34,3 +24,4 @@ echo "${BLUE}Installing asdf${NORMAL}"
 brew install asdf
 asdf plugin-add python
 asdf install python 3.10.2
+asdf global python 3.10.2
