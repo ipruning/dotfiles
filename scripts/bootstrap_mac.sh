@@ -1,13 +1,5 @@
 #!/usr/bin/env bash
 
-RED="$(tput setaf 1)"
-GREEN="$(tput setaf 2)"
-YELLOW="$(tput setaf 3)"
-BLUE="$(tput setaf 4)"
-NORMAL="$(tput sgr0)"
-
-source "$HOME"/dotfiles/bin/csys
-
 function main {
   case $SYSTEM_ARCH in
   arm64*)
@@ -62,7 +54,11 @@ function main {
   ln -sf "$HOME"/dotfiles/config/mackup/.mackup "$HOME"/.mackup
 
   echo "${BLUE}Restoring dotfiles${NORMAL}"
-  mackup restore
+  if [ "$MODE" == "--force" ]; then
+    mackup --force restore
+  else
+    mackup restore
+  fi
 
   echo "${BLUE}Installing asdf${NORMAL}"
   asdf plugin-add clojure https://github.com/asdf-community/asdf-clojure.git
