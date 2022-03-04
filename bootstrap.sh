@@ -10,16 +10,17 @@ NORMAL="$(tput sgr0)"
 function main {
   echo "${BLUE}Cloning dotfiles...${NORMAL}"
   git clone --depth 1 https://github.com/Spehhhhh/dotfiles.git "$HOME"/dotfiles
+  source "$HOME"/dotfiles/bin/csys # check SYSTEM_OS, SYSTEM_ARCH
 
   # init
   echo "${BLUE}Runing the bootstrap script...${NORMAL}"
   case "$OSTYPE" in
   darwin*)
-    sh "$HOME"/dotfiles/scripts/bootstrap_mac.sh
+    source "$HOME"/dotfiles/scripts/bootstrap_mac.sh
     ;;
   linux*)
     if [[ "$(uname -m)" == *armv7l* ]]; then
-      sh "$HOME"/dotfiles/scripts/bootstrap_raspberry.sh
+      source "$HOME"/dotfiles/scripts/bootstrap_raspberry.sh
     else
       echo "${RED}Unsupported system architecture.${NORMAL}"
     fi
@@ -33,18 +34,22 @@ function main {
   esac
 }
 
-# Checking the environment
-if [ -d "$HOME"/dotfiles ]; then
-  echo "${YELLOW}You already have dotfiles installed.${NORMAL}"
-  echo "${GREEN}Please remove $HOME/dotfiles if you want to re-install.${NORMAL}"
-  exit
-fi
-
-echo "${RED}This will overwrite existing files in your home directory. Are you sure? (y/n)${NORMAL}"
-read -r
-
-if [[ $REPLY =~ ^[Yy] ]]; then
+if [[ $1 == "--force" ]]; then
   main
 else
-  echo ""
+  echo "${RED}This will overwrite existing files in your home directory. Are you sure? (y/n)${NORMAL}"
+  read -r
+  # Checking the environment
+  if [ -d "$HOME"/dotfiles ]; then
+    echo "${YELLOW}You already have dotfiles installed.${NORMAL}"
+    echo "${GREEN}Please remove $HOME/dotfiles if you want to re-install.${NORMAL}"
+    exit
+  fi
+  echo "${RED}This will overwrite existing files in your home directory. Are you sure? (y/n)${NORMAL}"
+  read -r
+  if [[ $REPLY =~ ^[Yy] ]]; then
+    main
+  else
+    echo ""
+  fi
 fi
