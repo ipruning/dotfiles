@@ -79,9 +79,6 @@ function main {
   echo "${BLUE}Installing other packages${NORMAL}"
   which autocorrect || curl -sSL https://git.io/JcGER | bash # AutoCorrect
 
-  echo "${BLUE}Installing VS Code extenstions${NORMAL}"
-  xargs <"$HOME"/dotfiles/assets/vscode/vscode.txt -n 1 code --install-extension
-
   echo "${BLUE}Installing oh-my-tmux${NORMAL}"
   git clone https://github.com/gpakosz/.tmux.git "$HOME"/.tmux
   ln -sf "$HOME"/.tmux/.tmux.conf "$HOME"/.tmux.conf
@@ -94,18 +91,22 @@ function main {
   # "$HOME"/.emacs.d/bin/doom install
 }
 
-# init
-case $(uname -m) in
+main
+
+case $SYSTEM_ARCH in
 arm64*)
-  main
-  echo "${GREEN}Done${NORMAL}"
+  echo ""
   ;;
 x86_64*)
-  main
-  echo "${GREEN}Done${NORMAL}"
+  echo ""
   echo "${YELLOW}Please check the path to miniforge in init.sh${NORMAL}"
   ;;
 *)
+  echo ""
   echo "${RED}unknown: $(uname -m)${NORMAL}"
   ;;
 esac
+
+echo "${GREEN}Done${NORMAL}"
+echo "${GREEN}You can install the VS Code plugin by running the following command.${NORMAL}"
+echo "${GREEN}xargs <""$HOME""/dotfiles/assets/vscode/vscode.txt -n 1 code --install-extension${NORMAL}"
