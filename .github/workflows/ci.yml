@@ -14,7 +14,7 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/Spehhhhh/dotfiles.git $HOME/dotfiles
           cd $HOME/dotfiles
-          ./scripts/bootstrap_mac_ci.sh
+          ./scripts/bootstrap_ci.sh
       - name: run test
         run: |
           ./test/test_ci.sh
