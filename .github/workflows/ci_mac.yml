@@ -8,6 +8,6 @@ jobs:
     steps:
       - uses: actions/checkout@master
       - name: bootstrap
-        run: sh ./bootstrap.sh
+        run: sh ./scripts/bootstrap_mac.sh
       - name: test
         run: sh ./test/test_mac.sh
