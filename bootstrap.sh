@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 RED="$(tput setaf 1)"
 GREEN="$(tput setaf 2)"
@@ -15,7 +15,7 @@ function main {
   echo "${BLUE}Runing the bootstrap script...${NORMAL}"
   case "$OSTYPE" in
   darwin*)
-    sh "$HOME"/dotfiles/bootstrap_macos.sh
+    sh "$HOME"/dotfiles/bootstrap_mac.sh
     ;;
   linux*)
     if [[ "$(uname -m)" == *armv7l* ]]; then
