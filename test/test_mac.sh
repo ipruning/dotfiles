@@ -1,14 +1,10 @@
 #!/usr/bin/env bash
 
-# set -e
+set -e
 
-test -d "$HOME"/dotfiles
-
-echo "Testing"
 echo "Testing Git"
 test -x "$(which git)"
 echo "Testing Python"
-zsh -c "python --version" | grep --fixed-strings "Python 3.10.2"
 python --version | grep --fixed-strings "Python 3.10.2"
 which python | rg "shims"
 echo "Testing ZSH"
