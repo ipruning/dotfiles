@@ -8,4 +8,7 @@ jobs:
     steps:
       - uses: actions/checkout@master
       - name: build
-        run: sh ./bootstrap.sh --force
+        run: |
+          git clone --depth 1 https://github.com/Spehhhhh/dotfiles.git "$HOME"/dotfiles
+          cd "$HOME"/dotfiles
+          sh ./bootstrap.sh --force
