@@ -6,8 +6,8 @@ jobs:
     runs-on: macos-latest
     if: "!contains(github.event.head_commit.message, '[ci skip]')"
     steps:
-      - uses: actions/checkout@master
-      - name: bootstrap
+      - uses: actions/checkout@v2
+      - name: Set up macOS
         run: sh ./scripts/bootstrap_mac.sh
-      - name: test
+      - name: Run test
         run: sh ./test/test_mac.sh
