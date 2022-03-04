@@ -1,5 +1,3 @@
-#!/bin/zsh
-
 set -e
 
 test -d "$HOME"/dotfiles
