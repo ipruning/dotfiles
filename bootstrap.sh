@@ -8,6 +8,8 @@ NORMAL="$(tput sgr0)"
 
 # main
 function main {
+  echo "${BLUE}Cloning dotfiles...${NORMAL}"
+  git clone --depth 1 https://github.com/Spehhhhh/dotfiles.git "$HOME"/dotfiles
   echo "${BLUE}Runing the bootstrap script...${NORMAL}"
   source "$HOME"/dotfiles/bin/csys # check SYSTEM_OS, SYSTEM_ARCH
   case "$OSTYPE" in
@@ -33,22 +35,19 @@ function main {
 MODE="$1"
 
 if [[ $MODE == "--force" ]]; then
+  rm -rf "$HOME"/dotfiles
   main
 else
   echo "${RED}This will overwrite existing files in your home directory. Are you sure? (y/n)${NORMAL}"
   read -r
-  # Checking the environment
-  if [ -d "$HOME"/dotfiles ]; then
-    echo "${YELLOW}You already have dotfiles installed.${NORMAL}"
-    echo "${GREEN}Please remove $HOME/dotfiles if you want to re-install.${NORMAL}"
-    exit
-  fi
-  echo "${RED}This will overwrite existing files in your home directory. Are you sure? (y/n)${NORMAL}"
-  read -r
   if [[ $REPLY =~ ^[Yy] ]]; then
-    echo "${BLUE}Cloning dotfiles...${NORMAL}"
-    git clone --depth 1 https://github.com/Spehhhhh/dotfiles.git "$HOME"/dotfiles
-    main
+    if [ -d "$HOME"/dotfiles ]; then
+      echo "${YELLOW}You already have dotfiles installed.${NORMAL}"
+      echo "${GREEN}Please remove $HOME/dotfiles if you want to re-install.${NORMAL}"
+      exit
+    else
+      main
+    fi
   else
     echo ""
   fi
