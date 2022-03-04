@@ -8,4 +8,4 @@ jobs:
     steps:
       - uses: actions/checkout@master
       - name: build
-        run: sh ./bootstrap.sh
+        run: sh ./bootstrap.sh --force
