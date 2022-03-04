@@ -1,8 +1,8 @@
 name: build
 on: [push, pull_request]
 jobs:
-  default-version:
-    name: Run CI
+  ci:
+    name: run ci
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -10,11 +10,11 @@ jobs:
         os: [macos-latest, ubuntu-latest]
     steps:
       - uses: actions/checkout@v2
-      - name: Set up macOS
+      - name: set up
         run: |
-          git clone --depth 1 https://github.com/Spehhhhh/dotfiles.git "$HOME"/dotfiles
-          cd "$HOME"/dotfiles
+          git clone --depth 1 https://github.com/Spehhhhh/dotfiles.git $HOME/dotfiles
+          cd $HOME/dotfiles
           ./scripts/bootstrap_mac_ci.sh
-      - name: Run test
+      - name: run test
         run: |
           ./test/test_ci.sh
