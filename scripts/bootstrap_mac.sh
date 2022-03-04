@@ -6,7 +6,7 @@ YELLOW="$(tput setaf 3)"
 BLUE="$(tput setaf 4)"
 NORMAL="$(tput sgr0)"
 
-SYSTEM_ARCH=$(uname -m)
+source "$HOME"/dotfiles/bin/csys
 
 function main {
   case $SYSTEM_ARCH in
