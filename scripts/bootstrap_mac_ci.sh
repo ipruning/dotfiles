@@ -31,12 +31,7 @@ echo "${BLUE}Installing mackup${NORMAL}"
 ln -sf "$HOME"/dotfiles/config/mackup/.mackup.cfg "$HOME"/.mackup.cfg
 ln -sf "$HOME"/dotfiles/config/mackup/.mackup "$HOME"/.mackup
 
-echo "${BLUE}Restoring dotfiles${NORMAL}"
-if [ "$MODE" == "--force" ]; then
-  mackup --force restore
-else
-  mackup restore
-fi
+mackup --force restore
 
 echo "${BLUE}Installing asdf${NORMAL}"
 asdf plugin-add python
