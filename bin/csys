@@ -63,12 +63,12 @@ checksystem() {
 main() {
     checksystem
     echo "SYSTEM_OS: $SYSTEM_OS"
-    echo "SYSTEM_ARCH: $SYSTEM_ARCH"
-    echo "KERNEL: $KERNEL"
     echo "DIST: $DIST"
+    echo "DistroBasedOn: $DistroBasedOn"
     echo "PSUEDONAME: $PSUEDONAME"
     echo "REV: $REV"
-    echo "DistroBasedOn: $DistroBasedOn"
+    echo "KERNEL: $KERNEL"
+    echo "SYSTEM_ARCH: $SYSTEM_ARCH"
 }
 
 main
