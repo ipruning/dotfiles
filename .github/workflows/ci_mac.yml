@@ -8,6 +8,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Set up macOS
-        run: sh ./scripts/bootstrap_mac.sh
+        run: |
+          git clone --depth 1 https://github.com/Spehhhhh/dotfiles.git "$HOME"/dotfiles
+          cd "$HOME"/dotfiles
+          sh ./scripts/bootstrap_mac.sh
       - name: Run test
         run: sh ./test/test_mac.sh
