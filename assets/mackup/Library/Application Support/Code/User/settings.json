@@ -197,6 +197,7 @@
     "ipynb",
     "Killall",
     "maci",
+    "mackup",
     "marp",
     "matlabpath",
     "mlint",
@@ -206,8 +207,11 @@
     "platformio",
     "Pylance",
     "qalc",
+    "shellcheck",
     "venv",
+    "Vosk",
     "vsintellicode"
   ],
-  "explorer.confirmDragAndDrop": false
+  "explorer.confirmDragAndDrop": false,
+  "shellcheck.exclude": ["SC1091"]
 }
