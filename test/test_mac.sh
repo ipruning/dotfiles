@@ -1,14 +1,19 @@
-#!/bin/zsh
+#!/usr/bin/env bash
 
 set -e
 
-echo "Testing for macOS"
+echo "Testing"
 
-echo "Testing Homebrew"
-test -x "$(which brew)"
 test -x "$(which git)"
-test -x "$(which code)" # VSCode
+test -x "$(which code)"
+python --version | rg "Python 3.10.2"
+which python | rg "shims"
 
-echo "Testing oh-my-zsh"
+test -d "$HOME"/dotfiles
+echo "Testing ZSH"
 test -x "$(which zsh)"
 test -d "$HOME"/.oh-my-zsh
+echo "Testing Homebrew"
+test -x "$(which brew)"
+echo "Testing Mackup"
+test -f "$HOME"/.zshrc
