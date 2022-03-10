@@ -1,0 +1,4 @@
+# espanso configuration file
+
+show_notifications: false
+toggle_key: OFF
