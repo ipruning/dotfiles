@@ -49,7 +49,6 @@
   "workbench.editor.revealIfOpen": true,
   // open files from quick open as tabs
   "workbench.editor.enablePreviewFromQuickOpen": false,
-  "workbench.startupEditor": "none",
   "workbench.editorAssociations": {
     "*.ipynb": "jupyter-notebook",
     "*.pdf": "pdf.preview"
@@ -213,5 +212,61 @@
     "vsintellicode"
   ],
   "explorer.confirmDragAndDrop": false,
-  "shellcheck.exclude": ["SC1091"]
+  "shellcheck.exclude": ["SC1091"],
+  // Vim easymotion is required for Jump menu - <SPC> j
+  "vim.easymotion": true,
+  // Use system clipboard for vim
+  "vim.useSystemClipboard": true,
+  // Trigger the main which key menu with in the active editor with vim
+  // This cannot be put into keybindings.json because it will
+  // create conflict with Vim.
+  // https://github.com/stevenguh/spacecode/issues/3
+  "vim.normalModeKeyBindingsNonRecursive": [
+    {
+      "before": ["<space>"],
+      "commands": ["vspacecode.space"]
+    },
+    {
+      "before": [","],
+      "commands": [
+        "vspacecode.space",
+        {
+          "command": "whichkey.triggerKey",
+          "args": "m"
+        }
+      ]
+    }
+  ],
+  "vim.visualModeKeyBindingsNonRecursive": [
+    {
+      "before": ["<space>"],
+      "commands": ["vspacecode.space"]
+    },
+    {
+      "before": [","],
+      "commands": [
+        "vspacecode.space",
+        {
+          "command": "whichkey.triggerKey",
+          "args": "m"
+        }
+      ]
+    }
+  ],
+  "gitlens.defaultDateLocale": null,
+  "gitlens.defaultDateFormat": "YYYY-MM-DD hh:mm",
+  "gitlens.defaultTimeFormat": "hh:mm",
+  "gitlens.defaultDateShortFormat": "YYYY-MM-DD",
+  "workbench.startupEditor": "none",
+  "workbench.colorCustomizations": {
+    "editor.lineHighlightBackground": "#1073cf2d",
+    "editor.lineHighlightBorder": "#9fced11f"
+  },
+  "editor.wordWrap": "off",
+  "diffEditor.wordWrap": "off",
+  "editor.guides.indentation": false,
+  "editor.guides.bracketPairs": false,
+  "editor.inlayHints.enabled": false,
+  "blockman.n03MaxDepth": 4,
+  "blockman.n01LineHeight": 0
 }
