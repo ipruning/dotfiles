@@ -6,4 +6,4 @@ windows:
       - runUnblockNeteaseMusic
       - runfava
       - yacron -c $HOME/dotfiles/scripts/yacron/job_0.yaml
-      - echo hello
+      - htop
