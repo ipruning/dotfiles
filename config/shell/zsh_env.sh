@@ -78,7 +78,8 @@ export PATH="${HOME}/dotfiles/bin:$PATH"
 if [[ -n $SSH_CONNECTION ]]; then
   export EDITOR='vim'
 else
-  export EDITOR='code'
+  export EDITOR='vim'
+  # export EDITOR='code'
 fi
 
 #===============================================================================
@@ -97,14 +98,19 @@ test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell
 #===============================================================================
 # 👇 puppeteer
 #===============================================================================
-# export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-# PUPPETEER_EXECUTABLE_PATH=$(brew --prefix)/bin/chromium
-# export PUPPETEER_EXECUTABLE_PATH
+export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+PUPPETEER_EXECUTABLE_PATH=$(brew --prefix)/bin/chromium
+export PUPPETEER_EXECUTABLE_PATH
 
 #===============================================================================
 # 👇 tumxp
 #===============================================================================
 export DISABLE_AUTO_TITLE='true'
+
+#===============================================================================
+# 👇 bat
+#===============================================================================
+export BAT_THEME="OneHalfDark"
 
 #===============================================================================
 # 👇 fzf
