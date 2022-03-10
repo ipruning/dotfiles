@@ -1,16 +1,16 @@
 jobs:
-  - name: kill ScreenTimeAgent
-    command: |
-      launchctl kickstart -k gui/$UID/com.apple.ScreenTimeAgent
-    shell: /bin/zsh
-    schedule: "0 * * * *"
-    captureStderr: true
-    onFailure:
-      report:
-        shell:
-          shell: /bin/zsh
-          command: echo "Error code $YACRON_RETCODE"
-  - name: Backup Homebrew
+  # - name: kill ScreenTimeAgent
+  #   command: |
+  #     launchctl kickstart -k gui/$UID/com.apple.ScreenTimeAgent
+  #   shell: /bin/zsh
+  #   schedule: "0 * * * *"
+  #   captureStderr: true
+  #   onFailure:
+  #     report:
+  #       shell:
+  #         shell: /bin/zsh
+  #         command: echo "Error code $YACRON_RETCODE"
+  - name: Backup
     command: |
       brew bundle dump --file=$HOME/dotfiles/assets/brew/Brewfile --force
       pipx list --json | jq ".venvs | .[] | .metadata.main_package.package" -r > $HOME/dotfiles/assets/pipx/pipx.txt
