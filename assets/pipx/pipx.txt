@@ -4,6 +4,7 @@ manim
 mkdocs-material
 nhentai
 nox
+pdm
 poetry
 pre-commit
 pz

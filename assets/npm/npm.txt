@@ -8,8 +8,10 @@ gatsby-cli
 ghost-cli
 jshint
 markdownlint-cli
+npm
 parrotsay
 picgo
 pnpm
+vercel
 yarn
 zhlint
