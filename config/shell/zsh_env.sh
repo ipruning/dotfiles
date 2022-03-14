@@ -96,6 +96,11 @@ test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell
 # export PKG_CONFIG_PATH="$(brew --prefix qt@5)/lib/pkgconfig"
 
 #===============================================================================
+# 👇 broot
+#===============================================================================
+source "${HOME}/.config/broot/launcher/bash/br"
+
+#===============================================================================
 # 👇 puppeteer
 #===============================================================================
 export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
