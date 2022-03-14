@@ -10,7 +10,6 @@ betterthantomorrow.calva
 bierner.markdown-mermaid
 bodil.file-browser
 brittanychiang.halcyon-vscode
-bungcip.better-toml
 christian-kohler.npm-intellisense
 codeandstuff.package-json-upgrade
 csholmq.excel-to-markdown-table
@@ -37,7 +36,6 @@ gamunu.vscode-yarn
 Gimly81.matlab
 GitHub.copilot
 GitHub.vscode-pull-request-github
-gitkraken.gitkraken-authentication
 golang.go
 GrapeCity.gc-excelviewer
 GraphQL.vscode-graphql
@@ -102,6 +100,7 @@ serayuzgur.crates
 shd101wyy.markdown-preview-enhanced
 silvenon.mdx
 skn0tt.markdown-link-expander
+sourcery.sourcery
 spencerwoo.vscode-sspai-markdown-helper
 sswg.swift-lang
 streetsidesoftware.code-spell-checker
