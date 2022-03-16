@@ -5,7 +5,7 @@
 #===============================================================================
 opon() {
   if [[ -z $OP_SESSION_my ]]; then
-    eval "$(op signin my)"
+    eval "$(op signin --account my)"
   fi
 }
 opoff() {
