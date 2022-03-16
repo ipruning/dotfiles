@@ -16,7 +16,7 @@
     "plaintext": false,
     "markdown": false
   },
-  "terminal.integrated.fontFamily": "'CaskaydiaCove Nerd Font'",
+  "terminal.integrated.fontFamily": "CaskaydiaCove Nerd Font",
   "terminal.integrated.fontSize": 12,
   "terminal.integrated.inheritEnv": false,
   "terminal.integrated.confirmOnExit": "hasChildProcesses",
@@ -93,6 +93,7 @@
     "MD026": false, // Trailing punctuation in heading
     "MD033": false, // Inline HTML
     "MD034": false, // Bare URL used
+    "MD041": false, // First line in a file should be a top-level heading
     "MD045": false // Images should have alternate text (alt text)
   },
   "markdown.marp.exportType": "html",
