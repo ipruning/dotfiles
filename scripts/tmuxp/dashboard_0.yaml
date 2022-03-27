@@ -2,8 +2,14 @@ session_name: dashboard_0
 windows:
   - window_name: Dashboard
     layout: tiled
+    shell_command_before:
+      - cd $HOME
     panes:
-      - runUnblockNeteaseMusic
-      - runfava
-      - yacron -c $HOME/dotfiles/scripts/yacron/job_0.yaml
-      - htop
+      - shell_command:
+          - runUnblockNeteaseMusic
+      - shell_command:
+          - runfava
+      - shell_command:
+          - yacron -c $HOME/dotfiles/scripts/yacron/job_0.yaml
+      - shell_command:
+          - speedtest-cli
