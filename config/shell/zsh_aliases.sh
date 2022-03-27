@@ -19,6 +19,7 @@ if [[ -n $SSH_CONNECTION ]]; then
   alias la='lsd -a --icon never'
   alias lla='lsd -la --icon never'
   alias lt='lsd --tree --icon never'
+  alias ls='lsd --icon never'
 else
   alias l='lsd -l'
   alias la='lsd -a'
