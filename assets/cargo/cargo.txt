@@ -1,0 +1,7 @@
+cargo-update v8.1.2:
+    cargo-install-update
+    cargo-install-update-config
+mdbook-linkcheck v0.7.6:
+    mdbook-linkcheck
+mdbook-pdf v0.1.2:
+    mdbook-pdf
