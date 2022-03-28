@@ -1,15 +1,15 @@
 session_name: dashboard_0
 windows:
-  - window_name: Dashboard
+  - window_name: dashboard_0
     layout: tiled
-    shell_command_before:
-      - cd $HOME
+    # shell_command_before:
+    #   - cd $HOME
     panes:
       - shell_command:
+          - echo "Start the NM Server"
           - runUnblockNeteaseMusic
       - shell_command:
-          - runfava
-      - shell_command:
+          - echo "Start the backup task"
           - yacron -c $HOME/dotfiles/scripts/yacron/job_0.yaml
-      - shell_command:
-          - speedtest-cli
+      - speedtest-cli
+      - echo "Hello"
