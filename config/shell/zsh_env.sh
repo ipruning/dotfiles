@@ -55,7 +55,7 @@ export plugins=(
   # yarn
   poetry
   ripgrep
-  magic-enter
+  # magic-enter # tmuxp bug
   zbell
   command-not-found
   systemadmin
