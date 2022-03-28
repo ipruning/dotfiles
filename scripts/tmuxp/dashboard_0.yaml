@@ -2,14 +2,8 @@ session_name: dashboard_0
 windows:
   - window_name: dashboard_0
     layout: tiled
-    # shell_command_before:
-    #   - cd $HOME
     panes:
-      - shell_command:
-          - echo "Start the NM Server"
-          - runUnblockNeteaseMusic
-      - shell_command:
-          - echo "Start the backup task"
-          - yacron -c $HOME/dotfiles/scripts/yacron/job_0.yaml
+      - runUnblockNeteaseMusic
+      - yacron -c $HOME/dotfiles/scripts/yacron/job_0.yaml
       - speedtest-cli
       - echo "Hello"
