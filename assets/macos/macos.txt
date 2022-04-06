@@ -1,189 +1,188 @@
-1Password.app
-ABBYY FineReader PDF.app
-Affinity Photo.app
-Alacritty.app
-Alfred 4.app
-AltTab.app
-Anki.app
-Apparency.app
-Athens.app
-Audio Hijack.app
-Audio Jam.app
-BetterDummy.app
-Blackmagic Disk Speed Test.app
-Blender.app
-Capture One 22.app
-Chromium.app
-ClashX Pro.app
-Compressor.app
-Contexts.app
-Cubox Helper.app
-Cubox.app
-DEVONthink 3.app
-DaisyDisk.app
-Day One.app
-DeepL.app
-DevToys.app
-Developer.app
-Discord.app
-Docker.app
-Drafts.app
-Dropbox.app
-Eagle for Safari.app
-Eagle.app
-Emacs.app
-Equinox.app
-Espanso.app
-Eudic.app
-Fig.app
-Figma.app
-Final Cut Pro.app
-Fork.app
-Fritzing.app
-GarageBand.app
-Geekbench 5.app
-GoodNotes.app
-Google Chrome.app
-Hepta.app
-Hook.app
-Hustl.app
-IINA.app
-Itsycal.app
-Kaleidoscope.app
-Karabiner-Elements.app
-Karabiner-EventViewer.app
-KeyCastr.app
-Keyboard Maestro.app
-Keynote.app
-LTspice.app
-Lark.app
-LayAuto3.app
-Linear.app
-LinearMouse.app
-Logic Pro X.app
-Logseq.app
-Loopback.app
-LosslessCut.app
-LyricsX.app
-MATLAB_R2022a.app
-MWeb Pro.app
-Magnet.app
-MainStage 3.app
-Maipo.app
-Mathematica.app
-Mathpix Snipping Tool.app
-MenubarX.app
-Microsoft Excel.app
-Microsoft Outlook.app
-Microsoft PowerPoint.app
-Microsoft Remote Desktop.app
-Microsoft Word.app
-Mini Motorways.app
-Mos.app
-Motion.app
-MultiMC.app
-MusicHarbor.app
-NeteaseMusic.app
-Notion.app
-Numbers.app
-OBS.app
-Obsidian.app
-Octotree.app
-OmniGraffle.app
-OmniPlan.app
-OpenEmu.app
-PDF Expert.app
-Pages.app
-PaimonMenuBar.app
-Parallels Desktop.app
-Parsec.app
-PasteNow.app
-PicGo.app
-Picsee.app
-Pixea.app
-Pixelmator Pro.app
-Plash.app
-Pocket Casts.app
-PowerShell.app
-Proxifier.app
-PyCharm.app
-QLMarkdown.app
-QQ.app
-Raindrop.io.app
-Raycast.app
-Rayon.app
-Refined GitHub.app
-Rider.app
-Roam Research.app
-Rocket.app
-Safari.app
-Save to Raindrop.io.app
-Scapple.app
-ScreenFlow.app
-Scrivener.app
-ServerCat.app
+1Password
+ABBYY FineReader PDF
+Affinity Photo
+Alacritty
+Alfred 4
+AltTab
+Anki
+Apparency
+Athens
+Audio Hijack
+Audio Jam
+BetterDummy
+Blackmagic Disk Speed Test
+Blender
+Capture One 22
+Chromium
+ClashX Pro
+Compressor
+Contexts
+Cubox Helper
+Cubox
+DEVONthink 3
+DaisyDisk
+Day One
+DeepL
+DevToys
+Developer
+Discord
+Docker
+Drafts
+Dropbox
+Eagle for Safari
+Eagle
+Emacs
+Equinox
+Espanso
+Eudic
+Fig
+Figma
+Final Cut Pro
+Fork
+Fritzing
+GarageBand
+Geekbench 5
+GoodNotes
+Google Chrome
+Hepta
+Hook
+Hustl
+IINA
+Itsycal
+Kaleidoscope
+Karabiner-Elements
+Karabiner-EventViewer
+KeyCastr
+Keyboard Maestro
+Keynote
+LTspice
+Lark
+LayAuto3
+Linear
+LinearMouse
+Logic Pro X
+Logseq
+Loopback
+LosslessCut
+LyricsX
+MATLAB_R2022a
+MWeb Pro
+Magnet
+MainStage 3
+Maipo
+Mathematica
+Mathpix Snipping Tool
+MenubarX
+Microsoft Excel
+Microsoft Outlook
+Microsoft PowerPoint
+Microsoft Remote Desktop
+Microsoft Word
+Mini Motorways
+Mos
+Motion
+MultiMC
+MusicHarbor
+NeteaseMusic
+Notion
+Numbers
+OBS
+Obsidian
+Octotree
+OmniGraffle
+OmniPlan
+OpenEmu
+PDF Expert
+Pages
+PaimonMenuBar
+Parallels Desktop
+Parsec
+PasteNow
+PicGo
+Picsee
+Pixea
+Pixelmator Pro
+Plash
+Pocket Casts
+PowerShell
+Proxifier
+PyCharm
+QLMarkdown
+QQ
+Raindrop.io
+Raycast
+Rayon
+Refined GitHub
+Rider
+Roam Research
+Rocket
+Safari
+Save to Raindrop.io
+Scapple
+ScreenFlow
+Scrivener
+ServerCat
 Setapp
-Setapp.app
-Shadowrocket.app
-Shapr3D.app
-Shottr.app
-Sideloadly.app
-Simplified for Twitter.app
-Skim.app
-Slack.app
-Sloth.app
-SoundSource.app
-Spark.app
-Steam.app
-Suspicious Package.app
-SwitchKey.app
-Syntax Highlight.app
-Taio.app
-TakeABreak.app
-Tampermonkey.app
-TeamViewer.app
-Telegram.app
-TencentMeeting.app
-Termius.app
-TestFlight.app
-Texpad.app
-Things3.app
-Tito Control.app
-TopNotch.app
-Tweetbot.app
-UninstallPKG.app
-Unity Hub.app
-VNC Viewer.app
-Vision.app
-Visual Studio Code - Insiders.app
-Visual Studio Code.app
-Warp.app
-WeChat.app
-WechatExporter.app
-WezTerm.app
-Wireshark.app
-WolframScript.app
-XLD.app
-Xcode.app
-Xnip.app
-YACReader.app
-ZeroTier.app
-Zotero.app
-aDrive.app
-calibre.app
-fHash.app
-iMazing.app
-iMobie M1 App Checker.app
-iMovie.app
-iTerm.app
-logioptionsplus.app
-qbittorrent.app
-uBlacklist for Safari.app
-uPic.app
-waifu2x.app
-钱条.app
-小宇宙.app
-云图计划.app
-微信读书.app
-明日方舟.app
-讯飞语音输入.app
+Shadowrocket
+Shapr3D
+Shottr
+Sideloadly
+Simplified for Twitter
+Skim
+Slack
+Sloth
+SoundSource
+Spark
+Steam
+Suspicious Package
+SwitchKey
+Syntax Highlight
+Taio
+TakeABreak
+Tampermonkey
+TeamViewer
+Telegram
+TencentMeeting
+Termius
+TestFlight
+Texpad
+Things3
+Tito Control
+TopNotch
+Tweetbot
+UninstallPKG
+Unity Hub
+VNC Viewer
+Vision
+Visual Studio Code - Insiders
+Visual Studio Code
+Warp
+WeChat
+WechatExporter
+WezTerm
+Wireshark
+WolframScript
+XLD
+Xcode
+Xnip
+YACReader
+ZeroTier
+Zotero
+aDrive
+calibre
+fHash
+iMazing
+iMobie M1 App Checker
+iMovie
+iTerm
+logioptionsplus
+qbittorrent
+uBlacklist for Safari
+uPic
+waifu2x
+钱条
+小宇宙
+云图计划
+微信读书
+明日方舟
+讯飞语音输入
