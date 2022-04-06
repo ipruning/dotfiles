@@ -17,6 +17,8 @@ jobs:
       npm list --global --depth=0 --json | jq ".dependencies | keys[]" -r > $HOME/dotfiles/assets/npm/npm.txt
       cargo install --list > $HOME/dotfiles/assets/cargo/cargo.txt
       code --list-extensions > $HOME/dotfiles/assets/vscode/vscode.txt
+      ls /Applications | rg '\.app' | sed 's/\.app//g' | > $HOME/dotfiles/assets/macos/macos.txt
+      ls /Applications/Setapp | rg '\.app' | sed 's/\.app//g' | > $HOME/dotfiles/assets/setapp/setapp.txt
     shell: /bin/zsh
     schedule: "0 1,13,20 * * *"
     captureStderr: true
