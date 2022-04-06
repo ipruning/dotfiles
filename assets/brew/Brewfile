@@ -58,6 +58,7 @@ brew "lsd"
 brew "m-cli"
 brew "mackup"
 brew "mas"
+brew "mdbook"
 brew "micro"
 brew "mosh"
 brew "navi"
@@ -114,15 +115,12 @@ cask "emacs-mac"
 cask "espanso"
 cask "fig"
 cask "font-caskaydia-cove-nerd-font"
-cask "font-fira-code-nerd-font"
-cask "font-jetbrains-mono-nerd-font"
 cask "font-sauce-code-pro-nerd-font"
 cask "font-source-code-pro"
 cask "font-source-code-pro-for-powerline"
 cask "font-times-new-roman"
 cask "ipatool"
 cask "logseq"
-cask "lulu"
 cask "miniforge"
 cask "notion"
 cask "obsidian"
@@ -137,6 +135,7 @@ cask "quicklook-json"
 cask "quicklookase"
 cask "squirrel"
 cask "suspicious-package"
+cask "syntax-highlight"
 cask "topnotch"
 cask "uninstallpkg"
 cask "visual-studio-code-insiders"
@@ -148,6 +147,7 @@ cask "zulu"
 cask "zulu11"
 cask "zulu8"
 mas "Compressor", id: 424390742
+mas "Cubox", id: 1113361350
 mas "Day One", id: 1055511498
 mas "Developer", id: 640199958
 mas "Disk Speed Test", id: 425264550
@@ -166,10 +166,12 @@ mas "MainStage", id: 634159523
 mas "Maipo", id: 789066512
 mas "MenubarX", id: 1575588022
 mas "Microsoft Excel", id: 462058435
+mas "Microsoft Outlook", id: 985367838
 mas "Microsoft PowerPoint", id: 462062816
 mas "Microsoft Remote Desktop", id: 1295203466
 mas "Microsoft Word", id: 462054704
 mas "Mini Motorways", id: 1456188526
+mas "Money Progress", id: 1614349717
 mas "Motion", id: 434290957
 mas "MusicHarbor", id: 1440405750
 mas "Numbers", id: 409203825
@@ -182,18 +184,20 @@ mas "Plash", id: 1494023538
 mas "QQ", id: 451108668
 mas "Rayon", id: 1609781496
 mas "Refined GitHub", id: 1519867270
+mas "Save to Raindrop.io", id: 1549370672
+mas "ServerCat", id: 1501532023
 mas "Shapr3D", id: 1091675654
 mas "Simplified for Twitter", id: 1479307973
 mas "Slack", id: 803453959
 mas "Spark", id: 1176895641
+mas "Taio", id: 1527036273
 mas "Take a Break", id: 1457158844
 mas "Tampermonkey", id: 1482490089
 mas "TestFlight", id: 899247664
 mas "Tweetbot", id: 1384080005
 mas "uBlacklist for Safari", id: 1547912640
 mas "uPic", id: 1549159979
+mas "Vision", id: 1572457968
 mas "waifu2x", id: 1286485858
-mas "WeChat", id: 836500024
-mas "WeCom", id: 1189898970
 mas "Xnip", id: 1221250572
 mas "讯飞语音输入", id: 1243368435
