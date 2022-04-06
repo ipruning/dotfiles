@@ -1,0 +1,51 @@
+AirBuddy.app
+Bartender.app
+BetterTouchTool.app
+BetterZip.app
+CleanMyMac X.app
+CleanShot X.app
+Core Shell.app
+Dash.app
+Disk Drill.app
+Downie.app
+Due.app
+Focus.app
+ForkLift.app
+Gifox.app
+HoudahSpot.app
+Hype.app
+Image2icon.app
+KeyKey Typing Tutor.app
+Keysmith.app
+Lungo.app
+MarginNote.app
+MathKey.app
+Meta.app
+MetaImage.app
+MindNode.app
+Mockuuups Studio.app
+Mosaic.app
+One Switch.app
+OpenIn.app
+PDF Search.app
+Paw.app
+Permute.app
+PliimPRO.app
+Presentify.app
+Proxyman.app
+Renamer.app
+SQLPro Studio.app
+SQLPro for SQLite.app
+SSH Config Editor.app
+Session.app
+SnapMotion.app
+SnippetsLab.app
+Squash.app
+TablePlus.app
+TextSniper.app
+Timing.app
+Ulysses.app
+Vidrio.app
+Yoink.app
+iBoysoft MagicMenu.app
+iStat Menus.app
