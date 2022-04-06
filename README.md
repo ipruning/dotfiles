@@ -7,7 +7,7 @@
     - [`zshrc`](#zshrc)
     - [`~/.gitconfig.local`](#gitconfiglocal)
     - [macOS](#macos)
-    - [Arch](#arch)
+    - [Arch Linux](#arch-linux)
   - [ChangeLog](#changelog)
 
 ## TODO
@@ -21,6 +21,8 @@
 > ⚠️ If you don't fully understand what this script does, don't run it!
 
 Execute the bootstrap script（执行 bootstrap 脚本）
+
+如果你不能 🔬 🧗‍♀️ 则建议使用清华大学提供的 Homebrew 镜像，具体请参考[清华大学开源软件镜像站](https://mirrors.tuna.tsinghua.edu.cn/help/homebrew/)。
 
 ```shell
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Spehhhhh/dotfiles/master/bootstrap.sh)"
@@ -64,7 +66,7 @@ In addition, you will need to sign into the AppStore with your Apple ID as the M
   - 标题栏显示完整路径；
   - 显示隐藏文件；
 
-### Arch
+### Arch Linux
 
 ## ChangeLog
 
