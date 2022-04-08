@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+# brew install freetype
+# python3 -m venv .venv && source .venv/bin/activate && python3 -m pip install --upgrade
+# pip install -r requirements.txt
+# pip install git+https://github.com/lucasb-eyer/pydensecrf.git
+
+if [ "$1" == "-h" ]; then
+    echo "Usage: $(basename "$0") </YOUR_DIR>"
+    exit 0
+fi
+
+MANGA_DIR="$PWD/$1"
+echo "Translating $MANGA_DIR"
+
+APP="$HOME/Database/App/Manga/manga-image-translator"
+export DYLD_LIBRARY_PATH=/opt/homebrew/lib:$DYLD_LIBRARY_PATH
+cd "$APP" && .venv/bin/python translate_demo.py --mode batch --verbose --use-inpainting --translator=baidu --target-lang=CHS --image "$MANGA_DIR"
