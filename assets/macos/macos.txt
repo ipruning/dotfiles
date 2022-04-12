@@ -17,6 +17,7 @@ Chromium
 ClashX Pro
 Compressor
 Contexts
+Cron
 Cubox Helper
 Cubox
 DEVONthink 3
@@ -42,6 +43,7 @@ Fork
 Fritzing
 GarageBand
 Geekbench 5
+GitHub Desktop
 GoodNotes
 Google Chrome
 Hepta
@@ -62,6 +64,7 @@ Linear
 LinearMouse
 Logic Pro X
 Logseq
+Loom
 Loopback
 LosslessCut
 LyricsX
@@ -153,9 +156,11 @@ Tweetbot
 UninstallPKG
 Unity Hub
 VNC Viewer
+VideoFusion-macOS
 Vision
 Visual Studio Code - Insiders
 Visual Studio Code
+Vivid
 Warp
 WeChat
 WechatExporter
@@ -183,6 +188,7 @@ waifu2x
 钱条
 小宇宙
 云图计划
+企业微信
 微信读书
 明日方舟
 讯飞语音输入

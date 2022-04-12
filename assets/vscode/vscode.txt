@@ -1,5 +1,7 @@
 alefragnani.Bookmarks
 alefragnani.project-manager
+antfu.file-nesting
+antfu.slidev
 antfu.smart-clicks
 aster.vscode-subtitles
 asvetliakov.vscode-neovim
