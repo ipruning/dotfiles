@@ -26,8 +26,7 @@ else
   alias lla='lsd -la'
   alias lt='lsd --tree'
   alias jupyter-lab='${HOME}/.conda/envs/learningpytorch/bin/jupyter-lab'
-  # alias r_unm='node ${HOME}/Database/App/UnblockNeteaseMusic/app.js -p 80:443 -f 103.126.92.132'
-  alias r_unm='node ${HOME}/Database/App/UnblockNeteaseMusic/app.js'
+  alias r_unm='node ${HOME}/Database/App/UnblockNeteaseMusic/app.js -p 80:443 -f 103.126.92.132'
   alias r_fava='fava ${HOME}/Database/Ledger/main.bean -p 4000'
 fi
 
