@@ -24,6 +24,7 @@ eg2.vscode-npm-script
 esbenp.prettier-vscode
 fabiospampinato.vscode-diff
 felipecaputo.git-project-manager
+firefox-devtools.vscode-firefox-debug
 foam.foam-vscode
 formulahendry.auto-close-tag
 formulahendry.auto-rename-tag
@@ -41,6 +42,7 @@ hediet.vscode-drawio
 herrmannplatz.npm-dependency-links
 huacnlee.auto-correct
 humao.rest-client
+icrawl.discord-vscode
 James-Yu.latex-workshop
 kahole.magit
 KevinRose.vsc-python-indent
@@ -49,6 +51,7 @@ KnisterPeter.vscode-commitizen
 laike9m.cyberbrain
 Lencerf.beancount
 leodevbro.blockman
+LeonardSSH.vscord
 marp-team.marp-vscode
 matklad.rust-analyzer
 mattn.Lisp

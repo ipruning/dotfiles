@@ -1,3 +1,5 @@
+bore-cli v0.3.0:
+    bore
 cargo-update v8.1.2:
     cargo-install-update
     cargo-install-update-config

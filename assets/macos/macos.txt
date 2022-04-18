@@ -158,7 +158,6 @@ Unity Hub
 VNC Viewer
 VideoFusion-macOS
 Vision
-Visual Studio Code - Insiders
 Visual Studio Code
 Vivid
 Warp
@@ -168,7 +167,7 @@ WezTerm
 Wireshark
 WolframScript
 XLD
-Xcode
+Xcode-13.3.1
 Xnip
 YACReader
 ZeroTier
@@ -184,6 +183,7 @@ logioptionsplus
 qbittorrent
 uBlacklist for Safari
 uPic
+voicepeak
 waifu2x
 钱条
 小宇宙
