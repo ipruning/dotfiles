@@ -15,7 +15,7 @@ jobs:
       brew bundle dump --file=$HOME/dotfiles/assets/brew/Brewfile --force
       pipx list --json | jq ".venvs | .[] | .metadata.main_package.package" -r > $HOME/dotfiles/assets/pipx/pipx.txt
       npm list --global --depth=0 --json | jq ".dependencies | keys[]" -r > $HOME/dotfiles/assets/npm/npm.txt
-      cargo install --list > $HOME/dotfiles/assets/cargo/cargo.txt
+      cargo install --list | grep -v '^[[:blank:]]' | awk '{print $1}' > $HOME/dotfiles/assets/cargo/cargo.txt
       code --list-extensions > $HOME/dotfiles/assets/vscode/vscode.txt
       ls /Applications | rg '\.app' | sed 's/\.app//g' | > $HOME/dotfiles/assets/macos/macos.txt
       ls /Applications/Setapp | rg '\.app' | sed 's/\.app//g' | > $HOME/dotfiles/assets/setapp/setapp.txt
