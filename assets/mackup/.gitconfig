@@ -1,46 +1,52 @@
 [include]
-	path = ~/.gitconfig.local
+    path = ~/.gitconfig.local
 [branch]
-	sort = -committerdate # Show most recently changed branches first.
+    sort = -committerdate # Show most recently changed branches first.
 [core]
-	excludesfile = ~/.gitignore_global
-	pager = diff-so-fancy | less --tabs=4 -RFX
+    excludesfile = ~/.gitignore_global
+    pager = diff-so-fancy | less --tabs=4 -RFX
 [commit]
-	# gpgsign = true
+    # gpgsign = true
 [color]
-	ui = true
+    ui = true
 [color "branch"]
-	current = yellow reverse
-	local = yellow
-	remote = green
+    current = yellow reverse
+    local = yellow
+    remote = green
 [color "diff"]
-	meta = 11
-	frag = magenta bold
-	old = red bold
-	new = green bold
-	func = 146 bold
-	commit = yellow bold
-	whitespace = red reverse
+    meta = 11
+    frag = magenta bold
+    old = red bold
+    new = green bold
+    func = 146 bold
+    commit = yellow bold
+    whitespace = red reverse
 [color "diff-highlight"]
-	oldNormal = red bold
-	oldHighlight = red bold 52
-	newNormal = green bold
-	newHighlight = green bold 22
+    oldNormal = red bold
+    oldHighlight = red bold 52
+    newNormal = green bold
+    newHighlight = green bold 22
 [color "status"]
-	added = yellow
-	changed = green
-	untracked = cyan
+    added = yellow
+    changed = green
+    untracked = cyan
 [filter "lfs"]
-	required = true
-	clean = git-lfs clean -- %f
-	smudge = git-lfs smudge -- %f
-	process = git-lfs filter-process
+    required = true
+    clean = git-lfs clean -- %f
+    smudge = git-lfs smudge -- %f
+    process = git-lfs filter-process
 [gpg]
-	program = gpg
+    program = gpg
 [interactive]
-	diffFilter = diff-so-fancy --patch
+    diffFilter = diff-so-fancy --patch
 [user]
-	# name = YOUR_NAME
-	# email = YOUR_EMAIL@example.com
-	# signingkey = YOUR_GPG_FINGERPRINT
-	# editor = YOUR_EDITOR
+    # name = YOUR_NAME
+    # email = YOUR_EMAIL@example.com
+    # signingkey = YOUR_GPG_FINGERPRINT
+    # editor = YOUR_EDITOR
+[diff]
+    tool = difftastic
+[difftool]
+    prompt = false
+[difftool "difftastic"]
+    cmd = difft "$LOCAL" "$REMOTE"
