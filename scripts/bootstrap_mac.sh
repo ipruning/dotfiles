@@ -70,11 +70,14 @@ function main {
   asdf plugin-add rust https://github.com/asdf-community/asdf-rust.git
   asdf install
 
-  echo "${BLUE}Installing npm packages${NORMAL}"
-  xargs npm install --global <"$HOME"/dotfiles/assets/npm/npm_dev.txt
+  echo "${BLUE}Installing cargo packages${NORMAL}"
+  xargs <"$HOME"/dotfiles/assets/cargo/cargo_dev.txt -n 1 cargo install
 
   echo "${BLUE}Installing pipx packages${NORMAL}"
   xargs <"$HOME"/dotfiles/assets/pipx/pipx_dev.txt -n 1 pipx install
+
+  echo "${BLUE}Installing npm packages${NORMAL}"
+  xargs npm install --global <"$HOME"/dotfiles/assets/npm/npm_dev.txt
 
   echo "${BLUE}Installing other packages${NORMAL}"
   which autocorrect || curl -sSL https://git.io/JcGER | bash # AutoCorrect
@@ -89,6 +92,8 @@ function main {
   # echo "${BLUE}Installing doom-emacs${NORMAL}"
   # git clone --depth 1 https://github.com/hlissner/doom-emacs "$HOME"/.emacs.d
   # "$HOME"/.emacs.d/bin/doom install
+
+  asdf reshim
 }
 
 main
