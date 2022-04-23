@@ -1,4 +1,6 @@
 bore-cli
 cargo-update
+difftastic
 mdbook-linkcheck
 mdbook-pdf
+typos-cli
