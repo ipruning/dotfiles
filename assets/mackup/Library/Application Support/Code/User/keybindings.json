@@ -1,23 +1,27 @@
 [
+  // Toggle between terminal and editor focus
+  // https://stackoverflow.com/questions/42796887/switch-focus-between-editor-and-integrated-terminal
+  { "key": "cmd+j", "command": "workbench.action.terminal.focus" },
   {
-    "key": "alt+space",
-    "command": "whichkey.show",
-    "when": "editorTextFocus"
-  },  
-  {
-    "key": "cmd+[Comma]",
-    "command": "workbench.action.openGlobalSettings"
+    "key": "cmd+j",
+    "command": "workbench.action.focusActiveEditorGroup",
+    "when": "terminalFocus"
   },
+  // Trigger vspacecode in empty editor group
   {
     "key": "space",
     "command": "vspacecode.space",
     "when": "activeEditorGroupEmpty && focusedView == '' && !whichkeyActive && !inputFocus"
   },
+  // Trigger vspacecode when sidebar is in focus
   {
     "key": "space",
     "command": "vspacecode.space",
     "when": "sideBarFocus && !inputFocus && !whichkeyActive"
   },
+  // Keybindings required for edamagit
+  // https://github.com/kahole/edamagit#vim-support-vscodevim
+  // Cannot be added to package.json because keybinding replacements
   {
     "key": "tab",
     "command": "extension.vim_tab",
@@ -72,6 +76,8 @@
     "key": "ctrl+u x",
     "command": "-magit.reset-hard"
   },
+  // Extra ref menu support for edamagit with the key "y"
+  // Cannot be added to package.json because keybinding replacements
   {
     "key": "y",
     "command": "-magit.show-refs"
@@ -81,6 +87,7 @@
     "command": "vspacecode.showMagitRefMenu",
     "when": "editorTextFocus && editorLangId == 'magit' && vim.mode == 'Normal'"
   },
+  // Easy navigation in quick open/QuickPick
   {
     "key": "ctrl+j",
     "command": "workbench.action.quickOpenSelectNext",
@@ -91,6 +98,8 @@
     "command": "workbench.action.quickOpenSelectPrevious",
     "when": "inQuickOpen"
   },
+  // Easy navigation in suggestion/intellisense
+  // Cannot be added to package.json because of conflict with vim's default bindings
   {
     "key": "ctrl+j",
     "command": "selectNextSuggestion",
@@ -106,6 +115,8 @@
     "command": "acceptSelectedSuggestion",
     "when": "suggestWidgetMultipleSuggestions && suggestWidgetVisible && textInputFocus"
   },
+  // Easy navigation in parameter hint (i.e. traverse the hints when there's multiple overload for one method)
+  // Cannot be added to package.json because of conflict with vim's default bindings
   {
     "key": "ctrl+j",
     "command": "showNextParameterHint",
@@ -116,6 +127,7 @@
     "command": "showPrevParameterHint",
     "when": "editorFocus && parameterHintsMultipleSignatures && parameterHintsVisible"
   },
+  // Add ctrl+h/l to navigate in file browser
   {
     "key": "ctrl+h",
     "command": "file-browser.stepOut",
