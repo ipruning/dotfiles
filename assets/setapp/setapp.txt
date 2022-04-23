@@ -30,6 +30,7 @@ OpenIn
 PDF Search
 Paw
 Permute
+PhotoBulk
 PliimPRO
 Presentify
 Proxyman
@@ -43,6 +44,7 @@ SnippetsLab
 Squash
 TablePlus
 TextSniper
+TextSoap
 Timing
 Ulysses
 Vidrio

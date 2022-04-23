@@ -85,6 +85,7 @@ oderwat.indent-rainbow
 piersdeseilligny.betterfountain
 PKief.material-icon-theme
 platformio.platformio-ide
+pomdtr.excalidraw-editor
 RandomFractalsInc.vscode-data-preview
 rebornix.ruby
 redhat.java

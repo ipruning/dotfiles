@@ -1,7 +1,6 @@
 1Password
 ABBYY FineReader PDF
 Affinity Photo
-Alacritty
 Alfred 4
 AltTab
 Anki
@@ -18,8 +17,6 @@ ClashX Pro
 Compressor
 Contexts
 Cron
-Cubox Helper
-Cubox
 DEVONthink 3
 DaisyDisk
 Day One
@@ -59,6 +56,7 @@ Keyboard Maestro
 Keynote
 LTspice
 Lark
+Latest
 LayAuto3
 Linear
 LinearMouse
@@ -129,6 +127,7 @@ Setapp
 Shadowrocket
 Shapr3D
 Shottr
+SiYuan
 Sideloadly
 Simplified for Twitter
 Skim
@@ -174,6 +173,7 @@ ZeroTier
 Zotero
 aDrive
 calibre
+draw.io
 fHash
 iMazing
 iMobie M1 App Checker
