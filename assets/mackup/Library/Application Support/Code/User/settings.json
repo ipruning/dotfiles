@@ -85,16 +85,31 @@
   "python.formatting.provider": "black",
   "python.languageServer": "Pylance",
   // Markdown
+  //
   "markdownlint.config": {
-    "MD004": false, // Unordered list style
-    "MD007": false, // Unordered list indentation
-    "MD018": false, // No space after hash on atx style heading
-    "MD025": false, // Multiple top-level headings in the same document
-    "MD026": false, // Trailing punctuation in heading
-    "MD033": false, // Inline HTML
-    "MD034": false, // Bare URL used
-    "MD041": false, // First line in a file should be a top-level heading
-    "MD045": false // Images should have alternate text (alt text)
+    // https://github.com/DavidAnson/markdownlint/blob/main/schema/.markdownlint.jsonc
+    // MD004/ul-style - Unordered list style
+    "MD004": false,
+    // MD007/ul-indent - Unordered list indentation
+    "MD007": {
+      "indent": 2
+    },
+    // MD013/line-length - Line length
+    "MD013": false,
+    // MD018/no-missing-space-atx - No space after hash on atx style heading
+    "MD018": false,
+    // MD025/single-title/single-h1 - Multiple top-level headings in the same document
+    "MD025": false,
+    // MD026/no-trailing-punctuation - Trailing punctuation in heading
+    "MD026": false,
+    // MD033/no-inline-html - Inline HTML
+    "MD033": false,
+    // MD034/no-bare-urls - Bare URL used
+    "MD034": false,
+    // MD041/first-line-heading/first-line-h1 - First line in a file should be a top-level heading
+    "MD041": false,
+    // MD045/no-alt-text - Images should have alternate text (alt text)
+    "MD045": false
   },
   "markdown.marp.exportType": "html",
   "markdown.marp.enableHtml": true,
@@ -103,7 +118,8 @@
   },
   "markdownFormatter.formatULSymbol": false,
   "markdown.extension.italic.indicator": "_",
-  "projectManager.git.baseFolders": ["~/Desktop"],
+  "markdown.extension.list.indentationSize": "inherit",
+  "projectManager.git.baseFolders": ["~/Coding", "~/Desktop"],
   "hediet.vscode-drawio.local-storage": "eyIuZHJhd2lvLWNvbmZpZyI6IntcImxhbmd1YWdlXCI6XCJcIixcImN1c3RvbUZvbnRzXCI6W10sXCJsaWJyYXJpZXNcIjpcImdlbmVyYWxcIixcImN1c3RvbUxpYnJhcmllc1wiOltcIkwuc2NyYXRjaHBhZFwiXSxcInBsdWdpbnNcIjpbXSxcInJlY2VudENvbG9yc1wiOltdLFwiZm9ybWF0V2lkdGhcIjpcIjI0MFwiLFwiY3JlYXRlVGFyZ2V0XCI6ZmFsc2UsXCJwYWdlRm9ybWF0XCI6e1wieFwiOjAsXCJ5XCI6MCxcIndpZHRoXCI6ODUwLFwiaGVpZ2h0XCI6MTEwMH0sXCJzZWFyY2hcIjp0cnVlLFwic2hvd1N0YXJ0U2NyZWVuXCI6dHJ1ZSxcImdyaWRDb2xvclwiOlwiI2QwZDBkMFwiLFwiZGFya0dyaWRDb2xvclwiOlwiIzZlNmU2ZVwiLFwiYXV0b3NhdmVcIjp0cnVlLFwicmVzaXplSW1hZ2VzXCI6bnVsbCxcIm9wZW5Db3VudGVyXCI6MCxcInZlcnNpb25cIjoxOCxcInVuaXRcIjoxLFwiaXNSdWxlck9uXCI6ZmFsc2UsXCJ1aVwiOlwiXCJ9In0=",
   "diffEditor.ignoreTrimWhitespace": false,
   "indentRainbow.ignoreLinePatterns": [
@@ -181,38 +197,15 @@
   "terminal.integrated.tabs.location": "left",
   "terminal.integrated.tabs.enabled": false,
   "Lua.telemetry.enable": false,
-  "cSpell.userWords": [
-    "autocorrect",
-    "autofetch",
-    "beancount",
-    "Brewfile",
-    "Caskaydia",
-    "donot",
-    "dotfiles",
-    "drawio",
-    "esbenp",
-    "fava",
-    "gitconfiglocal",
-    "gopath",
-    "hediet",
-    "ipynb",
-    "Killall",
-    "maci",
-    "mackup",
-    "marp",
-    "matlabpath",
-    "mlint",
-    "mlintpath",
-    "neovim",
-    "nvim",
-    "platformio",
-    "Pylance",
-    "qalc",
-    "shellcheck",
-    "venv",
-    "Vosk",
-    "vsintellicode"
-  ],
+  "cSpell.customDictionaries": {
+    "custom-dictionary-user": {
+      "name": "custom-dictionary-user",
+      "path": "~/.cspell/custom-dictionary-user.txt",
+      "addWords": true,
+      "scope": "user"
+    }
+  },
+  "cSpell.userWords": ["autocorrect", "shellcheck"],
   "explorer.confirmDragAndDrop": false,
   "shellcheck.exclude": ["SC1091"],
   // Vim easymotion is required for Jump menu - <SPC> j
@@ -293,7 +286,7 @@
   "explorer.experimental.fileNesting.enabled": true,
   "explorer.experimental.fileNesting.expand": false,
   "explorer.experimental.fileNesting.patterns": {
-    "//": "Last update at 4/19/2022, 4:47:31 PM",
+    "//": "Last update at 4/23/2022, 2:45:08 PM",
     "*.asax": "$(capture).*.cs, $(capture).*.vb",
     "*.ascx": "$(capture).*.cs, $(capture).*.vb",
     "*.ashx": "$(capture).*.cs, $(capture).*.vb",
