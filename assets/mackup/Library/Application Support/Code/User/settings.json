@@ -196,7 +196,6 @@
   "vscode-neovim.neovimExecutablePaths.darwin": "/opt/homebrew/bin/nvim",
   "markdown-preview-enhanced.previewTheme": "one-dark.css",
   "terminal.integrated.tabs.location": "left",
-  "terminal.integrated.tabs.enabled": false,
   "Lua.telemetry.enable": false,
   "cSpell.customDictionaries": {
     "custom-dictionary-user": {
@@ -209,6 +208,33 @@
   "cSpell.userWords": ["autocorrect", "shellcheck"],
   "explorer.confirmDragAndDrop": false,
   "shellcheck.exclude": ["SC1091"],
+  "gitlens.defaultDateLocale": null,
+  "gitlens.defaultDateFormat": "YYYY-MM-DD hh:mm",
+  "gitlens.defaultTimeFormat": "hh:mm",
+  "gitlens.defaultDateShortFormat": "YYYY-MM-DD",
+  "workbench.startupEditor": "none",
+  "workbench.colorCustomizations": {
+    "editor.lineHighlightBackground": "#1073cf2d",
+    "editor.lineHighlightBorder": "#9fced11f"
+  },
+  "editor.wordWrap": "off",
+  "diffEditor.wordWrap": "off",
+  "editor.guides.indentation": false,
+  "editor.guides.bracketPairs": false,
+  "editor.inlayHints.enabled": false,
+  "blockman.n03MaxDepth": 4,
+  "blockman.n01LineHeight": 0,
+  "evenBetterToml.formatter.alignEntries": true,
+  "evenBetterToml.formatter.indentEntries": true,
+  "evenBetterToml.schema.enabled": false,
+  "terminal.integrated.env.osx": {
+    "FIG_NEW_SESSION": "1"
+  },
+  "editor.accessibilitySupport": "off",
+  "yaml.schemas": {
+    "https://json.schemastore.org/github-workflow.json": ".github/workflows/*"
+  },
+  // VSpaceCode
   // Vim easymotion is required for Jump menu - <SPC> j
   "vim.easymotion": true,
   // Use system clipboard for vim
@@ -249,35 +275,10 @@
       ]
     }
   ],
-  "gitlens.defaultDateLocale": null,
-  "gitlens.defaultDateFormat": "YYYY-MM-DD hh:mm",
-  "gitlens.defaultTimeFormat": "hh:mm",
-  "gitlens.defaultDateShortFormat": "YYYY-MM-DD",
-  "workbench.startupEditor": "none",
-  "workbench.colorCustomizations": {
-    "editor.lineHighlightBackground": "#1073cf2d",
-    "editor.lineHighlightBorder": "#9fced11f"
-  },
-  "editor.wordWrap": "off",
-  "diffEditor.wordWrap": "off",
-  "editor.guides.indentation": false,
-  "editor.guides.bracketPairs": false,
-  "editor.inlayHints.enabled": false,
-  "blockman.n03MaxDepth": 4,
-  "blockman.n01LineHeight": 0,
-  "evenBetterToml.formatter.alignEntries": true,
-  "evenBetterToml.formatter.indentEntries": true,
-  "evenBetterToml.schema.enabled": false,
-  "terminal.integrated.env.osx": {
-    "FIG_NEW_SESSION": "1"
-  },
-  "editor.accessibilitySupport": "off",
-  "yaml.schemas": {
-    "https://json.schemastore.org/github-workflow.json": ".github/workflows/*"
-  },
   "files.associations": {
     ".gitconfig": "ini"
   },
+  // File Nesting
   "fileNestingUpdater.autoUpdate": true,
   "fileNestingUpdater.autoUpdateInterval": 720,
   "fileNestingUpdater.promptOnAutoUpdate": true,
