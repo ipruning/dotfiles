@@ -44,6 +44,7 @@ alias ip='curl -4 ip.sb'
 alias ipv6='curl -6 ip.sb'
 
 # alias cat='bat'
+# alias cp='fcp'
 # alias df='duf'
 # alias dig='dog'
 # alias du='dust'
