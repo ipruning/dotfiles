@@ -135,6 +135,7 @@
     "rust"
   ],
   "indentRainbow.colorOnWhiteSpaceOnly": true,
+  "errorLens.excludeBySource": ["eslint", "jshint"],
   "notebook.cellToolbarLocation": {
     "default": "right",
     "jupyter-notebook": "left"
