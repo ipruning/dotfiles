@@ -7,6 +7,12 @@
     "command": "workbench.action.focusActiveEditorGroup",
     "when": "terminalFocus"
   },
+  // Trigger vspacecode
+  {
+    "key": "alt+space",
+    "command": "whichkey.show",
+    "when": "editorTextFocus"
+  },
   // Trigger vspacecode in empty editor group
   {
     "key": "space",
