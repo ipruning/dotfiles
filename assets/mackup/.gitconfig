@@ -1,5 +1,7 @@
 [include]
     path = ~/.gitconfig.local
+[alias]
+	lg = log --graph --decorate \n-30 --all --date-order --date=format:'%Y-%m-%d %H:%M:%S' \n--pretty=format:'%C(cyan)%h%Creset %C(black bold)%ad%Creset%C(auto)%d %s'
 [branch]
     sort = -committerdate # Show most recently changed branches first.
 [core]
