@@ -132,9 +132,12 @@ export BAT_THEME="OneHalfDark"
 #===============================================================================
 case $SYSTEM_TYPE in
 mac_arm64 | mac_x86_64*)
-  source "$(brew --prefix fzf)/shell/completion.zsh"
-  source "$(brew --prefix fzf)/shell/key-bindings.zsh"
+  # source "$(brew --prefix fzf)/shell/completion.zsh"
+  # source "$(brew --prefix fzf)/shell/key-bindings.zsh"
+  source "/opt/homebrew/opt/fzf/shell/completion.zsh"
+  source "/opt/homebrew/opt/fzf/shell/key-bindings.zsh"
   ;;
+
 raspberry) ;;
 
 esac
