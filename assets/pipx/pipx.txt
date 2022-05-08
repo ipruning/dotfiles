@@ -8,6 +8,9 @@ pdm
 poetry
 pre-commit
 pz
+socid-extractor
 speedtest-cli
 things-cli
+tmuxp
+twint
 yacron

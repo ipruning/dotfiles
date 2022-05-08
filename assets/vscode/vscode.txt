@@ -16,6 +16,9 @@ DavidAnson.vscode-markdownlint
 dbaeumer.jshint
 dbaeumer.vscode-eslint
 deerawan.vscode-dash
+dendron.dendron
+dendron.dendron-markdown-shortcuts
+dendron.dendron-paste-image
 dnicolson.binary-plist
 dongfg.vscode-beancount-formatter
 donjayamanne.githistory
@@ -43,6 +46,7 @@ hediet.vscode-drawio
 herrmannplatz.npm-dependency-links
 huacnlee.auto-correct
 humao.rest-client
+Ikuyadeu.r
 James-Yu.latex-workshop
 kahole.magit
 KevinRose.vsc-python-indent
