@@ -45,7 +45,7 @@
 
 [[layers]]
     name               = 'lang#python'
-    python_interpreter = '~/.conda/envs/learningpython/bin/python'
+    python_interpreter = '~/.conda/envs/python3.10/bin/python'
 
 [[layers]]
     name              = 'ui'
