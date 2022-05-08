@@ -47,6 +47,7 @@ Hepta
 Hook
 Hustl
 IINA
+Input Source Pro
 Itsycal
 Kaleidoscope
 Karabiner-Elements
@@ -57,6 +58,7 @@ Keynote
 LTspice
 Lark
 Latest
+Lattics
 LayAuto3
 Linear
 LinearMouse
@@ -91,6 +93,7 @@ OBS
 Obsidian
 Octotree
 OmniGraffle
+OmniOutliner
 OmniPlan
 OpenEmu
 PDF Expert
@@ -101,6 +104,7 @@ Parsec
 PasteNow
 PicGo
 Picsee
+Pictogram
 Pixea
 Pixelmator Pro
 Plash
@@ -129,7 +133,6 @@ Shapr3D
 Shottr
 SiYuan
 Sideloadly
-Simplified for Twitter
 Skim
 Slack
 Sloth
@@ -151,6 +154,7 @@ Texpad
 Things3
 Tito Control
 TopNotch
+Tropy
 Tweetbot
 UninstallPKG
 Unity Hub
