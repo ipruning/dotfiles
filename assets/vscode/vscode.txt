@@ -1,3 +1,4 @@
+AffenWiesel.matlab-formatter
 alefragnani.Bookmarks
 alefragnani.project-manager
 antfu.file-nesting
@@ -22,7 +23,6 @@ DotJoshJohnson.xml
 eamodio.gitlens
 eg2.vscode-npm-script
 esbenp.prettier-vscode
-fabiospampinato.vscode-diff
 felipecaputo.git-project-manager
 firefox-devtools.vscode-firefox-debug
 foam.foam-vscode
@@ -33,6 +33,7 @@ foxundermoon.shell-format
 Gimly81.matlab
 GitHub.copilot
 GitHub.copilot-labs
+GitHub.github-vscode-theme
 GitHub.vscode-pull-request-github
 golang.go
 GrapeCity.gc-excelviewer
@@ -42,7 +43,6 @@ hediet.vscode-drawio
 herrmannplatz.npm-dependency-links
 huacnlee.auto-correct
 humao.rest-client
-icrawl.discord-vscode
 James-Yu.latex-workshop
 kahole.magit
 KevinRose.vsc-python-indent
@@ -50,8 +50,6 @@ kisstkondoros.vscode-gutter-preview
 KnisterPeter.vscode-commitizen
 laike9m.cyberbrain
 Lencerf.beancount
-leodevbro.blockman
-LeonardSSH.vscord
 marp-team.marp-vscode
 matklad.rust-analyzer
 mattn.Lisp
@@ -86,7 +84,6 @@ piersdeseilligny.betterfountain
 PKief.material-icon-theme
 platformio.platformio-ide
 pomdtr.excalidraw-editor
-RandomFractalsInc.vscode-data-preview
 rebornix.ruby
 redhat.java
 redhat.vscode-xml
