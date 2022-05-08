@@ -52,3 +52,5 @@
 ;;
 ;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
 ;; they are implemented.
+
+(setq display-line-numbers-type 'relative) ;; display line numbers relative to the current line
