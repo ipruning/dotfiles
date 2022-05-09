@@ -27,29 +27,27 @@ __color_installed() {
 
 __list_all_plugins() {
     join -t ' ' -a 1 \
-        <( asdf plugin-list-all 2>/dev/null | awk '{print $1}' | sort ) \
-        <( __list_installed_plugins | awk '{print $1 " (installed)"}' | sort ) |
+        <(asdf plugin-list-all 2>/dev/null | awk '{print $1}' | sort) \
+        <(__list_installed_plugins | awk '{print $1 " (installed)"}' | sort) |
         __color_installed
 }
-
 
 __list_current() {
     asdf current 2>&1 | awk '{ print $1,$2 }' | column -t
 }
 
-
 __select_available_plugins() {
-    plugins=$( __list_all_plugins )
-    cat <( echo "$plugins" | grep "installed" ) \
-        <( echo "$plugins" | grep -v "installed" ) |
-    fzf -m --tac --ansi | awk '{ print $1 }'
+    plugins=$(__list_all_plugins)
+    cat <(echo "$plugins" | grep "installed") \
+        <(echo "$plugins" | grep -v "installed") |
+        fzf -m --tac --ansi | awk '{ print $1 }'
 }
 
 __select_installed_plugins() {
-    plugins=$( __list_all_plugins )
-    cat <( echo "$plugins" | grep -v "installed" ) \
-        <( echo "$plugins" | grep "installed" ) |
-    fzf -m --tac --ansi | awk '{ print $1 }'
+    plugins=$(__list_all_plugins)
+    cat <(echo "$plugins" | grep -v "installed") \
+        <(echo "$plugins" | grep "installed") |
+        fzf -m --tac --ansi | awk '{ print $1 }'
 }
 
 __version_filter() {
@@ -78,27 +76,27 @@ __version_filter() {
         filter="${ASDFZF_VERSION_KEEP:-all}"
     fi
     case "$filter" in
-        all)
-            echo "cat"
-            ;;
-        semver-no-prerelease)
-            echo "sed -E -n '/^[0-9]+(\.[0-9]+)*(\+[0-9A-Za-z\.-]+)*$/p'"
-            ;;
-        semver-only-prerelease)
-            echo "sed -E -n '/^[0-9]+(\.[0-9]+)*-[0-9A-Za-z\.-]+(\+[0-9A-Za-z\.-]+)*/p'"
-            ;;
-        *)
-            echo "Unknown version filter: $filter" >&2
-            exit 1
-            ;;
+    all)
+        echo "cat"
+        ;;
+    semver-no-prerelease)
+        echo "sed -E -n '/^[0-9]+(\.[0-9]+)*(\+[0-9A-Za-z\.-]+)*$/p'"
+        ;;
+    semver-only-prerelease)
+        echo "sed -E -n '/^[0-9]+(\.[0-9]+)*-[0-9A-Za-z\.-]+(\+[0-9A-Za-z\.-]+)*/p'"
+        ;;
+    *)
+        echo "Unknown version filter: $filter" >&2
+        exit 1
+        ;;
     esac
 }
 
 __list_all_versions() {
-    version_filter=$( __version_filter "$1" )
+    version_filter=$(__version_filter "$1")
     join -t ' ' -a 1 \
-        <( asdf list-all "$1" 2>/dev/null | awk '{print $1}' | eval "$version_filter" | sort ) \
-        <( asdf list "$1" 2>/dev/null | awk '{print $1}' | eval "$version_filter" | awk '{print $1 " (installed)"}' | sort ) | \
+        <(asdf list-all "$1" 2>/dev/null | awk '{print $1}' | eval "$version_filter" | sort) \
+        <(asdf list "$1" 2>/dev/null | awk '{print $1}' | eval "$version_filter" | awk '{print $1 " (installed)"}' | sort) |
         sort -V |
         __color_installed
 }
@@ -109,23 +107,23 @@ __list_installed_versions() {
 
 __select_installed_version() {
     __list_installed_versions "$1" |
-    fzf --tac --ansi --no-sort |
-    awk '{ print $1 }'
+        fzf --tac --ansi --no-sort |
+        awk '{ print $1 }'
 
 }
 
 __select_available_versions() {
-    versions=$( __list_all_versions "$1" )
+    versions=$(__list_all_versions "$1")
     cat <(echo "$versions" | grep "installed") \
-        <(echo "$versions" | grep -v "installed") |\
-    fzf -m --tac --ansi --no-sort | awk '{ print $1 }'
+        <(echo "$versions" | grep -v "installed") |
+        fzf -m --tac --ansi --no-sort | awk '{ print $1 }'
 }
 
 __select_installed_versions() {
-    versions=$( __list_all_versions "$1" )
+    versions=$(__list_all_versions "$1")
     cat <(echo "$versions" | grep -v "installed") \
-        <(echo "$versions" | grep "installed") |\
-    fzf -m --tac --ansi --no-sort | awk '{ print $1 }'
+        <(echo "$versions" | grep "installed") |
+        fzf -m --tac --ansi --no-sort | awk '{ print $1 }'
 }
 
 __get_current_version() {
@@ -139,12 +137,12 @@ __multi() {
 }
 
 _install() {
-    plugin=$( __select_installed_plugin )
+    plugin=$(__select_installed_plugin)
     __select_available_versions "$plugin" | __multi asdf install "$plugin"
 }
 
 _uninstall() {
-    plugin=$( __select_installed_plugin )
+    plugin=$(__select_installed_plugin)
     __select_installed_versions "$plugin" | __multi asdf uninstall "$plugin"
 }
 
@@ -156,34 +154,31 @@ _plugin-remove() {
     __select_installed_plugins | __multi asdf plugin-remove
 }
 
-
 _list() {
-    plugin=$( __select_installed_plugin )
+    plugin=$(__select_installed_plugin)
     __list_all_versions "$plugin" | grep installed
 }
 
 _list-all() {
-    plugin=$( __select_installed_plugin )
+    plugin=$(__select_installed_plugin)
     __list_all_versions "$plugin"
 }
 
 _global() {
-    plugin=$( __select_installed_plugin )
-    version=$( __select_installed_version "$plugin" )
+    plugin=$(__select_installed_plugin)
+    version=$(__select_installed_version "$plugin")
     asdf global "$plugin" "$version"
 }
 
 _local() {
-    plugin=$( __select_installed_plugin )
-    version=$( __select_installed_version "$plugin" )
+    plugin=$(__select_installed_plugin)
+    version=$(__select_installed_version "$plugin")
     asdf local "$plugin" "$version"
 }
 
 _current() {
-     __list_current | fzf
+    __list_current | fzf
 }
-
-
 
 __list_operations() {
     cat <<-EOF
