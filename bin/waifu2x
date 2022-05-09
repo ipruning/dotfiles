@@ -1,6 +1,5 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
-# Edit this line to specify the path to waifu2x.app
 WAIFU2X_APP="/Applications/waifu2x.app"
 
 if [ ! -d "${WAIFU2X_APP}" ]; then
