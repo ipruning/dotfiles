@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+
+helpFunction() {
+   echo ""
+   echo "Usage: $0 -a parameterA"
+   echo -e "\t-a parameterA is the path of a Markdown file."
+   exit 1 # Exit script after printing help
+}
+
+while getopts "a:" opt; do
+   case "$opt" in
+   a) parameterA="$OPTARG" ;;
+   ?) helpFunction ;; # Print helpFunction in case parameter is non-existent
+   esac
+done
+
+# Print helpFunction in case parameters are empty
+if [ -z "$parameterA" ]; then
+   echo "Some or all of the parameters are empty"
+   helpFunction
+fi
+
+# Begin script in case all parameters are correct
+echo "--------------------------------------------------------------------------------"
+echo "The path is $parameterA"
+echo "--------------------------------------------------------------------------------"
+
+read -r -n2 -p "Do you want to continue [Y/N]? " answer
+case $answer in
+Y | y)
+   echo "Continue"
+   ;;
+N | n)
+   echo "Exit"
+   ;;
+*)
+   echo "Error"
+   ;;
+esac
+
+# file=${parameterA##*/}
+# name=${file%%.*}
+name=$(basename $parameterA .md)
+doctor-jones "$(cat ${parameterA})" >"$name".doctor-jones.md
+zhlint "$parameterA" --output="$name".string-zhlint.md
+
+echo "--------------------------------------------------------------------------------"
+echo "可用 VS Code format Markdown syntax"
+echo "--------------------------------------------------------------------------------"
+
+# npm install -g markdownlint-cli
+# npm install lint-md -g
