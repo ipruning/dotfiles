@@ -1,4 +1,5 @@
 black
+isort
 pip
 setuptools
 wheel
