@@ -1,4 +1,11 @@
 # gitignore
 
+# log
 *.log
 automatic_backups
+
+# bin
+bin/double-entry-generator
+bin/pandoc-crossref
+bin/redo
+bin/wayback
