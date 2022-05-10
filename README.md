@@ -60,11 +60,11 @@ In addition, you will need to sign into the AppStore with your Apple ID as the M
 - 修改共享电脑名称；
 - 设置触发角；
 - Dock
-  - 添加空白格： `defaults write com.apple.dock persistent-apps -array-add '{"tile-type"="spacer-tile";}'; Killall Dock`
+    - 添加空白格： `defaults write com.apple.dock persistent-apps -array-add '{"tile-type"="spacer-tile";}'; Killall Dock`
 - Finder
-  - 显示拓展名；
-  - 标题栏显示完整路径；
-  - 显示隐藏文件；
+    - 显示拓展名；
+    - 标题栏显示完整路径；
+    - 显示隐藏文件；
 
 ### Arch Linux
 
