@@ -4,6 +4,6 @@ windows:
     layout: tiled
     panes:
       - r_unm
+      - r_archivebox
       - yacron -c $HOME/dotfiles/scripts/yacron/job_0.yaml
-      - speedtest-cli
-      - echo "Hello"
+      - brew bundle dump --file=$HOME/dotfiles/assets/brew/Brewfile --force
