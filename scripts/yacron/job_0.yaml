@@ -10,17 +10,17 @@ jobs:
   #       shell:
   #         shell: /bin/zsh
   #         command: echo "Error code $YACRON_RETCODE"
-  - name: Backup Homebrew
-    command: |
-      brew bundle dump --file=$HOME/dotfiles/assets/brew/Brewfile --force
-    shell: /bin/zsh
-    schedule: "0 0 * * *"
-    captureStderr: true
-    onFailure:
-      report:
-        shell:
-          shell: /bin/zsh
-          command: echo "Error code $YACRON_RETCODE"
+  # - name: Backup Homebrew
+  #   command: |
+  #     brew bundle dump --file=$HOME/dotfiles/assets/brew/Brewfile --force
+  #   shell: /bin/zsh
+  #   schedule: "0 0 * * *"
+  #   captureStderr: true
+  #   onFailure:
+  #     report:
+  #       shell:
+  #         shell: /bin/zsh
+  #         command: echo "Error code $YACRON_RETCODE"
   - name: Backup Others
     command: |
       cargo install --list | grep -v '^[[:blank:]]' | awk '{print $1}' > $HOME/dotfiles/assets/cargo/cargo.txt
