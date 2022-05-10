@@ -26,17 +26,23 @@
   "code-runner.runInTerminal": true,
   "code-runner.executorMap": {
     "beancount": "fava $fullFileName -p 4000",
-    "markdown": "cd $dir && ~/Dropbox/Apps/Scripts/md-formatter.sh -a $fullFileName",
+    "markdown": "cd $dir && md-formatter -a $fullFileName",
     "python": "$pythonPath -u $fullFileName"
   },
   "code-runner.clearPreviousOutput": true,
   "code-runner.ignoreSelection": true,
+  "code-runner.saveFileBeforeRun": true,
   "git.autofetch": true,
   "git.confirmSync": false,
   "git.enableSmartCommit": true,
   "gitlens.views.repositories.files.layout": "list",
   "gitlens.codeLens.scopes": ["document"],
-  "gitProjectManager.baseProjectsFolders": ["~/Coding", "~/Desktop"],
+  "gitProjectManager.baseProjectsFolders": [
+    "~/Coding",
+    "~/Desktop",
+    "~/Stacks"
+  ],
+  "projectManager.git.baseFolders": ["~/Coding", "~/Desktop", "~/Stacks"],
   "diffEditor.renderSideBySide": true,
   "workbench.activityBar.visible": true,
   "workbench.iconTheme": "material-icon-theme",
@@ -50,8 +56,7 @@
   // open files from quick open as tabs
   "workbench.editor.enablePreviewFromQuickOpen": false,
   "workbench.editorAssociations": {
-    "*.ipynb": "jupyter-notebook",
-    "*.pdf": "pdf.preview"
+    "*.ipynb": "jupyter-notebook"
   },
   // "http.proxySupport": "off",
   "remote.SSH.connectTimeout": 1000,
@@ -119,7 +124,7 @@
   "markdownFormatter.formatULSymbol": false,
   "markdown.extension.italic.indicator": "_",
   "markdown.extension.list.indentationSize": "inherit",
-  "projectManager.git.baseFolders": ["~/Coding", "~/Desktop"],
+  "markdown.extension.tableFormatter.normalizeIndentation": true,
   "diffEditor.ignoreTrimWhitespace": false,
   "indentRainbow.ignoreLinePatterns": [
     "/[ \t]* [*]/g", // lines beginning with <whitespace><space>*
@@ -157,6 +162,7 @@
     },
     "editor.tabSize": 4
   },
+  // Formatting
   "[javascript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.tabSize": 2
@@ -180,6 +186,8 @@
   },
   // Beancount
   "beancount.fixedCJKWidth": true,
+  "beancount.inputMethods": ["pinyin"],
+  "beancount.mainBeanFile": "~/Database/Ledger/main.bean",
   "beancountFormatter.fixedCJKWidth": true,
   "beancountFormatter.currencyColumn": 72,
   "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
@@ -288,7 +296,7 @@
   "explorer.fileNesting.enabled": true,
   "explorer.fileNesting.expand": false,
   "explorer.fileNesting.patterns": {
-    "//": "Last update at 5/8/2022, 5:49:17 AM",
+    "//": "Last update at 5/10/2022, 4:23:08 AM",
     "*.asax": "$(capture).*.cs, $(capture).*.vb",
     "*.ascx": "$(capture).*.cs, $(capture).*.vb",
     "*.ashx": "$(capture).*.cs, $(capture).*.vb",
