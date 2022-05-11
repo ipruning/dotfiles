@@ -27,12 +27,13 @@ else
   alias lt='lsd --tree'
   alias jupyter='jupyter-notebook'
   alias jupyter-lab='${HOME}/.conda/envs/python3.10/bin/jupyter-lab'
-  alias r_unm='node ${HOME}/Stacks/Utilities/UnblockNeteaseMusic/app.js -p 80:443 -f 103.126.92.132'
-  alias r_fava='fava ${HOME}/Database/Ledger/main.bean -p 4000'
-  alias r_citespace='cd ${HOME}/Database/CiteSpace/5.8.R3/ && ./StartCiteSpace_M1_Pro.sh'
-  alias r_archivebox='cd ${HOME}/Database/ArchiveBox/ && archivebox server'
-  alias r_update='brew update'
-  alias r_upgrade='brew upgrade && brew cu && pipx upgrade-all && npx npm-check --global --update-all && cargo install-update -a && gh extension upgrade --all'
+  alias r-unm='node ${HOME}/Stacks/Utilities/UnblockNeteaseMusic/app.js -p 80:443 -f 103.126.92.132'
+  alias r-fava='fava ${HOME}/Database/Ledger/main.bean -p 4000'
+  alias r-citespace='cd ${HOME}/Database/CiteSpace/5.8.R3/ && ./StartCiteSpace_M1_Pro.sh'
+  # alias r-archivebox='cd ${HOME}/Database/ArchiveBox/ && archivebox server'
+  alias r-archivebox='cd /Volumes/Workspace/Database/ArchiveBox && archivebox server'
+  alias r-update='brew update'
+  alias r-upgrade='brew upgrade && brew cu && pipx upgrade-all && npx npm-check --global --update-all && cargo install-update -a && gh extension upgrade --all'
 fi
 
 alias rip='rip -i'                          # A safe and ergonomic alternative to rm
