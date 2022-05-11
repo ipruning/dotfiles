@@ -143,15 +143,21 @@ export BAT_THEME="OneHalfDark"
 #===============================================================================
 case $SYSTEM_TYPE in
 mac_arm64 | mac_x86_64*)
-  # source "$(brew --prefix fzf)/shell/completion.zsh"
-  # source "$(brew --prefix fzf)/shell/key-bindings.zsh"
-  source "/opt/homebrew/opt/fzf/shell/completion.zsh"
-  source "/opt/homebrew/opt/fzf/shell/key-bindings.zsh"
+  # https://github.com/jeffreytse/zsh-vi-mode/issues/24
+  zvm_after_init() {
+    source "/opt/homebrew/opt/fzf/shell/completion.zsh"
+    source "/opt/homebrew/opt/fzf/shell/key-bindings.zsh"
+  }
   ;;
 
 raspberry) ;;
 
 esac
+
+#===============================================================================
+# 👇 redo
+#===============================================================================
+export HISTFILE="${HOME}/.zsh_history"
 
 #===============================================================================
 # 👇 fzf CTRL-T to fuzzily search for a file or directory in your home directory then insert its path at the cursor
