@@ -30,8 +30,9 @@ else
   alias r-citespace='cd ${HOME}/Database/CiteSpace/5.8.R3/ && ./StartCiteSpace_M1_Pro.sh'
   # alias r-archivebox='cd ${HOME}/Database/ArchiveBox/ && archivebox server'
   alias r-archivebox='cd /Volumes/Workspace/Database/ArchiveBox && archivebox server'
-  alias r-update='brew update'
-  alias r-upgrade='brew upgrade && brew cu && pipx upgrade-all && npx npm-check --global --update-all && cargo install-update -a && gh extension upgrade --all && conda update --all'
+  alias r-update='brew update && brew cu && asdf latest --all && tldr --update'
+  alias r-upgrade='brew upgrade && pipx upgrade-all && npm update -g npm && npx npm-check --global --update-all && cargo install-update -a && gh extension upgrade --all && conda update --all && asdf update && asdf plugin update --all'
+  # alias r-upgrade='omz update && pio update && pio upgrade && npm update -g npm && xcodes update && mas upgrade'
 fi
 
 alias rip='rip -i'                          # A safe and ergonomic alternative to rm
