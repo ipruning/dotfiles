@@ -1,6 +1,6 @@
 clojure 1.11.1.1113
 elixir 1.13.4
-golang 1.18.1
+golang 1.18.2
 nodejs lts
 python 3.10.4 3.9.12 2.7.18 pypy3.9-7.3.9
 ruby 3.1.0
