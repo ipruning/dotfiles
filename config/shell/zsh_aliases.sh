@@ -33,7 +33,7 @@ else
   # alias r-archivebox='cd ${HOME}/Database/ArchiveBox/ && archivebox server'
   alias r-archivebox='cd /Volumes/Workspace/Database/ArchiveBox && archivebox server'
   alias r-update='brew update'
-  alias r-upgrade='brew upgrade && brew cu && pipx upgrade-all && npx npm-check --global --update-all && cargo install-update -a && gh extension upgrade --all'
+  alias r-upgrade='brew upgrade && brew cu && pipx upgrade-all && npx npm-check --global --update-all && cargo install-update -a && gh extension upgrade --all && conda update --all'
 fi
 
 alias rip='rip -i'                          # A safe and ergonomic alternative to rm
