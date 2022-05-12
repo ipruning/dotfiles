@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-
 #===============================================================================
 # 👇 1Password
 #===============================================================================
@@ -41,8 +39,8 @@ sudo-command-line() {
   fi
   zle reset-prompt
 }
-zle     -N   sudo-command-line
-bindkey '^S' sudo-command-line
+# zle     -N   sudo-command-line
+# bindkey '^S' sudo-command-line
 
 #===============================================================================
 # 👇 Git
@@ -55,13 +53,13 @@ getrepo() {
 # 👇 fzf Option-C 快速查找目录
 # ALT-C to fuzzily search for a directory in your home directory then cd into it
 #===============================================================================
-if [[ $(uname) == "Darwin" ]]; then # Default #TODO, For Mac OS: Option-C
-  bindkey 'ç' fzf-cd-widget
-fi
+# if [[ $(uname) == "Darwin" ]]; then # Default #TODO, For Mac OS: Option-C
+#   bindkey 'ç' fzf-cd-widget
+# fi
 export FZF_ALT_C_COMMAND="fd --ignore-file ~/.rgignore --hidden --follow --ignore-case --type d"
 
 #===============================================================================
-# 👇 fzf Option + X 跳转近期目录
+# 👇 fzf Option-X 跳转近期目录
 #===============================================================================
 fzf-dirs-widget() {
   dir=$(dirs -v | fzf --height "${FZF_TMUX_HEIGHT:-40%}" --reverse | cut -b3-)
@@ -77,11 +75,11 @@ fzf-dirs-widget() {
   return $ret
 }
 zle     -N    fzf-dirs-widget
-if [[ $(uname) == "Darwin" ]]; then # Default alt-X, For Mac OS: Option-X
-  bindkey '≈' fzf-dirs-widget
-else
-  bindkey '\ex' fzf-dirs-widget
-fi
+# if [[ $(uname) == "Darwin" ]]; then # Default alt-X, For Mac OS: Option-X
+#   bindkey '≈' fzf-dirs-widget
+# else
+#   bindkey '\ex' fzf-dirs-widget
+# fi
 # Use ~~ as the trigger sequence instead of the default **
 # export FZF_COMPLETION_TRIGGER='~~'
 export FZF_COMPLETION_OPTS='--border --info=inline'
@@ -160,9 +158,9 @@ fkill() {
 # z foo<space><tab> # shows interactive completions via zoxide
 
 #===============================================================================
-# 👇 asdf
+# 👇 fzf asdf
 #===============================================================================
-# ref asdfzf()
+# ref fasdf()
 
 #===============================================================================
 # 👇 tmux

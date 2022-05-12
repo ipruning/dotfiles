@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-
 #===============================================================================
 # 👇 Aliases
 # 👇 For a full list of active aliases, run `alias`.

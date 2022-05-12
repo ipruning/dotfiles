@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-
 #===============================================================================
 # 👇 direnv
 #===============================================================================
@@ -82,6 +80,22 @@ export PATH="${HOME}/dotfiles/bin:$PATH"
 #===============================================================================
 # export ZVM_CURSOR_STYLE_ENABLED=false
 
+# https://github.com/jeffreytse/zsh-vi-mode/issues/24
+case $SYSTEM_TYPE in
+mac_arm64)
+  zvm_after_init() {
+    source "/opt/homebrew/opt/fzf/shell/completion.zsh"
+    source "/opt/homebrew/opt/fzf/shell/key-bindings.zsh"
+    bindkey 'ç' fzf-cd-widget
+    bindkey '≈' fzf-dirs-widget
+    zle -N sudo-command-line
+    bindkey '^S' sudo-command-line
+  }
+  ;;
+mac_x86_64*) ;;
+raspberry) ;;
+esac
+
 #===============================================================================
 # 👇 doom-emacs binary
 #===============================================================================
@@ -97,9 +111,9 @@ export LANG=en_US.UTF-8
 # 👇 Preferred editor for local and remote sessions
 #===============================================================================
 if [[ -n $SSH_CONNECTION ]]; then
-  export EDITOR='vim'
+  export EDITOR='nvim'
 else
-  export EDITOR='vim'
+  export EDITOR='nvim'
   # export EDITOR='code'
 fi
 
@@ -142,16 +156,8 @@ export BAT_THEME="OneHalfDark"
 # 👇 fzf
 #===============================================================================
 case $SYSTEM_TYPE in
-mac_arm64 | mac_x86_64*)
-  # https://github.com/jeffreytse/zsh-vi-mode/issues/24
-  zvm_after_init() {
-    source "/opt/homebrew/opt/fzf/shell/completion.zsh"
-    source "/opt/homebrew/opt/fzf/shell/key-bindings.zsh"
-  }
-  ;;
-
+mac_arm64 | mac_x86_64*) ;;
 raspberry) ;;
-
 esac
 
 #===============================================================================
