@@ -46,7 +46,7 @@
   "diffEditor.renderSideBySide": true,
   "workbench.activityBar.visible": true,
   "workbench.iconTheme": "material-icon-theme",
-  "workbench.colorTheme": "One Dark Pro Darker",
+  "workbench.colorTheme": "One Dark Pro",
   // "workbench.settings.useSplitJSON": true,
   // editor
   // open files as tabs
@@ -87,10 +87,15 @@
   },
   "todo-tree.regex.regex": "(//|#|<!--|;|/\\*|^|^\\s*(-|\\d+.))\\s*($TAGS)",
   // Python
+  "python.defaultInterpreterPath": "~/.asdf/shims/python",
   "python.formatting.provider": "black",
   "python.languageServer": "Pylance",
+  "python.linting.enabled": true,
+  // "python.linting.flake8Enabled": true,
+  // "python.testing.unittestEnabled": false,
+  // "python.testing.pytestEnabled": true,
+  // "python.testing.pytestArgs": ["tests"],
   // Markdown
-  //
   "markdownlint.config": {
     // https://github.com/DavidAnson/markdownlint/blob/main/schema/.markdownlint.jsonc
     // MD004/ul-style - Unordered list style
@@ -163,6 +168,9 @@
     "editor.tabSize": 4
   },
   // Formatting
+  "[dockerfile]": {
+    "editor.defaultFormatter": "ms-azuretools.vscode-docker"
+  },
   "[javascript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.tabSize": 2
@@ -195,13 +203,11 @@
   "platformio-ide.useBuiltinPython": false,
   "go.toolsManagement.autoUpdate": true,
   "autocorrect.formatOnSave": false,
-  "python.defaultInterpreterPath": "~/.asdf/shims/python",
   "matlab.matlabpath": "/Applications/MATLAB_R2022a.app/bin",
   "matlab.mlintpath": "/Applications/MATLAB_R2022a.app/bin/maci64/mlint",
   "json.maxItemsComputed": 10000,
   "vscode-neovim.neovimExecutablePaths.darwin": "/opt/homebrew/bin/nvim",
   "markdown-preview-enhanced.previewTheme": "one-dark.css",
-  "terminal.integrated.tabs.location": "left",
   "Lua.telemetry.enable": false,
   "cSpell.customDictionaries": {
     "custom-dictionary-user": {
@@ -227,7 +233,6 @@
   "diffEditor.wordWrap": "off",
   "editor.guides.indentation": false,
   "editor.guides.bracketPairs": false,
-  "editor.inlayHints.enabled": false,
   "blockman.n03MaxDepth": 4,
   "blockman.n01LineHeight": 0,
   "evenBetterToml.formatter.alignEntries": true,
