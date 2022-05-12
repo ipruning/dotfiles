@@ -3,7 +3,7 @@ windows:
   - window_name: dashboard_0
     layout: tiled
     panes:
-      - r-unm
-      - r-archivebox
+      - yacron -c $HOME/dotfiles/scripts/yacron/job_0.yaml
+      - brew bundle dump --file=$HOME/dotfiles/assets/brew/Brewfile --force
       - echo "Hello"
       - echo "Hello"
