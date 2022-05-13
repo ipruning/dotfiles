@@ -11,10 +11,9 @@
   "editor.linkedEditing": true,
   "editor.suggestSelection": "first",
   "github.copilot.enable": {
-    "*": true
-    // "yaml": false,
-    // "plaintext": false,
-    // "markdown": false
+    "*": true,
+    "markdown": false,
+    "plaintext": false
   },
   "terminal.integrated.fontFamily": "CaskaydiaCove Nerd Font",
   "terminal.integrated.fontSize": 12,
@@ -304,7 +303,7 @@
   "explorer.fileNesting.enabled": true,
   "explorer.fileNesting.expand": false,
   "explorer.fileNesting.patterns": {
-    "//": "Last update at 5/10/2022, 4:23:08 AM",
+    "//": "Last update at 5/13/2022, 2:30:25 AM",
     "*.asax": "$(capture).*.cs, $(capture).*.vb",
     "*.ascx": "$(capture).*.cs, $(capture).*.vb",
     "*.ashx": "$(capture).*.cs, $(capture).*.vb",
