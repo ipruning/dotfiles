@@ -4,7 +4,6 @@ BetterTouchTool
 BetterZip
 CleanMyMac X
 CleanShot X
-Core Shell
 Dash
 Disk Drill
 Downie
@@ -15,7 +14,6 @@ Gifox
 HoudahSpot
 Hype
 Image2icon
-KeyKey Typing Tutor
 Keysmith
 Lungo
 MarginNote

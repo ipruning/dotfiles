@@ -3,4 +3,5 @@ cargo-update
 difftastic
 mdbook-linkcheck
 mdbook-pdf
+monolith
 typos-cli
