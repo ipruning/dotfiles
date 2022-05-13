@@ -17,4 +17,4 @@ jobs:
           ./scripts/bootstrap_ci.sh
       - name: run test
         run: |
-          ./test/test_ci.sh
+          ./tests/test_ci.sh
