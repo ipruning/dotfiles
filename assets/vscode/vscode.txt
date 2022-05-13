@@ -6,12 +6,14 @@ antfu.slidev
 antfu.smart-clicks
 aster.vscode-subtitles
 asvetliakov.vscode-neovim
+benjamin-simmonds.pythoncpp-debug
 betterthantomorrow.calva
 bierner.markdown-mermaid
 brittanychiang.halcyon-vscode
 christian-kohler.npm-intellisense
 codeandstuff.package-json-upgrade
 csholmq.excel-to-markdown-table
+darkriszty.markdown-table-prettify
 DavidAnson.vscode-markdownlint
 dbaeumer.jshint
 dbaeumer.vscode-eslint
@@ -34,6 +36,7 @@ formulahendry.auto-rename-tag
 formulahendry.code-runner
 foxundermoon.shell-format
 Gimly81.matlab
+GitHub.codespaces
 GitHub.copilot
 GitHub.copilot-labs
 GitHub.github-vscode-theme
@@ -47,7 +50,10 @@ herrmannplatz.npm-dependency-links
 huacnlee.auto-correct
 humao.rest-client
 Ikuyadeu.r
+ionutvmi.path-autocomplete
+jacobdufault.fuzzy-search
 James-Yu.latex-workshop
+jeff-hykin.better-cpp-syntax
 kahole.magit
 KevinRose.vsc-python-indent
 kisstkondoros.vscode-gutter-preview
@@ -63,6 +69,7 @@ mervin.markdown-formatter
 mhutchie.git-graph
 mindaro-dev.file-downloader
 ms-azuretools.vscode-docker
+MS-CEINTL.vscode-language-pack-zh-hans
 ms-dotnettools.csharp
 ms-kubernetes-tools.vscode-kubernetes-tools
 ms-python.python
@@ -76,6 +83,8 @@ ms-vscode-remote.remote-ssh-edit
 ms-vscode.cmake-tools
 ms-vscode.cpptools
 ms-vscode.cpptools-extension-pack
+ms-vscode.cpptools-themes
+ms-vscode.powershell
 mshr-h.veriloghdl
 mushan.vscode-paste-image
 naumovs.color-highlight
@@ -105,6 +114,8 @@ sswg.swift-lang
 streetsidesoftware.code-spell-checker
 sumneko.lua
 tamasfe.even-better-toml
+tecosaur.latex-utilities
+telesoho.vscode-markdown-paste-image
 timonwong.shellcheck
 tomoki1207.pdf
 usernamehw.errorlens
@@ -118,7 +129,6 @@ VSpaceCode.vspacecode
 VSpaceCode.whichkey
 wicked-labs.wvsc-serendipity
 wingrunr21.vscode-ruby
-withfig.fig
 XING.zotero-cite
 yanzf.powertools
 yinfei.luahelper
