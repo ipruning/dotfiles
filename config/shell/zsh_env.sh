@@ -64,6 +64,7 @@ export plugins=(
   zbell
   command-not-found
   systemadmin
+  cheat # https://github.com/cheat/cheat/issues/616
 )
 
 #===============================================================================
