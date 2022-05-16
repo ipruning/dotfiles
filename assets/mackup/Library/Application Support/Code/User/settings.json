@@ -12,12 +12,14 @@
   "editor.suggestSelection": "first",
   "github.copilot.enable": {
     "*": true,
-    "markdown": false,
-    "plaintext": false
+    "yaml": false,
+    "plaintext": false,
+    "markdown": false
   },
   "terminal.integrated.fontFamily": "CaskaydiaCove Nerd Font",
   "terminal.integrated.fontSize": 12,
   "terminal.integrated.inheritEnv": false,
+  "terminal.integrated.commandsToSkipShell": ["language-julia.interrupt"],
   "terminal.integrated.confirmOnExit": "hasChildProcesses",
   "terminal.integrated.defaultProfile.osx": "zsh",
   "terminal.external.osxExec": "/Applications/iTerm.app/Contents/MacOS/iTerm2",
@@ -27,6 +29,7 @@
     "beancount": "fava $fullFileName -p 4000",
     "markdown": "cd $dir && md-formatter -a $fullFileName",
     "python": "$pythonPath -u $fullFileName"
+    // "julia": "julia +release~aarch64 $fullFileName"
   },
   "code-runner.clearPreviousOutput": true,
   "code-runner.ignoreSelection": true,
@@ -45,7 +48,7 @@
   "diffEditor.renderSideBySide": true,
   "workbench.activityBar.visible": true,
   "workbench.iconTheme": "material-icon-theme",
-  "workbench.colorTheme": "One Dark Pro",
+  "workbench.colorTheme": "One Dark Pro Darker",
   // "workbench.settings.useSplitJSON": true,
   // editor
   // open files as tabs
@@ -63,12 +66,18 @@
     "BUG",
     "HACK",
     "FIXME",
+    "TODO",
     "#Todo",
     "#TODO",
     "[ ]",
     "[x]"
   ],
   "todo-tree.highlights.customHighlight": {
+    "TODO": {
+      "foreground": "#00FF00",
+      "iconColour": "#00FF00",
+      "gutterIcon": true
+    },
     "#Todo": {
       "foreground": "#00FF00",
       "iconColour": "#00FF00",
@@ -86,7 +95,7 @@
   },
   "todo-tree.regex.regex": "(//|#|<!--|;|/\\*|^|^\\s*(-|\\d+.))\\s*($TAGS)",
   // Python
-  "python.defaultInterpreterPath": "~/.asdf/shims/python",
+  "python.defaultInterpreterPath": "/Users/alex/.conda/envs/python3.10/bin/python",
   "python.formatting.provider": "black",
   "python.languageServer": "Pylance",
   "python.linting.enabled": true,
@@ -120,15 +129,17 @@
     // MD045/no-alt-text - Images should have alternate text (alt text)
     "MD045": false
   },
+  "markdown.extension.toc.levels": "2..6",
   "markdown.marp.exportType": "html",
   "markdown.marp.enableHtml": true,
+
+  "markdown.extension.italic.indicator": "_",
+  "markdown.extension.list.indentationSize": "inherit",
+  "markdown.extension.tableFormatter.normalizeIndentation": true,
   "markdownFormatter.formatOpt": {
     "indent_size": 4
   },
   "markdownFormatter.formatULSymbol": false,
-  "markdown.extension.italic.indicator": "_",
-  "markdown.extension.list.indentationSize": "inherit",
-  "markdown.extension.tableFormatter.normalizeIndentation": true,
   "diffEditor.ignoreTrimWhitespace": false,
   "indentRainbow.ignoreLinePatterns": [
     "/[ \t]* [*]/g", // lines beginning with <whitespace><space>*
@@ -152,23 +163,33 @@
   "explorer.confirmDelete": false,
   "liveServer.settings.donotShowInfoMsg": true,
   // Language
+  // Formatting
   "[markdown]": {
-    "editor.defaultFormatter": "mervin.markdown-formatter",
-    "editor.formatOnSave": false,
-    "editor.renderWhitespace": "all",
+    "editor.fontSize": 13,
+    "editor.fontFamily": "'CaskaydiaCove Nerd Font', 'Source Han Sans SC'",
     "editor.quickSuggestions": true,
+    "editor.renderWhitespace": "selection", // all will cause lag
+    "editor.formatOnSave": false,
+    "editor.defaultFormatter": "mervin.markdown-formatter",
     "editor.tabSize": 4
   },
   "[python]": {
-    "editor.defaultFormatter": "ms-python.python",
     "editor.codeActionsOnSave": {
       "source.organizeImports": false
     },
+    "editor.defaultFormatter": "ms-python.python",
     "editor.tabSize": 4
   },
-  // Formatting
   "[dockerfile]": {
     "editor.defaultFormatter": "ms-azuretools.vscode-docker"
+  },
+  "[html]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.tabSize": 2
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.tabSize": 2
   },
   "[javascript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
@@ -183,6 +204,10 @@
     "editor.tabSize": 2
   },
   "[yaml]": {
+    "editor.defaultFormatter": "redhat.vscode-yaml",
+    "editor.tabSize": 2
+  },
+  "[yml]": {
     "editor.defaultFormatter": "redhat.vscode-yaml",
     "editor.tabSize": 2
   },
@@ -210,6 +235,9 @@
   "vscode-neovim.neovimExecutablePaths.darwin": "/opt/homebrew/bin/nvim",
   "markdown-preview-enhanced.previewTheme": "one-dark.css",
   "Lua.telemetry.enable": false,
+  "julia.symbolCacheDownload": true,
+  "julia.enableTelemetry": false,
+  "julia.executablePath": "julia +release~aarch64",
   "cSpell.customDictionaries": {
     "custom-dictionary-user": {
       "name": "custom-dictionary-user",
@@ -218,7 +246,6 @@
       "scope": "user"
     }
   },
-  "cSpell.userWords": ["autocorrect", "shellcheck"],
   "explorer.confirmDragAndDrop": false,
   "shellcheck.exclude": ["SC1091", "SC2148"],
   "shellcheck.executablePath": "/opt/homebrew/bin/shellcheck",
@@ -240,9 +267,6 @@
   "evenBetterToml.formatter.alignEntries": true,
   "evenBetterToml.formatter.indentEntries": true,
   "evenBetterToml.schema.enabled": false,
-  "terminal.integrated.env.osx": {
-    "FIG_NEW_SESSION": "1"
-  },
   "editor.accessibilitySupport": "off",
   "yaml.schemas": {
     "https://json.schemastore.org/github-workflow.json": ".github/workflows/*"
@@ -303,7 +327,7 @@
   "explorer.fileNesting.enabled": true,
   "explorer.fileNesting.expand": false,
   "explorer.fileNesting.patterns": {
-    "//": "Last update at 5/13/2022, 2:30:25 AM",
+    "//": "Last update at 5/16/2022, 3:28:45 AM",
     "*.asax": "$(capture).*.cs, $(capture).*.vb",
     "*.ascx": "$(capture).*.cs, $(capture).*.vb",
     "*.ashx": "$(capture).*.cs, $(capture).*.vb",
