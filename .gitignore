@@ -5,7 +5,10 @@
 automatic_backups
 
 # bin
+bin/autocorrect
 bin/double-entry-generator
+bin/pandoc
 bin/pandoc-crossref
 bin/redo
 bin/wayback
+bin/warpd
