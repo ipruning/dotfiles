@@ -5,5 +5,5 @@ windows:
     panes:
       - r-unm
       - r-archivebox
-      - echo "Hello"
-      - echo "Hello"
+      - yacron -c $HOME/dotfiles/scripts/yacron/job_0.yaml
+      - brew bundle dump --file=$HOME/dotfiles/assets/brew/Brewfile --force
