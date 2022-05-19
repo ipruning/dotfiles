@@ -11,6 +11,7 @@ betterthantomorrow.calva
 bierner.markdown-mermaid
 brittanychiang.halcyon-vscode
 christian-kohler.npm-intellisense
+christian-kohler.path-intellisense
 codeandstuff.package-json-upgrade
 csholmq.excel-to-markdown-table
 darkriszty.markdown-table-prettify
@@ -36,10 +37,10 @@ formulahendry.auto-rename-tag
 formulahendry.code-runner
 foxundermoon.shell-format
 Gimly81.matlab
+ginfuru.ginfuru-better-solarized-dark-theme
 GitHub.codespaces
 GitHub.copilot
 GitHub.copilot-labs
-GitHub.github-vscode-theme
 GitHub.vscode-pull-request-github
 golang.go
 GrapeCity.gc-excelviewer
@@ -54,6 +55,8 @@ ionutvmi.path-autocomplete
 jacobdufault.fuzzy-search
 James-Yu.latex-workshop
 jeff-hykin.better-cpp-syntax
+jock.svg
+julialang.language-julia
 kahole.magit
 KevinRose.vsc-python-indent
 kisstkondoros.vscode-gutter-preview

@@ -6,13 +6,11 @@ AltTab
 Anaconda-Navigator
 Anki
 Apparency
-Athens
 Audio Hijack
 Audio Jam
 BetterDummy
 Blackmagic Disk Speed Test
 Blender
-CLion
 Capture One 22
 Chromium
 ClashX Pro
@@ -25,6 +23,7 @@ Day One
 DeepL
 DevToys
 Developer
+Dice by PCalc
 Discord
 Docker
 Drafts
@@ -51,6 +50,7 @@ IINA
 IconChanger
 Input Source Pro
 Itsycal
+JetBrains Toolbox
 Kaleidoscope
 Karabiner-Elements
 Karabiner-EventViewer
@@ -89,7 +89,6 @@ Motion
 MultiMC
 MusicHarbor
 NeteaseMusic
-Notion
 Numbers
 OBS
 Obsidian
@@ -111,16 +110,13 @@ Pixea
 Pixelmator Pro
 Plash
 Pocket Casts
-PowerShell
 Proxifier
-PyCharm
 QLMarkdown
 QQ
 Raindrop.io
 Raycast
 Rayon
 Refined GitHub
-Rider
 Roam Research Local
 Rocket
 RustDesk
@@ -156,7 +152,6 @@ TestFlight
 Texpad
 Things3
 Tito Control
-TopNotch
 Tropy
 Tweetbot
 UninstallPKG
@@ -168,13 +163,14 @@ Visual Studio Code
 Vivid
 Warp
 WeChat
-WebStorm
 WechatExporter
 WezTerm
 Wireshark
 WolframScript
 XLD
 Xcode-13.3.1
+Xcode
+Xcodes
 Xnip
 YACReader
 ZeroTier
