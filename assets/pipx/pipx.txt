@@ -1,4 +1,5 @@
 black
+cookiecutter
 deadlink
 isort
 maigret

@@ -5,6 +5,7 @@
 cnpm
 doctor-jones
 gatsby-cli
+generator-awesome-list
 ghost-cli
 jshint
 markdownlint-cli
@@ -14,4 +15,5 @@ picgo
 pnpm
 vercel
 yarn
+yo
 zhlint
