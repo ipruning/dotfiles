@@ -17,7 +17,7 @@ opoff() {
 # }
 getkey() {
   opon
-  op item get id_rsa_macbook_14 --format json | jq ".fields | .[1] | .value" -r | ssh-add -
+  op item get id_rsa_macbook_14 --format json | jq '.fields | map(select(.id == "private_key")) | .[0] | .value' -r | ssh-add -
   opoff
 }
 remkey() {
