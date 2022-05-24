@@ -178,6 +178,7 @@ export HISTFILE="${HOME}/.zsh_history"
 export FZF_DEFAULT_OPTS="--height=100% --layout=reverse --info=inline --border --margin=1 --padding=1"
 export FZF_DEFAULT_COMMAND="fd --ignore-file ~/.rgignore --hidden --follow --ignore-case . /etc $HOME"
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+export FZF_TAB_COMMAND="$FZF_DEFAULT_COMMAND"
 
 #===============================================================================
 # 👇 Autodetect architecture (and set `brew` path) (and set `python` path)
