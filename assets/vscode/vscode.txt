@@ -25,7 +25,6 @@ dendron.dendron-paste-image
 dnicolson.binary-plist
 dongfg.vscode-beancount-formatter
 donjayamanne.githistory
-DotJoshJohnson.xml
 eamodio.gitlens
 eg2.vscode-npm-script
 esbenp.prettier-vscode
@@ -50,7 +49,6 @@ hediet.vscode-drawio
 herrmannplatz.npm-dependency-links
 huacnlee.auto-correct
 humao.rest-client
-Ikuyadeu.r
 ionutvmi.path-autocomplete
 jacobdufault.fuzzy-search
 James-Yu.latex-workshop
@@ -61,19 +59,14 @@ kahole.magit
 KevinRose.vsc-python-indent
 kisstkondoros.vscode-gutter-preview
 KnisterPeter.vscode-commitizen
-laike9m.cyberbrain
 Lencerf.beancount
 marp-team.marp-vscode
-matklad.rust-analyzer
 mattn.Lisp
-mblode.zotero
 mechatroner.rainbow-csv
 mervin.markdown-formatter
 mhutchie.git-graph
-mindaro-dev.file-downloader
 ms-azuretools.vscode-docker
 MS-CEINTL.vscode-language-pack-zh-hans
-ms-dotnettools.csharp
 ms-kubernetes-tools.vscode-kubernetes-tools
 ms-python.python
 ms-python.vscode-pylance
@@ -92,7 +85,6 @@ mshr-h.veriloghdl
 mushan.vscode-paste-image
 naumovs.color-highlight
 ninoseki.vscode-pylens
-njpipeorgan.wolfram-language-notebook
 njpwerner.autodocstring
 nortakales.vs-qalc
 oderwat.indent-rainbow
@@ -104,8 +96,10 @@ rebornix.ruby
 redhat.java
 redhat.vscode-xml
 redhat.vscode-yaml
+REditorSupport.r
 Rickaym.manim-sideview
 ritwickdey.LiveServer
+rust-lang.rust-analyzer
 seanwu.vscode-qt-for-python
 serayuzgur.crates
 shd101wyy.markdown-preview-enhanced
@@ -126,6 +120,11 @@ vadimcn.vscode-lldb
 vintharas.learn-vim
 VisualStudioExptTeam.intellicode-api-usage-examples
 VisualStudioExptTeam.vscodeintellicode
+vscjava.vscode-java-debug
+vscjava.vscode-java-dependency
+vscjava.vscode-java-pack
+vscjava.vscode-java-test
+vscjava.vscode-maven
 vscode-icons-team.vscode-icons
 vscodevim.vim
 VSpaceCode.vspacecode

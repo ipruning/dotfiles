@@ -18,6 +18,7 @@ Keysmith
 Lungo
 MarginNote
 MathKey
+MenubarX
 Meta
 MetaImage
 MindNode
