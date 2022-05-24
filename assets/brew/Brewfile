@@ -13,6 +13,7 @@ tap "homebrew/cask-versions"
 tap "homebrew/command-not-found"
 tap "homebrew/core"
 tap "homebrew/services"
+tap "jandedobbeleer/oh-my-posh"
 tap "majd/repo"
 tap "martido/graph"
 tap "oh-my-home/fonts"
@@ -84,6 +85,7 @@ brew "mosh"
 brew "navi"
 brew "neovim"
 brew "nmap"
+brew "nnn"
 brew "onefetch"
 brew "openssl@3"
 brew "php"
@@ -125,6 +127,7 @@ brew "brimdata/tap/zq"
 brew "cloudflare/cloudflare/cloudflared"
 brew "d12frosted/emacs-plus/emacs-plus@28", args: ["with-nobu417-big-sur-icon"]
 brew "eth-p/software/bat-extras"
+brew "jandedobbeleer/oh-my-posh/oh-my-posh"
 brew "sourcegraph/src-cli/src-cli"
 brew "timothyye/tap/skm"
 brew "yqrashawn/goku/goku"
@@ -148,6 +151,7 @@ cask "mactex"
 cask "miniforge"
 cask "obsidian"
 cask "openemu"
+cask "powershell"
 cask "qlimagesize"
 cask "qlmarkdown"
 cask "qlstephen"
@@ -155,6 +159,7 @@ cask "qlvideo"
 cask "squirrel"
 cask "suspicious-package"
 cask "syntax-highlight"
+cask "topnotch"
 cask "uninstallpkg"
 cask "wechattweak-cli"
 cask "wezterm"
@@ -165,25 +170,22 @@ cask "zulu"
 cask "zulu11"
 cask "zulu17"
 cask "zulu8"
+mas "Cinebench", id: 1438772273
 mas "Compressor", id: 424390742
 mas "Day One", id: 1055511498
 mas "Developer", id: 640199958
 mas "Dice", id: 1479250666
-mas "Disk Speed Test", id: 425264550
 mas "Drafts", id: 1435957248
 mas "Eagle for Safari", id: 1526651672
-mas "Equinox", id: 1591510203
 mas "Final Cut Pro", id: 424389933
 mas "GarageBand", id: 682658836
 mas "GoodNotes", id: 1444383602
 mas "iMovie", id: 408981434
 mas "Keynote", id: 409183694
-mas "Lattics", id: 1575605022
 mas "Logic Pro", id: 634148309
 mas "Magnet", id: 441258766
 mas "MainStage", id: 634159523
 mas "Maipo", id: 789066512
-mas "MenubarX", id: 1575588022
 mas "Microsoft Excel", id: 462058435
 mas "Microsoft Outlook", id: 985367838
 mas "Microsoft PowerPoint", id: 462062816
@@ -204,14 +206,12 @@ mas "QQ", id: 451108668
 mas "Rayon", id: 1609781496
 mas "Refined GitHub", id: 1519867270
 mas "Save to Raindrop.io", id: 1549370672
-mas "ServerCat", id: 1501532023
 mas "Shapr3D", id: 1091675654
 mas "Slack", id: 803453959
 mas "Spark", id: 1176895641
 mas "Taio", id: 1527036273
 mas "Take a Break", id: 1457158844
 mas "Tampermonkey", id: 1482490089
-mas "TestFlight", id: 899247664
 mas "Tweetbot", id: 1384080005
 mas "uBlacklist for Safari", id: 1547912640
 mas "uPic", id: 1549159979

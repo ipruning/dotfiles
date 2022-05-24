@@ -3,16 +3,14 @@ ABBYY FineReader PDF
 Affinity Photo
 Alfred 4
 AltTab
-Anaconda-Navigator
 Anki
 Apparency
 Audio Hijack
 Audio Jam
-BetterDummy
-Blackmagic Disk Speed Test
 Blender
 Capture One 22
 Chromium
+Cinebench
 ClashX Pro
 Compressor
 Contexts
@@ -31,7 +29,6 @@ Dropbox
 Eagle for Safari
 Eagle
 Emacs
-Equinox
 Espanso
 Eudic
 Figma
@@ -39,7 +36,6 @@ Final Cut Pro
 Fork
 Fritzing
 GarageBand
-Geekbench 5
 GitHub Desktop
 GoodNotes
 Google Chrome
@@ -51,7 +47,6 @@ IconChanger
 Input Source Pro
 Itsycal
 JetBrains Toolbox
-Kaleidoscope
 Karabiner-Elements
 Karabiner-EventViewer
 KeyCastr
@@ -60,7 +55,6 @@ Keynote
 LTspice
 Lark
 Latest
-Lattics
 LayAuto3
 Linear
 LinearMouse
@@ -77,7 +71,6 @@ MainStage 3
 Maipo
 Mathematica
 Mathpix Snipping Tool
-MenubarX
 Microsoft Excel
 Microsoft Outlook
 Microsoft PowerPoint
@@ -110,28 +103,26 @@ Pixea
 Pixelmator Pro
 Plash
 Pocket Casts
-Proxifier
+PowerShell
 QLMarkdown
 QQ
 Raindrop.io
 Raycast
 Rayon
 Refined GitHub
-Roam Research Local
+Roam Research
 Rocket
-RustDesk
 Safari
 Save to Raindrop.io
 Scapple
 ScreenFlow
 Scrivener
-ServerCat
 Setapp
 Shadowrocket
 Shapr3D
 Shottr
-SiYuan
 Sideloadly
+Sketch
 Skim
 Slack
 Sloth
@@ -139,7 +130,6 @@ SoundSource
 Spark
 Steam
 Suspicious Package
-SwitchKey
 Syntax Highlight
 Taio
 TakeABreak
@@ -148,15 +138,12 @@ TeamViewer
 Telegram
 TencentMeeting
 Termius
-TestFlight
-Texpad
 Things3
 Tito Control
 Tropy
 Tweetbot
 UninstallPKG
 Unity Hub
-VNC Viewer
 VideoFusion-macOS
 Vision
 Visual Studio Code
@@ -175,7 +162,6 @@ Xnip
 YACReader
 ZeroTier
 Zotero
-aDrive
 calibre
 draw.io
 fHash
