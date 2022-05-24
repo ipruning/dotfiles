@@ -46,6 +46,7 @@
   ],
   "projectManager.git.baseFolders": ["~/Coding", "~/Desktop", "~/Stacks"],
   "diffEditor.renderSideBySide": true,
+  "workbench.tree.indent": 20,
   "workbench.activityBar.visible": true,
   "workbench.iconTheme": "material-icon-theme",
   "workbench.colorTheme": "One Dark Pro Darker",
@@ -73,6 +74,10 @@
     "[x]"
   ],
   "todo-tree.highlights.customHighlight": {
+    "BUG": {
+      "foreground": "#FF0000",
+      "iconColour": "#FF0000"
+    },
     "TODO": {
       "foreground": "#00FF00",
       "iconColour": "#00FF00",
@@ -87,10 +92,6 @@
       "foreground": "#00FF00",
       "iconColour": "#00FF00",
       "gutterIcon": true
-    },
-    "BUG": {
-      "foreground": "#FF0000",
-      "iconColour": "#FF0000"
     }
   },
   "todo-tree.regex.regex": "(//|#|<!--|;|/\\*|^|^\\s*(-|\\d+.))\\s*($TAGS)",
@@ -212,9 +213,13 @@
     "editor.tabSize": 2
   },
   "prettier.tabWidth": 2,
+  "material-icon-theme.files.associations": {
+    ".autocorrectrc": "Yaml",
+    ".coverage": "Log"
+  },
   "material-icon-theme.languages.associations": {
-    "beancount": "log",
-    "qalc": "log"
+    "beancount": "Log",
+    "qalc": "Log"
   },
   // Beancount
   "beancount.fixedCJKWidth": true,
@@ -327,7 +332,7 @@
   "explorer.fileNesting.enabled": true,
   "explorer.fileNesting.expand": false,
   "explorer.fileNesting.patterns": {
-    "//": "Last update at 5/19/2022, 6:34:02 AM",
+    "//": "Last update at 5/22/2022, 8:59:43 AM",
     "*.asax": "$(capture).*.cs, $(capture).*.vb",
     "*.ascx": "$(capture).*.cs, $(capture).*.vb",
     "*.ashx": "$(capture).*.cs, $(capture).*.vb",
@@ -383,5 +388,6 @@
     "svelte.config.*": "*.env, .babelrc*, .codecov, .cssnanorc*, .env.*, .envrc, .htmlnanorc*, .lighthouserc.*, .mocha*, .postcssrc*, .terserrc*, api-extractor.json, ava.config.*, babel.config.*, cssnano.config.*, cypress.json, env.d.ts, htmlnanorc.*, jasmine.*, jest.config.*, jsconfig.*, karma*, lighthouserc.*, mdsvex.config.js, playwright.config.*, postcss.config.*, puppeteer.config.*, svgo.config.*, tailwind.config.*, tsconfig.*, tsdoc.*, unocss.config.*, vitest.config.*, webpack.config.*, windi.config.*",
     "vite.config.*": "*.env, .babelrc*, .codecov, .cssnanorc*, .env.*, .envrc, .htmlnanorc*, .lighthouserc.*, .mocha*, .postcssrc*, .terserrc*, api-extractor.json, ava.config.*, babel.config.*, cssnano.config.*, cypress.json, env.d.ts, htmlnanorc.*, jasmine.*, jest.config.*, jsconfig.*, karma*, lighthouserc.*, playwright.config.*, postcss.config.*, puppeteer.config.*, svgo.config.*, tailwind.config.*, tsconfig.*, tsdoc.*, unocss.config.*, vitest.config.*, webpack.config.*, windi.config.*",
     "vue.config.*": "*.env, .babelrc*, .codecov, .cssnanorc*, .env.*, .envrc, .htmlnanorc*, .lighthouserc.*, .mocha*, .postcssrc*, .terserrc*, api-extractor.json, ava.config.*, babel.config.*, cssnano.config.*, cypress.json, env.d.ts, htmlnanorc.*, jasmine.*, jest.config.*, jsconfig.*, karma*, lighthouserc.*, playwright.config.*, postcss.config.*, puppeteer.config.*, svgo.config.*, tailwind.config.*, tsconfig.*, tsdoc.*, unocss.config.*, vitest.config.*, webpack.config.*, windi.config.*"
-  }
+  },
+  "powershell.startAutomatically": false
 }
