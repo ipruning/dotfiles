@@ -1,39 +1,47 @@
 # My dotfiles
 
+<!--rehype:style=font-size: 38px; border-bottom: 0; display: flex; min-height: 260px; align-items: center; justify-content: center;-->
+
+[![jaywcjlove/sb](https://wangchujiang.com/sb/lang/english.svg)](README.md) [![jaywcjlove/sb](https://wangchujiang.com/sb/lang/chinese.svg)](README.zh-cn.md)
+
+<!--rehype:style=text-align: center;-->
+
+## Table of Contents
+
+- [Table of Contents](#table-of-contents)
 - [TODO](#todo)
 - [Bootstrap](#bootstrap)
 - [Customize](#customize)
     - [`zshrc`](#zshrc)
     - [`~/.gitconfig.local`](#gitconfiglocal)
-    - [macOS](#macos)
-    - [Arch Linux](#arch-linux)
+    - [macOS 配置](#macos-配置)
+    - [macOS Homebrew 配置指南](#macos-homebrew-配置指南)
+    - [Arch Linux 配置](#arch-linux-配置)
 - [ChangeLog](#changelog)
 
 ## TODO
 
 - [ ] 重构脚本使其尽可能幂等；
+- [ ] 为 bootstrap 添加 Homebrew 镜像；并提供一个选项；
 - [ ] 添加配图；
 
 ## Bootstrap
 
 > ⚠️ 如果你不完全理解这个脚本的作用，就不要运行它！
-> ⚠️ If you don't fully understand what this script does, don't run it!
 
-Execute the bootstrap script（执行 bootstrap 脚本）
-
-如果你不能 🔬 🧗‍♀️ 则建议使用清华大学提供的 Homebrew 镜像，具体请参考[清华大学开源软件镜像站](https://mirrors.tuna.tsinghua.edu.cn/help/homebrew/)。
+执行 bootstrap 脚本。
 
 ```shell
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Spehhhhh/dotfiles/master/bootstrap.sh)"
 ```
 
-If you are a macOS user, you will need to install xcode first or download it here  <https://developer.apple.com/download/more/>.
+如果是 macOS 新用户，可能需要安装 XCode Command Line Tools。
 
 ```shell
 xcode-select --install
 ```
 
-In addition, you will need to sign into the AppStore with your Apple ID as the MAS app is available in the Brewfile.
+此外，你需要用你的 Apple ID 登录 App Store，因为 Brewfile 中的 NAS 程序必须经过验证。
 
 脚本会执行以下步骤：
 
@@ -48,7 +56,7 @@ In addition, you will need to sign into the AppStore with your Apple ID as the M
 
 使用 `~/.gitconfig.local` 来存储敏感信息，如用户名，邮箱，私钥等。
 
-### macOS
+### macOS 配置
 
 - 修改用户名；
 - 修改共享电脑名称 `sudo scutil --set HostName mac`；
@@ -65,8 +73,35 @@ In addition, you will need to sign into the AppStore with your Apple ID as the M
     - 标题栏显示完整路径；
     - 显示隐藏文件；
 
-### Arch Linux
+### macOS Homebrew 配置指南
+
+如果你不能 🔬 🧗‍♀️ 则建议使用清华大学提供的 Homebrew 镜像，具体请参考[清华大学开源软件镜像站](https://mirrors.tuna.tsinghua.edu.cn/help/homebrew/)。
+
+```shell
+# 把默认 Shell 从 Bash 改为 ZSH。
+chsh -s $(which zsh)
+
+# 暂时关闭 SSL 证书验证。之后请手动开启。
+git config --global http.sslVerify "false"
+
+# 配置清华镜像环境变量
+export HOMEBREW_BREW_GIT_REMOTE="https://mirrors.tuna.tsinghua.edu.cn/git/homebrew/brew.git"
+export HOMEBREW_CORE_GIT_REMOTE="https://mirrors.tuna.tsinghua.edu.cn/git/homebrew/homebrew-core.git"
+export HOMEBREW_BOTTLE_DOMAIN="https://mirrors.tuna.tsinghua.edu.cn/homebrew-bottles"
+
+# 使用清华镜像的安装脚本安装 Homebrew
+git clone --depth=1 https://mirrors.tuna.tsinghua.edu.cn/git/homebrew/install.git brew-install
+/bin/bash brew-install/install.sh
+
+# 删除安装时产生的临时文件
+rm -rf brew-install
+
+# 安装成功后需将 Homebrew 的相关路径加入到环境变量中。如何添加环境变量请参考 Homebrew 命令行输出。
+```
+
+### Arch Linux 配置
 
 ## ChangeLog
 
-- 220301 Make the repo public
+- 2022-05-25 Update REAMDE
+- 2022-03-01 Make the repo public
