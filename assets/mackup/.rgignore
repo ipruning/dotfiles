@@ -1,9 +1,13 @@
 # Git
 .git
 
-# Node
+# Node.js
 node_modules
-.node_modules
 
 # Python
+venv
+.venv
+env
+.env
 site-packages
+.ipynb_checkpoints
