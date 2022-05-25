@@ -31,10 +31,11 @@
 ;; change `org-directory'. It must be set before org loads!
 (setq org-directory "~/Database/Org/")
 
+(setq org-roam-directory "~/Database/Org/")
+
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
 (setq display-line-numbers-type t)
-
 
 ;; Here are some additional functions/macros that could help you configure Doom:
 ;;
