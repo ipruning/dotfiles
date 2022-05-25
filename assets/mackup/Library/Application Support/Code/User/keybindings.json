@@ -1,4 +1,6 @@
 [
+  // Toggle VIM
+  { "key": "ctrl+shift+v", "command": "toggleVim" },
   // Toggle between terminal and editor focus
   // https://stackoverflow.com/questions/42796887/switch-focus-between-editor-and-integrated-terminal
   { "key": "cmd+j", "command": "workbench.action.terminal.focus" },
@@ -7,6 +9,7 @@
     "command": "workbench.action.focusActiveEditorGroup",
     "when": "terminalFocus"
   },
+  // Keybindings required for VSpaceCode
   // Trigger vspacecode
   {
     "key": "alt+space",
