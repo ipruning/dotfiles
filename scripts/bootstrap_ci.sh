@@ -24,7 +24,7 @@ touch "$HOME"/.zshrc
 echo "source $HOME/dotfiles/config/shell/init.sh" >>"$HOME"/.zshrc
 mv "$HOME"/.zprofile "$HOME"/.zprofile.bak
 touch "$HOME"/.zprofile
-echo "eval "$(/usr/local/homebrew/bin/brew shellenv)"" >>"$HOME"/.zprofile
+echo "eval $(/usr/local/homebrew/bin/brew shellenv)" >>"$HOME"/.zprofile
 
 echo "${BLUE}Installing mackup${NORMAL}"
 brew install mackup
