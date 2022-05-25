@@ -163,7 +163,7 @@ export BAT_THEME="OneHalfDark"
 # 👇 fzf
 #===============================================================================
 case $SYSTEM_TYPE in
-mac_arm64 | mac_x86_64*) ;;
+mac_arm64 | mac_x86_64) ;;
 raspberry) ;;
 esac
 
