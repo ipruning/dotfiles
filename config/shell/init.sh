@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-
 #===============================================================================
 # 👇 INIT
 #===============================================================================
@@ -11,19 +9,12 @@ else
   return
 fi
 
+#===============================================================================
+# 👇 csys
+#===============================================================================
+
 # if [[ "$(sysctl -a | grep machdep.cpu.brand_string)" == *Apple* ]]; then
 #   echo test
-# fi
-
-# if [[ $(uname) == 'Darwin' ]]; then
-#   platform='darwin'
-# else
-#   platform='linux'
-# fi
-# if [[ $(arch) == 'arm64' ]]; then
-#   arch='arm64'
-# else
-#   arch='amd64'
 # fi
 
 SYSTEM_ARCH=$(uname -m)
@@ -38,7 +29,7 @@ darwin*)
     SYSTEM_TYPE="mac_x86_64"
     ;;
   *)
-    echo "${RED}Unsupported system architecture.${NORMAL}"
+    SYSTEM_TYPE="unknown"
     ;;
   esac
   ;;
@@ -46,15 +37,14 @@ linux*)
   if [[ "$(uname -m)" == *armv7l* ]]; then
     SYSTEM_TYPE="raspberry"
   else
-    echo "${RED}Unsupported system architecture.${NORMAL}"
     SYSTEM_TYPE="unknown"
   fi
   ;;
 msys*)
-  echo "${RED}Unsupported system architecture.${NORMAL}"
+  SYSTEM_TYPE="unknown"
   ;;
 *)
-  echo "${RED}unknown: $OSTYPE${NORMAL}"
+
   SYSTEM_TYPE="unknown"
   ;;
 esac
@@ -67,23 +57,31 @@ esac
 #===============================================================================
 # 👇 env
 #===============================================================================
-if [ -n "$BASH_VERSION" ] || [ -n "$ZSH_VERSION" ]; then
-  # run script for interactive mode of bash/zsh
-  if [[ $- == *i* ]] && [ -z "$_INIT_SH_NOFUN" ]; then
-    if [ -f "$HOME/dotfiles/config/shell/zsh_env.sh" ]; then
-      . "$HOME/dotfiles/config/shell/zsh_env.sh"
-    fi
-    if [ -f "$HOME/dotfiles/config/shell/zsh_functions.sh" ]; then
-      . "$HOME/dotfiles/config/shell/zsh_functions.sh"
-    fi
-    if [ -f "$HOME/dotfiles/config/shell/zsh_aliases.sh" ]; then
-      . "$HOME/dotfiles/config/shell/zsh_aliases.sh"
-    fi
-    if [ -f "$HOME/dotfiles/config/shell/zsh_completion.sh" ]; then
-      . "$HOME/dotfiles/config/shell/zsh_completion.sh"
+
+case $SYSTEM_TYPE in
+mac_arm64 | mac_x86_64 | raspberry)
+  if [ -n "$BASH_VERSION" ] || [ -n "$ZSH_VERSION" ]; then
+    # run script for interactive mode of bash/zsh
+    if [[ $- == *i* ]] && [ -z "$_INIT_SH_NOFUN" ]; then
+      if [ -f "$HOME/dotfiles/config/shell/zsh_env.sh" ]; then
+        . "$HOME/dotfiles/config/shell/zsh_env.sh"
+      fi
+      if [ -f "$HOME/dotfiles/config/shell/zsh_functions.sh" ]; then
+        . "$HOME/dotfiles/config/shell/zsh_functions.sh"
+      fi
+      if [ -f "$HOME/dotfiles/config/shell/zsh_aliases.sh" ]; then
+        . "$HOME/dotfiles/config/shell/zsh_aliases.sh"
+      fi
+      if [ -f "$HOME/dotfiles/config/shell/zsh_completion.sh" ]; then
+        . "$HOME/dotfiles/config/shell/zsh_completion.sh"
+      fi
     fi
   fi
-fi
+  ;;
+unknown)
+  echo "${RED}Unsupported system architecture.${NORMAL}"
+  ;;
+esac
 
 #===============================================================================
 # 👇 zprof
