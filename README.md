@@ -1,14 +1,13 @@
 # My dotfiles
 
-- [My dotfiles](#my-dotfiles)
-    - [TODO](#todo)
-    - [Bootstrap](#bootstrap)
-    - [Customize](#customize)
-        - [`zshrc`](#zshrc)
-        - [`~/.gitconfig.local`](#gitconfiglocal)
-        - [macOS](#macos)
-        - [Arch Linux](#arch-linux)
-    - [ChangeLog](#changelog)
+- [TODO](#todo)
+- [Bootstrap](#bootstrap)
+- [Customize](#customize)
+    - [`zshrc`](#zshrc)
+    - [`~/.gitconfig.local`](#gitconfiglocal)
+    - [macOS](#macos)
+    - [Arch Linux](#arch-linux)
+- [ChangeLog](#changelog)
 
 ## TODO
 
