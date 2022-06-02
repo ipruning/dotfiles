@@ -7,7 +7,7 @@
 	<key>AutoHideTmuxClientSession</key>
 	<false/>
 	<key>Command</key>
-	<string>pwsh</string>
+	<string>/usr/local/bin/pwsh</string>
 	<key>Custom Color Presets</key>
 	<dict>
 		<key>Dracula</key>
