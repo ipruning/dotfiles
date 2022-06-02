@@ -17,13 +17,22 @@ matches:
         type: date
         params:
           format: "%y%m%d"
+  - trigger: "#ld"
+    replace: "{{longdate}}"
+    vars:
+      - name: longdate
+        type: date
+        params:
+          format: "%Y-%m-%d"
   - trigger: "#fd"
     replace: "{{fulldate}}"
     vars:
       - name: fulldate
-        type: date
+        type: script
         params:
-          format: "%Y-%m-%d"
+          args:
+            - python3
+            - "%CONFIG%/scripts/fulldate.py"
   - trigger: "#st"
     replace: "{{shorttime}}"
     vars:
