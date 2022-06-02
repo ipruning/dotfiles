@@ -41,11 +41,11 @@ export plugins=(
   asdf
   autoupdate
   colored-man-pages
-  thefuck
+  # thefuck
   fd
-  fzf-tab
-  docker
-  docker-compose
+  # fzf-tab
+  # docker
+  # docker-compose
   gh
   git-open
   catimg
@@ -58,11 +58,11 @@ export plugins=(
   macos # showfiles hidefiles
   # npm
   # yarn
-  poetry
+  # poetry
   ripgrep
   # magic-enter # tmuxp bug
   zbell
-  command-not-found
+  # command-not-found
   systemadmin
   cheat # https://github.com/cheat/cheat/issues/616
 )
@@ -178,7 +178,6 @@ export HISTFILE="${HOME}/.zsh_history"
 export FZF_DEFAULT_OPTS="--height=100% --layout=reverse --info=inline --border --margin=1 --padding=1"
 export FZF_DEFAULT_COMMAND="fd --ignore-file ~/.rgignore --hidden --follow --ignore-case . /etc $HOME"
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
-export FZF_TAB_COMMAND="$FZF_DEFAULT_COMMAND"
 
 #===============================================================================
 # 👇 Autodetect architecture (and set `brew` path) (and set `python` path)
