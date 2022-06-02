@@ -34,11 +34,17 @@ darwin*)
   esac
   ;;
 linux*)
-  if [[ "$(uname -m)" == *armv7l* ]]; then
+  case $SYSTEM_ARCH in
+  x86_64*)
+    SYSTEM_TYPE="linux_x86_64"
+    ;;
+  *armv7l*)
     SYSTEM_TYPE="raspberry"
-  else
+    ;;
+  *)
     SYSTEM_TYPE="unknown"
-  fi
+    ;;
+  esac
   ;;
 msys*)
   SYSTEM_TYPE="unknown"
@@ -59,7 +65,7 @@ esac
 #===============================================================================
 
 case $SYSTEM_TYPE in
-mac_arm64 | mac_x86_64 | raspberry)
+mac_arm64 | mac_x86_64 | linux_x86_64 | raspberry)
   if [ -n "$BASH_VERSION" ] || [ -n "$ZSH_VERSION" ]; then
     # run script for interactive mode of bash/zsh
     if [[ $- == *i* ]] && [ -z "$_INIT_SH_NOFUN" ]; then
