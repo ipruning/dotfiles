@@ -56,6 +56,7 @@ LTspice
 Lark
 Latest
 LayAuto3
+League of Legends
 Linear
 LinearMouse
 Logic Pro X
@@ -82,6 +83,7 @@ Motion
 MultiMC
 MusicHarbor
 NeteaseMusic
+Nova
 Numbers
 OBS
 Obsidian
@@ -90,6 +92,7 @@ OmniGraffle
 OmniOutliner
 OmniPlan
 OpenEmu
+Optimus Player
 PDF Expert
 Pages
 PaimonMenuBar
@@ -108,7 +111,6 @@ QLMarkdown
 QQ
 Raindrop.io
 Raycast
-Rayon
 Refined GitHub
 Roam Research
 Rocket
@@ -140,6 +142,7 @@ TencentMeeting
 Termius
 Things3
 Tito Control
+TopNotch
 Tropy
 Tweetbot
 UninstallPKG

@@ -1,3 +1,4 @@
+aaron-bond.better-comments
 AffenWiesel.matlab-formatter
 alefragnani.Bookmarks
 alefragnani.project-manager
@@ -13,6 +14,7 @@ brittanychiang.halcyon-vscode
 christian-kohler.npm-intellisense
 christian-kohler.path-intellisense
 codeandstuff.package-json-upgrade
+cschleiden.vscode-github-actions
 csholmq.excel-to-markdown-table
 darkriszty.markdown-table-prettify
 DavidAnson.vscode-markdownlint
@@ -41,6 +43,7 @@ GitHub.codespaces
 GitHub.copilot
 GitHub.copilot-labs
 GitHub.vscode-pull-request-github
+GitLab.gitlab-workflow
 golang.go
 GrapeCity.gc-excelviewer
 GraphQL.vscode-graphql
@@ -60,7 +63,9 @@ KevinRose.vsc-python-indent
 kisstkondoros.vscode-gutter-preview
 KnisterPeter.vscode-commitizen
 Lencerf.beancount
+mads-hartmann.bash-ide-vscode
 marp-team.marp-vscode
+mathiassoeholm.markdown-link-updater
 mattn.Lisp
 mechatroner.rainbow-csv
 mervin.markdown-formatter
@@ -82,7 +87,6 @@ ms-vscode.cpptools-extension-pack
 ms-vscode.cpptools-themes
 ms-vscode.powershell
 mshr-h.veriloghdl
-mushan.vscode-paste-image
 naumovs.color-highlight
 ninoseki.vscode-pylens
 njpwerner.autodocstring
@@ -92,20 +96,22 @@ piersdeseilligny.betterfountain
 PKief.material-icon-theme
 platformio.platformio-ide
 pomdtr.excalidraw-editor
+qezhu.gitlink
 rebornix.ruby
 redhat.java
 redhat.vscode-xml
 redhat.vscode-yaml
 REditorSupport.r
+Remisa.shellman
 Rickaym.manim-sideview
 ritwickdey.LiveServer
+rogalmic.bash-debug
 rust-lang.rust-analyzer
 seanwu.vscode-qt-for-python
 serayuzgur.crates
 shd101wyy.markdown-preview-enhanced
 silvenon.mdx
 skn0tt.markdown-link-expander
-sourcery.sourcery
 spencerwoo.vscode-sspai-markdown-helper
 sswg.swift-lang
 streetsidesoftware.code-spell-checker
@@ -114,7 +120,7 @@ tamasfe.even-better-toml
 tecosaur.latex-utilities
 telesoho.vscode-markdown-paste-image
 timonwong.shellcheck
-tomoki1207.pdf
+Tyriar.sort-lines
 usernamehw.errorlens
 vadimcn.vscode-lldb
 vintharas.learn-vim
@@ -129,10 +135,8 @@ vscode-icons-team.vscode-icons
 vscodevim.vim
 VSpaceCode.vspacecode
 VSpaceCode.whichkey
-wicked-labs.wvsc-serendipity
 wingrunr21.vscode-ruby
 XING.zotero-cite
-yanzf.powertools
 yinfei.luahelper
 yy0931.save-as-root
 yzhang.markdown-all-in-one
