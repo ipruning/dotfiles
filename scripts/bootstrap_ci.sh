@@ -52,16 +52,20 @@ linux_x86_64)
   test -r ~/.bash_profile && echo "eval \"\$($(brew --prefix)/bin/brew shellenv)\"" >>~/.bash_profile
   echo "eval \"\$($(brew --prefix)/bin/brew shellenv)\"" >>~/.profile
   ;;
-unknown)
-  echo "${RED}Unsupported system architecture.${NORMAL}"
-  ;;
 esac
 
-echo "${BLUE}Installing zsh${NORMAL}"
-brew install zsh
-ZSH_PATH="$(brew --prefix)/bin/zsh"
-sudo sh -c "echo $ZSH_PATH >> /etc/shells"
-sudo chsh -s "$ZSH_PATH"
+case $SYSTEM_TYPE in
+mac_x86_64)
+  chsh -s /bin/zsh
+  ;;
+linux_x86_64)
+  echo "${BLUE}Installing zsh${NORMAL}"
+  brew install zsh
+  ZSH_PATH="$(brew --prefix)/bin/zsh"
+  sudo sh -c "echo $ZSH_PATH >> /etc/shells"
+  sudo chsh -s "$ZSH_PATH"
+  ;;
+esac
 
 echo "${BLUE}Installing oh-my-zsh${NORMAL}"
 export CHSH=no
@@ -103,9 +107,5 @@ linux_x86_64)
 
   echo "${BLUE}Reshiming asdf${NORMAL}"
   asdf reshim
-
-  ;;
-unknown)
-  echo "${RED}Unsupported system architecture.${NORMAL}"
   ;;
 esac
