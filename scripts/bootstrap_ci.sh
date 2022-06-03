@@ -1,39 +1,101 @@
 #!/usr/bin/env bash
 
-echo "${BLUE}Installing oh-my-zsh${NORMAL}"
-export CHSH=no
-export RUNZSH=no
-export KEEP_ZSHRC=yes
+#===============================================================================
+# 👇 csys
+#===============================================================================
+SYSTEM_ARCH=$(uname -m)
 
-echo "${BLUE}Installing Homebrew${NORMAL}"
-which brew || /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+case "$OSTYPE" in
+darwin*)
+  case $SYSTEM_ARCH in
+  arm64*)
+    SYSTEM_TYPE="mac_arm64"
+    ;;
+  x86_64*)
+    SYSTEM_TYPE="mac_x86_64"
+    ;;
+  *)
+    SYSTEM_TYPE="unknown"
+    ;;
+  esac
+  ;;
+linux*)
+  case $SYSTEM_ARCH in
+  x86_64*)
+    SYSTEM_TYPE="linux_x86_64"
+    ;;
+  *armv7l*)
+    SYSTEM_TYPE="raspberry"
+    ;;
+  *)
+    SYSTEM_TYPE="unknown"
+    ;;
+  esac
+  ;;
+msys*)
+  SYSTEM_TYPE="unknown"
+  ;;
+*)
+  SYSTEM_TYPE="unknown"
+  ;;
+esac
 
-eval "$(/usr/local/homebrew/bin/brew shellenv)"
-/home/linuxbrew/.linuxbrew/bin/brew shellenv
+case $SYSTEM_TYPE in
+mac_x86_64)
+  which brew || /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  eval "$(/usr/local/homebrew/bin/brew shellenv)"
+  ;;
+linux_x86_64)
+  which brew || /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  test -d ~/.linuxbrew && eval "$(~/.linuxbrew/bin/brew shellenv)"
+  test -d /home/linuxbrew/.linuxbrew && eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+  test -r ~/.bash_profile && echo "eval \"\$($(brew --prefix)/bin/brew shellenv)\"" >>~/.bash_profile
+  echo "eval \"\$($(brew --prefix)/bin/brew shellenv)\"" >>~/.profile
+  ;;
+unknown)
+  echo "${RED}Unsupported system architecture.${NORMAL}"
+  ;;
+esac
 
-echo "Installing Zsh"
+echo "Installing zsh"
 brew install zsh
 ZSH_PATH="$(brew --prefix)/bin/zsh"
 sudo sh -c "echo $ZSH_PATH >> /etc/shells"
 sudo chsh -s "$ZSH_PATH"
 
-echo "${BLUE}Installing zsh dotiles${NORMAL}"
+echo "${BLUE}Installing oh-my-zsh${NORMAL}"
+export CHSH=no
+export RUNZSH=no
+export KEEP_ZSHRC=yes
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" --unattended --keep-zshrc
-mv "$HOME"/.zshrc "$HOME"/.zshrc.bak
-touch "$HOME"/.zshrc
-echo "source $HOME/dotfiles/config/shell/init.sh" >>"$HOME"/.zshrc
-mv "$HOME"/.zprofile "$HOME"/.zprofile.bak
-touch "$HOME"/.zprofile
-echo "eval $(/usr/local/homebrew/bin/brew shellenv)" >>"$HOME"/.zprofile
+
+echo "${BLUE}Installing zsh dotiles${NORMAL}"
+grep --fixed-strings "dotfiles/config/shell/init.sh" "$HOME"/.zshrc || mv "$HOME"/.zshrc "$HOME"/.zshrc.bak && cp "$HOME"/dotfiles/config/shell/mac/zshrc.sh "$HOME"/.zshrc
+if [ -e "$HOME"/.zprofile ]; then
+  mv "$HOME"/.zprofile "$HOME"/.zprofile.bak && cp "$HOME"/dotfiles/config/shell/mac/zprofile.sh "$HOME"/.zprofile
+else
+  cp "$HOME"/dotfiles/config/shell/mac/zprofile.sh "$HOME"/.zprofile
+fi
+
+brew install mackup
 
 echo "${BLUE}Installing mackup${NORMAL}"
-brew install mackup
 ln -sf "$HOME"/dotfiles/config/mackup/.mackup.cfg "$HOME"/.mackup.cfg
 ln -sf "$HOME"/dotfiles/config/mackup/.mackup "$HOME"/.mackup
-mackup --force restore
+
+echo "${BLUE}Restoring dotfiles${NORMAL}"
+if [ "$MODE" == "--force" ]; then
+  mackup --force restore
+else
+  mackup restore
+fi
+
+brew install asdf
 
 echo "${BLUE}Installing asdf${NORMAL}"
-brew install asdf
 asdf plugin-add python
 asdf install python 3.10.2
 asdf global python 3.10.2
+
+echo "${BLUE}Reshiming asdf${NORMAL}"
+asdf reshim
