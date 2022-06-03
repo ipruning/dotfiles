@@ -99,6 +99,7 @@ function main {
   git clone --depth 1 https://github.com/doomemacs/doomemacs ~/.emacs.d
   ~/.emacs.d/bin/doom install
 
+  echo "${BLUE}Reshiming asdf${NORMAL}"
   asdf reshim
 }
 
