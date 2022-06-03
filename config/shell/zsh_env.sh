@@ -29,9 +29,12 @@ else
 fi
 
 #===============================================================================
-# 👇 History Stamps
+# 👇 History
 #===============================================================================
 export HIST_STAMPS="yyyy-mm-dd"
+export HISTFILE="$HOME/.zsh_history"
+export HISTSIZE=100000
+export SAVEHIST=$HISTSIZE
 
 #===============================================================================
 # 👇 Standard plugins can be found in $ZSH/plugins/
@@ -82,6 +85,11 @@ export UPDATE_ZSH_DAYS=42
 # 👇 Custom binary
 #===============================================================================
 export PATH="${HOME}/dotfiles/bin:$PATH"
+
+#===============================================================================
+# 👇 zsh-autosuggestions
+#===============================================================================
+bindkey '^L' autosuggest-accept # https://github.com/zsh-users/zsh-autosuggestions#key-bindings
 
 #===============================================================================
 # 👇 zsh-vi-mode
