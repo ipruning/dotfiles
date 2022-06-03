@@ -10,6 +10,7 @@ Downie
 Due
 Focus
 ForkLift
+Gemini
 Gifox
 HoudahSpot
 Hype
