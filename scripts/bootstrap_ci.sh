@@ -57,7 +57,7 @@ unknown)
   ;;
 esac
 
-echo "Installing zsh"
+echo "${BLUE}Installing zsh${NORMAL}"
 brew install zsh
 ZSH_PATH="$(brew --prefix)/bin/zsh"
 sudo sh -c "echo $ZSH_PATH >> /etc/shells"
@@ -77,24 +77,23 @@ else
   cp "$HOME"/dotfiles/config/shell/mac/zprofile.sh "$HOME"/.zprofile
 fi
 
-brew install mackup
-
-echo "${BLUE}Installing mackup${NORMAL}"
-ln -sf "$HOME"/dotfiles/config/mackup/.mackup.cfg "$HOME"/.mackup.cfg
-ln -sf "$HOME"/dotfiles/config/mackup/.mackup "$HOME"/.mackup
-
-echo "${BLUE}Restoring dotfiles${NORMAL}"
-if [ "$MODE" == "--force" ]; then
-  mackup --force restore
-else
-  mackup restore
-fi
-
 case $SYSTEM_TYPE in
 mac_x86_64)
   brew install python@3.9
   ;;
 linux_x86_64)
+  brew install mackup
+
+  echo "${BLUE}Installing mackup${NORMAL}"
+  ln -sf "$HOME"/dotfiles/config/mackup/.mackup.cfg "$HOME"/.mackup.cfg
+  ln -sf "$HOME"/dotfiles/config/mackup/.mackup "$HOME"/.mackup
+
+  echo "${BLUE}Restoring dotfiles${NORMAL}"
+  if [ "$MODE" == "--force" ]; then
+    mackup --force restore
+  else
+    mackup restore
+  fi
   brew install asdf
 
   echo "${BLUE}Installing asdf${NORMAL}"
