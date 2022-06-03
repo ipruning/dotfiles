@@ -90,12 +90,23 @@ else
   mackup restore
 fi
 
-brew install asdf
+case $SYSTEM_TYPE in
+mac_x86_64)
+  brew install python@3.9
+  ;;
+linux_x86_64)
+  brew install asdf
 
-echo "${BLUE}Installing asdf${NORMAL}"
-asdf plugin-add python
-asdf install python 3.9.13
-asdf global python 3.9.13
+  echo "${BLUE}Installing asdf${NORMAL}"
+  asdf plugin-add python
+  asdf install python 3.9.13
+  asdf global python 3.9.13
 
-echo "${BLUE}Reshiming asdf${NORMAL}"
-asdf reshim
+  echo "${BLUE}Reshiming asdf${NORMAL}"
+  asdf reshim
+
+  ;;
+unknown)
+  echo "${RED}Unsupported system architecture.${NORMAL}"
+  ;;
+esac
