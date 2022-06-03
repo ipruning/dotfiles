@@ -83,7 +83,7 @@ fi
 
 case $SYSTEM_TYPE in
 mac_x86_64)
-  brew install python@3.9
+  brew install golang
   ;;
 linux_x86_64)
   brew install mackup
@@ -98,12 +98,15 @@ linux_x86_64)
   else
     mackup restore
   fi
+
+  apt install coreutils
+  apt install curl
   brew install asdf
 
   echo "${BLUE}Installing asdf${NORMAL}"
-  asdf plugin-add python
-  asdf install python 3.9.13
-  asdf global python 3.9.13
+  asdf plugin-add golang https://github.com/kennyp/asdf-golang.git
+  asdf install golang 1.18.3
+  asdf global golang 1.18.3
 
   echo "${BLUE}Reshiming asdf${NORMAL}"
   asdf reshim

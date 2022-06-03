@@ -5,10 +5,10 @@ set -e
 echo "Testing Git"
 test -x "$(which git)"
 
-echo "Testing Python"
-test -x "$(which python)"
-# python --version | grep --fixed-strings "Python 3.10.4"
-# which python | rg "shims"
+# echo "Testing Python"
+# test -x "$(which python3)"
+# python3 --version | grep --fixed-strings "Python 3.10.4"
+# which python3 | rg "shims"
 
 echo "Testing ZSH"
 test -x "$(which zsh)"
