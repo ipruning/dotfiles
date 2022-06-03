@@ -46,6 +46,7 @@ export plugins=(
   # fzf-tab
   # docker
   # docker-compose
+  extract # x <file>
   gh
   git-open
   catimg
