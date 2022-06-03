@@ -1,6 +1,7 @@
 black
 cookiecutter
 deadlink
+fava
 isort
 maigret
 manim
