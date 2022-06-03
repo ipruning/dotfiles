@@ -94,8 +94,8 @@ brew install asdf
 
 echo "${BLUE}Installing asdf${NORMAL}"
 asdf plugin-add python
-asdf install python 3.10.2
-asdf global python 3.10.2
+asdf install python 3.9.13
+asdf global python 3.9.13
 
 echo "${BLUE}Reshiming asdf${NORMAL}"
 asdf reshim
