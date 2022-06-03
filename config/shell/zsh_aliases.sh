@@ -58,5 +58,6 @@ alias ipv6='curl -6 ip.sb'
 # alias ps='procs'
 # alias sed="sd"
 # alias top='htop'
+alias v='nvim'
 # alias vi='nvim'
 # alias vim='nvim'
