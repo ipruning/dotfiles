@@ -1,12 +1,12 @@
 #===============================================================================
-# 👇 direnv
-#===============================================================================
-eval "$(direnv hook bash)"
-
-#===============================================================================
 # 👇 Fig pre block. Keep at the top of this file.
 #===============================================================================
 # eval "$(fig init zsh pre)"
+
+#===============================================================================
+# 👇 direnv
+#===============================================================================
+eval "$(direnv hook bash)"
 
 #===============================================================================
 # 👇 GPG Signing
@@ -33,7 +33,7 @@ fi
 #===============================================================================
 export HIST_STAMPS="yyyy-mm-dd"
 export HISTFILE="$HOME/.zsh_history"
-export HISTSIZE=100000
+export HISTSIZE=1000000
 export SAVEHIST=$HISTSIZE
 setopt HIST_REDUCE_BLANKS # Remove superfluous blanks from each command line being added to the history list.
 
@@ -131,6 +131,7 @@ if [[ -n $SSH_CONNECTION ]]; then
   export EDITOR='nvim'
 else
   export EDITOR='nvim'
+  # export EDITOR="emacsclient -t -a=\"\""
   # export EDITOR='code'
 fi
 
