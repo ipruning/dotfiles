@@ -35,6 +35,7 @@ export HIST_STAMPS="yyyy-mm-dd"
 export HISTFILE="$HOME/.zsh_history"
 export HISTSIZE=100000
 export SAVEHIST=$HISTSIZE
+setopt HIST_REDUCE_BLANKS # Remove superfluous blanks from each command line being added to the history list.
 
 #===============================================================================
 # 👇 Standard plugins can be found in $ZSH/plugins/
