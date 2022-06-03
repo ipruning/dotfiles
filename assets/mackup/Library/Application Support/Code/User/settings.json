@@ -211,6 +211,7 @@
   "material-icon-theme.files.associations": {
     ".autocorrectrc": "Yaml",
     "Brewfile_dev": "Ruby",
+    "Brewfile_leaves": "Ruby",
     ".coverage": "Log"
   },
   "material-icon-theme.languages.associations": {

@@ -1,6 +1,7 @@
 bore-cli
 cargo-update
 difftastic
+mdbook
 mdbook-linkcheck
 mdbook-pdf
 monolith
