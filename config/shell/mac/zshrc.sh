@@ -1,3 +1,1 @@
-#!/usr/bin/env bash
-
-source $HOME/dotfiles/config/shell/init.sh
+source "$HOME"/dotfiles/config/shell/init.sh
