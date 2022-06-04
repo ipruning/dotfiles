@@ -61,10 +61,10 @@ pipx install tmuxp
 cargo install zoxide
 
 echo "${BLUE}Installing npm packages${NORMAL}"
-xargs npm install --global <"$HOME"/dotfiles/assets/npm/npm_dev.txt
+xargs npm install --global <"$HOME"/dotfiles/assets/packages/npm_dev.txt
 
 echo "${BLUE}Installing pipx packages${NORMAL}"
-xargs <"$HOME"/dotfiles/assets/pipx/pipx_dev.txt -n 1 pipx install
+xargs <"$HOME"/dotfiles/assets/packages/pipx_dev.txt -n 1 pipx install
 
 echo "${BLUE}Installing other packages${NORMAL}"
 which autocorrect || curl -sSL https://git.io/JcGER | bash # AutoCorrect
