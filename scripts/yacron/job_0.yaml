@@ -12,7 +12,7 @@ jobs:
   #         command: echo "Error code $YACRON_RETCODE"
   # - name: Backup Homebrew
   #   command: |
-  #     brew bundle dump --file=$HOME/dotfiles/assets/packages/Brewfile --force
+  #     brew bundle dump --file="$HOME"/dotfiles/assets/packages/Brewfile --force
   #   shell: /bin/zsh
   #   schedule: "0 0 * * *"
   #   captureStderr: true
