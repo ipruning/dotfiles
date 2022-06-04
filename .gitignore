@@ -7,6 +7,7 @@ automatic_backups
 # bin
 bin/autocorrect
 bin/double-entry-generator
+bin/feishu2md
 bin/pandoc
 bin/pandoc-crossref
 bin/redo
