@@ -35,6 +35,9 @@ export HIST_STAMPS="yyyy-mm-dd"
 export HISTFILE="$HOME/.zsh_history"
 export HISTSIZE=1000000
 export SAVEHIST=$HISTSIZE
+setopt appendhistory
+setopt INC_APPEND_HISTORY # Write to the history file immediately, not when the shell exits.
+setopt SHARE_HISTORY      # share history between sessions
 setopt HIST_REDUCE_BLANKS # Remove superfluous blanks from each command line being added to the history list.
 
 #===============================================================================
