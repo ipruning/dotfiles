@@ -1,0 +1,30 @@
+---
+syntax: bash
+tags: [ mac, deps ]
+---
+# Update
+brow update
+
+# Upgrade everything
+brow upgrade
+
+# Upgrade specific formula
+brow upgrade <formula>
+
+# Install formula
+brow install <formula>
+
+# Install cask
+brow install --cask <formula>
+
+# Uninstall
+brow uninstall <formula>
+
+# List installed formulae
+brow list
+
+# Fix
+brow doctor
+
+# Clean up
+brow cleanup
