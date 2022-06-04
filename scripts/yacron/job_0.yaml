@@ -12,7 +12,7 @@ jobs:
   #         command: echo "Error code $YACRON_RETCODE"
   # - name: Backup Homebrew
   #   command: |
-  #     brew bundle dump --file=$HOME/dotfiles/assets/brew/Brewfile --force
+  #     brew bundle dump --file=$HOME/dotfiles/assets/packages/Brewfile --force
   #   shell: /bin/zsh
   #   schedule: "0 0 * * *"
   #   captureStderr: true
@@ -23,13 +23,13 @@ jobs:
   #         command: echo "Error code $YACRON_RETCODE"
   - name: Backup Others
     command: |
-      brew leaves >"$HOME"/dotfiles/assets/brew/Brewfile_leaves
-      cargo install --list | grep -v '^[[:blank:]]' | awk '{print $1}' >"$HOME"/dotfiles/assets/cargo/cargo.txt
-      pipx list --json | jq ".venvs | .[] | .metadata.main_package.package" -r >"$HOME"/dotfiles/assets/pipx/pipx.txt
-      npm list --global --depth=0 --json | jq ".dependencies | keys[]" -r >"$HOME"/dotfiles/assets/npm/npm.txt
-      code --list-extensions >"$HOME"/dotfiles/assets/vscode/vscode.txt
-      ls /Applications | rg '\.app' | sed 's/\.app//g' >"$HOME"/dotfiles/assets/macos/macos.txt
-      ls /Applications/Setapp | rg '\.app' | sed 's/\.app//g' >"$HOME"/dotfiles/assets/setapp/setapp.txt
+      brew leaves >"$HOME"/dotfiles/assets/packages/Brewfile.txt
+      cargo install --list | grep -v '^[[:blank:]]' | awk '{print $1}' >"$HOME"/dotfiles/assets/packages/cargo.txt
+      pipx list --json | jq ".venvs | .[] | .metadata.main_package.package" -r >"$HOME"/dotfiles/assets/packages/pipx.txt
+      npm list --global --depth=0 --json | jq ".dependencies | keys[]" -r >"$HOME"/dotfiles/assets/packages/npm.txt
+      code --list-extensions >"$HOME"/dotfiles/assets/packages/vscode_extensions.txt
+      ls /Applications | rg '\.app' | sed 's/\.app//g' >"$HOME"/dotfiles/assets/packages/macos_applications.txt
+      ls /Applications/Setapp | rg '\.app' | sed 's/\.app//g' >"$HOME"/dotfiles/assets/packages/macos_setapp.txt
       cp "$HOME"/.zsh_history /Volumes/Bookshelf/Database/Backup/CLI/zsh_history_$(date +\%Y_\%m_\%d).bak
     shell: /bin/zsh
     schedule: "0 1,13,20 * * *"
