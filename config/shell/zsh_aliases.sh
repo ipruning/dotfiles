@@ -49,6 +49,7 @@ alias ipv6='curl -6 ip.sb'
 
 # alias cat='bat'
 # alias cp='fcp'
+# alias cut='choose'
 # alias df='duf'
 # alias dig='dog'
 # alias du='dust'
@@ -57,6 +58,7 @@ alias ipv6='curl -6 ip.sb'
 # alias ping='gping'
 # alias ps='procs'
 # alias sed="sd"
+# alias sort="huniq"
 # alias top='htop'
 alias v='nvim'
 # alias vi='nvim'
