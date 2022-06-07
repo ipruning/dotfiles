@@ -324,12 +324,12 @@
   "dendron.rootDir": "~/Database/Dendron",
   // File Nesting
   "fileNestingUpdater.autoUpdate": true,
-  "fileNestingUpdater.autoUpdateInterval": 4320,
+  "fileNestingUpdater.autoUpdateInterval": 20160,
   "fileNestingUpdater.promptOnAutoUpdate": true,
   "explorer.fileNesting.enabled": true,
   "explorer.fileNesting.expand": false,
   "explorer.fileNesting.patterns": {
-    "//": "Last update at 6/4/2022, 12:11:19 AM",
+    "//": "Last update at 6/7/2022, 4:24:55 AM",
     "*.asax": "$(capture).*.cs, $(capture).*.vb",
     "*.ascx": "$(capture).*.cs, $(capture).*.vb",
     "*.ashx": "$(capture).*.cs, $(capture).*.vb",
