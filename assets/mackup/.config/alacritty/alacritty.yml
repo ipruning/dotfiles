@@ -17,14 +17,14 @@ window:
 font:
   normal:
     family: "CaskaydiaCove Nerd Font"
-  size: 12
+  size: 13
   use_thin_strokes: true
 
 # Colors (One Dark)
 colors:
   # Default colors
   primary:
-    background: "0x1e2127"
+    background: "0x282C34"
     foreground: "0xabb2bf"
 
   # Normal colors
