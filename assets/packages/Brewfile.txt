@@ -8,6 +8,7 @@ brimdata/tap/zed
 brimdata/tap/zq
 broot
 cheat
+choose-rust
 cloudflare/cloudflare/cloudflared
 cmake
 commitizen
@@ -25,6 +26,7 @@ ffmpeg
 fpp
 freexl
 gh
+git-cliff
 git-extras
 git-lfs
 git-quick-stats
@@ -62,17 +64,20 @@ platformio
 popt
 procs
 proj
+pueue
 pybind11
 pyenv
 qt@5
 r
 rm-improved
+rust
 sd
 shellcheck
 smartmontools
 sourcegraph/src-cli/src-cli
 ssh-copy-id
 starship
+t-rec
 tealdeer
 thefuck
 timothyye/tap/skm

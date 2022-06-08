@@ -1,6 +1,9 @@
 bore-cli
 cargo-update
+coreutils
 difftastic
+gfold
+huniq
 mdbook
 mdbook-linkcheck
 mdbook-pdf
