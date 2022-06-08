@@ -46,33 +46,34 @@ setopt INC_APPEND_HISTORY # Write to the history file immediately, not when the 
 #===============================================================================
 export plugins=(
   asdf
-  autoupdate
+  # catimg
   colored-man-pages
-  # thefuck
-  fd
-  # fzf-tab
+  # command-not-found
   # docker
   # docker-compose
   extract # x <file>
+  fd
+  # fzf
   gh
-  git-open
-  catimg
-  zsh-autosuggestions
-  zsh-completions
-  zsh-interactive-cd
-  zsh-osx-autoproxy # export https_proxy=http://127.0.0.1:7890 http_proxy=http://127.0.0.1:7890 all_proxy=socks5://127.0.0.1:7890
-  zsh-syntax-highlighting
-  zsh-vi-mode
   macos # showfiles hidefiles
-  # npm
-  # yarn
-  # poetry
-  ripgrep
   # magic-enter # tmuxp bug
-  zbell
-  # command-not-found
+  # npm
+  # poetry
   systemadmin
-  cheat # https://github.com/cheat/cheat/issues/616
+  # thefuck
+  # yarn
+  ripgrep
+  # zbell
+  # zsh-interactive-cd
+  autoupdate              # https://github.com/TamCore/autoupdate-oh-my-zsh-plugins
+  cheat                   # https://github.com/cheat/cheat/issues/616
+  fzf-tab                 # https://github.com/Aloxaf/fzf-tab
+  git-open                # https://github.com/paulirish/git-open
+  zsh-autosuggestions     # https://github.com/zsh-users/zsh-autosuggestions
+  zsh-completions         # https://github.com/zsh-users/zsh-completions
+  zsh-osx-autoproxy       # export https_proxy=http://127.0.0.1:7890 http_proxy=http://127.0.0.1:7890 all_proxy=socks5://127.0.0.1:7890
+  zsh-syntax-highlighting # https://github.com/zsh-users/zsh-syntax-highlighting
+  zsh-vi-mode             # https://github.com/jeffreytse/zsh-vi-mode
 )
 
 #===============================================================================
