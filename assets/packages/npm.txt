@@ -1,6 +1,7 @@
 @argdown/cli
 @lint-md/cli
 @marp-team/marp-cli
+@slidev/cli
 @squoosh/cli
 cnpm
 doctor-jones

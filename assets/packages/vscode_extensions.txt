@@ -10,7 +10,7 @@ asvetliakov.vscode-neovim
 benjamin-simmonds.pythoncpp-debug
 betterthantomorrow.calva
 bierner.markdown-mermaid
-brittanychiang.halcyon-vscode
+bodil.file-browser
 christian-kohler.npm-intellisense
 christian-kohler.path-intellisense
 codeandstuff.package-json-upgrade
@@ -71,7 +71,7 @@ mechatroner.rainbow-csv
 mervin.markdown-formatter
 mhutchie.git-graph
 ms-azuretools.vscode-docker
-MS-CEINTL.vscode-language-pack-zh-hans
+ms-dotnettools.csharp
 ms-kubernetes-tools.vscode-kubernetes-tools
 ms-python.python
 ms-python.vscode-pylance
@@ -81,12 +81,14 @@ ms-toolsai.jupyter-renderers
 ms-vscode-remote.remote-containers
 ms-vscode-remote.remote-ssh
 ms-vscode-remote.remote-ssh-edit
+ms-vscode-remote.remote-wsl
 ms-vscode.cmake-tools
 ms-vscode.cpptools
 ms-vscode.cpptools-extension-pack
 ms-vscode.cpptools-themes
 ms-vscode.powershell
 mshr-h.veriloghdl
+msjsdiag.vscode-react-native
 naumovs.color-highlight
 ninoseki.vscode-pylens
 njpwerner.autodocstring
@@ -120,6 +122,7 @@ tamasfe.even-better-toml
 tecosaur.latex-utilities
 telesoho.vscode-markdown-paste-image
 timonwong.shellcheck
+twxs.cmake
 Tyriar.sort-lines
 usernamehw.errorlens
 vadimcn.vscode-lldb
@@ -131,10 +134,10 @@ vscjava.vscode-java-dependency
 vscjava.vscode-java-pack
 vscjava.vscode-java-test
 vscjava.vscode-maven
-vscode-icons-team.vscode-icons
 vscodevim.vim
 VSpaceCode.vspacecode
 VSpaceCode.whichkey
+Vue.volar
 wingrunr21.vscode-ruby
 XING.zotero-cite
 yinfei.luahelper
