@@ -1,6 +1,6 @@
 # Beware! This file is rewritten by htop when settings are changed in the interface.
 # The parser is also very primitive, and not human-friendly.
-htop_version=3.2.0
+htop_version=3.2.1
 config_reader_min_version=3
 fields=0 48 6 17 18 50 52 47 39 38 53 49 1
 hide_kernel_threads=1
@@ -34,7 +34,7 @@ column_meters_0=AllCPUs Blank
 column_meter_modes_0=1 2
 column_meters_1=Memory Swap Blank DateTime Uptime Battery Blank Tasks LoadAverage
 column_meter_modes_1=1 1 2 2 2 2 2 2 2
-tree_view=0
+tree_view=1
 sort_key=52
 tree_sort_key=46
 sort_direction=-1
@@ -44,7 +44,7 @@ all_branches_collapsed=0
 screen:Main=PID USER TTY PRIORITY NICE NLWP PERCENT_NORM_CPU PERCENT_MEM M_RESIDENT M_VIRT ELAPSED TIME Command
 .sort_key=PERCENT_NORM_CPU
 .tree_sort_key=PERCENT_CPU
-.tree_view=0
+.tree_view=1
 .tree_view_always_by_pid=0
 .sort_direction=-1
 .tree_sort_direction=-1
