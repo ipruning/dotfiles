@@ -134,7 +134,7 @@
   "markdown.extension.toc.levels": "2..6",
   "markdown.marp.exportType": "html",
   "markdown.marp.enableHtml": true,
-
+  "markdown.experimental.validate.enabled": true,
   "markdown.extension.italic.indicator": "_",
   "markdown.extension.list.indentationSize": "inherit",
   "markdown.extension.tableFormatter.normalizeIndentation": true,
@@ -163,7 +163,11 @@
   "[markdown]": {
     "editor.fontSize": 13,
     "editor.fontFamily": "'CaskaydiaCove Nerd Font', 'Source Han Sans SC'",
-    "editor.quickSuggestions": true,
+    "editor.quickSuggestions": {
+      "comments": "on",
+      "strings": "on",
+      "other": "on"
+    },
     "editor.renderWhitespace": "selection", // all will cause lag
     "editor.formatOnSave": false,
     "editor.defaultFormatter": "mervin.markdown-formatter",
