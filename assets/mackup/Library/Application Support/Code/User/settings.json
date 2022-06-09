@@ -222,6 +222,9 @@
     "beancount": "Log",
     "qalc": "Log"
   },
+  // Lua
+  "luahelper.format.continuation_indent_width": 2,
+  "luahelper.format.indent_width": 2,
   // Beancount
   "beancount.fixedCJKWidth": true,
   "beancount.inputMethods": ["pinyin"],
