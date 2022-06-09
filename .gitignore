@@ -8,6 +8,7 @@ automatic_backups
 bin/autocorrect
 bin/double-entry-generator
 bin/feishu2md
+bin/neovide
 bin/pandoc
 bin/pandoc-crossref
 bin/redo
