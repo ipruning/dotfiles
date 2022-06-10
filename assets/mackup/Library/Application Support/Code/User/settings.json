@@ -10,6 +10,7 @@
   "editor.bracketPairColorization.enabled": true,
   "editor.linkedEditing": true,
   "editor.suggestSelection": "first",
+  "editor.cursorSmoothCaretAnimation": true,
   "github.copilot.enable": {
     "*": true,
     "yaml": false,
@@ -48,6 +49,7 @@
   "projectManager.git.baseFolders": ["~/Coding", "~/Desktop", "~/Stacks"],
   "diffEditor.renderSideBySide": true,
   "workbench.tree.indent": 20,
+  "workbench.tree.renderIndentGuides": "none",
   "workbench.activityBar.visible": true,
   "workbench.iconTheme": "material-icon-theme",
   "workbench.colorTheme": "One Dark Pro Darker",
@@ -327,6 +329,7 @@
   "files.associations": {
     ".gitconfig": "ini"
   },
+  "files.simpleDialog.enable": true,
   // draw.io
   "hediet.vscode-drawio.codeLinkActivated": true,
   // Dendron
