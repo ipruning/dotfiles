@@ -162,7 +162,6 @@
   // Formatting
   "[markdown]": {
     "editor.fontSize": 13,
-    "editor.fontFamily": "'CaskaydiaCove Nerd Font', 'Source Han Sans SC'",
     "editor.quickSuggestions": {
       "comments": "on",
       "strings": "on",
@@ -174,7 +173,8 @@
     "editor.tabSize": 4
   },
   "[lua]": {
-    "editor.formatOnSave": false
+    "editor.formatOnSave": false,
+    "editor.tabSize": 2
   },
   "[python]": {
     "editor.codeActionsOnSave": {
@@ -226,8 +226,7 @@
     "qalc": "Log"
   },
   // Lua
-  "luahelper.format.continuation_indent_width": 2,
-  "luahelper.format.indent_width": 2,
+
   // Beancount
   "beancount.fixedCJKWidth": true,
   "beancount.inputMethods": ["pinyin"],
