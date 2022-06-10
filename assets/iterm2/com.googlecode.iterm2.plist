@@ -6,6 +6,8 @@
 	<true/>
 	<key>AutoHideTmuxClientSession</key>
 	<false/>
+	<key>CheckTestRelease</key>
+	<true/>
 	<key>Command</key>
 	<string>/usr/local/bin/pwsh</string>
 	<key>Custom Color Presets</key>
