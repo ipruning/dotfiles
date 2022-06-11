@@ -53,7 +53,7 @@ function main {
     echo "unknown: $SYSTEM_ARCH"
     ;;
   esac
-  brew bundle --file="$HOME"/dotfiles/assets/packages/Brewfile_dev
+  brew bundle --file="$HOME"/dotfiles/assets/others/packages/Brewfile_dev
 
   echo "${BLUE}Installing mackup${NORMAL}"
   ln -sf "$HOME"/dotfiles/config/mackup/.mackup.cfg "$HOME"/.mackup.cfg
@@ -77,13 +77,13 @@ function main {
   asdf install
 
   echo "${BLUE}Installing cargo packages${NORMAL}"
-  xargs <"$HOME"/dotfiles/assets/packages/cargo_dev.txt -n 1 cargo install
+  xargs <"$HOME"/dotfiles/assets/others/packages/cargo_dev.txt -n 1 cargo install
 
   echo "${BLUE}Installing pipx packages${NORMAL}"
-  xargs <"$HOME"/dotfiles/assets/packages/pipx_dev.txt -n 1 pipx install
+  xargs <"$HOME"/dotfiles/assets/others/packages/pipx_dev.txt -n 1 pipx install
 
   echo "${BLUE}Installing npm packages${NORMAL}"
-  xargs npm install --global <"$HOME"/dotfiles/assets/packages/npm_dev.txt
+  xargs npm install --global <"$HOME"/dotfiles/assets/others/packages/npm_dev.txt
 
   echo "${BLUE}Installing other packages${NORMAL}"
   which autocorrect || curl -sSL https://git.io/JcGER | bash # AutoCorrect
@@ -121,4 +121,4 @@ esac
 
 echo "${GREEN}Done${NORMAL}"
 echo "${GREEN}You can install the VS Code plugin by running the following command.${NORMAL}"
-echo "${GREEN}xargs <""$HOME""/dotfiles/assets/packages/vscode_extensions.txt -n 1 code --install-extension${NORMAL}"
+echo "${GREEN}xargs <""$HOME""/dotfiles/assets/others/packages/vscode_extensions.txt -n 1 code --install-extension${NORMAL}"
