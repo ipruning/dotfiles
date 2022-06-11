@@ -163,7 +163,7 @@
   // Language
   // Formatting
   "[markdown]": {
-    "editor.fontSize": 13,
+    "editor.fontSize": 14,
     "editor.quickSuggestions": {
       "comments": "on",
       "strings": "on",
