@@ -2,7 +2,7 @@ local wezterm = require 'wezterm';
 return {
     font = wezterm.font("CaskaydiaCove Nerd Font"),
     font_size = 13.0,
-    color_scheme = "iceberg-dark",
+    color_scheme = "nord",
     -- default_cursor_style = "BlinkingBar",
     -- cursor_blink_rate = 500,
     -- force_reverse_video_cursor = true,
