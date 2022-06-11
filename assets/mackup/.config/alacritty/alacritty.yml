@@ -6,7 +6,6 @@ window:
     columns: 100
     lines: 40
   decorations: buttonless
-  # opacity: 0.98
   startup_mode: Windowed
   title: Alacritty
   dynamic_title: true
@@ -17,37 +16,32 @@ window:
 font:
   normal:
     family: "CaskaydiaCove Nerd Font"
-  size: 13
+  size: 14
   use_thin_strokes: true
 
-# Colors (One Dark)
+# Colors (One Dark Pro Darker)
 colors:
-  # Default colors
   primary:
-    background: "0x282C34"
+    background: "0x23272e"
     foreground: "0xabb2bf"
-
-  # Normal colors
   normal:
-    black: "0x1e2127"
-    red: "0xe06c75"
-    green: "0x98c379"
-    yellow: "0xd19a66"
-    blue: "0x61afef"
-    magenta: "0xc678dd"
-    cyan: "0x56b6c2"
-    white: "0xabb2bf"
-
-  # Bright colors
+    black: "0x3f4451"
+    blue: "0x4aa5f0"
+    cyan: "0x42b3c2"
+    green: "0x8cc265"
+    magenta: "0xc162de"
+    red: "0xe05561"
+    white: "0xe6e6e6"
+    yellow: "0xd18f52"
   bright:
-    black: "0x5c6370"
-    red: "0xe06c75"
-    green: "0x98c379"
-    yellow: "0xd19a66"
-    blue: "0x61afef"
-    magenta: "0xc678dd"
-    cyan: "0x56b6c2"
-    white: "0xffffff"
+    black: "0x4f5666"
+    blue: "0x4dc4ff"
+    cyan: "0x4cd1e0"
+    green: "0xa5e075"
+    magenta: "0xde73ff"
+    red: "0xff616e"
+    white: "0xd7dae0"
+    yellow: "0xf0a45d"
 
 scrolling:
   history: 10000
