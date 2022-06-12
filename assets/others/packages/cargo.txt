@@ -1,4 +1,5 @@
 bore-cli
+cargo-bundle
 cargo-update
 coreutils
 difftastic

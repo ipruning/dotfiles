@@ -15,6 +15,7 @@ ClashX Pro
 Compressor
 Contexts
 Cron
+Cryptomator
 DEVONthink 3
 DaisyDisk
 Day One
@@ -39,6 +40,7 @@ GarageBand
 GitHub Desktop
 GoodNotes
 Google Chrome
+Hammerspoon
 Hepta
 Hook
 Hustl
@@ -154,7 +156,6 @@ Vivid
 Warp
 WeChat
 WechatExporter
-WezTerm
 Wireshark
 WolframScript
 XLD

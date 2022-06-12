@@ -7,6 +7,7 @@ beancount
 brimdata/tap/zed
 brimdata/tap/zq
 broot
+chafa
 cheat
 choose-rust
 cloudflare/cloudflare/cloudflared
@@ -19,10 +20,13 @@ dog
 duf
 dust
 eth-p/software/bat-extras
+exa
+exiftool
 extra-cmake-modules
 fcp
 fd
 ffmpeg
+fmt
 fpp
 freexl
 gh
@@ -44,6 +48,8 @@ jandedobbeleer/oh-my-posh/oh-my-posh
 jq
 juliaup
 lazydocker
+lazygit
+lesspipe
 libice
 librttopo
 lsd
@@ -53,7 +59,9 @@ mas
 minizip
 mosh
 navi
+ncdu
 neovim
+ninja
 nmap
 nnn
 numpy
@@ -72,6 +80,7 @@ r
 rm-improved
 rust
 sd
+sevenzip
 shellcheck
 smartmontools
 sourcegraph/src-cli/src-cli
@@ -85,9 +94,11 @@ tmate
 tmux
 tokei
 tor
+ugit
 vips
 xerces-c
 yq
 yqrashawn/goku/goku
 yt-dlp
+zola
 zoxide
