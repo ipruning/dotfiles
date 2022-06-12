@@ -114,8 +114,6 @@ mac*)
     bindkey '≈' fzf-dirs-widget
     # 👇 Ctrl-L accept zsh-autosuggestions https://github.com/zsh-users/zsh-autosuggestions#key-bindings
     bindkey '^L' autosuggest-accept
-    # 👇 Ctrl-I
-    # bindkey '^I' fzf_completion
   }
   ;;
 linux*)
@@ -206,8 +204,8 @@ export HISTFILE="${HOME}/.zsh_history"
 #===============================================================================
 # 👇 Autodetect architecture (and set `brew` path) (and set `python` path)
 #===============================================================================
-case $SYSTEM_ARCH in
-arm64)
+case $SYSTEM_TYPE in
+mac_arm64)
   # Python
   # alias 'cvenv'='python3 -m venv .venv && source .venv/bin/activate && python3 -m pip install --upgrade -r $HOME/.requirements.txt'
   alias 'cvenv'='$(brew --prefix python@3.10)/bin/python3 -m venv .venv && source .venv/bin/activate && python3 -m pip install --upgrade -r $HOME/.requirements.txt'
@@ -231,7 +229,7 @@ arm64)
   # Java
   export JAVA_HOME=/Library/Java/JavaVirtualMachines/zulu-17.jdk/Contents/Home
   ;;
-x86_64 | i386)
+mac_x86_64)
   # Brew
   if [[ -f /usr/local/homebrew/bin/brew ]]; then
     eval "$(/usr/local/homebrew/bin/brew shellenv)" # homebrew intel shell env
@@ -241,9 +239,6 @@ x86_64 | i386)
   eval "$(pyenv init -)"      # pyenv intel shell env
   alias 'cvenv'='python3 -m venv .venv && source .venv/bin/activate && python3 -m pip install --upgrade -r $HOME/.requirements.txt'
   alias 'svenv'='source .venv/bin/activate'
-  ;;
-*)
-  echo "System architecture: $SYSTEM_ARCH"
   ;;
 esac
 
