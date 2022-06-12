@@ -63,6 +63,7 @@ zle     -N    fzf-dirs-widget
 
 #===============================================================================
 # 👇 fzf completion will use ~~ as the trigger sequence instead of the default **
+# 👇 Ctrl-I will be used to trigger completion
 #===============================================================================
 export FZF_COMPLETION_TRIGGER='~~'
 export FZF_COMPLETION_OPTS='--border --info=inline'
