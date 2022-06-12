@@ -34,25 +34,15 @@ fi
 #===============================================================================
 export plugins=(
   asdf
-  # catimg
   colored-man-pages
-  # command-not-found
-  # docker
-  # docker-compose
   extract # x <file>
   fd
-  # fzf
   gh
   macos # showfiles hidefiles
-  # magic-enter # tmuxp bug
-  # npm
-  # poetry
+  magic-enter
   systemadmin
-  # thefuck
-  # yarn
   ripgrep
-  # zbell
-  # zsh-interactive-cd
+  zbell
   autoupdate              # https://github.com/TamCore/autoupdate-oh-my-zsh-plugins
   cheat                   # https://github.com/cheat/cheat/issues/616
   fzf-tab                 # https://github.com/Aloxaf/fzf-tab
@@ -67,7 +57,6 @@ export plugins=(
 #===============================================================================
 # 👇 Language environment
 #===============================================================================
-export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
 
 #===============================================================================
