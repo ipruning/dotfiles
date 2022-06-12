@@ -3,13 +3,12 @@
 # 👇 For a full list of active aliases, run `alias`.
 #===============================================================================
 
-case $SYSTEM_ARCH in
-arm64*)
+case $SYSTEM_TYPE in
+mac_arm64)
   alias x86_64='arch -x86_64 zsh --login'
   alias x86_64_run='arch -x86_64 zsh -c'
   alias brow='/usr/local/homebrew/bin/brew'
   ;;
-x86_64*) ;;
 esac
 
 if [[ -n $SSH_CONNECTION ]]; then
@@ -27,7 +26,6 @@ else
   alias r-unm='node ${HOME}/Stacks/Utilities/UnblockNeteaseMusic/app.js -p 80:443 -f 103.126.92.132'
   alias r-fava='fava ${HOME}/Database/Ledger/main.bean -p 4000'
   alias r-citespace='cd ${HOME}/Database/CiteSpace/5.8.R3/ && ./StartCiteSpace_M1_Pro.sh'
-  # alias r-archivebox='cd ${HOME}/Database/ArchiveBox/ && archivebox server'
   alias r-archivebox='cd /Volumes/Workspace/Database/ArchiveBox && archivebox server'
   alias r-update='brew update && brew cu && asdf latest --all && tldr --update'
   alias r-upgrade='brew upgrade && pipx upgrade-all && npm update -g npm && npx npm-check --global --update-all && cargo install-update -a && gh extension upgrade --all && conda update --all && asdf update && asdf plugin update --all'
@@ -61,5 +59,3 @@ alias ipv6='curl -6 ip.sb'
 # alias sort="huniq"
 # alias top='htop'
 alias v='nvim'
-# alias vi='nvim'
-# alias vim='nvim'
