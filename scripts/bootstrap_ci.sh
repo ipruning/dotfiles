@@ -21,6 +21,9 @@ darwin*)
   ;;
 linux*)
   case $SYSTEM_ARCH in
+  arm64*)
+    SYSTEM_TYPE="linux_arm64"
+    ;;
   x86_64*)
     SYSTEM_TYPE="linux_x86_64"
     ;;
