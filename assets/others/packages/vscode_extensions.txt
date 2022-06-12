@@ -55,6 +55,7 @@ humao.rest-client
 ionutvmi.path-autocomplete
 jacobdufault.fuzzy-search
 James-Yu.latex-workshop
+jebbs.plantuml
 jeff-hykin.better-cpp-syntax
 jock.svg
 julialang.language-julia
@@ -92,6 +93,7 @@ msjsdiag.vscode-react-native
 naumovs.color-highlight
 ninoseki.vscode-pylens
 njpwerner.autodocstring
+NomicFoundation.hardhat-solidity
 nortakales.vs-qalc
 oderwat.indent-rainbow
 piersdeseilligny.betterfountain
