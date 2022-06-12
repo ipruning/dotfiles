@@ -109,7 +109,7 @@ mac_arm64 | mac_x86_64)
     source "/opt/homebrew/opt/fzf/shell/key-bindings.zsh"
     # 👇 Option-C
     bindkey 'ç' fzf-cd-widget
-    # 👇 Option-~
+    # 👇 Option-X
     bindkey '≈' fzf-dirs-widget
     # 👇 Ctrl-L accept zsh-autosuggestions https://github.com/zsh-users/zsh-autosuggestions#key-bindings
     bindkey '^L' autosuggest-accept
