@@ -2105,7 +2105,7 @@
 			<key>Send Code When Idle</key>
 			<false/>
 			<key>Session Close Undo Timeout</key>
-			<integer>42</integer>
+			<integer>15</integer>
 			<key>Shortcut</key>
 			<string></string>
 			<key>Show Mark Indicators</key>
@@ -2479,6 +2479,8 @@
 				<key>Red Component</key>
 				<real>0.98747438192367554</real>
 			</dict>
+			<key>Automatically Log</key>
+			<false/>
 			<key>BM Growl</key>
 			<true/>
 			<key>Background Color</key>
@@ -2935,6 +2937,8 @@
 			<true/>
 			<key>Option Key Sends</key>
 			<integer>0</integer>
+			<key>Plain Text Logging</key>
+			<integer>1</integer>
 			<key>Prompt Before Closing 2</key>
 			<false/>
 			<key>Right Option Key Sends</key>
@@ -2974,7 +2978,7 @@
 			<key>Send Code When Idle</key>
 			<false/>
 			<key>Session Close Undo Timeout</key>
-			<integer>42</integer>
+			<integer>15</integer>
 			<key>Shortcut</key>
 			<string></string>
 			<key>Show Mark Indicators</key>
@@ -3932,7 +3936,7 @@
 			<key>Send Code When Idle</key>
 			<false/>
 			<key>Session Close Undo Timeout</key>
-			<integer>42</integer>
+			<integer>15</integer>
 			<key>Shortcut</key>
 			<string></string>
 			<key>Show Mark Indicators</key>
@@ -4306,6 +4310,8 @@
 				<key>Red Component</key>
 				<real>0.98747438192367554</real>
 			</dict>
+			<key>Automatically Log</key>
+			<false/>
 			<key>BM Growl</key>
 			<true/>
 			<key>Background Color</key>
@@ -4760,6 +4766,8 @@
 			<true/>
 			<key>Option Key Sends</key>
 			<integer>0</integer>
+			<key>Plain Text Logging</key>
+			<integer>1</integer>
 			<key>Prompt Before Closing 2</key>
 			<false/>
 			<key>Right Option Key Sends</key>
@@ -4799,7 +4807,7 @@
 			<key>Send Code When Idle</key>
 			<false/>
 			<key>Session Close Undo Timeout</key>
-			<integer>42</integer>
+			<integer>15</integer>
 			<key>Shortcut</key>
 			<string></string>
 			<key>Show Mark Indicators</key>
@@ -5218,6 +5226,8 @@
 				<key>Red Component</key>
 				<real>0.98747438192367554</real>
 			</dict>
+			<key>Automatically Log</key>
+			<false/>
 			<key>BM Growl</key>
 			<true/>
 			<key>Background Color</key>
@@ -5674,6 +5684,8 @@
 			<true/>
 			<key>Option Key Sends</key>
 			<integer>0</integer>
+			<key>Plain Text Logging</key>
+			<integer>1</integer>
 			<key>Prompt Before Closing 2</key>
 			<false/>
 			<key>Right Option Key Sends</key>
@@ -5713,7 +5725,7 @@
 			<key>Send Code When Idle</key>
 			<false/>
 			<key>Session Close Undo Timeout</key>
-			<integer>42</integer>
+			<integer>15</integer>
 			<key>Shortcut</key>
 			<string></string>
 			<key>Show Mark Indicators</key>
