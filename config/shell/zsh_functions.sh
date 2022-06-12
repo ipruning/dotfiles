@@ -10,11 +10,6 @@ opoff() {
   op signout
   unset OP_SESSION_my
 }
-# getpwd() {
-#   opon
-#   op get item "$1" | jq -r '.details.fields[] |select(.designation=="password").value'
-#   opoff
-# }
 getkey() {
   opon
   op item get id_rsa_macbook_14 --format json | jq '.fields | map(select(.id == "private_key")) | .[0] | .value' -r | ssh-add -
@@ -39,8 +34,7 @@ sudo-command-line() {
   fi
   zle reset-prompt
 }
-# zle     -N   sudo-command-line
-# bindkey '^S' sudo-command-line
+zle -N sudo-command-line
 
 #===============================================================================
 # 👇 Git
@@ -50,12 +44,8 @@ getrepo() {
 }
 
 #===============================================================================
-# 👇 fzf Option-C 快速查找目录
-# ALT-C to fuzzily search for a directory in your home directory then cd into it
+# 👇 fzf Option-C 快速查找目录 fuzzily search for a directory in your home directory then cd into it
 #===============================================================================
-# if [[ $(uname) == "Darwin" ]]; then # Default #TODO, For Mac OS: Option-C
-#   bindkey 'ç' fzf-cd-widget
-# fi
 export FZF_ALT_C_COMMAND="fd --ignore-file ~/.rgignore --hidden --follow --ignore-case --type d"
 
 #===============================================================================
@@ -75,13 +65,11 @@ fzf-dirs-widget() {
   return $ret
 }
 zle     -N    fzf-dirs-widget
-# if [[ $(uname) == "Darwin" ]]; then # Default alt-X, For Mac OS: Option-X
-#   bindkey '≈' fzf-dirs-widget
-# else
-#   bindkey '\ex' fzf-dirs-widget
-# fi
-# Use ~~ as the trigger sequence instead of the default **
-# export FZF_COMPLETION_TRIGGER='~~'
+
+#===============================================================================
+# 👇 fzf completion will use ~~ as the trigger sequence instead of the default **
+#===============================================================================
+export FZF_COMPLETION_TRIGGER='~~'
 export FZF_COMPLETION_OPTS='--border --info=inline'
 _fzf_comprun() {
   local command=$1
@@ -93,14 +81,6 @@ _fzf_comprun() {
     *)            fzf "$@" ;;
   esac
 }
-
-#===============================================================================
-# 👇 fzf f
-#===============================================================================
-# f() {
-#   sels=( "${(@f)$(fd "${fd_default[@]}" "${@:2}"| fzf)}" )
-#   test -n "$sels" && print -z -- "$1 ${sels[@]:q:q}"
-# }
 
 #===============================================================================
 # 👇 fzf 浏览器历史记录
