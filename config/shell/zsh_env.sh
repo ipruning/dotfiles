@@ -113,6 +113,8 @@ mac_arm64 | mac_x86_64)
     bindkey '≈' fzf-dirs-widget
     # 👇 Ctrl-L accept zsh-autosuggestions https://github.com/zsh-users/zsh-autosuggestions#key-bindings
     bindkey '^L' autosuggest-accept
+    # 👇 Ctrl-I
+    bindkey '^I' fzf_completion
   }
   ;;
 linux_x86_64 | raspberry)
@@ -126,18 +128,23 @@ esac
 # 👇 fzf
 #===============================================================================
 case $SYSTEM_TYPE in
-mac_arm64 | mac_x86_64)
+mac*)
   export FZF_DEFAULT_OPTS="--height=100% --layout=reverse --info=inline --border --margin=1 --padding=1"
   # export FZF_DEFAULT_COMMAND="fd --ignore-file ~/.rgignore --hidden --follow --ignore-case . /etc $HOME"
   export FZF_DEFAULT_COMMAND="fd --ignore-file ~/.rgignore --hidden --follow --ignore-case ."
   ;;
-raspberry) ;;
+linux*) ;;
 esac
 
 #===============================================================================
 # 👇 fzf Ctrl-T to fuzzily search for a file or directory in your home directory then insert its path at the cursor
 #===============================================================================
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+
+#===============================================================================
+# 👇 fzf Option-C 快速查找目录 fuzzily search for a directory in your home directory then cd into it
+#===============================================================================
+export FZF_ALT_C_COMMAND="fd --ignore-file ~/.rgignore --hidden --follow --ignore-case --type d"
 
 #===============================================================================
 # 👇 doom-emacs binary
