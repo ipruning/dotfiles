@@ -100,13 +100,14 @@ export PATH="${HOME}/dotfiles/bin:$PATH"
 # 👇 custom keybindings
 #===============================================================================
 case $SYSTEM_TYPE in
-mac_arm64 | mac_x86_64)
+mac*)
   zvm_after_init() {
-    # 👇 Option-S
-    bindkey '^S' sudo-command-line
     # 👇 fzf
+    # [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
     source "/opt/homebrew/opt/fzf/shell/completion.zsh"
     source "/opt/homebrew/opt/fzf/shell/key-bindings.zsh"
+    # 👇 Option-S
+    bindkey '^S' sudo-command-line
     # 👇 Option-C
     bindkey 'ç' fzf-cd-widget
     # 👇 Option-X
@@ -114,10 +115,10 @@ mac_arm64 | mac_x86_64)
     # 👇 Ctrl-L accept zsh-autosuggestions https://github.com/zsh-users/zsh-autosuggestions#key-bindings
     bindkey '^L' autosuggest-accept
     # 👇 Ctrl-I
-    bindkey '^I' fzf_completion
+    # bindkey '^I' fzf_completion
   }
   ;;
-linux_x86_64 | raspberry)
+linux*)
   zvm_after_init() {
     bindkey '\ex' fzf-dirs-widget
   }
