@@ -29,18 +29,6 @@ else
 fi
 
 #===============================================================================
-# 👇 History
-#===============================================================================
-export HIST_STAMPS="yyyy-mm-dd"
-export HISTFILE="$HOME/.zsh_history"
-export HISTSIZE=1000000
-export SAVEHIST=$HISTSIZE
-# setopt appendhistory
-setopt INC_APPEND_HISTORY # Write to the history file immediately, not when the shell exits.
-# setopt SHARE_HISTORY      # share history between sessions
-# setopt HIST_REDUCE_BLANKS # Remove superfluous blanks from each command line being added to the history list.
-
-#===============================================================================
 # 👇 Standard plugins can be found in $ZSH/plugins/
 # 👇 Custom plugins may be added to $ZSH_CUSTOM/plugins/
 #===============================================================================
@@ -77,56 +65,84 @@ export plugins=(
 )
 
 #===============================================================================
-# 👇 ZSH
+# 👇 Language environment
 #===============================================================================
-source "$ZSH"/oh-my-zsh.sh
+export LC_ALL=en_US.UTF-8
+export LANG=en_US.UTF-8
 
 #===============================================================================
-# 👇 autoupdate-zsh-plugin
+# 👇 History
+#===============================================================================
+export HIST_STAMPS="yyyy-mm-dd"
+export HISTFILE="$HOME/.zsh_history"
+export HISTSIZE=1000000
+export SAVEHIST=$HISTSIZE
+setopt EXTENDED_HISTORY
+setopt INC_APPEND_HISTORY # Write to the history file immediately, not when the shell exits.
+
+#===============================================================================
+# 👇 oh-my-zsh autoupdate-zsh-plugin
 #===============================================================================
 export UPDATE_ZSH_DAYS=42
 
 #===============================================================================
-# 👇 Custom binary
+# 👇 oh-my-zsh init
+#===============================================================================
+source "$ZSH"/oh-my-zsh.sh
+
+#===============================================================================
+# 👇 custom binary
 #===============================================================================
 export PATH="${HOME}/dotfiles/bin:$PATH"
 
 #===============================================================================
-# 👇 zsh-autosuggestions
+# 👇 zsh-vi-mode https://github.com/jeffreytse/zsh-vi-mode/issues/24
+# 👇 custom keybindings
 #===============================================================================
-bindkey '^L' autosuggest-accept # https://github.com/zsh-users/zsh-autosuggestions#key-bindings
-
-#===============================================================================
-# 👇 zsh-vi-mode
-#===============================================================================
-# export ZVM_CURSOR_STYLE_ENABLED=false
-
-# https://github.com/jeffreytse/zsh-vi-mode/issues/24
 case $SYSTEM_TYPE in
-mac_arm64)
+mac_arm64 | mac_x86_64)
   zvm_after_init() {
+    # 👇 Option-S
+    bindkey '^S' sudo-command-line
+    # 👇 fzf
     source "/opt/homebrew/opt/fzf/shell/completion.zsh"
     source "/opt/homebrew/opt/fzf/shell/key-bindings.zsh"
+    # 👇 Option-C
     bindkey 'ç' fzf-cd-widget
+    # 👇 Option-~
     bindkey '≈' fzf-dirs-widget
-    zle -N sudo-command-line
-    bindkey '^S' sudo-command-line
+    # 👇 Ctrl-L accept zsh-autosuggestions https://github.com/zsh-users/zsh-autosuggestions#key-bindings
+    bindkey '^L' autosuggest-accept
   }
   ;;
-mac_x86_64*) ;;
+linux_x86_64 | raspberry)
+  zvm_after_init() {
+    bindkey '\ex' fzf-dirs-widget
+  }
+  ;;
+esac
+
+#===============================================================================
+# 👇 fzf
+#===============================================================================
+case $SYSTEM_TYPE in
+mac_arm64 | mac_x86_64)
+  export FZF_DEFAULT_OPTS="--height=100% --layout=reverse --info=inline --border --margin=1 --padding=1"
+  # export FZF_DEFAULT_COMMAND="fd --ignore-file ~/.rgignore --hidden --follow --ignore-case . /etc $HOME"
+  export FZF_DEFAULT_COMMAND="fd --ignore-file ~/.rgignore --hidden --follow --ignore-case ."
+  ;;
 raspberry) ;;
 esac
+
+#===============================================================================
+# 👇 fzf Ctrl-T to fuzzily search for a file or directory in your home directory then insert its path at the cursor
+#===============================================================================
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 
 #===============================================================================
 # 👇 doom-emacs binary
 #===============================================================================
 export PATH="${HOME}/.emacs.d/bin:$PATH"
-
-#===============================================================================
-# 👇 Language environment
-#===============================================================================
-export LC_ALL=en_US.UTF-8
-export LANG=en_US.UTF-8
 
 #===============================================================================
 # 👇 Preferred editor for local and remote sessions
@@ -175,24 +191,9 @@ export DISABLE_AUTO_TITLE='true'
 export BAT_THEME="OneHalfDark"
 
 #===============================================================================
-# 👇 fzf
-#===============================================================================
-case $SYSTEM_TYPE in
-mac_arm64 | mac_x86_64) ;;
-raspberry) ;;
-esac
-
-#===============================================================================
 # 👇 redo
 #===============================================================================
 export HISTFILE="${HOME}/.zsh_history"
-
-#===============================================================================
-# 👇 fzf CTRL-T to fuzzily search for a file or directory in your home directory then insert its path at the cursor
-#===============================================================================
-export FZF_DEFAULT_OPTS="--height=100% --layout=reverse --info=inline --border --margin=1 --padding=1"
-export FZF_DEFAULT_COMMAND="fd --ignore-file ~/.rgignore --hidden --follow --ignore-case . /etc $HOME"
-export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 
 #===============================================================================
 # 👇 Autodetect architecture (and set `brew` path) (and set `python` path)
