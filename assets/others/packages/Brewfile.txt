@@ -82,6 +82,7 @@ rust
 sd
 sevenzip
 shellcheck
+sk
 smartmontools
 sourcegraph/src-cli/src-cli
 ssh-copy-id
@@ -94,6 +95,7 @@ tmate
 tmux
 tokei
 tor
+tree
 ugit
 vips
 xerces-c
