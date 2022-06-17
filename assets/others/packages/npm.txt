@@ -4,6 +4,7 @@
 @slidev/cli
 @squoosh/cli
 cnpm
+corepack
 doctor-jones
 gatsby-cli
 generator-awesome-list
