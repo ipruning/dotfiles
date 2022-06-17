@@ -45,6 +45,7 @@ export plugins=(
   zbell
   autoupdate              # https://github.com/TamCore/autoupdate-oh-my-zsh-plugins
   cheat                   # https://github.com/cheat/cheat/issues/616
+  forgit                  # https://github.com/wfxr/forgit
   fzf-tab                 # https://github.com/Aloxaf/fzf-tab
   git-open                # https://github.com/paulirish/git-open
   zsh-autosuggestions     # https://github.com/zsh-users/zsh-autosuggestions
@@ -111,6 +112,27 @@ linux*)
   }
   ;;
 esac
+
+#===============================================================================
+# 👇 forgit
+#===============================================================================
+forgit_log=glo
+forgit_diff=gd
+forgit_add=ga
+forgit_reset_head=grh
+forgit_ignore=gi
+forgit_checkout_file=gcf
+forgit_checkout_branch=gcb
+forgit_branch_delet=gbd
+forgit_checkout_tag=gct
+forgit_checkout_commit=gco
+forgit_revert_commit=grc
+forgit_clean=gclean
+forgit_stash_show=gss
+forgit_cherry_pick=gcp
+forgit_rebase=grb
+forgit_fixup=gfu
+export PATH="$PATH:$FORGIT_INSTALL_DIR/bin"
 
 #===============================================================================
 # 👇 fzf
