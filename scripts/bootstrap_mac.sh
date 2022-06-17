@@ -68,9 +68,9 @@ function main {
 
   echo "${BLUE}Installing asdf${NORMAL}"
   asdf plugin-add clojure https://github.com/asdf-community/asdf-clojure.git
+  asdf plugin-add elixir https://github.com/asdf-vm/asdf-elixir.git
   asdf plugin-add golang https://github.com/kennyp/asdf-golang.git
   asdf plugin-add nodejs https://github.com/asdf-vm/asdf-nodejs.git
-  asdf plugin-add php https://github.com/asdf-community/asdf-php.git
   asdf plugin-add python
   asdf plugin-add ruby https://github.com/asdf-vm/asdf-ruby.git
   asdf plugin-add rust https://github.com/asdf-community/asdf-rust.git
@@ -88,14 +88,11 @@ function main {
   echo "${BLUE}Installing other packages${NORMAL}"
   which autocorrect || curl -sSL https://git.io/JcGER | bash # AutoCorrect
 
-  echo "${BLUE}Installing oh-my-tmux${NORMAL}"
+  echo "${BLUE}Installing tmux configuration (oh-my-tmux)${NORMAL}"
   git clone https://github.com/gpakosz/.tmux.git "$HOME"/.tmux
   ln -sf "$HOME"/.tmux/.tmux.conf "$HOME"/.tmux.conf
 
-  echo "${BLUE}Installing SpaceVim${NORMAL}"
-  curl -sLf https://spacevim.org/install.sh | bash
-
-  echo "${BLUE}Installing Doom Emacs${NORMAL}"
+  echo "${BLUE}Installing emacs configuration (Doom Emacs)${NORMAL}"
   git clone --depth 1 https://github.com/doomemacs/doomemacs ~/.emacs.d
   ~/.emacs.d/bin/doom install
 
