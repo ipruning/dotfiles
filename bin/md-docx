@@ -20,7 +20,7 @@ pandoc --standalone "${FILEDIR}" \
     --csl="${HOME}/Database/Zotero/styles/ieee.csl" \
     --filter pandoc-crossref \
     --toc \
-    --reference-doc="${HOME}/Dotfiles/assets/others/pandoc/template_cw.docx" \
+    --reference-doc="${HOME}/dotfiles/assets/others/pandoc/template_cw.docx" \
     --number-sections \
     --metadata reference-section-title="Reference" \
     --citeproc \

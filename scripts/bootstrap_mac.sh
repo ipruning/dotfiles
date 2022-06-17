@@ -31,6 +31,7 @@ function main {
   ZSH_CUSTOM=${ZSH_CUSTOM:-~/.oh-my-zsh/custom}
   git clone https://github.com/TamCore/autoupdate-oh-my-zsh-plugins "$ZSH_CUSTOM"/plugins/autoupdate
   git clone https://github.com/Aloxaf/fzf-tab "$ZSH_CUSTOM"/plugins/fzf-tab
+  git clone https://github.com/wfxr/forgit "$ZSH_CUSTOM"/plugins/forgit
   git clone https://github.com/paulirish/git-open.git "$ZSH_CUSTOM"/plugins/git-open
   git clone https://github.com/zsh-users/zsh-autosuggestions "$ZSH_CUSTOM"/plugins/zsh-autosuggestions
   git clone https://github.com/zsh-users/zsh-completions "$ZSH_CUSTOM"/plugins/zsh-completions
