@@ -97,7 +97,6 @@
     }
   },
   "todo-tree.regex.regex": "(//|#|<!--|;|/\\*|^|^\\s*(-|\\d+.))\\s*($TAGS)",
-  // Python
   "python.defaultInterpreterPath": "/Users/alex/.conda/envs/python3.10/bin/python",
   "python.formatting.provider": "black",
   "python.languageServer": "Pylance",
@@ -340,7 +339,7 @@
   "explorer.fileNesting.enabled": true,
   "explorer.fileNesting.expand": false,
   "explorer.fileNesting.patterns": {
-    "//": "Last update at 6/19/2022, 10:28:43 PM",
+    "//": "Last update at 6/19/2022, 10:30:03 PM",
     "*.asax": "$(capture).*.cs, $(capture).*.vb",
     "*.ascx": "$(capture).*.cs, $(capture).*.vb",
     "*.ashx": "$(capture).*.cs, $(capture).*.vb",
