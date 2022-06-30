@@ -4,6 +4,7 @@ asciinema
 asdf
 bandwhich
 beancount
+bottom
 brimdata/tap/zed
 brimdata/tap/zq
 broot
@@ -45,7 +46,6 @@ htop
 hugo
 hyperfine
 iperf
-jandedobbeleer/oh-my-posh/oh-my-posh
 jq
 juliaup
 lazydocker
@@ -66,6 +66,7 @@ ninja
 nmap
 nnn
 numpy
+oh-my-posh
 openssl@3
 php
 pipx
@@ -91,6 +92,7 @@ ssh-copy-id
 starship
 t-rec
 tealdeer
+the_silver_searcher
 thefuck
 timothyye/tap/skm
 tmate
@@ -103,6 +105,6 @@ vips
 xerces-c
 yq
 yqrashawn/goku/goku
-yt-dlp/taps/yt-dlp
+yt-dlp
 zola
 zoxide
