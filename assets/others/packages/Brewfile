@@ -13,7 +13,6 @@ tap "homebrew/cask-versions"
 tap "homebrew/command-not-found"
 tap "homebrew/core"
 tap "homebrew/services"
-tap "jandedobbeleer/oh-my-posh"
 tap "majd/repo"
 tap "martido/graph"
 tap "oh-my-home/fonts"
@@ -40,6 +39,7 @@ brew "cairo"
 brew "chafa"
 brew "cheat"
 brew "choose-rust"
+brew "ciphey"
 brew "cmake"
 brew "commitizen"
 brew "dasel"
@@ -89,6 +89,7 @@ brew "ncdu"
 brew "neovim"
 brew "nmap"
 brew "nnn"
+brew "oh-my-posh"
 brew "openssl@3"
 brew "php"
 brew "pipx"
@@ -130,7 +131,6 @@ brew "brimdata/tap/zq"
 brew "cloudflare/cloudflare/cloudflared"
 brew "d12frosted/emacs-plus/emacs-plus@28", args: ["with-nobu417-big-sur-icon"]
 brew "eth-p/software/bat-extras"
-brew "jandedobbeleer/oh-my-posh/oh-my-posh"
 brew "sourcegraph/src-cli/src-cli"
 brew "timothyye/tap/skm"
 brew "yqrashawn/goku/goku"
@@ -188,7 +188,6 @@ mas "Magnet", id: 441258766
 mas "MainStage", id: 634159523
 mas "Maipo", id: 789066512
 mas "Microsoft Excel", id: 462058435
-mas "Microsoft Outlook", id: 985367838
 mas "Microsoft PowerPoint", id: 462062816
 mas "Microsoft Remote Desktop", id: 1295203466
 mas "Microsoft Word", id: 462054704

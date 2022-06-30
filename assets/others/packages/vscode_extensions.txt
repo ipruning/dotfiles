@@ -70,6 +70,7 @@ ms-vscode.powershell
 msjsdiag.vscode-react-native
 naumovs.color-highlight
 ninoseki.vscode-pylens
+njpwerner.autodocstring
 NomicFoundation.hardhat-solidity
 nortakales.vs-qalc
 oderwat.indent-rainbow
@@ -90,6 +91,7 @@ shd101wyy.markdown-preview-enhanced
 silvenon.mdx
 skn0tt.markdown-link-expander
 spencerwoo.vscode-sspai-markdown-helper
+sswg.swift-lang
 tamasfe.even-better-toml
 tecosaur.latex-utilities
 telesoho.vscode-markdown-paste-image
