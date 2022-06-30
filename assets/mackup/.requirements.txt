@@ -1,5 +1,6 @@
 black
 isort
 pip
+rich
 setuptools
 wheel

@@ -2,6 +2,7 @@ black
 cookiecutter
 deadlink
 fava
+ffsubsync
 isort
 maigret
 manim

@@ -10,6 +10,7 @@ broot
 chafa
 cheat
 choose-rust
+ciphey
 cloudflare/cloudflare/cloudflared
 cmake
 commitizen
@@ -75,6 +76,7 @@ proj
 pueue
 pybind11
 pyenv
+python-tabulate
 qt@5
 r
 rm-improved
@@ -101,6 +103,6 @@ vips
 xerces-c
 yq
 yqrashawn/goku/goku
-yt-dlp
+yt-dlp/taps/yt-dlp
 zola
 zoxide

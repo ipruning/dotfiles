@@ -75,7 +75,6 @@ Maipo
 Mathematica
 Mathpix Snipping Tool
 Microsoft Excel
-Microsoft Outlook
 Microsoft PowerPoint
 Microsoft Remote Desktop
 Microsoft Word
@@ -98,6 +97,7 @@ Optimus Player
 PDF Expert
 Pages
 PaimonMenuBar
+Paperlib
 Parallels Desktop
 Parsec
 PasteNow
