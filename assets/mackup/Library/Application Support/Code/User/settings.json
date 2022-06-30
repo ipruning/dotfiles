@@ -100,11 +100,11 @@
   "python.defaultInterpreterPath": "~/.conda/envs/python3.10/bin/python",
   "python.formatting.provider": "black",
   "python.languageServer": "Pylance",
-  "python.linting.enabled": true,
-  "python.linting.flake8Enabled": true,
-  "python.testing.unittestEnabled": false,
-  "python.testing.pytestEnabled": true,
-  "python.testing.pytestArgs": ["tests"],
+  // "python.linting.enabled": true,
+  // "python.linting.flake8Enabled": true,
+  // "python.testing.unittestEnabled": false,
+  // "python.testing.pytestEnabled": true,
+  // "python.testing.pytestArgs": ["tests"],
   "markdownlint.config": {
     // https://github.com/DavidAnson/markdownlint/blob/main/schema/.markdownlint.jsonc
     // MD004/ul-style - Unordered list style
