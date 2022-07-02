@@ -3,7 +3,7 @@ windows:
   - window_name: dashboard_1
     layout: tiled
     panes:
-      - echo "Hello"
-      - echo "Hello"
+      - r-unm
+      - r-archivebox
       - echo "Hello"
       - echo "Hello"
