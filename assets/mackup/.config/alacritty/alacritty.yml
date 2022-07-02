@@ -5,13 +5,16 @@ window:
   dimensions:
     columns: 100
     lines: 40
+  padding:
+    x: 10
+    y: 10
   decorations: buttonless
-  startup_mode: Windowed
+  # decorations: transparent
+  opacity: 1.0
+  startup_mode: Maximized
+  # startup_mode: Windowed
   title: Alacritty
   dynamic_title: true
-  padding:
-    x: 15
-    y: 15
 
 font:
   normal:
@@ -46,3 +49,7 @@ colors:
 scrolling:
   history: 10000
   multiplier: 3
+
+key_bindings:
+  # - { key: Return, mods: Super|Shift, action: CreateNewWindow }
+  - { key: Return, mods: Control, action: CreateNewWindow }
