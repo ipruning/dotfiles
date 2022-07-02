@@ -1,0 +1,12 @@
+jobs:
+  - name: kill ScreenTimeAgent
+    command: |
+      launchctl kickstart -k gui/$UID/com.apple.ScreenTimeAgent
+    shell: /bin/zsh
+    schedule: "0 * * * *"
+    captureStderr: true
+    onFailure:
+      report:
+        shell:
+          shell: /bin/zsh
+          command: echo "Error code $YACRON_RETCODE"
