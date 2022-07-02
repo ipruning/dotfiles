@@ -18,6 +18,7 @@ Cron
 Cryptomator
 DEVONthink 3
 DaisyDisk
+Darkroom
 Day One
 DeepL
 DevToys
@@ -42,6 +43,7 @@ GoodNotes
 Google Chrome
 Hammerspoon
 Hepta
+Homerow
 Hook
 Hustl
 IINA
@@ -146,6 +148,7 @@ Termius
 Things3
 Tito Control
 TopNotch
+Tot
 Tropy
 Tweetbot
 UninstallPKG

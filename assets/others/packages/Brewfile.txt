@@ -37,6 +37,7 @@ git-extras
 git-lfs
 git-quick-stats
 gitui
+gnu-sed
 gnupg
 go
 gping
@@ -51,6 +52,7 @@ juliaup
 lazydocker
 lazygit
 lesspipe
+lf
 libice
 librttopo
 lsd
@@ -64,7 +66,6 @@ ncdu
 neovim
 ninja
 nmap
-nnn
 numpy
 oh-my-posh
 openssl@3
