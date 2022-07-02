@@ -4,6 +4,7 @@ antfu.file-nesting
 antfu.slidev
 antfu.smart-clicks
 aster.vscode-subtitles
+asvetliakov.vscode-neovim
 benjamin-simmonds.pythoncpp-debug
 betterthantomorrow.calva
 bierner.markdown-mermaid
@@ -18,7 +19,6 @@ dbaeumer.vscode-eslint
 dnicolson.binary-plist
 dongfg.vscode-beancount-formatter
 eamodio.gitlens
-eg2.vscode-npm-script
 esbenp.prettier-vscode
 formulahendry.auto-close-tag
 formulahendry.auto-rename-tag
