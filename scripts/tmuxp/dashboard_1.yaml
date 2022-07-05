@@ -5,5 +5,5 @@ windows:
     panes:
       - r-unm
       - r-archivebox
-      - echo "Hello"
+      - r-deepl
       - echo "Hello"
