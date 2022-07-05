@@ -217,7 +217,8 @@
     ".autocorrectrc": "Yaml",
     "Brewfile_dev": "Ruby",
     "Brewfile_leaves": "Ruby",
-    ".coverage": "Log"
+    ".coverage": "Log",
+    ".secrets.baseline": "Json"
   },
   "material-icon-theme.languages.associations": {
     "beancount": "Log",
