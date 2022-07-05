@@ -1,6 +1,7 @@
 black
 cookiecutter
 deadlink
+detect-secrets
 fava
 ffsubsync
 isort
