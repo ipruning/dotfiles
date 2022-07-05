@@ -9,6 +9,7 @@ Apparency
 Audio Hijack
 Audio Jam
 Blender
+Bob
 Capture One 22
 Chromium
 ClashX Pro
@@ -25,7 +26,6 @@ DevToys
 Developer
 Dice by PCalc
 Discord
-Docker
 Drafts
 Dropbox
 Eagle for Safari
@@ -86,6 +86,7 @@ Motion
 MultiMC
 MusicHarbor
 NeteaseMusic
+Notion
 Numbers
 OBS
 Obsidian

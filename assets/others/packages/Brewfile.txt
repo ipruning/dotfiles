@@ -14,10 +14,12 @@ choose-rust
 ciphey
 cloudflare/cloudflare/cloudflared
 cmake
+colima
 commitizen
 d12frosted/emacs-plus/emacs-plus@28
 dasel
 direnv
+docker
 dog
 duf
 dust
@@ -109,3 +111,4 @@ yqrashawn/goku/goku
 yt-dlp
 zola
 zoxide
+zsh

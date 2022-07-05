@@ -36,6 +36,7 @@ huacnlee.auto-correct
 humao.rest-client
 ionutvmi.path-autocomplete
 jacobdufault.fuzzy-search
+JakeBecker.elixir-ls
 James-Yu.latex-workshop
 jebbs.plantuml
 jeff-hykin.better-cpp-syntax
@@ -77,6 +78,7 @@ oderwat.indent-rainbow
 piersdeseilligny.betterfountain
 PKief.material-icon-theme
 platformio.platformio-ide
+polarmutex.beancount-langserver
 pomdtr.excalidraw-editor
 qezhu.gitlink
 rebornix.ruby

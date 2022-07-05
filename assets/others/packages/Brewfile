@@ -31,6 +31,7 @@ brew "autoconf"
 brew "coreutils"
 brew "asdf"
 brew "bandwhich"
+brew "bash"
 brew "bat"
 brew "beancount"
 brew "bottom"
@@ -42,9 +43,11 @@ brew "cheat"
 brew "choose-rust"
 brew "ciphey"
 brew "cmake"
+brew "colima"
 brew "commitizen"
 brew "dasel"
 brew "direnv"
+brew "docker"
 brew "dog"
 brew "duf"
 brew "dust"
@@ -127,6 +130,7 @@ brew "yq"
 brew "yt-dlp"
 brew "zola"
 brew "zoxide"
+brew "zsh"
 brew "archivebox/archivebox/archivebox"
 brew "brimdata/tap/zed"
 brew "brimdata/tap/zq"
@@ -143,7 +147,6 @@ cask "apparency"
 cask "chromium"
 cask "clashx-pro"
 cask "devtoys"
-cask "docker"
 cask "espanso"
 cask "font-caskaydia-cove-nerd-font"
 cask "font-sauce-code-pro-nerd-font"
@@ -174,7 +177,9 @@ cask "zulu"
 cask "zulu11"
 cask "zulu17"
 cask "zulu8"
+mas "Bob", id: 1630034110
 mas "Compressor", id: 424390742
+mas "Darkroom", id: 953286746
 mas "Day One", id: 1055511498
 mas "Developer", id: 640199958
 mas "Dice", id: 1479250666
@@ -214,6 +219,7 @@ mas "Spark", id: 1176895641
 mas "Taio", id: 1527036273
 mas "Take a Break", id: 1457158844
 mas "Tampermonkey", id: 1482490089
+mas "Tot", id: 1491071483
 mas "Tweetbot", id: 1384080005
 mas "uBlacklist for Safari", id: 1547912640
 mas "uPic", id: 1549159979
