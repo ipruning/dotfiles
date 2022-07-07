@@ -2,6 +2,7 @@ archivebox/archivebox/archivebox
 aria2
 asciinema
 asdf
+awk
 bandwhich
 beancount
 bottom
@@ -35,11 +36,13 @@ fpp
 freexl
 gh
 git-cliff
+git-crypt
 git-extras
 git-lfs
 git-quick-stats
 gitui
 gnu-sed
+gnu-tar
 gnupg
 go
 gping
@@ -51,8 +54,6 @@ hyperfine
 iperf
 jq
 juliaup
-lazydocker
-lazygit
 lesspipe
 lf
 libice
@@ -60,6 +61,7 @@ librttopo
 lsd
 m-cli
 mackup
+make
 mas
 minizip
 mosh
@@ -95,6 +97,7 @@ ssh-copy-id
 starship
 t-rec
 tealdeer
+texinfo
 the_silver_searcher
 thefuck
 timothyye/tap/skm
