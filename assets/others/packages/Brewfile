@@ -64,6 +64,7 @@ brew "gh"
 brew "pcre2"
 brew "git"
 brew "git-cliff"
+brew "git-crypt"
 brew "git-extras"
 brew "git-lfs"
 brew "git-quick-stats"
@@ -80,8 +81,6 @@ brew "hyperfine"
 brew "iperf"
 brew "jq"
 brew "juliaup"
-brew "lazydocker"
-brew "lazygit"
 brew "lesspipe"
 brew "lf"
 brew "lsd"
@@ -135,7 +134,7 @@ brew "archivebox/archivebox/archivebox"
 brew "brimdata/tap/zed"
 brew "brimdata/tap/zq"
 brew "cloudflare/cloudflare/cloudflared"
-brew "d12frosted/emacs-plus/emacs-plus@28", args: ["with-nobu417-big-sur-icon"]
+brew "d12frosted/emacs-plus/emacs-plus@28", args: ["with-native-comp", "with-nobu417-big-sur-icon"]
 brew "eth-p/software/bat-extras"
 brew "sourcegraph/src-cli/src-cli"
 brew "timothyye/tap/skm"
@@ -219,7 +218,6 @@ mas "Spark", id: 1176895641
 mas "Taio", id: 1527036273
 mas "Take a Break", id: 1457158844
 mas "Tampermonkey", id: 1482490089
-mas "Tot", id: 1491071483
 mas "Tweetbot", id: 1384080005
 mas "uBlacklist for Safari", id: 1547912640
 mas "uPic", id: 1549159979

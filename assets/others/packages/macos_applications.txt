@@ -80,7 +80,9 @@ Microsoft Excel
 Microsoft PowerPoint
 Microsoft Remote Desktop
 Microsoft Word
+Mimestream
 Mini Motorways
+Monodraw
 Mos
 Motion
 MultiMC
@@ -149,12 +151,12 @@ Termius
 Things3
 Tito Control
 TopNotch
-Tot
 Tropy
 Tweetbot
 UninstallPKG
 Unity Hub
 VideoFusion-macOS
+VirtualBuddy
 Vision
 Visual Studio Code
 Vivid
