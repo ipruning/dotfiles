@@ -2,7 +2,6 @@ archivebox/archivebox/archivebox
 aria2
 asciinema
 asdf
-bandwhich
 beancount
 bottom
 brimdata/tap/zed
@@ -24,7 +23,6 @@ dog
 duf
 dust
 eth-p/software/bat-extras
-exa
 exiftool
 extra-cmake-modules
 fcp
@@ -43,12 +41,12 @@ gping
 graphviz
 grex
 htop
+httpie
 hugo
 hyperfine
 iperf
 jq
 juliaup
-lesspipe
 lf
 lsd
 m-cli
@@ -67,7 +65,6 @@ platformio
 procs
 pueue
 pyenv
-qt@5
 r
 rm-improved
 sd
@@ -80,7 +77,6 @@ ssh-copy-id
 starship
 t-rec
 tealdeer
-the_silver_searcher
 thefuck
 timothyye/tap/skm
 tmate
@@ -95,4 +91,3 @@ yqrashawn/goku/goku
 yt-dlp
 zola
 zoxide
-zsh
