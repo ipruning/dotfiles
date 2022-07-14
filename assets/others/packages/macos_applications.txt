@@ -116,6 +116,7 @@ Pocket Casts
 PowerShell
 QLMarkdown
 QQ
+QSpace
 Raindrop.io
 Raycast
 Refined GitHub
@@ -181,6 +182,7 @@ iMobie M1 App Checker
 iMovie
 iTerm
 logioptionsplus
+massCode
 qbittorrent
 uBlacklist for Safari
 uPic
