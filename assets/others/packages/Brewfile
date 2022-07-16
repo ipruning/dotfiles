@@ -167,3 +167,53 @@ cask "xld"
 cask "zerotier-one"
 cask "zulu17"
 cask "zulu8"
+mas "Bob", id: 1630034110
+mas "Compressor", id: 424390742
+mas "Darkroom", id: 953286746
+mas "Day One", id: 1055511498
+mas "Developer", id: 640199958
+mas "Dice", id: 1479250666
+mas "Drafts", id: 1435957248
+mas "Eagle for Safari", id: 1526651672
+mas "Final Cut Pro", id: 424389933
+mas "GarageBand", id: 682658836
+mas "GoodNotes", id: 1444383602
+mas "iMovie", id: 408981434
+mas "Keynote", id: 409183694
+mas "Logic Pro", id: 634148309
+mas "Magnet", id: 441258766
+mas "MainStage", id: 634159523
+mas "Maipo", id: 789066512
+mas "Microsoft Excel", id: 462058435
+mas "Microsoft PowerPoint", id: 462062816
+mas "Microsoft Remote Desktop", id: 1295203466
+mas "Microsoft Word", id: 462054704
+mas "Mini Motorways", id: 1456188526
+mas "Money Progress", id: 1614349717
+mas "Motion", id: 434290957
+mas "MusicHarbor", id: 1440405750
+mas "Numbers", id: 409203825
+mas "Octotree", id: 1457450145
+mas "OneDrive", id: 823766827
+mas "Pages", id: 409201541
+mas "PasteNow", id: 1552536109
+mas "Picsee", id: 1454805783
+mas "Pixea", id: 1507782672
+mas "Plash", id: 1494023538
+mas "QQ", id: 451108668
+mas "QSpace", id: 1469774098
+mas "Refined GitHub", id: 1519867270
+mas "Save to Raindrop.io", id: 1549370672
+mas "Shapr3D", id: 1091675654
+mas "Slack", id: 803453959
+mas "Spark", id: 1176895641
+mas "Taio", id: 1527036273
+mas "Take a Break", id: 1457158844
+mas "Tampermonkey", id: 1482490089
+mas "Tweetbot", id: 1384080005
+mas "uBlacklist for Safari", id: 1547912640
+mas "uPic", id: 1549159979
+mas "Vision", id: 1572457968
+mas "waifu2x", id: 1286485858
+mas "Xnip", id: 1221250572
+mas "讯飞语音输入", id: 1243368435

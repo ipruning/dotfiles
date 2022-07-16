@@ -19,6 +19,7 @@ dbaeumer.vscode-eslint
 dnicolson.binary-plist
 dongfg.vscode-beancount-formatter
 eamodio.gitlens
+emilast.LogFileHighlighter
 esbenp.prettier-vscode
 formulahendry.auto-close-tag
 formulahendry.auto-rename-tag
@@ -47,6 +48,7 @@ KevinRose.vsc-python-indent
 kisstkondoros.vscode-gutter-preview
 KnisterPeter.vscode-commitizen
 Lencerf.beancount
+llvm-vs-code-extensions.vscode-clangd
 marp-team.marp-vscode
 mathiassoeholm.markdown-link-updater
 mechatroner.rainbow-csv
@@ -74,6 +76,7 @@ ninoseki.vscode-pylens
 njpwerner.autodocstring
 NomicFoundation.hardhat-solidity
 nortakales.vs-qalc
+notskm.clang-tidy
 oderwat.indent-rainbow
 piersdeseilligny.betterfountain
 PKief.material-icon-theme
@@ -109,6 +112,7 @@ VSpaceCode.vspacecode
 VSpaceCode.whichkey
 Vue.volar
 wingrunr21.vscode-ruby
+xaver.clang-format
 XING.zotero-cite
 yinfei.luahelper
 yy0931.save-as-root
