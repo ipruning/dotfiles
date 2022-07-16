@@ -12,13 +12,13 @@ mac_arm64)
 esac
 
 if [[ -n $SSH_CONNECTION ]]; then
-  alias l='lsd -l --icon never'
+  alias l='lsd --icon never'
   alias la='lsd -a --icon never'
   alias ll='lsd -lh --icon never'
   alias lla='lsd -la --icon never'
   alias lt='lsd --tree --icon never'
 else
-  alias l='lsd -l'
+  alias l='lsd'
   alias la='lsd -a'
   alias ll='lsd -lh'
   alias lla='lsd -la'
