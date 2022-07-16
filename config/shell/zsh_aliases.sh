@@ -49,7 +49,7 @@ alias szshrc='source ~/.zshrc'
 alias ip='curl -4 ip.sb'
 alias ipv6='curl -6 ip.sb'
 
-# alias cat='bat'
+alias cat='bat --paging=never'
 # alias cp='fcp'
 # alias cut='choose'
 # alias df='duf'
