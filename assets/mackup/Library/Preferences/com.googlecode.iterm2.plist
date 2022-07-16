@@ -6,6 +6,8 @@
 	<true/>
 	<key>AutoHideTmuxClientSession</key>
 	<false/>
+	<key>BadgeRightMargin</key>
+	<integer>10</integer>
 	<key>CheckTestRelease</key>
 	<true/>
 	<key>Command</key>
@@ -5996,6 +5998,10 @@
 	<key>TabStyleWithAutomaticOption</key>
 	<integer>5</integer>
 	<key>TabViewType</key>
+	<integer>0</integer>
+	<key>TerminalMargin</key>
+	<integer>10</integer>
+	<key>TerminalVMargin</key>
 	<integer>0</integer>
 	<key>ToolbeltTools</key>
 	<array>
