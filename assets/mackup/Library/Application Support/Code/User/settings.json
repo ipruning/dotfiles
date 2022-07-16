@@ -19,7 +19,7 @@
     "rust": false
   },
   "terminal.integrated.fontFamily": "CaskaydiaCove Nerd Font",
-  "terminal.integrated.fontSize": 12,
+  "terminal.integrated.fontSize": 14,
   "terminal.integrated.inheritEnv": false,
   "terminal.integrated.commandsToSkipShell": ["language-julia.interrupt"],
   "terminal.integrated.confirmOnExit": "hasChildProcesses",
@@ -138,6 +138,7 @@
   "markdown.extension.italic.indicator": "_",
   "markdown.extension.list.indentationSize": "inherit",
   "markdown.extension.tableFormatter.normalizeIndentation": true,
+  "markdown.suggest.paths.enabled": false,
   "markdownFormatter.formatOpt": {
     "indent_size": 4
   },
@@ -249,6 +250,7 @@
     }
   },
   "explorer.confirmDragAndDrop": false,
+  "path-autocomplete.triggerOutsideStrings": true,
   "shellcheck.exclude": ["SC1091", "SC2148"],
   "shellcheck.executablePath": "/opt/homebrew/bin/shellcheck",
   "gitlens.defaultDateLocale": null,
