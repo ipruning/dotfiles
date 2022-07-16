@@ -182,9 +182,6 @@
     "editor.defaultFormatter": "ms-python.python",
     "editor.tabSize": 4
   },
-  "[dockerfile]": {
-    "editor.defaultFormatter": "ms-azuretools.vscode-docker"
-  },
   "[html]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.tabSize": 2
