@@ -2,7 +2,6 @@ archivebox/archivebox/archivebox
 aria2
 asciinema
 asdf
-beancount
 bottom
 brimdata/tap/zed
 brimdata/tap/zq
@@ -52,7 +51,6 @@ lsd
 m-cli
 mackup
 mas
-mosh
 navi
 ncdu
 neovim

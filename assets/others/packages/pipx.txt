@@ -1,8 +1,10 @@
+beancount
 black
 cookiecutter
 deadlink
 detect-secrets
 fava
+fava-investor
 ffsubsync
 isort
 maigret
@@ -18,6 +20,7 @@ pandoc-xnos
 pdm
 poetry
 pre-commit
+pricehist
 pz
 socid-extractor
 speedtest-cli
