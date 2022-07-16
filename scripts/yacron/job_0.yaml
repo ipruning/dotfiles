@@ -57,9 +57,9 @@ jobs:
           command: echo "Error code $YACRON_RETCODE"
   - name: backup zsh_history
     command: |
-      cp "$HOME"/.zsh_history "$HOME"//Database/Backup/CLI/zsh_history_$(date +\%Y_\%m_\%d).bak
+      cp "$HOME"/.zsh_history "$HOME"//Database/Backup/CLI/zsh_history_$(date +\%Y_\%m_\%d_\%H_\%M_\%S).bak
     shell: /bin/zsh
-    schedule: "0 1,13,20 * * *"
+    schedule: "0 * * * *"
     captureStderr: true
     onFailure:
       report:
