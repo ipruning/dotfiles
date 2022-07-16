@@ -6,6 +6,7 @@ automatic_backups
 
 # bin
 bin/autocorrect
+bin/cwim
 bin/double-entry-generator
 bin/feishu2md
 bin/neovide
