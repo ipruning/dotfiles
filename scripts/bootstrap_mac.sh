@@ -84,7 +84,7 @@ function main {
   xargs <"$HOME"/dotfiles/assets/others/packages/pipx_dev.txt -n 1 pipx install
 
   echo "${BLUE}Installing npm packages${NORMAL}"
-  xargs npm install --global <"$HOME"/dotfiles/assets/others/packages/npm_dev.txt
+  xargs npm install --location=global <"$HOME"/dotfiles/assets/others/packages/npm_dev.txt
 
   echo "${BLUE}Installing other packages${NORMAL}"
   which autocorrect || curl -sSL https://git.io/JcGER | bash # AutoCorrect
