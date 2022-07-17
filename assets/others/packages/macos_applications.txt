@@ -3,6 +3,7 @@ ABBYY FineReader PDF
 Affinity Photo
 Alacritty
 Alfred 4
+Alfred 5
 AltTab
 Anki
 Apparency
@@ -154,6 +155,7 @@ Tito Control
 TopNotch
 Tropy
 Tweetbot
+Unblah
 UninstallPKG
 Unity Hub
 VideoFusion-macOS
