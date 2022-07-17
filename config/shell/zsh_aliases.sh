@@ -31,8 +31,11 @@ else
   alias r-fava='fava ${HOME}/Database/Ledger/main.bean -p 4000'
   alias r-unm='node ${HOME}/Stacks/Utilities/UnblockNeteaseMusic/app.js -p 80:443 -f 103.126.92.132'
   alias r-update='brew update && brew cu && asdf latest --all && tldr --update'
-  alias r-upgrade='brew upgrade && pipx upgrade-all && npm update -g npm && npx npm-check --global --update-all && cargo install-update -a && gh extension upgrade --all && conda update --all && asdf update && asdf plugin update --all'
-  # alias r-upgrade='omz update && pio update && pio upgrade && npm update -g npm && xcodes update && mas upgrade'
+  alias r-upgrade='brew upgrade && pipx upgrade-all && npx npm-check --global --update-all && cargo install-update --all && gh extension upgrade --all && conda update --all && asdf update && asdf plugin update --all'
+  # omz update
+  # pio update && pio upgrade
+  # xcodes update
+  # mas upgrade
 fi
 
 alias rip='rip -i'                          # A safe and ergonomic alternative to rm

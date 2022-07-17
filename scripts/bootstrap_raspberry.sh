@@ -61,7 +61,7 @@ pipx install tmuxp
 cargo install zoxide
 
 echo "${BLUE}Installing npm packages${NORMAL}"
-xargs npm install --global <"$HOME"/dotfiles/assets/others/packages/npm_dev.txt
+xargs npm install --location=global <"$HOME"/dotfiles/assets/others/packages/npm_dev.txt
 
 echo "${BLUE}Installing pipx packages${NORMAL}"
 xargs <"$HOME"/dotfiles/assets/others/packages/pipx_dev.txt -n 1 pipx install
