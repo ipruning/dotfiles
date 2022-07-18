@@ -70,12 +70,10 @@ Loom
 Loopback
 LosslessCut
 LyricsX
-MATLAB_R2022a
 MWeb Pro
 Magnet
 MainStage 3
 Maipo
-Mathematica
 Mathpix Snipping Tool
 Microsoft Excel
 Microsoft PowerPoint
@@ -161,13 +159,13 @@ Unity Hub
 VideoFusion-macOS
 VirtualBuddy
 Vision
+Visual Studio Code - Insiders
 Visual Studio Code
 Vivid
 Warp
 WeChat
 WechatExporter
 Wireshark
-WolframScript
 XLD
 Xcode-13.4.1
 Xcode
