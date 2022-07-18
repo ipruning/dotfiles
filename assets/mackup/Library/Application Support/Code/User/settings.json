@@ -4,7 +4,7 @@
   "editor.fontSize": 12,
   "editor.fontFamily": "'CaskaydiaCove Nerd Font', 'Source Han Sans SC'",
   "editor.formatOnSave": true,
-  "editor.tabSize": 4,
+  "editor.tabSize": 2,
   "editor.inlineSuggest.enabled": true,
   "editor.cursorBlinking": "phase",
   "editor.bracketPairColorization.enabled": true,
@@ -13,13 +13,12 @@
   "editor.cursorSmoothCaretAnimation": true,
   "github.copilot.enable": {
     "*": true,
-    "yaml": false,
     "plaintext": false,
     "markdown": false,
     "rust": false
   },
-  "terminal.integrated.fontFamily": "CaskaydiaCove Nerd Font",
-  "terminal.integrated.fontSize": 14,
+  "terminal.integrated.fontFamily": "'CaskaydiaCove Nerd Font', 'Source Han Sans SC'",
+  "terminal.integrated.fontSize": 12,
   "terminal.integrated.inheritEnv": false,
   "terminal.integrated.commandsToSkipShell": ["language-julia.interrupt"],
   "terminal.integrated.confirmOnExit": "hasChildProcesses",
@@ -41,12 +40,6 @@
   "git.enableSmartCommit": true,
   "gitlens.views.repositories.files.layout": "list",
   "gitlens.codeLens.scopes": ["document"],
-  "gitProjectManager.baseProjectsFolders": [
-    "~/Coding",
-    "~/Desktop",
-    "~/Stacks"
-  ],
-  "projectManager.git.baseFolders": ["~/Coding", "~/Desktop", "~/Stacks"],
   "diffEditor.renderSideBySide": true,
   "workbench.tree.indent": 20,
   "workbench.tree.renderIndentGuides": "none",
@@ -158,7 +151,6 @@
   },
   "redhat.telemetry.enabled": false,
   "explorer.confirmDelete": false,
-  "liveServer.settings.donotShowInfoMsg": true,
   "[markdown]": {
     "editor.fontSize": 14,
     "editor.quickSuggestions": {
@@ -231,21 +223,11 @@
   "platformio-ide.activateOnlyOnPlatformIOProject": true,
   "platformio-ide.useBuiltinPython": false,
   "autocorrect.formatOnSave": false,
-  "matlab.matlabpath": "/Applications/MATLAB_R2022a.app/bin",
-  "matlab.mlintpath": "/Applications/MATLAB_R2022a.app/bin/maci64/mlint",
   "json.maxItemsComputed": 10000,
   "markdown-preview-enhanced.previewTheme": "one-dark.css",
   "julia.symbolCacheDownload": true,
   "julia.enableTelemetry": false,
   "julia.executablePath": "julia +release~aarch64",
-  "cSpell.customDictionaries": {
-    "custom-dictionary-user": {
-      "name": "custom-dictionary-user",
-      "path": "~/.cspell/custom-dictionary-user.txt",
-      "addWords": true,
-      "scope": "user"
-    }
-  },
   "explorer.confirmDragAndDrop": false,
   "path-autocomplete.triggerOutsideStrings": true,
   "shellcheck.exclude": ["SC1091", "SC2148"],
@@ -274,6 +256,23 @@
     ".gitconfig": "ini"
   },
   "files.simpleDialog.enable": true,
+  "gitProjectManager.baseProjectsFolders": [
+    "~/Coding",
+    "~/Desktop",
+    "~/Stacks"
+  ],
+  "projectManager.git.baseFolders": ["~/Coding", "~/Desktop", "~/Stacks"],
+  "liveServer.settings.donotShowInfoMsg": true,
+  "matlab.matlabpath": "/Applications/MATLAB_R2022a.app/bin",
+  "matlab.mlintpath": "/Applications/MATLAB_R2022a.app/bin/maci64/mlint",
+  "cSpell.customDictionaries": {
+    "custom-dictionary-user": {
+      "name": "custom-dictionary-user",
+      "path": "~/.cspell/custom-dictionary-user.txt",
+      "addWords": true,
+      "scope": "user"
+    }
+  },
   // draw.io
   "hediet.vscode-drawio.codeLinkActivated": true,
   // Dendron
