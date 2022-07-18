@@ -4,6 +4,6 @@ windows:
     layout: tiled
     panes:
       - yacron -c "$HOME"/dotfiles/scripts/yacron/job_0.yaml
-      - brew bundle dump --file="$HOME"/dotfiles/assets/others/packages/Brewfile --force
+      - echo "Hello"
       - echo "Hello"
       - echo "Hello"
