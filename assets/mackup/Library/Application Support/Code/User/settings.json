@@ -152,7 +152,7 @@
   "redhat.telemetry.enabled": false,
   "explorer.confirmDelete": false,
   "[markdown]": {
-    "editor.fontSize": 14,
+    "editor.fontSize": 12,
     "editor.quickSuggestions": {
       "comments": "on",
       "strings": "on",
@@ -329,7 +329,7 @@
   "explorer.fileNesting.enabled": true,
   "explorer.fileNesting.expand": false,
   "explorer.fileNesting.patterns": {
-    "//": "Last update at 7/15/2022, 4:48:29 AM",
+    "//": "Last update at 7/18/2022, 11:59:55 PM",
     "*.asax": "$(capture).*.cs, $(capture).*.vb",
     "*.ascx": "$(capture).*.cs, $(capture).*.vb",
     "*.ashx": "$(capture).*.cs, $(capture).*.vb",
