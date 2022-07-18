@@ -1,6 +1,9 @@
 # https://stackoverflow.com/questions/60309665
 set-option -ga terminal-overrides ",xterm-256color:Tc"
 
+# https://superuser.com/questions/209437/how-do-i-scroll-in-tmux
+set -g mouse on
+
 # : << EOF
 # https://github.com/gpakosz/.tmux
 # (‑●‑●)> dual licensed under the WTFPL v2 license and the MIT license,
