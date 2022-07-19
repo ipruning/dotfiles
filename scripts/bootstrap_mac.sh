@@ -30,8 +30,8 @@ function main {
   echo "${BLUE}Installing zsh plugins${NORMAL}"
   ZSH_CUSTOM=${ZSH_CUSTOM:-~/.oh-my-zsh/custom}
   git clone https://github.com/TamCore/autoupdate-oh-my-zsh-plugins "$ZSH_CUSTOM"/plugins/autoupdate
-  git clone https://github.com/Aloxaf/fzf-tab "$ZSH_CUSTOM"/plugins/fzf-tab
   git clone https://github.com/wfxr/forgit "$ZSH_CUSTOM"/plugins/forgit
+  git clone https://github.com/Aloxaf/fzf-tab "$ZSH_CUSTOM"/plugins/fzf-tab
   git clone https://github.com/paulirish/git-open.git "$ZSH_CUSTOM"/plugins/git-open
   git clone https://github.com/zsh-users/zsh-autosuggestions "$ZSH_CUSTOM"/plugins/zsh-autosuggestions
   git clone https://github.com/zsh-users/zsh-completions "$ZSH_CUSTOM"/plugins/zsh-completions
@@ -71,20 +71,24 @@ function main {
   asdf plugin-add clojure https://github.com/asdf-community/asdf-clojure.git
   asdf plugin-add elixir https://github.com/asdf-vm/asdf-elixir.git
   asdf plugin-add golang https://github.com/kennyp/asdf-golang.git
+  asdf plugin-add lua https://github.com/Stratus3D/asdf-lua.git
   asdf plugin-add nodejs https://github.com/asdf-vm/asdf-nodejs.git
   asdf plugin-add python
   asdf plugin-add ruby https://github.com/asdf-vm/asdf-ruby.git
   asdf plugin-add rust https://github.com/asdf-community/asdf-rust.git
   asdf install
 
+  echo "${BLUE}Reshiming asdf${NORMAL}"
+  asdf reshim
+
   echo "${BLUE}Installing cargo packages${NORMAL}"
   xargs <"$HOME"/dotfiles/assets/others/packages/cargo_dev.txt -n 1 cargo install
 
-  echo "${BLUE}Installing pipx packages${NORMAL}"
-  xargs <"$HOME"/dotfiles/assets/others/packages/pipx_dev.txt -n 1 pipx install
-
   echo "${BLUE}Installing npm packages${NORMAL}"
   xargs npm install --location=global <"$HOME"/dotfiles/assets/others/packages/npm_dev.txt
+
+  echo "${BLUE}Installing pipx packages${NORMAL}"
+  xargs <"$HOME"/dotfiles/assets/others/packages/pipx_dev.txt -n 1 pipx install
 
   echo "${BLUE}Installing other packages${NORMAL}"
   which autocorrect || curl -sSL https://git.io/JcGER | bash # AutoCorrect
@@ -96,9 +100,6 @@ function main {
   echo "${BLUE}Installing emacs configuration (Doom Emacs)${NORMAL}"
   git clone --depth 1 https://github.com/doomemacs/doomemacs ~/.emacs.d
   ~/.emacs.d/bin/doom install
-
-  echo "${BLUE}Reshiming asdf${NORMAL}"
-  asdf reshim
 }
 
 main
