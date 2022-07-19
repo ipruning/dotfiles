@@ -6,10 +6,12 @@ detect-secrets
 fava
 fava-investor
 ffsubsync
+flake8
 isort
 maigret
 manim
 mkdocs-material
+mypy
 nhentai
 nox
 pandoc-eqnos
@@ -21,6 +23,8 @@ pdm
 poetry
 pre-commit
 pricehist
+pylint
+pytest
 pz
 socid-extractor
 speedtest-cli

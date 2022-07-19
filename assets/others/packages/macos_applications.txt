@@ -23,6 +23,7 @@ DaisyDisk
 Darkroom
 Day One
 DeepL
+DevCleaner
 DevToys
 Developer
 Dice by PCalc
@@ -80,6 +81,7 @@ Microsoft PowerPoint
 Microsoft Remote Desktop
 Microsoft Word
 Mimestream
+Min
 Mini Motorways
 Monodraw
 Mos
@@ -96,6 +98,7 @@ OmniGraffle
 OmniOutliner
 OmniPlan
 OneDrive
+OnyX
 OpenEmu
 Optimus Player
 PDF Expert

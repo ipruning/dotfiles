@@ -15,6 +15,7 @@ npm
 parrotsay
 picgo
 pnpm
+typescript
 vercel
 yarn
 yo
