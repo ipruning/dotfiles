@@ -53,6 +53,9 @@
     clean = git-lfs clean -- %f
     smudge = git-lfs smudge -- %f
     process = git-lfs filter-process
+[gc]
+    reflogExpire = 200 # default 90 days
+    reflogExpireUnreachable = 90 # default 30 days
 [gpg]
     program = gpg
 [user]
