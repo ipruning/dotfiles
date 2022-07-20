@@ -5,15 +5,6 @@
 case $SYSTEM_TYPE in
 mac_arm64 | mac_x86_64)
   #===============================================================================
-  # 👇 homebrew completions
-  #===============================================================================
-  # if type brew &>/dev/null; then
-  #   FPATH="$(brew --prefix)/share/zsh/site-functions:${FPATH}"
-  #   autoload -Uz compinit
-  #   compinit
-  # fi
-
-  #===============================================================================
   # 👇 1password completions
   #===============================================================================
   eval "$(op completion zsh)"
