@@ -44,15 +44,14 @@ export plugins=(
   ripgrep
   zbell
   autoupdate              # https://github.com/TamCore/autoupdate-oh-my-zsh-plugins
-  cheat                   # https://github.com/cheat/cheat/issues/616
   forgit                  # https://github.com/wfxr/forgit
   fzf-tab                 # https://github.com/Aloxaf/fzf-tab
   git-open                # https://github.com/paulirish/git-open
   zsh-autosuggestions     # https://github.com/zsh-users/zsh-autosuggestions
-  zsh-completions         # https://github.com/zsh-users/zsh-completions
   zsh-syntax-highlighting # https://github.com/zsh-users/zsh-syntax-highlighting
   zsh-vi-mode             # https://github.com/jeffreytse/zsh-vi-mode
   # Archive
+  # zsh-completions         # https://github.com/zsh-users/zsh-completions
   # zsh-osx-autoproxy       # export https_proxy=http://127.0.0.1:7890 http_proxy=http://127.0.0.1:7890 all_proxy=socks5://127.0.0.1:7890
 )
 
@@ -65,6 +64,11 @@ export plugins=(
 # 👇 Language environment
 #===============================================================================
 export LANG=en_US.UTF-8
+
+#===============================================================================
+# 👇 Cheat
+#===============================================================================
+export CHEAT_USE_FZF=true
 
 #===============================================================================
 # 👇 History
@@ -237,6 +241,11 @@ export BAT_THEME="OneHalfDark"
 export PATH="$(brew --prefix llvm)/bin:${PATH}"
 export LDFLAGS="-L$(brew --prefix llvm)/lib"
 export CPPFLAGS="-I$(brew --prefix llvm)/include"
+
+#===============================================================================
+# 👇 zoxide
+#===============================================================================
+eval "$(zoxide init zsh)"
 
 #===============================================================================
 # 👇 Autodetect architecture (and set `brew` path) (and set `python` path)

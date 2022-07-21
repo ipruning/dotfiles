@@ -1,6 +1,6 @@
 #===============================================================================
 # 👇 completions
-# if you are using a custom compinit setup with a ZSH Framework, ensure compinit is below your sourcing of the framework
+# 👇 if you are using a custom compinit setup with a ZSH Framework, ensure compinit is below your sourcing of the framework
 #===============================================================================
 case $SYSTEM_TYPE in
 mac_arm64 | mac_x86_64)
@@ -13,17 +13,19 @@ mac_arm64 | mac_x86_64)
   #===============================================================================
   # 👇 cz completions
   #===============================================================================
-  eval "$(register-python-argcomplete cz)"
+  # eval "$(register-python-argcomplete cz)"
 
   #===============================================================================
   # 👇 pipx completions
   #===============================================================================
-  eval "$(register-python-argcomplete pipx)"
-
-  #===============================================================================
-  # 👇 zoxide completions
-  #===============================================================================
-  eval "$(zoxide init zsh)"
+  # eval "$(register-python-argcomplete pipx)"
   ;;
 raspberry) ;;
 esac
+
+#===============================================================================
+# 👇 custom completions
+#===============================================================================
+fpath+=~/dotfiles/config/shell/zsh_completion
+
+compinit
