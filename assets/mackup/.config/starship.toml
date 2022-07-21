@@ -1,8 +1,7 @@
 # ~/.config/starship.toml
 
 # Use custom format
-format = '''$all$custom
-'''
+format = '''$all$custom'''
 
 # 1 second
 command_timeout = 1000
