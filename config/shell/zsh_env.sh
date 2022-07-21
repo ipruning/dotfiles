@@ -4,11 +4,6 @@
 # eval "$(fig init zsh pre)"
 
 #===============================================================================
-# 👇 direnv
-#===============================================================================
-eval "$(direnv hook bash)"
-
-#===============================================================================
 # 👇 GPG Signing
 #===============================================================================
 # if [ -r ~/.zshrc ]; then echo 'export GPG_TTY=$(tty)' >> ~/.zshrc; \
@@ -33,6 +28,8 @@ fi
 # 👇 Custom plugins may be added to $ZSH_CUSTOM/plugins/
 #===============================================================================
 export plugins=(
+  fzf-tab # https://github.com/Aloxaf/fzf-tab
+
   asdf
   colored-man-pages
   extract # x <file>
@@ -45,7 +42,6 @@ export plugins=(
   zbell
   autoupdate              # https://github.com/TamCore/autoupdate-oh-my-zsh-plugins
   forgit                  # https://github.com/wfxr/forgit
-  fzf-tab                 # https://github.com/Aloxaf/fzf-tab
   git-open                # https://github.com/paulirish/git-open
   zsh-autosuggestions     # https://github.com/zsh-users/zsh-autosuggestions
   zsh-syntax-highlighting # https://github.com/zsh-users/zsh-syntax-highlighting
@@ -54,6 +50,10 @@ export plugins=(
   # zsh-completions         # https://github.com/zsh-users/zsh-completions
   # zsh-osx-autoproxy       # export https_proxy=http://127.0.0.1:7890 http_proxy=http://127.0.0.1:7890 all_proxy=socks5://127.0.0.1:7890
 )
+
+#===============================================================================
+# 👇 fzf-tab
+#===============================================================================
 
 #===============================================================================
 # 👇 zsh-completions
@@ -136,22 +136,22 @@ esac
 #===============================================================================
 # 👇 forgit
 #===============================================================================
-forgit_log=glo
-forgit_diff=gd
-forgit_add=ga
-forgit_reset_head=grh
-forgit_ignore=gi
-forgit_checkout_file=gcf
-forgit_checkout_branch=gcb
-forgit_branch_delet=gbd
-forgit_checkout_tag=gct
-forgit_checkout_commit=gco
-forgit_revert_commit=grc
-forgit_clean=gclean
-forgit_stash_show=gss
-forgit_cherry_pick=gcp
-forgit_rebase=grb
-forgit_fixup=gfu
+# forgit_log=glo
+# forgit_diff=gd
+# forgit_add=ga
+# forgit_reset_head=grh
+# forgit_ignore=gi
+# forgit_checkout_file=gcf
+# forgit_checkout_branch=gcb
+# forgit_branch_delet=gbd
+# forgit_checkout_tag=gct
+# forgit_checkout_commit=gco
+# forgit_revert_commit=grc
+# forgit_clean=gclean
+# forgit_stash_show=gss
+# forgit_cherry_pick=gcp
+# forgit_rebase=grb
+# forgit_fixup=gfu
 export PATH="$PATH:$FORGIT_INSTALL_DIR/bin"
 
 #===============================================================================
@@ -204,6 +204,11 @@ test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell
 # export LDFLAGS="-L$(brew --prefix qt@5)/lib"
 # export CPPFLAGS="-I$(brew --prefix qt@5)/include"
 # export PKG_CONFIG_PATH="$(brew --prefix qt@5)/lib/pkgconfig"
+
+#===============================================================================
+# 👇 direnv
+#===============================================================================
+eval "$(direnv hook bash)"
 
 #===============================================================================
 # 👇 thefuck
