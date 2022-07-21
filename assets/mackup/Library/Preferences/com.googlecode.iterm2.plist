@@ -11,7 +11,7 @@
 	<key>CheckTestRelease</key>
 	<true/>
 	<key>Command</key>
-	<string>/opt/homebrew/bin/zsh</string>
+	<string>/usr/local/bin/pwsh</string>
 	<key>Custom Color Presets</key>
 	<dict>
 		<key>Dracula</key>
@@ -2936,7 +2936,7 @@
 			<key>Non-ASCII Ligatures</key>
 			<false/>
 			<key>Normal Font</key>
-			<string>CaskaydiaCoveNerdFontComplete- 12</string>
+			<string>CaskaydiaCoveNerdFontComplete- 14</string>
 			<key>Only The Default BG Color Uses Transparency</key>
 			<true/>
 			<key>Option Key Sends</key>
@@ -3890,7 +3890,7 @@
 			<key>Non-ASCII Ligatures</key>
 			<false/>
 			<key>Normal Font</key>
-			<string>CaskaydiaCoveNerdFontComplete- 13</string>
+			<string>CaskaydiaCoveNerdFontComplete- 14</string>
 			<key>Only The Default BG Color Uses Transparency</key>
 			<true/>
 			<key>Open Toolbelt</key>
@@ -4765,7 +4765,7 @@
 			<key>Non-ASCII Ligatures</key>
 			<false/>
 			<key>Normal Font</key>
-			<string>CaskaydiaCoveNerdFontComplete- 12</string>
+			<string>CaskaydiaCoveNerdFontComplete- 14</string>
 			<key>Only The Default BG Color Uses Transparency</key>
 			<true/>
 			<key>Option Key Sends</key>
@@ -5683,7 +5683,7 @@
 			<key>Non-ASCII Ligatures</key>
 			<false/>
 			<key>Normal Font</key>
-			<string>CaskaydiaCoveNerdFontComplete- 12</string>
+			<string>CaskaydiaCoveNerdFontComplete- 14</string>
 			<key>Only The Default BG Color Uses Transparency</key>
 			<true/>
 			<key>Option Key Sends</key>
