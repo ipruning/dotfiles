@@ -100,8 +100,16 @@ mac*)
   zvm_after_init() {
     # 👇 fzf
     # [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-    source "/opt/homebrew/opt/fzf/shell/completion.zsh"
-    source "/opt/homebrew/opt/fzf/shell/key-bindings.zsh"
+    case $SYSTEM_TYPE in
+    mac_arm64)
+      source "/opt/homebrew/opt/fzf/shell/completion.zsh"
+      source "/opt/homebrew/opt/fzf/shell/key-bindings.zsh"
+      ;;
+    mac_x86_64)
+      source "$(brew --prefix fzf)/shell/completion.zsh"
+      source "$(brew --prefix fzf)/shell/key-bindings.zsh"
+      ;;
+    esac
     # 👇 Option-S
     bindkey '^S' sudo-command-line
     # 👇 Option-C
