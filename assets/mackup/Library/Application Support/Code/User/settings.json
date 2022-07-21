@@ -64,6 +64,7 @@
     "HACK",
     "FIXME",
     "TODO",
+    "[[TODO]]",
     "#Todo",
     "#TODO",
     "[ ]",
@@ -75,6 +76,11 @@
       "iconColour": "#FF0000"
     },
     "TODO": {
+      "foreground": "#00FF00",
+      "iconColour": "#00FF00",
+      "gutterIcon": true
+    },
+    "[[TODO]]": {
       "foreground": "#00FF00",
       "iconColour": "#00FF00",
       "gutterIcon": true
