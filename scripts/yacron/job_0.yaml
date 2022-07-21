@@ -2,6 +2,7 @@ jobs:
   - name: backup homebrew packages
     command: |
       brew bundle dump --file="$HOME"/dotfiles/assets/others/packages/Brewfile --force
+      sleep 10
       brew leaves >"$HOME"/dotfiles/assets/others/packages/Brewfile.txt
     shell: /bin/zsh
     schedule: "0 1,13,20 * * *"
