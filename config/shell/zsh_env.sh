@@ -226,10 +226,9 @@ export BAT_THEME="OneHalfDark"
 #===============================================================================
 # 👇 LLVM
 #===============================================================================
-# export PATH="$(brew --prefix llvm)/bin:${PATH}"
-export PATH="/opt/homebrew/opt/llvm/bin:$PATH"
-export LDFLAGS="-L/opt/homebrew/opt/llvm/lib"
-export CPPFLAGS="-I/opt/homebrew/opt/llvm/include"
+export PATH="$(brew --prefix llvm)/bin:${PATH}"
+export LDFLAGS="-L$(brew --prefix llvm)/lib"
+export CPPFLAGS="-I$(brew --prefix llvm)/include"
 
 #===============================================================================
 # 👇 Autodetect architecture (and set `brew` path) (and set `python` path)
