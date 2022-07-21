@@ -23,6 +23,7 @@ pdm
 poetry
 pre-commit
 pricehist
+pydeps
 pylint
 pytest
 pz
