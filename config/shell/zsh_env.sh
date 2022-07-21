@@ -197,6 +197,12 @@ test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell
 eval "$(thefuck --alias)"
 
 #===============================================================================
+# 👇 Sourcegraph
+#===============================================================================
+# export SRC_ACCESS_TOKEN=my-token
+# export SRC_ENDPOINT=https://sourcegraph.example.com
+
+#===============================================================================
 # 👇 broot
 #===============================================================================
 source "${HOME}/.config/broot/launcher/bash/br"
@@ -205,8 +211,7 @@ source "${HOME}/.config/broot/launcher/bash/br"
 # 👇 puppeteer
 #===============================================================================
 export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-PUPPETEER_EXECUTABLE_PATH=$(brew --prefix)/bin/chromium
-export PUPPETEER_EXECUTABLE_PATH
+export PUPPETEER_EXECUTABLE_PATH=$(brew --prefix)/bin/chromium
 
 #===============================================================================
 # 👇 tumxp
@@ -219,9 +224,12 @@ export DISABLE_AUTO_TITLE='true'
 export BAT_THEME="OneHalfDark"
 
 #===============================================================================
-# 👇 redo
+# 👇 LLVM
 #===============================================================================
-export HISTFILE="${HOME}/.zsh_history"
+# export PATH="$(brew --prefix llvm)/bin:${PATH}"
+export PATH="/opt/homebrew/opt/llvm/bin:$PATH"
+export LDFLAGS="-L/opt/homebrew/opt/llvm/lib"
+export CPPFLAGS="-I/opt/homebrew/opt/llvm/include"
 
 #===============================================================================
 # 👇 Autodetect architecture (and set `brew` path) (and set `python` path)
