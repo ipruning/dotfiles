@@ -1,3 +1,4 @@
+@antfu/ni
 @argdown/cli
 @lint-md/cli
 @marp-team/marp-cli
