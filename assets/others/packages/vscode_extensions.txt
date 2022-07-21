@@ -3,6 +3,7 @@ antfu.file-nesting
 antfu.slidev
 antfu.smart-clicks
 aster.vscode-subtitles
+BazelBuild.vscode-bazel
 betterthantomorrow.calva
 bodil.file-browser
 codeandstuff.package-json-upgrade

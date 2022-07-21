@@ -81,7 +81,6 @@ Microsoft PowerPoint
 Microsoft Remote Desktop
 Microsoft Word
 Mimestream
-Min
 Mini Motorways
 Monodraw
 Mos
@@ -162,7 +161,6 @@ Unity Hub
 VideoFusion-macOS
 VirtualBuddy
 Vision
-Visual Studio Code - Insiders
 Visual Studio Code
 Vivid
 Warp
