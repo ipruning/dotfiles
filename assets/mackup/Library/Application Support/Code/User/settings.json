@@ -230,7 +230,7 @@
   "julia.executablePath": "julia +release~aarch64",
   "explorer.confirmDragAndDrop": false,
   "path-autocomplete.triggerOutsideStrings": true,
-  "shellcheck.exclude": ["SC1091", "SC2148"],
+  "shellcheck.exclude": ["SC1091", "SC2148", "SC2155"],
   "shellcheck.executablePath": "/opt/homebrew/bin/shellcheck",
   "gitlens.defaultDateLocale": null,
   "gitlens.defaultDateFormat": "YYYY-MM-DD hh:mm",
