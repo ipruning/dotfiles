@@ -2,6 +2,7 @@ archivebox/archivebox/archivebox
 aria2
 asciinema
 asdf
+bazelisk
 bottom
 brimdata/tap/zed
 brimdata/tap/zq
@@ -47,6 +48,7 @@ iperf
 jq
 juliaup
 lf
+llvm
 lsd
 m-cli
 mackup
@@ -55,7 +57,6 @@ navi
 ncdu
 neovim
 nmap
-oh-my-posh
 openssl@3
 php
 pipx
