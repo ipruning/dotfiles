@@ -14,7 +14,8 @@ Set-PSReadLineKeyHandler -Key DownArrow -ScriptBlock {
 }
 
 $(/opt/homebrew/bin/brew shellenv) | Invoke-Expression
-$(oh-my-posh init pwsh --config https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/spaceship.omp.json) | Invoke-Expression
+(&starship init powershell) | Invoke-Expression
+# $(oh-my-posh init pwsh --config https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/spaceship.omp.json) | Invoke-Expression
 
 # replace 'Ctrl+t' and 'Ctrl+r' with your preferred bindings:
 Set-PsFzfOption -PSReadlineChordProvider 'Ctrl+t' -PSReadlineChordReverseHistory 'Ctrl+r'
