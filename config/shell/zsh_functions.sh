@@ -59,7 +59,7 @@ fzf-dirs-widget() {
   zle reset-prompt
   return $ret
 }
-zle     -N    fzf-dirs-widget
+zle -N fzf-dirs-widget
 
 #===============================================================================
 # 👇 fzf completion will use ~~ as the trigger sequence instead of the default **
