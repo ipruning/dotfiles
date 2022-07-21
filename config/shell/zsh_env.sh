@@ -28,8 +28,6 @@ fi
 # 👇 Custom plugins may be added to $ZSH_CUSTOM/plugins/
 #===============================================================================
 export plugins=(
-  fzf-tab # https://github.com/Aloxaf/fzf-tab
-
   asdf
   colored-man-pages
   extract # x <file>
@@ -44,21 +42,13 @@ export plugins=(
   forgit                  # https://github.com/wfxr/forgit
   git-open                # https://github.com/paulirish/git-open
   zsh-autosuggestions     # https://github.com/zsh-users/zsh-autosuggestions
+  zsh-completions         # https://github.com/zsh-users/zsh-completions
   zsh-syntax-highlighting # https://github.com/zsh-users/zsh-syntax-highlighting
   zsh-vi-mode             # https://github.com/jeffreytse/zsh-vi-mode
   # Archive
-  # zsh-completions         # https://github.com/zsh-users/zsh-completions
   # zsh-osx-autoproxy       # export https_proxy=http://127.0.0.1:7890 http_proxy=http://127.0.0.1:7890 all_proxy=socks5://127.0.0.1:7890
+  # fzf-tab # https://github.com/Aloxaf/fzf-tab
 )
-
-#===============================================================================
-# 👇 fzf-tab
-#===============================================================================
-
-#===============================================================================
-# 👇 zsh-completions
-#===============================================================================
-# fpath+=${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-completions/src
 
 #===============================================================================
 # 👇 Language environment
@@ -89,6 +79,14 @@ export UPDATE_ZSH_DAYS=42
 # 👇 oh-my-zsh init
 #===============================================================================
 source "$ZSH"/oh-my-zsh.sh
+
+#===============================================================================
+# 👇 fzf-tab https://github.com/Aloxaf/fzf-tab/wiki/Configuration
+# 👇 fzf-tab needs to be loaded after compinit (oh-my-zsh.sh)
+#===============================================================================
+source "$ZSH_CUSTOM"/plugins/fzf-tab/fzf-tab.plugin.zsh
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'lsd --icon=always $realpath'
+zstyle ':fzf-tab:*' fzf-pad 10
 
 #===============================================================================
 # 👇 custom binary

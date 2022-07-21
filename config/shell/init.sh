@@ -15,13 +15,15 @@ else
   return
 fi
 
+ZSH_CUSTOM=${ZSH_CUSTOM:-~/.oh-my-zsh/custom}
+
 #===============================================================================
 # 👇 custom completions
-# 👇 Oh My Zsh, it will call compinit for youcompinit
+# 👇 Oh My Zsh will call compinit for you
 #===============================================================================
 FPATH="$(brew --prefix)/share/zsh/site-functions:$FPATH"
 FPATH="$HOME/dotfiles/config/shell/zsh_completion:$FPATH"
-# compinit
+FPATH="$ZSH_CUSTOM/plugins/zsh-completions/src:$FPATH"
 
 #===============================================================================
 # 👇 env
