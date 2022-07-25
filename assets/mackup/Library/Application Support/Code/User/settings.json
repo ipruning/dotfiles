@@ -63,10 +63,9 @@
     "BUG",
     "HACK",
     "FIXME",
-    "TODO",
-    "[[TODO]]",
-    "#Todo",
     "#TODO",
+    "#Todo",
+    "[[TODO]]",
     "[ ]",
     "[x]"
   ],
@@ -75,12 +74,7 @@
       "foreground": "#FF0000",
       "iconColour": "#FF0000"
     },
-    "TODO": {
-      "foreground": "#00FF00",
-      "iconColour": "#00FF00",
-      "gutterIcon": true
-    },
-    "[[TODO]]": {
+    "#TODO": {
       "foreground": "#00FF00",
       "iconColour": "#00FF00",
       "gutterIcon": true
@@ -90,7 +84,7 @@
       "iconColour": "#00FF00",
       "gutterIcon": true
     },
-    "#TODO": {
+    "[[TODO]]": {
       "foreground": "#00FF00",
       "iconColour": "#00FF00",
       "gutterIcon": true
@@ -262,6 +256,8 @@
     ".gitconfig": "ini"
   },
   "files.simpleDialog.enable": true,
+  "files.insertFinalNewline": true,
+  "files.trimFinalNewlines": true,
   "gitProjectManager.baseProjectsFolders": [
     "~/Coding",
     "~/Desktop",
