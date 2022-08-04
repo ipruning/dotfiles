@@ -20,7 +20,6 @@ font:
   normal:
     family: "CaskaydiaCove Nerd Font"
   size: 14
-  use_thin_strokes: true
 
 # Colors (One Dark Pro Darker)
 colors:
