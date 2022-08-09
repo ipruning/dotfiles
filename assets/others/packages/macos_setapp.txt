@@ -25,6 +25,7 @@ MetaImage
 MindNode
 Mockuuups Studio
 Mosaic
+NotePlan
 Numi
 Ohtipi
 One Switch

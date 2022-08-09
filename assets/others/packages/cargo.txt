@@ -1,6 +1,7 @@
 bore-cli
 cargo-bundle
 cargo-update
+cargo-vet
 coreutils
 difftastic
 gfold
