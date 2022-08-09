@@ -11,6 +11,7 @@
   "editor.linkedEditing": true,
   "editor.suggestSelection": "first",
   "editor.cursorSmoothCaretAnimation": true,
+  "editor.experimental.stickyScroll.enabled": true,
   "github.copilot.enable": {
     "*": true,
     "plaintext": false,
