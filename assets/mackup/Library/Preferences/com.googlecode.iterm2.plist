@@ -2077,7 +2077,7 @@
 			<key>Rows</key>
 			<integer>40</integer>
 			<key>Screen</key>
-			<integer>-2</integer>
+			<integer>-1</integer>
 			<key>Scrollback Lines</key>
 			<integer>20000</integer>
 			<key>Selected Text Color</key>
@@ -5934,10 +5934,14 @@
 			<string>/Users/alex</string>
 		</dict>
 	</array>
+	<key>OpenArrangementAtStartup</key>
+	<false/>
 	<key>OpenBookmark</key>
 	<false/>
 	<key>OpenFileInNewWindows</key>
 	<true/>
+	<key>OpenNoWindowsAtStartup</key>
+	<false/>
 	<key>OpenTmuxWindowsIn</key>
 	<integer>0</integer>
 	<key>PMPrintingExpandedStateForPrint2</key>
@@ -5981,6 +5985,8 @@
 	<true/>
 	<key>PromptOnQuit</key>
 	<true/>
+	<key>RestoreWindowsToSameSpaces</key>
+	<false/>
 	<key>SavePasteHistory</key>
 	<false/>
 	<key>SeparateStatusBarsPerPane</key>
