@@ -1,3 +1,4 @@
+1Password for Safari
 1Password
 ABBYY FineReader PDF
 Affinity Photo
@@ -9,6 +10,8 @@ Anki
 Apparency
 Audio Hijack
 Audio Jam
+Blackmagic Disk Speed Test
+Blackmagic Media Express
 Blender
 Bob
 Capture One 22
@@ -37,6 +40,7 @@ Espanso
 Eudic
 Figma
 Final Cut Pro
+Firefox
 Fork
 Fritzing
 GarageBand
@@ -134,6 +138,7 @@ Shadowrocket
 Shapr3D
 Shottr
 Sideloadly
+Silicon
 Sketch
 Skim
 Slack
@@ -162,7 +167,6 @@ VideoFusion-macOS
 VirtualBuddy
 Vision
 Visual Studio Code
-Vivid
 Warp
 WeChat
 WechatExporter
@@ -189,10 +193,10 @@ uBlacklist for Safari
 uPic
 voicepeak
 waifu2x
+waifuExtension
 钱条
 小宇宙
 云图计划
 企业微信
 微信读书
-明日方舟
 讯飞语音输入

@@ -15,7 +15,6 @@ cloudflare/cloudflare/cloudflared
 cmake
 colima
 commitizen
-d12frosted/emacs-plus/emacs-plus@28
 dasel
 direnv
 docker
@@ -64,6 +63,7 @@ platformio
 procs
 pueue
 pyenv
+qt
 r
 rm-improved
 sd
@@ -71,7 +71,6 @@ sevenzip
 shellcheck
 sk
 smartmontools
-sourcegraph/src-cli/src-cli
 ssh-copy-id
 starship
 t-rec
