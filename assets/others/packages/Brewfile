@@ -21,7 +21,7 @@ tap "robotsandpencils/made"
 tap "sunnyyoung/repo"
 tap "timothyye/tap"
 tap "yqrashawn/goku"
-brew "jpeg"
+brew "jpeg", link: true
 brew "libpng"
 brew "aria2"
 brew "xz"
@@ -204,6 +204,7 @@ mas "PasteNow", id: 1552536109
 mas "Picsee", id: 1454805783
 mas "Pixea", id: 1507782672
 mas "Plash", id: 1494023538
+mas "Qmenu", id: 1567442612
 mas "QQ", id: 451108668
 mas "QSpace", id: 1469774098
 mas "Refined GitHub", id: 1519867270
