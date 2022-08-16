@@ -122,8 +122,10 @@ PowerShell
 QLMarkdown
 QQ
 QSpace
+Qmenu
 Raindrop.io
 Raycast
+Rectangle
 Refined GitHub
 Roam Research
 Rocket
@@ -199,4 +201,5 @@ waifuExtension
 云图计划
 企业微信
 微信读书
+明日方舟
 讯飞语音输入
