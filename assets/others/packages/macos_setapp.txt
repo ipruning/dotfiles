@@ -51,6 +51,7 @@ TextSoap
 Timing
 Ulysses
 Vidrio
+Vivid
 Yoink
 iBoysoft MagicMenu
 iStat Menus

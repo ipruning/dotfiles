@@ -2,6 +2,7 @@ aaron-bond.better-comments
 antfu.file-nesting
 antfu.slidev
 antfu.smart-clicks
+arcanis.vscode-zipfs
 aster.vscode-subtitles
 BazelBuild.vscode-bazel
 betterthantomorrow.calva
