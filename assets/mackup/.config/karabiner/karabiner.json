@@ -17,9 +17,33 @@
         },
         "rules": [
           {
+            "description": "Change left_control to left_control / esc(if_alone).",
             "manipulators": [
               {
-                "description": "Change caps_lock to command+control+option+shift.",
+                "from": {
+                  "key_code": "left_control",
+                  "modifiers": {
+                    "optional": ["any"]
+                  }
+                },
+                "to": [
+                  {
+                    "key_code": "left_control"
+                  }
+                ],
+                "to_if_alone": [
+                  {
+                    "key_code": "escape"
+                  }
+                ],
+                "type": "basic"
+              }
+            ]
+          },
+          {
+            "description": "Change caps_lock to Hyper(command-control-option-shift).",
+            "manipulators": [
+              {
                 "from": {
                   "key_code": "caps_lock",
                   "modifiers": {
@@ -37,7 +61,7 @@
             ]
           },
           {
-            "description": "Change up_arrow to Hyper. (Post spacebar if pressed alone)",
+            "description": "Change up_arrow to Hyper(command-control-option-shift) / up_arrow(if_alone).",
             "manipulators": [
               {
                 "from": {
