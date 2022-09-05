@@ -6,6 +6,11 @@ format = '''$all$custom'''
 # 1 second
 command_timeout = 1000
 
+# [character]
+#     success_symbol = "[➜](bold green)"
+#     vicmd_symbol   = "[➜](bold yellow)"
+#     error_symbol   = "[✖](bold red)"
+
 # [custom.arm64]
 # command = "echo  "
 # when = 'test "$(uname -m)" = "arm64"'
@@ -13,11 +18,6 @@ command_timeout = 1000
 [custom.x86_64]
     command = "echo  "
     when    = 'test "$(uname -m)" = "x86_64"'
-
-[character]
-    success_symbol = "[➜](bold green)"
-    vicmd_symbol   = "[➜](bold yellow)"
-    error_symbol   = "[✖](bold red)"
 
 [aws]
     symbol   = " "
