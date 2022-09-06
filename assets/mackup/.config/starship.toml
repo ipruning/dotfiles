@@ -1,19 +1,13 @@
 # ~/.config/starship.toml
 
-# Use custom format
 format = '''$all$custom'''
 
-# 1 second
 command_timeout = 1000
 
-# [character]
-#     success_symbol = "[➜](bold green)"
-#     vicmd_symbol   = "[➜](bold yellow)"
-#     error_symbol   = "[✖](bold red)"
-
-# [custom.arm64]
-# command = "echo  "
-# when = 'test "$(uname -m)" = "arm64"'
+[character]
+    success_symbol = "[>](bold green)"
+    vicmd_symbol   = "[>](bold yellow)"
+    error_symbol   = "[>](bold red)"
 
 [custom.x86_64]
     command = "echo  "
