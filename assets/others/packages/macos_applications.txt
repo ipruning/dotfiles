@@ -3,7 +3,6 @@
 ABBYY FineReader PDF
 Affinity Photo
 Alacritty
-Alfred 4
 Alfred 5
 AltTab
 Anki
@@ -31,7 +30,6 @@ DevToys
 Developer
 Dice by PCalc
 Discord
-Drafts
 Dropbox
 Eagle for Safari
 Eagle
@@ -57,6 +55,7 @@ IconChanger
 Input Source Pro
 Itsycal
 JetBrains Toolbox
+Jetpack Joyride 2
 Karabiner-Elements
 Karabiner-EventViewer
 KeyCastr
@@ -76,15 +75,14 @@ Loopback
 LosslessCut
 LyricsX
 MWeb Pro
-Magnet
 MainStage 3
 Maipo
 Mathpix Snipping Tool
+Messenger
 Microsoft Excel
 Microsoft PowerPoint
 Microsoft Remote Desktop
 Microsoft Word
-Mimestream
 Mini Motorways
 Monodraw
 Mos
@@ -96,7 +94,6 @@ Notion
 Numbers
 OBS
 Obsidian
-Octotree
 OmniGraffle
 OmniOutliner
 OmniPlan
@@ -107,7 +104,6 @@ Optimus Player
 PDF Expert
 Pages
 PaimonMenuBar
-Paperlib
 Parallels Desktop
 Parsec
 PasteNow
@@ -116,20 +112,16 @@ Picsee
 Pictogram
 Pixea
 Pixelmator Pro
-Plash
 Pocket Casts
+PocketTube
 PowerShell
 QLMarkdown
 QQ
-QSpace
-Qmenu
 Raindrop.io
 Raycast
 Rectangle
-Refined GitHub
 Roam Research
 Rocket
-RustDesk
 Safari
 Save to Raindrop.io
 Scapple
@@ -150,7 +142,6 @@ Spark
 Steam
 Suspicious Package
 Syntax Highlight
-Taio
 TakeABreak
 Tampermonkey
 TeamViewer
@@ -160,24 +151,26 @@ Termius
 Things3
 Tito Control
 TopNotch
+TradingView
 Tropy
 Tweetbot
 Unblah
 UninstallPKG
 Unity Hub
-VideoFusion-macOS
+Vimari
 VirtualBuddy
 Vision
 Visual Studio Code
+Vivaldi
 Warp
 WeChat
 WechatExporter
-Wireshark
+WhatsApp
+Wooshy
 XLD
-Xcode-13.4.1
+Xcode-14.0.0
 Xcode
 Xcodes
-Xnip
 YACReader
 ZeroTier
 Zotero
@@ -185,7 +178,6 @@ calibre
 draw.io
 fHash
 iMazing
-iMobie M1 App Checker
 iMovie
 iTerm
 logioptionsplus
@@ -196,10 +188,10 @@ uPic
 voicepeak
 waifu2x
 waifuExtension
-钱条
+zoom.us
 小宇宙
-云图计划
 企业微信
 微信读书
 明日方舟
 讯飞语音输入
+少女前线：云图计划

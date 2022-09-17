@@ -77,7 +77,6 @@ Rickaym.manim-sideview
 rust-lang.rust-analyzer
 serayuzgur.crates
 shd101wyy.markdown-preview-enhanced
-silvenon.mdx
 skn0tt.markdown-link-expander
 sswg.swift-lang
 tamasfe.even-better-toml
@@ -86,6 +85,7 @@ telesoho.vscode-markdown-paste-image
 timonwong.shellcheck
 twxs.cmake
 Tyriar.sort-lines
+unifiedjs.vscode-mdx
 usernamehw.errorlens
 vadimcn.vscode-lldb
 vintharas.learn-vim

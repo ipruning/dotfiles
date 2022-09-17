@@ -27,7 +27,6 @@ Mockuuups Studio
 Mosaic
 NotePlan
 Numi
-Ohtipi
 One Switch
 OpenIn
 PDF Search
@@ -46,7 +45,6 @@ SnapMotion
 SnippetsLab
 Squash
 TablePlus
-TextSniper
 TextSoap
 Timing
 Ulysses
