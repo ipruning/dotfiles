@@ -83,6 +83,7 @@ Microsoft Excel
 Microsoft PowerPoint
 Microsoft Remote Desktop
 Microsoft Word
+Mini Metro+
 Mini Motorways
 Monodraw
 Mos
@@ -148,6 +149,7 @@ TeamViewer
 Telegram
 TencentMeeting
 Termius
+The Pathless
 Things3
 Tito Control
 TopNotch

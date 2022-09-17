@@ -8,6 +8,7 @@ BazelBuild.vscode-bazel
 betterthantomorrow.calva
 bodil.file-browser
 codeandstuff.package-json-upgrade
+codezombiech.gitignore
 cschleiden.vscode-github-actions
 csholmq.excel-to-markdown-table
 darkriszty.markdown-table-prettify
@@ -16,6 +17,7 @@ dbaeumer.vscode-eslint
 dnicolson.binary-plist
 dongfg.vscode-beancount-formatter
 eamodio.gitlens
+EditorConfig.EditorConfig
 emilast.LogFileHighlighter
 esbenp.prettier-vscode
 formulahendry.code-runner
