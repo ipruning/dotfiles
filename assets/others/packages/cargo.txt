@@ -1,15 +1,11 @@
-bore-cli
 cargo-bundle
 cargo-make
 cargo-update
 cargo-vet
 coreutils
-difftastic
-gfold
 huniq
 mdbook
 mdbook-linkcheck
 mdbook-pdf
-monolith
 nu
 typos-cli
