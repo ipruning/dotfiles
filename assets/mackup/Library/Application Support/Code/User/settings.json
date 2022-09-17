@@ -136,7 +136,6 @@
     "indent_size": 4
   },
   "markdownFormatter.formatULSymbol": false,
-  "diffEditor.ignoreTrimWhitespace": false,
   "indentRainbow.ignoreLinePatterns": [
     "/[ \t]* [*]/g", // lines beginning with <whitespace><space>*
     "/[ \t]+[/]{2}/g" // lines beginning with <whitespace>//
@@ -397,5 +396,6 @@
     "vue.config.*": "*.env, .babelrc*, .codecov, .cssnanorc*, .env.*, .envrc, .htmlnanorc*, .lighthouserc.*, .mocha*, .postcssrc*, .terserrc*, api-extractor.json, ava.config.*, babel.config.*, contentlayer.config.*, cssnano.config.*, cypress.*, env.d.ts, formkit.config.*, formulate.config.*, histoire.config.*, htmlnanorc.*, jasmine.*, jest.config.*, jsconfig.*, karma*, lighthouserc.*, playwright.config.*, postcss.config.*, puppeteer.config.*, svgo.config.*, tailwind.config.*, tsconfig.*, tsdoc.*, unocss.config.*, vitest.config.*, webpack.config.*, windi.config.*"
   },
   "C_Cpp.intelliSenseEngine": "Disabled",
-  "editor.stickyScroll.enabled": true
+  "editor.stickyScroll.enabled": true,
+  "diffEditor.ignoreTrimWhitespace": false
 }
