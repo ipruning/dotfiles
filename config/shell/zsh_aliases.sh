@@ -28,6 +28,7 @@ alias r-deepl='colima start && docker run -itd -p 8080:80 zu1k/deepl'
 alias r-fava='fava ${HOME}/Database/Ledger/main.bean -p 4000'
 alias r-bb='/Applications/OpenBB\ Terminal/OpenBB\ Terminal'
 alias r-unm='node ${HOME}/Stacks/Utilities/UnblockNeteaseMusic/app.js -p 80:443 -f 103.126.92.132'
+alias r-lol='open /Applications/League\ of\ Legends.app/ --args --locale=zh_CN'
 
 alias r-update='brew update && brew cu && asdf latest --all && tldr --update'
 alias r-upgrade='brew upgrade && pipx upgrade-all && npx npm-check --global --update-all && cargo install-update --all && gh extension upgrade --all && conda update --all && asdf update && asdf plugin update --all'
