@@ -53,6 +53,7 @@ Hustl
 IINA
 IconChanger
 Input Source Pro
+Install League of Legends euw
 Itsycal
 JetBrains Toolbox
 Jetpack Joyride 2
@@ -90,6 +91,7 @@ Mos
 Motion
 MultiMC
 MusicHarbor
+Neovide
 NeteaseMusic
 Notion
 Numbers
@@ -121,6 +123,7 @@ QQ
 Raindrop.io
 Raycast
 Rectangle
+Riot Client ()
 Roam Research
 Rocket
 Safari

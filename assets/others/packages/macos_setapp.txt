@@ -8,6 +8,7 @@ Dash
 Disk Drill
 Downie
 Due
+Expressions
 Focus
 ForkLift
 Gemini
