@@ -7,6 +7,7 @@ Alfred 5
 AltTab
 Anki
 Apparency
+Ask Command
 Audio Hijack
 Audio Jam
 Blackmagic Disk Speed Test
@@ -53,7 +54,6 @@ Hustl
 IINA
 IconChanger
 Input Source Pro
-Install League of Legends euw
 Itsycal
 JetBrains Toolbox
 Jetpack Joyride 2
@@ -63,6 +63,7 @@ KeyCastr
 Keyboard Maestro
 Keynote
 LTspice
+LanguageTool for Desktop
 Lark
 Latest
 LayAuto3
@@ -142,7 +143,6 @@ Skim
 Slack
 Sloth
 SoundSource
-Spark
 Steam
 Suspicious Package
 Syntax Highlight
@@ -185,9 +185,10 @@ fHash
 iMazing
 iMovie
 iTerm
+kitty
 logioptionsplus
 massCode
-qbittorrent
+qBittorrent
 uBlacklist for Safari
 uPic
 voicepeak
