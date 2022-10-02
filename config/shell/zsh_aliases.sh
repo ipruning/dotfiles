@@ -31,7 +31,8 @@ alias r-unm='node ${HOME}/Stacks/Utilities/UnblockNeteaseMusic/app.js -p 80:443 
 alias r-lol='open /Applications/League\ of\ Legends.app/ --args --locale=zh_CN'
 
 alias r-update='brew update && brew cu && asdf latest --all && tldr --update'
-alias r-upgrade='brew upgrade && pipx upgrade-all && npx npm-check --global --update-all && cargo install-update --all && gh extension upgrade --all && conda update --all && asdf update && asdf plugin update --all'
+alias r-upgrade='brew upgrade && pipx upgrade-all && npx npm-check --global --update-all && cargo install-update --all && gh extension upgrade --all && asdf update && asdf plugin update --all'
+# conda update --all
 # mas upgrade
 # omz update
 # pio update && pio upgrade
