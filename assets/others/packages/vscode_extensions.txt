@@ -5,7 +5,9 @@ antfu.smart-clicks
 arcanis.vscode-zipfs
 aster.vscode-subtitles
 BazelBuild.vscode-bazel
+benjamin-simmonds.pythoncpp-debug
 betterthantomorrow.calva
+bierner.markdown-mermaid
 bodil.file-browser
 codeandstuff.package-json-upgrade
 codezombiech.gitignore
@@ -18,6 +20,7 @@ dnicolson.binary-plist
 dongfg.vscode-beancount-formatter
 eamodio.gitlens
 EditorConfig.EditorConfig
+eg2.vscode-npm-script
 emilast.LogFileHighlighter
 esbenp.prettier-vscode
 formulahendry.code-runner
@@ -58,8 +61,10 @@ ms-toolsai.jupyter-renderers
 ms-vscode-remote.remote-containers
 ms-vscode-remote.remote-ssh
 ms-vscode-remote.remote-ssh-edit
+ms-vscode.cmake-tools
 ms-vscode.cpptools
 ms-vscode.powershell
+msjsdiag.vscode-react-native
 naumovs.color-highlight
 ninoseki.vscode-pylens
 njpwerner.autodocstring
@@ -69,6 +74,7 @@ notskm.clang-tidy
 oderwat.indent-rainbow
 piersdeseilligny.betterfountain
 PKief.material-icon-theme
+platformio.platformio-ide
 pomdtr.excalidraw-editor
 qezhu.gitlink
 redhat.vscode-xml
@@ -95,6 +101,7 @@ VisualStudioExptTeam.intellicode-api-usage-examples
 vscodevim.vim
 VSpaceCode.vspacecode
 VSpaceCode.whichkey
+Vue.volar
 xaver.clang-format
 XING.zotero-cite
 yinfei.luahelper
