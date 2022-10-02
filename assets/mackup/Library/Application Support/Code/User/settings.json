@@ -40,7 +40,7 @@
   "git.enableSmartCommit": true,
   "gitlens.views.repositories.files.layout": "list",
   "gitlens.codeLens.scopes": ["document"],
-  "diffEditor.renderSideBySide": true,
+
   "workbench.tree.indent": 20,
   "workbench.tree.renderIndentGuides": "none",
   "workbench.activityBar.visible": true,
@@ -57,6 +57,8 @@
   "workbench.editorAssociations": {
     "*.ipynb": "jupyter-notebook"
   },
+  "workbench.layoutControl.enabled": false,
+  "window.commandCenter": false,
   // "http.proxySupport": "off",
   "remote.SSH.connectTimeout": 1000,
   "todo-tree.general.tags": [
@@ -242,6 +244,8 @@
   },
   "editor.wordWrap": "off",
   "diffEditor.wordWrap": "off",
+  "diffEditor.renderSideBySide": true,
+  "diffEditor.ignoreTrimWhitespace": false,
   "editor.guides.indentation": false,
   "editor.guides.bracketPairs": false,
   "evenBetterToml.formatter.alignEntries": true,
@@ -395,7 +399,5 @@
     "vite.config.*": "*.env, .babelrc*, .codecov, .cssnanorc*, .env.*, .envrc, .htmlnanorc*, .lighthouserc.*, .mocha*, .postcssrc*, .terserrc*, api-extractor.json, ava.config.*, babel.config.*, contentlayer.config.*, cssnano.config.*, cypress.*, env.d.ts, formkit.config.*, formulate.config.*, histoire.config.*, htmlnanorc.*, jasmine.*, jest.config.*, jsconfig.*, karma*, lighthouserc.*, playwright.config.*, postcss.config.*, puppeteer.config.*, svgo.config.*, tailwind.config.*, tsconfig.*, tsdoc.*, unocss.config.*, vitest.config.*, webpack.config.*, windi.config.*",
     "vue.config.*": "*.env, .babelrc*, .codecov, .cssnanorc*, .env.*, .envrc, .htmlnanorc*, .lighthouserc.*, .mocha*, .postcssrc*, .terserrc*, api-extractor.json, ava.config.*, babel.config.*, contentlayer.config.*, cssnano.config.*, cypress.*, env.d.ts, formkit.config.*, formulate.config.*, histoire.config.*, htmlnanorc.*, jasmine.*, jest.config.*, jsconfig.*, karma*, lighthouserc.*, playwright.config.*, postcss.config.*, puppeteer.config.*, svgo.config.*, tailwind.config.*, tsconfig.*, tsdoc.*, unocss.config.*, vitest.config.*, webpack.config.*, windi.config.*"
   },
-  "C_Cpp.intelliSenseEngine": "Disabled",
-  "editor.stickyScroll.enabled": true,
-  "diffEditor.ignoreTrimWhitespace": false
+  "editor.stickyScroll.enabled": true
 }
