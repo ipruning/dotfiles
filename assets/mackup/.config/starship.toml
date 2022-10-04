@@ -23,11 +23,11 @@ command_timeout = 1000
     discharging_symbol = ""
 
 [[battery.display]]
-    threshold = 10
+    threshold = 15
     style     = "red"
 
 [[battery.display]]
-    threshold = 25
+    threshold = 30
     style     = "yellow"
 
 [conda]
