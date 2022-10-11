@@ -22,10 +22,10 @@ fi
 alias jupyter='jupyter-notebook'
 alias jupyter-lab='${HOME}/.conda/envs/python3.10/bin/jupyter-lab'
 
-alias r-archivebox='cd /Volumes/Workspace/Database/ArchiveBox && archivebox server'
-alias r-citespace='cd ${HOME}/Database/CiteSpace/5.8.R3/ && ./StartCiteSpace_M1_Pro.sh'
+alias r-archivebox='cd /Volumes/Workspace/Databases/ArchiveBox && archivebox server'
+alias r-citespace='cd ${HOME}/Databases/CiteSpace/5.8.R3/ && ./StartCiteSpace_M1_Pro.sh'
 alias r-deepl='colima start && docker run -itd -p 8080:80 zu1k/deepl'
-alias r-fava='fava ${HOME}/Database/Ledger/main.bean -p 4000'
+alias r-fava='fava ${HOME}/Databases/Ledger/main.bean -p 4000'
 alias r-bb='/Applications/OpenBB\ Terminal/OpenBB\ Terminal'
 alias r-unm='node ${HOME}/Stacks/Utilities/UnblockNeteaseMusic/app.js -p 80:443 -f 103.126.92.132'
 alias r-lol='open /Applications/League\ of\ Legends.app/ --args --locale=zh_CN'

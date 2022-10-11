@@ -218,7 +218,7 @@
   // Beancount
   "beancount.fixedCJKWidth": true,
   "beancount.inputMethods": ["pinyin"],
-  "beancount.mainBeanFile": "~/Database/Ledger/main.bean",
+  "beancount.mainBeanFile": "~/Databases/Ledger/main.bean",
   "beancountFormatter.fixedCJKWidth": true,
   "beancountFormatter.currencyColumn": 72,
   "platformio-ide.activateOnlyOnPlatformIOProject": true,
@@ -281,7 +281,7 @@
   // draw.io
   "hediet.vscode-drawio.codeLinkActivated": true,
   // Dendron
-  "dendron.rootDir": "~/Database/Dendron",
+  "dendron.rootDir": "~/Databases/Dendron",
   // nvim
   "vscode-neovim.neovimExecutablePaths.darwin": "/opt/homebrew/bin/nvim",
   // vim
