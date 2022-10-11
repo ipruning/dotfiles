@@ -30,6 +30,7 @@ DevCleaner
 DevToys
 Developer
 Dice by PCalc
+DiffusionBee
 Discord
 Dropbox
 Eagle for Safari
@@ -39,7 +40,6 @@ Espanso
 Eudic
 Figma
 Final Cut Pro
-Firefox
 Fork
 Fritzing
 GarageBand
@@ -56,7 +56,6 @@ IconChanger
 Input Source Pro
 Itsycal
 JetBrains Toolbox
-Jetpack Joyride 2
 Karabiner-Elements
 Karabiner-EventViewer
 KeyCastr
@@ -85,8 +84,6 @@ Microsoft Excel
 Microsoft PowerPoint
 Microsoft Remote Desktop
 Microsoft Word
-Mini Metro+
-Mini Motorways
 Monodraw
 Mos
 Motion
@@ -115,7 +112,6 @@ PicGo
 Picsee
 Pictogram
 Pixea
-Pixelmator Pro
 Pocket Casts
 PocketTube
 PowerShell
@@ -124,7 +120,6 @@ QQ
 Raindrop.io
 Raycast
 Rectangle
-Riot Client ()
 Roam Research
 Rocket
 Safari
@@ -159,14 +154,12 @@ TopNotch
 TradingView
 Tropy
 Tweetbot
-Unblah
 UninstallPKG
 Unity Hub
 Vimari
 VirtualBuddy
 Vision
 Visual Studio Code
-Vivaldi
 Warp
 WeChat
 WechatExporter
@@ -181,7 +174,6 @@ ZeroTier
 Zotero
 calibre
 draw.io
-fHash
 iMazing
 iMovie
 iTerm
@@ -200,4 +192,3 @@ zoom.us
 微信读书
 明日方舟
 讯飞语音输入
-少女前线：云图计划
