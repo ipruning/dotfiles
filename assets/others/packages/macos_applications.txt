@@ -147,7 +147,6 @@ TeamViewer
 Telegram
 TencentMeeting
 Termius
-The Pathless
 Things3
 Tito Control
 TopNotch
