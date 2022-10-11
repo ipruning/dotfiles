@@ -143,7 +143,7 @@
     "/[ \t]+[/]{2}/g" // lines beginning with <whitespace>//
   ],
   "indentRainbow.ignoreErrorLanguages": ["clojure", "json", "python", "rust"],
-  "indentRainbow.excludedLanguages": ["log", "magit", "plaintext"],
+  "indentRainbow.excludedLanguages": ["latex", "log", "magit", "plaintext"],
   "indentRainbow.colorOnWhiteSpaceOnly": true,
   "errorLens.excludeBySource": ["eslint", "jshint"],
   "notebook.cellToolbarLocation": {
@@ -152,17 +152,22 @@
   },
   "redhat.telemetry.enabled": false,
   "explorer.confirmDelete": false,
+  "[latex]": {
+    "editor.tabSize": 2,
+    "editor.wordWrap": "on"
+  },
   "[markdown]": {
-    "editor.fontSize": 12,
     "editor.quickSuggestions": {
       "comments": "on",
       "strings": "on",
       "other": "on"
     },
-    "editor.renderWhitespace": "selection", // all will cause lag
-    "editor.formatOnSave": false,
     "editor.defaultFormatter": "DavidAnson.vscode-markdownlint",
-    "editor.tabSize": 4
+    "editor.fontSize": 12,
+    "editor.formatOnSave": false,
+    "editor.renderWhitespace": "selection", // all will cause lag
+    "editor.tabSize": 4,
+    "editor.wordWrap": "on"
   },
   "[lua]": {
     "editor.formatOnSave": false,
