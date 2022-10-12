@@ -20,9 +20,16 @@ function main {
   sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" --unattended --keep-zshrc
 
   echo "${BLUE}Installing zsh dotiles${NORMAL}"
-  grep --fixed-strings "dotfiles/config/shell/init.sh" "$HOME"/.zshrc || mv "$HOME"/.zshrc "$HOME"/.zshrc.bak && cp "$HOME"/dotfiles/config/shell/mac/zshrc.sh "$HOME"/.zshrc
+  if [ -e "$HOME"/.zshrc ]; then
+    # #TODO # grep --fixed-strings "dotfiles/config/shell/init.sh" "$HOME"/.zshrc || mv "$HOME"/.zshrc "$HOME"/.zshrc.bak && cp "$HOME"/dotfiles/config/shell/mac/zshrc.sh "$HOME"/.zshrc
+    mv "$HOME"/.zshrc "$HOME"/.zshrc.bak && cp "$HOME"/dotfiles/config/shell/mac/zshrc.sh "$HOME"/.zshrc
+    # #TODO # touch "$HOME"/.zshrc
+  else
+    cp "$HOME"/dotfiles/config/shell/mac/zshrc.sh "$HOME"/.zshrc
+  fi
   if [ -e "$HOME"/.zprofile ]; then
     mv "$HOME"/.zprofile "$HOME"/.zprofile.bak && cp "$HOME"/dotfiles/config/shell/mac/zprofile.sh "$HOME"/.zprofile
+    # #TODO # touch "$HOME"/.zprofile
   else
     cp "$HOME"/dotfiles/config/shell/mac/zprofile.sh "$HOME"/.zprofile
   fi
@@ -69,8 +76,10 @@ function main {
 
   echo "${BLUE}Installing asdf${NORMAL}"
   asdf plugin-add clojure https://github.com/asdf-community/asdf-clojure.git
+  asdf plugin-add crystal https://github.com/asdf-community/asdf-crystal.git
   asdf plugin-add elixir https://github.com/asdf-vm/asdf-elixir.git
   asdf plugin-add golang https://github.com/kennyp/asdf-golang.git
+  asdf plugin-add java https://github.com/halcyon/asdf-java.git
   asdf plugin-add lua https://github.com/Stratus3D/asdf-lua.git
   asdf plugin-add nodejs https://github.com/asdf-vm/asdf-nodejs.git
   asdf plugin-add python
@@ -91,7 +100,6 @@ function main {
   xargs <"$HOME"/dotfiles/assets/others/packages/pipx_dev.txt -n 1 pipx install
 
   echo "${BLUE}Installing other packages${NORMAL}"
-  which autocorrect || curl -sSL https://git.io/JcGER | bash # AutoCorrect
 
   echo "${BLUE}Installing tmux configuration (oh-my-tmux)${NORMAL}"
   git clone https://github.com/gpakosz/.tmux.git "$HOME"/.tmux
