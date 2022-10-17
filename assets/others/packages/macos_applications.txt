@@ -89,6 +89,7 @@ Mos
 Motion
 MultiMC
 MusicHarbor
+Neat
 Neovide
 NeteaseMusic
 Notion
@@ -102,6 +103,7 @@ OneDrive
 OnyX
 OpenEmu
 Optimus Player
+Orion
 PDF Expert
 Pages
 PaimonMenuBar
