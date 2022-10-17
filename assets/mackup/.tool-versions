@@ -1,7 +1,7 @@
 clojure 1.11.1.1149
 crystal 1.5.0
 elixir 1.13.4
-golang 1.18.3
+golang 1.19.2
 lua 5.4.4
 nodejs 18.9.0
 python 3.10.4 3.9.12 2.7.18 pypy3.9-7.3.9
