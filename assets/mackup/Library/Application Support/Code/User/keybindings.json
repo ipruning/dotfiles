@@ -1,4 +1,25 @@
 [
+  // Jupyter
+  {
+    "key": "shift+cmd+down",
+    "command": "notebook.cell.moveDown",
+    "when": "notebookEditorFocused && !inputFocus"
+  },
+  {
+    "key": "alt+down",
+    "command": "-notebook.cell.moveDown",
+    "when": "notebookEditorFocused && !inputFocus"
+  },
+  {
+    "key": "shift+cmd+up",
+    "command": "notebook.cell.moveUp",
+    "when": "notebookEditorFocused && !inputFocus"
+  },
+  {
+    "key": "alt+up",
+    "command": "-notebook.cell.moveUp",
+    "when": "notebookEditorFocused && !inputFocus"
+  },
   // Toggle inlay hints
   {
     "key": "ctrl+shift+h",
