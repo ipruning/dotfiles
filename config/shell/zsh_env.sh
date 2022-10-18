@@ -292,17 +292,17 @@ zle -N _navi_widget
 eval "$(zoxide init zsh)"
 
 #===============================================================================
-# 👇 Autodetect architecture (and set `brew` path) (and set `python` path)
+# 👇 autodetect architecture (and set `brew` path) (and set `python` path)
 #===============================================================================
 case $SYSTEM_TYPE in
 mac_arm64)
-  # Python
+  # python
   # alias 'cvenv'='python3 -m venv .venv && source .venv/bin/activate && python3 -m pip install --upgrade -r $HOME/.requirements.txt'
   alias 'cvenv'='$(brew --prefix python@3.10)/bin/python3 -m venv .venv && source .venv/bin/activate && python3 -m pip install --upgrade -r $HOME/.requirements.txt'
   alias 'svenv'='source .venv/bin/activate'
   alias 'cenv'='conda create --prefix ./.env && conda activate ./.env'
   alias 'senv'='conda activate ./.env'
-  # Python Miniforge
+  # python miniforge
   # >>> conda initialize >>>
   # !! Contents within this block are managed by 'conda init' !!
   if ! __conda_setup="$('/opt/homebrew/Caskroom/miniforge/base/bin/conda' 'shell.zsh' 'hook' 2>/dev/null)"; then
@@ -316,15 +316,15 @@ mac_arm64)
   fi
   unset __conda_setup
   # <<< conda initialize <<<
-  # Java
+  # java
   export JAVA_HOME=/Library/Java/JavaVirtualMachines/zulu-17.jdk/Contents/Home
   ;;
 mac_x86_64)
-  # Brew
+  # brew
   if [[ -f /usr/local/homebrew/bin/brew ]]; then
     eval "$(/usr/local/homebrew/bin/brew shellenv)" # homebrew intel shell env
   fi
-  # Python
+  # python
   eval "$(pyenv init --path)" # pyenv intel shell env
   eval "$(pyenv init -)"      # pyenv intel shell env
   alias 'cvenv'='python3 -m venv .venv && source .venv/bin/activate && python3 -m pip install --upgrade -r $HOME/.requirements.txt'
