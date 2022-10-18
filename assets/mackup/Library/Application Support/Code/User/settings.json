@@ -145,7 +145,13 @@
     "/[ \t]* [*]/g", // lines beginning with <whitespace><space>*
     "/[ \t]+[/]{2}/g" // lines beginning with <whitespace>//
   ],
-  "indentRainbow.ignoreErrorLanguages": ["clojure", "json", "python", "rust"],
+  "indentRainbow.ignoreErrorLanguages": [
+    "clojure",
+    "json",
+    "markdown",
+    "python",
+    "rust"
+  ],
   "indentRainbow.excludedLanguages": ["latex", "log", "magit", "plaintext"],
   "indentRainbow.colorOnWhiteSpaceOnly": true,
   "errorLens.excludeBySource": ["eslint", "jshint"],
