@@ -261,6 +261,7 @@
   "diffEditor.wordWrap": "off",
   "diffEditor.renderSideBySide": true,
   "diffEditor.ignoreTrimWhitespace": false,
+  "diffEditor.maxComputationTime": 10000,
   "editor.guides.indentation": false,
   "editor.guides.bracketPairs": false,
   "evenBetterToml.formatter.alignEntries": true,
