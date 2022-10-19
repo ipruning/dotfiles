@@ -83,6 +83,7 @@ Messenger
 Microsoft Excel
 Microsoft PowerPoint
 Microsoft Remote Desktop
+Microsoft Teams
 Microsoft Word
 Monodraw
 Mos
