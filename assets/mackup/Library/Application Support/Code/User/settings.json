@@ -41,17 +41,14 @@
   "git.enableSmartCommit": true,
   "gitlens.views.repositories.files.layout": "list",
   "gitlens.codeLens.scopes": ["document"],
-
   "workbench.tree.indent": 20,
   "workbench.tree.renderIndentGuides": "none",
   "workbench.activityBar.visible": true,
   "workbench.iconTheme": "material-icon-theme",
   "workbench.colorTheme": "One Dark Pro Darker",
-  // "workbench.settings.useSplitJSON": true,
   // editor
   // open files as tabs
   "workbench.editor.enablePreview": false,
-
   // reveal existing files if they are open (avoids tons of tabs)
   "workbench.editor.revealIfOpen": true,
   // open files from quick open as tabs
@@ -62,7 +59,8 @@
   },
   "workbench.layoutControl.enabled": false,
   "window.commandCenter": false,
-  // "http.proxySupport": "off",
+  "jupyter.widgetScriptSources": ["jsdelivr.com", "unpkg.com"],
+  "jupyter.askForKernelRestart": false,
   "remote.SSH.connectTimeout": 1000,
   "todo-tree.general.tags": [
     "BUG",
@@ -132,7 +130,7 @@
   "markdown.extension.toc.levels": "2..6",
   "markdown.marp.exportType": "html",
   "markdown.marp.enableHtml": true,
-  "markdown.experimental.validate.enabled": true,
+  "markdown.validate.enabled": true,
   "markdown.extension.italic.indicator": "_",
   "markdown.extension.list.indentationSize": "inherit",
   "markdown.extension.tableFormatter.normalizeIndentation": true,
@@ -187,6 +185,7 @@
       "source.organizeImports": false
     },
     "editor.defaultFormatter": "ms-python.python",
+    "editor.formatOnSave": false,
     "editor.tabSize": 4
   },
   "[html]": {
@@ -237,7 +236,6 @@
   "beancountFormatter.currencyColumn": 72,
   "platformio-ide.activateOnlyOnPlatformIOProject": true,
   "platformio-ide.useBuiltinPython": false,
-  "`hardhat``.telemetry": false,
   "autocorrect.formatOnSave": false,
   "json.maxItemsComputed": 10000,
   "markdown-preview-enhanced.previewTheme": "one-dark.css",
@@ -350,7 +348,7 @@
   "explorer.fileNesting.enabled": true,
   "explorer.fileNesting.expand": false,
   "explorer.fileNesting.patterns": {
-    "//": "Last update at 10/12/2022, 3:03:20 PM",
+    "//": "Last update at 11/1/2022, 12:25:13 AM",
     "*.asax": "$(capture).*.cs, $(capture).*.vb",
     "*.ascx": "$(capture).*.cs, $(capture).*.vb",
     "*.ashx": "$(capture).*.cs, $(capture).*.vb",
