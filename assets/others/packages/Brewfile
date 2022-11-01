@@ -87,6 +87,7 @@ brew "hyperfine"
 brew "iperf"
 brew "jq"
 brew "juliaup"
+brew "latexindent"
 brew "lf"
 brew "llvm"
 brew "lsd"
@@ -107,7 +108,6 @@ brew "procs"
 brew "pueue"
 brew "pyenv"
 brew "qt"
-brew "r"
 brew "ripgrep"
 brew "rm-improved"
 brew "sd"
@@ -192,6 +192,7 @@ mas "GarageBand", id: 682658836
 mas "GoodNotes", id: 1444383602
 mas "iMovie", id: 408981434
 mas "Keynote", id: 409183694
+mas "LiquidText", id: 922765270
 mas "Logic Pro", id: 634148309
 mas "MainStage", id: 634159523
 mas "Maipo", id: 789066512
@@ -209,7 +210,6 @@ mas "PasteNow", id: 1552536109
 mas "Picsee", id: 1454805783
 mas "Pixea", id: 1507782672
 mas "PocketTube", id: 1533703891
-mas "QQ", id: 451108668
 mas "Save to Raindrop.io", id: 1549370672
 mas "Shapr3D", id: 1091675654
 mas "Slack", id: 803453959
