@@ -61,6 +61,7 @@ Karabiner-EventViewer
 KeyCastr
 Keyboard Maestro
 Keynote
+LINE
 LTspice
 LanguageTool for Desktop
 Lark
@@ -69,10 +70,10 @@ LayAuto3
 League of Legends
 Linear
 LinearMouse
+LiquidText
 Logic Pro X
 Logseq
 Loom
-Loopback
 LosslessCut
 LyricsX
 MWeb Pro
@@ -119,7 +120,7 @@ Pocket Casts
 PocketTube
 PowerShell
 QLMarkdown
-QQ
+QQ-NT
 Raindrop.io
 Raycast
 Rectangle
@@ -168,7 +169,7 @@ WechatExporter
 WhatsApp
 Wooshy
 XLD
-Xcode-14.0.0
+Xcode-14.1.0-Release.Candidate.2
 Xcode
 Xcodes
 YACReader
