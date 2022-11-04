@@ -1,5 +1,6 @@
 1Password for Safari
 1Password
+A Better Finder Attributes 7
 ABBYY FineReader PDF
 Affinity Photo
 Alacritty
@@ -7,6 +8,7 @@ Alfred 5
 AltTab
 Anki
 Apparency
+Arc
 Ask Command
 Audio Hijack
 Audio Jam
@@ -17,6 +19,7 @@ Bob
 Capture One 22
 Chromium
 ClashX Pro
+Clay
 Compressor
 Contexts
 Cron
@@ -24,12 +27,10 @@ Cryptomator
 DEVONthink 3
 DaisyDisk
 Darkroom
-Day One
 DeepL
 DevCleaner
 DevToys
 Developer
-Dice by PCalc
 DiffusionBee
 Discord
 Dropbox
@@ -61,7 +62,6 @@ Karabiner-EventViewer
 KeyCastr
 Keyboard Maestro
 Keynote
-LINE
 LTspice
 LanguageTool for Desktop
 Lark
@@ -70,7 +70,6 @@ LayAuto3
 League of Legends
 Linear
 LinearMouse
-LiquidText
 Logic Pro X
 Logseq
 Loom
@@ -105,7 +104,6 @@ OneDrive
 OnyX
 OpenEmu
 Optimus Player
-Orion
 PDF Expert
 Pages
 PaimonMenuBar
@@ -161,7 +159,6 @@ UninstallPKG
 Unity Hub
 Vimari
 VirtualBuddy
-Vision
 Visual Studio Code
 Warp
 WeChat
@@ -169,7 +166,6 @@ WechatExporter
 WhatsApp
 Wooshy
 XLD
-Xcode-14.1.0-Release.Candidate.2
 Xcode
 Xcodes
 YACReader
@@ -190,8 +186,6 @@ voicepeak
 waifu2x
 waifuExtension
 zoom.us
-小宇宙
 企业微信
-微信读书
 明日方舟
 讯飞语音输入

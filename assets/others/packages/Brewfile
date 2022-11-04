@@ -4,6 +4,7 @@ tap "buo/cask-upgrade"
 tap "candid82/brew"
 tap "cloudflare/cloudflare"
 tap "d12frosted/emacs-plus"
+tap "deb-sig/tap"
 tap "espanso/espanso"
 tap "eth-p/software"
 tap "homebrew/bundle"
@@ -139,6 +140,7 @@ brew "brimdata/tap/zed"
 brew "brimdata/tap/zq"
 brew "cloudflare/cloudflare/cloudflared"
 brew "d12frosted/emacs-plus/emacs-plus@29", args: ["with-native-comp", "with-nobu417-big-sur-icon"]
+brew "deb-sig/tap/double-entry-generator"
 brew "eth-p/software/bat-extras"
 brew "timothyye/tap/skm"
 brew "yqrashawn/goku/goku"
@@ -182,17 +184,14 @@ mas "1Password for Safari", id: 1569813296
 mas "Bob", id: 1630034110
 mas "Compressor", id: 424390742
 mas "Darkroom", id: 953286746
-mas "Day One", id: 1055511498
 mas "DevCleaner", id: 1388020431
 mas "Developer", id: 640199958
-mas "Dice", id: 1479250666
 mas "Eagle for Safari", id: 1526651672
 mas "Final Cut Pro", id: 424389933
 mas "GarageBand", id: 682658836
 mas "GoodNotes", id: 1444383602
 mas "iMovie", id: 408981434
 mas "Keynote", id: 409183694
-mas "LiquidText", id: 922765270
 mas "Logic Pro", id: 634148309
 mas "MainStage", id: 634159523
 mas "Maipo", id: 789066512
@@ -219,7 +218,6 @@ mas "Tweetbot", id: 1384080005
 mas "uBlacklist for Safari", id: 1547912640
 mas "uPic", id: 1549159979
 mas "Vimari", id: 1480933944
-mas "Vision", id: 1572457968
 mas "waifu2x", id: 1286485858
 mas "WhatsApp", id: 1147396723
 mas "讯飞语音输入", id: 1243368435
