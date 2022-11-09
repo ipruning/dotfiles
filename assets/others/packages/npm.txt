@@ -2,6 +2,7 @@
 @argdown/cli
 @lint-md/cli
 @marp-team/marp-cli
+@railway/cli
 @slidev/cli
 @squoosh/cli
 cnpm

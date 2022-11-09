@@ -33,6 +33,7 @@ DevToys
 Developer
 DiffusionBee
 Discord
+Drafts
 Dropbox
 Eagle for Safari
 Eagle
@@ -50,7 +51,6 @@ Google Chrome
 Hammerspoon
 Hepta
 Homerow
-Hook
 Hustl
 IINA
 IconChanger

@@ -13,6 +13,7 @@ Focus
 ForkLift
 Gemini
 Gifox
+Hookmark
 HoudahSpot
 Hype
 Image2icon
@@ -26,7 +27,6 @@ MetaImage
 MindNode
 Mockuuups Studio
 Mosaic
-NotePlan
 Numi
 One Switch
 OpenIn
