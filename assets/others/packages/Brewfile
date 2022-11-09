@@ -86,6 +86,7 @@ brew "httpie"
 brew "hugo"
 brew "hyperfine"
 brew "iperf"
+brew "jc"
 brew "jq"
 brew "juliaup"
 brew "latexindent"
@@ -186,6 +187,7 @@ mas "Compressor", id: 424390742
 mas "Darkroom", id: 953286746
 mas "DevCleaner", id: 1388020431
 mas "Developer", id: 640199958
+mas "Drafts", id: 1435957248
 mas "Eagle for Safari", id: 1526651672
 mas "Final Cut Pro", id: 424389933
 mas "GarageBand", id: 682658836
