@@ -89,6 +89,12 @@ zstyle ':fzf-tab:complete:cd:*' fzf-preview 'lsd --icon=always $realpath'
 zstyle ':fzf-tab:*' fzf-pad 10
 
 #===============================================================================
+# 👇 gcloud
+#===============================================================================
+source "/opt/homebrew/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.zsh.inc"
+source "/opt/homebrew/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.zsh.inc"
+
+#===============================================================================
 # 👇 custom binary
 #===============================================================================
 export PATH="${HOME}/dotfiles/bin:$PATH"
