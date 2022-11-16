@@ -25,8 +25,6 @@
     prompt = false
 [difftool "difftastic"]
     cmd = difft "$LOCAL" "$REMOTE"
-[commit]
-    # gpgsign = true
 [color]
     ui = true
 [color "branch"]
@@ -60,6 +58,11 @@
     reflogExpireUnreachable = 90 # default 30 days
 [gpg]
     program = gpg
+	format = ssh 
+[gpg "ssh"]
+	program = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
+[commit]
+    # gpgsign = true
 [user]
     # name = YOUR_NAME
     # email = YOUR_EMAIL@example.com
