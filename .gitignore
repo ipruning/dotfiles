@@ -4,13 +4,14 @@
 *.log
 automatic_backups
 
-# bin
+# bin (compiled binaries)
 bin/cwim
-bin/double-entry-generator
 bin/feishu2md
 bin/nnn
-bin/pandoc
-bin/pandoc-crossref
 bin/redo
 bin/wayback
 bin/warpd
+
+# bin (downloaded binaries)
+bin/pandoc
+bin/pandoc-crossref
