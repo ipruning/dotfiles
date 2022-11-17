@@ -67,6 +67,7 @@ ms-vscode-remote.remote-ssh-edit
 ms-vscode.cmake-tools
 ms-vscode.cpptools
 ms-vscode.powershell
+ms-vscode.remote-explorer
 msjsdiag.vscode-react-native
 naumovs.color-highlight
 ninoseki.vscode-pylens

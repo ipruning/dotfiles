@@ -2,7 +2,6 @@
 1Password
 A Better Finder Attributes 7
 ABBYY FineReader PDF
-Affinity Photo
 Alacritty
 Alfred 5
 AltTab
@@ -67,7 +66,6 @@ LanguageTool for Desktop
 Lark
 Latest
 LayAuto3
-League of Legends
 Linear
 LinearMouse
 Logic Pro X
