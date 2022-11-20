@@ -94,7 +94,7 @@
     }
   },
   "todo-tree.regex.regex": "(//|#|<!--|;|/\\*|^|^\\s*(-|\\d+.))\\s*($TAGS)",
-  "python.defaultInterpreterPath": "~/.conda/envs/python3.10/bin/python",
+  "python.defaultInterpreterPath": "/Users/alex/.conda/envs/LearningAI/bin/python",
   "python.formatting.provider": "black",
   "python.languageServer": "Pylance",
   // "python.linting.enabled": true,
@@ -240,7 +240,7 @@
   "platformio-ide.useBuiltinPython": false,
   "autocorrect.formatOnSave": false,
   "json.maxItemsComputed": 10000,
-  "markdown-preview-enhanced.previewTheme": "one-dark.css",
+  "markdown-preview-enhanced.previewTheme": "one-light.css",
   "julia.symbolCacheDownload": true,
   "julia.enableTelemetry": false,
   "julia.executablePath": "julia +release~aarch64",
