@@ -19,8 +19,8 @@ if [[ -n $SSH_CONNECTION ]]; then
   alias lsd='lsd --icon never'
 fi
 
-alias r-jupyter='jupyter-notebook'
-alias r-jupyter-lab='${HOME}/.conda/envs/python3.10/bin/jupyter-lab'
+alias r-jupyter='${HOME}/.conda/envs/LearningAI/bin/jupyter-notebook'
+alias r-jupyter-lab='${HOME}/.conda/envs/LearningAI/bin/jupyter-lab'
 
 alias r-archivebox='cd /Volumes/Workspace/Databases/ArchiveBox && archivebox server'
 alias r-citespace='cd ${HOME}/Databases/CiteSpace/5.8.R3/ && ./StartCiteSpace_M1_Pro.sh'
