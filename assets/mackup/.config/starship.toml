@@ -47,6 +47,9 @@ command_timeout = 1000
 [docker_context]
     symbol = " "
 
+[gcloud]
+    disabled = true
+
 [git_branch]
     symbol = " "
 
@@ -58,22 +61,12 @@ command_timeout = 1000
 [golang]
     symbol = " "
 
+
 [hg_branch]
     symbol = " "
 
-    # [hg_branch]
-    # format = "on [🌱 $branch](bold purple)"
-    # truncation_length = 4
-    # truncation_symbol = ""
-
 [java]
     symbol = " "
-
-    # [memory_usage]
-    # symbol = " "
-    # disabled = false
-    # threshold = 90
-    # style = "bold dimmed green"
 
 [package]
     symbol = " "
