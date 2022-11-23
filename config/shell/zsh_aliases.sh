@@ -30,14 +30,28 @@ alias r-bb='/Applications/OpenBB\ Terminal/OpenBB\ Terminal'
 alias r-unm='node ${HOME}/Stacks/Utilities/UnblockNeteaseMusic/app.js -p 80:443 -f 103.126.92.132'
 alias r-lol='open /Applications/League\ of\ Legends.app/ --args --locale=zh_CN'
 
-alias r-update='brew update && brew cu && asdf latest --all && tldr --update'
-alias r-upgrade='brew upgrade && pipx upgrade-all && npx npm-check --global --update-all && cargo install-update --all && gh extension upgrade --all && asdf update && asdf plugin update --all'
-# conda update --all
-# mas upgrade
-# omz update
-# pio update && pio upgrade
-# rustup self update
-# xcodes update
+r-update() {
+  asdf latest --all
+  brew cu
+  brew update
+  tldr --update
+}
+
+r-upgrade() {
+  asdf plugin update --all
+  asdf update
+  brew upgrade
+  cargo install-update --all
+  # conda update --all
+  gh extension upgrade --all
+  juliaup update
+  mas upgrade
+  npx npm-check --global --update-all
+  omz update
+  pipx upgrade-all
+  rustup self update
+  rustup update
+}
 
 alias cpi='cp -i'
 alias cwd='printf "%q\n" "$(pwd)" | pbcopy' # Copy current working directory to clipboard
