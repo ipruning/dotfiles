@@ -17,7 +17,7 @@ ln -sf "$HOME"/dotfiles/config/mackup/.mackup "$HOME"/.mackup
 mackup restore
 
 echo "${BLUE}Installing rust${NORMAL}"
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 source "$HOME"/.cargo/env
 
 echo "${BLUE}Installing oh-my-zsh${NORMAL}"
