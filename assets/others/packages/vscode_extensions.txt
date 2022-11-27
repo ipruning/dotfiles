@@ -31,7 +31,7 @@ golang.go
 GrapeCity.gc-excelviewer
 Gruntfuggly.todo-tree
 hediet.vscode-drawio
-huacnlee.auto-correct
+huacnlee.autocorrect
 humao.rest-client
 ionutvmi.path-autocomplete
 jacobdufault.fuzzy-search
@@ -94,6 +94,7 @@ sswg.swift-lang
 tamasfe.even-better-toml
 tecosaur.latex-utilities
 telesoho.vscode-markdown-paste-image
+tensorchord.vscode-envd
 timonwong.shellcheck
 twxs.cmake
 Tyriar.sort-lines

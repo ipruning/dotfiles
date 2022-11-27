@@ -4,6 +4,7 @@ black
 cookiecutter
 deadlink
 detect-secrets
+envd
 fava
 fava-investor
 ffsubsync
