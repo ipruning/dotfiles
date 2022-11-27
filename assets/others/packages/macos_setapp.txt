@@ -13,6 +13,7 @@ Focus
 ForkLift
 Gemini
 Gifox
+HazeOver
 Hookmark
 HoudahSpot
 Hype
