@@ -95,6 +95,11 @@ source "/opt/homebrew/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completi
 source "/opt/homebrew/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.zsh.inc"
 
 #===============================================================================
+# 👇 colima & docker
+#===============================================================================
+export DOCKER_HOST="unix://${HOME}/.colima/default/docker.sock"
+
+#===============================================================================
 # 👇 custom binary
 #===============================================================================
 export PATH="${HOME}/dotfiles/bin:$PATH"
