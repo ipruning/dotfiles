@@ -61,6 +61,7 @@ Karabiner-EventViewer
 KeyCastr
 Keyboard Maestro
 Keynote
+Kit
 LTspice
 LanguageTool for Desktop
 Lark
