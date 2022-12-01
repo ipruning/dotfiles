@@ -45,7 +45,7 @@ r-upgrade() {
   # conda update --all
   gh extension upgrade --all
   juliaup update
-  mas upgrade
+  # mas upgrade
   npx npm-check --global --update-all
   omz update
   pipx upgrade-all
