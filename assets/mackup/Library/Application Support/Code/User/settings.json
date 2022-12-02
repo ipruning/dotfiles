@@ -48,7 +48,7 @@
   "workbench.colorTheme": "One Dark Pro Darker",
   // editor
   // open files as tabs
-  "workbench.editor.enablePreview": false,
+  "workbench.editor.enablePreview": true,
   // reveal existing files if they are open (avoids tons of tabs)
   "workbench.editor.revealIfOpen": true,
   // open files from quick open as tabs
@@ -57,7 +57,7 @@
     "*.ipynb": "jupyter-notebook",
     "*.pdf": "latex-workshop-pdf-hook"
   },
-  "workbench.layoutControl.enabled": false,
+  "workbench.layoutControl.enabled": true,
   "window.commandCenter": false,
   "jupyter.widgetScriptSources": ["jsdelivr.com", "unpkg.com"],
   "jupyter.askForKernelRestart": false,
@@ -152,11 +152,12 @@
   "indentRainbow.ignoreErrorLanguages": [
     "clojure",
     "json",
+    "latex",
     "markdown",
     "python",
     "rust"
   ],
-  "indentRainbow.excludedLanguages": ["latex", "log", "magit", "plaintext"],
+  "indentRainbow.excludedLanguages": ["log", "magit", "plaintext"],
   "indentRainbow.colorOnWhiteSpaceOnly": true,
   "errorLens.excludeBySource": ["eslint", "jshint"],
   "notebook.cellToolbarLocation": {
@@ -167,7 +168,7 @@
   "explorer.confirmDelete": false,
   "[latex]": {
     "editor.fontSize": 14,
-    "editor.formatOnSave": false,
+    "editor.formatOnSave": true,
     "editor.tabSize": 2,
     "editor.wordWrap": "on"
   },
@@ -264,7 +265,7 @@
     "editor.lineHighlightBorder": "#9fced11f"
   },
   "editor.wordWrap": "off",
-  "diffEditor.wordWrap": "off",
+  "diffEditor.wordWrap": "on",
   "diffEditor.renderSideBySide": true,
   "diffEditor.ignoreTrimWhitespace": false,
   "diffEditor.maxComputationTime": 10000,
