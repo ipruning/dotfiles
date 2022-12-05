@@ -12,19 +12,21 @@
   "editor.stickyScroll.enabled": true,
   "editor.suggestSelection": "first",
   "editor.tabSize": 2,
-  "github.copilot.enable": {
-    "*": true,
-    "plaintext": false,
-    "markdown": false,
-    "rust": false
-  },
-  "terminal.integrated.fontFamily": "'CaskaydiaCove Nerd Font', 'Source Han Sans SC'",
-  "terminal.integrated.fontSize": 12,
-  "terminal.integrated.inheritEnv": false,
+  "editor.wordWrap": "off",
+  "editor.guides.indentation": false,
+  "editor.guides.bracketPairs": false,
+  "editor.accessibilitySupport": "off",
+  "diffEditor.wordWrap": "on",
+  "diffEditor.renderSideBySide": true,
+  "diffEditor.ignoreTrimWhitespace": false,
+  "diffEditor.maxComputationTime": 10000,
+  "terminal.external.osxExec": "/Applications/iTerm.app/Contents/MacOS/iTerm2",
   "terminal.integrated.commandsToSkipShell": ["language-julia.interrupt"],
   "terminal.integrated.confirmOnExit": "hasChildProcesses",
   "terminal.integrated.defaultProfile.osx": "zsh",
-  "terminal.external.osxExec": "/Applications/iTerm.app/Contents/MacOS/iTerm2",
+  "terminal.integrated.fontFamily": "'CaskaydiaCove Nerd Font', 'Source Han Sans SC'",
+  "terminal.integrated.fontSize": 12,
+  "terminal.integrated.inheritEnv": false,
   "powershell.startAutomatically": false,
   "code-runner.preserveFocus": false,
   "code-runner.runInTerminal": true,
@@ -36,16 +38,27 @@
   "code-runner.clearPreviousOutput": true,
   "code-runner.ignoreSelection": true,
   "code-runner.saveFileBeforeRun": true,
+  "github.copilot.enable": {
+    "*": true,
+    "plaintext": false,
+    "markdown": false,
+    "rust": false
+  },
   "git.autofetch": true,
   "git.confirmSync": false,
   "git.enableSmartCommit": true,
   "gitlens.views.repositories.files.layout": "list",
   "gitlens.codeLens.scopes": ["document"],
+  "workbench.activityBar.visible": true,
+  "workbench.colorTheme": "One Dark Pro Darker",
+  "workbench.colorCustomizations": {
+    "editor.lineHighlightBackground": "#1073cf2d",
+    "editor.lineHighlightBorder": "#9fced11f"
+  },
+  "workbench.iconTheme": "material-icon-theme",
   "workbench.tree.indent": 20,
   "workbench.tree.renderIndentGuides": "none",
-  "workbench.activityBar.visible": true,
-  "workbench.iconTheme": "material-icon-theme",
-  "workbench.colorTheme": "One Dark Pro Darker",
+  "workbench.startupEditor": "none",
   // editor
   // open files as tabs
   "workbench.editor.enablePreview": true,
@@ -58,10 +71,6 @@
     "*.pdf": "latex-workshop-pdf-hook"
   },
   "workbench.layoutControl.enabled": true,
-  "window.commandCenter": false,
-  "jupyter.widgetScriptSources": ["jsdelivr.com", "unpkg.com"],
-  "jupyter.askForKernelRestart": false,
-  "remote.SSH.connectTimeout": 1000,
   "todo-tree.general.tags": [
     "BUG",
     "HACK",
@@ -100,6 +109,8 @@
     }
   },
   "todo-tree.regex.regex": "(//|#|<!--|;|/\\*|^|^\\s*(-|\\d+.))\\s*($TAGS)",
+  "jupyter.widgetScriptSources": ["jsdelivr.com", "unpkg.com"],
+  "jupyter.askForKernelRestart": false,
   "isort.check": true,
   "isort.importStrategy": "fromEnvironment",
   "isort.args": ["--line-length=120"],
@@ -149,6 +160,21 @@
     "indent_size": 4
   },
   "markdownFormatter.formatULSymbol": false,
+  "material-icon-theme.files.associations": {
+    ".autocorrectrc": "Yaml",
+    "Brewfile_dev": "Ruby",
+    "Brewfile_leaves": "Ruby",
+    ".coverage": "Log",
+    ".secrets.baseline": "Json"
+  },
+  "material-icon-theme.languages.associations": {
+    "beancount": "Log",
+    "qalc": "Log"
+  },
+  "files.associations": {
+    ".gitconfig": "ini",
+    ".gitconfig.local": "ini"
+  },
   "indentRainbow.ignoreLinePatterns": [
     "/[ \t]* [*]/g", // lines beginning with <whitespace><space>*
     "/[ \t]+[/]{2}/g" // lines beginning with <whitespace>//
@@ -163,13 +189,7 @@
   ],
   "indentRainbow.excludedLanguages": ["log", "magit", "plaintext"],
   "indentRainbow.colorOnWhiteSpaceOnly": true,
-  "errorLens.excludeBySource": ["eslint", "jshint"],
-  "notebook.cellToolbarLocation": {
-    "default": "right",
-    "jupyter-notebook": "left"
-  },
-  "redhat.telemetry.enabled": false,
-  "explorer.confirmDelete": false,
+  "prettier.tabWidth": 2,
   "[latex]": {
     "editor.fontSize": 14,
     "editor.formatOnSave": true,
@@ -229,76 +249,46 @@
     "editor.defaultFormatter": "redhat.vscode-yaml",
     "editor.tabSize": 2
   },
-  "prettier.tabWidth": 2,
-  "material-icon-theme.files.associations": {
-    ".autocorrectrc": "Yaml",
-    "Brewfile_dev": "Ruby",
-    "Brewfile_leaves": "Ruby",
-    ".coverage": "Log",
-    ".secrets.baseline": "Json"
+  "notebook.cellToolbarLocation": {
+    "default": "right",
+    "jupyter-notebook": "left"
   },
-  "material-icon-theme.languages.associations": {
-    "beancount": "Log",
-    "qalc": "Log"
-  },
-  // Beancount
+  "C_Cpp.intelliSenseEngine": "disabled",
+  "autocorrect.formatOnSave": false,
   "beancount.fixedCJKWidth": true,
   "beancount.inputMethods": ["pinyin"],
   "beancount.mainBeanFile": "~/Databases/Ledger/main.bean",
-  "beancountFormatter.fixedCJKWidth": true,
   "beancountFormatter.currencyColumn": 72,
-  "platformio-ide.activateOnlyOnPlatformIOProject": true,
-  "platformio-ide.useBuiltinPython": false,
-  "autocorrect.formatOnSave": false,
-  "json.maxItemsComputed": 10000,
-  "markdown-preview-enhanced.previewTheme": "one-light.css",
-  "julia.symbolCacheDownload": true,
-  "julia.enableTelemetry": false,
-  "julia.executablePath": "julia +release~aarch64",
-  "explorer.confirmDragAndDrop": false,
-  "path-autocomplete.triggerOutsideStrings": true,
-  "shellcheck.exclude": ["SC1091", "SC2148", "SC2155"],
-  "shellcheck.executablePath": "/opt/homebrew/bin/shellcheck",
-  "gitlens.defaultDateLocale": null,
-  "gitlens.defaultDateFormat": "YYYY-MM-DD hh:mm",
-  "gitlens.defaultTimeFormat": "hh:mm",
-  "gitlens.defaultDateShortFormat": "YYYY-MM-DD",
-  "C_Cpp.intelliSenseEngine": "disabled",
-  "file-browser.hideIgnoredFiles": true,
-  "workbench.startupEditor": "none",
-  "workbench.colorCustomizations": {
-    "editor.lineHighlightBackground": "#1073cf2d",
-    "editor.lineHighlightBorder": "#9fced11f"
-  },
-  "editor.wordWrap": "off",
-  "diffEditor.wordWrap": "on",
-  "diffEditor.renderSideBySide": true,
-  "diffEditor.ignoreTrimWhitespace": false,
-  "diffEditor.maxComputationTime": 10000,
-  "editor.guides.indentation": false,
-  "editor.guides.bracketPairs": false,
+  "beancountFormatter.fixedCJKWidth": true,
+  "dendron.rootDir": "~/Databases/Dendron",
+  "errorLens.excludeBySource": ["eslint", "jshint"],
   "evenBetterToml.formatter.alignEntries": true,
   "evenBetterToml.formatter.indentEntries": true,
   "evenBetterToml.schema.enabled": false,
-  "editor.accessibilitySupport": "off",
+  "explorer.confirmDelete": false,
+  "explorer.confirmDragAndDrop": false,
+  "file-browser.hideIgnoredFiles": true,
+  "gitlens.defaultDateFormat": "YYYY-MM-DD hh:mm",
+  "gitlens.defaultDateLocale": null,
+  "gitlens.defaultDateShortFormat": "YYYY-MM-DD",
+  "gitlens.defaultTimeFormat": "hh:mm",
+  "json.maxItemsComputed": 10000,
+  "julia.enableTelemetry": false,
+  "julia.executablePath": "julia +release~aarch64",
+  "julia.symbolCacheDownload": true,
+  "markdown-preview-enhanced.previewTheme": "one-light.css",
+  "path-autocomplete.triggerOutsideStrings": true,
+  "redhat.telemetry.enabled": false,
+  "remote.SSH.connectTimeout": 1000,
+  "shellcheck.exclude": ["SC1091", "SC2148", "SC2155"],
+  "shellcheck.executablePath": "/opt/homebrew/bin/shellcheck",
+  "window.commandCenter": false,
   "yaml.schemas": {
     "https://json.schemastore.org/github-workflow.json": ".github/workflows/*"
-  },
-  "files.associations": {
-    ".gitconfig": "ini"
   },
   "files.simpleDialog.enable": true,
   "files.insertFinalNewline": true,
   "files.trimFinalNewlines": true,
-  "gitProjectManager.baseProjectsFolders": [
-    "~/Coding",
-    "~/Desktop",
-    "~/Stacks"
-  ],
-  "projectManager.git.baseFolders": ["~/Coding", "~/Desktop", "~/Stacks"],
-  "liveServer.settings.donotShowInfoMsg": true,
-  "matlab.matlabpath": "/Applications/MATLAB_R2022a.app/bin",
-  "matlab.mlintpath": "/Applications/MATLAB_R2022a.app/bin/maci64/mlint",
   "cSpell.customDictionaries": {
     "custom-dictionary-user": {
       "name": "custom-dictionary-user",
@@ -307,10 +297,18 @@
       "scope": "user"
     }
   },
-  // draw.io
   "hediet.vscode-drawio.codeLinkActivated": true,
-  // Dendron
-  "dendron.rootDir": "~/Databases/Dendron",
+  "liveServer.settings.donotShowInfoMsg": true,
+  "matlab.matlabpath": "/Applications/MATLAB_R2022a.app/bin",
+  "matlab.mlintpath": "/Applications/MATLAB_R2022a.app/bin/maci64/mlint",
+  "platformio-ide.activateOnlyOnPlatformIOProject": true,
+  "platformio-ide.useBuiltinPython": false,
+  "projectManager.git.baseFolders": ["~/Coding", "~/Desktop", "~/Stacks"],
+  "gitProjectManager.baseProjectsFolders": [
+    "~/Coding",
+    "~/Desktop",
+    "~/Stacks"
+  ],
   // nvim
   "vscode-neovim.neovimExecutablePaths.darwin": "/opt/homebrew/bin/nvim",
   // vim
@@ -363,7 +361,7 @@
   "explorer.fileNesting.enabled": true,
   "explorer.fileNesting.expand": false,
   "explorer.fileNesting.patterns": {
-    "//": "Last update at 11/30/2022, 10:55:18 PM",
+    "//": "Last update at 12/5/2022, 10:04:48 PM",
     "*.asax": "$(capture).*.cs, $(capture).*.vb",
     "*.ascx": "$(capture).*.cs, $(capture).*.vb",
     "*.ashx": "$(capture).*.cs, $(capture).*.vb",
