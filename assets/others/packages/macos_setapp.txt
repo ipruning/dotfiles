@@ -4,6 +4,7 @@ BetterTouchTool
 BetterZip
 CleanMyMac X
 CleanShot X
+Craft
 Dash
 Disk Drill
 Downie
