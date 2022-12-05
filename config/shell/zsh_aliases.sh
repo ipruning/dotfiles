@@ -48,6 +48,7 @@ r-upgrade() {
   # mas upgrade
   npx npm-check --global --update-all
   omz update
+  python -m pip install --upgrade pip
   pipx upgrade-all
   rustup self update
   rustup update
