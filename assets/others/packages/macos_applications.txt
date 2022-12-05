@@ -11,6 +11,7 @@ Arc
 Ask Command
 Audio Hijack
 Audio Jam
+BetterDisplay
 Blackmagic Disk Speed Test
 Blackmagic Media Express
 Blender
@@ -47,6 +48,7 @@ GarageBand
 GitHub Desktop
 GoodNotes
 Google Chrome
+Grammarly Desktop
 Hammerspoon
 Hepta
 Homerow
@@ -117,7 +119,7 @@ Pocket Casts
 PocketTube
 PowerShell
 QLMarkdown
-QQ-NT
+QQ
 Raindrop.io
 Raycast
 Rectangle

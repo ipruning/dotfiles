@@ -1,6 +1,7 @@
 autocut
 beancount
 black
+commitizen
 cookiecutter
 deadlink
 detect-secrets
@@ -10,6 +11,7 @@ fava-investor
 ffsubsync
 flake8
 isort
+mackup
 maigret
 manim
 mkdocs-material
