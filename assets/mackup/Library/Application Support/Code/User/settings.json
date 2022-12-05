@@ -100,6 +100,10 @@
     }
   },
   "todo-tree.regex.regex": "(//|#|<!--|;|/\\*|^|^\\s*(-|\\d+.))\\s*($TAGS)",
+  "isort.check": true,
+  "isort.importStrategy": "fromEnvironment",
+  "isort.args": ["--line-length=120"],
+  "python.formatting.blackArgs": ["--line-length=120"],
   "python.defaultInterpreterPath": "/Users/alex/.conda/envs/LearningAI/bin/python",
   "python.formatting.provider": "black",
   "python.languageServer": "Pylance",
@@ -259,6 +263,8 @@
   "gitlens.defaultDateFormat": "YYYY-MM-DD hh:mm",
   "gitlens.defaultTimeFormat": "hh:mm",
   "gitlens.defaultDateShortFormat": "YYYY-MM-DD",
+  "C_Cpp.intelliSenseEngine": "disabled",
+  "file-browser.hideIgnoredFiles": true,
   "workbench.startupEditor": "none",
   "workbench.colorCustomizations": {
     "editor.lineHighlightBackground": "#1073cf2d",
