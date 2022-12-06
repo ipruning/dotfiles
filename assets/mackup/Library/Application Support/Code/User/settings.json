@@ -253,7 +253,7 @@
     "default": "right",
     "jupyter-notebook": "left"
   },
-  "C_Cpp.intelliSenseEngine": "disabled",
+  "C_Cpp.intelliSenseEngine": "Disabled",
   "autocorrect.formatOnSave": false,
   "beancount.fixedCJKWidth": true,
   "beancount.inputMethods": ["pinyin"],
