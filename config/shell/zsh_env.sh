@@ -45,9 +45,9 @@ export plugins=(
   git-open                # https://github.com/paulirish/git-open
   zsh-autosuggestions     # https://github.com/zsh-users/zsh-autosuggestions
   zsh-completions         # https://github.com/zsh-users/zsh-completions
-  zsh-osx-autoproxy       # https://github.com/sukkaw/zsh-osx-autoproxy
   zsh-syntax-highlighting # https://github.com/zsh-users/zsh-syntax-highlighting
   zsh-vi-mode             # https://github.com/jeffreytse/zsh-vi-mode
+  # zsh-osx-autoproxy       # https://github.com/sukkaw/zsh-osx-autoproxy
 )
 
 #===============================================================================
@@ -238,7 +238,7 @@ eval "$(thefuck --alias)"
 #===============================================================================
 # 👇 broot
 #===============================================================================
-source "${HOME}/.config/broot/launcher/bash/br"
+source "${HOME}/.config/broot/launcher/bash/br" || broot --install
 
 #===============================================================================
 # 👇 puppeteer
