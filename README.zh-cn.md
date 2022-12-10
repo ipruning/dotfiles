@@ -14,9 +14,10 @@
 - [Customize](#customize)
     - [`zshrc`](#zshrc)
     - [`~/.gitconfig.local`](#gitconfiglocal)
-    - [macOS 配置](#macos-配置)
+    - [macOS 配置指南](#macos-配置指南)
     - [macOS Homebrew 配置指南](#macos-homebrew-配置指南)
-    - [Arch Linux 配置](#arch-linux-配置)
+    - [Ubuntu 配置指南](#ubuntu-配置指南)
+    - [Arch 配置指南](#arch-配置指南)
 - [ChangeLog](#changelog)
 
 ## TODO
@@ -56,7 +57,7 @@ xcode-select --install
 
 使用 `~/.gitconfig.local` 来存储敏感信息，如用户名，邮箱，私钥等。
 
-### macOS 配置
+### macOS 配置指南
 
 - 修改用户名；
 - 修改共享电脑名称 `sudo scutil --set HostName mac`；
@@ -99,7 +100,14 @@ rm -rf brew-install
 # 安装成功后需将 Homebrew 的相关路径加入到环境变量中。如何添加环境变量请参考 Homebrew 命令行输出。
 ```
 
-### Arch Linux 配置
+### Ubuntu 配置指南
+
+```shell
+git clone --depth 1 https://github.com/Spehhhhh/dotfiles.git "$HOME"/dotfiles
+source "$HOME"/dotfiles/scripts/bootstrap_linux.sh
+```
+
+### Arch 配置指南
 
 ## ChangeLog
 
