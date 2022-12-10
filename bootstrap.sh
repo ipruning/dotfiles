@@ -20,7 +20,9 @@ function bootstrap {
     ;;
   linux*)
     if [[ "$(uname -m)" == *armv7l* ]]; then
-      source "$HOME"/dotfiles/scripts/bootstrap_raspberry.sh
+      echo "${RED}Unsupported system architecture.${NORMAL}"
+    elif [[ "$(uname -m)" == *x86_64* ]]; then
+      echo "${RED}Unsupported system architecture.${NORMAL}"
     else
       echo "${RED}Unsupported system architecture.${NORMAL}"
     fi
@@ -34,9 +36,41 @@ function bootstrap {
   esac
 }
 
-MODE="$1"
+while getopts ":a:b:f:h" opt; do
+  case $opt in
+  a)
+    echo "Option -a: $OPTARG"
+    ;;
+  b)
+    echo "Option -b: $OPTARG"
+    ;;
+  f)
+    MODE="force"
+    ;;
+  h)
+    echo "Usage: bootstrap.sh [-f] [-h]"
+    exit 0
+    ;;
+  \?)
+    # If the user provides an invalid option, display an error message and exit
+    echo "Invalid option: -$OPTARG"
+    exit 1
+    ;;
+  :)
+    # If the user provides an option without an argument, display an error message and exit
+    echo "Option -$OPTARG requires an argument"
+    exit 1
+    ;;
+  esac
+done
 
-if [[ $MODE == "--force" ]]; then
+# Shift the options to the left so the remaining arguments are stored in $@
+shift $((OPTIND - 1))
+
+# Do something with the remaining arguments
+echo "Remaining arguments: $*"
+
+if [[ $MODE == "force" ]]; then
   rm -rf "$HOME"/dotfiles
   bootstrap
 else
@@ -52,6 +86,6 @@ else
       bootstrap
     fi
   else
-    echo ""
+    echo "${YELLOW}Aborting...${NORMAL}"
   fi
 fi
