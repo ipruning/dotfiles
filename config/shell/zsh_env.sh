@@ -91,8 +91,12 @@ zstyle ':fzf-tab:*' fzf-pad 10
 #===============================================================================
 # 👇 gcloud
 #===============================================================================
-source "/opt/homebrew/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.zsh.inc"
-source "/opt/homebrew/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.zsh.inc"
+case $SYSTEM_TYPE in
+mac*)
+  source "$(brew --prefix)/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.zsh.inc"
+  source "$(brew --prefix)/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.zsh.inc"
+  ;;
+esac
 
 #===============================================================================
 # 👇 colima & docker
@@ -339,6 +343,11 @@ mac_x86_64)
   # python
   eval "$(pyenv init --path)" # pyenv intel shell env
   eval "$(pyenv init -)"      # pyenv intel shell env
+  alias 'cvenv'='python3 -m venv .venv && source .venv/bin/activate && python3 -m pip install --upgrade -r $HOME/.requirements.txt'
+  alias 'svenv'='source .venv/bin/activate'
+  ;;
+linux_x86_64)
+  # python
   alias 'cvenv'='python3 -m venv .venv && source .venv/bin/activate && python3 -m pip install --upgrade -r $HOME/.requirements.txt'
   alias 'svenv'='source .venv/bin/activate'
   ;;
