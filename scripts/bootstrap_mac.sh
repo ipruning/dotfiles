@@ -1,18 +1,6 @@
 #!/usr/bin/env bash
 
 function main {
-  case $SYSTEM_ARCH in
-  arm64*)
-    echo "${BLUE}Installing dotfiles for macOS (Apple chips)${NORMAL}"
-    ;;
-  x86_64*)
-    echo "${BLUE}Installing dotfiles for macOS (Intel chips)${NORMAL}"
-    ;;
-  *)
-    echo "unknown $SYSTEM_ARCH"
-    ;;
-  esac
-
   echo "${BLUE}Installing oh-my-zsh${NORMAL}"
   export CHSH=no
   export RUNZSH=no
@@ -46,7 +34,7 @@ function main {
   git clone https://github.com/jeffreytse/zsh-vi-mode "$ZSH_CUSTOM"/plugins/zsh-vi-mode
 
   echo "${BLUE}Installing Homebrew${NORMAL}"
-  which brew || /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  which brew || NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
   echo "${BLUE}Installing Homebrew packages${NORMAL}"
   case $SYSTEM_ARCH in
@@ -67,7 +55,7 @@ function main {
   ln -sf "$HOME"/dotfiles/config/mackup/.mackup "$HOME"/.mackup
 
   echo "${BLUE}Restoring dotfiles${NORMAL}"
-  if [ "$MODE" == "--force" ]; then
+  if [ "$MODE" == "force" ]; then
     mackup --force restore
   else
     mackup restore
@@ -108,6 +96,18 @@ function main {
   git clone --depth 1 https://github.com/doomemacs/doomemacs ~/.emacs.d
   ~/.emacs.d/bin/doom install
 }
+
+case $SYSTEM_ARCH in
+arm64*)
+  echo "${BLUE}Installing dotfiles for macOS (Apple chips)${NORMAL}"
+  ;;
+x86_64*)
+  echo "${BLUE}Installing dotfiles for macOS (Intel chips)${NORMAL}"
+  ;;
+*)
+  echo "unknown $SYSTEM_ARCH"
+  ;;
+esac
 
 main
 
