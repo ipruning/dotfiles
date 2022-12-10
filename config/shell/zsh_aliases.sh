@@ -10,6 +10,18 @@ mac_arm64)
   ;;
 esac
 
+#===============================================================================
+# 👇
+#===============================================================================
+alias cat='bat --paging=never'
+# alias cp='fcp'
+alias cpi='cp -i'
+# alias cut='choose'
+# alias df='duf'
+# alias dig='dog'
+# alias du='dust'
+# alias find='fd'
+# alias grep='rg'
 alias l='lsd'
 alias la='lsd -a'
 alias ll='lsd -lh'
@@ -18,18 +30,44 @@ alias lt='lsd --tree'
 if [[ -n $SSH_CONNECTION ]]; then
   alias lsd='lsd --icon never'
 fi
+alias mvi='mv -i'
+# alias ping='gping'
+# alias ps='procs'
+alias rip='rip -i'
+alias rmi='rm -i'
+# alias sed="sd"
+# alias sort="huniq"
+# alias top='htop'
+alias v='nvim'
 
-alias r-jupyter='${HOME}/.conda/envs/LearningAI/bin/jupyter-notebook'
-alias r-jupyter-lab='${HOME}/.conda/envs/LearningAI/bin/jupyter-lab'
+#===============================================================================
+# 👇
+#===============================================================================
+alias cwd='printf "%q\n" "$(pwd)" | pbcopy' # Copy current working directory to clipboard
+alias ehost='${=EDITOR} /etc/hosts'
+alias eohmyzsh='${=EDITOR} ~/.oh-my-zsh'
+alias ezshrc='${=EDITOR} ~/.zshrc'
+alias szshrc='source ~/.zshrc'
+alias gii='git init && git commit --allow-empty -m "init"' # Initialize a git repo and make an empty commit
+alias ip='curl -4 ip.sb'
+alias ipv6='curl -6 ip.sb'
 
+#===============================================================================
+# 👇 run
+#===============================================================================
 alias r-archivebox='cd /Volumes/Workspace/Databases/ArchiveBox && archivebox server'
+alias r-bb='/Applications/OpenBB\ Terminal/OpenBB\ Terminal'
 alias r-citespace='cd ${HOME}/Databases/CiteSpace/5.8.R3/ && ./StartCiteSpace_M1_Pro.sh'
 alias r-deepl='colima start && docker run -itd -p 8080:80 zu1k/deepl'
 alias r-fava='fava ${HOME}/Databases/Ledger/main.bean -p 4000'
-alias r-bb='/Applications/OpenBB\ Terminal/OpenBB\ Terminal'
-alias r-unm='node ${HOME}/Stacks/Utilities/UnblockNeteaseMusic/app.js -p 80:443 -f 103.126.92.132'
+alias r-jupyter-lab='${HOME}/.conda/envs/LearningAI/bin/jupyter-lab'
+alias r-jupyter='${HOME}/.conda/envs/LearningAI/bin/jupyter-notebook'
 alias r-lol='open /Applications/League\ of\ Legends.app/ --args --locale=zh_CN'
+alias r-unm='node ${HOME}/Stacks/Utilities/UnblockNeteaseMusic/app.js -p 80:443 -f 103.126.92.132'
 
+#===============================================================================
+# 👇 run update
+#===============================================================================
 r-update() {
   asdf latest --all
   brew cu
@@ -37,6 +75,9 @@ r-update() {
   tldr --update
 }
 
+#===============================================================================
+# 👇 run upgrade
+#===============================================================================
 r-upgrade() {
   asdf plugin update --all
   asdf update
@@ -53,31 +94,3 @@ r-upgrade() {
   rustup self update
   rustup update
 }
-
-alias cpi='cp -i'
-alias cwd='printf "%q\n" "$(pwd)" | pbcopy' # Copy current working directory to clipboard
-alias ehost='${=EDITOR} /etc/hosts'
-alias eohmyzsh='${=EDITOR} ~/.oh-my-zsh'
-alias ezshrc='${=EDITOR} ~/.zshrc'
-alias gii='git init && git commit --allow-empty -m "init"' # Initialize a git repo and make an empty commit
-alias ip='curl -4 ip.sb'
-alias ipv6='curl -6 ip.sb'
-alias mvi='mv -i'
-alias rmi='rm -i'
-alias szshrc='source ~/.zshrc'
-
-alias cat='bat --paging=never'
-# alias cp='fcp'
-# alias cut='choose'
-# alias df='duf'
-# alias dig='dog'
-# alias du='dust'
-# alias find='fd'
-# alias grep='rg'
-# alias ping='gping'
-# alias ps='procs'
-alias rip='rip -i' # A safe and ergonomic alternative to rm
-# alias sed="sd"
-# alias sort="huniq"
-# alias top='htop'
-alias v='nvim'
