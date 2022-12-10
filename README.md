@@ -9,11 +9,8 @@
 ## Table of Contents
 
 - [Table of Contents](#table-of-contents)
-- [TODO](#todo)
 - [Bootstrap](#bootstrap)
 - [ChangeLog](#changelog)
-
-## TODO
 
 ## Bootstrap
 
