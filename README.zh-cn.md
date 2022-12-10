@@ -103,8 +103,7 @@ rm -rf brew-install
 ### Ubuntu 配置指南
 
 ```shell
-git clone --depth 1 https://github.com/Spehhhhh/dotfiles.git "$HOME"/dotfiles
-source "$HOME"/dotfiles/scripts/bootstrap_linux.sh
+git clone --depth 1 https://github.com/Spehhhhh/dotfiles.git "$HOME"/dotfiles && source "$HOME"/dotfiles/scripts/bootstrap_linux.sh
 ```
 
 ### Arch 配置指南
