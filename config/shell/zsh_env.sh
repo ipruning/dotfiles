@@ -26,14 +26,16 @@ fi
 #===============================================================================
 # 👇 Standard plugins can be found in $ZSH/plugins/
 # 👇 Custom plugins may be added to $ZSH_CUSTOM/plugins/
+# x <file> extract <file>
+# showfiles show hidefiles
 #===============================================================================
 export plugins=(
   asdf
   colored-man-pages
-  extract # x <file>
+  extract
   fd
   gh
-  macos # showfiles hidefiles
+  macos
   magic-enter
   systemadmin
   ripgrep
@@ -43,11 +45,9 @@ export plugins=(
   git-open                # https://github.com/paulirish/git-open
   zsh-autosuggestions     # https://github.com/zsh-users/zsh-autosuggestions
   zsh-completions         # https://github.com/zsh-users/zsh-completions
+  zsh-osx-autoproxy       # https://github.com/sukkaw/zsh-osx-autoproxy
   zsh-syntax-highlighting # https://github.com/zsh-users/zsh-syntax-highlighting
   zsh-vi-mode             # https://github.com/jeffreytse/zsh-vi-mode
-  # Archive
-  # zsh-osx-autoproxy       # export https_proxy=http://127.0.0.1:7890 http_proxy=http://127.0.0.1:7890 all_proxy=socks5://127.0.0.1:7890
-  # fzf-tab # https://github.com/Aloxaf/fzf-tab
 )
 
 #===============================================================================
@@ -161,6 +161,7 @@ esac
 # forgit_cherry_pick=gcp
 # forgit_rebase=grb
 # forgit_fixup=gfu
+FORGIT_INSTALL_DIR="$ZSH_CUSTOM"/plugins/forgit
 export PATH="$PATH:$FORGIT_INSTALL_DIR/bin"
 
 #===============================================================================
