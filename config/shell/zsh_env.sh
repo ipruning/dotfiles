@@ -15,13 +15,18 @@
 export ZSH="${HOME}/.oh-my-zsh"
 
 #===============================================================================
-# 👇 ZSH Theme
+# 👇 zsh Theme
 #===============================================================================
 if [[ -n $SSH_CONNECTION ]]; then
   eval "$(starship init zsh)"
 else
   eval "$(starship init zsh)"
 fi
+
+#===============================================================================
+# 👇 zsh-vi-mode https://github.com/jeffreytse/zsh-vi-mode/issues/24
+#===============================================================================
+export ZVM_INIT_MODE=sourcing
 
 #===============================================================================
 # 👇 Standard plugins can be found in $ZSH/plugins/
@@ -109,46 +114,33 @@ export DOCKER_HOST="unix://${HOME}/.colima/default/docker.sock"
 export PATH="${HOME}/dotfiles/bin:$PATH"
 
 #===============================================================================
-# 👇 zsh-vi-mode https://github.com/jeffreytse/zsh-vi-mode/issues/24
 # 👇 custom keybindings
 #===============================================================================
+# 👇 fzf
 case $SYSTEM_TYPE in
-mac*)
-  zvm_after_init() {
-    # 👇 fzf
-    # [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-    case $SYSTEM_TYPE in
-    mac_arm64)
-      source "$(brew --prefix fzf)/shell/completion.zsh"
-      source "$(brew --prefix fzf)/shell/key-bindings.zsh"
-      ;;
-    mac_x86_64)
-      source "/opt/homebrew/opt/fzf/shell/completion.zsh"
-      source "/opt/homebrew/opt/fzf/shell/key-bindings.zsh"
-      ;;
-    linux_x86_64)
-      source "$(brew --prefix fzf)/shell/completion.zsh"
-      source "$(brew --prefix fzf)/shell/key-bindings.zsh"
-      ;;
-    esac
-    # 👇 Option-S
-    bindkey '^S' sudo-command-line
-    # 👇 Option-C
-    bindkey 'ç' fzf-cd-widget
-    # 👇 Option-X
-    bindkey '≈' fzf-dirs-widget
-    # 👇 Ctrl-L accept zsh-autosuggestions https://github.com/zsh-users/zsh-autosuggestions#key-bindings
-    bindkey '^L' autosuggest-accept
-    # 👇 Ctrl-G
-    bindkey '^g' _navi_widget
-  }
+mac_arm64)
+  source "$(brew --prefix fzf)/shell/completion.zsh"
+  source "$(brew --prefix fzf)/shell/key-bindings.zsh"
   ;;
-linux*)
-  zvm_after_init() {
-    bindkey '\ex' fzf-dirs-widget
-  }
+mac_x86_64)
+  source "/opt/homebrew/opt/fzf/shell/completion.zsh"
+  source "/opt/homebrew/opt/fzf/shell/key-bindings.zsh"
+  ;;
+linux_x86_64)
+  source "$(brew --prefix fzf)/shell/completion.zsh"
+  source "$(brew --prefix fzf)/shell/key-bindings.zsh"
   ;;
 esac
+# 👇 Option-S
+bindkey '^S' sudo-command-line
+# 👇 Option-C
+bindkey 'ç' fzf-cd-widget
+# 👇 Option-X
+bindkey '≈' fzf-dirs-widget
+# 👇 Ctrl-L accept zsh-autosuggestions https://github.com/zsh-users/zsh-autosuggestions#key-bindings
+bindkey '^L' autosuggest-accept
+# 👇 Ctrl-G
+bindkey '^g' _navi_widget
 
 #===============================================================================
 # 👇 forgit
