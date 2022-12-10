@@ -97,7 +97,7 @@ linux_x86_64)
 
   echo "${BLUE}Restoring dotfiles${NORMAL}"
   if [ "$MODE" == "force" ]; then
-    mackup --force restore
+    mackup restore --force
   else
     mackup restore
   fi
