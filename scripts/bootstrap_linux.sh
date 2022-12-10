@@ -2,7 +2,8 @@
 
 function main {
   echo "${BLUE}Installing essential${NORMAL}"
-  sudo apt-get install -y build-essential
+  sudo apt-get install -y -q build-essential
+  sudo locale-gen en_US.UTF-8
 
   echo "${BLUE}Installing zsh${NORMAL}"
   sudo apt-get install -y zsh
@@ -44,12 +45,12 @@ function main {
   which brew || NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
   echo "${BLUE}Installing Homebrew packages${NORMAL}"
-  echo '# Set PATH, MANPATH, etc., for Homebrew.' >>/root/.profile
   echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >>/root/.profile
   eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-  brew install asdf
   brew install gcc
-  brew install pipx
+
+  echo "${BLUE}Installing Homebrew packages${NORMAL}"
+  brew bundle --file="$HOME"/dotfiles/assets/others/packages/Brewfile_dev
 
   echo "${BLUE}Installing mackup${NORMAL}"
   ln -sf "$HOME"/dotfiles/config/mackup/.mackup.cfg "$HOME"/.mackup.cfg
@@ -57,38 +58,22 @@ function main {
 
   echo "${BLUE}Restoring dotfiles${NORMAL}"
   if [ "$MODE" == "force" ]; then
-    mackup --force restore
+    mackup restore --root --force
   else
-    mackup restore
+    mackup restore --root
   fi
 
-  echo "${BLUE}Installing asdf${NORMAL}"
-  asdf plugin-add clojure https://github.com/asdf-community/asdf-clojure.git
-  asdf plugin-add crystal https://github.com/asdf-community/asdf-crystal.git
-  asdf plugin-add elixir https://github.com/asdf-vm/asdf-elixir.git
-  asdf plugin-add golang https://github.com/kennyp/asdf-golang.git
-  asdf plugin-add java https://github.com/halcyon/asdf-java.git
-  asdf plugin-add lua https://github.com/Stratus3D/asdf-lua.git
-  asdf plugin-add nodejs https://github.com/asdf-vm/asdf-nodejs.git
-  asdf plugin-add python
-  asdf plugin-add ruby https://github.com/asdf-vm/asdf-ruby.git
-  asdf plugin-add rust https://github.com/asdf-community/asdf-rust.git
-  asdf install
-
-  echo "${BLUE}Reshiming asdf${NORMAL}"
-  # asdf reshim
-
   echo "${BLUE}Installing cargo packages${NORMAL}"
-  # xargs <"$HOME"/dotfiles/assets/others/packages/cargo_dev.txt -n 1 cargo install
 
   echo "${BLUE}Installing npm packages${NORMAL}"
-  # xargs npm install --location=global <"$HOME"/dotfiles/assets/others/packages/npm_dev.txt
 
   echo "${BLUE}Installing pipx packages${NORMAL}"
-  # xargs <"$HOME"/dotfiles/assets/others/packages/pipx_dev.txt -n 1 pipx install
 
   echo "${BLUE}Installing other packages${NORMAL}"
-  cargo install rm-improved
+  brew install rm-improved
+  brew install broot
+  brew install direnv
+  brew install thefuck
 
   echo "${BLUE}Installing tmux configuration (oh-my-tmux)${NORMAL}"
   git clone https://github.com/gpakosz/.tmux.git "$HOME"/.tmux
@@ -112,15 +97,15 @@ NORMAL="$(tput sgr0)"
 
 main
 
+# echo 'debconf debconf/frontend select Noninteractive' | sudo debconf-set-selections
+# sudo apt-get install -y -q make
+# sudo apt-get install -y -q libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev
+
 # echo "${BLUE}Installing mackup${NORMAL}"
 # python3 -m pipx install mackup
 # ln -sf "$HOME"/dotfiles/config/mackup/.mackup.cfg "$HOME"/.mackup.cfg
 # ln -sf "$HOME"/dotfiles/config/mackup/.mackup "$HOME"/.mackup
 # mackup restore
-
-# echo "${BLUE}Installing packages${NORMAL}"
-# sudo apt-get install -y htop
-# sudo apt-get install -y neovim
 
 # git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
 # ~/.fzf/install --all
