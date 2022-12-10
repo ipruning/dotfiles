@@ -96,7 +96,7 @@ linux_x86_64)
   ln -sf "$HOME"/dotfiles/config/mackup/.mackup "$HOME"/.mackup
 
   echo "${BLUE}Restoring dotfiles${NORMAL}"
-  if [ "$MODE" == "--force" ]; then
+  if [ "$MODE" == "force" ]; then
     mackup --force restore
   else
     mackup restore
