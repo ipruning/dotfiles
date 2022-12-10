@@ -21,15 +21,14 @@ function main {
 
   echo "${BLUE}Installing zsh dotiles${NORMAL}"
   if [ -e "$HOME"/.zshrc ]; then
-    # #TODO # grep --fixed-strings "dotfiles/config/shell/init.sh" "$HOME"/.zshrc || mv "$HOME"/.zshrc "$HOME"/.zshrc.bak && cp "$HOME"/dotfiles/config/shell/mac/zshrc.sh "$HOME"/.zshrc
-    mv "$HOME"/.zshrc "$HOME"/.zshrc.bak && cp "$HOME"/dotfiles/config/shell/mac/zshrc.sh "$HOME"/.zshrc
-    # #TODO # touch "$HOME"/.zshrc
+    mv "$HOME"/.zshrc "$HOME"/.zshrc.bak
+    cp "$HOME"/dotfiles/config/shell/mac/zshrc.sh "$HOME"/.zshrc
   else
     cp "$HOME"/dotfiles/config/shell/mac/zshrc.sh "$HOME"/.zshrc
   fi
   if [ -e "$HOME"/.zprofile ]; then
-    mv "$HOME"/.zprofile "$HOME"/.zprofile.bak && cp "$HOME"/dotfiles/config/shell/mac/zprofile.sh "$HOME"/.zprofile
-    # #TODO # touch "$HOME"/.zprofile
+    mv "$HOME"/.zprofile "$HOME"/.zprofile.bak
+    cp "$HOME"/dotfiles/config/shell/mac/zprofile.sh "$HOME"/.zprofile
   else
     cp "$HOME"/dotfiles/config/shell/mac/zprofile.sh "$HOME"/.zprofile
   fi
