@@ -17,13 +17,13 @@ window:
 font:
   normal:
     family: CaskaydiaCove Nerd Font
-    style: Light
+    style: SemiLight
   bold:
     family: CaskaydiaCove Nerd Font
     style: Regular
   italic:
     family: CaskaydiaCove Nerd Font
-    style: Light Italic
+    style: SemiLight Italic
   bold_italic:
     family: CaskaydiaCove Nerd Font
     style: Italic
