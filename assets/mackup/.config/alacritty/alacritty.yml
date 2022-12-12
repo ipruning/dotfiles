@@ -8,20 +8,27 @@ window:
   padding:
     x: 10
     y: 10
-  decorations: buttonless
-  # decorations: transparent
+  decorations: buttonless # buttonless / transparent
   opacity: 1.0
-  startup_mode: Maximized
-  # startup_mode: Windowed
+  startup_mode: Maximized # Maximized / Windowed
   title: Alacritty
   dynamic_title: true
 
 font:
   normal:
-    family: "CaskaydiaCove Nerd Font"
+    family: CaskaydiaCove Nerd Font
+    style: Light
+  bold:
+    family: CaskaydiaCove Nerd Font
+    style: Regular
+  italic:
+    family: CaskaydiaCove Nerd Font
+    style: Light Italic
+  bold_italic:
+    family: CaskaydiaCove Nerd Font
+    style: Italic
   size: 13
 
-# Colors (One Dark Pro Darker)
 colors:
   primary:
     background: "0x23272e"
@@ -50,5 +57,4 @@ scrolling:
   multiplier: 3
 
 key_bindings:
-  # - { key: Return, mods: Super|Shift, action: CreateNewWindow }
-  - { key: Return, mods: Control, action: CreateNewWindow }
+  - { key: Return, mods: Control, action: CreateNewWindow } # { key: Return, mods: Super|Shift, action: CreateNewWindow }
