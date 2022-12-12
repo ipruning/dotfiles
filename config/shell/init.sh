@@ -78,6 +78,9 @@ mac_arm64 | mac_x86_64 | linux_x86_64 | raspberry)
       if [ -f "$HOME/dotfiles/config/shell/zsh_env.sh" ]; then
         . "$HOME/dotfiles/config/shell/zsh_env.sh"
       fi
+      if [ -f "$HOME/dotfiles/config/shell/zsh_env_private.sh" ]; then
+        . "$HOME/dotfiles/config/shell/zsh_env_private.sh"
+      fi
       if [ -f "$HOME/dotfiles/config/shell/zsh_functions.sh" ]; then
         . "$HOME/dotfiles/config/shell/zsh_functions.sh"
       fi
