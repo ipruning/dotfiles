@@ -16,7 +16,7 @@ Blackmagic Disk Speed Test
 Blackmagic Media Express
 Blender
 Bob
-Capture One 22
+Capture One 23
 Chromium
 ClashX Pro
 Clay
@@ -120,6 +120,7 @@ PocketTube
 PowerShell
 QLMarkdown
 QQ
+QuickLook Video
 Raindrop.io
 Raycast
 Rectangle
@@ -188,5 +189,4 @@ waifu2x
 waifuExtension
 zoom.us
 企业微信
-明日方舟
 讯飞语音输入

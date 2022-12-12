@@ -2,7 +2,10 @@ archivebox/archivebox/archivebox
 aria2
 asciinema
 asdf
+autocorrect
+awk
 bazelisk
+bore-cli
 bottom
 brimdata/tap/zed
 brimdata/tap/zq
@@ -14,8 +17,10 @@ ciphey
 cloudflare/cloudflare/cloudflared
 cmake
 colima
-commitizen
+d12frosted/emacs-plus/emacs-plus@29
 dasel
+deb-sig/tap/double-entry-generator
+difftastic
 direnv
 docker
 dog
@@ -28,6 +33,8 @@ fcp
 fd
 ffmpeg
 fpp
+frps
+fswatch
 gh
 git-cliff
 git-crypt
@@ -35,7 +42,10 @@ git-extras
 git-lfs
 git-quick-stats
 gitui
+gnu-sed
+gnu-tar
 gnupg
+gobject-introspection
 gping
 graphviz
 grex
@@ -44,14 +54,17 @@ httpie
 hugo
 hyperfine
 iperf
+jc
 jq
 juliaup
+latexindent
 lf
 llvm
 lsd
 m-cli
-mackup
+make
 mas
+monolith
 navi
 ncdu
 neovim
@@ -64,7 +77,6 @@ procs
 pueue
 pyenv
 qt
-r
 rm-improved
 sd
 sevenzip
@@ -75,6 +87,7 @@ ssh-copy-id
 starship
 t-rec
 tealdeer
+texinfo
 thefuck
 timothyye/tap/skm
 tmate
@@ -88,5 +101,6 @@ watchexec
 yq
 yqrashawn/goku/goku
 yt-dlp
+zig
 zola
 zoxide

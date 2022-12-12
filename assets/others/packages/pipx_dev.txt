@@ -1,6 +1,4 @@
-black
 nox
-pdm
 poetry
 pre-commit
 speedtest-cli
