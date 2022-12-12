@@ -27,6 +27,9 @@
   "terminal.integrated.fontFamily": "'CaskaydiaCove Nerd Font', 'Source Han Sans SC'",
   "terminal.integrated.fontSize": 12,
   "terminal.integrated.inheritEnv": false,
+  "terminal.integrated.env.osx": {
+    "FIG_NEW_SESSION": "1"
+  },
   "powershell.startAutomatically": false,
   "code-runner.preserveFocus": false,
   "code-runner.runInTerminal": true,
