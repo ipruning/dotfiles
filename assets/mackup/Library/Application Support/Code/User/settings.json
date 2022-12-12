@@ -165,7 +165,6 @@
     "Brewfile_leaves": "ruby",
     "*.autocorrectrc": "yaml",
     "*.coverage": "log",
-    "*.plist": "plist",
     "*.secrets.baseline": "json",
     "*.strings": "plist"
   },
