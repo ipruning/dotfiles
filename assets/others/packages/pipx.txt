@@ -1,4 +1,5 @@
 autocut
+autopep8
 beancount
 black
 commitizen
@@ -24,6 +25,7 @@ pandoc-secnos
 pandoc-tablenos
 pandoc-xnos
 pdm
+pipenv
 poetry
 pre-commit
 pricehist
@@ -33,7 +35,10 @@ pytest
 pz
 socid-extractor
 speedtest-cli
+terminal-copilot
 things-cli
 tmuxp
 twint
+whisper
 yacron
+yapf
