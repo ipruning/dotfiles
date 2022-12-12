@@ -1,7 +1,7 @@
 #===============================================================================
 # 👇 Fig pre block. Keep at the top of this file.
 #===============================================================================
-# eval "$(fig init zsh pre)"
+# [[ -f "$HOME/.fig/shell/zshrc.pre.zsh" ]] && builtin source "$HOME/.fig/shell/zshrc.pre.zsh"
 
 #===============================================================================
 # 👇 GPG Signing
@@ -352,4 +352,4 @@ esac
 #===============================================================================
 # 👇 Fig post block. Keep at the bottom of this file.
 #===============================================================================
-# eval "$(fig init zsh post)"
+# [[ -f "$HOME/.fig/shell/zshrc.post.zsh" ]] && builtin source "$HOME/.fig/shell/zshrc.post.zsh"
