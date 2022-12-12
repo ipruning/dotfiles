@@ -15,3 +15,6 @@ bin/warpd
 # bin (downloaded binaries)
 bin/pandoc
 bin/pandoc-crossref
+
+# zsh
+config/shell/zsh_env_private.sh
