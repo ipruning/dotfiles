@@ -243,10 +243,12 @@
   },
   "[yaml]": {
     "editor.defaultFormatter": "redhat.vscode-yaml",
+    "editor.formatOnSave": false,
     "editor.tabSize": 2
   },
   "[yml]": {
     "editor.defaultFormatter": "redhat.vscode-yaml",
+    "editor.formatOnSave": false,
     "editor.tabSize": 2
   },
   "notebook.cellToolbarLocation": {
