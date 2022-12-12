@@ -161,11 +161,13 @@
   },
   "markdownFormatter.formatULSymbol": false,
   "material-icon-theme.files.associations": {
-    ".autocorrectrc": "Yaml",
-    "Brewfile_dev": "Ruby",
-    "Brewfile_leaves": "Ruby",
-    ".coverage": "Log",
-    ".secrets.baseline": "Json"
+    "Brewfile_dev": "ruby",
+    "Brewfile_leaves": "ruby",
+    "*.autocorrectrc": "yaml",
+    "*.coverage": "log",
+    "*.plist": "plist",
+    "*.secrets.baseline": "json",
+    "*.strings": "plist"
   },
   "material-icon-theme.languages.associations": {
     "beancount": "Log",
