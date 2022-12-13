@@ -18,7 +18,6 @@ formulahendry.code-runner
 foxundermoon.shell-format
 GitHub.copilot
 GitHub.copilot-labs
-GitHub.copilot-nightly
 golang.go
 Gruntfuggly.todo-tree
 huacnlee.autocorrect
@@ -82,6 +81,7 @@ VisualStudioExptTeam.intellicode-api-usage-examples
 vscodevim.vim
 VSpaceCode.vspacecode
 VSpaceCode.whichkey
+withfig.fig
 xaver.clang-format
 XING.zotero-cite
 yy0931.save-as-root
