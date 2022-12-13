@@ -1,43 +1,73 @@
 jobs:
-  # - name: backup homebrew packages
-  #   command: |
-  #     brew bundle dump --file="$HOME"/dotfiles/assets/others/packages/Brewfile --force
-  #     sleep 10
-  #     brew leaves >"$HOME"/dotfiles/assets/others/packages/Brewfile.txt
-  #   shell: /bin/zsh
-  #   schedule: "0 1,13,20 * * *"
-  #   captureStderr: true
-  #   onFailure:
-  #     report:
-  #       shell:
-  #         shell: /bin/zsh
-  #         command: echo "Error code $YACRON_RETCODE"
+  - name: backup homebrew packages
+    command: |
+      brew bundle dump --file="$HOME"/dotfiles/assets/others/packages/Brewfile --force
+      sleep 10
+      brew leaves >"$HOME"/dotfiles/assets/others/packages/Brewfile.txt
+    shell: /bin/zsh
+    schedule: "0 1,13,20 * * *"
+    captureStderr: true
+    onFailure:
+      report:
+        shell:
+          shell: /bin/zsh
+          command: echo "Error code $YACRON_RETCODE"
   - name: backup cargo packages
     command: |
       cargo install --list | grep -v '^[[:blank:]]' | awk '{print $1}' >"$HOME"/dotfiles/assets/others/packages/cargo.txt
     shell: /bin/zsh
     schedule: "0 1,13,20 * * *"
+    captureStderr: true
+    onFailure:
+      report:
+        shell:
+          shell: /bin/zsh
+          command: echo "Error code $YACRON_RETCODE"
   - name: backup applications
     command: |
       ls /Applications | rg '\.app' | sed 's/\.app//g' >"$HOME"/dotfiles/assets/others/packages/macos_applications.txt
       ls /Applications/Setapp | rg '\.app' | sed 's/\.app//g' >"$HOME"/dotfiles/assets/others/packages/macos_setapp.txt
     shell: /bin/zsh
     schedule: "0 1,13,20 * * *"
+    captureStderr: true
+    onFailure:
+      report:
+        shell:
+          shell: /bin/zsh
+          command: echo "Error code $YACRON_RETCODE"
   - name: backup npm packages
     command: |
       npm list --location=global --json | jq ".dependencies | keys[]" -r >"$HOME"/dotfiles/assets/others/packages/npm.txt
     shell: /bin/zsh
     schedule: "0 1,13,20 * * *"
+    captureStderr: true
+    onFailure:
+      report:
+        shell:
+          shell: /bin/zsh
+          command: echo "Error code $YACRON_RETCODE"
   - name: backup pipx packages
     command: |
       pipx list --json | jq ".venvs | .[] | .metadata.main_package.package" -r >"$HOME"/dotfiles/assets/others/packages/pipx.txt
     shell: /bin/zsh
     schedule: "0 1,13,20 * * *"
+    captureStderr: true
+    onFailure:
+      report:
+        shell:
+          shell: /bin/zsh
+          command: echo "Error code $YACRON_RETCODE"
   - name: backup vscode extensions
     command: |
       code --list-extensions >"$HOME"/dotfiles/assets/others/packages/vscode_extensions.txt
     shell: /bin/zsh
     schedule: "0 1,13,20 * * *"
+    captureStderr: true
+    onFailure:
+      report:
+        shell:
+          shell: /bin/zsh
+          command: echo "Error code $YACRON_RETCODE"
   - name: backup zsh_history
     command: |
       cp "$HOME"/.zsh_history "$HOME"/Databases/Backup/CLI/zsh_history_$(date +\%Y_\%m_\%d_\%H_\%M_\%S).bak
