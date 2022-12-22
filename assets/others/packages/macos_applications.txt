@@ -2,6 +2,7 @@
 1Password
 A Better Finder Attributes 7
 ABBYY FineReader PDF
+AI Photo
 Alacritty
 Alfred 5
 AltTab
@@ -125,6 +126,7 @@ QuickLook Video
 Raindrop.io
 Raycast
 Rectangle
+Rewind
 Roam Research
 Rocket
 Safari

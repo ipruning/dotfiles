@@ -42,10 +42,10 @@ git-extras
 git-lfs
 git-quick-stats
 gitui
+glow
 gnu-sed
 gnu-tar
 gnupg
-gobject-introspection
 gping
 graphviz
 grex
@@ -54,6 +54,7 @@ httpie
 hugo
 hyperfine
 iperf
+ipinfo-cli
 jc
 jq
 juliaup
@@ -69,7 +70,7 @@ navi
 ncdu
 neovim
 nmap
-openssl@3
+pdfgrep
 php
 pipx
 platformio
@@ -85,6 +86,7 @@ sk
 smartmontools
 ssh-copy-id
 starship
+swig
 t-rec
 tealdeer
 texinfo

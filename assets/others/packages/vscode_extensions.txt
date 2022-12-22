@@ -67,6 +67,7 @@ rust-lang.rust-analyzer
 serayuzgur.crates
 shd101wyy.markdown-preview-enhanced
 skn0tt.markdown-link-expander
+sourcery.sourcery
 tamasfe.even-better-toml
 tecosaur.latex-utilities
 telesoho.vscode-markdown-paste-image
