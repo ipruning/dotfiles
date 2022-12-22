@@ -15,4 +15,4 @@ echo "Translating $MANGA_DIR"
 
 APP="$HOME/Stacks/Utilities/Manga/manga-image-translator"
 export DYLD_LIBRARY_PATH=/opt/homebrew/lib:$DYLD_LIBRARY_PATH
-cd "$APP" && .venv/bin/python translate_demo.py --mode batch --verbose --use-inpainting --translator=baidu --target-lang=CHS --image "$MANGA_DIR"
+cd "$APP" && .venv/bin/python translate_demo.py --mode batch --verbose --translator=baidu --target-lang=CHS --image "$MANGA_DIR"
