@@ -6,6 +6,7 @@ autocorrect
 awk
 bazelisk
 bore-cli
+borkdude/brew/babashka
 bottom
 brimdata/tap/zed
 brimdata/tap/zq
