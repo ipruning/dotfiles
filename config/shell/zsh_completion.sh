@@ -20,5 +20,4 @@ mac_arm64 | mac_x86_64)
   #===============================================================================
   # eval "$(register-python-argcomplete pipx)"
   ;;
-raspberry) ;;
 esac
