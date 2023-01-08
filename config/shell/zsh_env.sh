@@ -97,7 +97,7 @@ zstyle ':fzf-tab:*' fzf-pad 10
 # 👇 gcloud
 #===============================================================================
 case $SYSTEM_TYPE in
-mac*)
+mac_arm64 | mac_x86_64)
   source "$(brew --prefix)/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.zsh.inc"
   source "$(brew --prefix)/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.zsh.inc"
   ;;
@@ -167,14 +167,8 @@ export PATH="$PATH:$FORGIT_INSTALL_DIR/bin"
 #===============================================================================
 # 👇 fzf
 #===============================================================================
-case $SYSTEM_TYPE in
-mac*)
-  export FZF_DEFAULT_OPTS="--height=100% --layout=reverse --info=inline --border --margin=1 --padding=1"
-  # export FZF_DEFAULT_COMMAND="fd --ignore-file ~/.rgignore --hidden --follow --ignore-case . /etc $HOME"
-  export FZF_DEFAULT_COMMAND="fd --ignore-file ~/.rgignore --hidden --follow --ignore-case ."
-  ;;
-linux*) ;;
-esac
+export FZF_DEFAULT_OPTS="--height=100% --layout=reverse --info=inline --border --margin=1 --padding=1"
+export FZF_DEFAULT_COMMAND="fd --ignore-file ~/.rgignore --hidden --follow --ignore-case ."
 
 #===============================================================================
 # 👇 fzf Ctrl-T to fuzzily search for a file or directory in your home directory then insert its path at the cursor
