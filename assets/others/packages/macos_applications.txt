@@ -68,6 +68,7 @@ Keynote
 Kit
 LTspice
 LanguageTool for Desktop
+LanguageTool
 Lark
 Latest
 LayAuto3

@@ -32,14 +32,13 @@ Mockuuups Studio
 Mosaic
 Numi
 One Switch
-OpenIn
 PDF Search
-Paw
 Permute
 PhotoBulk
 PliimPRO
 Presentify
 Proxyman
+RapidAPI
 Renamer
 SQLPro Studio
 SQLPro for SQLite
