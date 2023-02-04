@@ -17,6 +17,7 @@ tap "homebrew/core"
 tap "homebrew/services"
 tap "majd/repo"
 tap "martido/graph"
+tap "noborus/tap"
 tap "oh-my-home/fonts"
 tap "railwaycat/emacsmacport"
 tap "robotsandpencils/made"
@@ -24,8 +25,8 @@ tap "sunnyyoung/repo"
 tap "timothyye/tap"
 tap "yqrashawn/goku"
 brew "libpng"
-brew "aria2"
 brew "xz"
+brew "aria2"
 brew "asciinema"
 brew "autoconf"
 brew "coreutils"
@@ -94,9 +95,11 @@ brew "ipinfo-cli"
 brew "jc"
 brew "jq"
 brew "juliaup"
+brew "just"
 brew "latexindent"
 brew "lf"
 brew "llvm"
+brew "lnav"
 brew "lsd"
 brew "luajit"
 brew "m-cli"
@@ -148,6 +151,7 @@ brew "cloudflare/cloudflare/cloudflared"
 brew "d12frosted/emacs-plus/emacs-plus@29", args: ["with-native-comp", "with-nobu417-big-sur-icon"]
 brew "deb-sig/tap/double-entry-generator"
 brew "eth-p/software/bat-extras"
+brew "noborus/tap/ov"
 brew "timothyye/tap/skm"
 brew "yqrashawn/goku/goku"
 cask "1password"
@@ -225,7 +229,6 @@ mas "Shapr3D", id: 1091675654
 mas "Slack", id: 803453959
 mas "Take a Break", id: 1457158844
 mas "Tampermonkey", id: 1482490089
-mas "Tweetbot", id: 1384080005
 mas "uBlacklist for Safari", id: 1547912640
 mas "uPic", id: 1549159979
 mas "Vimari", id: 1480933944
