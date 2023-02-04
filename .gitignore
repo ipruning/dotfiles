@@ -11,6 +11,7 @@ bin/nnn
 bin/redo
 bin/wayback
 bin/warpd
+bin/webtty
 
 # bin (downloaded binaries)
 bin/pandoc

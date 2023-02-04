@@ -12,6 +12,7 @@ Arc
 Ask Command
 Audio Hijack
 Audio Jam
+BaiduNetdisk_mac
 BetterDisplay
 Blackmagic Disk Speed Test
 Blackmagic Media Express
@@ -19,6 +20,7 @@ Blender
 Bob
 Capture One 23
 Chromium
+CiteSpace
 ClashX Pro
 Clay
 Compressor
@@ -160,7 +162,6 @@ Tito Control
 TopNotch
 TradingView
 Tropy
-Tweetbot
 UninstallPKG
 Unity Hub
 Vimari
@@ -193,4 +194,5 @@ waifu2x
 waifuExtension
 zoom.us
 企业微信
+明日方舟
 讯飞语音输入

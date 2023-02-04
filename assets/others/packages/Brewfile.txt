@@ -59,9 +59,11 @@ ipinfo-cli
 jc
 jq
 juliaup
+just
 latexindent
 lf
 llvm
+lnav
 lsd
 m-cli
 make
@@ -71,6 +73,7 @@ navi
 ncdu
 neovim
 nmap
+noborus/tap/ov
 pdfgrep
 php
 pipx
@@ -87,7 +90,6 @@ sk
 smartmontools
 ssh-copy-id
 starship
-swig
 t-rec
 tealdeer
 texinfo
