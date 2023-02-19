@@ -1,7 +1,7 @@
 {
   "editor.bracketPairColorization.enabled": true,
   "editor.cursorBlinking": "phase",
-  "editor.cursorSmoothCaretAnimation": true,
+  "editor.cursorSmoothCaretAnimation": "on",
   "editor.fontFamily": "'CaskaydiaCove Nerd Font', 'Source Han Sans SC'",
   "editor.fontLigatures": true,
   "editor.fontSize": 12,
@@ -25,7 +25,7 @@
   "terminal.integrated.confirmOnExit": "hasChildProcesses",
   "terminal.integrated.defaultProfile.osx": "zsh",
   "terminal.integrated.fontFamily": "'CaskaydiaCove Nerd Font', 'Source Han Sans SC'",
-  "terminal.integrated.fontSize": 12,
+  "terminal.integrated.fontSize": 13,
   "terminal.integrated.inheritEnv": false,
   "terminal.integrated.env.osx": {
     "FIG_NEW_SESSION": "1"
@@ -50,6 +50,7 @@
   "git.autofetch": true,
   "git.confirmSync": false,
   "git.enableSmartCommit": true,
+  "git.openRepositoryInParentFolders": "never",
   "gitlens.views.repositories.files.layout": "list",
   "gitlens.codeLens.scopes": ["document"],
   "workbench.activityBar.visible": true,
@@ -184,6 +185,7 @@
     "/[ \t]+[/]{2}/g" // lines beginning with <whitespace>//
   ],
   "indentRainbow.ignoreErrorLanguages": [
+    "bib",
     "clojure",
     "json",
     "latex",
@@ -195,23 +197,25 @@
   "indentRainbow.colorOnWhiteSpaceOnly": true,
   "prettier.tabWidth": 2,
   "[latex]": {
-    "editor.fontSize": 14,
+    "editor.defaultFormatter": "James-Yu.latex-workshop",
+    "editor.fontSize": 12,
     "editor.formatOnSave": true,
+    "editor.renderWhitespace": "selection", // all will cause lag
     "editor.tabSize": 2,
     "editor.wordWrap": "on"
   },
   "[markdown]": {
+    "editor.defaultFormatter": "DavidAnson.vscode-markdownlint",
+    "editor.fontSize": 12,
+    "editor.formatOnSave": false,
+    "editor.renderWhitespace": "selection", // all will cause lag
+    "editor.tabSize": 4,
+    "editor.wordWrap": "on",
     "editor.quickSuggestions": {
       "comments": "on",
       "strings": "on",
       "other": "on"
-    },
-    "editor.defaultFormatter": "DavidAnson.vscode-markdownlint",
-    "editor.fontSize": 14,
-    "editor.formatOnSave": false,
-    "editor.renderWhitespace": "selection", // all will cause lag
-    "editor.tabSize": 4,
-    "editor.wordWrap": "on"
+    }
   },
   "[lua]": {
     "editor.formatOnSave": false,
@@ -367,7 +371,7 @@
   "explorer.fileNesting.enabled": true,
   "explorer.fileNesting.expand": false,
   "explorer.fileNesting.patterns": {
-    "//": "Last update at 1/6/2023, 10:54:47 AM",
+    "//": "Last update at 2/19/2023, 3:38:15 AM",
     "*.asax": "$(capture).*.cs, $(capture).*.vb",
     "*.ascx": "$(capture).*.cs, $(capture).*.vb",
     "*.ashx": "$(capture).*.cs, $(capture).*.vb",
@@ -375,6 +379,7 @@
     "*.bloc.dart": "$(capture).event.dart, $(capture).state.dart",
     "*.c": "$(capture).h",
     "*.cc": "$(capture).hpp, $(capture).h, $(capture).hxx",
+    "*.cjs": "$(capture).cjs.map, $(capture).*.cjs, $(capture)_*.cjs",
     "*.component.ts": "$(capture).component.html, $(capture).component.spec.ts, $(capture).component.css, $(capture).component.scss, $(capture).component.sass, $(capture).component.less",
     "*.cpp": "$(capture).hpp, $(capture).h, $(capture).hxx",
     "*.cs": "$(capture).*.cs",
@@ -389,11 +394,13 @@
     "*.js": "$(capture).js.map, $(capture).*.js, $(capture)_*.js",
     "*.jsx": "$(capture).js, $(capture).*.jsx, $(capture)_*.js, $(capture)_*.jsx",
     "*.master": "$(capture).*.cs, $(capture).*.vb",
+    "*.mjs": "$(capture).mjs.map, $(capture).*.mjs, $(capture)_*.mjs",
     "*.module.ts": "$(capture).resolver.ts, $(capture).controller.ts, $(capture).service.ts",
     "*.pubxml": "$(capture).pubxml.user",
     "*.resx": "$(capture).*.resx, $(capture).designer.cs, $(capture).designer.vb",
     "*.tex": "$(capture).acn, $(capture).acr, $(capture).alg, $(capture).aux, $(capture).bbl, $(capture).blg, $(capture).fdb_latexmk, $(capture).fls, $(capture).glg, $(capture).glo, $(capture).gls, $(capture).idx, $(capture).ind, $(capture).ist, $(capture).lof, $(capture).log, $(capture).lot, $(capture).out, $(capture).pdf, $(capture).synctex.gz, $(capture).toc, $(capture).xdv",
     "*.ts": "$(capture).js, $(capture).d.ts.map, $(capture).*.ts, $(capture)_*.js, $(capture)_*.ts",
+    "*.mts": "$(capture).ts, $(capture).*.mts, $(capture)_*.ts, $(capture)_*.mts",
     "*.tsx": "$(capture).ts, $(capture).*.tsx, $(capture)_*.ts, $(capture)_*.tsx",
     "*.vbproj": "*.config, *proj.user, appsettings.*, bundleconfig.json",
     "*.vue": "$(capture).*.ts, $(capture).*.js, $(capture).story.vue",
