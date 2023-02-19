@@ -104,7 +104,6 @@ ugit
 vips
 watchexec
 yq
-yqrashawn/goku/goku
 yt-dlp
 zig
 zola
