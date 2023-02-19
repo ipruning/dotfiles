@@ -335,6 +335,7 @@ mac_x86_64)
   eval "$(pyenv init -)"      # pyenv intel shell env
   alias 'cvenv'='python3 -m venv .venv && source .venv/bin/activate && python3 -m pip install --upgrade -r $HOME/.requirements.txt'
   alias 'svenv'='source .venv/bin/activate'
+  # python miniconda
   ;;
 linux_x86_64)
   # python
