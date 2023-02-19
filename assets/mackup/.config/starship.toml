@@ -10,8 +10,8 @@ command_timeout = 1000
     error_symbol   = "[>](bold red)"
 
 [custom.x86_64]
-    command = "echo  "
-    when    = 'test "$(uname -m)" = "x86_64"'
+    # command = "echo  "
+    # when    = 'test "$(uname -m)" = "x86_64"'
 
 [aws]
     symbol   = " "
