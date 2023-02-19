@@ -113,7 +113,6 @@ Optimus Player
 PDF Expert
 Pages
 PaimonMenuBar
-Parallels Desktop
 Parsec
 PasteNow
 PicGo
@@ -143,7 +142,6 @@ Shapr3D
 Shottr
 Sideloadly
 Silicon
-Sketch
 Skim
 Slack
 Sloth
@@ -162,6 +160,7 @@ Tito Control
 TopNotch
 TradingView
 Tropy
+Tunnelblick
 UninstallPKG
 Unity Hub
 Vimari
@@ -194,5 +193,4 @@ waifu2x
 waifuExtension
 zoom.us
 企业微信
-明日方舟
 讯飞语音输入
