@@ -93,4 +93,6 @@ r-upgrade() {
   pipx upgrade-all
   rustup self update
   rustup update
+  wget https://raw.githubusercontent.com/vast-ai/vast-python/master/vast.py -O "${HOME}"/Dotfiles/bin/vast
+  chmod +x "${HOME}"/Dotfiles/bin/vast
 }
