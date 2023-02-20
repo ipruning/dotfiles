@@ -18,6 +18,7 @@ Gifox
 HazeOver
 Hookmark
 HoudahSpot
+Hustl
 Hype
 Image2icon
 Keysmith
@@ -49,11 +50,13 @@ SnapMotion
 SnippetsLab
 Squash
 TablePlus
+Taskheat
 TextSoap
 Timing
 Ulysses
 Vidrio
 Vivid
+XCOrganizer
 Yoink
 iBoysoft MagicMenu
 iStat Menus

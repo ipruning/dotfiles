@@ -32,7 +32,6 @@ exiftool
 extra-cmake-modules
 fcp
 fd
-ffmpeg
 fpp
 frps
 fswatch
@@ -71,7 +70,7 @@ mas
 monolith
 navi
 ncdu
-neovim
+neovide
 nmap
 noborus/tap/ov
 pdfgrep
