@@ -107,6 +107,7 @@ brew "monolith"
 brew "navi"
 brew "ncdu"
 brew "neovim"
+brew "neovide"
 brew "nmap"
 brew "pdfgrep"
 brew "php"
@@ -171,7 +172,6 @@ cask "latest"
 cask "logseq"
 cask "mactex"
 cask "miniforge"
-cask "neovide"
 cask "obsidian"
 cask "openemu"
 cask "powershell"
@@ -232,5 +232,4 @@ mas "uBlacklist for Safari", id: 1547912640
 mas "uPic", id: 1549159979
 mas "Vimari", id: 1480933944
 mas "waifu2x", id: 1286485858
-mas "WhatsApp", id: 1147396723
 mas "讯飞语音输入", id: 1243368435

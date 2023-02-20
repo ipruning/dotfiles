@@ -56,7 +56,6 @@ Grammarly Desktop
 Hammerspoon
 Hepta
 Homerow
-Hustl
 IINA
 IconChanger
 Input Source Pro
@@ -97,7 +96,6 @@ Motion
 MultiMC
 MusicHarbor
 Neat
-Neovide
 NeteaseMusic
 Notion
 Numbers
@@ -169,7 +167,6 @@ Visual Studio Code
 Warp
 WeChat
 WechatExporter
-WhatsApp
 Wooshy
 XLD
 Xcode
@@ -184,7 +181,6 @@ iMovie
 iTerm
 kitty
 logioptionsplus
-massCode
 qBittorrent
 uBlacklist for Safari
 uPic
