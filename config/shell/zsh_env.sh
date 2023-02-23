@@ -304,7 +304,7 @@ case $SYSTEM_TYPE in
 mac_arm64)
   # python
   # alias 'cvenv'='python3 -m venv .venv && source .venv/bin/activate && python3 -m pip install --upgrade -r $HOME/.requirements.txt'
-  alias 'cvenv'='$(brew --prefix python@3.10)/bin/python3 -m venv .venv && source .venv/bin/activate && python3 -m pip install --upgrade -r $HOME/.requirements.txt'
+  alias 'cvenv'='$(brew --prefix python@3.10)/bin/python3.10 -m venv .venv && source .venv/bin/activate && python3 -m pip install --upgrade -r $HOME/.requirements.txt'
   alias 'svenv'='source .venv/bin/activate'
   alias 'cenv'='conda create --prefix ./.env && conda activate ./.env'
   alias 'senv'='conda activate ./.env'
