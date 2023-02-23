@@ -1,12 +1,24 @@
 jobs:
-  - name: kill ScreenTimeAgent
+  - name: kill input method
     command: |
-      launchctl kickstart -k gui/$UID/com.apple.ScreenTimeAgent
+      kill -9 'pgrep SCIM'
+      kill -9 'pgrep Spotlight'
     shell: /bin/zsh
-    schedule: "0 * * * *"
+    schedule: "0 */2 * * *"
     captureStderr: true
     onFailure:
       report:
         shell:
           shell: /bin/zsh
           command: echo "Error code $YACRON_RETCODE"
+  # - name: kill ScreenTimeAgent
+  #   command: |
+  #     launchctl kickstart -k gui/$UID/com.apple.ScreenTimeAgent
+  #   shell: /bin/zsh
+  #   schedule: "0 * * * *"
+  #   captureStderr: true
+  #   onFailure:
+  #     report:
+  #       shell:
+  #         shell: /bin/zsh
+  #         command: echo "Error code $YACRON_RETCODE"
