@@ -16,18 +16,33 @@ window:
 
 font:
   normal:
-    family: CaskaydiaCove Nerd Font
-    style: SemiLight
-  bold:
-    family: CaskaydiaCove Nerd Font
+    family: "MonoLisa Nerd Font"
     style: Regular
+  bold:
+    family: "MonoLisa Nerd Font"
+    style: Bold
   italic:
-    family: CaskaydiaCove Nerd Font
-    style: SemiLight Italic
+    family: "MonoLisa Nerd Font"
+    style: Regular Italic
   bold_italic:
-    family: CaskaydiaCove Nerd Font
-    style: Italic
-  size: 13
+    family: "MonoLisa Nerd Font"
+    style: Bold Italic
+  size: 14
+
+# font:
+#   normal:
+#     family: CaskaydiaCove Nerd Font
+#     style: SemiLight
+#   bold:
+#     family: CaskaydiaCove Nerd Font
+#     style: Regular
+#   italic:
+#     family: CaskaydiaCove Nerd Font
+#     style: SemiLight Italic
+#   bold_italic:
+#     family: CaskaydiaCove Nerd Font
+#     style: Italic
+#   size: 13
 
 colors:
   primary:
