@@ -4,6 +4,6 @@ windows:
     layout: tiled
     panes:
       - yacron -c "$HOME"/dotfiles/scripts/yacron/job_0.yaml
-      - brew bundle dump --file="$HOME"/dotfiles/assets/others/packages/Brewfile --force
-      - htop
-      - nvidia-smi dmon
+      - ~/Stacks/Utilities/Pix2Text/.venv/bin/python ~/Stacks/Utilities/Pix2Text/scripts/screenshot_daemon.py
+      - echo "Hello"
+      - echo "Hello"
