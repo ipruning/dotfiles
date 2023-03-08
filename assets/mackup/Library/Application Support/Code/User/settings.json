@@ -226,6 +226,7 @@
     },
     "editor.defaultFormatter": "ms-python.python",
     "editor.formatOnSave": false,
+    "editor.formatOnType": false,
     "editor.tabSize": 4
   },
   "[html]": {
