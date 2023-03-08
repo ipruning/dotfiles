@@ -9,11 +9,9 @@ tap "d12frosted/emacs-plus"
 tap "deb-sig/tap"
 tap "eth-p/software"
 tap "homebrew/bundle"
-tap "homebrew/cask"
 tap "homebrew/cask-fonts"
 tap "homebrew/cask-versions"
 tap "homebrew/command-not-found"
-tap "homebrew/core"
 tap "homebrew/services"
 tap "majd/repo"
 tap "martido/graph"
@@ -98,12 +96,14 @@ brew "juliaup"
 brew "just"
 brew "latexindent"
 brew "lf"
+brew "libmagic"
 brew "llvm"
 brew "lnav"
 brew "lsd"
 brew "luajit"
 brew "m-cli"
 brew "mas"
+brew "media-info"
 brew "monolith"
 brew "navi"
 brew "ncdu"
@@ -219,6 +219,7 @@ mas "Motion", id: 434290957
 mas "MusicHarbor", id: 1440405750
 mas "Numbers", id: 409203825
 mas "OneDrive", id: 823766827
+mas "OpenCat", id: 6445999201
 mas "Pages", id: 409201541
 mas "PasteNow", id: 1552536109
 mas "Picsee", id: 1454805783

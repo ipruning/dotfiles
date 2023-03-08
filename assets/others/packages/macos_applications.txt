@@ -106,6 +106,7 @@ OmniOutliner
 OmniPlan
 OneDrive
 OnyX
+OpenCat
 OpenEmu
 Optimus Player
 PDF Expert
@@ -127,7 +128,6 @@ Raindrop.io
 Raycast
 Rectangle
 Rewind
-Roam Research
 Rocket
 Safari
 Save to Raindrop.io
@@ -189,4 +189,5 @@ waifu2x
 waifuExtension
 zoom.us
 企业微信
+明日方舟
 讯飞语音输入

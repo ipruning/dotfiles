@@ -16,6 +16,7 @@ emilast.LogFileHighlighter
 esbenp.prettier-vscode
 formulahendry.code-runner
 foxundermoon.shell-format
+gencay.vscode-chatgpt
 GitHub.copilot
 GitHub.copilot-labs
 golang.go
@@ -89,3 +90,4 @@ XING.zotero-cite
 yy0931.save-as-root
 yzhang.markdown-all-in-one
 zhuangtongfa.material-theme
+ziglang.vscode-zig
