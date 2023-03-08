@@ -27,7 +27,7 @@ font:
   bold_italic:
     family: "MonoLisa Nerd Font"
     style: Bold Italic
-  size: 14
+  size: 13
 
 # font:
 #   normal:
