@@ -11,6 +11,8 @@ fava
 fava-investor
 ffsubsync
 flake8
+git-sim
+huggingface-hub
 isort
 mackup
 maigret
@@ -19,6 +21,7 @@ mkdocs-material
 mypy
 nhentai
 nox
+openai-whisper
 pandoc-eqnos
 pandoc-fignos
 pandoc-secnos
@@ -39,6 +42,7 @@ terminal-copilot
 things-cli
 tmuxp
 twint
-whisper
 yacron
 yapf
+zotero-cli-tool
+zowie

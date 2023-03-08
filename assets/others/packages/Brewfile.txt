@@ -61,12 +61,14 @@ juliaup
 just
 latexindent
 lf
+libmagic
 llvm
 lnav
 lsd
 m-cli
 make
 mas
+media-info
 monolith
 navi
 ncdu
