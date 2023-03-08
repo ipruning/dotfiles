@@ -72,4 +72,4 @@ scrolling:
   multiplier: 3
 
 key_bindings:
-  - { key: Return, mods: Control, action: CreateNewWindow } # { key: Return, mods: Super|Shift, action: CreateNewWindow }
+  - { key: Return, mods: Control, action: CreateNewWindow }
