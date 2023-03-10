@@ -141,6 +141,10 @@ bindkey '≈' fzf-dirs-widget
 bindkey '^L' autosuggest-accept
 # 👇 Ctrl-G
 bindkey '^g' _navi_widget
+# 👇 Alt-Left
+bindkey "^[[1;3C" forward-word
+# 👇 Alt-Right
+bindkey "^[[1;3D" backward-word
 
 #===============================================================================
 # 👇 forgit
