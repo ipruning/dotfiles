@@ -60,7 +60,7 @@
   "gitlens.views.repositories.files.layout": "list",
   "gitlens.codeLens.scopes": ["document"],
   "workbench.activityBar.visible": true,
-  "workbench.colorTheme": "One Dark Pro Darker",
+  "workbench.colorTheme": "One Dark Pro",
   "workbench.colorCustomizations": {
     "editor.lineHighlightBackground": "#1073cf2d",
     "editor.lineHighlightBorder": "#9fced11f"
@@ -327,111 +327,111 @@
   "vscode-neovim.neovimExecutablePaths.darwin": "/opt/homebrew/bin/nvim",
   // vim old
   "vim.smartRelativeLine": true,
-  // VSpaceCode
-  // Vim easymotion is required for Jump menu - <SPC> j
-  "vim.easymotion": true,
-  // Use system clipboard for VIM
-  "vim.useSystemClipboard": true,
-  // Trigger the main which key menu with in the active editor with VIM
-  // This cannot be put into keybindings.json because it will
-  // create conflict with Vim.
-  // https://github.com/stevenguh/spacecode/issues/3
-  "vim.normalModeKeyBindingsNonRecursive": [
-    {
-      "before": ["<space>"],
-      "commands": ["vspacecode.space"]
-    },
-    {
-      "before": [","],
-      "commands": [
-        "vspacecode.space",
-        {
-          "command": "whichkey.triggerKey",
-          "args": "m"
-        }
-      ]
-    }
-  ],
-  "vim.visualModeKeyBindingsNonRecursive": [
-    {
-      "before": ["<space>"],
-      "commands": ["vspacecode.space"]
-    },
-    {
-      "before": [","],
-      "commands": [
-        "vspacecode.space",
-        {
-          "command": "whichkey.triggerKey",
-          "args": "m"
-        }
-      ]
-    }
-  ],
-  // vim Scott
-  // "vim.useSystemClipboard": true,
-  // "vim.foldfix": true,
-  // "vim.timeout": 1000,
+  // // vim & VSpaceCode old
+  // // Vim easymotion is required for Jump menu - <SPC> j
   // "vim.easymotion": true,
-  // "vim.sneak": true,
-  // "vim.incsearch": true,
-  // "vim.useCtrlKeys": true,
-  // "vim.hlsearch": true,
-  // "vim.insertModeKeyBindings": [
+  // // Use system clipboard for VIM
+  // "vim.useSystemClipboard": true,
+  // // Trigger the main which key menu with in the active editor with VIM
+  // // This cannot be put into keybindings.json because it will
+  // // create conflict with Vim.
+  // // https://github.com/stevenguh/spacecode/issues/3
+  // "vim.normalModeKeyBindingsNonRecursive": [
   //   {
-  //     "before": ["k", "j"],
-  //     "after": ["<Esc>"]
+  //     "before": ["<space>"],
+  //     "commands": ["vspacecode.space"]
   //   },
   //   {
-  //     "before": ["j", "k"],
-  //     "after": ["<Esc>"]
+  //     "before": [","],
+  //     "commands": [
+  //       "vspacecode.space",
+  //       {
+  //         "command": "whichkey.triggerKey",
+  //         "args": "m"
+  //       }
+  //     ]
   //   }
   // ],
   // "vim.visualModeKeyBindingsNonRecursive": [
-  //   { "before": ["C-l"], "commands": ["workbench.action.navigateRight"] },
-  //   { "before": ["C-h"], "commands": ["workbench.action.navigateLeft"] },
-  //   { "before": ["C-j"], "commands": ["workbench.action.navigateDown"] },
-  //   { "before": ["C-k"], "commands": ["workbench.action.navigateUp"] },
-  //   { "before": ["L"], "commands": ["workbench.action.nextEditor"] },
-  //   { "before": ["H"], "commands": ["workbench.action.previousEditor"] },
-  //   { "before": ["<space>"], "commands": ["whichkey.show"] }
+  //   {
+  //     "before": ["<space>"],
+  //     "commands": ["vspacecode.space"]
+  //   },
+  //   {
+  //     "before": [","],
+  //     "commands": [
+  //       "vspacecode.space",
+  //       {
+  //         "command": "whichkey.triggerKey",
+  //         "args": "m"
+  //       }
+  //     ]
+  //   }
   // ],
-  // "vim.normalModeKeyBindingsNonRecursive": [
-  //   {
-  //     "before": ["g", "r"],
-  //     "commands": ["editor.action.rename"],
-  //     "when": "editorHasRenameProvider && editorTextFocus && !editorReadonly"
-  //   },
-  //   { "before": ["g", "p"], "commands": ["editor.action.peekDefinition"] },
-  //   { "before": ["g", "h"], "commands": ["references-view.findReferences"] },
-  //   {
-  //     "before": ["<C-u>"],
-  //     "after": ["1", "0", "k"]
-  //   },
-  //   {
-  //     "before": ["<C-d>"],
-  //     "after": ["1", "0", "j"]
-  //   },
-  //   { "before": ["C-l"], "commands": ["workbench.action.navigateRight"] },
-  //   { "before": ["C-h"], "commands": ["workbench.action.navigateLeft"] },
-  //   { "before": ["C-j"], "commands": ["workbench.action.navigateDown"] },
-  //   { "before": ["C-k"], "commands": ["workbench.action.navigateUp"] },
-  //   { "before": ["L"], "commands": ["workbench.action.nextEditor"] },
-  //   { "before": ["H"], "commands": ["workbench.action.previousEditor"] },
-  //   {
-  //     "before": ["K"],
-  //     "commands": ["editor.action.showHover"]
-  //   },
-  //   {
-  //     "before": ["g", "l"],
-  //     "commands": ["editor.action.showHover"]
-  //   },
-  //   { "before": ["+"], "commands": ["workbench.action.increaseViewSize"] },
-  //   { "before": ["_"], "commands": ["workbench.action.decreaseViewSize"] },
-  //   { "before": ["<space>"], "commands": ["whichkey.show"] },
-  //   { "before": ["]", "e"], "commands": ["editor.action.marker.next"] },
-  //   { "before": ["[", "e"], "commands": ["editor.action.marker.prev"] }
-  // ],
+  // vim & VSpaceCode Scott
+  "vim.useSystemClipboard": true,
+  "vim.foldfix": true,
+  "vim.timeout": 1000,
+  "vim.easymotion": true,
+  "vim.sneak": true,
+  "vim.incsearch": true,
+  "vim.useCtrlKeys": true,
+  "vim.hlsearch": true,
+  "vim.insertModeKeyBindings": [
+    {
+      "before": ["k", "j"],
+      "after": ["<Esc>"]
+    },
+    {
+      "before": ["j", "k"],
+      "after": ["<Esc>"]
+    }
+  ],
+  "vim.visualModeKeyBindingsNonRecursive": [
+    { "before": ["C-l"], "commands": ["workbench.action.navigateRight"] },
+    { "before": ["C-h"], "commands": ["workbench.action.navigateLeft"] },
+    { "before": ["C-j"], "commands": ["workbench.action.navigateDown"] },
+    { "before": ["C-k"], "commands": ["workbench.action.navigateUp"] },
+    { "before": ["L"], "commands": ["workbench.action.nextEditor"] },
+    { "before": ["H"], "commands": ["workbench.action.previousEditor"] },
+    { "before": ["<space>"], "commands": ["whichkey.show"] }
+  ],
+  "vim.normalModeKeyBindingsNonRecursive": [
+    {
+      "before": ["g", "r"],
+      "commands": ["editor.action.rename"],
+      "when": "editorHasRenameProvider && editorTextFocus && !editorReadonly"
+    },
+    { "before": ["g", "p"], "commands": ["editor.action.peekDefinition"] },
+    { "before": ["g", "h"], "commands": ["references-view.findReferences"] },
+    {
+      "before": ["<C-u>"],
+      "after": ["1", "0", "k"]
+    },
+    {
+      "before": ["<C-d>"],
+      "after": ["1", "0", "j"]
+    },
+    { "before": ["C-l"], "commands": ["workbench.action.navigateRight"] },
+    { "before": ["C-h"], "commands": ["workbench.action.navigateLeft"] },
+    { "before": ["C-j"], "commands": ["workbench.action.navigateDown"] },
+    { "before": ["C-k"], "commands": ["workbench.action.navigateUp"] },
+    { "before": ["L"], "commands": ["workbench.action.nextEditor"] },
+    { "before": ["H"], "commands": ["workbench.action.previousEditor"] },
+    {
+      "before": ["K"],
+      "commands": ["editor.action.showHover"]
+    },
+    {
+      "before": ["g", "l"],
+      "commands": ["editor.action.showHover"]
+    },
+    { "before": ["+"], "commands": ["workbench.action.increaseViewSize"] },
+    { "before": ["_"], "commands": ["workbench.action.decreaseViewSize"] },
+    { "before": ["<space>"], "commands": ["whichkey.show"] },
+    { "before": ["]", "e"], "commands": ["editor.action.marker.next"] },
+    { "before": ["[", "e"], "commands": ["editor.action.marker.prev"] }
+  ],
   // whichkey Scott
   // "whichkey.delay": 100,
   // "whichkey.bindings": [
