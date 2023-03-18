@@ -33,6 +33,15 @@ matches:
           args:
             - python3
             - "%CONFIG%/scripts/fulldate.py"
+  - trigger: "#otd"
+    replace: "{{onthisday}}"
+    vars:
+      - name: onthisday
+        type: script
+        params:
+          args:
+            - python3
+            - "%CONFIG%/scripts/onthisday.py"
   - trigger: "#st"
     replace: "{{shorttime}}"
     vars:
