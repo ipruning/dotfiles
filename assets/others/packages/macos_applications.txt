@@ -52,7 +52,6 @@ GarageBand
 GitHub Desktop
 GoodNotes
 Google Chrome
-Grammarly Desktop
 Hammerspoon
 Hepta
 Homerow
@@ -95,7 +94,6 @@ Mos
 Motion
 MultiMC
 MusicHarbor
-Neat
 NeteaseMusic
 Notion
 Numbers
@@ -172,6 +170,7 @@ XLD
 Xcode
 Xcodes
 YACReader
+Zed
 ZeroTier
 Zotero
 calibre

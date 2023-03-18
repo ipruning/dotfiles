@@ -1,4 +1,3 @@
-autocut
 autopep8
 beancount
 black
@@ -15,13 +14,11 @@ git-sim
 huggingface-hub
 isort
 mackup
-maigret
 manim
 mkdocs-material
 mypy
 nhentai
 nox
-openai-whisper
 pandoc-eqnos
 pandoc-fignos
 pandoc-secnos
@@ -41,8 +38,6 @@ speedtest-cli
 terminal-copilot
 things-cli
 tmuxp
-twint
 yacron
 yapf
 zotero-cli-tool
-zowie
