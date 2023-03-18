@@ -13,6 +13,9 @@
   "editor.linkedEditing": true,
   "editor.minimap.enabled": false,
   "editor.stickyScroll.enabled": true,
+  "editor.semanticTokenColorCustomizations": {
+    "enabled": true
+  },
   "editor.suggestSelection": "first",
   "editor.tabSize": 2,
   "editor.wordWrap": "off",
@@ -28,7 +31,7 @@
   "terminal.integrated.confirmOnExit": "hasChildProcesses",
   "terminal.integrated.defaultProfile.osx": "zsh",
   "terminal.integrated.fontFamily": "'MonoLisa Nerd Font', 'Source Han Sans SC'",
-  "terminal.integrated.fontSize": 13,
+  "terminal.integrated.fontSize": 14,
   // "terminal.integrated.fontFamily": "'CaskaydiaCove Nerd Font', 'Source Han Sans SC'",
   // "terminal.integrated.fontSize": 14,
   // "terminal.integrated.lineHeight": 1.2,
@@ -60,7 +63,7 @@
   "gitlens.views.repositories.files.layout": "list",
   "gitlens.codeLens.scopes": ["document"],
   "workbench.activityBar.visible": true,
-  "workbench.colorTheme": "One Dark Pro",
+  "workbench.colorTheme": "One Dark Pro Darker",
   "workbench.colorCustomizations": {
     "editor.lineHighlightBackground": "#1073cf2d",
     "editor.lineHighlightBorder": "#9fced11f"
@@ -128,19 +131,21 @@
   "python.formatting.blackArgs": ["--line-length=120"],
   "python.formatting.provider": "black",
   "python.languageServer": "Pylance",
-  // "python.linting.enabled": true,
-  // "python.linting.flake8Enabled": true,
-  // "python.testing.unittestEnabled": false,
-  // "python.testing.pytestEnabled": true,
-  // "python.testing.pytestArgs": ["tests"],
+  "python.linting.flake8Args": [
+    "--max-line-length=120",
+    "--ignore=E203,E402,E501,W503"
+  ],
   "markdownlint.config": {
     // https://github.com/DavidAnson/markdownlint/blob/main/schema/.markdownlint.jsonc
     // MD004/ul-style - Unordered list style
     "MD004": false,
     // MD007/ul-indent - Unordered list indentation
-    "MD007": {
-      "indent": 4
-    },
+    // "MD007": {
+    //   "indent": 4
+    // },
+    "MD007": false,
+    // MD010/no-hard-tabs - Hard tabs
+    "MD010": false,
     // MD013/line-length - Line length
     "MD013": false,
     // MD018/no-missing-space-atx - No space after hash on atx style heading
@@ -196,25 +201,36 @@
   "indentRainbow.colorOnWhiteSpaceOnly": true,
   "prettier.tabWidth": 2,
   "[latex]": {
+    "editor.acceptSuggestionOnEnter": "on",
+    "editor.snippetSuggestions": "top",
+    "editor.tabCompletion": "on",
+    "editor.quickSuggestions": {
+      "comments": "on",
+      "strings": "on",
+      "other": "on"
+    },
     "editor.defaultFormatter": "James-Yu.latex-workshop",
-    "editor.fontSize": 12,
+    "editor.fontSize": 14,
     "editor.formatOnSave": true,
     "editor.renderWhitespace": "selection", // all will cause lag
     "editor.tabSize": 2,
     "editor.wordWrap": "on"
   },
   "[markdown]": {
-    "editor.defaultFormatter": "DavidAnson.vscode-markdownlint",
-    "editor.fontSize": 12,
-    "editor.formatOnSave": false,
-    "editor.renderWhitespace": "selection", // all will cause lag
-    "editor.tabSize": 4,
-    "editor.wordWrap": "on",
+    "editor.acceptSuggestionOnEnter": "on",
+    "editor.snippetSuggestions": "top",
+    "editor.tabCompletion": "on",
     "editor.quickSuggestions": {
       "comments": "on",
       "strings": "on",
       "other": "on"
-    }
+    },
+    "editor.defaultFormatter": "DavidAnson.vscode-markdownlint",
+    "editor.fontSize": 14,
+    "editor.formatOnSave": false,
+    "editor.renderWhitespace": "selection", // all will cause lag
+    "editor.tabSize": 4,
+    "editor.wordWrap": "on"
   },
   "[lua]": {
     "editor.formatOnSave": false,
