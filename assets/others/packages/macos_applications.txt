@@ -18,7 +18,9 @@ Blackmagic Disk Speed Test
 Blackmagic Media Express
 Blender
 Bob
+Buzz
 Capture One 23
+ChatGPT
 Chromium
 CiteSpace
 ClashX Pro
@@ -27,6 +29,7 @@ Compressor
 Contexts
 Cron
 Cryptomator
+Cursor
 DEVONthink 3
 DaisyDisk
 Darkroom
@@ -104,6 +107,7 @@ OmniOutliner
 OmniPlan
 OneDrive
 OnyX
+OpenAI Translator
 OpenCat
 OpenEmu
 Optimus Player
@@ -153,6 +157,7 @@ TencentMeeting
 Termius
 Things3
 Tito Control
+Todoist
 TopNotch
 TradingView
 Tropy
