@@ -32,6 +32,7 @@ exiftool
 extra-cmake-modules
 fcp
 fd
+ffmpeg
 fpp
 frps
 fswatch

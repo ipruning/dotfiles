@@ -88,6 +88,7 @@ VSpaceCode.whichkey
 withfig.fig
 xaver.clang-format
 XING.zotero-cite
+YOUR_PUBLISHER_NAME.vscode-chatgpt
 yy0931.save-as-root
 yzhang.markdown-all-in-one
 zhuangtongfa.material-theme

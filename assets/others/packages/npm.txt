@@ -17,7 +17,9 @@ parrotsay
 picgo
 pnpm
 typescript
+typescript-language-server
 vercel
+vsce
 yarn
 yo
 zhlint
