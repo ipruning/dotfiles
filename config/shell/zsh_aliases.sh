@@ -95,4 +95,6 @@ r-upgrade() {
   rustup update
   wget https://raw.githubusercontent.com/vast-ai/vast-python/master/vast.py -O "${HOME}"/Dotfiles/bin/vast
   chmod +x "${HOME}"/Dotfiles/bin/vast
+  wget https://raw.githubusercontent.com/reorx/ai.py/master/ai.py -O "${HOME}"/Dotfiles/bin/ai
+  chmod +x "${HOME}"/Dotfiles/bin/ai
 }
