@@ -9,8 +9,9 @@ bin/cwim
 bin/feishu2md
 bin/nnn
 bin/redo
-bin/wayback
+bin/typst
 bin/warpd
+bin/wayback
 bin/webtty
 
 # bin (downloaded binaries)
