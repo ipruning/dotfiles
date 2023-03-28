@@ -219,10 +219,10 @@
                                 "conditions": [
                                     {
                                         "bundle_identifiers": [
+                                            "^org.alacritty",
                                             "^com.apple.Terminal",
                                             "^com.googlecode.iterm2",
-                                            "^com.microsoft.VSCode",
-                                            "^org.alacritty"
+                                            "^com.microsoft.VSCode"
                                         ],
                                         "type": "frontmost_application_if"
                                     }
@@ -253,10 +253,10 @@
                                 "conditions": [
                                     {
                                         "bundle_identifiers": [
+                                            "^org.alacritty",
                                             "^com.apple.Terminal",
                                             "^com.googlecode.iterm2",
-                                            "^com.microsoft.VSCode",
-                                            "^org.alacritty"
+                                            "^com.microsoft.VSCode"
                                         ],
                                         "type": "frontmost_application_if"
                                     }
