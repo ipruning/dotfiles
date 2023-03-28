@@ -47,6 +47,9 @@
     "markdown": "cd $dir && md-formatter -a $fullFileName",
     "python": "$pythonPath -u $fullFileName"
   },
+  "code-runner.executorMapByGlob": {
+    "*.typ": "typst $fullFileName"
+  },
   "code-runner.clearPreviousOutput": true,
   "code-runner.ignoreSelection": true,
   "code-runner.saveFileBeforeRun": true,
@@ -181,7 +184,8 @@
     "*.autocorrectrc": "yaml",
     "*.coverage": "log",
     "*.secrets.baseline": "json",
-    "*.strings": "plist"
+    "*.strings": "plist",
+    "*.typ": "tex"
   },
   "material-icon-theme.languages.associations": {
     "beancount": "Log",
@@ -308,6 +312,7 @@
   "julia.symbolCacheDownload": true,
   "markdown-preview-enhanced.previewTheme": "one-light.css",
   "path-autocomplete.triggerOutsideStrings": true,
+  "hediet.vscode-drawio.resizeImages": null,
   "redhat.telemetry.enabled": false,
   "remote.SSH.connectTimeout": 1000,
   "shellcheck.exclude": ["SC1091", "SC2148", "SC2155"],

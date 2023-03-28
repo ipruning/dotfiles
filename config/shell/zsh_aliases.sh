@@ -39,6 +39,10 @@ alias rmi='rm -i'
 # alias sort="huniq"
 # alias top='htop'
 alias v='nvim'
+# alias ai='ai'
+# alias chatgpt='chatgpt'
+# alias copilot='copilot'
+# alias gptcommit='gptcommit'
 
 #===============================================================================
 # 👇
