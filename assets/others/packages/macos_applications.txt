@@ -3,6 +3,7 @@
 A Better Finder Attributes 7
 ABBYY FineReader PDF
 AI Photo
+Aiko
 Alacritty
 Alfred 5
 AltTab
@@ -88,6 +89,7 @@ Maipo
 Mathpix Snipping Tool
 Messenger
 Microsoft Excel
+Microsoft Outlook
 Microsoft PowerPoint
 Microsoft Remote Desktop
 Microsoft Teams
@@ -111,6 +113,7 @@ OpenAI Translator
 OpenCat
 OpenEmu
 Optimus Player
+OrbStack
 PDF Expert
 Pages
 PaimonMenuBar
@@ -178,6 +181,7 @@ YACReader
 Zed
 ZeroTier
 Zotero
+bloop
 calibre
 draw.io
 iMazing

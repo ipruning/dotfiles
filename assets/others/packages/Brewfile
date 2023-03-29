@@ -7,7 +7,6 @@ tap "candid82/brew"
 tap "cloudflare/cloudflare"
 tap "d12frosted/emacs-plus"
 tap "deb-sig/tap"
-tap "eth-p/software"
 tap "homebrew/bundle"
 tap "homebrew/cask-fonts"
 tap "homebrew/cask-versions"
@@ -151,12 +150,10 @@ brew "brimdata/tap/zq"
 brew "cloudflare/cloudflare/cloudflared"
 brew "d12frosted/emacs-plus/emacs-plus@29", args: ["with-native-comp", "with-nobu417-big-sur-icon"]
 brew "deb-sig/tap/double-entry-generator"
-brew "eth-p/software/bat-extras"
 brew "noborus/tap/ov"
 brew "timothyye/tap/skm"
 cask "1password"
 cask "1password-cli"
-cask "alacritty"
 cask "apparency"
 cask "chromium"
 cask "clashx-pro"
@@ -194,6 +191,7 @@ cask "zulu17"
 cask "zulu8"
 mas "1Password for Safari", id: 1569813296
 mas "AI Photo", id: 6444911377
+mas "Aiko", id: 1672085276
 mas "Bob", id: 1630034110
 mas "Compressor", id: 424390742
 mas "Darkroom", id: 953286746
@@ -212,6 +210,7 @@ mas "MainStage", id: 634159523
 mas "Maipo", id: 789066512
 mas "Messenger", id: 1480068668
 mas "Microsoft Excel", id: 462058435
+mas "Microsoft Outlook", id: 985367838
 mas "Microsoft PowerPoint", id: 462062816
 mas "Microsoft Remote Desktop", id: 1295203466
 mas "Microsoft Word", id: 462054704

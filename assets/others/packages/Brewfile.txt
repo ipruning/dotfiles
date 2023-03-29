@@ -4,6 +4,7 @@ asciinema
 asdf
 autocorrect
 awk
+bat
 bazelisk
 bore-cli
 borkdude/brew/babashka
@@ -17,6 +18,7 @@ choose-rust
 ciphey
 cloudflare/cloudflare/cloudflared
 cmake
+cmocka
 colima
 d12frosted/emacs-plus/emacs-plus@29
 dasel
@@ -27,7 +29,6 @@ docker
 dog
 duf
 dust
-eth-p/software/bat-extras
 exiftool
 extra-cmake-modules
 fcp
