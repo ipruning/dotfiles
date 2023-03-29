@@ -1,19 +1,14 @@
 [include]
     path = ~/.gitconfig.local
 [alias]
+    dft = difftool
 	lg = log --graph --decorate \n-30 --all --date-order --date=format:'%Y-%m-%d %H:%M:%S' \n--pretty=format:'%C(cyan)%h%Creset %C(black bold)%ad%Creset%C(auto)%d %s'
 [branch]
     sort = -committerdate # Show most recently changed branches first.
 [core]
     excludesfile = ~/.gitignore_global
-    pager = delta
 [init]
 	defaultBranch = main
-[interactive]
-    diffFilter = delta --color-only
-[delta]
-    navigate = true  # use n and N to move between diff sections
-    side-by-side = true
 [merge]
     conflictstyle = diff3
 [push]
@@ -21,6 +16,8 @@
 [diff]
     colorMoved = default
     tool = difftastic
+[pager]
+    difftool = true
 [difftool]
     prompt = false
 [difftool "difftastic"]
