@@ -3,6 +3,7 @@ cargo-make
 cargo-update
 cargo-vet
 coreutils
+gptcommit
 huniq
 mdbook
 mdbook-linkcheck
