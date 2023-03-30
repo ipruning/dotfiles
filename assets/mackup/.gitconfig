@@ -3,21 +3,18 @@
 [alias]
     dft = difftool
 	lg = log --graph --decorate \n-30 --all --date-order --date=format:'%Y-%m-%d %H:%M:%S' \n--pretty=format:'%C(cyan)%h%Creset %C(black bold)%ad%Creset%C(auto)%d %s'
+[pager]
+    difftool = true
 [branch]
     sort = -committerdate # Show most recently changed branches first.
 [core]
     excludesfile = ~/.gitignore_global
 [init]
 	defaultBranch = main
-[merge]
-    conflictstyle = diff3
 [push]
 	autoSetupRemote = true
 [diff]
-    colorMoved = default
     tool = difftastic
-[pager]
-    difftool = true
 [difftool]
     prompt = false
 [difftool "difftastic"]
@@ -55,12 +52,12 @@
     reflogExpireUnreachable = 90 # default 30 days
 [gpg]
     program = gpg
-	format = ssh 
+	format = ssh
 [gpg "ssh"]
-	program = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
+	program = /Applications/1Password.app/Contents/MacOS/op-ssh-sign
 [commit]
     # gpgsign = true
-[user]
+[user] # This is the default user, but you can override it in .gitconfig.local
     # name = YOUR_NAME
     # email = YOUR_EMAIL@example.com
     # signingkey = YOUR_GPG_FINGERPRINT
