@@ -201,6 +201,7 @@
   ],
   "indentRainbow.ignoreErrorLanguages": ["*"],
   "indentRainbow.excludedLanguages": [
+    "beancount",
     "csv",
     "latex",
     "log",
@@ -300,8 +301,8 @@
   "chatgpt.method": "Browser Auto-login",
   "chatgpt.promptPrefix.customPrompt1": "Refactor the following code",
   "chatgpt.promptPrefix.customPrompt1-enabled": true,
-  "genieai.openai.maxTokens": 8000,
-  "genieai.openai.model": "gpt-4",
+  // "genieai.openai.maxTokens": 3000,
+  // "genieai.openai.model": "gpt-4",
   "genieai.promptPrefix.customPrompt1": "Refactor the following code",
   "genieai.promptPrefix.customPrompt1-enabled": true,
   "dendron.rootDir": "~/Databases/Dendron",
