@@ -197,5 +197,4 @@ waifu2x
 waifuExtension
 zoom.us
 企业微信
-明日方舟
 讯飞语音输入
