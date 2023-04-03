@@ -3,8 +3,18 @@
 # https://github.com/reegnz/asdfzf
 set -euo pipefail
 
+ASDF_DATA_DIR="${ASDF_DATA_DIR:-$HOME/.asdf}"
+ASDF_PLUGIN_PATH="${ASDF_DATA_DIR}/plugins"
+ASDF_INSTALL_PATH="${ASDF_DATA_DIR}/installs"
+ASDF_REPOSITORY_PATH="${ASDF_DATA_DIR}/repository"
+
 __list_installed_plugins() {
-    asdf plugin-list 2>/dev/null | sort
+    local plugin_dir="${ASDF_PLUGIN_PATH}"
+    if [[ -d "${plugin_dir}" ]]; then
+        for entry in $plugin_dir/*; do
+            echo ${entry##*/}
+        done | sort
+    fi
 }
 
 __select_installed_plugin() {
@@ -27,9 +37,18 @@ __color_installed() {
         }'
 }
 
+__list_all_supported_plugins() {
+    local plugin_dir="${ASDF_REPOSITORY_PATH}/plugins"
+    if [[ -d "$plugin_dir" ]]; then
+        for entry in $plugin_dir/*; do
+            echo ${entry##*/}
+        done
+    fi
+}
+
 __list_all_plugins() {
     join -t ' ' -a 1 \
-        <(asdf plugin-list-all 2>/dev/null | awk '{print $1}' | sort) \
+        <(__list_all_supported_plugins | sort) \
         <(__list_installed_plugins | awk '{print $1 " (installed)"}' | sort) |
         __color_installed
 }
@@ -98,33 +117,33 @@ __list_all_versions() {
     version_filter=$(__version_filter "$1")
     join -t ' ' -a 1 \
         <(asdf list-all "$1" 2>/dev/null | awk '{print $1}' | eval "$version_filter" | sort) \
-        <(asdf list "$1" 2>/dev/null | awk '{print $1}' | eval "$version_filter" | awk '{print $1 " (installed)"}' | sort) |
-        sort -V |
-        __color_installed
+        <(__list_installed_versions "$1" | sort) |
+        sort -V | __color_installed
 }
 
 __list_installed_versions() {
-    __list_all_versions "$1" | grep 'installed'
+    local plugin_dir="${ASDF_INSTALL_PATH}/$1"
+    if [[ -d "${plugin_dir}" ]]; then
+        for entry in $plugin_dir/*; do
+            echo ${entry##*/}
+        done | sort | awk '{print $1 " (installed)"}'
+    fi
 }
 
 __select_installed_version() {
-    __list_installed_versions "$1" |
-        fzf --tac --ansi --no-sort |
-        awk '{ print $1 }'
+    __list_installed_versions "$1" | __color_installed
+    fzf --tac --ansi --no-sort | awk '{ print $1 }'
+}
 
+__select_installed_versions() {
+    __list_installed_versions $1 | __color_installed
+    fzf -m --tac --ansi --no-sort | awk '{ print $1 }'
 }
 
 __select_available_versions() {
     versions=$(__list_all_versions "$1")
     cat <(echo "$versions" | grep "installed") \
         <(echo "$versions" | grep -v "installed") |
-        fzf -m --tac --ansi --no-sort | awk '{ print $1 }'
-}
-
-__select_installed_versions() {
-    versions=$(__list_all_versions "$1")
-    cat <(echo "$versions" | grep -v "installed") \
-        <(echo "$versions" | grep "installed") |
         fzf -m --tac --ansi --no-sort | awk '{ print $1 }'
 }
 
@@ -202,7 +221,7 @@ __select_operation() {
 
 main() {
     operation=$(__select_operation)
-    "_$operation"
+    _$operation
 }
 
 main
