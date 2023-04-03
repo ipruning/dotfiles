@@ -1,7 +1,6 @@
 # gitignore
 
-# log
-*.log
+# backup
 automatic_backups
 
 # bin (compiled binaries)
@@ -9,7 +8,6 @@ bin/cwim
 bin/feishu2md
 bin/nnn
 bin/redo
-bin/typst
 bin/warpd
 bin/wayback
 bin/webtty
@@ -17,6 +15,9 @@ bin/webtty
 # bin (downloaded binaries)
 bin/pandoc
 bin/pandoc-crossref
+
+# log
+*.log
 
 # zsh
 config/shell/zsh_env_private.sh
