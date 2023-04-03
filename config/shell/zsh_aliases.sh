@@ -33,7 +33,7 @@ fi
 alias mvi='mv -i'
 # alias ping='gping'
 # alias ps='procs'
-alias rip='rip -i'
+# alias rip='rip -i'
 alias rmi='rm -i'
 # alias sed="sd"
 # alias sort="huniq"
