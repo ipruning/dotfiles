@@ -6,19 +6,68 @@
 # pip install git+https://github.com/lucasb-eyer/pydensecrf.git
 # brew install freetype
 
-if [ "$1" == "-h" ]; then
-    echo "Usage: $(basename "$0") </YOUR_DIR>"
-    exit 0
+VERBOSE=0
+MODE="batch"
+TRANSLATOR="gpt3.5"
+TARGET_LANG="CHS"
+INPUT=""
+
+print_help() {
+    echo "Usage: $(basename "$0") [-v] [-m mode] [-t translator] [-l language] [-i input_directory]"
+    echo ""
+    echo "Options:"
+    echo "  -v            Enable verbose mode (Optional)"
+    echo "  -m mode       Set the mode, default is 'batch' (Optional)"
+    echo "  -t translator Set the translator, default is 'gpt3.5' (Optional)"
+    echo "  -l language   Set the target language, default is 'CHS' (Optional)"
+    echo "  -i directory  Set the input manga directory (Required)"
+}
+
+while getopts ":vm:t:l:i:h" opt; do
+    case $opt in
+    v) VERBOSE=1 ;;
+    m) MODE="$OPTARG" ;;
+    t) TRANSLATOR="$OPTARG" ;;
+    l) TARGET_LANG="$OPTARG" ;;
+    i) INPUT="$OPTARG" ;;
+    h)
+        print_help
+        exit 0
+        ;;
+    \?)
+        echo "Invalid option: -$OPTARG" >&2
+        print_help
+        exit 1
+        ;;
+    :)
+        echo "Option -$OPTARG requires an argument." >&2
+        print_help
+        exit 1
+        ;;
+    esac
+done
+
+if [ -z "$INPUT" ]; then
+    echo "Error: Input directory is required."
+    print_help
+    exit 1
 fi
 
-MANGA_DIR="$PWD/$1"
+MANGA_DIR="$PWD/$INPUT"
 FOLDER_PATH="$HOME/Stacks/Utilities/Manga/manga-image-translator"
 PYTHON_EXEC="$FOLDER_PATH/.venv/bin/python"
+
+if [ $VERBOSE -eq 1 ]; then
+    read -ra VERBOSE_ARG <<<"--verbose"
+else
+    VERBOSE_ARG=()
+fi
+
 ARGS=(
-    "--verbose"
-    "--mode=batch"
-    "--translator=gpt3.5"
-    "--target-lang=CHS"
+    "${VERBOSE_ARG[@]}"
+    "--mode=$MODE"
+    "--translator=$TRANSLATOR"
+    "--target-lang=$TARGET_LANG"
     "--input=$MANGA_DIR"
 )
 
