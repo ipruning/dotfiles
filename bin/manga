@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 
-# brew install freetype
+# git clone https://github.com/zyddnys/manga-image-translator.git
 # python3 -m venv .venv && source .venv/bin/activate && python3 -m pip install --upgrade
 # pip install -r requirements.txt
 # pip install git+https://github.com/lucasb-eyer/pydensecrf.git
+# brew install freetype
 
 if [ "$1" == "-h" ]; then
     echo "Usage: $(basename "$0") </YOUR_DIR>"
@@ -11,8 +12,17 @@ if [ "$1" == "-h" ]; then
 fi
 
 MANGA_DIR="$PWD/$1"
-echo "Translating $MANGA_DIR"
+FOLDER_PATH="$HOME/Stacks/Utilities/Manga/manga-image-translator"
+PYTHON_EXEC="$FOLDER_PATH/.venv/bin/python"
+ARGS=(
+    "--verbose"
+    "--mode=batch"
+    "--translator=gpt3.5"
+    "--target-lang=CHS"
+    "--input=$MANGA_DIR"
+)
 
-APP="$HOME/Stacks/Utilities/Manga/manga-image-translator"
-export DYLD_LIBRARY_PATH=/opt/homebrew/lib:$DYLD_LIBRARY_PATH
-cd "$APP" && .venv/bin/python translate_demo.py --mode batch --verbose --translator=baidu --target-lang=CHS --image "$MANGA_DIR"
+echo "Translating $MANGA_DIR"
+export DYLD_LIBRARY_PATH="$HOMEBREW_PREFIX/lib:$DYLD_LIBRARY_PATH"
+
+cd "$FOLDER_PATH" && $PYTHON_EXEC -m manga_translator "${ARGS[@]}"
