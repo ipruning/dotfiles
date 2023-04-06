@@ -67,6 +67,7 @@ alias r-fava='fava ${HOME}/Databases/Ledger/main.bean -p 4000'
 alias r-jupyter-lab='${HOME}/.conda/envs/LearningAI/bin/jupyter-lab'
 alias r-jupyter='${HOME}/.conda/envs/LearningAI/bin/jupyter-notebook'
 alias r-lol='open /Applications/League\ of\ Legends.app/ --args --locale=zh_CN'
+alias r-p2t='${HOME}/Stacks/Utilities/Pix2Text/.venv/bin/python ${HOME}/Stacks/Utilities/Pix2Text/scripts/screenshot_daemon.py'
 alias r-unm='node ${HOME}/Stacks/Utilities/UnblockNeteaseMusic/app.js -p 80:443 -f 103.126.92.132'
 
 #===============================================================================
