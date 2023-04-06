@@ -19,7 +19,6 @@ Blackmagic Disk Speed Test
 Blackmagic Media Express
 Blender
 Bob
-Buzz
 Capture One 23
 ChatGPT
 Chromium
@@ -78,6 +77,7 @@ Latest
 LayAuto3
 Linear
 LinearMouse
+Little Snitch
 Logic Pro X
 Logseq
 Loom
@@ -109,7 +109,6 @@ OmniOutliner
 OmniPlan
 OneDrive
 OnyX
-OpenAI Translator
 OpenCat
 OpenEmu
 Optimus Player
