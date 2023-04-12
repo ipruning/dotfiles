@@ -153,7 +153,6 @@ Suspicious Package
 Syntax Highlight
 TakeABreak
 Tampermonkey
-TeamViewer
 Telegram
 TencentMeeting
 Termius
