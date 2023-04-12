@@ -4,9 +4,6 @@ cargo-update
 cargo-vet
 coreutils
 gptcommit
-huniq
 mdbook
 mdbook-linkcheck
 mdbook-pdf
-nu
-typos-cli

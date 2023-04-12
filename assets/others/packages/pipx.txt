@@ -19,7 +19,6 @@ mackup
 manim
 mkdocs-material
 mypy
-nhentai
 nox
 pandoc-eqnos
 pandoc-fignos
