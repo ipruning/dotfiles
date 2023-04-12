@@ -104,6 +104,7 @@ tmux
 tokei
 tor
 tree
+typos-cli
 typst
 ugit
 vips
