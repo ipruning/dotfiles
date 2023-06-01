@@ -2,7 +2,6 @@
 1Password
 A Better Finder Attributes 7
 ABBYY FineReader PDF
-AI Photo
 Aiko
 Alacritty
 Alfred 5
@@ -20,11 +19,11 @@ Blackmagic Media Express
 Blender
 Bob
 Capture One 23
-ChatGPT
 Chromium
 CiteSpace
 ClashX Pro
 Clay
+Cloudflare WARP
 Compressor
 Contexts
 Cron
@@ -33,6 +32,7 @@ Cursor
 DEVONthink 3
 DaisyDisk
 Darkroom
+Day One
 DeepL
 DevCleaner
 DevToys
@@ -87,6 +87,7 @@ MWeb Pro
 MainStage 3
 Maipo
 Mathpix Snipping Tool
+MessAuto
 Messenger
 Microsoft Excel
 Microsoft Outlook
@@ -100,6 +101,7 @@ Motion
 MultiMC
 MusicHarbor
 NeteaseMusic
+NoFWL
 Notion
 Numbers
 OBS
@@ -118,6 +120,7 @@ Pages
 PaimonMenuBar
 Parsec
 PasteNow
+Photomator
 PicGo
 Picsee
 Pictogram
@@ -138,6 +141,7 @@ Save to Raindrop.io
 Scapple
 ScreenFlow
 Scrivener
+ServerCat
 Setapp
 Shadowrocket
 Shapr3D
@@ -151,7 +155,6 @@ SoundSource
 Steam
 Suspicious Package
 Syntax Highlight
-TakeABreak
 Tampermonkey
 Telegram
 TencentMeeting
@@ -168,10 +171,12 @@ Unity Hub
 Vimari
 VirtualBuddy
 Visual Studio Code
+Vivaldi
 Warp
 WeChat
 WechatExporter
 Wooshy
+WorkFlowy
 XLD
 Xcode
 Xcodes

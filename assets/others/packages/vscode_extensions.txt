@@ -41,6 +41,7 @@ mathiassoeholm.markdown-link-updater
 mechatroner.rainbow-csv
 mhutchie.git-graph
 ms-azuretools.vscode-docker
+ms-python.black-formatter
 ms-python.flake8
 ms-python.isort
 ms-python.python
