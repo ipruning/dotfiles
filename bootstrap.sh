@@ -8,7 +8,7 @@ NORMAL="$(tput sgr0)"
 
 function setup_dotfiles {
   echo "${BLUE}Cloning dotfiles...${NORMAL}"
-  git clone --depth 1 https://github.com/Spehhhhh/dotfiles.git "$HOME"/dotfiles
+  git clone --depth 1 https://github.com/ipruning/dotfiles.git "$HOME"/dotfiles
 }
 
 function bootstrap {
