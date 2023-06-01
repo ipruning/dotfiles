@@ -19,7 +19,7 @@
 Execute the bootstrap script.
 
 ```shell
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Spehhhhh/dotfiles/master/bootstrap.sh)"
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/ipruning/dotfiles/master/bootstrap.sh)"
 ```
 
 If you are a macOS user, you will need to install xcode first or download it here  <https://developer.apple.com/download/more/>.
