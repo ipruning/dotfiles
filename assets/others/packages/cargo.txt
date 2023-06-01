@@ -3,7 +3,6 @@ cargo-make
 cargo-update
 cargo-vet
 coreutils
-gptcommit
 mdbook
 mdbook-linkcheck
 mdbook-pdf
