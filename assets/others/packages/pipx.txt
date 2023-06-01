@@ -11,10 +11,10 @@ fava
 fava-investor
 ffsubsync
 flake8
+frogmouth
 git-sim
 huggingface-hub
 isort
-langflow
 mackup
 manim
 mkdocs-material
