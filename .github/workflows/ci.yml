@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: set up
         run: |
-          git clone --depth 1 https://github.com/Spehhhhh/dotfiles.git $HOME/dotfiles
+          git clone --depth 1 https://github.com/ipruning/dotfiles.git $HOME/dotfiles
           cd $HOME/dotfiles
           ./scripts/bootstrap_ci.sh
       - name: run test
