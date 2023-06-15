@@ -1,4 +1,3 @@
-archivebox/archivebox/archivebox
 aria2
 asciinema
 asdf
@@ -38,6 +37,7 @@ fpp
 frps
 fswatch
 gh
+git
 git-cliff
 git-crypt
 git-extras
@@ -85,6 +85,7 @@ procs
 pueue
 pyenv
 qt
+ripgrep
 rm-improved
 rust
 sd
@@ -109,6 +110,7 @@ typst
 ugit
 vips
 watchexec
+wget
 yq
 yt-dlp
 zig
