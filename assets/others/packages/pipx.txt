@@ -1,7 +1,6 @@
 autopep8
 beancount
 black
-chatGPT
 commitizen
 cookiecutter
 deadlink

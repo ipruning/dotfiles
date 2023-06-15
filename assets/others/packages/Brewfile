@@ -1,5 +1,4 @@
 tap "1password/tap"
-tap "archivebox/archivebox"
 tap "borkdude/brew"
 tap "brimdata/tap"
 tap "buo/cask-upgrade"
@@ -147,7 +146,6 @@ brew "yt-dlp"
 brew "zig"
 brew "zola"
 brew "zoxide"
-brew "archivebox/archivebox/archivebox"
 brew "borkdude/brew/babashka"
 brew "brimdata/tap/zed"
 brew "brimdata/tap/zq"
@@ -211,7 +209,6 @@ mas "GarageBand", id: 682658836
 mas "GoodNotes", id: 1444383602
 mas "iMovie", id: 408981434
 mas "Keynote", id: 409183694
-mas "LanguageTool", id: 1534275760
 mas "Logic Pro", id: 634148309
 mas "MainStage", id: 634159523
 mas "Maipo", id: 789066512
@@ -265,6 +262,7 @@ vscode "foxundermoon.shell-format"
 vscode "genieai.chatgpt-vscode"
 vscode "GitHub.copilot"
 vscode "GitHub.copilot-labs"
+vscode "github.vscode-github-actions"
 vscode "golang.go"
 vscode "Gruntfuggly.todo-tree"
 vscode "hediet.vscode-drawio"

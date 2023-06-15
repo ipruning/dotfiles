@@ -20,6 +20,7 @@ foxundermoon.shell-format
 genieai.chatgpt-vscode
 GitHub.copilot
 GitHub.copilot-labs
+github.vscode-github-actions
 golang.go
 Gruntfuggly.todo-tree
 hediet.vscode-drawio
