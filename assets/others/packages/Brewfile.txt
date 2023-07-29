@@ -1,6 +1,7 @@
 aria2
 asciinema
 asdf
+atuin
 autocorrect
 awk
 bat
@@ -43,7 +44,6 @@ git-crypt
 git-extras
 git-lfs
 git-quick-stats
-gitui
 glow
 gnu-sed
 gnu-tar
@@ -62,6 +62,8 @@ jq
 juliaup
 just
 latexindent
+lazydocker
+lazygit
 lf
 libmagic
 llvm

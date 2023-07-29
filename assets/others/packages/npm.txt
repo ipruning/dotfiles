@@ -1,9 +1,11 @@
 @antfu/ni
 @argdown/cli
+@githubnext/github-copilot-cli
 @lint-md/cli
 @marp-team/marp-cli
 @railway/cli
 @slidev/cli
+@slidev/theme-default
 @squoosh/cli
 cnpm
 corepack

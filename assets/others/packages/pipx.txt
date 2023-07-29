@@ -14,11 +14,13 @@ frogmouth
 git-sim
 huggingface-hub
 isort
+jupyter-book
 mackup
 manim
 mkdocs-material
 mypy
 nox
+openai
 pandoc-eqnos
 pandoc-fignos
 pandoc-secnos
@@ -38,6 +40,7 @@ speedtest-cli
 terminal-copilot
 things-cli
 tmuxp
+vastai
 yacron
 yapf
 zotero-cli-tool
