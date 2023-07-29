@@ -3,10 +3,12 @@
   "editor.bracketPairColorization.enabled": true,
   "editor.cursorBlinking": "phase",
   "editor.cursorSmoothCaretAnimation": "on",
-  "editor.fontLigatures": true,
   "editor.fontFamily": "'MonoLisa Nerd Font', 'Source Han Sans SC'",
+  "editor.fontLigatures": true,
   "editor.fontSize": 12,
+  "editor.lineHeight": 0,
   // "editor.fontFamily": "'CaskaydiaCove Nerd Font', 'Source Han Sans SC'",
+  // "editor.fontLigatures": true,
   // "editor.fontSize": 12,
   // "editor.lineHeight": 1.6,
   "editor.formatOnSave": true,
@@ -23,7 +25,7 @@
   "editor.guides.indentation": false,
   "editor.guides.bracketPairs": false,
   "editor.unicodeHighlight.ambiguousCharacters": false,
-  // "diffEditor.wordWrap": "on",
+  "diffEditor.wordWrap": "off",
   "diffEditor.renderSideBySide": true,
   "diffEditor.ignoreTrimWhitespace": false,
   "diffEditor.maxComputationTime": 10000,
@@ -33,9 +35,6 @@
   "terminal.integrated.defaultProfile.osx": "zsh",
   "terminal.integrated.fontFamily": "'MonoLisa Nerd Font', 'Source Han Sans SC'",
   "terminal.integrated.fontSize": 14,
-  // "terminal.integrated.fontFamily": "'CaskaydiaCove Nerd Font', 'Source Han Sans SC'",
-  // "terminal.integrated.fontSize": 14,
-  // "terminal.integrated.lineHeight": 1.2,
   "terminal.integrated.inheritEnv": false,
   "terminal.integrated.env.osx": {
     "FIG_NEW_SESSION": "1"
@@ -49,6 +48,7 @@
     "python": "$pythonPath -u $fullFileName"
   },
   "code-runner.executorMapByGlob": {
+    "*.lmql": "lmql run $fullFileName",
     "*.typ": "typst $fullFileName"
   },
   "code-runner.clearPreviousOutput": true,
@@ -67,7 +67,7 @@
   "gitlens.views.repositories.files.layout": "list",
   "gitlens.codeLens.scopes": ["document"],
   "workbench.activityBar.visible": true,
-  "workbench.colorTheme": "One Dark Pro",
+  "workbench.colorTheme": "Catppuccin Mocha",
   "workbench.colorCustomizations": {
     "editor.lineHighlightBackground": "#1073cf2d",
     "editor.lineHighlightBorder": "#9fced11f"
@@ -88,6 +88,35 @@
     "*.pdf": "latex-workshop-pdf-hook"
   },
   "workbench.layoutControl.enabled": true,
+  "todohighlight.include": ["**/*.txt", "**/*.chatml"],
+  "todohighlight.keywords": [
+    {
+      "text": "<|im_start|>user",
+      "backgroundColor": "rgba(0, 0, 0, 0)"
+    },
+    {
+      "text": "<|im_start|>assistant",
+      "backgroundColor": "rgba(0, 0, 0, 0)"
+    },
+    {
+      "text": "<|im_start|>system",
+      "backgroundColor": "rgba(0, 0, 0, 0)"
+    },
+    {
+      "text": "<|im_end|>",
+      "backgroundColor": "rgba(0, 0, 0, 0)"
+    },
+    {
+      "text": "Let's think step by step",
+      "color": "#FF0000",
+      "backgroundColor": "rgba(0, 0, 0, 0)"
+    },
+    {
+      "text": "the answer",
+      "color": "#FF0000",
+      "backgroundColor": "rgba(0, 0, 0, 0)"
+    }
+  ],
   "todo-tree.general.tags": [
     "BUG",
     "HACK",
@@ -125,21 +154,23 @@
       "gutterIcon": true
     }
   },
+  "xml.symbols.maxItemsComputed": 50000,
   "todo-tree.regex.regex": "(//|#|<!--|;|/\\*|^|^\\s*(-|\\d+.))\\s*($TAGS)",
   "jupyter.widgetScriptSources": ["jsdelivr.com", "unpkg.com"],
   "jupyter.askForKernelRestart": false,
-  "isort.check": true,
-  "isort.importStrategy": "fromEnvironment",
-  "isort.args": ["--line-length=120"],
-  "black-formatter.args": ["--line-length=120"],
   "python.defaultInterpreterPath": "~/.conda/envs/LearningAI/bin/python",
+  "python.languageServer": "Pylance",
   "python.formatting.blackArgs": ["--line-length=120"],
   "python.formatting.provider": "black",
-  "python.languageServer": "Pylance",
+  "black-formatter.args": ["--line-length=120"],
   "python.linting.flake8Args": [
     "--max-line-length=120",
     "--ignore=E203,E402,E501,W503"
   ],
+  "flake8.args": ["--max-line-length=120", "--ignore=E203,E402,E501,W503"],
+  "isort.check": true,
+  "isort.importStrategy": "fromEnvironment",
+  "isort.args": ["--line-length=120"],
   "markdownlint.config": {
     // https://github.com/DavidAnson/markdownlint/blob/main/schema/.markdownlint.jsonc
     // MD004/ul-style - Unordered list style
@@ -176,15 +207,12 @@
   "markdown.extension.list.indentationSize": "inherit",
   "markdown.extension.tableFormatter.normalizeIndentation": true,
   "markdown.suggest.paths.enabled": false,
-  "markdownFormatter.formatOpt": {
-    "indent_size": 4
-  },
-  "markdownFormatter.formatULSymbol": false,
   "material-icon-theme.files.associations": {
     "Brewfile_dev": "ruby",
     "Brewfile_leaves": "ruby",
     "*.autocorrectrc": "yaml",
     "*.coverage": "log",
+    "*.lmql": "python",
     "*.secrets.baseline": "json",
     "*.strings": "plist",
     "*.typ": "tex"
@@ -292,22 +320,14 @@
     "default": "right",
     "jupyter-notebook": "left"
   },
-  "C_Cpp.intelliSenseEngine": "Disabled",
+  "autocorrect.enable": false,
+  "autocorrect.enableLint": true,
   "autocorrect.formatOnSave": false,
   "beancount.fixedCJKWidth": true,
   "beancount.inputMethods": ["pinyin"],
   "beancount.mainBeanFile": "~/Databases/Ledger/main.bean",
   "beancountFormatter.currencyColumn": 72,
   "beancountFormatter.fixedCJKWidth": true,
-  "chatgpt.gpt3.model": "text-davinci-002-render-paid",
-  "chatgpt.method": "Browser Auto-login",
-  "chatgpt.promptPrefix.customPrompt1": "Refactor the following code",
-  "chatgpt.promptPrefix.customPrompt1-enabled": true,
-  "genieai.openai.maxTokens": 4000,
-  "genieai.openai.model": "gpt-4",
-  "genieai.promptPrefix.customPrompt1": "Refactor the following code",
-  "genieai.promptPrefix.customPrompt1-enabled": true,
-  "dendron.rootDir": "~/Databases/Dendron",
   "errorLens.excludeBySource": ["eslint", "jshint"],
   "evenBetterToml.formatter.alignEntries": true,
   "evenBetterToml.formatter.indentEntries": true,
@@ -328,14 +348,35 @@
   "hediet.vscode-drawio.resizeImages": null,
   "redhat.telemetry.enabled": false,
   "remote.SSH.connectTimeout": 1000,
-  "shellcheck.exclude": ["SC1091", "SC2148", "SC2155"],
+  "shellcheck.enable": true,
+  "shellcheck.enableQuickFix": true,
+  "shellcheck.run": "onType",
   "shellcheck.executablePath": "/opt/homebrew/bin/shellcheck",
+  "shellcheck.exclude": ["SC1091", "SC2148", "SC2155"],
+  "shellcheck.customArgs": [],
+  "shellcheck.ignorePatterns": {
+    "**/*.xonshrc": true,
+    "**/*.xsh": true,
+    "**/*.zsh": true,
+    "**/*.zshrc": true,
+    "**/zshrc": true,
+    "**/*.zprofile": true,
+    "**/zprofile": true,
+    "**/*.zlogin": true,
+    "**/zlogin": true,
+    "**/*.zlogout": true,
+    "**/zlogout": true,
+    "**/*.zshenv": true,
+    "**/zshenv": true,
+    "**/*.zsh-theme": true
+  },
+  "shellcheck.ignoreFileSchemes": ["git", "gitfs", "output"],
   "window.commandCenter": false,
   "yaml.schemas": {
     "https://json.schemastore.org/github-workflow.json": ".github/workflows/*"
   },
   "files.simpleDialog.enable": true,
-  "files.insertFinalNewline": false,
+  "files.insertFinalNewline": true,
   "files.trimFinalNewlines": true,
   "cSpell.customDictionaries": {
     "custom-dictionary-user": {
@@ -345,23 +386,13 @@
       "scope": "user"
     }
   },
-  "hediet.vscode-drawio.codeLinkActivated": true,
-  "liveServer.settings.donotShowInfoMsg": true,
-  "matlab.matlabpath": "/Applications/MATLAB_R2022a.app/bin",
-  "matlab.mlintpath": "/Applications/MATLAB_R2022a.app/bin/maci64/mlint",
   "platformio-ide.activateOnlyOnPlatformIOProject": true,
   "platformio-ide.useBuiltinPython": false,
-  "projectManager.git.baseFolders": ["~/Coding", "~/Desktop", "~/Stacks"],
-  "gitProjectManager.baseProjectsFolders": [
-    "~/Coding",
-    "~/Desktop",
-    "~/Stacks"
-  ],
-  // nvim
+  // nvim (old)
   "vscode-neovim.neovimExecutablePaths.darwin": "/opt/homebrew/bin/nvim",
-  // vim old
+  // vim (old)
   "vim.smartRelativeLine": true,
-  // // vim & VSpaceCode old
+  // // vim & VSpaceCode (old)
   // // Vim easymotion is required for Jump menu - <SPC> j
   // "vim.easymotion": true,
   // // Use system clipboard for VIM
@@ -402,7 +433,7 @@
   //     ]
   //   }
   // ],
-  // vim & VSpaceCode Scott
+  // vim & VSpaceCode from Scott
   "vim.useSystemClipboard": true,
   "vim.foldfix": true,
   "vim.timeout": 1000,
@@ -466,7 +497,7 @@
     { "before": ["]", "e"], "commands": ["editor.action.marker.next"] },
     { "before": ["[", "e"], "commands": ["editor.action.marker.prev"] }
   ],
-  // whichkey Scott
+  // whichkey from Scott
   // "whichkey.delay": 100,
   // "whichkey.bindings": [
   //   {
@@ -684,7 +715,7 @@
   "explorer.fileNesting.enabled": true,
   "explorer.fileNesting.expand": false,
   "explorer.fileNesting.patterns": {
-    "//": "Last update at 6/14/2023, 8:04:54 PM",
+    "//": "Last update at 7/29/2023, 12:44:20 AM",
     "*.asax": "$(capture).*.cs, $(capture).*.vb",
     "*.ascx": "$(capture).*.cs, $(capture).*.vb",
     "*.ashx": "$(capture).*.cs, $(capture).*.vb",
@@ -727,6 +758,7 @@
     "BUILD.bazel": "*.bzl, *.bazel, *.bazelrc, bazel.rc, .bazelignore, .bazelproject, WORKSPACE",
     "CMakeLists.txt": "*.cmake, *.cmake.in, .cmake-format.yaml, CMakePresets.json",
     "I*.cs": "$(capture).cs",
+    "Pipfile": ".editorconfig, .flake8, .isort.cfg, .python-version, Pipfile, Pipfile.lock, requirements*.in, requirements*.pip, requirements*.txt, tox.ini",
     "artisan": "*.env, .babelrc*, .codecov, .cssnanorc*, .env.*, .envrc, .htmlnanorc*, .lighthouserc.*, .mocha*, .postcssrc*, .terserrc*, api-extractor.json, ava.config.*, babel.config.*, contentlayer.config.*, cssnano.config.*, cypress.*, env.d.ts, formkit.config.*, formulate.config.*, histoire.config.*, htmlnanorc.*, jasmine.*, jest.config.*, jsconfig.*, karma*, lighthouserc.*, playwright.config.*, postcss.config.*, puppeteer.config.*, rspack.config.*, server.php, svgo.config.*, tailwind.config.*, tsconfig.*, tsdoc.*, uno.config.*, unocss.config.*, vitest.config.*, webpack.config.*, webpack.mix.js, windi.config.*",
     "astro.config.*": "*.env, .babelrc*, .codecov, .cssnanorc*, .env.*, .envrc, .htmlnanorc*, .lighthouserc.*, .mocha*, .postcssrc*, .terserrc*, api-extractor.json, ava.config.*, babel.config.*, contentlayer.config.*, cssnano.config.*, cypress.*, env.d.ts, formkit.config.*, formulate.config.*, histoire.config.*, htmlnanorc.*, jasmine.*, jest.config.*, jsconfig.*, karma*, lighthouserc.*, playwright.config.*, postcss.config.*, puppeteer.config.*, rspack.config.*, svgo.config.*, tailwind.config.*, tsconfig.*, tsdoc.*, uno.config.*, unocss.config.*, vitest.config.*, webpack.config.*, windi.config.*",
     "cargo.toml": ".clippy.toml, .rustfmt.toml, cargo.lock, clippy.toml, cross.toml, rust-toolchain.toml, rustfmt.toml",
@@ -739,16 +771,20 @@
     "gemfile": ".ruby-version, gemfile.lock",
     "go.mod": ".air*, go.sum",
     "go.work": "go.work.sum",
+    "hatch.toml": ".editorconfig, .flake8, .isort.cfg, .python-version, hatch.toml, requirements*.in, requirements*.pip, requirements*.txt, tox.ini",
     "mix.exs": ".credo.exs, .dialyzer_ignore.exs, .formatter.exs, .iex.exs, .tool-versions, mix.lock",
     "next.config.*": "*.env, .babelrc*, .codecov, .cssnanorc*, .env.*, .envrc, .htmlnanorc*, .lighthouserc.*, .mocha*, .postcssrc*, .terserrc*, api-extractor.json, ava.config.*, babel.config.*, contentlayer.config.*, cssnano.config.*, cypress.*, env.d.ts, formkit.config.*, formulate.config.*, histoire.config.*, htmlnanorc.*, jasmine.*, jest.config.*, jsconfig.*, karma*, lighthouserc.*, next-env.d.ts, playwright.config.*, postcss.config.*, puppeteer.config.*, rspack.config.*, svgo.config.*, tailwind.config.*, tsconfig.*, tsdoc.*, uno.config.*, unocss.config.*, vitest.config.*, webpack.config.*, windi.config.*",
-    "nuxt.config.*": "*.env, .babelrc*, .codecov, .cssnanorc*, .env.*, .envrc, .htmlnanorc*, .lighthouserc.*, .mocha*, .postcssrc*, .terserrc*, api-extractor.json, ava.config.*, babel.config.*, contentlayer.config.*, cssnano.config.*, cypress.*, env.d.ts, formkit.config.*, formulate.config.*, histoire.config.*, htmlnanorc.*, jasmine.*, jest.config.*, jsconfig.*, karma*, lighthouserc.*, playwright.config.*, postcss.config.*, puppeteer.config.*, rspack.config.*, svgo.config.*, tailwind.config.*, tsconfig.*, tsdoc.*, uno.config.*, unocss.config.*, vitest.config.*, webpack.config.*, windi.config.*",
-    "package.json": ".browserslist*, .circleci*, .commitlint*, .cz-config.js, .czrc, .dlint.json, .dprint.json, .editorconfig, .eslint*, .firebase*, .flowconfig, .github*, .gitlab*, .gitpod*, .huskyrc*, .jslint*, .lintstagedrc*, .markdownlint*, .node-version, .nodemon*, .npm*, .nvmrc, .pm2*, .pnp.*, .pnpm*, .prettier*, .releaserc*, .sentry*, .simple-git-hooks*, .stackblitz*, .styleci*, .stylelint*, .tazerc*, .textlint*, .tool-versions, .travis*, .versionrc*, .vscode*, .watchman*, .xo-config*, .yamllint*, .yarnrc*, Procfile, apollo.config.*, appveyor*, azure-pipelines*, bower.json, build.config.*, commitlint*, crowdin*, dangerfile*, dlint.json, dprint.json, electron-builder.*, eslint*, firebase.json, grunt*, gulp*, jenkins*, lerna*, lint-staged*, nest-cli.*, netlify*, nodemon*, npm-shrinkwrap.json, nx.*, package-lock.json, package.nls*.json, phpcs.xml, pm2.*, pnpm*, prettier*, pullapprove*, pyrightconfig.json, release-tasks.sh, release.config.*, renovate*, rollup.config.*, rspack*, simple-git-hooks*, stylelint*, tslint*, tsup.config.*, turbo*, typedoc*, unlighthouse*, vercel*, vetur.config.*, webpack*, workspace.json, xo.config.*, yarn*",
+    "nuxt.config.*": "*.env, .babelrc*, .codecov, .cssnanorc*, .env.*, .envrc, .htmlnanorc*, .lighthouserc.*, .mocha*, .nuxtignore, .postcssrc*, .terserrc*, api-extractor.json, ava.config.*, babel.config.*, contentlayer.config.*, cssnano.config.*, cypress.*, env.d.ts, formkit.config.*, formulate.config.*, histoire.config.*, htmlnanorc.*, jasmine.*, jest.config.*, jsconfig.*, karma*, lighthouserc.*, playwright.config.*, postcss.config.*, puppeteer.config.*, rspack.config.*, svgo.config.*, tailwind.config.*, tsconfig.*, tsdoc.*, uno.config.*, unocss.config.*, vitest.config.*, webpack.config.*, windi.config.*",
+    "package.json": ".browserslist*, .circleci*, .commitlint*, .cz-config.js, .czrc, .dlint.json, .dprint.json, .editorconfig, .eslint*, .firebase*, .flowconfig, .github*, .gitlab*, .gitpod*, .huskyrc*, .jslint*, .lintstagedrc*, .markdownlint*, .node-version, .nodemon*, .npm*, .nvmrc, .pm2*, .pnp.*, .pnpm*, .prettier*, .release-please*.json, .releaserc*, .sentry*, .simple-git-hooks*, .stackblitz*, .styleci*, .stylelint*, .tazerc*, .textlint*, .tool-versions, .travis*, .versionrc*, .vscode*, .watchman*, .xo-config*, .yamllint*, .yarnrc*, Procfile, apollo.config.*, appveyor*, azure-pipelines*, bower.json, build.config.*, commitlint*, crowdin*, dangerfile*, dlint.json, dprint.json, electron-builder.*, eslint*, firebase.json, grunt*, gulp*, jenkins*, lerna*, lint-staged*, nest-cli.*, netlify*, nodemon*, npm-shrinkwrap.json, nx.*, package-lock.json, package.nls*.json, phpcs.xml, pm2.*, pnpm*, prettier*, pullapprove*, pyrightconfig.json, release-please*.json, release-tasks.sh, release.config.*, renovate*, rollup.config.*, rspack*, simple-git-hooks*, stylelint*, tslint*, tsup.config.*, turbo*, typedoc*, unlighthouse*, vercel*, vetur.config.*, webpack*, workspace.json, xo.config.*, yarn*",
     "pubspec.yaml": ".metadata, .packages, all_lint_rules.yaml, analysis_options.yaml, build.yaml, pubspec.lock, pubspec_overrides.yaml",
-    "pyproject.toml": ".pdm.toml, pdm.lock, pyproject.toml",
+    "pyproject.toml": ".editorconfig, .flake8, .isort.cfg, .pdm-python, .pdm.toml, .python-version, MANIFEST.in, Pipfile, Pipfile.lock, hatch.toml, pdm.lock, poetry.lock, pyproject.toml, requirements*.in, requirements*.pip, requirements*.txt, setup.cfg, setup.py, tox.ini",
     "quasar.conf.js": "*.env, .babelrc*, .codecov, .cssnanorc*, .env.*, .envrc, .htmlnanorc*, .lighthouserc.*, .mocha*, .postcssrc*, .terserrc*, api-extractor.json, ava.config.*, babel.config.*, contentlayer.config.*, cssnano.config.*, cypress.*, env.d.ts, formkit.config.*, formulate.config.*, histoire.config.*, htmlnanorc.*, jasmine.*, jest.config.*, jsconfig.*, karma*, lighthouserc.*, playwright.config.*, postcss.config.*, puppeteer.config.*, quasar.extensions.json, rspack.config.*, svgo.config.*, tailwind.config.*, tsconfig.*, tsdoc.*, uno.config.*, unocss.config.*, vitest.config.*, webpack.config.*, windi.config.*",
     "readme*": "authors, backers*, changelog*, citation*, code_of_conduct*, codeowners, contributing*, contributors, copying, credits, governance.md, history.md, license*, maintainers, readme*, security.md, sponsors*",
     "remix.config.*": "*.env, .babelrc*, .codecov, .cssnanorc*, .env.*, .envrc, .htmlnanorc*, .lighthouserc.*, .mocha*, .postcssrc*, .terserrc*, api-extractor.json, ava.config.*, babel.config.*, contentlayer.config.*, cssnano.config.*, cypress.*, env.d.ts, formkit.config.*, formulate.config.*, histoire.config.*, htmlnanorc.*, jasmine.*, jest.config.*, jsconfig.*, karma*, lighthouserc.*, playwright.config.*, postcss.config.*, puppeteer.config.*, remix.*, rspack.config.*, svgo.config.*, tailwind.config.*, tsconfig.*, tsdoc.*, uno.config.*, unocss.config.*, vitest.config.*, webpack.config.*, windi.config.*",
-    "rush.json": ".browserslist*, .circleci*, .commitlint*, .cz-config.js, .czrc, .dlint.json, .dprint.json, .editorconfig, .eslint*, .firebase*, .flowconfig, .github*, .gitlab*, .gitpod*, .huskyrc*, .jslint*, .lintstagedrc*, .markdownlint*, .node-version, .nodemon*, .npm*, .nvmrc, .pm2*, .pnp.*, .pnpm*, .prettier*, .releaserc*, .sentry*, .simple-git-hooks*, .stackblitz*, .styleci*, .stylelint*, .tazerc*, .textlint*, .tool-versions, .travis*, .versionrc*, .vscode*, .watchman*, .xo-config*, .yamllint*, .yarnrc*, Procfile, apollo.config.*, appveyor*, azure-pipelines*, bower.json, build.config.*, commitlint*, crowdin*, dangerfile*, dlint.json, dprint.json, electron-builder.*, eslint*, firebase.json, grunt*, gulp*, jenkins*, lerna*, lint-staged*, nest-cli.*, netlify*, nodemon*, npm-shrinkwrap.json, nx.*, package-lock.json, package.nls*.json, phpcs.xml, pm2.*, pnpm*, prettier*, pullapprove*, pyrightconfig.json, release-tasks.sh, release.config.*, renovate*, rollup.config.*, rspack*, simple-git-hooks*, stylelint*, tslint*, tsup.config.*, turbo*, typedoc*, unlighthouse*, vercel*, vetur.config.*, webpack*, workspace.json, xo.config.*, yarn*",
+    "requirements.txt": ".editorconfig, .flake8, .isort.cfg, .python-version, requirements*.in, requirements*.pip, requirements*.txt, tox.ini",
+    "rush.json": ".browserslist*, .circleci*, .commitlint*, .cz-config.js, .czrc, .dlint.json, .dprint.json, .editorconfig, .eslint*, .firebase*, .flowconfig, .github*, .gitlab*, .gitpod*, .huskyrc*, .jslint*, .lintstagedrc*, .markdownlint*, .node-version, .nodemon*, .npm*, .nvmrc, .pm2*, .pnp.*, .pnpm*, .prettier*, .release-please*.json, .releaserc*, .sentry*, .simple-git-hooks*, .stackblitz*, .styleci*, .stylelint*, .tazerc*, .textlint*, .tool-versions, .travis*, .versionrc*, .vscode*, .watchman*, .xo-config*, .yamllint*, .yarnrc*, Procfile, apollo.config.*, appveyor*, azure-pipelines*, bower.json, build.config.*, commitlint*, crowdin*, dangerfile*, dlint.json, dprint.json, electron-builder.*, eslint*, firebase.json, grunt*, gulp*, jenkins*, lerna*, lint-staged*, nest-cli.*, netlify*, nodemon*, npm-shrinkwrap.json, nx.*, package-lock.json, package.nls*.json, phpcs.xml, pm2.*, pnpm*, prettier*, pullapprove*, pyrightconfig.json, release-please*.json, release-tasks.sh, release.config.*, renovate*, rollup.config.*, rspack*, simple-git-hooks*, stylelint*, tslint*, tsup.config.*, turbo*, typedoc*, unlighthouse*, vercel*, vetur.config.*, webpack*, workspace.json, xo.config.*, yarn*",
+    "setup.cfg": ".editorconfig, .flake8, .isort.cfg, .python-version, MANIFEST.in, requirements*.in, requirements*.pip, requirements*.txt, setup.cfg, tox.ini",
+    "setup.py": ".editorconfig, .flake8, .isort.cfg, .python-version, MANIFEST.in, requirements*.in, requirements*.pip, requirements*.txt, setup.cfg, setup.py, tox.ini",
     "shims.d.ts": "*.d.ts",
     "svelte.config.*": "*.env, .babelrc*, .codecov, .cssnanorc*, .env.*, .envrc, .htmlnanorc*, .lighthouserc.*, .mocha*, .postcssrc*, .terserrc*, api-extractor.json, ava.config.*, babel.config.*, contentlayer.config.*, cssnano.config.*, cypress.*, env.d.ts, formkit.config.*, formulate.config.*, histoire.config.*, houdini.config.*, htmlnanorc.*, jasmine.*, jest.config.*, jsconfig.*, karma*, lighthouserc.*, mdsvex.config.js, playwright.config.*, postcss.config.*, puppeteer.config.*, rspack.config.*, svgo.config.*, tailwind.config.*, tsconfig.*, tsdoc.*, uno.config.*, unocss.config.*, vite.config.*, vitest.config.*, webpack.config.*, windi.config.*",
     "vite.config.*": "*.env, .babelrc*, .codecov, .cssnanorc*, .env.*, .envrc, .htmlnanorc*, .lighthouserc.*, .mocha*, .postcssrc*, .terserrc*, api-extractor.json, ava.config.*, babel.config.*, contentlayer.config.*, cssnano.config.*, cypress.*, env.d.ts, formkit.config.*, formulate.config.*, histoire.config.*, htmlnanorc.*, jasmine.*, jest.config.*, jsconfig.*, karma*, lighthouserc.*, playwright.config.*, postcss.config.*, puppeteer.config.*, rspack.config.*, svgo.config.*, tailwind.config.*, tsconfig.*, tsdoc.*, uno.config.*, unocss.config.*, vitest.config.*, webpack.config.*, windi.config.*",
