@@ -20,10 +20,10 @@ font:
     style: Regular
   bold:
     family: "MonoLisa Nerd Font"
-    style: Bold
+    style: Bold ltalic
   italic:
     family: "MonoLisa Nerd Font"
-    style: Regular Italic
+    style: Bold ltalic
   bold_italic:
     family: "MonoLisa Nerd Font"
     style: Bold Italic
@@ -44,28 +44,107 @@ font:
 #     style: Italic
 #   size: 13
 
+# colors:
+#   primary:
+#     background: "0x23272e"
+#     foreground: "0xabb2bf"
+#   normal:
+#     black: "0x3f4451"
+#     blue: "0x4aa5f0"
+#     cyan: "0x42b3c2"
+#     green: "0x8cc265"
+#     magenta: "0xc162de"
+#     red: "0xe05561"
+#     white: "0xe6e6e6"
+#     yellow: "0xd18f52"
+#   bright:
+#     black: "0x4f5666"
+#     blue: "0x4dc4ff"
+#     cyan: "0x4cd1e0"
+#     green: "0xa5e075"
+#     magenta: "0xde73ff"
+#     red: "0xff616e"
+#     white: "0xd7dae0"
+#     yellow: "0xf0a45d"
+
 colors:
-  primary:
-    background: "0x23272e"
-    foreground: "0xabb2bf"
-  normal:
-    black: "0x3f4451"
-    blue: "0x4aa5f0"
-    cyan: "0x42b3c2"
-    green: "0x8cc265"
-    magenta: "0xc162de"
-    red: "0xe05561"
-    white: "0xe6e6e6"
-    yellow: "0xd18f52"
-  bright:
-    black: "0x4f5666"
-    blue: "0x4dc4ff"
-    cyan: "0x4cd1e0"
-    green: "0xa5e075"
-    magenta: "0xde73ff"
-    red: "0xff616e"
-    white: "0xd7dae0"
-    yellow: "0xf0a45d"
+    primary:
+        background: "#1E1E2E" # base
+        foreground: "#CDD6F4" # text
+        # Bright and dim foreground colors
+        dim_foreground: "#CDD6F4" # text
+        bright_foreground: "#CDD6F4" # text
+
+    # Cursor colors
+    cursor:
+        text: "#1E1E2E" # base
+        cursor: "#F5E0DC" # rosewater
+    vi_mode_cursor:
+        text: "#1E1E2E" # base
+        cursor: "#B4BEFE" # lavender
+
+    # Search colors
+    search:
+        matches:
+            foreground: "#1E1E2E" # base
+            background: "#A6ADC8" # subtext0
+        focused_match:
+            foreground: "#1E1E2E" # base
+            background: "#A6E3A1" # green
+        footer_bar:
+            foreground: "#1E1E2E" # base
+            background: "#A6ADC8" # subtext0
+
+    # Keyboard regex hints
+    hints:
+        start:
+            foreground: "#1E1E2E" # base
+            background: "#F9E2AF" # yellow
+        end:
+            foreground: "#1E1E2E" # base
+            background: "#A6ADC8" # subtext0
+
+    # Selection colors
+    selection:
+        text: "#1E1E2E" # base
+        background: "#F5E0DC" # rosewater
+
+    # Normal colors
+    normal:
+        black: "#45475A" # surface1
+        red: "#F38BA8" # red
+        green: "#A6E3A1" # green
+        yellow: "#F9E2AF" # yellow
+        blue: "#89B4FA" # blue
+        magenta: "#F5C2E7" # pink
+        cyan: "#94E2D5" # teal
+        white: "#BAC2DE" # subtext1
+
+    # Bright colors
+    bright:
+        black: "#585B70" # surface2
+        red: "#F38BA8" # red
+        green: "#A6E3A1" # green
+        yellow: "#F9E2AF" # yellow
+        blue: "#89B4FA" # blue
+        magenta: "#F5C2E7" # pink
+        cyan: "#94E2D5" # teal
+        white: "#A6ADC8" # subtext0
+
+    # Dim colors
+    dim:
+        black: "#45475A" # surface1
+        red: "#F38BA8" # red
+        green: "#A6E3A1" # green
+        yellow: "#F9E2AF" # yellow
+        blue: "#89B4FA" # blue
+        magenta: "#F5C2E7" # pink
+        cyan: "#94E2D5" # teal
+        white: "#BAC2DE" # subtext1
+
+    indexed_colors:
+        - { index: 16, color: "#FAB387" }
+        - { index: 17, color: "#F5E0DC" }
 
 scrolling:
   history: 10000
