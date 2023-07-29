@@ -2,7 +2,6 @@
 1Password
 A Better Finder Attributes 7
 ABBYY FineReader PDF
-Aiko
 Alacritty
 Alfred 5
 AltTab
@@ -37,7 +36,6 @@ DeepL
 DevCleaner
 DevToys
 Developer
-DiffusionBee
 Discord
 Drafts
 Dropbox
@@ -46,6 +44,8 @@ Eagle
 Emacs
 Espanso
 Eudic
+Evernote
+Exporter
 Fig
 Figma
 Final Cut Pro
@@ -88,9 +88,7 @@ MainStage 3
 Maipo
 Mathpix Snipping Tool
 MessAuto
-Messenger
 Microsoft Excel
-Microsoft Outlook
 Microsoft PowerPoint
 Microsoft Remote Desktop
 Microsoft Teams
@@ -101,7 +99,6 @@ Motion
 MultiMC
 MusicHarbor
 NeteaseMusic
-NoFWL
 Notion
 Numbers
 OBS
@@ -128,13 +125,17 @@ Pixea
 Pocket Casts
 PocketTube
 PowerShell
+ProNotes
 QLMarkdown
 QQ
 QuickLook Video
 Raindrop.io
 Raycast
 Rectangle
+RemNote
 Rewind
+Rize
+Roam Research
 Rocket
 Safari
 Save to Raindrop.io
@@ -151,6 +152,7 @@ Silicon
 Skim
 Slack
 Sloth
+Sniffnet
 SoundSource
 Steam
 Suspicious Package
@@ -159,9 +161,11 @@ Tampermonkey
 Telegram
 TencentMeeting
 Termius
+Texts
 Things3
 Tito Control
 Todoist
+Tonal
 TopNotch
 TradingView
 Tropy
@@ -171,7 +175,6 @@ Unity Hub
 Vimari
 VirtualBuddy
 Visual Studio Code
-Vivaldi
 Warp
 WeChat
 WechatExporter
@@ -187,10 +190,10 @@ Zotero
 bloop
 calibre
 draw.io
+iA Presenter
 iMazing
 iMovie
 iTerm
-kitty
 logioptionsplus
 qBittorrent
 uBlacklist for Safari
