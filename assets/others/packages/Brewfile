@@ -30,6 +30,9 @@ brew "coreutils"
 brew "asdf"
 brew "atuin"
 brew "autocorrect"
+brew "awscli"
+brew "python@3.10"
+brew "azure-cli"
 brew "bash"
 brew "bat"
 brew "bazelisk"
@@ -44,7 +47,6 @@ brew "pango"
 brew "chafa"
 brew "cheat"
 brew "choose-rust"
-brew "python@3.10"
 brew "ciphey"
 brew "cmake"
 brew "colima"
@@ -112,6 +114,7 @@ brew "ncdu"
 brew "neovim"
 brew "neovide"
 brew "nmap"
+brew "node"
 brew "pdfgrep"
 brew "php"
 brew "pipx"
@@ -206,7 +209,7 @@ mas "Eagle for Safari", id: 1526651672
 mas "Exporter", id: 1099120373
 mas "Final Cut Pro", id: 424389933
 mas "GarageBand", id: 682658836
-mas "GoodNotes", id: 1444383602
+mas "Goodnotes", id: 1444383602
 mas "iMovie", id: 408981434
 mas "Keynote", id: 409183694
 mas "Logic Pro", id: 634148309
@@ -223,7 +226,6 @@ mas "OneDrive", id: 823766827
 mas "OpenCat", id: 6445999201
 mas "Pages", id: 409201541
 mas "PasteNow", id: 1552536109
-mas "Photomator", id: 1444636541
 mas "Picsee", id: 1454805783
 mas "Pixea", id: 1507782672
 mas "PocketTube", id: 1533703891
@@ -262,6 +264,7 @@ vscode "formulahendry.code-runner"
 vscode "foxundermoon.shell-format"
 vscode "GitHub.copilot"
 vscode "GitHub.copilot-chat"
+vscode "github.vscode-github-actions"
 vscode "Gruntfuggly.todo-tree"
 vscode "hediet.vscode-drawio"
 vscode "huacnlee.autocorrect"
@@ -273,6 +276,7 @@ vscode "kahole.magit"
 vscode "KevinRose.vsc-python-indent"
 vscode "kisstkondoros.vscode-gutter-preview"
 vscode "Lencerf.beancount"
+vscode "LeonardSSH.vscord"
 vscode "lmql-team.lmql"
 vscode "marp-team.marp-vscode"
 vscode "mathiassoeholm.markdown-link-updater"
@@ -282,6 +286,7 @@ vscode "ms-azuretools.vscode-docker"
 vscode "ms-python.black-formatter"
 vscode "ms-python.flake8"
 vscode "ms-python.isort"
+vscode "ms-python.mypy-type-checker"
 vscode "ms-python.pylint"
 vscode "ms-python.python"
 vscode "ms-python.vscode-pylance"
@@ -311,6 +316,7 @@ vscode "Rickaym.manim-sideview"
 vscode "rust-lang.rust-analyzer"
 vscode "serayuzgur.crates"
 vscode "shd101wyy.markdown-preview-enhanced"
+vscode "sirmspencer.vscode-autohide"
 vscode "skn0tt.markdown-link-expander"
 vscode "streetsidesoftware.code-spell-checker"
 vscode "tamasfe.even-better-toml"

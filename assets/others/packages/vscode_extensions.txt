@@ -21,6 +21,7 @@ formulahendry.code-runner
 foxundermoon.shell-format
 GitHub.copilot
 GitHub.copilot-chat
+github.vscode-github-actions
 Gruntfuggly.todo-tree
 hediet.vscode-drawio
 huacnlee.autocorrect
@@ -41,6 +42,7 @@ ms-azuretools.vscode-docker
 ms-python.black-formatter
 ms-python.flake8
 ms-python.isort
+ms-python.mypy-type-checker
 ms-python.pylint
 ms-python.python
 ms-python.vscode-pylance
