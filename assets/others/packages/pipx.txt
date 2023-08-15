@@ -1,4 +1,3 @@
-autopep8
 beancount
 black
 commitizen
@@ -10,11 +9,11 @@ fava
 fava-investor
 ffsubsync
 flake8
-frogmouth
 git-sim
 huggingface-hub
 isort
 jupyter-book
+jupyterlab
 mackup
 manim
 mkdocs-material
@@ -34,7 +33,6 @@ pricehist
 pydeps
 pylint
 pytest
-pz
 socid-extractor
 speedtest-cli
 terminal-copilot
@@ -42,5 +40,4 @@ things-cli
 tmuxp
 vastai
 yacron
-yapf
 zotero-cli-tool
