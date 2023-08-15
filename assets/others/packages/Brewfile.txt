@@ -4,6 +4,8 @@ asdf
 atuin
 autocorrect
 awk
+awscli
+azure-cli
 bat
 bazelisk
 bore-cli
@@ -50,6 +52,7 @@ gnu-tar
 gnupg
 gping
 graphviz
+grep
 grex
 htop
 httpie
@@ -79,6 +82,7 @@ ncdu
 neovide
 nmap
 noborus/tap/ov
+node
 pdfgrep
 php
 pipx
