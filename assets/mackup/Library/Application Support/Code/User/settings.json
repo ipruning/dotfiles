@@ -76,6 +76,7 @@
   "workbench.tree.indent": 20,
   "workbench.tree.renderIndentGuides": "none",
   "workbench.startupEditor": "none",
+  "workbench.sideBar.location": "right",
   // editor
   // open files as tabs
   "workbench.editor.enablePreview": true,
@@ -159,6 +160,7 @@
   "jupyter.widgetScriptSources": ["jsdelivr.com", "unpkg.com"],
   "jupyter.askForKernelRestart": false,
   "python.defaultInterpreterPath": "~/.conda/envs/LearningAI/bin/python",
+  "python.analysis.typeCheckingMode": "basic",
   "python.languageServer": "Pylance",
   "python.formatting.blackArgs": ["--line-length=120"],
   "python.formatting.provider": "black",
@@ -168,6 +170,7 @@
     "--ignore=E203,E402,E501,W503"
   ],
   "flake8.args": ["--max-line-length=120", "--ignore=E203,E402,E501,W503"],
+  "pylint.args": ["--max-line-length=120"],
   "isort.check": true,
   "isort.importStrategy": "fromEnvironment",
   "isort.args": ["--line-length=120"],
@@ -715,7 +718,7 @@
   "explorer.fileNesting.enabled": true,
   "explorer.fileNesting.expand": false,
   "explorer.fileNesting.patterns": {
-    "//": "Last update at 7/29/2023, 12:44:20 AM",
+    "//": "Last update at 8/25/2023, 10:23:22 AM",
     "*.asax": "$(capture).*.cs, $(capture).*.vb",
     "*.ascx": "$(capture).*.cs, $(capture).*.vb",
     "*.ashx": "$(capture).*.cs, $(capture).*.vb",
@@ -789,5 +792,8 @@
     "svelte.config.*": "*.env, .babelrc*, .codecov, .cssnanorc*, .env.*, .envrc, .htmlnanorc*, .lighthouserc.*, .mocha*, .postcssrc*, .terserrc*, api-extractor.json, ava.config.*, babel.config.*, contentlayer.config.*, cssnano.config.*, cypress.*, env.d.ts, formkit.config.*, formulate.config.*, histoire.config.*, houdini.config.*, htmlnanorc.*, jasmine.*, jest.config.*, jsconfig.*, karma*, lighthouserc.*, mdsvex.config.js, playwright.config.*, postcss.config.*, puppeteer.config.*, rspack.config.*, svgo.config.*, tailwind.config.*, tsconfig.*, tsdoc.*, uno.config.*, unocss.config.*, vite.config.*, vitest.config.*, webpack.config.*, windi.config.*",
     "vite.config.*": "*.env, .babelrc*, .codecov, .cssnanorc*, .env.*, .envrc, .htmlnanorc*, .lighthouserc.*, .mocha*, .postcssrc*, .terserrc*, api-extractor.json, ava.config.*, babel.config.*, contentlayer.config.*, cssnano.config.*, cypress.*, env.d.ts, formkit.config.*, formulate.config.*, histoire.config.*, htmlnanorc.*, jasmine.*, jest.config.*, jsconfig.*, karma*, lighthouserc.*, playwright.config.*, postcss.config.*, puppeteer.config.*, rspack.config.*, svgo.config.*, tailwind.config.*, tsconfig.*, tsdoc.*, uno.config.*, unocss.config.*, vitest.config.*, webpack.config.*, windi.config.*",
     "vue.config.*": "*.env, .babelrc*, .codecov, .cssnanorc*, .env.*, .envrc, .htmlnanorc*, .lighthouserc.*, .mocha*, .postcssrc*, .terserrc*, api-extractor.json, ava.config.*, babel.config.*, contentlayer.config.*, cssnano.config.*, cypress.*, env.d.ts, formkit.config.*, formulate.config.*, histoire.config.*, htmlnanorc.*, jasmine.*, jest.config.*, jsconfig.*, karma*, lighthouserc.*, playwright.config.*, postcss.config.*, puppeteer.config.*, rspack.config.*, svgo.config.*, tailwind.config.*, tsconfig.*, tsdoc.*, uno.config.*, unocss.config.*, vitest.config.*, webpack.config.*, windi.config.*"
-  }
+  },
+  "rift.autostart": false,
+  "rift.chatModel": "openai:gpt-4",
+  "rift.completionsModel": "openai:gpt-4"
 }

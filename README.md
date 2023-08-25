@@ -32,5 +32,5 @@ In addition, you will need to sign into the AppStore with your Apple ID as the M
 
 ## ChangeLog
 
-- 2022-05-25 Update REAMDE
+- 2022-05-25 Update README
 - 2022-03-01 Make the repo public
