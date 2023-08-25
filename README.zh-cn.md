@@ -110,5 +110,5 @@ git clone --depth 1 https://github.com/ipruning/dotfiles.git "$HOME"/dotfiles &&
 
 ## ChangeLog
 
-- 2022-05-25 Update REAMDE
+- 2022-05-25 Update README
 - 2022-03-01 Make the repo public
