@@ -69,7 +69,6 @@ lazydocker
 lazygit
 lf
 libmagic
-llvm
 lnav
 lsd
 m-cli
