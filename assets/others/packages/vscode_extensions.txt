@@ -32,12 +32,14 @@ julialang.language-julia
 kahole.magit
 KevinRose.vsc-python-indent
 kisstkondoros.vscode-gutter-preview
+lehoanganh298.json-lines-viewer
 Lencerf.beancount
 lmql-team.lmql
 marp-team.marp-vscode
 mathiassoeholm.markdown-link-updater
 mechatroner.rainbow-csv
 mhutchie.git-graph
+morph.rift-vscode
 ms-azuretools.vscode-docker
 ms-python.black-formatter
 ms-python.flake8
@@ -64,6 +66,7 @@ nvarner.typst-lsp
 oderwat.indent-rainbow
 PKief.material-icon-theme
 platformio.platformio-ide
+pomdtr.excalidraw-editor
 qezhu.gitlink
 redhat.vscode-xml
 redhat.vscode-yaml

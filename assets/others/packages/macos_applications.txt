@@ -1,7 +1,6 @@
 1Password for Safari
 1Password
 A Better Finder Attributes 7
-ABBYY FineReader PDF
 Alacritty
 Alfred 5
 AltTab
@@ -10,7 +9,6 @@ Apparency
 Arc
 Ask Command
 Audio Hijack
-Audio Jam
 BaiduNetdisk_mac
 BetterDisplay
 Blackmagic Disk Speed Test
@@ -21,6 +19,7 @@ Capture One 23
 Chromium
 CiteSpace
 ClashX Pro
+ClassIn
 Clay
 Cloudflare WARP
 Compressor
@@ -53,13 +52,19 @@ Fork
 Fritzing
 GarageBand
 GitHub Desktop
-GoodNotes
+Goodnotes
 Google Chrome
+Google Docs
+Google Drive
+Google Sheets
+Google Slides
+HEY
 Hammerspoon
-Hepta
+Heptabase
 Homerow
 IINA
 IconChanger
+Immersive Translate
 Input Source Pro
 Itsycal
 JetBrains Toolbox
@@ -93,6 +98,8 @@ Microsoft PowerPoint
 Microsoft Remote Desktop
 Microsoft Teams
 Microsoft Word
+Milanote
+Mochi Diffusion
 Monodraw
 Mos
 Motion
@@ -117,13 +124,13 @@ Pages
 PaimonMenuBar
 Parsec
 PasteNow
-Photomator
 PicGo
 Picsee
 Pictogram
 Pixea
 Pocket Casts
 PocketTube
+Poe
 PowerShell
 ProNotes
 QLMarkdown
@@ -168,7 +175,6 @@ Todoist
 Tonal
 TopNotch
 TradingView
-Tropy
 Tunnelblick
 UninstallPKG
 Unity Hub
@@ -184,8 +190,8 @@ XLD
 Xcode
 Xcodes
 YACReader
-Zed
 ZeroTier
+Zotero-6
 Zotero
 bloop
 calibre
