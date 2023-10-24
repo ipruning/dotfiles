@@ -1,5 +1,8 @@
 # gitignore
 
+# AIDER
+.aider*
+
 # backup
 automatic_backups
 
@@ -13,8 +16,6 @@ bin/wayback
 bin/webtty
 
 # bin (downloaded binaries)
-bin/pandoc
-bin/pandoc-crossref
 
 # log
 *.log

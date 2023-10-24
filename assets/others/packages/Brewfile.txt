@@ -49,7 +49,6 @@ git-quick-stats
 glow
 gnu-sed
 gnu-tar
-gnupg
 gping
 graphviz
 grep
@@ -69,12 +68,14 @@ lazydocker
 lazygit
 lf
 libmagic
+llvm
 lnav
 lsd
 m-cli
 make
 mas
 media-info
+modularml/packages/modular
 monolith
 navi
 ncdu
@@ -82,6 +83,7 @@ neovide
 nmap
 noborus/tap/ov
 node
+pandoc-crossref
 pdfgrep
 php
 pipx
