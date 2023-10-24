@@ -4,6 +4,6 @@ elixir 1.14.3
 golang 1.20.2
 lua 5.4.4
 nodejs 20.6.1
-python 3.11.4 2.7.18 pypy3.9-7.3.9
+python 3.10.13 2.7.18 pypy3.9-7.3.9
 ruby 3.2.1
 rust stable

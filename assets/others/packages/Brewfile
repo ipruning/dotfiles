@@ -13,6 +13,7 @@ tap "homebrew/command-not-found"
 tap "homebrew/services"
 tap "majd/repo"
 tap "martido/graph"
+tap "modularml/packages"
 tap "noborus/tap"
 tap "oh-my-home/fonts"
 tap "railwaycat/emacsmacport"
@@ -115,6 +116,7 @@ brew "neovim"
 brew "neovide"
 brew "nmap"
 brew "node"
+brew "pandoc-crossref"
 brew "pdfgrep"
 brew "php"
 brew "pipx"
@@ -157,6 +159,7 @@ brew "brimdata/tap/zq"
 brew "cloudflare/cloudflare/cloudflared"
 brew "d12frosted/emacs-plus/emacs-plus@29", args: ["with-native-comp", "with-nobu417-big-sur-icon"]
 brew "deb-sig/tap/double-entry-generator"
+brew "modularml/packages/modular"
 brew "noborus/tap/ov"
 brew "timothyye/tap/skm"
 brew "zurawiki/brews/gptcommit"
@@ -176,21 +179,18 @@ cask "font-smiley-sans"
 cask "font-times-new-roman"
 cask "google-chrome"
 cask "google-cloud-sdk"
-cask "ipatool"
-cask "latest"
 cask "logseq"
 cask "mactex"
 cask "miniforge"
 cask "obsidian"
-cask "openemu"
 cask "powershell"
 cask "qlimagesize"
 cask "qlmarkdown"
 cask "qlvideo"
 cask "squirrel"
+cask "surge"
 cask "suspicious-package"
 cask "syntax-highlight"
-cask "topnotch"
 cask "tunnelblick"
 cask "uninstallpkg"
 cask "visual-studio-code"
@@ -203,16 +203,18 @@ cask "zulu8"
 mas "1Password for Safari", id: 1569813296
 mas "Bob", id: 1630034110
 mas "Compressor", id: 424390742
-mas "Darkroom", id: 953286746
 mas "Day One", id: 1055511498
 mas "DevCleaner", id: 1388020431
 mas "Developer", id: 640199958
+mas "Dice", id: 1479250666
 mas "Drafts", id: 1435957248
 mas "Eagle for Safari", id: 1526651672
 mas "Exporter", id: 1099120373
+mas "Fantastical", id: 975937182
 mas "Final Cut Pro", id: 424389933
+mas "Flighty", id: 1358823008
 mas "GarageBand", id: 682658836
-mas "Goodnotes", id: 1444383602
+mas "Hush", id: 1544743900
 mas "Immersive Translate", id: 6447957425
 mas "iMovie", id: 408981434
 mas "Keynote", id: 409183694
@@ -227,14 +229,11 @@ mas "Motion", id: 434290957
 mas "MusicHarbor", id: 1440405750
 mas "Numbers", id: 409203825
 mas "OneDrive", id: 823766827
-mas "OpenCat", id: 6445999201
 mas "Pages", id: 409201541
 mas "PasteNow", id: 1552536109
-mas "Picsee", id: 1454805783
-mas "Pixea", id: 1507782672
+mas "Photomator", id: 1444636541
 mas "PocketTube", id: 1533703891
 mas "Save to Raindrop.io", id: 1549370672
-mas "ServerCat", id: 1501532023
 mas "Shapr3D", id: 1091675654
 mas "Slack", id: 803453959
 mas "Tampermonkey", id: 1482490089
@@ -244,7 +243,7 @@ mas "uBlacklist for Safari", id: 1547912640
 mas "uPic", id: 1549159979
 mas "Vimari", id: 1480933944
 mas "waifu2x", id: 1286485858
-mas "讯飞语音输入", id: 1243368435
+vscode "1Password.op-vscode"
 vscode "antfu.file-nesting"
 vscode "antfu.slidev"
 vscode "aster.vscode-subtitles"
@@ -286,6 +285,7 @@ vscode "marp-team.marp-vscode"
 vscode "mathiassoeholm.markdown-link-updater"
 vscode "mechatroner.rainbow-csv"
 vscode "mhutchie.git-graph"
+vscode "modular-mojotools.vscode-mojo"
 vscode "morph.rift-vscode"
 vscode "ms-azuretools.vscode-docker"
 vscode "ms-python.black-formatter"
@@ -304,6 +304,7 @@ vscode "ms-vscode-remote.remote-containers"
 vscode "ms-vscode-remote.remote-ssh"
 vscode "ms-vscode-remote.remote-ssh-edit"
 vscode "ms-vscode.cpptools"
+vscode "ms-vscode.live-server"
 vscode "ms-vscode.powershell"
 vscode "ms-vscode.remote-explorer"
 vscode "naumovs.color-highlight"
