@@ -51,7 +51,7 @@ export plugins=(
   zsh-autosuggestions     # https://github.com/zsh-users/zsh-autosuggestions
   zsh-completions         # https://github.com/zsh-users/zsh-completions
   zsh-syntax-highlighting # https://github.com/zsh-users/zsh-syntax-highlighting
-  zsh-vi-mode             # https://github.com/jeffreytse/zsh-vi-mode
+  # zsh-vi-mode             # https://github.com/jeffreytse/zsh-vi-mode
   # zsh-osx-autoproxy       # https://github.com/sukkaw/zsh-osx-autoproxy
 )
 
@@ -105,8 +105,14 @@ esac
 
 #===============================================================================
 # 👇 colima & docker
+# export DOCKER_HOST="unix://${HOME}/.colima/default/docker.sock"
 #===============================================================================
-export DOCKER_HOST="unix://${HOME}/.colima/default/docker.sock"
+
+#===============================================================================
+# 👇 orbstack & docker
+# docker context use colima
+# docker context use orbstack
+#===============================================================================
 
 #===============================================================================
 # 👇 custom binary
@@ -258,6 +264,12 @@ export LDFLAGS="-L$(brew --prefix llvm)/lib"
 export CPPFLAGS="-I$(brew --prefix llvm)/include"
 
 #===============================================================================
+# 👇 Mojo
+#===============================================================================
+export MODULAR_HOME="$HOME/.modular"
+export PATH="$MODULAR_HOME/pkg/packages.modular.com_mojo/bin:$PATH"
+
+#===============================================================================
 # 👇 navi
 # 👇 eval "$(navi widget zsh)"
 #===============================================================================
@@ -307,8 +319,7 @@ eval "$(zoxide init zsh)"
 case $SYSTEM_TYPE in
 mac_arm64)
   # python
-  # alias 'cvenv'='python3 -m venv .venv && source .venv/bin/activate && python3 -m pip install --upgrade -r $HOME/.requirements.txt'
-  alias 'cvenv'='$(brew --prefix python@3.10)/bin/python3.10 -m venv .venv && source .venv/bin/activate && python3 -m pip install --upgrade -r $HOME/.requirements.txt'
+  alias 'cvenv'='$(brew --prefix python@3.11)/bin/python3.11 -m venv .venv && source .venv/bin/activate && python3 -m pip install --upgrade -r $HOME/.requirements.txt'
   alias 'svenv'='source .venv/bin/activate'
   alias 'cenv'='conda create --prefix ./.env && conda activate ./.env'
   alias 'senv'='conda activate ./.env'
