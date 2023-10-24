@@ -6,10 +6,12 @@
 @railway/cli
 @slidev/cli
 @slidev/theme-default
+@squoosh/cli
 @vscode/vsce
 corepack
 gatsby-cli
 generator-awesome-list
+ghost-cli
 markdownlint-cli
 npm
 picgo

@@ -5,8 +5,9 @@ BetterTouchTool
 BetterZip
 CleanMyMac X
 CleanShot X
-Craft
 Dash
+Dato
+DevUtils
 Disk Drill
 Downie
 Due
@@ -15,29 +16,24 @@ Focus
 ForkLift
 Gemini
 Gifox
-HazeOver
 Hookmark
 HoudahSpot
 Hustl
-Hype
 Image2icon
 Keysmith
+Luminar Neo
 Lungo
 MarginNote
-MathKey
 MenubarX
 Meta
 MetaImage
 MindNode
 Mockuuups Studio
-Mosaic
-NotePlan
 Numi
 One Switch
 PDF Search
 Permute
 PhotoBulk
-PliimPRO
 PopClip
 Presentify
 Proxyman
@@ -46,8 +42,6 @@ Renamer
 SQLPro Studio
 SQLPro for SQLite
 SSH Config Editor
-Session
-SnapMotion
 SnippetsLab
 Spark Mail
 Squash
@@ -55,11 +49,9 @@ TablePlus
 Taskheat
 TextSoap
 Timing
-TypingMind
 Ulysses
-Vidrio
 Vivid
+WiFi Explorer
 XCOrganizer
 Yoink
-iBoysoft MagicMenu
 iStat Menus

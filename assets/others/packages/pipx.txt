@@ -36,7 +36,6 @@ pylint
 pytest
 socid-extractor
 speedtest-cli
-terminal-copilot
 things-cli
 tmuxp
 vastai
