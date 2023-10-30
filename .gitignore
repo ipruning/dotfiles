@@ -16,6 +16,7 @@ bin/wayback
 bin/webtty
 
 # bin (downloaded binaries)
+bin/try
 
 # log
 *.log
