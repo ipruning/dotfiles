@@ -191,6 +191,11 @@ export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 export FZF_ALT_C_COMMAND="fd --ignore-file ~/.rgignore --hidden --follow --ignore-case --type d"
 
 #===============================================================================
+# 👇 Hub Python Library
+#===============================================================================
+# export HF_HUB_ENABLE_HF_TRANSFER=1
+
+#===============================================================================
 # 👇 doom-emacs binary
 #===============================================================================
 export PATH="${HOME}/.emacs.d/bin:$PATH"
