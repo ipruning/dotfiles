@@ -543,7 +543,7 @@
                     "treat_as_built_in_keyboard": false
                 },
                 {
-                    "disable_built_in_keyboard_if_exists": false,
+                    "disable_built_in_keyboard_if_exists": true,
                     "fn_function_keys": [],
                     "identifiers": {
                         "is_game_pad": false,
@@ -557,11 +557,11 @@
                     "simple_modifications": [
                         {
                             "from": {
-                                "key_code": "left_option"
+                                "key_code": "caps_lock"
                             },
                             "to": [
                                 {
-                                    "key_code": "left_command"
+                                    "key_code": "left_control"
                                 }
                             ]
                         },
@@ -577,21 +577,21 @@
                         },
                         {
                             "from": {
-                                "key_code": "caps_lock"
-                            },
-                            "to": [
-                                {
-                                    "key_code": "left_control"
-                                }
-                            ]
-                        },
-                        {
-                            "from": {
                                 "key_code": "left_control"
                             },
                             "to": [
                                 {
                                     "key_code": "caps_lock"
+                                }
+                            ]
+                        },
+                        {
+                            "from": {
+                                "key_code": "left_option"
+                            },
+                            "to": [
+                                {
+                                    "key_code": "left_command"
                                 }
                             ]
                         },
