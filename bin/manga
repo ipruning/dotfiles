@@ -54,7 +54,7 @@ if [ -z "$INPUT" ]; then
 fi
 
 MANGA_DIR="$PWD/$INPUT"
-FOLDER_PATH="$HOME/Stacks/Utilities/Manga/manga-image-translator"
+FOLDER_PATH="$HOME/Databases/Stacks/Utilities/Manga/manga-image-translator"
 PYTHON_EXEC="$FOLDER_PATH/.venv/bin/python"
 
 if [ $VERBOSE -eq 1 ]; then
