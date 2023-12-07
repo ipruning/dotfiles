@@ -55,10 +55,10 @@
 	format = ssh
 [gpg "ssh"]
 	program = /Applications/1Password.app/Contents/MacOS/op-ssh-sign
-[commit]
-    # gpgsign = true
-[user] # This is the default user, but you can override it in .gitconfig.local
-    # name = YOUR_NAME
-    # email = YOUR_EMAIL@example.com
-    # signingkey = YOUR_GPG_FINGERPRINT
-    # editor = YOUR_EDITOR
+; [commit]
+    ; gpgsign = true
+; [user] # This is the default user, but you can override it in .gitconfig.local
+    ; name = YOUR_NAME
+    ; email = YOUR_EMAIL@example.com
+    ; signingkey = YOUR_GPG_FINGERPRINT
+    ; editor = YOUR_EDITOR

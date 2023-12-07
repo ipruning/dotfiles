@@ -3128,6 +3128,8 @@
 			<false/>
 			<key>Session Close Undo Timeout</key>
 			<integer>15</integer>
+			<key>Set Local Environment Vars</key>
+			<integer>2</integer>
 			<key>Shortcut</key>
 			<string></string>
 			<key>Show Mark Indicators</key>
