@@ -1,9 +1,0 @@
-session_name: dashboard_1
-windows:
-  - window_name: dashboard_1
-    layout: tiled
-    panes:
-      - r-unm
-      - r-archivebox
-      - r-deepl
-      - echo "Hello"

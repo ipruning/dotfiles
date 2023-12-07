@@ -1,9 +1,31 @@
 session_name: dashboard_0
 windows:
-  - window_name: dashboard_0
-    layout: tiled
+  - window_name: w_01
+    focus: 'true'
+    layout: main-vertical
+    options: {
+        main-pane-width: 50%
+        }
+    shell_command_before:
+      - cmd: cd ~
+        sleep_before: .25
+        sleep_after: .25
     panes:
       - yacron -c "$HOME"/dotfiles/scripts/yacron/job_0.yaml
-      - echo "Hello"
-      - echo "Hello"
+      - focus: 'true'
+        shell_command: lazydocker
+      - htop
+  - window_name: w_02
+    focus: 'true'
+    layout: main-vertical
+    options: {
+        main-pane-width: 50%
+        }
+    shell_command_before:
+      - cmd: cd ~/Dotfiles/
+        sleep_before: .25
+        sleep_after: .25
+    panes:
+      - focus: 'true'
+        shell_command: nvim .
       - echo "Hello"
