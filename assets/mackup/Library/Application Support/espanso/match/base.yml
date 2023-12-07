@@ -33,15 +33,15 @@ matches:
           args:
             - python3
             - "%CONFIG%/scripts/fulldate.py"
-  - trigger: "#otd"
-    replace: "{{onthisday}}"
-    vars:
-      - name: onthisday
-        type: script
-        params:
-          args:
-            - python3
-            - "%CONFIG%/scripts/onthisday.py"
+  # - trigger: "#otd"
+  #   replace: "{{onthisday}}"
+  #   vars:
+  #     - name: onthisday
+  #       type: script
+  #       params:
+  #         args:
+  #           - python3
+  #           - "%CONFIG%/scripts/onthisday.py"
   - trigger: "#st"
     replace: "{{shorttime}}"
     vars:
@@ -51,14 +51,14 @@ matches:
           format: "%H:%M"
 
   # Shell commands
-  - trigger: "#ip"
-    replace: "{{output}}"
-    vars:
-      - name: output
-        type: shell
-        params:
-          cmd: "ifconfig | grep 'inet ' | grep -Fv 127.0.0.1 | awk '{print $2}'"
-          shell: bash
+  # - trigger: "#ip"
+  #   replace: "{{output}}"
+  #   vars:
+  #     - name: output
+  #       type: shell
+  #       params:
+  #         cmd: "ifconfig | grep 'inet ' | grep -Fv 127.0.0.1 | awk '{print $2}'"
+  #         shell: bash
 
   # Roam Research
   # - trigger: "【【"
@@ -69,8 +69,8 @@ matches:
   #   replace: ;;
 
   # Software abbreviations
-  - trigger: "#rm"
-    replace: "Roam Research"
+  # - trigger: "#rm"
+    # replace: "Roam Research"
 
   # Mac symbols
 
@@ -96,17 +96,17 @@ matches:
               id: "3"
 
   # Test 1
-  - trigger: "#test1"
-    replace: "{{email.addresses}}"
-    vars:
-      - name: "email"
-        type: form
-        params:
-          layout: "Email address \n[[addresses]]"
-          fields:
-            addresses:
-              type: choice
-              values:
-                - "address1@example.com"
-                - "address2@example.com"
-                - "address3@example.com"
+  # - trigger: "#test1"
+  #   replace: "{{email.addresses}}"
+  #   vars:
+  #     - name: "email"
+  #       type: form
+  #       params:
+  #         layout: "Email address \n[[addresses]]"
+  #         fields:
+  #           addresses:
+  #             type: choice
+  #             values:
+  #               - "address1@example.com"
+  #               - "address2@example.com"
+  #               - "address3@example.com"
