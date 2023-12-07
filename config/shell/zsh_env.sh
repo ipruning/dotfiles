@@ -1,7 +1,7 @@
 #===============================================================================
 # 👇 Fig pre block. Keep at the top of this file.
 #===============================================================================
-# [[ -f "$HOME/.fig/shell/zshrc.pre.zsh" ]] && builtin source "$HOME/.fig/shell/zshrc.pre.zsh"
+[[ -f "$HOME/.fig/shell/zshrc.pre.zsh" ]] && builtin source "$HOME/.fig/shell/zshrc.pre.zsh"
 
 #===============================================================================
 # 👇 GPG Signing
@@ -58,7 +58,18 @@ export plugins=(
 #===============================================================================
 # 👇 Language environment
 #===============================================================================
-export LANG=en_US.UTF-8
+# export LANG=en_US.UTF-8
+
+#===============================================================================
+# 👇 LANG prevents the export setting from breaking iTerm2.
+#===============================================================================
+# export LANG="${LC_ALL:-$LANG}"
+# unset LC_ALL
+
+#===============================================================================
+# 👇 broot
+#===============================================================================
+source /Users/alex/.config/broot/launcher/bash/br
 
 #===============================================================================
 # 👇 Cheat
@@ -102,17 +113,6 @@ mac_arm64 | mac_x86_64)
   source "$(brew --prefix)/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.zsh.inc"
   ;;
 esac
-
-#===============================================================================
-# 👇 colima & docker
-# export DOCKER_HOST="unix://${HOME}/.colima/default/docker.sock"
-#===============================================================================
-
-#===============================================================================
-# 👇 orbstack & docker
-# docker context use colima
-# docker context use orbstack
-#===============================================================================
 
 #===============================================================================
 # 👇 custom binary
@@ -191,24 +191,12 @@ export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 export FZF_ALT_C_COMMAND="fd --ignore-file ~/.rgignore --hidden --follow --ignore-case --type d"
 
 #===============================================================================
-# 👇 Hub Python Library
-#===============================================================================
-# export HF_HUB_ENABLE_HF_TRANSFER=1
-
-#===============================================================================
-# 👇 doom-emacs binary
-#===============================================================================
-export PATH="${HOME}/.emacs.d/bin:$PATH"
-
-#===============================================================================
 # 👇 Preferred editor for local and remote sessions
 #===============================================================================
 if [[ -n $SSH_CONNECTION ]]; then
   export EDITOR='nvim'
 else
   export EDITOR='nvim'
-  # export EDITOR="emacsclient -t -a=\"\""
-  # export EDITOR='code'
 fi
 
 #===============================================================================
@@ -217,12 +205,9 @@ fi
 test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
 
 #===============================================================================
-# 👇 qt5
+# 👇 pipx
 #===============================================================================
-# export PATH="$(brew --prefix qt@5)/bin:$PATH"
-# export LDFLAGS="-L$(brew --prefix qt@5)/lib"
-# export CPPFLAGS="-I$(brew --prefix qt@5)/include"
-# export PKG_CONFIG_PATH="$(brew --prefix qt@5)/lib/pkgconfig"
+export PIPX_DEFAULT_PYTHON="$(brew --prefix python@3.11)/bin/python3.11"
 
 #===============================================================================
 # 👇 direnv
@@ -235,15 +220,9 @@ eval "$(direnv hook bash)"
 eval "$(thefuck --alias)"
 
 #===============================================================================
-# 👇 Sourcegraph
+# 👇 GitHub Copilot CLl
 #===============================================================================
-# export SRC_ACCESS_TOKEN=my-token
-# export SRC_ENDPOINT=https://sourcegraph.example.com
-
-#===============================================================================
-# 👇 broot
-#===============================================================================
-source "${HOME}/.config/broot/launcher/bash/br" || broot --install
+eval "$(github-copilot-cli alias -- "$0")"
 
 #===============================================================================
 # 👇 puppeteer
@@ -271,8 +250,8 @@ export CPPFLAGS="-I$(brew --prefix llvm)/include"
 #===============================================================================
 # 👇 Mojo
 #===============================================================================
-export MODULAR_HOME="$HOME/.modular"
-export PATH="$MODULAR_HOME/pkg/packages.modular.com_mojo/bin:$PATH"
+# export MODULAR_HOME="$HOME/.modular"
+# export PATH="$MODULAR_HOME/pkg/packages.modular.com_mojo/bin:$PATH"
 
 #===============================================================================
 # 👇 navi
@@ -365,6 +344,20 @@ linux_x86_64)
 esac
 
 #===============================================================================
+# 👇 Sourcegraph
+#===============================================================================
+# export SRC_ACCESS_TOKEN=my-token
+# export SRC_ENDPOINT=https://sourcegraph.example.com
+
+#===============================================================================
+# 👇 qt5
+#===============================================================================
+# export PATH="$(brew --prefix qt@5)/bin:$PATH"
+# export LDFLAGS="-L$(brew --prefix qt@5)/lib"
+# export CPPFLAGS="-I$(brew --prefix qt@5)/include"
+# export PKG_CONFIG_PATH="$(brew --prefix qt@5)/lib/pkgconfig"
+
+#===============================================================================
 # 👇 Fig post block. Keep at the bottom of this file.
 #===============================================================================
-# [[ -f "$HOME/.fig/shell/zshrc.post.zsh" ]] && builtin source "$HOME/.fig/shell/zshrc.post.zsh"
+[[ -f "$HOME/.fig/shell/zshrc.post.zsh" ]] && builtin source "$HOME/.fig/shell/zshrc.post.zsh"
