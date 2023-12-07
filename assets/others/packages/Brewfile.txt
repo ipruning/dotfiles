@@ -1,3 +1,4 @@
+appleboy/tap/codegpt
 aria2
 asciinema
 asdf
@@ -17,8 +18,7 @@ broot
 chafa
 cheat
 choose-rust
-ciphey
-cloudflare/cloudflare/cloudflared
+cloudflared
 cmake
 colima
 d12frosted/emacs-plus/emacs-plus@29
@@ -27,7 +27,6 @@ deb-sig/tap/double-entry-generator
 difftastic
 direnv
 docker
-dog
 duf
 dust
 exiftool
@@ -40,7 +39,6 @@ fpp
 frps
 fswatch
 gh
-git
 git-cliff
 git-crypt
 git-extras
@@ -56,8 +54,10 @@ grex
 htop
 httpie
 hugo
+hurl
 hyperfine
 iperf
+iperf3
 ipinfo-cli
 jc
 jq
@@ -68,7 +68,6 @@ lazydocker
 lazygit
 lf
 libmagic
-llvm
 lnav
 lsd
 m-cli
@@ -117,6 +116,7 @@ typst
 ugit
 vips
 watchexec
+wgcf
 wget
 yq
 yt-dlp

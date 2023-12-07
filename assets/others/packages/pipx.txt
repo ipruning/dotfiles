@@ -1,5 +1,7 @@
+asitop
 beancount
 black
+chainforge
 commitizen
 cookiecutter
 deadlink
@@ -17,7 +19,6 @@ jupyterlab
 kaggle
 mackup
 manim
-mkdocs-material
 mypy
 nox
 openai

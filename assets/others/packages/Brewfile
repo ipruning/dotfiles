@@ -1,9 +1,9 @@
 tap "1password/tap"
+tap "appleboy/tap"
 tap "borkdude/brew"
 tap "brimdata/tap"
 tap "buo/cask-upgrade"
 tap "candid82/brew"
-tap "cloudflare/cloudflare"
 tap "d12frosted/emacs-plus"
 tap "deb-sig/tap"
 tap "homebrew/bundle"
@@ -32,7 +32,6 @@ brew "asdf"
 brew "atuin"
 brew "autocorrect"
 brew "awscli"
-brew "python@3.10"
 brew "azure-cli"
 brew "bash"
 brew "bat"
@@ -48,7 +47,7 @@ brew "pango"
 brew "chafa"
 brew "cheat"
 brew "choose-rust"
-brew "ciphey"
+brew "cloudflared"
 brew "cmake"
 brew "colima"
 brew "curl"
@@ -56,7 +55,6 @@ brew "dasel"
 brew "difftastic"
 brew "direnv"
 brew "docker"
-brew "dog"
 brew "duf"
 brew "dust"
 brew "exiftool"
@@ -88,9 +86,11 @@ brew "hdf5"
 brew "htop"
 brew "httpie"
 brew "hugo"
+brew "hurl"
 brew "hyperfine"
 brew "imagemagick"
 brew "iperf"
+brew "iperf3"
 brew "ipinfo-cli"
 brew "jc"
 brew "jpeg", link: true
@@ -124,6 +124,7 @@ brew "platformio"
 brew "procs"
 brew "pueue"
 brew "pyenv"
+brew "python@3.10"
 brew "qt"
 brew "ripgrep"
 brew "rm-improved"
@@ -147,16 +148,17 @@ brew "typst"
 brew "ugit"
 brew "vips"
 brew "watchexec"
+brew "wgcf"
 brew "wget"
 brew "yq"
 brew "yt-dlp"
 brew "zig"
 brew "zola"
 brew "zoxide"
+brew "appleboy/tap/codegpt"
 brew "borkdude/brew/babashka"
 brew "brimdata/tap/zed"
 brew "brimdata/tap/zq"
-brew "cloudflare/cloudflare/cloudflared"
 brew "d12frosted/emacs-plus/emacs-plus@29", args: ["with-native-comp", "with-nobu417-big-sur-icon"]
 brew "deb-sig/tap/double-entry-generator"
 brew "modularml/packages/modular"
@@ -167,17 +169,14 @@ cask "1password"
 cask "1password-cli"
 cask "alacritty"
 cask "apparency"
-cask "arc"
-cask "chromium"
 cask "clashx-pro"
 cask "devtoys"
-cask "espanso"
 cask "fig"
 cask "font-caskaydia-cove-nerd-font"
 cask "font-jetbrains-mono-nerd-font"
+cask "font-monaspace-nerd-font"
 cask "font-smiley-sans"
 cask "font-times-new-roman"
-cask "google-chrome"
 cask "google-cloud-sdk"
 cask "logseq"
 cask "mactex"
@@ -187,7 +186,6 @@ cask "powershell"
 cask "qlimagesize"
 cask "qlmarkdown"
 cask "qlvideo"
-cask "squirrel"
 cask "surge"
 cask "suspicious-package"
 cask "syntax-highlight"
@@ -195,13 +193,14 @@ cask "tunnelblick"
 cask "uninstallpkg"
 cask "visual-studio-code"
 cask "wechattweak-cli"
+cask "wezterm"
 cask "xcodes"
 cask "xld"
 cask "zerotier-one"
-cask "zulu17"
-cask "zulu8"
+cask "zulu21"
 mas "1Password for Safari", id: 1569813296
 mas "Bob", id: 1630034110
+mas "CapCut", id: 1500855883
 mas "Compressor", id: 424390742
 mas "Day One", id: 1055511498
 mas "DevCleaner", id: 1388020431
@@ -210,13 +209,14 @@ mas "Dice", id: 1479250666
 mas "Drafts", id: 1435957248
 mas "Eagle for Safari", id: 1526651672
 mas "Exporter", id: 1099120373
-mas "Fantastical", id: 975937182
 mas "Final Cut Pro", id: 424389933
 mas "Flighty", id: 1358823008
 mas "GarageBand", id: 682658836
+mas "Goodnotes", id: 1444383602
 mas "Hush", id: 1544743900
 mas "Immersive Translate", id: 6447957425
 mas "iMovie", id: 408981434
+mas "Jetpack 2", id: 1598096399
 mas "Keynote", id: 409183694
 mas "Logic Pro", id: 634148309
 mas "MainStage", id: 634159523
@@ -227,22 +227,25 @@ mas "Microsoft Remote Desktop", id: 1295203466
 mas "Microsoft Word", id: 462054704
 mas "Motion", id: 434290957
 mas "MusicHarbor", id: 1440405750
+mas "Notability", id: 360593530
 mas "Numbers", id: 409203825
 mas "OneDrive", id: 823766827
 mas "Pages", id: 409201541
 mas "PasteNow", id: 1552536109
 mas "Photomator", id: 1444636541
+mas "Planny", id: 1515324201
 mas "PocketTube", id: 1533703891
 mas "Save to Raindrop.io", id: 1549370672
+mas "Save to Reader", id: 1640236961
 mas "Shapr3D", id: 1091675654
 mas "Slack", id: 803453959
+mas "Surfingkeys", id: 1609752330
 mas "Tampermonkey", id: 1482490089
-mas "Todoist", id: 585829637
+mas "TickTick", id: 966085870
 mas "Tonal", id: 6449281141
 mas "uBlacklist for Safari", id: 1547912640
 mas "uPic", id: 1549159979
-mas "Vimari", id: 1480933944
-mas "waifu2x", id: 1286485858
+mas "Whisper", id: 1668083311
 vscode "1Password.op-vscode"
 vscode "antfu.file-nesting"
 vscode "antfu.slidev"
@@ -250,6 +253,7 @@ vscode "aster.vscode-subtitles"
 vscode "bierner.markdown-mermaid"
 vscode "bodil.file-browser"
 vscode "Catppuccin.catppuccin-vsc"
+vscode "Catppuccin.catppuccin-vsc-icons"
 vscode "codeandstuff.package-json-upgrade"
 vscode "codezombiech.gitignore"
 vscode "darkriszty.markdown-table-prettify"
@@ -262,17 +266,20 @@ vscode "EditorConfig.EditorConfig"
 vscode "EdwinKofler.vscode-assorted-languages"
 vscode "emilast.LogFileHighlighter"
 vscode "esbenp.prettier-vscode"
+vscode "fabiospampinato.vscode-highlight"
 vscode "figma.figma-vscode-extension"
 vscode "formulahendry.code-runner"
 vscode "foxundermoon.shell-format"
 vscode "GitHub.copilot"
 vscode "GitHub.copilot-chat"
+vscode "GitHub.copilot-labs"
 vscode "github.vscode-github-actions"
 vscode "Gruntfuggly.todo-tree"
 vscode "hediet.vscode-drawio"
 vscode "huacnlee.autocorrect"
 vscode "ionutvmi.path-autocomplete"
 vscode "jacobdufault.fuzzy-search"
+vscode "JacobPfeifer.pfeifer-hurl"
 vscode "James-Yu.latex-workshop"
 vscode "julialang.language-julia"
 vscode "kahole.magit"
@@ -303,10 +310,14 @@ vscode "ms-toolsai.vscode-jupyter-slideshow"
 vscode "ms-vscode-remote.remote-containers"
 vscode "ms-vscode-remote.remote-ssh"
 vscode "ms-vscode-remote.remote-ssh-edit"
+vscode "ms-vscode.cmake-tools"
 vscode "ms-vscode.cpptools"
+vscode "ms-vscode.cpptools-extension-pack"
+vscode "ms-vscode.cpptools-themes"
 vscode "ms-vscode.live-server"
 vscode "ms-vscode.powershell"
 vscode "ms-vscode.remote-explorer"
+vscode "ms-vscode.remote-server"
 vscode "naumovs.color-highlight"
 vscode "ninoseki.vscode-pylens"
 vscode "njpwerner.autodocstring"
@@ -329,6 +340,7 @@ vscode "tamasfe.even-better-toml"
 vscode "tecosaur.latex-utilities"
 vscode "telesoho.vscode-markdown-paste-image"
 vscode "timonwong.shellcheck"
+vscode "twxs.cmake"
 vscode "Tyriar.sort-lines"
 vscode "unifiedjs.vscode-mdx"
 vscode "usernamehw.errorlens"
@@ -337,7 +349,7 @@ vscode "VisualStudioExptTeam.intellicode-api-usage-examples"
 vscode "vscodevim.vim"
 vscode "VSpaceCode.vspacecode"
 vscode "VSpaceCode.whichkey"
-vscode "wayou.vscode-todo-highlight"
+vscode "withfig.fig"
 vscode "yy0931.save-as-root"
 vscode "yzhang.markdown-all-in-one"
 vscode "zhuangtongfa.material-theme"

@@ -1,14 +1,13 @@
 1Password for Safari
 1Password
 A Better Finder Attributes 7
-Affinity Photo 2
 Alacritty
 Alfred 5
-AltTab
+Alibaba Cloud Client
 Amethyst
+Amie
 Anki
 Apparency
-Arc
 Audio Hijack
 BaiduNetdisk
 BetterDisplay
@@ -17,8 +16,8 @@ Blackmagic Disk Speed Test
 Blackmagic Media Express
 Blender
 Bob
+CapCut
 Capture One 23
-Chromium
 ClashX Pro
 ClassIn
 Cloudflare WARP
@@ -30,7 +29,6 @@ Cursor
 DEVONthink 3
 DaisyDisk
 Day One
-DeepL
 DevCleaner
 Developer
 Dice by PCalc
@@ -40,25 +38,23 @@ Dropbox
 Eagle for Safari
 Eagle
 Emacs
-Espanso
 Eudic
 Evernote
 Exporter
-Fantastical
 Fig
 Figma
 Final Cut Pro
 Flighty
 Fork
-Fritzing
 GarageBand
 GitHub Desktop
+Goodnotes
 Google Chrome
 Google Docs
 Google Drive
 Google Sheets
 Google Slides
-HEY
+HTTPie
 Hammerspoon
 Heptabase
 Homerow
@@ -67,8 +63,8 @@ IINA
 IconChanger
 Immersive Translate
 Input Source Pro
-Itsycal
 JetBrains Toolbox
+Jetpack Joyride 2
 Karabiner-Elements
 Karabiner-EventViewer
 KeyCastr
@@ -79,15 +75,14 @@ LanguageTool for Desktop
 Lark
 LayAuto3
 Linear
-LinearMouse
 Logic Pro X
 Logseq
 Loom
+Loopback
 LosslessCut
 LyricsX
 MWeb Pro
-MacWhisper
-MainStage 3
+MainStage
 Maipo
 Mathpix Snipping Tool
 MessAuto
@@ -97,13 +92,15 @@ Microsoft Remote Desktop
 Microsoft Teams
 Microsoft Word
 Milanote
+Mimestream
 Mochi Diffusion
 Monodraw
 Mos
 Motion
-MultiMC
+Multi
 MusicHarbor
 NeteaseMusic
+Notability
 Notion
 Numbers
 OBS
@@ -122,12 +119,12 @@ Parsec
 PasteNow
 Photomator
 PicGo
+Planny
+PlayCover
 Pocket Casts
 PocketTube
 PowerShell
 ProNotes
-Proton Mail Bridge
-ProtonVPN
 QLMarkdown
 QQ
 QuickLook Video
@@ -138,14 +135,14 @@ RemNote
 Rewind
 Rize
 Roam Research
-RustDesk
 Safari
 Save to Raindrop.io
+Save to Reader
 Scapple
+Screen Studio
 ScreenFlow
 Scrolla
 Setapp
-Shadowrocket
 Shapr3D
 Shottr
 Sideloadly
@@ -156,42 +153,45 @@ Sloth
 Sniffnet
 SoundSource
 Steam
+Surfingkeys
 Surge
 Suspicious Package
 Syntax Highlight
 Tampermonkey
+Tana
 Telegram
 TencentMeeting
 Termius
 Texts
 Things3
+TickTick
 Tito Control
-Todoist
 Tonal
 TradingView
 Tunnelblick
 UninstallPKG
 Unity Hub
 Viable
-Vimari
 VirtualBuddy
 Visual Studio Code
 Warp
 WeChat
 WechatExporter
+WezTerm
+Whisky
+Whisper Transcription
 Wooshy
 WorkFlowy
 XLD
-Xcode
 Xcodes
 YACReader
 ZeroTier
-Zotero-6
 Zotero
 bloop
 calibre
 draw.io
 iA Presenter
+iA Writer
 iMazing
 iMovie
 iTerm
@@ -200,7 +200,6 @@ logioptionsplus
 qBittorrent
 uBlacklist for Safari
 uPic
-waifu2x
-waifuExtension
 zoom.us
 企业微信
+崩坏:星穹铁道 alias

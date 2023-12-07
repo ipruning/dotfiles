@@ -1,14 +1,15 @@
 Aeon Timeline
-AirBuddy
 Bartender
-BetterTouchTool
 BetterZip
 CleanMyMac X
 CleanShot X
+Clop
+Craft
 Dash
 Dato
 DevUtils
 Disk Drill
+DisplayBuddy
 Downie
 Due
 Expressions
@@ -29,9 +30,12 @@ Meta
 MetaImage
 MindNode
 Mockuuups Studio
+NotePlan
 Numi
 One Switch
+PDF Pals
 PDF Search
+Paletro
 Permute
 PhotoBulk
 PopClip
@@ -49,9 +53,13 @@ TablePlus
 Taskheat
 TextSoap
 Timing
+Tripsy
+Typeface
+TypingMind
 Ulysses
 Vivid
 WiFi Explorer
 XCOrganizer
+Xnapper
 Yoink
 iStat Menus
