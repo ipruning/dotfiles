@@ -1,9 +1,4 @@
 #===============================================================================
-# 👇 Fig pre block. Keep at the top of this file.
-#===============================================================================
-[[ -f "$HOME/.fig/shell/zshrc.pre.zsh" ]] && builtin source "$HOME/.fig/shell/zshrc.pre.zsh"
-
-#===============================================================================
 # 👇 GPG Signing
 #===============================================================================
 # if [ -r ~/.zshrc ]; then echo 'export GPG_TTY=$(tty)' >> ~/.zshrc; \
@@ -250,8 +245,8 @@ export CPPFLAGS="-I$(brew --prefix llvm)/include"
 #===============================================================================
 # 👇 Mojo
 #===============================================================================
-# export MODULAR_HOME="$HOME/.modular"
-# export PATH="$MODULAR_HOME/pkg/packages.modular.com_mojo/bin:$PATH"
+export MODULAR_HOME="$HOME/.modular"
+export PATH="$MODULAR_HOME/pkg/packages.modular.com_mojo/bin:$PATH"
 
 #===============================================================================
 # 👇 navi
@@ -356,8 +351,3 @@ esac
 # export LDFLAGS="-L$(brew --prefix qt@5)/lib"
 # export CPPFLAGS="-I$(brew --prefix qt@5)/include"
 # export PKG_CONFIG_PATH="$(brew --prefix qt@5)/lib/pkgconfig"
-
-#===============================================================================
-# 👇 Fig post block. Keep at the bottom of this file.
-#===============================================================================
-[[ -f "$HOME/.fig/shell/zshrc.post.zsh" ]] && builtin source "$HOME/.fig/shell/zshrc.post.zsh"
