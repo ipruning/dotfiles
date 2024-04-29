@@ -1,3 +1,4 @@
+1Blocker
 1Password for Safari
 1Password
 A Better Finder Attributes 7
@@ -8,22 +9,25 @@ Amethyst
 Amie
 Anki
 Apparency
+Arc
 Audio Hijack
+Avenue
 BaiduNetdisk
+Bear
 BetterDisplay
 Bezel
+Binance
 Blackmagic Disk Speed Test
 Blackmagic Media Express
 Blender
 Bob
 CapCut
-Capture One 23
+Capture One
 ClashX Pro
 ClassIn
 Cloudflare WARP
 Compressor
 Contexts
-Cron
 Cryptomator
 Cursor
 DEVONthink 3
@@ -34,17 +38,21 @@ Developer
 Dice by PCalc
 Discord
 Drafts
+DrawingPics
 Dropbox
 Eagle for Safari
 Eagle
-Emacs
+Endel
 Eudic
 Evernote
 Exporter
-Fig
+FSNotes
 Figma
 Final Cut Pro
+Firefox
+FixTim
 Flighty
+Folder Hub
 Fork
 GarageBand
 GitHub Desktop
@@ -63,6 +71,7 @@ IINA
 IconChanger
 Immersive Translate
 Input Source Pro
+Jane Reader
 JetBrains Toolbox
 Jetpack Joyride 2
 Karabiner-Elements
@@ -70,6 +79,8 @@ Karabiner-EventViewer
 KeyCastr
 Keyboard Maestro
 Keynote
+LINE
+LM Studio
 LTspice
 LanguageTool for Desktop
 Lark
@@ -77,6 +88,7 @@ LayAuto3
 Linear
 Logic Pro X
 Logseq
+Longbridge Pro
 Loom
 Loopback
 LosslessCut
@@ -93,23 +105,28 @@ Microsoft Teams
 Microsoft Word
 Milanote
 Mimestream
+Mini Metro+
 Mochi Diffusion
 Monodraw
 Mos
 Motion
 Multi
 MusicHarbor
+MyCard
 NeteaseMusic
 Notability
+Notion Calendar
 Notion
 Numbers
 OBS
 Obsidian
+OmniFocus
 OmniGraffle
 OmniOutliner
 OmniPlan
 OneDrive
 OnyX
+OpenAI Translator
 Optimus Player
 OrbStack
 PDF Expert
@@ -119,22 +136,29 @@ Parsec
 PasteNow
 Photomator
 PicGo
+Pile
 Planny
 PlayCover
 Pocket Casts
 PocketTube
+Poe
 PowerShell
 ProNotes
 QLMarkdown
 QQ
 QuickLook Video
+RSSHub Radar
 Raindrop.io
 Raycast
+Reader
 Rectangle
 RemNote
+Replit
 Rewind
 Rize
 Roam Research
+Rond
+RustDesk
 Safari
 Save to Raindrop.io
 Save to Reader
@@ -143,20 +167,26 @@ Screen Studio
 ScreenFlow
 Scrolla
 Setapp
+Shadowrocket
 Shapr3D
 Shottr
 Sideloadly
 Silicon
+Sketch
 Skim
 Slack
 Sloth
 Sniffnet
 SoundSource
+Stack Next SE
 Steam
+Stickies Pro
+Superlist
 Surfingkeys
 Surge
 Suspicious Package
 Syntax Highlight
+Tailscale
 Tampermonkey
 Tana
 Telegram
@@ -167,6 +197,7 @@ Things3
 TickTick
 Tito Control
 Tonal
+TopNotch
 TradingView
 Tunnelblick
 UninstallPKG
@@ -177,29 +208,40 @@ Visual Studio Code
 Warp
 WeChat
 WechatExporter
-WezTerm
 Whisky
 Whisper Transcription
 Wooshy
 WorkFlowy
 XLD
+XPTV
+Xcode
 Xcodes
 YACReader
-ZeroTier
+YACReaderLibrary
+Zed Preview
+Zotero-6
 Zotero
 bloop
 calibre
 draw.io
+flomo
 iA Presenter
 iA Writer
 iMazing
 iMovie
 iTerm
 kindaVim
+lghub
 logioptionsplus
+pcsuite
 qBittorrent
 uBlacklist for Safari
 uPic
+wpsoffice
 zoom.us
 企业微信
-崩坏:星穹铁道 alias
+即刻
+小红书
+犬岛
+随身工作台
+集换社
