@@ -216,3 +216,48 @@ function dgpt() {
 
     ai "$prompt"
 }
+
+#===============================================================================
+# 👇 rip-venv
+#===============================================================================
+rip-venv() {
+    # Ensure a directory path is provided
+    if [[ -z "$1" ]]; then
+        echo "Error: No directory path provided. Please specify a path."
+        return 1
+    elif [[ ! -d "$1" ]]; then
+        echo "Error: The provided path is not a directory or does not exist."
+        return 1
+    fi
+
+    # Use fd to find .venv directories and store the results
+    local venv_dirs
+    venv_dirs=$(fd --type d --hidden --no-ignore ".venv" "$1" 2>/dev/null)
+
+    # Check if fd is not installed
+    if ! command -v fd &>/dev/null; then
+        echo "Error: 'fd' command is not installed. Please install fd to use this function."
+        return 1
+    fi
+
+    # Inform if no .venv directories are found
+    if [[ -z "$venv_dirs" ]]; then
+        echo "No .venv directories found."
+        return 0
+    fi
+
+    # Process each directory path
+    echo "Found .venv directories:"
+    echo "$venv_dirs"
+    echo "Proceed with deletion? [y/N]"
+    IFS= read -r proceed < /dev/tty
+    if [[ $proceed =~ ^[Yy]$ ]]; then
+        echo "$venv_dirs" | while IFS= read -r line; do
+            echo "Deleting $line..."
+            rip "$line"
+            echo "Deleted: $line"
+        done
+    else
+        echo "Deletion canceled."
+    fi
+}
