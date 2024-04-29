@@ -25,6 +25,7 @@
 - [ ] 重构脚本使其尽可能幂等；
 - [ ] 为 bootstrap 添加 Homebrew 镜像；并提供一个选项；
 - [ ] 添加配图；
+- [ ] Alacrity 配置迁移
 
 ## Bootstrap
 
