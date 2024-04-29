@@ -39,13 +39,13 @@
     "command": "workbench.action.togglePanel",
     "when": "terminalFocus"
   },
-  // Keybindings required for VSpaceCode
   // Trigger vspacecode
   {
     "key": "alt+space",
     "command": "whichkey.show",
     "when": "editorTextFocus"
   },
+  // Keybindings required for VSpaceCode https://github.com/VSpaceCode/VSpaceCode/blob/master/src/configuration/keybindings.jsonc
   // Trigger vspacecode in empty editor group
   {
     "key": "space",
@@ -64,12 +64,12 @@
   {
     "key": "tab",
     "command": "extension.vim_tab",
-    "when": "editorFocus && vim.active && !inDebugRepl && vim.mode != 'Insert' && editorLangId != 'magit'"
+    "when": "editorTextFocus && vim.active && !inDebugRepl && vim.mode != 'Insert' && editorLangId != 'magit'"
   },
   {
     "key": "tab",
     "command": "-extension.vim_tab",
-    "when": "editorFocus && vim.active && !inDebugRepl && vim.mode != 'Insert'"
+    "when": "editorTextFocus && vim.active && !inDebugRepl && vim.mode != 'Insert'"
   },
   {
     "key": "x",
@@ -126,6 +126,18 @@
     "command": "vspacecode.showMagitRefMenu",
     "when": "editorTextFocus && editorLangId == 'magit' && vim.mode == 'Normal'"
   },
+  // Extra refresh menu support for edamagit with the key "g"
+  // Cannot be added to package.json because keybinding replacements
+  {
+    "key": "g",
+    "command": "-magit.refresh",
+    "when": "editorTextFocus && editorLangId == 'magit' && vim.mode =~ /^(?!SearchInProgressMode|CommandlineInProgress).*$/"
+  },
+  {
+    "key": "g",
+    "command": "vspacecode.showMagitRefreshMenu",
+    "when": "editorTextFocus && editorLangId == 'magit' && vim.mode =~ /^(?!SearchInProgressMode|CommandlineInProgress).*$/"
+  },
   // Easy navigation in quick open/QuickPick
   {
     "key": "ctrl+j",
@@ -166,6 +178,22 @@
     "command": "showPrevParameterHint",
     "when": "editorFocus && parameterHintsMultipleSignatures && parameterHintsVisible"
   },
+  // Easy navigation in code action
+  {
+    "key": "ctrl+j",
+    "command": "selectNextCodeAction",
+    "when": "codeActionMenuVisible"
+  },
+  {
+    "key": "ctrl+k",
+    "command": "selectPrevCodeAction",
+    "when": "codeActionMenuVisible"
+  },
+  {
+    "key": "ctrl+l",
+    "command": "acceptSelectedCodeAction",
+    "when": "codeActionMenuVisible"
+  },
   // Add ctrl+h/l to navigate in file browser
   {
     "key": "ctrl+h",
@@ -176,10 +204,5 @@
     "key": "ctrl+l",
     "command": "file-browser.stepIn",
     "when": "inFileBrowser"
-  },
-  {
-    "key": "shift+cmd+c",
-    "command": "-workbench.action.terminal.openNativeConsole",
-    "when": "!terminalFocus"
   }
 ]
