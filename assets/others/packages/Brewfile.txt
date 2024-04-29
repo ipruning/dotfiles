@@ -12,7 +12,6 @@ bazelisk
 bore-cli
 borkdude/brew/babashka
 bottom
-brimdata/tap/zed
 brimdata/tap/zq
 broot
 chafa
@@ -20,6 +19,7 @@ cheat
 choose-rust
 cloudflared
 cmake
+cocoapods
 colima
 d12frosted/emacs-plus/emacs-plus@29
 dasel
@@ -38,6 +38,7 @@ flyctl
 fpp
 frps
 fswatch
+genact
 gh
 git-cliff
 git-crypt
@@ -68,6 +69,7 @@ lazydocker
 lazygit
 lf
 libmagic
+llvm
 lnav
 lsd
 m-cli
@@ -76,12 +78,15 @@ mas
 media-info
 modularml/packages/modular
 monolith
+moreutils
 navi
 ncdu
 neovide
 nmap
 noborus/tap/ov
 node
+ollama
+oven-sh/bun/bun
 pandoc-crossref
 pdfgrep
 php
@@ -93,7 +98,6 @@ pyenv
 qt
 ripgrep
 rm-improved
-rust
 sd
 sevenzip
 shellcheck
@@ -107,7 +111,7 @@ texinfo
 thefuck
 timothyye/tap/skm
 tmate
-tmux
+tmuxp
 tokei
 tor
 tree
@@ -120,6 +124,7 @@ wgcf
 wget
 yq
 yt-dlp
+zeabur/tap/cli
 zig
 zola
 zoxide

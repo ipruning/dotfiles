@@ -1,4 +1,5 @@
 Aeon Timeline
+Backtrack
 Bartender
 BetterZip
 CleanMyMac X
@@ -21,15 +22,18 @@ Hookmark
 HoudahSpot
 Hustl
 Image2icon
+In Your Face
 Keysmith
 Luminar Neo
 Lungo
 MarginNote
+Marked
 MenubarX
 Meta
 MetaImage
 MindNode
 Mockuuups Studio
+MurmurType
 NotePlan
 Numi
 One Switch
@@ -46,10 +50,12 @@ Renamer
 SQLPro Studio
 SQLPro for SQLite
 SSH Config Editor
+SnapMotion
 SnippetsLab
 Spark Mail
 Squash
 TablePlus
+TaskPaper
 Taskheat
 TextSoap
 Timing
@@ -62,4 +68,5 @@ WiFi Explorer
 XCOrganizer
 Xnapper
 Yoink
+iBoysoft NTFS for Mac
 iStat Menus
