@@ -49,12 +49,13 @@ Exporter
 FSNotes
 Figma
 Final Cut Pro
-Firefox
+Firefox Nightly
 FixTim
 Flighty
 Folder Hub
 Fork
 GarageBand
+GitButler
 GitHub Desktop
 Goodnotes
 Google Chrome
@@ -98,7 +99,10 @@ MainStage
 Maipo
 Mathpix Snipping Tool
 MessAuto
+Microsoft Defender
 Microsoft Excel
+Microsoft OneNote
+Microsoft Outlook
 Microsoft PowerPoint
 Microsoft Remote Desktop
 Microsoft Teams
@@ -108,6 +112,7 @@ Mimestream
 Mini Metro+
 Mochi Diffusion
 Monodraw
+Moonlight
 Mos
 Motion
 Multi
@@ -224,7 +229,6 @@ Zotero
 bloop
 calibre
 draw.io
-flomo
 iA Presenter
 iA Writer
 iMazing
@@ -237,11 +241,11 @@ pcsuite
 qBittorrent
 uBlacklist for Safari
 uPic
-wpsoffice
 zoom.us
 企业微信
+优酷
 即刻
+小宇宙
 小红书
-犬岛
 随身工作台
 集换社
