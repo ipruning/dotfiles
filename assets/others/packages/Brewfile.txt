@@ -20,7 +20,6 @@ choose-rust
 cloudflared
 cmake
 cocoapods
-colima
 d12frosted/emacs-plus/emacs-plus@29
 dasel
 deb-sig/tap/double-entry-generator
