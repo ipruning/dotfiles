@@ -37,6 +37,7 @@ flyctl
 fpp
 frps
 fswatch
+gdu
 genact
 gh
 git-cliff

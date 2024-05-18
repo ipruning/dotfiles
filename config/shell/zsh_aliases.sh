@@ -20,14 +20,6 @@ alias mvi='mv -i'
 # 👇
 #===============================================================================
 alias cat='bat --paging=never'
-# alias cp='fcp'
-# alias cut='choose'
-# alias df='duf'
-# alias dig='dog'
-# alias du='dust'
-# alias find='fd'
-# alias grep='rg'
-# alias br='br -s'
 alias l='lsd'
 alias la='lsd -a'
 alias ll='lsd -lh'
@@ -36,26 +28,20 @@ alias lt='lsd --tree'
 if [[ -n $SSH_CONNECTION ]]; then
   alias lsd='lsd --icon never'
 fi
-# alias ping='gping'
-# alias ps='procs'
-# alias rip='rip -i'
 alias rmi='rm -i'
-# alias sed="sd"
-# alias sort="huniq"
-# alias top='htop'
-# alias vim='nvim'
-alias v='nvim'
-# alias gptcommit='gptcommit'
+alias v='neovide'
 
 #===============================================================================
 # 👇
 #===============================================================================
 alias cwd='printf "%q\n" "$(pwd)" | pbcopy'
-alias ehost='${=EDITOR} /etc/hosts'
-alias eohmyzsh='${=EDITOR} ~/.oh-my-zsh'
-alias ezshrc='${=EDITOR} ~/.zshrc'
-alias szshrc='source ~/.zshrc'
-alias gii='git init && git commit --allow-empty -m "init"'
+
+alias e-host='${=EDITOR} /etc/hosts'
+alias e-ohmyzsh='${=EDITOR} ~/.oh-my-zsh'
+alias e-zshrc='${=EDITOR} ~/.zshrc'
+
+alias s-zshrc='source ~/.zshrc'
+
 alias ip='curl -4 ip.sb'
 alias ipv6='curl -6 ip.sb'
 
@@ -93,9 +79,6 @@ r-update() {
   tldr --update
 }
 
-# mas upgrade
-# conda update --all
-
 r-upgrade() {
   echo -e "\033[33mUpdating all asdf plugins...\033[0m"
   asdf plugin update --all
@@ -111,6 +94,9 @@ r-upgrade() {
 
   echo -e "\033[33mUpgrading all GitHub CLI extensions...\033[0m"
   gh extension upgrade --all
+
+  echo -e "\033[33mUpgrading all macOS applications...\033[0m"
+  mas upgrade
 
   echo -e "\033[33mChecking and updating global npm packages...\033[0m"
   npx npm-check --global --update-all
