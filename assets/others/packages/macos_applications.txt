@@ -80,6 +80,7 @@ Karabiner-EventViewer
 KeyCastr
 Keyboard Maestro
 Keynote
+Klack
 LINE
 LM Studio
 LTspice
