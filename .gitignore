@@ -11,6 +11,7 @@ bin/cwim
 bin/feishu2md
 bin/nnn
 bin/redo
+bin/updo
 bin/warpd
 bin/wayback
 bin/webtty
