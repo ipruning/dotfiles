@@ -95,8 +95,8 @@ r-upgrade() {
   echo -e "\033[33mUpgrading all GitHub CLI extensions...\033[0m"
   gh extension upgrade --all
 
-  echo -e "\033[33mUpgrading all macOS applications...\033[0m"
-  mas upgrade
+  # echo -e "\033[33mUpgrading all macOS applications...\033[0m"
+  # sudo mas upgrade
 
   echo -e "\033[33mChecking and updating global npm packages...\033[0m"
   npx npm-check --global --update-all
