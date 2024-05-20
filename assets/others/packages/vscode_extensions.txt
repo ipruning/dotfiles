@@ -68,7 +68,7 @@ ms-vscode.remote-explorer
 ms-vscode.remote-server
 myriad-dreamin.tinymist
 naumovs.color-highlight
-ninoseki.vscode-pylens
+ninoseki.vscode-mogami
 njpwerner.autodocstring
 oderwat.indent-rainbow
 oven.bun-vscode

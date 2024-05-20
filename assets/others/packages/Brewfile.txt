@@ -28,6 +28,7 @@ direnv
 docker
 duf
 dust
+eget
 exiftool
 extra-cmake-modules
 fcp
@@ -61,6 +62,7 @@ iperf
 iperf3
 ipinfo-cli
 jc
+jless
 jq
 juliaup
 just
@@ -86,6 +88,7 @@ nmap
 noborus/tap/ov
 node
 ollama
+ouch
 oven-sh/bun/bun
 pandoc-crossref
 pdfgrep
@@ -113,11 +116,14 @@ timothyye/tap/skm
 tmate
 tmuxp
 tokei
+topgrade
 tor
 tree
+trippy
 typos-cli
 typst
 ugit
+veeso/termscp/termscp
 vips
 watchexec
 wgcf
@@ -128,4 +134,3 @@ zeabur/tap/cli
 zig
 zola
 zoxide
-zurawiki/brews/gptcommit
