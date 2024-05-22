@@ -100,12 +100,8 @@ MainStage
 Maipo
 Mathpix Snipping Tool
 MessAuto
-Microsoft Defender
 Microsoft Excel
-Microsoft OneNote
-Microsoft Outlook
 Microsoft PowerPoint
-Microsoft Remote Desktop
 Microsoft Teams
 Microsoft Word
 Milanote
@@ -236,7 +232,6 @@ iMazing
 iMovie
 iTerm
 kindaVim
-lghub
 logioptionsplus
 pcsuite
 qBittorrent

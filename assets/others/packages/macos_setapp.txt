@@ -14,7 +14,7 @@ DisplayBuddy
 Downie
 Due
 Expressions
-Focus
+Focus 2
 ForkLift
 Gemini
 Gifox
