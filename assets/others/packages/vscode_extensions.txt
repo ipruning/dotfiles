@@ -6,6 +6,7 @@ bierner.markdown-mermaid
 bodil.file-browser
 catppuccin.catppuccin-vsc
 catppuccin.catppuccin-vsc-icons
+charliermarsh.ruff
 codeandstuff.package-json-upgrade
 codezombiech.gitignore
 darkriszty.markdown-table-prettify
@@ -34,7 +35,6 @@ jacobpfeifer.pfeifer-hurl
 james-yu.latex-workshop
 julialang.language-julia
 kahole.magit
-kevinrose.vsc-python-indent
 kisstkondoros.vscode-gutter-preview
 lehoanganh298.json-lines-viewer
 lencerf.beancount
@@ -43,11 +43,12 @@ marimo-team.vscode-marimo
 marp-team.marp-vscode
 mathiassoeholm.markdown-link-updater
 mechatroner.rainbow-csv
-mhutchie.git-graph
 modular-mojotools.vscode-mojo
 ms-azuretools.vscode-docker
 ms-python.black-formatter
+ms-python.flake8
 ms-python.isort
+ms-python.mypy-type-checker
 ms-python.python
 ms-python.vscode-pylance
 ms-toolsai.jupyter

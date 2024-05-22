@@ -244,13 +244,15 @@ mas "LINE", id: 539883307
 mas "Logic Pro", id: 634148309
 mas "MainStage", id: 634159523
 mas "Maipo", id: 789066512
+mas "Microsoft Excel", id: 462058435
 mas "Microsoft PowerPoint", id: 462062816
-mas "Microsoft Remote Desktop", id: 1295203466
+mas "Microsoft Word", id: 462054704
 mas "Mini Metro+", id: 1550663539
 mas "Motion", id: 434290957
 mas "MusicHarbor", id: 1440405750
 mas "Notability", id: 360593530
 mas "Numbers", id: 409203825
+mas "OneDrive", id: 823766827
 mas "Pages", id: 409201541
 mas "PasteNow", id: 1552536109
 mas "Photomator", id: 1444636541
@@ -277,6 +279,7 @@ vscode "bierner.markdown-mermaid"
 vscode "bodil.file-browser"
 vscode "catppuccin.catppuccin-vsc"
 vscode "catppuccin.catppuccin-vsc-icons"
+vscode "charliermarsh.ruff"
 vscode "codeandstuff.package-json-upgrade"
 vscode "codezombiech.gitignore"
 vscode "darkriszty.markdown-table-prettify"
@@ -305,7 +308,6 @@ vscode "jacobpfeifer.pfeifer-hurl"
 vscode "james-yu.latex-workshop"
 vscode "julialang.language-julia"
 vscode "kahole.magit"
-vscode "kevinrose.vsc-python-indent"
 vscode "kisstkondoros.vscode-gutter-preview"
 vscode "lehoanganh298.json-lines-viewer"
 vscode "lencerf.beancount"
@@ -314,11 +316,12 @@ vscode "marimo-team.vscode-marimo"
 vscode "marp-team.marp-vscode"
 vscode "mathiassoeholm.markdown-link-updater"
 vscode "mechatroner.rainbow-csv"
-vscode "mhutchie.git-graph"
 vscode "modular-mojotools.vscode-mojo"
 vscode "ms-azuretools.vscode-docker"
 vscode "ms-python.black-formatter"
+vscode "ms-python.flake8"
 vscode "ms-python.isort"
+vscode "ms-python.mypy-type-checker"
 vscode "ms-python.python"
 vscode "ms-python.vscode-pylance"
 vscode "ms-toolsai.jupyter"
