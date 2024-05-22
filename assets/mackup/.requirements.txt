@@ -1,7 +1,8 @@
-black
 isort
+loguru
 pip
-requests
+pipx
 rich
+ruff
 setuptools
 wheel
