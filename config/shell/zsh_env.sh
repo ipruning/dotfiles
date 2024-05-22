@@ -298,7 +298,7 @@ eval "$(zoxide init zsh)"
 case $SYSTEM_TYPE in
 mac_arm64)
   # python
-  alias 'cvenv'='$(brew --prefix python@3.11)/bin/python3.11 -m venv .venv && source .venv/bin/activate && python3 -m pip install --upgrade -r $HOME/.requirements.txt'
+  alias 'cvenv'='$(brew --prefix python@3.12)/bin/python3.12 -m venv .venv && source .venv/bin/activate && python3 -m pip install --upgrade -r $HOME/.requirements.txt'
   alias 'svenv'='source .venv/bin/activate'
   alias 'cenv'='conda create --prefix ./.env && conda activate ./.env'
   alias 'senv'='conda activate ./.env'
@@ -351,3 +351,17 @@ esac
 # export LDFLAGS="-L$(brew --prefix qt@5)/lib"
 # export CPPFLAGS="-I$(brew --prefix qt@5)/include"
 # export PKG_CONFIG_PATH="$(brew --prefix qt@5)/lib/pkgconfig"
+
+#===============================================================================
+# 👇 auto-activate virtualen
+#===============================================================================
+auto_activate_venv() {
+  if [[ -d "./venv" ]]; then
+    source "./venv/bin/activate"
+  elif [[ -d "./.venv" ]]; then
+    source "./.venv/bin/activate"
+  fi
+}
+
+autoload -U add-zsh-hook
+add-zsh-hook chpwd auto_activate_venv
