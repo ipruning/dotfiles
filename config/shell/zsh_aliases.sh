@@ -80,19 +80,19 @@ r-update() {
 }
 
 r-upgrade() {
-  echo -e "\033[33mUpdating all asdf plugins...\033[0m"
-  asdf plugin update --all
-
   echo -e "\033[33mUpdating asdf...\033[0m"
   asdf update
 
-  echo -e "\033[33mUpgrading all Homebrew formulas...\033[0m"
+  echo -e "\033[33mUpdating asdf plugins...\033[0m"
+  asdf plugin update --all
+
+  echo -e "\033[33mUpgrading Homebrew formulas...\033[0m"
   brew upgrade
 
-  echo -e "\033[33mUpdating all Rust crates...\033[0m"
+  echo -e "\033[33mUpdating Rust crates...\033[0m"
   cargo install-update --all
 
-  echo -e "\033[33mUpgrading all GitHub CLI extensions...\033[0m"
+  echo -e "\033[33mUpgrading GitHub CLI extensions...\033[0m"
   gh extension upgrade --all
 
   # echo -e "\033[33mUpgrading all macOS applications...\033[0m"
@@ -108,12 +108,12 @@ r-upgrade() {
   python -m pip install --upgrade pip
   pipx upgrade-all
 
+  echo -e "\033[33mUpgrading Rye...\033[0m"
+  rye self update
+
   echo -e "\033[33mUpdating Rust toolchain...\033[0m"
   rustup self update
   rustup update
-
-  echo -e "\033[33mDownloading and setting permissions for ai.py script...\033[0m"
-  wget https://raw.githubusercontent.com/reorx/ai.py/master/ai.py -O "${HOME}"/Dotfiles/bin/ai && chmod +x "${HOME}"/Dotfiles/bin/ai
 }
 
 r-backup() {
