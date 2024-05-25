@@ -130,7 +130,6 @@ wgcf
 wget
 yq
 yt-dlp
-zeabur/tap/cli
 zig
 zola
 zoxide
