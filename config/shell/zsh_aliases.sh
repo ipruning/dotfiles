@@ -89,14 +89,15 @@ r-upgrade() {
   echo -e "\033[33mUpgrading Homebrew formulas...\033[0m"
   brew upgrade
 
+  echo -e "\033[33mCleaning up Homebrew...\033[0m"
+  brew cleanup
+  brew autoremove
+
   echo -e "\033[33mUpdating Rust crates...\033[0m"
   cargo install-update --all
 
   echo -e "\033[33mUpgrading GitHub CLI extensions...\033[0m"
   gh extension upgrade --all
-
-  # echo -e "\033[33mUpgrading all macOS applications...\033[0m"
-  # sudo mas upgrade
 
   echo -e "\033[33mChecking and updating global npm packages...\033[0m"
   npx npm-check --global --update-all
@@ -117,33 +118,15 @@ r-upgrade() {
 }
 
 r-backup() {
-  echo -e "\033[33mUpdating Homebrew before backup...\033[0m"
+  echo -e "\033[33mBacking up all packages...\033[0m"
   brew update
-
-  echo -e "\033[33mDumping Homebrew bundle...\033[0m"
   brew bundle dump --file="$HOME"/dotfiles/assets/others/packages/Brewfile --force
-
-  echo -e "\033[33mCreating list of installed Homebrew leaves...\033[0m"
   brew leaves >"$HOME"/dotfiles/assets/others/packages/Brewfile.txt
-
-  echo -e "\033[33mListing installed Cargo packages...\033[0m"
   cargo install --list | grep -v '^[[:blank:]]' | awk '{print $1}' >"$HOME"/dotfiles/assets/others/packages/cargo.txt
-
-  echo -e "\033[33mListing installed Mac applications...\033[0m"
   ls /Applications | rg '\.app' | sed 's/\.app//g' >"$HOME"/dotfiles/assets/others/packages/macos_applications.txt
-
-  echo -e "\033[33mListing installed Setapp applications...\033[0m"
   ls /Applications/Setapp | rg '\.app' | sed 's/\.app//g' >"$HOME"/dotfiles/assets/others/packages/macos_setapp.txt
-
-  echo -e "\033[33mCreating npm global packages list...\033[0m"
   npm list --location=global --json | jq ".dependencies | keys[]" -r >"$HOME"/dotfiles/assets/others/packages/npm.txt
-
-  echo -e "\033[33mListing pipx managed packages...\033[0m"
   pipx list --json | jq ".venvs | .[] | .metadata.main_package.package" -r >"$HOME"/dotfiles/assets/others/packages/pipx.txt
-
-  echo -e "\033[33mListing Visual Studio Code extensions...\033[0m"
   code --list-extensions >"$HOME"/dotfiles/assets/others/packages/vscode_extensions.txt
-
-  echo -e "\033[33mBacking up .zsh_history...\033[0m"
   cp "$HOME"/.zsh_history "$HOME"/Databases/Backup/CLI/zsh_history_$(date +\%Y_\%m_\%d_\%H_\%M_\%S).bak
 }

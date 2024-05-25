@@ -550,7 +550,9 @@
       "commands": ["editor.action.outdentLines"]
     }
   ],
-  "workbench.sideBar.location": "right"
+  "workbench.sideBar.location": "right",
+  "excalidraw.theme": "auto",
+  "github.copilot.editor.enableAutoCompletions": true
   // vim & VSpaceCode from Scott
   // "vim.useSystemClipboard": true,
   // "vim.foldfix": true,
