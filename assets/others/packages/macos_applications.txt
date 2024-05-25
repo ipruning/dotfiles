@@ -23,6 +23,7 @@ Blender
 Bob
 CapCut
 Capture One
+ChatGPT
 ClashX Pro
 ClassIn
 Cloudflare WARP
