@@ -117,7 +117,7 @@ arm64*)
   ;;
 x86_64*)
   echo ""
-  echo "${YELLOW}Please check the path to miniforge in init.sh${NORMAL}"
+  echo "${YELLOW}Please check the path to miniforge in bootstrap.sh${NORMAL}"
   ;;
 *)
   echo ""
