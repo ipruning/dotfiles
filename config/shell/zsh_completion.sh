@@ -11,7 +11,7 @@ mac_arm64 | mac_x86_64)
   compdef _op op
 
   #===============================================================================
-  # 👇 pipx completions
+  # 👇 pipx completions (If you use brew to install pipx, you can comment out the following line.)
   #===============================================================================
   eval "$(register-python-argcomplete pipx)"
 
@@ -24,6 +24,5 @@ mac_arm64 | mac_x86_64)
   # 👇 rye completions
   #===============================================================================
   eval "$(rye self completion)"
-
   ;;
 esac
