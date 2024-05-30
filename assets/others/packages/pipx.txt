@@ -1,3 +1,4 @@
+argcomplete
 asitop
 beancount
 commitizen
