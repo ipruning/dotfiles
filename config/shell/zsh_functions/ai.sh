@@ -1,12 +1,5 @@
 #===============================================================================
-# 👇
-#===============================================================================
-llm() {
-  ai "$@"
-}
-
-#===============================================================================
-# 👇
+# 👇 Building
 #===============================================================================
 catfiles() {
   for file in "$@"; do
@@ -21,15 +14,44 @@ catfiles() {
   done
 }
 
-#===============================================================================
-# 👇
-#===============================================================================
+buffit() {
+  # Check if data is being piped or redirected to the function
+  if [ -t 0 ]; then # Checks if the standard input (file descriptor 0) is a terminal
+    # If no data is piped, check if my_buff is already set and print it if it is
+    if [ -n "$my_buff" ]; then
+      echo "$my_buff"
+    else
+      echo "No data piped and my_buff is empty."
+    fi
+  else
+    # Capture the input from standard in to my_buff
+    export my_buff=$(cat)
+  fi
+}
+
 prompt() {
+  # Check if stdin is a terminal (interactive)
+  if [ -t 0 ]; then
+    local input=""
+  else
+    local input=$(cat)
+  fi
+
   local added_prompt=$(printf "%s " "$@")
-  while IFS= read -r line; do
-    echo "$line"
-  done
-  echo "$added_prompt"
+
+  # If no input, just print the prompt
+  if [[ -z "$input" ]]; then
+    echo "$added_prompt"
+  # If input, print the prompt and the input
+  else
+    echo "<context>"
+    echo "$input"
+    echo "</context>"
+    echo ""
+    echo "<prompt>"
+    echo "$added_prompt"
+    echo "</prompt>"
+  fi
 }
 
 #===============================================================================
