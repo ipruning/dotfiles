@@ -15,7 +15,6 @@ bottom
 brimdata/tap/zq
 broot
 chafa
-cheat
 choose-rust
 cloudflared
 cmake
@@ -36,6 +35,7 @@ fd
 ffmpeg
 flyctl
 fontforge
+forgit
 fpp
 frps
 fswatch
