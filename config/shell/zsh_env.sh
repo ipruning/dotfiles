@@ -38,8 +38,8 @@ export plugins=(
   autoupdate              # https://github.com/TamCore/autoupdate-oh-my-zsh-plugins
   git-open                # https://github.com/paulirish/git-open
   zsh-autosuggestions     # https://github.com/zsh-users/zsh-autosuggestions
-  zsh-completions         # https://github.com/zsh-users/zsh-completions
   zsh-syntax-highlighting # https://github.com/zsh-users/zsh-syntax-highlighting
+  # zsh-completions         # https://github.com/zsh-users/zsh-completions
   # zsh-vi-mode             # https://github.com/jeffreytse/zsh-vi-mode
   # magic-enter
   # macos

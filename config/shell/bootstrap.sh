@@ -60,11 +60,21 @@ fi
 ZSH_CUSTOM=${ZSH_CUSTOM:-~/.oh-my-zsh/custom}
 
 #===============================================================================
-# 👇 custom completions (Oh My Zsh will call compinit for you)
+# 👇 custom completions (Oh-My-Zsh will call compinit for you) (should)
 #===============================================================================
 FPATH="$(brew --prefix)/share/zsh/site-functions:$FPATH"
-FPATH="$HOME/dotfiles/config/shell/zsh_completion:$FPATH"
 FPATH="$ZSH_CUSTOM/plugins/zsh-completions/src:$FPATH"
+
+# TODO
+# FPATH=(
+#   "$HOME"/Dotfiles/config/shell/zsh_completions
+#   "$HOME"/Dotfiles/config/shell/zsh_functions
+#   "${FPATH[@]}"
+# )
+# autoload -U "$HOME/dotfiles/config/shell/zsh_functions/_ai"
+. "$HOME"/dotfiles/config/shell/zsh_functions/ai.sh
+. "$HOME"/dotfiles/config/shell/zsh_functions/roam.sh
+. "$HOME"/dotfiles/config/shell/zsh_functions/others.sh
 
 #===============================================================================
 # 👇 env
