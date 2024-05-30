@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# https://github.com/reorx/ai.py
 import argparse
 import json
 import logging
@@ -469,10 +470,15 @@ class ChatSession:
         res_message, data, messages = self.create_completion(
             params_override=params_override
         )
+
+        p_price = data["usage"]["prompt_tokens"] / 1000000 * 5 * 7.26 * 1.03
+        c_price = data["usage"]["completion_tokens"] / 1000000 * 15 * 7.26 * 1.03
+        total_price = p_price + c_price
+
         if Config.verbose:
             print(
                 blue(
-                    f'stat: sent_messages={len(messages)} total_messages={len(self.messages)}  price=~${"{:.6f}".format(data["usage"]["total_tokens"]/1000*0.002)}'
+                    f'stat: sent_messages={len(messages)} total_messages={len(self.messages)}  price=~¥{"{:.6f}".format(total_price)}'
                 )
             )
         if Config.show_tokens:
