@@ -60,8 +60,7 @@ fi
 ZSH_CUSTOM=${ZSH_CUSTOM:-~/.oh-my-zsh/custom}
 
 #===============================================================================
-# 👇 custom completions
-# 👇 Oh My Zsh will call compinit for you
+# 👇 custom completions (Oh My Zsh will call compinit for you)
 #===============================================================================
 FPATH="$(brew --prefix)/share/zsh/site-functions:$FPATH"
 FPATH="$HOME/dotfiles/config/shell/zsh_completion:$FPATH"
