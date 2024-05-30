@@ -76,22 +76,11 @@ export UPDATE_ZSH_DAYS=7
 source "$ZSH"/oh-my-zsh.sh
 
 #===============================================================================
-# 👇 fzf-tab https://github.com/Aloxaf/fzf-tab/wiki/Configuration
-# 👇 fzf-tab needs to be loaded after compinit (oh-my-zsh.sh)
+# 👇 fzf-tab https://github.com/Aloxaf/fzf-tab/wiki/Configuration (fzf-tab needs to be loaded after compinit (oh-my-zsh.sh))
 #===============================================================================
 source "$ZSH_CUSTOM"/plugins/fzf-tab/fzf-tab.plugin.zsh
 zstyle ':fzf-tab:complete:cd:*' fzf-preview "lsd --icon=always $realpath"
 zstyle ':fzf-tab:*' fzf-pad 10
-
-#===============================================================================
-# 👇 gcloud
-#===============================================================================
-# case $SYSTEM_TYPE in
-# mac_arm64 | mac_x86_64)
-#   source "$(brew --prefix)/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.zsh.inc"
-#   source "$(brew --prefix)/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.zsh.inc"
-#   ;;
-# esac
 
 #===============================================================================
 # 👇 custom binary
@@ -117,9 +106,9 @@ linux_x86_64)
   ;;
 esac
 # 👇 Option-S (Control-S)
-bindkey '^S' sudo-command-line
+bindkey '^S' _sudo-command-line
 # 👇 Option-X
-bindkey '≈' fzf-dirs-widget
+bindkey '≈' _fzf-dirs-widget
 # 👇 Option-Left
 bindkey "^[[1;3C" forward-word
 # 👇 Option-Right
@@ -221,6 +210,8 @@ eval "$(navi widget zsh)"
 
 #===============================================================================
 # 👇 zoxide
+# z foo<tab> # shows the same completions as cd
+# z foo<space><tab> # shows interactive completions via zoxide
 #===============================================================================
 eval "$(zoxide init zsh)"
 
