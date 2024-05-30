@@ -19,7 +19,7 @@ alias mvi='mv -i'
 #===============================================================================
 # 👇
 #===============================================================================
-alias cat='bat --paging=never'
+alias bat='bat --paging=never'
 alias l='lsd'
 alias la='lsd -a'
 alias ll='lsd -lh'
@@ -34,16 +34,14 @@ alias v='neovide'
 #===============================================================================
 # 👇
 #===============================================================================
-alias cwd='printf "%q\n" "$(pwd)" | pbcopy'
-
+alias c-wd='printf "%q\n" "$(pwd)" | pbcopy'
 alias e-host='${=EDITOR} /etc/hosts'
 alias e-ohmyzsh='${=EDITOR} ~/.oh-my-zsh'
 alias e-zshrc='${=EDITOR} ~/.zshrc'
-
 alias s-zshrc='source ~/.zshrc'
 
-alias ip='curl -4 ip.sb'
-alias ipv6='curl -6 ip.sb'
+alias g-ip='curl -4 ip.sb'
+alias g-ipv6='curl -6 ip.sb'
 
 g-i() {
   git init
@@ -119,14 +117,15 @@ r-upgrade() {
 
 r-backup() {
   echo -e "\033[33mBacking up all packages...\033[0m"
-  brew update
   brew bundle dump --file="$HOME"/dotfiles/assets/others/packages/Brewfile --force
   brew leaves >"$HOME"/dotfiles/assets/others/packages/Brewfile.txt
+  brew update
   cargo install --list | grep -v '^[[:blank:]]' | awk '{print $1}' >"$HOME"/dotfiles/assets/others/packages/cargo.txt
+  code --list-extensions >"$HOME"/dotfiles/assets/others/packages/vscode_extensions.txt
+  cp "$HOME"/.zsh_history "$HOME"/Databases/Backup/CLI/zsh_history_$(date +\%Y_\%m_\%d_\%H_\%M_\%S).bak
+  gh extension list | awk '{print $3}' >"$HOME"/dotfiles/assets/others/packages/gh_extensions.txt
   ls /Applications | rg '\.app' | sed 's/\.app//g' >"$HOME"/dotfiles/assets/others/packages/macos_applications.txt
   ls /Applications/Setapp | rg '\.app' | sed 's/\.app//g' >"$HOME"/dotfiles/assets/others/packages/macos_setapp.txt
   npm list --location=global --json | jq ".dependencies | keys[]" -r >"$HOME"/dotfiles/assets/others/packages/npm.txt
   pipx list --json | jq ".venvs | .[] | .metadata.main_package.package" -r >"$HOME"/dotfiles/assets/others/packages/pipx.txt
-  code --list-extensions >"$HOME"/dotfiles/assets/others/packages/vscode_extensions.txt
-  cp "$HOME"/.zsh_history "$HOME"/Databases/Backup/CLI/zsh_history_$(date +\%Y_\%m_\%d_\%H_\%M_\%S).bak
 }
