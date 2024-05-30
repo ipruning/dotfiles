@@ -24,6 +24,7 @@ Bob
 CapCut
 Capture One
 ChatGPT
+Chromium
 ClassIn
 Cloudflare WARP
 Compressor
@@ -239,10 +240,10 @@ qBittorrent
 uBlacklist for Safari
 uPic
 zoom.us
-企业微信
 优酷
 即刻
 小宇宙
 小红书
-随身工作台
 集换社
+企业微信
+随身工作台
