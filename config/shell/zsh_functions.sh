@@ -22,7 +22,7 @@ remkey() {
 #===============================================================================
 # 👇 sudo Control-S
 #===============================================================================
-sudo-command-line() {
+_sudo-command-line() {
   [[ -z $BUFFER ]] && zle up-history
   local cmd="sudo "
   if [[ ${BUFFER} == ${cmd}* ]]; then
@@ -34,7 +34,7 @@ sudo-command-line() {
   fi
   zle reset-prompt
 }
-zle -N sudo-command-line
+zle -N _sudo-command-line
 
 #===============================================================================
 # 👇 Git
@@ -46,7 +46,7 @@ getrepo() {
 #===============================================================================
 # 👇 fzf Option-X 跳转近期目录
 #===============================================================================
-fzf-dirs-widget() {
+_fzf-dirs-widget() {
   dir=$(dirs -v | fzf --height "${FZF_TMUX_HEIGHT:-40%}" --reverse | cut -b3-)
   local dir
   if [[ -z "$dir" ]]; then
@@ -59,13 +59,13 @@ fzf-dirs-widget() {
   zle reset-prompt
   return $ret
 }
-zle -N fzf-dirs-widget
+zle -N _fzf-dirs-widget
 
 #===============================================================================
-# 👇 fzf completion will use ~~ as the trigger sequence instead of the default **
+# 👇 fzf completion will use == as the trigger sequence instead of the default **
 # 👇 Control-I will be used to trigger completion
 #===============================================================================
-export FZF_COMPLETION_TRIGGER='~~'
+export FZF_COMPLETION_TRIGGER='**'
 export FZF_COMPLETION_OPTS='--border --info=inline'
 _fzf_comprun() {
   local command=$1
@@ -79,7 +79,7 @@ _fzf_comprun() {
 }
 
 #===============================================================================
-# 👇 fzf 浏览器历史记录
+# 👇 fzf Chrome 历史记录
 #===============================================================================
 fch() {
   local cols sep google_history open
@@ -102,7 +102,7 @@ fch() {
 }
 
 #===============================================================================
-# 👇 fzf 浏览器书签
+# 👇 fzf Chrome 书签
 #===============================================================================
 fcb() {
     bookmarks_path=~/Library/Application\ Support/Google/Chrome/Default/Bookmarks
@@ -126,17 +126,6 @@ fkill() {
         --preview='echo {}' --preview-window=down,3,wrap \
         --layout=reverse --height=80% | awk '{print $2}' | xargs kill -9
 }
-
-#===============================================================================
-# 👇 fzf z
-#===============================================================================
-# z foo<tab> # shows the same completions as cd
-# z foo<space><tab> # shows interactive completions via zoxide
-
-#===============================================================================
-# 👇 fzf asdf
-#===============================================================================
-# ref fasdf()
 
 #===============================================================================
 # 👇 tmux
@@ -187,35 +176,16 @@ cd() {
 #===============================================================================
 # 👇 https://github.com/xbin-io/xbin/
 #===============================================================================
-function xbin() {
-  command="$1"
-  shift
-  args=( "$@" )
-  if [ -t 0 ]; then
-    curl -sS -X POST "https://xbin.io/${command}" -H "X-Args: ${args}"
-  else
-    curl -sS --data-binary @- "https://xbin.io/${command}" -H "X-Args: ${args}"
-  fi
-}
-
-#===============================================================================
-# 👇 https://kadekillary.work/posts/1000x-eng/
-# Examples of efficient data analysis using shell scripts
-# hgpt "create a 10 row csv of NBA player data with headers - please only include the data, nothing else" > nba.csv
-# dgpt "can you write a sql query to get the average PointsPerGame by Position from the following" "$(cat nba.csv)"
-#===============================================================================
-function hgpt {
-    local prompt=$1
-
-    ai "$prompt"
-}
-function dgpt() {
-    local prompt=$1
-    local data=$2
-    local prompt=$(echo "${prompt}: ${data}" | tr -s ' ')
-
-    ai "$prompt"
-}
+# % function xbin() {
+#   command="$1"
+#   shift
+#   args=( "$@" )
+#   if [ -t 0 ]; then
+#     curl -sS -X POST "https://xbin.io/${command}" -H "X-Args: ${args}"
+#   else
+#     curl -sS --data-binary @- "https://xbin.io/${command}" -H "X-Args: ${args}"
+#   fi
+# }
 
 #===============================================================================
 # 👇 rip-venv
