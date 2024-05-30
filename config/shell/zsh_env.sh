@@ -21,7 +21,7 @@ fi
 #===============================================================================
 # 👇 zsh-vi-mode https://github.com/jeffreytse/zsh-vi-mode/issues/24
 #===============================================================================
-export ZVM_INIT_MODE=sourcing
+# export ZVM_INIT_MODE=sourcing
 
 #===============================================================================
 # 👇 Standard plugins can be found in $ZSH/plugins/
@@ -33,43 +33,27 @@ export plugins=(
   asdf
   colored-man-pages
   extract
-  fd
-  gh
-  macos
-  magic-enter
   systemadmin
-  ripgrep
   zbell
   autoupdate              # https://github.com/TamCore/autoupdate-oh-my-zsh-plugins
-  forgit                  # https://github.com/wfxr/forgit
   git-open                # https://github.com/paulirish/git-open
   zsh-autosuggestions     # https://github.com/zsh-users/zsh-autosuggestions
   zsh-completions         # https://github.com/zsh-users/zsh-completions
   zsh-syntax-highlighting # https://github.com/zsh-users/zsh-syntax-highlighting
   # zsh-vi-mode             # https://github.com/jeffreytse/zsh-vi-mode
-  # zsh-osx-autoproxy       # https://github.com/sukkaw/zsh-osx-autoproxy
+  # magic-enter
+  # macos
 )
 
 #===============================================================================
-# 👇 Language environment
+# 👇 Set
 #===============================================================================
-# export LANG=en_US.UTF-8
+export LANG=en_US.UTF-8
 
 #===============================================================================
-# 👇 LANG prevents the export setting from breaking iTerm2.
+# 👇 broot https://github.com/Canop/broot
 #===============================================================================
-# export LANG="${LC_ALL:-$LANG}"
-# unset LC_ALL
-
-#===============================================================================
-# 👇 broot
-#===============================================================================
-source /Users/alex/.config/broot/launcher/bash/br
-
-#===============================================================================
-# 👇 Cheat
-#===============================================================================
-export CHEAT_USE_FZF=true
+source "${HOME}"/.config/broot/launcher/bash/br
 
 #===============================================================================
 # 👇 History
@@ -84,7 +68,7 @@ setopt INC_APPEND_HISTORY # Write to the history file immediately, not when the 
 #===============================================================================
 # 👇 oh-my-zsh autoupdate-zsh-plugin
 #===============================================================================
-export UPDATE_ZSH_DAYS=42
+export UPDATE_ZSH_DAYS=7
 
 #===============================================================================
 # 👇 oh-my-zsh init
@@ -96,7 +80,7 @@ source "$ZSH"/oh-my-zsh.sh
 # 👇 fzf-tab needs to be loaded after compinit (oh-my-zsh.sh)
 #===============================================================================
 source "$ZSH_CUSTOM"/plugins/fzf-tab/fzf-tab.plugin.zsh
-zstyle ':fzf-tab:complete:cd:*' fzf-preview 'lsd --icon=always $realpath'
+zstyle ':fzf-tab:complete:cd:*' fzf-preview "lsd --icon=always $realpath"
 zstyle ':fzf-tab:*' fzf-pad 10
 
 #===============================================================================
@@ -132,42 +116,23 @@ linux_x86_64)
   source "$(brew --prefix fzf)/shell/key-bindings.zsh"
   ;;
 esac
-# 👇 Option-S
+# 👇 Option-S (Control-S)
 bindkey '^S' sudo-command-line
-# 👇 Option-C
-bindkey 'ç' fzf-cd-widget
 # 👇 Option-X
 bindkey '≈' fzf-dirs-widget
-# 👇 Ctrl-L accept zsh-autosuggestions https://github.com/zsh-users/zsh-autosuggestions#key-bindings
-bindkey '^L' autosuggest-accept
-# 👇 Ctrl-G
-bindkey '^g' _navi_widget
-# 👇 Alt-Left
+# 👇 Option-Left
 bindkey "^[[1;3C" forward-word
-# 👇 Alt-Right
+# 👇 Option-Right
 bindkey "^[[1;3D" backward-word
+# 👇 Control-L accept zsh-autosuggestions https://github.com/zsh-users/zsh-autosuggestions#key-bindings
+bindkey '^L' autosuggest-accept
+# 👇 Control-G
+bindkey '^g' _navi_widget
 
 #===============================================================================
-# 👇 forgit
+# 👇 forgit https://github.com/wfxr/forgit
 #===============================================================================
-# forgit_log=glo
-# forgit_diff=gd
-# forgit_add=ga
-# forgit_reset_head=grh
-# forgit_ignore=gi
-# forgit_checkout_file=gcf
-# forgit_checkout_branch=gcb
-# forgit_branch_delet=gbd
-# forgit_checkout_tag=gct
-# forgit_checkout_commit=gco
-# forgit_revert_commit=grc
-# forgit_clean=gclean
-# forgit_stash_show=gss
-# forgit_cherry_pick=gcp
-# forgit_rebase=grb
-# forgit_fixup=gfu
-FORGIT_INSTALL_DIR="$ZSH_CUSTOM"/plugins/forgit
-export PATH="$PATH:$FORGIT_INSTALL_DIR/bin"
+[ -f "$HOMEBREW_PREFIX"/share/forgit/forgit.plugin.zsh ] && source "$HOMEBREW_PREFIX"/share/forgit/forgit.plugin.zsh
 
 #===============================================================================
 # 👇 fzf
@@ -176,13 +141,14 @@ export FZF_DEFAULT_OPTS="--height=100% --layout=reverse --info=inline --border -
 export FZF_DEFAULT_COMMAND="fd --ignore-file ~/.rgignore --hidden --follow --ignore-case ."
 
 #===============================================================================
-# 👇 fzf Ctrl-T to fuzzily search for a file or directory in your home directory then insert its path at the cursor
+# 👇 fzf Control-T to fuzzily search for a file or directory in your home directory then insert its path at the cursor
 #===============================================================================
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 
 #===============================================================================
 # 👇 fzf Option-C 快速查找目录 fuzzily search for a directory in your home directory then cd into it
 #===============================================================================
+bindkey 'ç' fzf-cd-widget
 export FZF_ALT_C_COMMAND="fd --ignore-file ~/.rgignore --hidden --follow --ignore-case --type d"
 
 #===============================================================================
@@ -202,7 +168,7 @@ test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell
 #===============================================================================
 # 👇 pipx
 #===============================================================================
-export PIPX_DEFAULT_PYTHON="$(brew --prefix python@3.11)/bin/python3.11"
+export PIPX_DEFAULT_PYTHON="$(brew --prefix python@3.12)/bin/python3.12"
 
 #===============================================================================
 # 👇 direnv
@@ -250,42 +216,8 @@ export PATH="$MODULAR_HOME/pkg/packages.modular.com_mojo/bin:$PATH"
 
 #===============================================================================
 # 👇 navi
-# 👇 eval "$(navi widget zsh)"
 #===============================================================================
-_navi_call() {
-  local result="$(navi "$@" </dev/tty)"
-  printf "%s" "$result"
-}
-
-_navi_widget() {
-  local -r input="${LBUFFER}"
-  local -r last_command="$(echo "${input}" | navi fn widget::last_command)"
-  local replacement="$last_command"
-
-  if [ -z "$last_command" ]; then
-    replacement="$(_navi_call --print)"
-  elif [ "$LASTWIDGET" = "_navi_widget" ] && [ "$input" = "$previous_output" ]; then
-    replacement="$(_navi_call --print --query "$last_command")"
-  else
-    replacement="$(_navi_call --print --best-match --query "$last_command")"
-  fi
-
-  if [ -n "$replacement" ]; then
-    local -r find="${last_command}_NAVIEND"
-    previous_output="${input}_NAVIEND"
-    previous_output="${previous_output//$find/$replacement}"
-  else
-    previous_output="$input"
-  fi
-
-  zle kill-whole-line
-  LBUFFER="${previous_output}"
-  region_highlight=("P0 100 bold")
-  zle redisplay
-}
-
-zle -N _navi_widget
-# bindkey '^g' _navi_widget
+eval "$(navi widget zsh)"
 
 #===============================================================================
 # 👇 zoxide
@@ -337,20 +269,6 @@ linux_x86_64)
   alias 'svenv'='source .venv/bin/activate'
   ;;
 esac
-
-#===============================================================================
-# 👇 Sourcegraph
-#===============================================================================
-# export SRC_ACCESS_TOKEN=my-token
-# export SRC_ENDPOINT=https://sourcegraph.example.com
-
-#===============================================================================
-# 👇 qt5
-#===============================================================================
-# export PATH="$(brew --prefix qt@5)/bin:$PATH"
-# export LDFLAGS="-L$(brew --prefix qt@5)/lib"
-# export CPPFLAGS="-I$(brew --prefix qt@5)/include"
-# export PKG_CONFIG_PATH="$(brew --prefix qt@5)/lib/pkgconfig"
 
 #===============================================================================
 # 👇 auto-activate virtualen
