@@ -14,24 +14,31 @@ from urllib.error import HTTPError
 
 __version__ = "0.3.1"
 
+MODEL = "gpt-3.5-turbo-0125"
+MODEL = "gpt-4o"
+
+# default_params = {
+#     "max_tokens": 80,
+#     "temperature": 0.8,
+#     "top_p": 1,
+#     "frequency_penalty": 0.5,
+#     "presence_penalty": 0,
+# }
+
 
 class Config:
-    api_key = None
     api_base_url = "https://api.openai.com/v1/"
-    default_model = "gpt-4o"
-    default_params = {
-        # 'max_tokens': 80,
-        # 'temperature': 0.8,
-        # 'top_p': 1,
-        # 'frequency_penalty': 0.5,
-        # 'presence_penalty': 0,
-    }
+    api_key = None
+    api_key = str()
+    debug = False
+    default_model = MODEL
+    default_params = {}
+    history = None
+    concise = False
+    show_tokens = False
     timeout = None
     verbose = False
-    show_tokens = False
-    history = None
     write_history = False
-    debug = False
 
 
 class Consts:
@@ -103,6 +110,12 @@ Prompts file: {prompts_file} ({'exists' if prompts_file.exists() else 'not exist
         help="show a breakdown of the tokens used in the prompt and in the response",
     )
     parser.add_argument(
+        "-r",
+        "--show-concise-output",
+        action="store_true",
+        help="show concise output, only show the content of the message",
+    )
+    parser.add_argument(
         "-d", "--debug", action="store_true", help="debug mode, enable logging"
     )
 
@@ -131,6 +144,7 @@ Prompts file: {prompts_file} ({'exists' if prompts_file.exists() else 'not exist
         Config.api_base_url = env_api_base_url
     # override config from args
     Config.verbose = args.verbose
+    Config.concise = args.show_concise_output
     Config.debug = args.debug
     Config.show_tokens = args.show_tokens
     if args.write_history and not args.history:
@@ -184,9 +198,10 @@ Prompts file: {prompts_file} ({'exists' if prompts_file.exists() else 'not exist
         session.set_system_message(pm.new_message("system", args.system))
     if Config.verbose:
         print_info(session)
-    for i in session.messages:
-        if i["role"] == "system" or Config.verbose:
-            print_message(i)
+    if not Config.concise:
+        for i in session.messages:
+            if i["role"] == "system" or Config.verbose:
+                print_message(i)
 
     # call the function
     if args.prompt:
@@ -328,6 +343,10 @@ multiline_code_re = re.compile(r"```\w*\n([^`]+)\n```")
 
 
 def print_message(message):
+    if Config.concise:
+        print(message["content"].strip())
+        return
+
     role = message["role"]
     role_with_padding = f" {role} "
     content = message["content"].strip()
@@ -351,6 +370,7 @@ def print_message(message):
         role_color = green_hl
 
     s = content_color(content)
+
     if Config.verbose:
         s = f"{role_color(role_with_padding)} {s}"
 
@@ -472,8 +492,26 @@ class ChatSession:
             params_override=params_override
         )
 
-        p_price = data["usage"]["prompt_tokens"] / 1000000 * 5 * 7.26 * 1.03
-        c_price = data["usage"]["completion_tokens"] / 1000000 * 15 * 7.26 * 1.03
+        USD_CNY = 7.25
+        FEE_RATE = 1.03
+        MILLION = 1000000
+
+        p_price = data["usage"]["prompt_tokens"] / MILLION * USD_CNY * FEE_RATE
+        c_price = data["usage"]["completion_tokens"] / MILLION * USD_CNY * FEE_RATE
+
+        if Config.default_model == "gpt-3.5-turbo-0125":
+            p_price = p_price * 0.5
+            c_price = p_price * 1.5
+        elif Config.default_model == "gpt-4o":
+            p_price = p_price * 5
+            c_price = p_price * 15
+        elif Config.default_model == "gpt-4-turbo":
+            p_price = p_price * 10
+            c_price = p_price * 30
+        else:
+            p_price = p_price * 1
+            c_price = p_price * 3
+
         total_price = p_price + c_price
 
         if Config.verbose:
