@@ -27,7 +27,10 @@ fi
 # 👇 Standard plugins can be found in $ZSH/plugins/
 # 👇 Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # x <file> extract <file>
-# showfiles show hidefiles
+# zsh-completions # https://github.com/zsh-users/zsh-completions
+# zsh-vi-mode     # https://github.com/jeffreytse/zsh-vi-mode
+# magic-enter
+# macos
 #===============================================================================
 export plugins=(
   asdf
@@ -39,10 +42,6 @@ export plugins=(
   git-open                # https://github.com/paulirish/git-open
   zsh-autosuggestions     # https://github.com/zsh-users/zsh-autosuggestions
   zsh-syntax-highlighting # https://github.com/zsh-users/zsh-syntax-highlighting
-  # zsh-completions         # https://github.com/zsh-users/zsh-completions
-  # zsh-vi-mode             # https://github.com/jeffreytse/zsh-vi-mode
-  # magic-enter
-  # macos
 )
 
 #===============================================================================
