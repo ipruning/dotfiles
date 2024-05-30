@@ -102,12 +102,12 @@ zstyle ':fzf-tab:*' fzf-pad 10
 #===============================================================================
 # 👇 gcloud
 #===============================================================================
-case $SYSTEM_TYPE in
-mac_arm64 | mac_x86_64)
-  source "$(brew --prefix)/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.zsh.inc"
-  source "$(brew --prefix)/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.zsh.inc"
-  ;;
-esac
+# case $SYSTEM_TYPE in
+# mac_arm64 | mac_x86_64)
+#   source "$(brew --prefix)/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.zsh.inc"
+#   source "$(brew --prefix)/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.zsh.inc"
+#   ;;
+# esac
 
 #===============================================================================
 # 👇 custom binary
@@ -215,9 +215,9 @@ eval "$(direnv hook bash)"
 eval "$(thefuck --alias)"
 
 #===============================================================================
-# 👇 GitHub Copilot CLl
+# 👇 GitHub Copilot CLl (ghcs, ghce)
 #===============================================================================
-eval "$(github-copilot-cli alias -- "$0")"
+eval "$(gh copilot alias -- zsh)"
 
 #===============================================================================
 # 👇 puppeteer
