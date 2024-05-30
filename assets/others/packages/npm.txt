@@ -1,6 +1,5 @@
 @antfu/ni
 @argdown/cli
-@githubnext/github-copilot-cli
 @lint-md/cli
 @marp-team/marp-cli
 @railway/cli
@@ -8,6 +7,7 @@
 @slidev/theme-default
 @squoosh/cli
 @vscode/vsce
+bun
 corepack
 gatsby-cli
 generator-awesome-list

@@ -24,7 +24,6 @@ Bob
 CapCut
 Capture One
 ChatGPT
-ClashX Pro
 ClassIn
 Cloudflare WARP
 Compressor
@@ -55,6 +54,7 @@ FixTim
 Flighty
 Folder Hub
 Fork
+FoxTrot Personal Search
 GarageBand
 GitButler
 GitHub Desktop

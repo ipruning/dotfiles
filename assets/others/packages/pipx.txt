@@ -9,6 +9,7 @@ fava
 fava-investor
 ffsubsync
 git-sim
+httpstat
 huggingface-hub
 kaggle
 mackup
