@@ -35,6 +35,7 @@ fcp
 fd
 ffmpeg
 flyctl
+fontforge
 fpp
 frps
 fswatch
@@ -71,6 +72,7 @@ lazydocker
 lazygit
 lf
 libmagic
+llama.cpp
 llvm
 lnav
 lsd
@@ -89,7 +91,6 @@ noborus/tap/ov
 node
 ollama
 ouch
-oven-sh/bun/bun
 pandoc-crossref
 pdfgrep
 php
