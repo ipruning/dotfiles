@@ -5,8 +5,6 @@ asdf
 atuin
 autocorrect
 awk
-awscli
-azure-cli
 bat
 bazelisk
 bore-cli
