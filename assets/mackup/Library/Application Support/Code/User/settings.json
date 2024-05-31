@@ -150,9 +150,7 @@
   "github.copilot.enable": {
     "*": true,
     "plaintext": false,
-    "markdown": false,
-    "scminput": false,
-    "rust": false
+    "markdown": false
   },
   "git.autofetch": true,
   "git.confirmSync": false,
