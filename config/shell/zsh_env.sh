@@ -32,13 +32,13 @@ fi
 # macos
 # magic-enter
 # systemadmin
+# colored-man-pages
+# extract
+# zbell
+# autoupdate              # https://github.com/TamCore/autoupdate-oh-my-zsh-plugins
 #===============================================================================
 export plugins=(
   asdf
-  colored-man-pages
-  extract
-  zbell
-  autoupdate              # https://github.com/TamCore/autoupdate-oh-my-zsh-plugins
   git-open                # https://github.com/paulirish/git-open
   zsh-autosuggestions     # https://github.com/zsh-users/zsh-autosuggestions
   zsh-syntax-highlighting # https://github.com/zsh-users/zsh-syntax-highlighting
@@ -151,7 +151,7 @@ fi
 #===============================================================================
 # 👇 iTerm2 https://iterm2.com/documentation-shell-integration.html
 #===============================================================================
-test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
+# test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
 
 #===============================================================================
 # 👇 pipx
