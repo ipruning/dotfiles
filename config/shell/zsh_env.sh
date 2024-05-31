@@ -29,14 +29,14 @@ fi
 # x <file> extract <file>
 # zsh-completions # https://github.com/zsh-users/zsh-completions
 # zsh-vi-mode     # https://github.com/jeffreytse/zsh-vi-mode
-# magic-enter
 # macos
+# magic-enter
+# systemadmin
 #===============================================================================
 export plugins=(
   asdf
   colored-man-pages
   extract
-  systemadmin
   zbell
   autoupdate              # https://github.com/TamCore/autoupdate-oh-my-zsh-plugins
   git-open                # https://github.com/paulirish/git-open
