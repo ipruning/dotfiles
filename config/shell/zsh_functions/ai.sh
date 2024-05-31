@@ -36,18 +36,23 @@ function buffit() {
 
 function llm() {
   if [ -t 0 ]; then
-    ollama run llama3:latest
+    ollama run "$LLM_CLI_MODEL"
   else
     local input=$(jq -Rs)
 
-    jq -n --argjson data "$input" '{
-      model: "llama3:latest",
+    jq -n \
+      --arg model "$LLM_CLI_MODEL" \
+      --argjson data "$input" '{
+      model: $model,
       messages: [
         {role: "system", content: "You are a helpful, smart, kind, and efficient AI assistant. You always fulfill the requests from user to the best of your ability."},
         {role: "user", content: $data}
       ],
       stream: true
-    }' | http POST http://localhost:11434/v1/chat/completions | cut -c 7- | sed 's/\[DONE\]//' | jq --stream -r -j 'fromstream(1|truncate_stream(inputs))[0].delta.content'
+    }' |
+      http POST "$LLM_CLI_API_BASE_URL" |
+      cut -c 7- | sed 's/\[DONE\]//' |
+      jq --stream -r -j 'fromstream(1|truncate_stream(inputs))[0].delta.content'
   fi
 }
 
