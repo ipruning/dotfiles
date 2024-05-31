@@ -2,4 +2,4 @@
 # TODO
 #===============================================================================
 
-source "$HOME"/dotfiles/config/shell/bootstrap.sh
+source "$HOME"/dotfiles/config/shell/zsh_bootstrap.sh
