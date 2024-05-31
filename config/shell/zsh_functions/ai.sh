@@ -1,74 +1,76 @@
 #===============================================================================
-# 👇 Building
+# 👇 Under development, please use with caution.
 #===============================================================================
-catfiles() {
+function catfiles() {
+  local file_count=0
   for file in "$@"; do
+    if [ -d "$file" ]; then
+      echo "Skipping directory: $file" >&2
+      continue
+    fi
     if [[ -r "$file" ]]; then
       echo "File Name: $(basename "$file")"
       echo "File Content:"
       cat "$file"
       echo ""
+      ((file_count++))
     else
       echo "Error: Cannot read $file" >&2
     fi
   done
+  echo "Total files processed: $file_count"
 }
 
-buffit() {
-  # Check if data is being piped or redirected to the function
-  if [ -t 0 ]; then # Checks if the standard input (file descriptor 0) is a terminal
-    # If no data is piped, check if my_buff is already set and print it if it is
+function buffit() {
+  if [ -t 0 ]; then
     if [ -n "$my_buff" ]; then
       echo "$my_buff"
     else
-      echo "No data piped and my_buff is empty."
+      echo "Error: No data piped and 'my_buff' is empty."
     fi
   else
-    # Capture the input from standard in to my_buff
-    export my_buff=$(cat)
+    read -r -d '' my_buff
+    echo "Buffer updated."
   fi
 }
 
-prompt() {
-  # Check if stdin is a terminal (interactive)
+function llm() {
   if [ -t 0 ]; then
-    local input=""
+    ollama run llama3:latest
   else
-    local input=$(cat)
+    local input=$(jq -Rs)
+
+    jq -n --argjson data "$input" '{
+      model: "llama3:latest",
+      messages: [
+        {role: "system", content: "You are a helpful, smart, kind, and efficient AI assistant. You always fulfill the requests from user to the best of your ability."},
+        {role: "user", content: $data}
+      ],
+      stream: true
+    }' | http POST http://localhost:11434/v1/chat/completions | cut -c 7- | sed 's/\[DONE\]//' | jq --stream -r -j 'fromstream(1|truncate_stream(inputs))[0].delta.content'
+  fi
+}
+
+function prompt() {
+  local input=""
+  local prompt_text=$(printf "%s " "$@")
+
+  if ! [ -t 0 ]; then
+    while IFS= read -r line; do
+      input+="$line\n"
+    done
   fi
 
-  local added_prompt=$(printf "%s " "$@")
-
-  # If no input, just print the prompt
   if [[ -z "$input" ]]; then
-    echo "$added_prompt"
-  # If input, print the prompt and the input
+    echo "$prompt_text"
   else
     echo "<context>"
-    echo "$input"
+    echo
+    echo -e "$input"
     echo "</context>"
-    echo ""
+    echo
     echo "<prompt>"
-    echo "$added_prompt"
+    echo "$prompt_text"
     echo "</prompt>"
   fi
-}
-
-#===============================================================================
-# 👇 https://kadekillary.work/posts/1000x-eng/
-# Examples of efficient data analysis using shell scripts
-# hgpt "create a 10 row csv of NBA player data with headers - please only include the data, nothing else" > nba.csv
-# dgpt "can you write a sql query to get the average PointsPerGame by Position from the following" "$(cat nba.csv)"
-#===============================================================================
-function hgpt {
-  local prompt=$1
-
-  ai "$prompt"
-}
-function dgpt() {
-  local prompt=$1
-  local data=$2
-  local prompt=$(echo "${prompt}: ${data}" | tr -s ' ')
-
-  ai "$prompt"
 }
