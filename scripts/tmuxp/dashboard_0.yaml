@@ -22,7 +22,7 @@ windows:
         main-pane-width: 50%
         }
     shell_command_before:
-      - cmd: cd ~/Dotfiles/
+      - cmd: cd ~/dotfiles/
         sleep_before: .25
         sleep_after: .25
     panes:
