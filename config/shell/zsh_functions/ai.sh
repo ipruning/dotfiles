@@ -48,6 +48,9 @@ function llm() {
         {role: "system", content: "You are a helpful, smart, kind, and efficient AI assistant. You always fulfill the requests from user to the best of your ability."},
         {role: "user", content: $data}
       ],
+      options: {
+        "num_ctx": 8192,
+      },
       stream: true
     }' |
       http POST "$LLM_CLI_API_BASE_URL" |
