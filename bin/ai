@@ -32,8 +32,8 @@ LM_INPUT = 1 / input_t_p_s * price_p_s * MILLION
 LM_OUTPUT = 1 / output_t_p_s * price_p_s * MILLION
 
 # MODEL = "lmstudio-community/Meta-Llama-3-8B-Instruct-GGUF/Meta-Llama-3-8B-Instruct-Q4_K_M.gguf"
-MODEL = "llama3:latest"
-# MODEL = "gpt-3.5-turbo-0125"
+# MODEL = "llama3:latest"
+MODEL = "gpt-3.5-turbo-0125"
 # MODEL = "gpt-4o"
 
 # default_params = {
@@ -523,12 +523,13 @@ class ChatSession:
         elif Config.default_model == "gpt-4-turbo":
             p_price = p_price * GPT_4_TURBO_INPUT
             c_price = p_price * GPT_4_TURBO_OUTPUT
-        elif Config.default_model.startswith("lmstudio-community"):
+        elif Config.default_model.startswith("llama3"):
             p_price = p_price * LM_INPUT
             c_price = p_price * LM_OUTPUT
         else:
             p_price = p_price * LM_INPUT
             c_price = p_price * LM_OUTPUT
+
         total_price = p_price + c_price
 
         if Config.verbose:
