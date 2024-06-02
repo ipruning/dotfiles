@@ -129,3 +129,11 @@ r-backup() {
   npm list --location=global --json | jq ".dependencies | keys[]" -r >"$HOME"/dotfiles/assets/others/packages/npm.txt
   pipx list --json | jq ".venvs | .[] | .metadata.main_package.package" -r >"$HOME"/dotfiles/assets/others/packages/pipx.txt
 }
+
+r-completion() {
+  echo -e "\033[33mGenerating completions...\033[0m"
+  rustup completions zsh >"$HOME"/dotfiles/config/shell/zsh_completions/_rustup
+  rye self completion >"$HOME"/dotfiles/config/shell/zsh_completions/_rye
+  rm -f ~/.zcompdump
+  compinit
+}
