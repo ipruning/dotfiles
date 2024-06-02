@@ -78,7 +78,7 @@ source "$ZSH"/oh-my-zsh.sh
 # 👇 fzf-tab https://github.com/Aloxaf/fzf-tab/wiki/Configuration (fzf-tab needs to be loaded after compinit (oh-my-zsh.sh))
 #===============================================================================
 source "$ZSH_CUSTOM"/plugins/fzf-tab/fzf-tab.plugin.zsh
-zstyle ':fzf-tab:complete:cd:*' fzf-preview "lsd --icon=always $realpath"
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'lsd --icon=always $realpath'
 zstyle ':fzf-tab:*' fzf-pad 10
 
 #===============================================================================

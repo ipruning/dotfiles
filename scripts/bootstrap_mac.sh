@@ -23,6 +23,7 @@ function main {
 
   echo "${BLUE}Installing zsh plugins${NORMAL}"
   ZSH_CUSTOM=${ZSH_CUSTOM:-~/.oh-my-zsh/custom}
+  # TODO
   git clone https://github.com/TamCore/autoupdate-oh-my-zsh-plugins "$ZSH_CUSTOM"/plugins/autoupdate
   git clone https://github.com/wfxr/forgit "$ZSH_CUSTOM"/plugins/forgit
   git clone https://github.com/Aloxaf/fzf-tab "$ZSH_CUSTOM"/plugins/fzf-tab
