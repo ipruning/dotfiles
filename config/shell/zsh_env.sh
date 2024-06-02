@@ -19,6 +19,11 @@ else
 fi
 
 #===============================================================================
+# 👇 rye (before asdf)
+#===============================================================================
+source "$HOME/.rye/env"
+
+#===============================================================================
 # 👇 zsh-vi-mode https://github.com/jeffreytse/zsh-vi-mode/issues/24
 #===============================================================================
 # export ZVM_INIT_MODE=sourcing
@@ -78,13 +83,35 @@ source "$ZSH"/oh-my-zsh.sh
 # 👇 fzf-tab https://github.com/Aloxaf/fzf-tab/wiki/Configuration (fzf-tab needs to be loaded after compinit (oh-my-zsh.sh))
 #===============================================================================
 source "$ZSH_CUSTOM"/plugins/fzf-tab/fzf-tab.plugin.zsh
+
+#===============================================================================
+# 👇 fzf-tab config
+#===============================================================================
+# disable sort when completing `git checkout`
+zstyle ':completion:*:git-checkout:*' sort false
+# set descriptions format to enable group support
+# NOTE: don't use escape sequences here, fzf-tab will ignore them
+zstyle ':completion:*:descriptions' format '[%d]'
+# set list-colors to enable filename colorizing
+# zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+# force zsh not to show completion menu, which allows fzf-tab to capture the unambiguous prefix
+zstyle ':completion:*' menu no
+# preview directory's content with eza when completing cd
 zstyle ':fzf-tab:complete:cd:*' fzf-preview 'lsd --icon=always $realpath'
+# switch group using `<` and `>`
+zstyle ':fzf-tab:*' switch-group '<' '>'
+#
 zstyle ':fzf-tab:*' fzf-pad 10
 
 #===============================================================================
-# 👇 custom binary
+# 👇 LM Studio
 #===============================================================================
-export PATH="${HOME}/dotfiles/bin:$PATH"
+export PATH="$PATH:/Users/alex/.cache/lm-studio/bin"
+
+#===============================================================================
+# 👇 pipx
+#===============================================================================
+export PATH="$PATH:$HOME/.local/bin"
 
 #===============================================================================
 # 👇 custom keybindings
@@ -273,3 +300,8 @@ auto_activate_venv() {
 
 autoload -U add-zsh-hook
 add-zsh-hook chpwd auto_activate_venv
+
+#===============================================================================
+# 👇 custom binary
+#===============================================================================
+export PATH="${HOME}/dotfiles/bin:$PATH"
