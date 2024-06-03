@@ -222,7 +222,7 @@ Xcode
 Xcodes
 YACReader
 YACReaderLibrary
-Zed Preview
+Zed
 Zotero-6
 Zotero
 bloop
