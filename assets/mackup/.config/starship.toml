@@ -1,43 +1,45 @@
-format = '''$all$custom'''
+format = '''
+(bold green)$sudo$directory$python$package$all$custom$character'''
+command_timeout = 500
+add_newline = false
 
-command_timeout = 1000
+[conda]
+    format      = '[$symbol$environment](dimmed green)'
+    ignore_base = false
 
 [character]
-    success_symbol = "[>](bold green)"
-    vicmd_symbol   = "[>](bold yellow)"
-    error_symbol   = "[>](bold red)"
+    success_symbol = '[>](bold green)'
+    vicmd_symbol   = '[>](bold yellow)'
+    error_symbol   = '[>](bold red)'
 
 [custom.x86_64]
-    command = "echo  "
+    command = 'echo  '
     when    = 'test "$(uname -m)" = "x86_64"'
-
-[battery]
-    full_symbol        = ""
-    charging_symbol    = ""
-    discharging_symbol = ""
-
 
 [[battery.display]]
     threshold = 20
-    style     = "red"
+    style     = 'red'
 
 [[battery.display]]
     threshold = 40
-    style     = "yellow"
+    style     = 'yellow'
 
 [cmd_duration]
-    show_milliseconds = true
-    min_time          = 5000
+    format             = 'took [$duration]($style) '
+    min_time           = 2_000
+    min_time_to_notify = 45_000
+    show_milliseconds  = false
+    show_notifications = true
 
 [directory]
-    read_only         = "  "
-    read_only_style   = "red"
-    truncation_length = 2
-    truncate_to_repo  = false
-    truncation_symbol = ".../"
+    read_only         = '  '
+    read_only_style   = 'red'
+    truncation_length = 3
+    truncate_to_repo  = true
+    truncation_symbol = '.../'
 
 [hg_branch]
-    format            = 'on [ $branch](bold purple)'
+    format            = 'on [ $branch](bold purple) '
     truncation_length = 4
     truncation_symbol = ''
 
@@ -47,69 +49,41 @@ command_timeout = 1000
     truncation_symbol = ''
     ignore_branches   = ['master', 'main']
 
-[git_commit]
-    commit_hash_length = 4
-    tag_symbol         = '🔖 '
-
-[git_state]
-    format      = '[\($state( $progress_current of $progress_total)\)]($style) '
-    cherry_pick = '[🍒 PICKING](bold red)'
-
-[git_metrics]
-    added_style = 'bold blue'
-    format      = '[+$added]($added_style)/[-$deleted]($deleted_style) '
-
-[git_status]
-    # ahead    = "⇡${count}"
-    # diverged = "⇕⇡${ahead_count}⇣${behind_count}"
-    # behind   = "⇣${count}"
-    # conflicted = '🏳'
-    # ahead      = '🏎💨'
-    # behind     = '😰'
-    # diverged   = '😵'
-    up_to_date = '✓'
-    # untracked  = '🤷'
-    # stashed    = '📦'
-    # modified   = '📝'
-    # staged = '[++\($count\)](green)'
-    # renamed    = '👅'
-    # deleted    = '🗑'
-
-    format     = "[[$conflicted](yellow)[$untracked](218)[$modified$renamed](255)[$staged](green)[$deleted](red)($ahead_behind$stashed)]($style)"
-    conflicted = " $count "
-    untracked  = " $count "
-    modified   = " $count "
-    deleted    = " $count "
-    staged     = " $count "
-    renamed    = " $count "
-    stashed    = " $count "
-    style      = "cyan"
-
-[aws]
-    symbol   = " "
-    disabled = true
-
 [docker_context]
-    symbol = " "
-
-[gcloud]
-    symbol   = " "
-    disabled = true
+    symbol = ' '
 
 [golang]
-    symbol = " "
+    symbol = ' '
 
 [java]
-    symbol = " "
+    symbol = ' '
 
 [python]
-    symbol = " "
+    format = '[${symbol}${pyenv_prefix}(${version} )(\($virtualenv\) )]($style)'
+    symbol = ' '
 
 [ruby]
-    symbol = " "
+    symbol = ' '
 
 [rust]
-    symbol = " "
+    symbol = ' '
 
 [swift]
-    symbol = "ﯣ "
+    symbol = ' '
+
+[package]
+    symbol = ' '
+
+[aws]
+    symbol   = ' '
+    disabled = true
+
+[gcloud]
+    symbol   = ' '
+    disabled = true
+
+[sudo]
+    format   = '[$symbol]($style)'
+    disabled = false
+    style    = 'bold green'
+    symbol   = ' '
