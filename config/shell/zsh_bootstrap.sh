@@ -64,6 +64,7 @@ ZSH_CUSTOM=${ZSH_CUSTOM:-~/.oh-my-zsh/custom}
 
 if type brew &>/dev/null; then
   # custom completions (Oh-My-Zsh will call compinit for you) (should)
+  # https://docs.brew.sh/Shell-Completion
   FPATH="$(brew --prefix)/share/zsh/site-functions:${FPATH}"
   FPATH="$HOME/dotfiles/config/shell/zsh_completions:$FPATH"
   autoload -Uz compinit
