@@ -83,7 +83,7 @@ monolith
 moreutils
 navi
 ncdu
-neovide
+neovim
 nmap
 noborus/tap/ov
 node
@@ -129,6 +129,7 @@ wgcf
 wget
 yq
 yt-dlp
+zellij
 zig
 zola
 zoxide
