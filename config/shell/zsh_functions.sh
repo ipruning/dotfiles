@@ -135,7 +135,7 @@ tm() {
   if [ "$1" ]; then
     tmux $change -t "$1" 2>/dev/null || (tmux new-session -d -s $1 && tmux $change -t "$1"); return
   fi
-  session=$(tmux list-sessions -F "#{session_name}" 2>/dev/null | fzf --exit-0) &&  tmux $change -t "$session" || echo "No sessions found."
+  session=$(tmux list-sessions -F "#{session_name}" 2>/dev/null | fzf --exit-0) && tmux $change -t "$session" || echo "No sessions found."
 }
 tmkill() {
     local sessions
@@ -148,6 +148,25 @@ tmkill() {
             tmux kill-session -t "$match[1]"
         }
     done
+}
+
+#===============================================================================
+# 👇 zellij
+#===============================================================================
+# TODO If an argument is provided, try to attach to the session with that name.
+# TODO With tab completion, this can be used to quickly switch to a session.
+zj() {
+    session=$(zellij list-sessions --no-formatting | awk '{
+        session_name=$1; $1="";
+        if ($0 ~ /EXITED/) print "\033[31m" session_name "\033[0m\t" $0;  # Red for exited sessions
+        else print "\033[32m" session_name "\033[0m\t" $0;  # Green for active sessions
+    }' | column -t -s $'\t' | fzf --ansi --exit-0 --header="Select a session to attach:" | awk '{print $1}')
+
+    if [ -n "$session" ]; then
+        zellij attach "$session"
+    else
+        echo "No sessions found."
+    fi
 }
 
 #===============================================================================
