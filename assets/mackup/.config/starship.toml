@@ -1,7 +1,9 @@
 format = '''
-(bold green)$sudo$directory$python$package$all$custom$character'''
-command_timeout = 500
-add_newline = false
+(bold green)$sudo$directory$python$package$all$custom$character
+'''
+
+add_newline     = false
+command_timeout = 1_000
 
 [conda]
     format      = '[$symbol$environment](dimmed green)'
@@ -26,8 +28,8 @@ add_newline = false
 
 [cmd_duration]
     format             = 'took [$duration]($style) '
-    min_time           = 2_000
-    min_time_to_notify = 45_000
+    min_time           = 10_000
+    min_time_to_notify = 60_000
     show_milliseconds  = false
     show_notifications = true
 
@@ -40,12 +42,12 @@ add_newline = false
 
 [hg_branch]
     format            = 'on [ $branch](bold purple) '
-    truncation_length = 4
+    truncation_length = 8
     truncation_symbol = ''
 
 [git_branch]
     symbol            = ' '
-    truncation_length = 4
+    truncation_length = 8
     truncation_symbol = ''
     ignore_branches   = ['master', 'main']
 
