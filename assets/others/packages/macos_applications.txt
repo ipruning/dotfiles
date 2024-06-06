@@ -89,6 +89,7 @@ LTspice
 LanguageTool for Desktop
 Lark
 LayAuto3
+Limitless
 Linear
 Logic Pro X
 Logseq
