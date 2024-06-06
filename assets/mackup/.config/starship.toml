@@ -29,7 +29,7 @@ command_timeout = 1_000
 [cmd_duration]
     format             = 'took [$duration]($style) '
     min_time           = 10_000
-    min_time_to_notify = 60_000
+    min_time_to_notify = 240_000
     show_milliseconds  = false
     show_notifications = true
 
