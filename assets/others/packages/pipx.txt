@@ -5,6 +5,7 @@ commitizen
 cookiecutter
 deadlink
 detect-secrets
+elia-chat
 envd
 fava
 fava-investor
