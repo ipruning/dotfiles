@@ -1,6 +1,7 @@
 [alias]
     dft = difftool
 	lg = log --graph --decorate \n-30 --all --date-order --date=format:'%Y-%m-%d %H:%M:%S' \n--pretty=format:'%C(cyan)%h%Creset %C(black bold)%ad%Creset%C(auto)%d %s'
+	gs = onefetch
 [pager]
     difftool = true
 [branch]
