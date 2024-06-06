@@ -306,6 +306,25 @@ auto_activate_venv() {
 autoload -U add-zsh-hook
 add-zsh-hook chpwd auto_activate_venv
 
+# TDDO
+
+last_repository=
+
+check_directory_for_new_repository() {
+  current_repository=$(git rev-parse --show-toplevel 2>/dev/null)
+  if [[ "$current_repository" ]] && [[ "$current_repository" != "$last_repository" ]]; then
+    onefetch
+  fi
+  last_repository=$Acurrent_repository
+}
+
+# Load the add-zsh-hook function
+autoload -U add-zsh-hook
+# Attach the function to the chpwd hook
+add-zsh-hook chpwd check_directory_for_new_repository
+# Optionally, call the function at shell startup to handle cases where the shell starts in a repository directory
+check_directory_for_new_repository
+
 #===============================================================================
 # 👇 custom binary
 #===============================================================================
