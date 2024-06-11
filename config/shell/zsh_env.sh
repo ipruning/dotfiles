@@ -229,10 +229,10 @@ export LDFLAGS="-L$(brew --prefix llvm)/lib"
 export CPPFLAGS="-I$(brew --prefix llvm)/include"
 
 #===============================================================================
-# 👇 Mojo
+# 👇 Modular Max
 #===============================================================================
 export MODULAR_HOME="$HOME/.modular"
-export PATH="$MODULAR_HOME/pkg/packages.modular.com_mojo/bin:$PATH"
+export PATH="$MODULAR_HOME/pkg/packages.modular.com_max/bin:$PATH"
 
 #===============================================================================
 # 👇 navi
@@ -293,6 +293,11 @@ linux_x86_64)
 esac
 
 #===============================================================================
+# 👇
+#===============================================================================
+autoload -U add-zsh-hook
+
+#===============================================================================
 # 👇 auto-activate virtualen
 #===============================================================================
 auto_activate_venv() {
@@ -302,28 +307,24 @@ auto_activate_venv() {
     source "./.venv/bin/activate"
   fi
 }
-
-autoload -U add-zsh-hook
 add-zsh-hook chpwd auto_activate_venv
+auto_activate_venv
 
-# TDDO
+#===============================================================================
+# 👇 auto-activate virtualen
+#===============================================================================
+# last_repository=
 
-last_repository=
+# check_directory_for_new_repository() {
+#   current_repository=$(git rev-parse --show-toplevel 2>/dev/null)
+#   if [[ "$current_repository" ]] && [[ "$current_repository" != "$last_repository" ]]; then
+#     onefetch
+#   fi
+#   last_repository=$current_repository
+# }
 
-check_directory_for_new_repository() {
-  current_repository=$(git rev-parse --show-toplevel 2>/dev/null)
-  if [[ "$current_repository" ]] && [[ "$current_repository" != "$last_repository" ]]; then
-    onefetch
-  fi
-  last_repository=$Acurrent_repository
-}
-
-# Load the add-zsh-hook function
-autoload -U add-zsh-hook
-# Attach the function to the chpwd hook
-add-zsh-hook chpwd check_directory_for_new_repository
-# Optionally, call the function at shell startup to handle cases where the shell starts in a repository directory
-check_directory_for_new_repository
+# add-zsh-hook chpwd check_directory_for_new_repository
+# check_directory_for_new_repository
 
 #===============================================================================
 # 👇 custom binary
