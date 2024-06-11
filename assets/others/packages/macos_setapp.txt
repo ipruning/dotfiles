@@ -1,6 +1,5 @@
 Aeon Timeline
 Backtrack
-Bartender
 BetterZip
 CleanMyMac X
 CleanShot X

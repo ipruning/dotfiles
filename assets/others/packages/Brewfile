@@ -1,5 +1,6 @@
 tap "1password/tap"
 tap "appleboy/tap"
+tap "bloznelis/tap"
 tap "borkdude/brew"
 tap "brimdata/tap"
 tap "buo/cask-upgrade"
@@ -126,6 +127,7 @@ brew "neovim"
 brew "nmap"
 brew "node"
 brew "ollama"
+brew "onefetch"
 brew "ouch"
 brew "pandoc-crossref"
 brew "pdfgrep"
@@ -172,6 +174,7 @@ brew "zig"
 brew "zola"
 brew "zoxide"
 brew "appleboy/tap/codegpt"
+brew "bloznelis/tap/kbt"
 brew "borkdude/brew/babashka"
 brew "brimdata/tap/zq"
 brew "d12frosted/emacs-plus/emacs-plus@29", args: ["with-native-comp", "with-nobu417-big-sur-icon"]
@@ -221,6 +224,7 @@ mas "Bear", id: 1091189122
 mas "Bob", id: 1630034110
 mas "CapCut", id: 1500855883
 mas "Compressor", id: 424390742
+mas "Crouton", id: 1461650987
 mas "Day One", id: 1055511498
 mas "DevCleaner", id: 1388020431
 mas "Developer", id: 640199958
