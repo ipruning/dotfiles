@@ -7,6 +7,7 @@ autocorrect
 awk
 bat
 bazelisk
+bloznelis/tap/kbt
 bore-cli
 borkdude/brew/babashka
 bottom
@@ -72,7 +73,6 @@ lazygit
 lf
 libmagic
 llama.cpp
-llvm
 lnav
 lsd
 m-cli
@@ -89,6 +89,7 @@ nmap
 noborus/tap/ov
 node
 ollama
+onefetch
 ouch
 pandoc-crossref
 pdfgrep

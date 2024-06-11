@@ -29,6 +29,7 @@ ClassIn
 Cloudflare WARP
 Compressor
 Contexts
+Crouton
 Cryptomator
 Cursor
 DEVONthink 3
@@ -71,6 +72,7 @@ Heptabase
 Homerow
 Hush
 IINA
+Ice
 IconChanger
 Immersive Translate
 Input Source Pro
@@ -191,6 +193,7 @@ Surfingkeys
 Surge
 Suspicious Package
 Syntax Highlight
+Synthesizer V Studio Basic
 Tailscale
 Tampermonkey
 Tana

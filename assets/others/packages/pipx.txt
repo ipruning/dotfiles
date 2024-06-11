@@ -17,11 +17,13 @@ kaggle
 mackup
 manim
 nox
+oterm
 pandoc-eqnos
 pandoc-fignos
 pandoc-secnos
 pandoc-tablenos
 pandoc-xnos
+pdm
 poetry
 pre-commit
 pricehist
