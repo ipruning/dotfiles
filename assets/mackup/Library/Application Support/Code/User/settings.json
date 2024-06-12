@@ -99,7 +99,7 @@
   "editor.cursorSmoothCaretAnimation": "on",
   "editor.fontFamily": "'MonoLisa Nerd Font', 'Source Han Sans SC'",
   "editor.fontLigatures": "'zero' on, 'ss02' on, 'ss04' on, 'ss06' on, 'calt' off, 'liga' off",
-  "editor.fontSize": 14,
+  "editor.fontSize": 12,
   "editor.lineHeight": 0,
   "catppuccin.boldKeywords": true,
   "catppuccin.italicComments": true,
@@ -122,12 +122,12 @@
   "diffEditor.wordWrap": "off",
   "diffEditor.renderSideBySide": true,
   "diffEditor.ignoreTrimWhitespace": false,
-  "diffEditor.maxComputationTime": 20000,
+  "diffEditor.maxComputationTime": 40000,
   "terminal.integrated.commandsToSkipShell": ["language-julia.interrupt"],
   "terminal.integrated.confirmOnExit": "hasChildProcesses",
   "terminal.integrated.defaultProfile.osx": "zsh",
   "terminal.integrated.fontFamily": "'MonoLisa Nerd Font'",
-  "terminal.integrated.fontSize": 14,
+  "terminal.integrated.fontSize": 12,
   "terminal.integrated.inheritEnv": false,
   "terminal.external.osxExec": "iTerm.app",
   "powershell.startAutomatically": false,
@@ -164,7 +164,7 @@
     "editor.lineHighlightBackground": "#1073cf2d",
     "editor.lineHighlightBorder": "#9fced11f"
   },
-  "workbench.iconTheme": "catppuccin-mocha",
+  "workbench.iconTheme": "material-icon-theme",
   "workbench.tree.indent": 22,
   "workbench.tree.renderIndentGuides": "always",
   "workbench.startupEditor": "none", // open files as tabs
@@ -175,18 +175,7 @@
     "*.pdf": "latex-workshop-pdf-hook"
   },
   "workbench.layoutControl.enabled": true,
-  "todo-tree.general.tags": ["FIXME", "TODO"],
-  "todo-tree.highlights.customHighlight": {
-    "FIXME": {
-      "foreground": "#FF0000",
-      "iconColour": "#FF0000"
-    },
-    "TODO": {
-      "foreground": "#FF0000",
-      "iconColour": "#FF0000",
-      "gutterIcon": true
-    }
-  },
+  "todo-tree.general.tags": ["TODO"],
   "todo-tree.regex.regex": "(//|#|<!--|;|/\\*|^|^\\s*(-|\\d+.))\\s*($TAGS)",
   "highlight.regexes": {
     "((?:<!-- *)?(?:#|// @|//|./\\*+|<!--|--|\\* @|{!|{{!--|{{!) *TODO(?:\\s*\\([^)]+\\))?:?)((?!\\w)(?: *-->| *\\*/| *!}| *--}}| *}}|(?= *(?:[^:]//|/\\*+|<!--|@|--|{!|{{!--|{{!))|(?: +[^\\n@]*?)(?= *(?:[^:]//|/\\*+|<!--|@|--(?!>)|{!|{{!--|{{!))|(?: +[^@\\n]+)?))": {
@@ -250,7 +239,7 @@
       ]
     }
   },
-  "xml.symbols.maxItemsComputed": 20000,
+  "xml.symbols.maxItemsComputed": 40000,
   "jupyter.widgetScriptSources": ["jsdelivr.com", "unpkg.com"],
   "jupyter.askForKernelRestart": false,
   "python.defaultInterpreterPath": "~/.conda/envs/LLM/bin/python",
@@ -346,7 +335,7 @@
       "other": "on"
     },
     "editor.defaultFormatter": "James-Yu.latex-workshop",
-    "editor.fontSize": 14,
+    "editor.fontSize": 12,
     "editor.formatOnSave": true,
     "editor.renderWhitespace": "selection", // all will cause lag
     "editor.tabSize": 2,
@@ -365,7 +354,7 @@
       "other": "on"
     },
     "editor.defaultFormatter": "DavidAnson.vscode-markdownlint",
-    "editor.fontSize": 14,
+    "editor.fontSize": 12,
     "editor.formatOnSave": false,
     "editor.renderWhitespace": "selection", // all will cause lag
     "editor.tabSize": 4,
@@ -442,7 +431,7 @@
   "gitlens.defaultDateLocale": null,
   "gitlens.defaultDateShortFormat": "YYYY-MM-DD",
   "gitlens.defaultTimeFormat": "hh:mm",
-  "json.maxItemsComputed": 20000,
+  "json.maxItemsComputed": 40000,
   "markdown-preview-enhanced.previewTheme": "one-dark.css",
   "markdown-preview-enhanced.revealjsTheme": "black.css",
   "path-autocomplete.triggerOutsideStrings": true,
@@ -452,7 +441,7 @@
   "shellcheck.enableQuickFix": true,
   "shellcheck.run": "onType",
   "shellcheck.executablePath": "/opt/homebrew/bin/shellcheck",
-  "shellcheck.exclude": ["SC1091", "SC2148", "SC2155"],
+  "shellcheck.exclude": ["SC1091", "SC2128", "SC2155"],
   "shellcheck.customArgs": [],
   "shellcheck.ignorePatterns": {
     "**/*.xonshrc": true,
@@ -472,7 +461,7 @@
   },
   "shellcheck.ignoreFileSchemes": ["git", "gitfs", "output"],
   "window.commandCenter": false,
-  "yaml.maxItemsComputed": 20000,
+  "yaml.maxItemsComputed": 40000,
   "yaml.schemas": {
     "https://json.schemastore.org/github-workflow.json": ".github/workflows/*"
   },
