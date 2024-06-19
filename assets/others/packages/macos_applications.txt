@@ -1,6 +1,7 @@
 1Blocker
 1Password for Safari
 1Password
+42memo
 A Better Finder Attributes 7
 Alacritty
 Alfred 5
@@ -79,6 +80,7 @@ Input Source Pro
 Jane Reader
 JetBrains Toolbox
 Jetpack Joyride 2
+Kagi for Safari
 Karabiner-Elements
 Karabiner-EventViewer
 KeyCastr
@@ -136,6 +138,7 @@ OnyX
 OpenAI Translator
 Optimus Player
 OrbStack
+Orion
 PDF Expert
 Pages
 Parallels Desktop
@@ -248,6 +251,7 @@ zoom.us
 即刻
 小宇宙
 小红书
+少数派
 集换社
 企业微信
 随身工作台

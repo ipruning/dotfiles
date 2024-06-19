@@ -60,6 +60,7 @@ brew "dust"
 brew "eget"
 brew "exiftool"
 brew "extra-cmake-modules"
+brew "fastfetch"
 brew "fcp"
 brew "fd"
 brew "sdl2"
@@ -149,6 +150,7 @@ brew "sk"
 brew "smartmontools"
 brew "ssh-copy-id"
 brew "starship"
+brew "superfile"
 brew "t-rec"
 brew "tealdeer"
 brew "thefuck"
@@ -223,6 +225,7 @@ mas "Avenue", id: 1523681067
 mas "Bear", id: 1091189122
 mas "Bob", id: 1630034110
 mas "CapCut", id: 1500855883
+mas "com.kagimacOS.Kagi-Search", id: 1622835804
 mas "Compressor", id: 424390742
 mas "Crouton", id: 1461650987
 mas "Day One", id: 1055511498
@@ -313,6 +316,7 @@ vscode "kdl-org.kdl"
 vscode "kisstkondoros.vscode-gutter-preview"
 vscode "lehoanganh298.json-lines-viewer"
 vscode "lencerf.beancount"
+vscode "marimo-team.vscode-marimo"
 vscode "mathiassoeholm.markdown-link-updater"
 vscode "mechatroner.rainbow-csv"
 vscode "modular-mojotools.vscode-mojo"
