@@ -29,6 +29,7 @@ dust
 eget
 exiftool
 extra-cmake-modules
+fastfetch
 fcp
 fd
 ffmpeg
@@ -109,6 +110,7 @@ sk
 smartmontools
 ssh-copy-id
 starship
+superfile
 t-rec
 tealdeer
 texinfo
