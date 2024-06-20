@@ -3,6 +3,8 @@ asitop
 beancount
 commitizen
 cookiecutter
+datasette
+datasette-studio
 deadlink
 detect-secrets
 elia-chat
@@ -14,6 +16,7 @@ git-sim
 httpstat
 huggingface-hub
 kaggle
+llm
 mackup
 manim
 nox
@@ -28,8 +31,12 @@ poetry
 pre-commit
 pricehist
 pydeps
+shot-scraper
 socid-extractor
 speedtest-cli
+sqlite-utils
+symbex
 things-cli
+ttok
 vastai
 yacron

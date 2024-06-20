@@ -279,7 +279,6 @@ mas "uBlacklist for Safari", id: 1547912640
 mas "uPic", id: 1549159979
 mas "Whisper Transcription", id: 1668083311
 vscode "antfu.file-nesting"
-vscode "asvetliakov.vscode-neovim"
 vscode "bierner.markdown-mermaid"
 vscode "bodil.file-browser"
 vscode "catppuccin.catppuccin-vsc"
