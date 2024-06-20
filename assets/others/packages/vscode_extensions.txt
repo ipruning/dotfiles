@@ -1,5 +1,4 @@
 antfu.file-nesting
-asvetliakov.vscode-neovim
 bierner.markdown-mermaid
 bodil.file-browser
 catppuccin.catppuccin-vsc

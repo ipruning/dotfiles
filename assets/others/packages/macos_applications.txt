@@ -80,6 +80,7 @@ Input Source Pro
 Jane Reader
 JetBrains Toolbox
 Jetpack Joyride 2
+JupyterLab
 Kagi for Safari
 Karabiner-Elements
 Karabiner-EventViewer
