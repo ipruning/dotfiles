@@ -121,7 +121,7 @@
   "editor.unicodeHighlight.invisibleCharacters": false,
   "diffEditor.wordWrap": "off",
   "diffEditor.renderSideBySide": true,
-  "diffEditor.ignoreTrimWhitespace": false,
+  "diffEditor.ignoreTrimWhitespace": true,
   "diffEditor.maxComputationTime": 10000,
   "terminal.integrated.commandsToSkipShell": ["language-julia.interrupt"],
   "terminal.integrated.confirmOnExit": "hasChildProcesses",
