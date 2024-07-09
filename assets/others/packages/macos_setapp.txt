@@ -1,18 +1,15 @@
 Aeon Timeline
-Backtrack
 BetterZip
 CleanMyMac X
 CleanShot X
 Clop
+CodeRunner
 Craft
 Dash
-Dato
 DevUtils
 Disk Drill
-DisplayBuddy
 Downie
 Due
-Expressions
 Focus 2
 ForkLift
 Gemini
@@ -22,8 +19,6 @@ HoudahSpot
 Hustl
 Image2icon
 In Your Face
-Keep It Shot
-Keysmith
 Luminar Neo
 Lungo
 MarginNote
@@ -33,12 +28,10 @@ Meta
 MetaImage
 MindNode
 Mockuuups Studio
-MurmurType
 Muse
 NotePlan
 Numi
 One Switch
-PDF Pals
 PDF Search
 Paletro
 Permute
@@ -48,26 +41,19 @@ Presentify
 Proxyman
 RapidAPI
 Renamer
-SQLPro Studio
-SQLPro for SQLite
 SSH Config Editor
 SnapMotion
 SnippetsLab
 Spark Mail
-Squash
 TablePlus
-TaskPaper
 Taskheat
 TextSoap
 Timing
 Tripsy
 Typeface
-TypingMind
 Ulysses
 Vivid
 WiFi Explorer
-XCOrganizer
-Xnapper
 Yoink
 iBoysoft NTFS for Mac
 iStat Menus
