@@ -99,7 +99,7 @@
   "editor.cursorSmoothCaretAnimation": "on",
   "editor.fontFamily": "'MonoLisa Nerd Font', 'Source Han Sans SC'",
   "editor.fontLigatures": "'zero' on, 'ss02' on, 'ss04' on, 'ss06' on, 'calt' off, 'liga' off",
-  "editor.fontSize": 12,
+  "editor.fontSize": 13,
   "editor.lineHeight": 0,
   "catppuccin.boldKeywords": true,
   "catppuccin.italicComments": true,
@@ -127,16 +127,21 @@
   "terminal.integrated.confirmOnExit": "hasChildProcesses",
   "terminal.integrated.defaultProfile.osx": "zsh",
   "terminal.integrated.fontFamily": "'MonoLisa Nerd Font'",
-  "terminal.integrated.fontSize": 12,
+  "terminal.integrated.fontSize": 13,
   "terminal.integrated.inheritEnv": false,
   "terminal.external.osxExec": "iTerm.app",
   "powershell.startAutomatically": false,
+  "code-runner.clearPreviousOutput": false,
+  "code-runner.enableAppInsights": false,
+  "code-runner.fileDirectoryAsCwd": true,
+  "code-runner.ignoreSelection": true,
   "code-runner.preserveFocus": false,
   "code-runner.runInTerminal": true,
+  "code-runner.saveFileBeforeRun": true,
   "code-runner.executorMap": {
-    "beancount": "fava $fullFileName -p 4000",
+    // "beancount": "fava -p 4000 $fullFileName",
     "javascript": "bun run $fullFileName",
-    "markdown": "cd $dir && md-formatter -a $fullFileName",
+    // "markdown": "cd $dir && md-formatter -a $fullFileName",
     "python": "$pythonPath -u $fullFileName",
     "typescript": "bun run $fullFileName"
   },
@@ -145,9 +150,6 @@
     "*.lmql": "lmql run $fullFileName",
     "*.typ": "typst $fullFileName"
   },
-  "code-runner.clearPreviousOutput": true,
-  "code-runner.ignoreSelection": true,
-  "code-runner.saveFileBeforeRun": true,
   "github.copilot.enable": {
     "*": true,
     "plaintext": false,
@@ -336,7 +338,7 @@
       "other": "on"
     },
     "editor.defaultFormatter": "James-Yu.latex-workshop",
-    "editor.fontSize": 12,
+    "editor.fontSize": 13,
     "editor.formatOnSave": true,
     "editor.renderWhitespace": "selection", // all will cause lag
     "editor.tabSize": 2,
@@ -355,7 +357,7 @@
       "other": "on"
     },
     "editor.defaultFormatter": "DavidAnson.vscode-markdownlint",
-    "editor.fontSize": 12,
+    "editor.fontSize": 13,
     "editor.formatOnSave": false,
     "editor.renderWhitespace": "selection", // all will cause lag
     "editor.tabSize": 2,
