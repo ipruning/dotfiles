@@ -13,6 +13,8 @@ borkdude/brew/babashka
 bottom
 brimdata/tap/zq
 broot
+btop
+cabextract
 chafa
 choose-rust
 cloudflared
@@ -63,6 +65,7 @@ iperf
 iperf3
 ipinfo-cli
 jc
+jd
 jless
 jnv
 jq

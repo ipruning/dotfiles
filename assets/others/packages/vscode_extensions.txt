@@ -35,9 +35,11 @@ kdl-org.kdl
 kisstkondoros.vscode-gutter-preview
 lehoanganh298.json-lines-viewer
 lencerf.beancount
+lmql-team.lmql
 marimo-team.vscode-marimo
 mathiassoeholm.markdown-link-updater
 mechatroner.rainbow-csv
+mgt19937.typst-preview
 modular-mojotools.vscode-mojo
 ms-azuretools.vscode-docker
 ms-python.debugpy
