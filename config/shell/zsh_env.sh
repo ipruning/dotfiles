@@ -177,7 +177,7 @@ export FZF_ALT_C_COMMAND="fd --ignore-file ~/.rgignore --hidden --follow --ignor
 if [[ -n $SSH_CONNECTION ]]; then
   export EDITOR='nvim'
 else
-  export EDITOR='code -w'
+  export EDITOR='zed --wait'
 fi
 
 #===============================================================================
