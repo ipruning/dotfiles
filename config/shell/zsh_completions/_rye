@@ -304,7 +304,7 @@ _rye() {
             return 0
             ;;
         rye__add)
-            opts="-d -v -q -h --git --url --path --absolute --tag --rev --branch --features --dev --excluded --optional --pre --pin --keyring-provider --sync --no-sync --verbose --quiet --help <REQUIREMENTS>..."
+            opts="-d -v -q -h --git --url --path --absolute --tag --rev --branch --features --dev --excluded --optional --pin --sync --no-sync --verbose --quiet --pre --with-sources --generate-hashes --keyring-provider --help <REQUIREMENTS>..."
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0
@@ -1042,7 +1042,7 @@ _rye() {
             return 0
             ;;
         rye__install)
-            opts="-p -f -v -q -h --git --url --path --absolute --tag --rev --branch --features --include-dep --extra-requirement --python --force --verbose --quiet --help <REQUIREMENT>"
+            opts="-p -f -v -q -h --git --url --path --absolute --tag --rev --branch --features --include-dep --extra-requirement --python --force --keyring-provider --verbose --quiet --help <REQUIREMENT>"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0
@@ -1090,6 +1090,10 @@ _rye() {
                     ;;
                 -p)
                     COMPREPLY=($(compgen -f "${cur}"))
+                    return 0
+                    ;;
+                --keyring-provider)
+                    COMPREPLY=($(compgen -W "disabled subprocess" -- "${cur}"))
                     return 0
                     ;;
                 *)
@@ -1144,7 +1148,7 @@ _rye() {
             return 0
             ;;
         rye__lock)
-            opts="-v -q -h --verbose --quiet --update --update-all --pre --features --all-features --with-sources --keyring-provider --reset --pyproject --generate-hashes --help"
+            opts="-v -q -h --verbose --quiet --update --update-all --pre --features --all-features --with-sources --keyring-provider --generate-hashes --universal --reset --pyproject --help"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0
@@ -1284,7 +1288,7 @@ _rye() {
             return 0
             ;;
         rye__remove)
-            opts="-v -q -h --dev --optional --sync --no-sync --keyring-provider --verbose --quiet --help <REQUIREMENTS>..."
+            opts="-d -v -q -h --dev --optional --sync --no-sync --verbose --quiet --pre --with-sources --generate-hashes --keyring-provider --help <REQUIREMENTS>..."
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0
@@ -1345,11 +1349,11 @@ _rye() {
             fi
             case "${prev}" in
                 --shell)
-                    COMPREPLY=($(compgen -W "bash elvish fish power-shell zsh nushell" -- "${cur}"))
+                    COMPREPLY=($(compgen -W "bash elvish fish powershell zsh nushell" -- "${cur}"))
                     return 0
                     ;;
                 -s)
-                    COMPREPLY=($(compgen -W "bash elvish fish power-shell zsh nushell" -- "${cur}"))
+                    COMPREPLY=($(compgen -W "bash elvish fish powershell zsh nushell" -- "${cur}"))
                     return 0
                     ;;
                 *)
@@ -1542,7 +1546,7 @@ _rye() {
             return 0
             ;;
         rye__sync)
-            opts="-f -v -q -h --force --no-dev --no-lock --verbose --quiet --update --update-all --pre --features --all-features --with-sources --keyring-provider --pyproject --reset --generate-hashes --help"
+            opts="-f -v -q -h --force --no-dev --no-lock --verbose --quiet --update --update-all --pre --features --all-features --with-sources --keyring-provider --generate-hashes --pyproject --reset --universal --help"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0
@@ -1572,7 +1576,7 @@ _rye() {
             return 0
             ;;
         rye__test)
-            opts="-a -p -s -v -q -h --all --package --pyproject --keyring-provider --no-capture --verbose --quiet --help [EXTRA_ARGS]..."
+            opts="-a -p -s -v -q -h --all --package --pyproject --no-capture --verbose --quiet --pre --with-sources --generate-hashes --keyring-provider --help [EXTRA_ARGS]..."
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0
@@ -1856,7 +1860,7 @@ _rye() {
             return 0
             ;;
         rye__tools__install)
-            opts="-p -f -v -q -h --git --url --path --absolute --tag --rev --branch --features --include-dep --extra-requirement --python --force --verbose --quiet --help <REQUIREMENT>"
+            opts="-p -f -v -q -h --git --url --path --absolute --tag --rev --branch --features --include-dep --extra-requirement --python --force --keyring-provider --verbose --quiet --help <REQUIREMENT>"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 3 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0
@@ -1904,6 +1908,10 @@ _rye() {
                     ;;
                 -p)
                     COMPREPLY=($(compgen -f "${cur}"))
+                    return 0
+                    ;;
+                --keyring-provider)
+                    COMPREPLY=($(compgen -W "disabled subprocess" -- "${cur}"))
                     return 0
                     ;;
                 *)
