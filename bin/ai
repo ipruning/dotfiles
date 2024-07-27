@@ -12,29 +12,32 @@ from typing import Callable, Optional, Tuple, Union
 from urllib import parse, request
 from urllib.error import HTTPError
 
-__version__ = "0.3.1"
+__version__ = "0.3.2"
 
 USD_CNY = 7.260
 FEE_RATE = 1.035
 MILLION = 1000000
+
 MAC_USD = 3479.000
 input_t_p_s = 181.36
 output_t_p_s = 16.21
 price_p_s = MAC_USD / (2 * 365 * 24 * 60 * 60)
+LM_INPUT = 1 / input_t_p_s * price_p_s * MILLION
+LM_OUTPUT = 1 / output_t_p_s * price_p_s * MILLION
+
 
 GPT_3_5_TURBO_INPUT = 0.500
 GPT_3_5_TURBO_OUTPUT = 1.500
 GPT_4O_INPUT = 5.000
 GPT_4O_OUTPUT = 15.000
+GPT_4O_MINI_INPUT = 0.15
+GPT_4O_MINI_OUTPUT = 0.60
 GPT_4_TURBO_INPUT = 10.000
 GPT_4_TURBO_OUTPUT = 30.000
-LM_INPUT = 1 / input_t_p_s * price_p_s * MILLION
-LM_OUTPUT = 1 / output_t_p_s * price_p_s * MILLION
 
 # MODEL = "lmstudio-community/Meta-Llama-3-8B-Instruct-GGUF/Meta-Llama-3-8B-Instruct-Q4_K_M.gguf"
 # MODEL = "llama3:latest"
-MODEL = "gpt-3.5-turbo-0125"
-# MODEL = "gpt-4o"
+MODEL = "gpt-4o"
 
 # default_params = {
 #     "max_tokens": 80,
@@ -523,6 +526,9 @@ class ChatSession:
         elif Config.default_model == "gpt-4-turbo":
             p_price = p_price * GPT_4_TURBO_INPUT
             c_price = p_price * GPT_4_TURBO_OUTPUT
+        elif Config.default_model == "gpt-4o-mini":
+            p_price = p_price * GPT_4O_MINI_INPUT
+            c_price = p_price * GPT_4O_MINI_OUTPUT
         elif Config.default_model.startswith("llama3"):
             p_price = p_price * LM_INPUT
             c_price = p_price * LM_OUTPUT
