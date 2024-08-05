@@ -432,6 +432,7 @@
   "beancountFormatter.currencyColumn": 72,
   "beancountFormatter.fixedCJKWidth": true,
   "errorLens.excludeBySource": ["eslint", "jshint"],
+  "errorLens.enabledDiagnosticLevels": ["error"],
   "evenBetterToml.formatter.alignEntries": true,
   "evenBetterToml.formatter.indentEntries": true,
   "evenBetterToml.schema.enabled": false,
