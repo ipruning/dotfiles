@@ -240,6 +240,11 @@ export PATH="$MODULAR_HOME/pkg/packages.modular.com_max/bin:$PATH"
 eval "$(navi widget zsh)"
 
 #===============================================================================
+# 👇 atuin
+#===============================================================================
+eval "$(atuin init zsh)"
+
+#===============================================================================
 # 👇 zoxide
 # z foo<tab> # shows the same completions as cd
 # z foo<space><tab> # shows interactive completions via zoxide
