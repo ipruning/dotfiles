@@ -78,6 +78,7 @@ lf
 libmagic
 llama.cpp
 lnav
+logdy
 lsd
 m-cli
 make
@@ -106,6 +107,7 @@ pyenv
 qt
 ripgrep
 rm-improved
+scc
 sd
 sevenzip
 shellcheck
@@ -126,6 +128,7 @@ topgrade
 tor
 tree
 trippy
+trufflehog
 typos-cli
 typst
 ugit

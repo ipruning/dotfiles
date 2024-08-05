@@ -28,6 +28,7 @@ pandoc-tablenos
 pandoc-xnos
 pdm
 poetry
+posting
 pre-commit
 pricehist
 pydeps
