@@ -3,7 +3,6 @@ BetterZip
 CleanMyMac X
 CleanShot X
 Clop
-CodeRunner
 Craft
 Dash
 DevUtils
