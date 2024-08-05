@@ -9,6 +9,7 @@ codezombiech.gitignore
 darkriszty.markdown-table-prettify
 davidanson.vscode-markdownlint
 dbaeumer.vscode-eslint
+devvai.devv
 dnicolson.binary-plist
 dongfg.vscode-beancount-formatter
 eamodio.gitlens
@@ -24,6 +25,7 @@ github.codespaces
 github.copilot
 github.copilot-chat
 github.vscode-github-actions
+grapecity.gc-excelviewer
 gruntfuggly.todo-tree
 huacnlee.autocorrect
 ionutvmi.path-autocomplete
@@ -39,7 +41,6 @@ lmql-team.lmql
 marimo-team.vscode-marimo
 mathiassoeholm.markdown-link-updater
 mechatroner.rainbow-csv
-mgt19937.typst-preview
 modular-mojotools.vscode-mojo
 ms-azuretools.vscode-docker
 ms-python.debugpy
@@ -69,7 +70,6 @@ qezhu.gitlink
 redhat.vscode-xml
 redhat.vscode-yaml
 rust-lang.rust-analyzer
-serayuzgur.crates
 shd101wyy.markdown-preview-enhanced
 skn0tt.markdown-link-expander
 sumneko.lua

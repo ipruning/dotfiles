@@ -41,6 +41,7 @@ DevCleaner
 Developer
 Dice by PCalc
 Discord
+DisplayLink Manager
 Drafts
 DrawingPics
 Dropbox
@@ -145,7 +146,6 @@ OrbStack
 Orion
 PDF Expert
 Pages
-Parallels Desktop
 Parsec
 PasteNow
 Photomator
@@ -168,6 +168,7 @@ Reader
 Rectangle
 RemNote
 Replit
+Reqable
 Rewind
 Rize
 Roam Research
@@ -209,14 +210,15 @@ TencentMeeting
 Termius
 Texts
 Things3
-TickTick
 Tito Control
 Tonal
 TopNotch
+Tot
 TradingView
 Tunnelblick
 UninstallPKG
 Unity Hub
+VMware Fusion
 Viable
 VirtualBuddy
 Visual Studio Code
