@@ -204,5 +204,21 @@
     "key": "ctrl+l",
     "command": "file-browser.stepIn",
     "when": "inFileBrowser"
+  },
+  {
+    "key": "cmd+r",
+    "command": "workbench.action.toggleAuxiliaryBar"
+  },
+  {
+    "key": "alt+cmd+b",
+    "command": "-workbench.action.toggleAuxiliaryBar"
+  },
+  {
+    "key": "cmd+b",
+    "command": "workbench.action.toggleSidebarVisibility"
+  },
+  {
+    "key": "cmd+b",
+    "command": "-workbench.action.toggleSidebarVisibility"
   }
 ]
