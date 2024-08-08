@@ -1,11 +1,9 @@
 1Blocker
 1Password for Safari
 1Password
-42memo
 A Better Finder Attributes 7
 Alacritty
 Alfred 5
-Alibaba Cloud Client
 Amethyst
 Amie
 Anki
@@ -16,7 +14,6 @@ Avenue
 BaiduNetdisk
 Bear
 BetterDisplay
-Bezel
 Binance
 Blackmagic Disk Speed Test
 Blackmagic Media Express
@@ -31,7 +28,6 @@ Cloudflare WARP
 Compressor
 Contexts
 CrossOver
-Crouton
 Cryptomator
 Cursor
 DEVONthink 3
@@ -43,34 +39,28 @@ Dice by PCalc
 Discord
 DisplayLink Manager
 Drafts
-DrawingPics
 Dropbox
 Eagle for Safari
 Eagle
-Endel
 Eudic
 Evernote
+ExcalidrawZ
 Exporter
-FSNotes
 Figma
 Final Cut Pro
 Firefox Nightly
 FixTim
-Flighty
 Folder Hub
 Fork
 FoxTrot Personal Search
 GarageBand
 GitButler
-GitHub Desktop
 Goodnotes
 Google Chrome
 Google Docs
 Google Drive
 Google Sheets
 Google Slides
-HTTPie
-Hammerspoon
 Heptabase
 Homerow
 Hush
@@ -79,10 +69,8 @@ Ice
 IconChanger
 Immersive Translate
 Input Source Pro
-Jane Reader
 JetBrains Toolbox
 Jetpack Joyride 2
-JupyterLab
 Kagi for Safari
 Karabiner-Elements
 Karabiner-EventViewer
@@ -90,18 +78,14 @@ KeyCastr
 Keyboard Maestro
 Keynote
 Klack
-LINE
 LM Studio
 LTspice
 LanguageTool for Desktop
 Lark
 LayAuto3
-Limitless
 Linear
 Logic Pro X
-Logseq
 Longbridge Pro
-Loom
 Loopback
 LosslessCut
 LyricsX
@@ -113,27 +97,19 @@ Mathpix Snipping Tool
 MessAuto
 Microsoft Excel
 Microsoft PowerPoint
-Microsoft Teams
 Microsoft Word
-Milanote
-Mimestream
 Mini Metro+
 Mochi Diffusion
-Monodraw
-Moonlight
 Mos
 Motion
-MuMuPlayer
 MusicHarbor
 MyCard
 NeteaseMusic
-Notability
 Notion Calendar
 Notion Mail
 Notion
 Numbers
 OBS
-Obsidian
 OmniFocus
 OmniGraffle
 OmniOutliner
@@ -143,20 +119,15 @@ OnyX
 OpenAI Translator
 Optimus Player
 OrbStack
-Orion
 PDF Expert
 Pages
 Parsec
 PasteNow
+Pearcleaner
 Photomator
-PicGo
-Pile
 Planny
 PlayCover
-Pocket Casts
 PocketTube
-Poe
-PowerShell
 ProNotes
 QLMarkdown
 QQ
@@ -164,16 +135,10 @@ QuickLook Video
 RSSHub Radar
 Raindrop.io
 Raycast
-Reader
 Rectangle
-RemNote
-Replit
 Reqable
 Rewind
-Rize
 Roam Research
-Rond
-RustDesk
 Safari
 Save to Raindrop.io
 Save to Reader
@@ -182,34 +147,27 @@ Screen Studio
 ScreenFlow
 Scrolla
 Setapp
-Shadowrocket
 Shapr3D
 Shottr
-Sideloadly
 Silicon
-Sketch
 Skim
 Slack
 Sloth
 Sniffnet
 SoundSource
-Stack Next SE
 Steam
-Stickies Pro
-Superlist
 Surfingkeys
 Surge
 Suspicious Package
 Syntax Highlight
-Synthesizer V Studio Basic
 Tailscale
 Tampermonkey
 Tana
 Telegram
 TencentMeeting
 Termius
-Texts
 Things3
+TickTick
 Tito Control
 Tonal
 TopNotch
@@ -217,16 +175,12 @@ Tot
 TradingView
 Tunnelblick
 UninstallPKG
-Unity Hub
 VMware Fusion
 Viable
 VirtualBuddy
 Visual Studio Code
-Warp
 WeChat
 WechatExporter
-Whisky
-Whisper Transcription
 Wooshy
 WorkFlowy
 XLD
@@ -236,28 +190,14 @@ Xcodes
 YACReader
 YACReaderLibrary
 Zed
-Zotero-6
 Zotero
-bloop
 calibre
-draw.io
-iA Presenter
-iA Writer
 iMazing
 iMovie
-iTerm
 kindaVim
 logioptionsplus
 pcsuite
 qBittorrent
 uBlacklist for Safari
 uPic
-zoom.us
 优酷
-即刻
-小宇宙
-小红书
-少数派
-集换社
-企业微信
-随身工作台
