@@ -196,6 +196,7 @@ cask "1password-cli"
 cask "alacritty"
 cask "apparency"
 cask "chromium"
+cask "cursor"
 cask "firefox@nightly"
 cask "font-caskaydia-cove-nerd-font"
 cask "font-hack-nerd-font"
@@ -203,14 +204,10 @@ cask "font-jetbrains-mono-nerd-font"
 cask "font-monaspace-nerd-font"
 cask "font-smiley-sans"
 cask "font-times-new-roman"
-cask "fsnotes"
-cask "logseq"
 cask "mactex"
 cask "miniforge"
-cask "obsidian"
 cask "otf-source-han-sans-sc"
 cask "otf-source-han-serif-sc"
-cask "powershell"
 cask "qlimagesize"
 cask "qlmarkdown"
 cask "qlvideo"
@@ -224,7 +221,6 @@ cask "visual-studio-code"
 cask "wechattweak-cli"
 cask "xcodes"
 cask "xld"
-cask "zulu@21"
 mas "1Blocker", id: 1365531024
 mas "1Password for Safari", id: 1569813296
 mas "Avenue", id: 1523681067
@@ -233,17 +229,14 @@ mas "Bob", id: 1630034110
 mas "CapCut", id: 1500855883
 mas "com.kagimacOS.Kagi-Search", id: 1622835804
 mas "Compressor", id: 424390742
-mas "Crouton", id: 1461650987
 mas "Day One", id: 1055511498
 mas "DevCleaner", id: 1388020431
 mas "Developer", id: 640199958
 mas "Dice", id: 1479250666
 mas "Drafts", id: 1435957248
 mas "Eagle for Safari", id: 1526651672
-mas "Endel", id: 1346247457
 mas "Exporter", id: 1099120373
 mas "Final Cut Pro", id: 424389933
-mas "Flighty", id: 1358823008
 mas "Folder Hub", id: 6473019059
 mas "GarageBand", id: 682658836
 mas "Goodnotes", id: 1444383602
@@ -253,7 +246,6 @@ mas "iMovie", id: 408981434
 mas "Jetpack 2", id: 1598096399
 mas "Keynote", id: 409183694
 mas "Klack", id: 6446206067
-mas "LINE", id: 539883307
 mas "Logic Pro", id: 634148309
 mas "MainStage", id: 634159523
 mas "Maipo", id: 789066512
@@ -263,7 +255,6 @@ mas "Microsoft Word", id: 462054704
 mas "Mini Metro+", id: 1550663539
 mas "Motion", id: 434290957
 mas "MusicHarbor", id: 1440405750
-mas "Notability", id: 360593530
 mas "Numbers", id: 409203825
 mas "OneDrive", id: 823766827
 mas "Pages", id: 409201541
@@ -276,41 +267,28 @@ mas "Save to Raindrop.io", id: 1549370672
 mas "Save to Reader", id: 1640236961
 mas "Shapr3D", id: 1091675654
 mas "Slack", id: 803453959
-mas "Stickies Pro", id: 1482080766
 mas "Surfingkeys", id: 1609752330
 mas "Tampermonkey", id: 1482490089
 mas "Tonal", id: 6449281141
 mas "Tot", id: 1491071483
 mas "uBlacklist for Safari", id: 1547912640
 mas "uPic", id: 1549159979
-mas "Whisper Transcription", id: 1668083311
 vscode "antfu.file-nesting"
-vscode "bierner.markdown-mermaid"
 vscode "bodil.file-browser"
 vscode "catppuccin.catppuccin-vsc"
-vscode "catppuccin.catppuccin-vsc-icons"
 vscode "charliermarsh.ruff"
-vscode "codeandstuff.package-json-upgrade"
-vscode "codezombiech.gitignore"
-vscode "darkriszty.markdown-table-prettify"
 vscode "davidanson.vscode-markdownlint"
-vscode "dbaeumer.vscode-eslint"
 vscode "devvai.devv"
-vscode "dnicolson.binary-plist"
 vscode "dongfg.vscode-beancount-formatter"
-vscode "eamodio.gitlens"
 vscode "editorconfig.editorconfig"
 vscode "edwinkofler.vscode-assorted-languages"
 vscode "emilast.logfilehighlighter"
 vscode "esbenp.prettier-vscode"
 vscode "fabiospampinato.vscode-highlight"
-vscode "figma.figma-vscode-extension"
 vscode "formulahendry.code-runner"
 vscode "foxundermoon.shell-format"
-vscode "github.codespaces"
 vscode "github.copilot"
 vscode "github.copilot-chat"
-vscode "github.vscode-github-actions"
 vscode "grapecity.gc-excelviewer"
 vscode "gruntfuggly.todo-tree"
 vscode "huacnlee.autocorrect"
@@ -319,15 +297,12 @@ vscode "jacobdufault.fuzzy-search"
 vscode "jacobpfeifer.pfeifer-hurl"
 vscode "james-yu.latex-workshop"
 vscode "kahole.magit"
-vscode "kdl-org.kdl"
 vscode "kisstkondoros.vscode-gutter-preview"
 vscode "lehoanganh298.json-lines-viewer"
 vscode "lencerf.beancount"
 vscode "lmql-team.lmql"
 vscode "marimo-team.vscode-marimo"
-vscode "mathiassoeholm.markdown-link-updater"
 vscode "mechatroner.rainbow-csv"
-vscode "modular-mojotools.vscode-mojo"
 vscode "ms-azuretools.vscode-docker"
 vscode "ms-python.debugpy"
 vscode "ms-python.python"
@@ -347,28 +322,21 @@ vscode "ms-vsliveshare.vsliveshare"
 vscode "myriad-dreamin.tinymist"
 vscode "naumovs.color-highlight"
 vscode "ninoseki.vscode-mogami"
-vscode "njpwerner.autodocstring"
 vscode "oderwat.indent-rainbow"
-vscode "oven.bun-vscode"
 vscode "pkief.material-icon-theme"
 vscode "pomdtr.excalidraw-editor"
 vscode "qezhu.gitlink"
 vscode "redhat.vscode-xml"
 vscode "redhat.vscode-yaml"
 vscode "rust-lang.rust-analyzer"
-vscode "shd101wyy.markdown-preview-enhanced"
-vscode "skn0tt.markdown-link-expander"
 vscode "sumneko.lua"
 vscode "tamasfe.even-better-toml"
 vscode "tecosaur.latex-utilities"
-vscode "telesoho.vscode-markdown-paste-image"
 vscode "timonwong.shellcheck"
 vscode "tyriar.sort-lines"
 vscode "usernamehw.errorlens"
 vscode "vintharas.learn-vim"
-vscode "visualstudioexptteam.intellicode-api-usage-examples"
 vscode "vscodevim.vim"
 vscode "vspacecode.vspacecode"
 vscode "vspacecode.whichkey"
 vscode "yy0931.save-as-root"
-vscode "yzhang.markdown-all-in-one"

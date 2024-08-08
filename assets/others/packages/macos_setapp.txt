@@ -2,13 +2,13 @@ Aeon Timeline
 BetterZip
 CleanMyMac X
 CleanShot X
+Clobbr
 Clop
 Craft
 Dash
 DevUtils
 Disk Drill
 Downie
-Due
 Focus 2
 ForkLift
 Gemini
@@ -27,7 +27,6 @@ Meta
 MetaImage
 MindNode
 Mockuuups Studio
-Muse
 NotePlan
 Numi
 One Switch
@@ -38,13 +37,12 @@ PhotoBulk
 PopClip
 Presentify
 Proxyman
-RapidAPI
 Renamer
 SSH Config Editor
 SnapMotion
 SnippetsLab
-Spark Mail
 TablePlus
+TaskPaper
 Taskheat
 TextSoap
 Timing
