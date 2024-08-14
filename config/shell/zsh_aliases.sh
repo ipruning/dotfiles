@@ -74,9 +74,6 @@ r-cf() {
 }
 
 r-update() {
-  echo -e "\033[33mUpdating all packages using asdf...\033[0m"
-  asdf latest --all
-
   echo -e "\033[33mChecking for outdated Homebrew formulas...\033[0m"
   brew cu
 
@@ -88,12 +85,6 @@ r-update() {
 }
 
 r-upgrade() {
-  echo -e "\033[33mUpdating asdf...\033[0m"
-  asdf update
-
-  echo -e "\033[33mUpdating asdf plugins...\033[0m"
-  asdf plugin update --all
-
   echo -e "\033[33mUpgrading Homebrew formulas...\033[0m"
   brew upgrade
 
@@ -123,6 +114,13 @@ r-upgrade() {
   echo -e "\033[33mUpdating Rust toolchain...\033[0m"
   rustup self update
   rustup update
+
+  echo -e "\033[33mUpdating mise...\033[0m"
+  mise self-update
+  mise plugins update
+
+  echo -e "\033[33mReshiming mise...\033[0m"
+  mise reshim
 }
 
 r-backup() {

@@ -1,8 +1,11 @@
 #===============================================================================
 # 👇 GPG Signing
 #===============================================================================
-# if [ -r ~/.zshrc ]; then echo 'export GPG_TTY=$(tty)' >> ~/.zshrc; \
-#   else echo 'export GPG_TTY=$(tty)' >> ~/.zprofile; fi
+# if [ -r ~/.zshrc ]; then
+#   echo "export GPG_TTY=$(tty)" >>~/.zshrc
+# else
+#   echo "export GPG_TTY=$(tty)" >>~/.zprofile
+# fi
 
 #===============================================================================
 # 👇 oh-my-zsh init
@@ -17,17 +20,6 @@ if [[ -n $SSH_CONNECTION ]]; then
 else
   eval "$(starship init zsh)"
 fi
-
-#===============================================================================
-# 👇 rye (before asdf)
-#===============================================================================
-source "$HOME/.rye/env"
-#===============================================================================
-
-#===============================================================================
-# 👇 #TODO mise
-#===============================================================================
-# eval "$(mise activate zsh)"
 
 #===============================================================================
 # 👇 zsh-vi-mode https://github.com/jeffreytse/zsh-vi-mode/issues/24
@@ -49,7 +41,6 @@ source "$HOME/.rye/env"
 # autoupdate              # https://github.com/TamCore/autoupdate-oh-my-zsh-plugins
 #===============================================================================
 export plugins=(
-  asdf
   git-open                # https://github.com/paulirish/git-open
   zsh-autosuggestions     # https://github.com/zsh-users/zsh-autosuggestions
   zsh-syntax-highlighting # https://github.com/zsh-users/zsh-syntax-highlighting
@@ -256,6 +247,17 @@ eval "$(atuin init zsh)"
 # z foo<space><tab> # shows interactive completions via zoxide
 #===============================================================================
 eval "$(zoxide init zsh)"
+
+#===============================================================================
+# 👇 rye
+#===============================================================================
+source "$HOME/.rye/env"
+#===============================================================================
+
+#===============================================================================
+# 👇 mise
+#===============================================================================
+eval "$("$HOME"/.local/bin/mise activate zsh)"
 
 #===============================================================================
 # 👇 autodetect architecture (and set `brew` path) (and set `python` path)

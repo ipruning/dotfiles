@@ -1,7 +1,6 @@
 appleboy/tap/codegpt
 aria2
 asciinema
-asdf
 atuin
 autocorrect
 bat
@@ -78,7 +77,6 @@ lsd
 m-cli
 mas
 media-info
-mise
 modularml/packages/modular
 monolith
 moreutils
