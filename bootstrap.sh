@@ -1,86 +1,92 @@
 #!/usr/bin/env bash
 
-RED="$(tput setaf 1)"
-GREEN="$(tput setaf 2)"
-YELLOW="$(tput setaf 3)"
-BLUE="$(tput setaf 4)"
-NORMAL="$(tput sgr0)"
+set -euo pipefail
 
-function setup_dotfiles {
+# Define color variables
+readonly RED=$(tput setaf 1)
+readonly GREEN=$(tput setaf 2)
+readonly YELLOW=$(tput setaf 3)
+readonly BLUE=$(tput setaf 4)
+readonly NORMAL=$(tput sgr0)
+
+DOTFILES_DIR="$HOME/dotfiles"
+MODE=""
+
+setup_dotfiles() {
   echo "${BLUE}Cloning dotfiles...${NORMAL}"
-  git clone --depth 1 https://github.com/ipruning/dotfiles.git "$HOME"/dotfiles
+  git clone --depth 1 https://github.com/ipruning/dotfiles.git "$DOTFILES_DIR"
 }
 
-function bootstrap {
+bootstrap() {
   echo "${BLUE}Setting up dotfiles...${NORMAL}"
-  source "$HOME"/dotfiles/bin/csys # check SYSTEM_OS, SYSTEM_ARCH
+  # shellcheck source=/dev/null
+  source "$DOTFILES_DIR/bin/csys" # check SYSTEM_OS, SYSTEM_ARCH
   case "$OSTYPE" in
   darwin*)
-    source "$HOME"/dotfiles/scripts/bootstrap_mac.sh
+    # shellcheck source=/dev/null
+    source "$DOTFILES_DIR/scripts/bootstrap_mac.sh"
     ;;
   linux*)
-    if [[ "$(uname -m)" == *armv7l* ]]; then
+    case "$(uname -m)" in
+    armv7l* | x86_64*)
       echo "${RED}Unsupported system architecture.${NORMAL}"
-    elif [[ "$(uname -m)" == *x86_64* ]]; then
+      ;;
+    *)
       echo "${RED}Unsupported system architecture.${NORMAL}"
-    else
-      echo "${RED}Unsupported system architecture.${NORMAL}"
-    fi
+      ;;
+    esac
     ;;
   msys*)
     echo "${RED}Unsupported system architecture.${NORMAL}"
     ;;
   *)
-    echo "${RED}unknown: $OSTYPE${NORMAL}"
+    echo "${RED}Unknown OS type: $OSTYPE${NORMAL}"
     ;;
   esac
 }
 
-while getopts ":a:b:f:h" opt; do
+usage() {
+  echo "Usage: $(basename "$0") [-f] [-h]"
+  echo "  -f  Force mode: Remove existing dotfiles and reinstall"
+  echo "  -h  Display this help message"
+}
+
+while getopts ":fh" opt; do
   case $opt in
-  a)
-    echo "Option -a: $OPTARG"
-    ;;
-  b)
-    echo "Option -b: $OPTARG"
-    ;;
   f)
     MODE="force"
     ;;
   h)
-    echo "Usage: bootstrap.sh [-f] [-h]"
+    usage
     exit 0
     ;;
   \?)
-    # If the user provides an invalid option, display an error message and exit
-    echo "Invalid option: -$OPTARG"
-    exit 1
-    ;;
-  :)
-    # If the user provides an option without an argument, display an error message and exit
-    echo "Option -$OPTARG requires an argument"
+    echo "Invalid option: -$OPTARG" >&2
+    usage
     exit 1
     ;;
   esac
 done
 
-# Shift the options to the left so the remaining arguments are stored in $@
 shift $((OPTIND - 1))
 
-# Do something with the remaining arguments
-echo "Remaining arguments: $*"
+if [[ $# -gt 0 ]]; then
+  echo "Unexpected arguments: $*" >&2
+  usage
+  exit 1
+fi
 
 if [[ $MODE == "force" ]]; then
-  rm -rf "$HOME"/dotfiles
+  rm -rf "$DOTFILES_DIR"
   bootstrap
 else
   echo "${RED}This will overwrite existing files in your home directory. Are you sure? (y/n)${NORMAL}"
-  read -r
-  if [[ $REPLY =~ ^[Yy] ]]; then
-    if [ -d "$HOME"/dotfiles ]; then
+  read -r response
+  if [[ $response =~ ^[Yy] ]]; then
+    if [[ -d "$DOTFILES_DIR" ]]; then
       echo "${YELLOW}You already have dotfiles installed.${NORMAL}"
-      echo "${GREEN}Please remove $HOME/dotfiles if you want to re-install.${NORMAL}"
-      exit
+      echo "${GREEN}Please remove $DOTFILES_DIR if you want to re-install.${NORMAL}"
+      exit 1
     else
       setup_dotfiles
       bootstrap
