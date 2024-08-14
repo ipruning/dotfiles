@@ -14,21 +14,6 @@ unset_proxy() {
 set_proxy
 
 #===============================================================================
-# 👇 Aliases and Environment Setup
-#===============================================================================
-r-lmql() {
-  emulate bash -c '. ~/Coding/LangMax/.venv/bin/activate'
-  ~/Coding/LangMax/.venv/bin/lmql "$@"
-}
-
-r-chainforge() {
-  emulate bash -c '. ~/Coding/ChainForge/.venv/bin/activate'
-  ~/Coding/ChainForge/.venv/bin/chainforge "$@"
-}
-
-alias code='cursor'
-
-#===============================================================================
 # 👇 Init
 #===============================================================================
 BOOTSTRAP_FILE="$HOME/dotfiles/config/shell/zsh_bootstrap.sh"
