@@ -135,6 +135,7 @@ Rectangle
 Reqable
 Rewind
 Roam Research
+Rond
 Safari
 Save to Raindrop.io
 Save to Reader

@@ -7,6 +7,7 @@ davidanson.vscode-markdownlint
 devvai.devv
 dongfg.vscode-beancount-formatter
 dorzey.vscode-sqlfluff
+eamodio.gitlens
 editorconfig.editorconfig
 edwinkofler.vscode-assorted-languages
 emilast.logfilehighlighter
@@ -16,6 +17,7 @@ formulahendry.code-runner
 foxundermoon.shell-format
 github.copilot
 github.copilot-chat
+github.vscode-github-actions
 grapecity.gc-excelviewer
 gruntfuggly.todo-tree
 huacnlee.autocorrect

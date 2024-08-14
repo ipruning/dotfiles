@@ -41,5 +41,6 @@ strip-tags
 symbex
 things-cli
 ttok
+uv
 vastai
 yacron
