@@ -1,0 +1,103 @@
+{
+  "language_models": {
+    "openai": {
+      "version": "1"
+    }
+  },
+  "chat_panel": {
+    "dock": "left"
+  },
+  "collaboration_panel": {
+    "dock": "left"
+  },
+  "outline_panel": {
+    "dock": "left"
+  },
+  "vim_mode": true,
+  "project_panel": {
+    "button": true,
+    "dock": "right"
+  },
+  "telemetry": {
+    "diagnostics": true,
+    "metrics": true
+  },
+  "preferred_line_length": 120,
+  "base_keymap": "VSCode",
+  "autosave": "on_focus_change",
+  "format_on_save": "on",
+  "buffer_font_family": "MonoLisa Nerd Font",
+  "buffer_font_size": 13,
+  "show_copilot_suggestions": true,
+  "relative_line_numbers": true,
+  "scrollbar": {
+    "show": "auto",
+    "cursors": true,
+    "git_diff": true,
+    "search_results": true,
+    "selected_symbol": true,
+    "diagnostics": true
+  },
+  "terminal": {
+    "dock": "bottom",
+    "copy_on_select": true,
+    "font_size": 13,
+    "working_directory": "current_project_directory"
+  },
+  "inlay_hints": {
+    "enabled": false,
+    "show_type_hints": true,
+    "show_parameter_hints": true,
+    "show_other_hints": true,
+    "edit_debounce_ms": 700,
+    "scroll_debounce_ms": 50
+  },
+  "indent_guides": {
+    "enabled": true,
+    "coloring": "indent_aware"
+  },
+  "git": {
+    "inline_blame": {
+      "enabled": true
+    }
+  },
+  "languages": {
+    "Python": {
+      "format_on_save": "on",
+      "formatter": {
+        "external": {
+          "command": "ruff",
+          "arguments": ["format", "-"]
+        }
+      }
+    },
+    "TypeScript": {
+      // Refer https://github.com/jellydn/ts-inlay-hints for how to setup for Neovim and VSCode
+      "inlay_hints": {
+        "enabled": true,
+        "show_parameter_hints": false,
+        "show_other_hints": true,
+        "show_type_hints": true
+      }
+    },
+    "Rainbow CSV": {
+      "soft_wrap": "none"
+    }
+  },
+  "theme": "Catppuccin Mocha",
+  "jupyter": {
+    "enabled": true
+  },
+  "assistant": {
+    "default_model": {
+      "provider": "openai",
+      "model": "gpt-4o-mini"
+    },
+    "dock": "left",
+    "version": "2",
+    "provider": null
+  },
+  "file_types": {
+    "Dockerfile": ["Dockerfile.*"]
+  }
+}
