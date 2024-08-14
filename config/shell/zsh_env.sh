@@ -24,9 +24,13 @@ fi
 source "$HOME/.rye/env"
 #===============================================================================
 
-# 👇 uv (before asdf)
+# 👇 cargo (before asdf) (cargo/bin/uv)
 #===============================================================================
 source "$HOME"/.cargo/env
+
+#===============================================================================
+# 👇 #TODO mise
+#===============================================================================
 
 #===============================================================================
 # 👇 zsh-vi-mode https://github.com/jeffreytse/zsh-vi-mode/issues/24
@@ -72,12 +76,12 @@ export HISTFILE="$HOME/.zsh_history"
 export HISTSIZE=1000000
 export SAVEHIST=$HISTSIZE
 setopt EXTENDED_HISTORY
-setopt INC_APPEND_HISTORY # Write to the history file immediately, not when the shell exits.
+setopt INC_APPEND_HISTORY
 
 #===============================================================================
 # 👇 oh-my-zsh autoupdate-zsh-plugin
 #===============================================================================
-export UPDATE_ZSH_DAYS=7
+export UPDATE_ZSH_DAYS=14
 
 #===============================================================================
 # 👇 oh-my-zsh init
