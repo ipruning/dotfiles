@@ -8,6 +8,12 @@ readonly YELLOW='\033[0;33m'
 readonly BLUE='\033[0;34m'
 readonly NORMAL='\033[0m'
 
+print_message() {
+  local color=$1
+  local message=$2
+  echo -e "${color}${message}${NORMAL}"
+}
+
 detect_system() {
   SYSTEM_ARCH=$(uname -m)
   case "$OSTYPE" in
@@ -34,16 +40,20 @@ detect_system() {
 }
 
 clone_dotfiles() {
-  echo -e "${BLUE}Cloning dotfiles repository...${NORMAL}"
+  print_message "$BLUE" "Cloning dotfiles repository..."
+  if [ -d "$HOME/dotfiles" ]; then
+    print_message "$YELLOW" "Dotfiles directory already exists. Removing..."
+    rm -rf "$HOME/dotfiles"
+  fi
   git clone --depth 1 https://github.com/ipruning/dotfiles.git "$HOME/dotfiles"
 }
 
 install_homebrew() {
   if ! command -v brew &>/dev/null; then
-    echo -e "${BLUE}Installing Homebrew...${NORMAL}"
+    print_message "$BLUE" "Installing Homebrew..."
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   else
-    echo -e "${GREEN}Homebrew is already installed.${NORMAL}"
+    print_message "$GREEN" "Homebrew is already installed."
   fi
 
   case $SYSTEM_TYPE in
@@ -65,14 +75,14 @@ install_homebrew() {
 }
 
 setup_zsh() {
-  echo -e "${BLUE}Setting up Zsh...${NORMAL}"
+  print_message "$BLUE" "Setting up Zsh..."
   case $SYSTEM_TYPE in
   mac_x86_64 | mac_arm64)
     if [[ $SHELL != "/bin/zsh" ]]; then
-      echo -e "${YELLOW}Changing default shell to Zsh...${NORMAL}"
-      chsh -s /bin/zsh || echo -e "${RED}Failed to change shell. Please change it manually.${NORMAL}"
+      print_message "$YELLOW" "Changing default shell to Zsh..."
+      chsh -s /bin/zsh || print_message "$RED" "Failed to change shell. Please change it manually."
     else
-      echo -e "${GREEN}Zsh is already the default shell.${NORMAL}"
+      print_message "$GREEN" "Zsh is already the default shell."
     fi
     ;;
   linux_x86_64)
@@ -82,27 +92,27 @@ setup_zsh() {
       if ! grep -q "$ZSH_PATH" /etc/shells; then
         echo "$ZSH_PATH" | sudo tee -a /etc/shells
       fi
-      echo -e "${YELLOW}Changing default shell to Zsh...${NORMAL}"
-      chsh -s "$ZSH_PATH" || echo -e "${RED}Failed to change shell. Please change it manually.${NORMAL}"
+      print_message "$YELLOW" "Changing default shell to Zsh..."
+      chsh -s "$ZSH_PATH" || print_message "$RED" "Failed to change shell. Please change it manually."
     else
-      echo -e "${GREEN}Zsh is already installed.${NORMAL}"
+      print_message "$GREEN" "Zsh is already installed."
     fi
     ;;
   esac
 }
 
 install_oh_my_zsh() {
-  echo -e "${BLUE}Installing Oh My Zsh...${NORMAL}"
+  print_message "$BLUE" "Installing Oh My Zsh..."
   if [[ ! -d "$HOME/.oh-my-zsh" ]]; then
     export CHSH=no RUNZSH=no KEEP_ZSHRC=yes
     sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" --unattended --keep-zshrc
   else
-    echo -e "${GREEN}Oh My Zsh is already installed.${NORMAL}"
+    print_message "$GREEN" "Oh My Zsh is already installed."
   fi
 }
 
 setup_dotfiles() {
-  echo -e "${BLUE}Setting up dotfiles...${NORMAL}"
+  print_message "$BLUE" "Setting up dotfiles..."
   case $SYSTEM_TYPE in
   mac_x86_64 | mac_arm64)
     brew install golang
@@ -110,22 +120,22 @@ setup_dotfiles() {
   linux_x86_64)
     brew install mackup asdf
 
-    echo -e "${BLUE}Installing mackup${NORMAL}"
+    print_message "$BLUE" "Installing mackup"
     ln -sf "$HOME/dotfiles/config/mackup/.mackup.cfg" "$HOME/.mackup.cfg"
     ln -sf "$HOME/dotfiles/config/mackup/.mackup" "$HOME/.mackup"
 
-    echo -e "${BLUE}Restoring dotfiles${NORMAL}"
+    print_message "$BLUE" "Restoring dotfiles"
     mackup restore --force
 
     sudo apt-get update
     sudo apt-get install -y coreutils curl
 
-    echo -e "${BLUE}Installing asdf${NORMAL}"
+    print_message "$BLUE" "Installing asdf"
     asdf plugin add golang https://github.com/kennyp/asdf-golang.git
     asdf install golang 1.22.3
     asdf global golang 1.22.3
 
-    echo -e "${BLUE}Reshiming asdf${NORMAL}"
+    print_message "$BLUE" "Reshiming asdf"
     asdf reshim
     ;;
   esac
@@ -138,7 +148,7 @@ main() {
   setup_zsh
   install_oh_my_zsh
   setup_dotfiles
-  echo -e "${GREEN}Bootstrap process completed successfully!${NORMAL}"
+  print_message "$GREEN" "Bootstrap process completed successfully!"
 }
 
 main
