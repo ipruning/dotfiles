@@ -2,115 +2,135 @@
 
 set -euo pipefail
 
-SYSTEM_ARCH=$(uname -m)
-SYSTEM_TYPE="unknown"
+readonly RED=$(tput setaf 1)
+readonly GREEN=$(tput setaf 2)
+readonly YELLOW=$(tput setaf 3)
+readonly BLUE=$(tput setaf 4)
+readonly NORMAL=$(tput sgr0)
 
-determine_system_type() {
+detect_system() {
+  SYSTEM_ARCH=$(uname -m)
   case "$OSTYPE" in
   darwin*)
     case $SYSTEM_ARCH in
     arm64*) SYSTEM_TYPE="mac_arm64" ;;
     x86_64*) SYSTEM_TYPE="mac_x86_64" ;;
+    *) SYSTEM_TYPE="unknown" ;;
     esac
     ;;
   linux*)
     case $SYSTEM_ARCH in
-    arm64*) SYSTEM_TYPE="linux_arm64" ;;
     x86_64*) SYSTEM_TYPE="linux_x86_64" ;;
     *armv7l*) SYSTEM_TYPE="raspberry" ;;
+    *) SYSTEM_TYPE="unknown" ;;
     esac
     ;;
+  *)
+    SYSTEM_TYPE="unknown"
+    ;;
   esac
+
+  export SYSTEM_TYPE
 }
 
 install_homebrew() {
   if ! command -v brew &>/dev/null; then
+    echo "${BLUE}Installing Homebrew...${NORMAL}"
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  else
+    echo "${GREEN}Homebrew is already installed.${NORMAL}"
   fi
 
   case $SYSTEM_TYPE in
-  mac_x86_64)
-    eval "$(/usr/local/homebrew/bin/brew shellenv)"
+  mac_x86_64 | mac_arm64)
+    eval "$(/opt/homebrew/bin/brew shellenv)"
     ;;
   linux_x86_64)
-    test -d ~/.linuxbrew && eval "$(~/.linuxbrew/bin/brew shellenv)"
-    test -d /home/linuxbrew/.linuxbrew && eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-    test -r ~/.bash_profile && echo "eval \"\$($(brew --prefix)/bin/brew shellenv)\"" >>~/.bash_profile
-    echo "eval \"\$($(brew --prefix)/bin/brew shellenv)\"" >>~/.profile
+    if [[ -d /home/linuxbrew/.linuxbrew ]]; then
+      eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+    elif [[ -d ~/.linuxbrew ]]; then
+      eval "$(~/.linuxbrew/bin/brew shellenv)"
+    fi
+
+    if ! grep -q "eval \"\$($(brew --prefix)/bin/brew shellenv)\"" ~/.profile; then
+      echo "eval \"\$($(brew --prefix)/bin/brew shellenv)\"" >>~/.profile
+    fi
     ;;
   esac
 }
 
 setup_zsh() {
+  echo "${BLUE}Setting up Zsh...${NORMAL}"
   case $SYSTEM_TYPE in
-  mac_x86_64)
-    chsh -s /bin/zsh
+  mac_x86_64 | mac_arm64)
+    if [[ $SHELL != "/bin/zsh" ]]; then
+      chsh -s /bin/zsh
+    else
+      echo "${GREEN}Zsh is already the default shell.${NORMAL}"
+    fi
     ;;
   linux_x86_64)
-    echo "Installing zsh"
-    brew install zsh
-    ZSH_PATH="$(brew --prefix)/bin/zsh"
-    sudo sh -c "echo $ZSH_PATH >> /etc/shells"
-    sudo chsh -s "$ZSH_PATH"
+    if ! command -v zsh &>/dev/null; then
+      brew install zsh
+      ZSH_PATH="$(brew --prefix)/bin/zsh"
+      if ! grep -q "$ZSH_PATH" /etc/shells; then
+        echo "$ZSH_PATH" | sudo tee -a /etc/shells
+      fi
+      sudo chsh -s "$ZSH_PATH" "$USER"
+    else
+      echo "${GREEN}Zsh is already installed.${NORMAL}"
+    fi
     ;;
   esac
 }
 
 install_oh_my_zsh() {
-  echo "Installing oh-my-zsh"
-  export CHSH=no RUNZSH=no KEEP_ZSHRC=yes
-  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" --unattended --keep-zshrc
-}
-
-setup_zsh_dotfiles() {
-  echo "Installing zsh dotfiles"
-  if ! grep -q "dotfiles/config/shell/zsh_bootstrap.sh" "$HOME/.zshrc"; then
-    mv "$HOME/.zshrc" "$HOME/.zshrc.bak"
-    cp "$HOME/dotfiles/assets/mackup/.zshrc" "$HOME/.zshrc"
+  echo "${BLUE}Installing Oh My Zsh...${NORMAL}"
+  if [[ ! -d "$HOME/.oh-my-zsh" ]]; then
+    export CHSH=no RUNZSH=no KEEP_ZSHRC=yes
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" --unattended --keep-zshrc
+  else
+    echo "${GREEN}Oh My Zsh is already installed.${NORMAL}"
   fi
-
-  if [ -e "$HOME/.zprofile" ]; then
-    mv "$HOME/.zprofile" "$HOME/.zprofile.bak"
-  fi
-  cp "$HOME/dotfiles/assets/mackup/.zprofile" "$HOME/.zprofile"
 }
 
 setup_dotfiles() {
+  echo "${BLUE}Setting up dotfiles...${NORMAL}"
   case $SYSTEM_TYPE in
-  mac_x86_64)
+  mac_x86_64 | mac_arm64)
     brew install golang
     ;;
   linux_x86_64)
     brew install mackup asdf
 
-    echo "Installing mackup"
+    echo "${BLUE}Installing mackup${NORMAL}"
     ln -sf "$HOME/dotfiles/config/mackup/.mackup.cfg" "$HOME/.mackup.cfg"
     ln -sf "$HOME/dotfiles/config/mackup/.mackup" "$HOME/.mackup"
 
-    echo "Restoring dotfiles"
-    mackup restore ${MODE:+--force}
+    echo "${BLUE}Restoring dotfiles${NORMAL}"
+    mackup restore --force
 
     sudo apt-get update
     sudo apt-get install -y coreutils curl
 
-    echo "Installing asdf"
+    echo "${BLUE}Installing asdf${NORMAL}"
     asdf plugin add golang https://github.com/kennyp/asdf-golang.git
-    asdf install golang 1.18.3
-    asdf global golang 1.18.3
+    asdf install golang 1.22.3
+    asdf global golang 1.22.3
 
-    echo "Reshiming asdf"
+    echo "${BLUE}Reshiming asdf${NORMAL}"
     asdf reshim
     ;;
   esac
 }
 
 main() {
-  determine_system_type
+  detect_system
   install_homebrew
   setup_zsh
   install_oh_my_zsh
-  setup_zsh_dotfiles
   setup_dotfiles
+  echo "${GREEN}Bootstrap process completed successfully!${NORMAL}"
 }
 
 main
