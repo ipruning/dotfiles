@@ -29,7 +29,7 @@ if [[ -n $SSH_CONNECTION ]]; then
   alias lsd='lsd --icon never'
 fi
 alias rmi='rm -i'
-alias v='neovide'
+alias v='cursor'
 
 #===============================================================================
 # 👇
@@ -52,16 +52,26 @@ g-sync() {
   gh repo list --fork --visibility public --json owner,name | jq -r 'map(.owner.login + "/" + .name) | .[]' | xargs -t -L1 gh repo sync
 }
 
-alias r-archivebox='cd /Volumes/Workspace/Databases/ArchiveBox && archivebox server'
+alias r-ab='cd /Volumes/Workspace/Databases/ArchiveBox && archivebox server'
 alias r-bb='/Applications/OpenBB\ Terminal/OpenBB\ Terminal'
-alias r-citespace='cd ${HOME}/Databases/CiteSpace/5.8.R3/ && ./StartCiteSpace_M1_Pro.sh'
-alias r-deepl='colima start && docker run -itd -p 8080:80 zu1k/deepl'
+alias r-cs='cd ${HOME}/Databases/CiteSpace/5.8.R3/ && ./StartCiteSpace_M1_Pro.sh'
+alias r-dl='colima start && docker run -itd -p 8080:80 zu1k/deepl'
 alias r-fava='fava ${HOME}/Databases/Ledger/main.bean -p 4000'
-alias r-jupyter-lab='${HOME}/.conda/envs/LearningAI/bin/jupyter-lab'
-alias r-jupyter='${HOME}/.conda/envs/LearningAI/bin/jupyter-notebook'
+alias r-jul='${HOME}/.conda/envs/LearningAI/bin/jupyter-lab'
+alias r-ju='${HOME}/.conda/envs/LearningAI/bin/jupyter-notebook'
 alias r-lol='open /Applications/League\ of\ Legends.app/ --args --locale=zh_CN'
 alias r-p2t='${HOME}/Databases/Stacks/Utilities/Pix2Text/.venv/bin/python ${HOME}/Databases/Stacks/Utilities/Pix2Text/scripts/screenshot_daemon.py'
 alias r-unm='node ${HOME}/Databases/Stacks/Utilities/UnblockNeteaseMusic/app.js -p 80:443 -f 103.126.92.132'
+
+r-lmql() {
+  emulate bash -c '. ~/Coding/LangMax/.venv/bin/activate'
+  ~/Coding/LangMax/.venv/bin/lmql "$@"
+}
+
+r-cf() {
+  emulate bash -c '. ~/Coding/ChainForge/.venv/bin/activate'
+  ~/Coding/ChainForge/.venv/bin/chainforge "$@"
+}
 
 r-update() {
   echo -e "\033[33mUpdating all packages using asdf...\033[0m"
