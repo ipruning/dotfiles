@@ -35,7 +35,6 @@
 执行 bootstrap 脚本。
 
 ```shell
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/ipruning/dotfiles/master/bootstrap.sh)"
 ```
 
 如果是 macOS 新用户，可能需要安装 XCode Command Line Tools。
@@ -105,10 +104,12 @@ rm -rf brew-install
 ### Ubuntu 配置指南
 
 ```shell
-git clone --depth 1 https://github.com/ipruning/dotfiles.git "$HOME"/dotfiles && source "$HOME"/dotfiles/scripts/bootstrap_linux.sh
 ```
 
 ### Arch 配置指南
+
+```shell
+```
 
 ## ChangeLog
 
