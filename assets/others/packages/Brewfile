@@ -50,7 +50,6 @@ brew "cairo"
 brew "pango"
 brew "chafa"
 brew "choose-rust"
-brew "cloudflared"
 brew "cmake"
 brew "cocoapods"
 brew "curl"
@@ -224,7 +223,6 @@ cask "xld"
 mas "1Blocker", id: 1365531024
 mas "1Password for Safari", id: 1569813296
 mas "Avenue", id: 1523681067
-mas "Bear", id: 1091189122
 mas "Bob", id: 1630034110
 mas "CapCut", id: 1500855883
 mas "com.kagimacOS.Kagi-Search", id: 1622835804
@@ -235,9 +233,7 @@ mas "Developer", id: 640199958
 mas "Dice", id: 1479250666
 mas "Drafts", id: 1435957248
 mas "Eagle for Safari", id: 1526651672
-mas "Exporter", id: 1099120373
 mas "Final Cut Pro", id: 424389933
-mas "Folder Hub", id: 6473019059
 mas "GarageBand", id: 682658836
 mas "Goodnotes", id: 1444383602
 mas "Hush", id: 1544743900
@@ -248,7 +244,6 @@ mas "Keynote", id: 409183694
 mas "Klack", id: 6446206067
 mas "Logic Pro", id: 634148309
 mas "MainStage", id: 634159523
-mas "Maipo", id: 789066512
 mas "Microsoft Excel", id: 462058435
 mas "Microsoft PowerPoint", id: 462062816
 mas "Microsoft Word", id: 462054704
@@ -270,16 +265,17 @@ mas "Slack", id: 803453959
 mas "Surfingkeys", id: 1609752330
 mas "Tampermonkey", id: 1482490089
 mas "Tonal", id: 6449281141
-mas "Tot", id: 1491071483
 mas "uBlacklist for Safari", id: 1547912640
 mas "uPic", id: 1549159979
 vscode "antfu.file-nesting"
 vscode "bodil.file-browser"
 vscode "catppuccin.catppuccin-vsc"
+vscode "catppuccin.catppuccin-vsc-icons"
 vscode "charliermarsh.ruff"
 vscode "davidanson.vscode-markdownlint"
 vscode "devvai.devv"
 vscode "dongfg.vscode-beancount-formatter"
+vscode "dorzey.vscode-sqlfluff"
 vscode "editorconfig.editorconfig"
 vscode "edwinkofler.vscode-assorted-languages"
 vscode "emilast.logfilehighlighter"
@@ -326,6 +322,7 @@ vscode "oderwat.indent-rainbow"
 vscode "pkief.material-icon-theme"
 vscode "pomdtr.excalidraw-editor"
 vscode "qezhu.gitlink"
+vscode "qwtel.sqlite-viewer"
 vscode "redhat.vscode-xml"
 vscode "redhat.vscode-yaml"
 vscode "rust-lang.rust-analyzer"

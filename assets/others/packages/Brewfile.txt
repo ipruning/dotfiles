@@ -17,7 +17,6 @@ btop
 cabextract
 chafa
 choose-rust
-cloudflared
 cmake
 cocoapods
 d12frosted/emacs-plus/emacs-plus@29

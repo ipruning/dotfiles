@@ -1,10 +1,12 @@
 antfu.file-nesting
 bodil.file-browser
 catppuccin.catppuccin-vsc
+catppuccin.catppuccin-vsc-icons
 charliermarsh.ruff
 davidanson.vscode-markdownlint
 devvai.devv
 dongfg.vscode-beancount-formatter
+dorzey.vscode-sqlfluff
 editorconfig.editorconfig
 edwinkofler.vscode-assorted-languages
 emilast.logfilehighlighter
@@ -51,6 +53,7 @@ oderwat.indent-rainbow
 pkief.material-icon-theme
 pomdtr.excalidraw-editor
 qezhu.gitlink
+qwtel.sqlite-viewer
 redhat.vscode-xml
 redhat.vscode-yaml
 rust-lang.rust-analyzer
