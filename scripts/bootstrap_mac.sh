@@ -11,15 +11,15 @@ function main {
   echo "${BLUE}Installing zsh dotiles${NORMAL}"
   if [ -e "$HOME"/.zshrc ]; then
     mv "$HOME"/.zshrc "$HOME"/.zshrc.bak
-    cp "$HOME"/dotfiles/config/shell/mac/zshrc.sh "$HOME"/.zshrc
+    cp "$HOME"/dotfiles/assets/mackup/.zshrc "$HOME"/.zshrc
   else
-    cp "$HOME"/dotfiles/config/shell/mac/zshrc.sh "$HOME"/.zshrc
+    cp "$HOME"/dotfiles/assets/mackup/.zshrc "$HOME"/.zshrc
   fi
   if [ -e "$HOME"/.zprofile ]; then
     mv "$HOME"/.zprofile "$HOME"/.zprofile.bak
-    cp "$HOME"/dotfiles/config/shell/mac/zprofile.sh "$HOME"/.zprofile
+    cp "$HOME"/dotfiles/assets/mackup/.zprofile "$HOME"/.zprofile
   else
-    cp "$HOME"/dotfiles/config/shell/mac/zprofile.sh "$HOME"/.zprofile
+    cp "$HOME"/dotfiles/assets/mackup/.zprofile "$HOME"/.zprofile
   fi
 
   echo "${BLUE}Installing zsh plugins${NORMAL}"
