@@ -1,3 +1,0 @@
-allow_urls    = ["https:"]
-ignore_urls   = ["github.com", "stackoverflow.com", "discord.gg", "doi.org"]
-igonore_files = [".svg"]
