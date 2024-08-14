@@ -7,7 +7,7 @@
 [branch]
     sort = -committerdate # Show most recently changed branches first.
 [core]
-    excludesfile = ~/.gitignore_global
+    excludesfile = ~/.gitignore
 [init]
 	defaultBranch = main
 [push]
