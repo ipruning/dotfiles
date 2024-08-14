@@ -66,13 +66,13 @@ setup_zsh_dotfiles() {
   echo "Installing zsh dotfiles"
   if ! grep -q "dotfiles/config/shell/zsh_bootstrap.sh" "$HOME/.zshrc"; then
     mv "$HOME/.zshrc" "$HOME/.zshrc.bak"
-    cp "$HOME/dotfiles/config/shell/mac/zshrc.sh" "$HOME/.zshrc"
+    cp "$HOME/dotfiles/assets/mackup/.zshrc" "$HOME/.zshrc"
   fi
 
   if [ -e "$HOME/.zprofile" ]; then
     mv "$HOME/.zprofile" "$HOME/.zprofile.bak"
   fi
-  cp "$HOME/dotfiles/config/shell/mac/zprofile.sh" "$HOME/.zprofile"
+  cp "$HOME/dotfiles/assets/mackup/.zprofile" "$HOME/.zprofile"
 }
 
 setup_dotfiles() {
