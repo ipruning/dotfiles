@@ -35,7 +35,9 @@ pydeps
 shot-scraper
 socid-extractor
 speedtest-cli
+sqlfluff
 sqlite-utils
+strip-tags
 symbex
 things-cli
 ttok
