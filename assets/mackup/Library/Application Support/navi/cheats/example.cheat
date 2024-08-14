@@ -1,6 +1,0 @@
-% example cheat
-
-# print something
-echo "My name is <name>!"
-
-$ name: whoami
