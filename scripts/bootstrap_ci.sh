@@ -47,7 +47,7 @@ setup_zsh() {
     chsh -s /bin/zsh
     ;;
   linux_x86_64)
-    echo "${BLUE}Installing zsh${NORMAL}"
+    echo "Installing zsh"
     brew install zsh
     ZSH_PATH="$(brew --prefix)/bin/zsh"
     sudo sh -c "echo $ZSH_PATH >> /etc/shells"
@@ -57,13 +57,13 @@ setup_zsh() {
 }
 
 install_oh_my_zsh() {
-  echo "${BLUE}Installing oh-my-zsh${NORMAL}"
+  echo "Installing oh-my-zsh"
   export CHSH=no RUNZSH=no KEEP_ZSHRC=yes
   sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" --unattended --keep-zshrc
 }
 
 setup_zsh_dotfiles() {
-  echo "${BLUE}Installing zsh dotfiles${NORMAL}"
+  echo "Installing zsh dotfiles"
   if ! grep -q "dotfiles/config/shell/zsh_bootstrap.sh" "$HOME/.zshrc"; then
     mv "$HOME/.zshrc" "$HOME/.zshrc.bak"
     cp "$HOME/dotfiles/config/shell/mac/zshrc.sh" "$HOME/.zshrc"
@@ -75,7 +75,7 @@ setup_zsh_dotfiles() {
   cp "$HOME/dotfiles/config/shell/mac/zprofile.sh" "$HOME/.zprofile"
 }
 
-setup_system_specific() {
+setup_dotfiles() {
   case $SYSTEM_TYPE in
   mac_x86_64)
     brew install golang
@@ -83,22 +83,22 @@ setup_system_specific() {
   linux_x86_64)
     brew install mackup asdf
 
-    echo "${BLUE}Installing mackup${NORMAL}"
+    echo "Installing mackup"
     ln -sf "$HOME/dotfiles/config/mackup/.mackup.cfg" "$HOME/.mackup.cfg"
     ln -sf "$HOME/dotfiles/config/mackup/.mackup" "$HOME/.mackup"
 
-    echo "${BLUE}Restoring dotfiles${NORMAL}"
+    echo "Restoring dotfiles"
     mackup restore ${MODE:+--force}
 
     sudo apt-get update
     sudo apt-get install -y coreutils curl
 
-    echo "${BLUE}Installing asdf${NORMAL}"
+    echo "Installing asdf"
     asdf plugin add golang https://github.com/kennyp/asdf-golang.git
     asdf install golang 1.18.3
     asdf global golang 1.18.3
 
-    echo "${BLUE}Reshiming asdf${NORMAL}"
+    echo "Reshiming asdf"
     asdf reshim
     ;;
   esac
@@ -110,7 +110,7 @@ main() {
   setup_zsh
   install_oh_my_zsh
   setup_zsh_dotfiles
-  setup_system_specific
+  setup_dotfiles
 }
 
 main
