@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+# TODO
 function main {
   echo "${BLUE}Installing oh-my-zsh${NORMAL}"
   export CHSH=no

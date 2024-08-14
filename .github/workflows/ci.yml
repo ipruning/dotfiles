@@ -9,7 +9,7 @@ jobs:
       matrix:
         os: [macos-latest, ubuntu-latest]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4.1.7
       - name: set up
         run: |
           git clone --depth 1 https://github.com/ipruning/dotfiles.git $HOME/dotfiles
