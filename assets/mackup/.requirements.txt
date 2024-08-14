@@ -1,8 +1,4 @@
-isort
-loguru
 pip
-pipx
-rich
 ruff
 setuptools
 wheel
