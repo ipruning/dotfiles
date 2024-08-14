@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# TODO Remove ASDF
+
 set -euo pipefail
 
 readonly RED='\033[0;31m'
