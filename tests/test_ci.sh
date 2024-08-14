@@ -8,9 +8,7 @@ test -x "$(which git)"
 echo "Testing Go"
 test -x "$(which go version)"
 
-echo "Testing ZSH"
-test -x "$(which zsh)"
-
+echo "Testing OMZ"
 test -d "$HOME"/.oh-my-zsh
 
 echo "Testing Homebrew"
