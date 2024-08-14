@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+#!/bin/bash
+
+# Check if a URL is provided
+if [ $# -eq 0 ]; then
+  echo "Usage: ccurl <URL>"
+  exit 1
+fi
+
+# Get the URL from the first argument
+url="$1"
+
+# Run curl with the modified URL and pass the output to subsequent commands
+curl -s "https://r.jina.ai/$url" | cat
+
+# Check if curl command was successful
+if [ "${PIPESTATUS[0]}" -ne 0 ]; then
+  echo "Error: curl command failed" >&2
+  exit 1
+fi
