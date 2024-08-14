@@ -39,15 +39,6 @@ detect_system() {
   export SYSTEM_TYPE
 }
 
-clone_dotfiles() {
-  print_message "$BLUE" "Cloning dotfiles repository..."
-  if [ -d "$HOME/dotfiles" ]; then
-    print_message "$YELLOW" "Dotfiles directory already exists. Removing..."
-    rm -rf "$HOME/dotfiles"
-  fi
-  git clone --depth 1 https://github.com/ipruning/dotfiles.git "$HOME/dotfiles"
-}
-
 install_homebrew() {
   if ! command -v brew &>/dev/null; then
     print_message "$BLUE" "Installing Homebrew..."
@@ -143,7 +134,6 @@ setup_dotfiles() {
 
 main() {
   detect_system
-  clone_dotfiles
   install_homebrew
   setup_zsh
   install_oh_my_zsh
