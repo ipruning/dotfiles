@@ -12,7 +12,6 @@ Arc
 Audio Hijack
 Avenue
 BaiduNetdisk
-Bear
 BetterDisplay
 Binance
 Blackmagic Disk Speed Test
@@ -45,12 +44,10 @@ Eagle
 Eudic
 Evernote
 ExcalidrawZ
-Exporter
 Figma
 Final Cut Pro
 Firefox Nightly
 FixTim
-Folder Hub
 Fork
 FoxTrot Personal Search
 GarageBand
@@ -92,7 +89,6 @@ LyricsX
 MAA
 MWeb Pro
 MainStage
-Maipo
 Mathpix Snipping Tool
 MessAuto
 Microsoft Excel
@@ -171,7 +167,6 @@ TickTick
 Tito Control
 Tonal
 TopNotch
-Tot
 TradingView
 Tunnelblick
 UninstallPKG
@@ -201,3 +196,4 @@ qBittorrent
 uBlacklist for Safari
 uPic
 优酷
+集换社
