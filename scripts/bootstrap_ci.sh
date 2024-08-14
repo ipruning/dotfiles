@@ -64,7 +64,8 @@ setup_zsh() {
   case $SYSTEM_TYPE in
   mac_x86_64 | mac_arm64)
     if [[ $SHELL != "/bin/zsh" ]]; then
-      chsh -s /bin/zsh
+      echo "${YELLOW}Changing default shell to Zsh...${NORMAL}"
+      sudo -n chsh -s /bin/zsh "$USER" || echo "${RED}Failed to change shell. Please change it manually.${NORMAL}"
     else
       echo "${GREEN}Zsh is already the default shell.${NORMAL}"
     fi
@@ -76,7 +77,8 @@ setup_zsh() {
       if ! grep -q "$ZSH_PATH" /etc/shells; then
         echo "$ZSH_PATH" | sudo tee -a /etc/shells
       fi
-      sudo chsh -s "$ZSH_PATH" "$USER"
+      echo "${YELLOW}Changing default shell to Zsh...${NORMAL}"
+      sudo -n chsh -s "$ZSH_PATH" "$USER" || echo "${RED}Failed to change shell. Please change it manually.${NORMAL}"
     else
       echo "${GREEN}Zsh is already installed.${NORMAL}"
     fi
