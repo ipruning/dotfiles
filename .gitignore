@@ -1,12 +1,5 @@
-# gitignore
-
-# AIDER
-.aider*
-
-# backup
+.DS_Store
 automatic_backups
-
-# bin (compiled binaries)
 bin/cwim
 bin/feishu2md
 bin/nnn
@@ -15,12 +8,4 @@ bin/updo
 bin/warpd
 bin/wayback
 bin/webtty
-
-# bin (downloaded binaries)
-bin/try
-
-# log
-*.log
-
-# zsh
 config/shell/zsh_env_private.sh
