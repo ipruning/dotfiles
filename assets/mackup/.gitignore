@@ -1,4 +1,4 @@
-# macOS
+# macos
 ._*
 .AppleDouble
 .DS_Store
@@ -7,18 +7,18 @@
 .Spotlight-V100
 .Trashes
 
-# Windows
+# windows
 Desktop.ini
 ehthumbs.db
 Thumbs.db
 
-# Node.js
+# node
 node_modules
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Python
+# python
 venv
 .venv
 env
@@ -26,9 +26,9 @@ env
 site-packages
 .ipynb_checkpoints
 
-# VS Code
+# code
 .vscode
 
-# Playground
+# playground
 playground
 Playground
