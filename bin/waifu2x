@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 WAIFU2X_APP="/Applications/waifu2x.app"
 

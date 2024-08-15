@@ -8,4 +8,4 @@ bin/updo
 bin/warpd
 bin/wayback
 bin/webtty
-config/shell/zsh_env_private.sh
+config/shell/env_private.zsh
