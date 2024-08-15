@@ -119,7 +119,6 @@ r-upgrade() {
 
   echo -e "\033[33mUpdating mise...\033[0m"
   mise self-update
-  mise plugins update
 
   echo -e "\033[33mReshiming mise...\033[0m"
   mise reshim
