@@ -1,18 +1,18 @@
 [tools]
-  go     = "latest"
-  node   = "latest"
-  python = "latest"
-  rust   = "latest"
+  "go:github.com/Owloops/updo" = "latest"
+  "go:github.com/barthr/redo"  = "latest"
+  go                           = "latest"
+  node                         = "latest"
+  python                       = "latest"
+  rust                         = "latest"
 
 [settings]
   legacy_version_file  = false
   always_keep_download = false
   always_keep_install  = false
 
+  env_file                              = '.env'
+  experimental                          = true
   plugin_autoupdate_last_check_duration = '1 week'
-
-  trusted_config_paths = ['~/coding']
-
-  env_file = '.env'
-
-  status = { missing_tools = "if_other_versions_installed", show_env = false, show_tools = false }
+  status                                = { missing_tools = "if_other_versions_installed", show_env = false, show_tools = false }
+  trusted_config_paths                  = ['~/coding']
