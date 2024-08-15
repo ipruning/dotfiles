@@ -1,3 +1,5 @@
+#!/bin/bash
+
 #===============================================================================
 # 👇 Aliases
 # 👇 For a full list of active aliases, run `alias`.
@@ -140,9 +142,9 @@ r-backup() {
 
 r-completion() {
   echo -e "\033[33mGenerating completions...\033[0m"
-  rustup completions zsh >"$HOME"/dotfiles/config/shell/zsh_completions/_rustup
-  rye self completion >"$HOME"/dotfiles/config/shell/zsh_completions/_rye
-  zellij setup --generate-completion zsh >"$HOME"/dotfiles/config/shell/zsh_completions/_zellij
+  rustup completions zsh >"$HOME"/dotfiles/config/shell/completions/_rustup
+  rye self completion >"$HOME"/dotfiles/config/shell/completions/_rye
+  zellij setup --generate-completion zsh >"$HOME"/dotfiles/config/shell/completions/_zellij
   rm -f ~/.zcompdump
   compinit
 }

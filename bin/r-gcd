@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 echo "Enter commit date (e.g. Wed Feb 7 12:00 2014 +0100):"
 read -r commit_date

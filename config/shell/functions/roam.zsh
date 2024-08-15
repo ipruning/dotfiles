@@ -1,6 +1,9 @@
+#!/bin/bash
+
 #===============================================================================
-# 👇
+# 👇 Under development, please use with caution.
 #===============================================================================
+
 function rr() {
   if [ -z "$1" ]; then
     echo "Please provide a search string."

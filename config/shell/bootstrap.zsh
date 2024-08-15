@@ -1,3 +1,5 @@
+#!/bin/bash
+
 #===============================================================================
 # TODO
 #===============================================================================
@@ -66,15 +68,10 @@ if type brew &>/dev/null; then
   # custom completions (Oh-My-Zsh will call compinit for you) (should)
   # https://docs.brew.sh/Shell-Completion
   FPATH="$(brew --prefix)/share/zsh/site-functions:${FPATH}"
-  FPATH="$HOME/dotfiles/config/shell/zsh_completions:$FPATH"
+  FPATH="$HOME/dotfiles/config/shell/completions:$FPATH"
   autoload -Uz compinit
   compinit -u
 fi
-
-# TODO
-. "$HOME"/dotfiles/config/shell/zsh_functions/ai.sh
-. "$HOME"/dotfiles/config/shell/zsh_functions/roam.sh
-. "$HOME"/dotfiles/config/shell/zsh_functions/others.sh
 
 #===============================================================================
 # 👇 env
@@ -82,23 +79,22 @@ fi
 case $SYSTEM_TYPE in
 mac_arm64 | mac_x86_64 | linux_x86_64 | raspberry)
   if [ -n "$BASH_VERSION" ] || [ -n "$ZSH_VERSION" ]; then
-    # run script for interactive mode of bash/zsh
     if [[ $- == *i* ]] && [ -z "$_INIT_SH_NOFUN" ]; then
-      if [ -f "$HOME/dotfiles/config/shell/zsh_env.sh" ]; then
-        . "$HOME/dotfiles/config/shell/zsh_env.sh"
-      fi
-      if [ -f "$HOME/dotfiles/config/shell/zsh_env_private.sh" ]; then
-        . "$HOME/dotfiles/config/shell/zsh_env_private.sh"
-      fi
-      if [ -f "$HOME/dotfiles/config/shell/zsh_functions.sh" ]; then
-        . "$HOME/dotfiles/config/shell/zsh_functions.sh"
-      fi
-      if [ -f "$HOME/dotfiles/config/shell/zsh_aliases.sh" ]; then
-        . "$HOME/dotfiles/config/shell/zsh_aliases.sh"
-      fi
-      if [ -f "$HOME/dotfiles/config/shell/zsh_completion.sh" ]; then
-        . "$HOME/dotfiles/config/shell/zsh_completion.sh"
-      fi
+      local config_files=(
+        "$HOME/dotfiles/config/shell/env.zsh"
+        "$HOME/dotfiles/config/shell/env_private.zsh"
+        "$HOME/dotfiles/config/shell/functions/ai.zsh"
+        "$HOME/dotfiles/config/shell/functions/roam.zsh"
+        "$HOME/dotfiles/config/shell/functions/misc.zsh"
+        "$HOME/dotfiles/config/shell/aliases.zsh"
+        "$HOME/dotfiles/config/shell/completions.zsh"
+      )
+
+      for file in "${config_files[@]}"; do
+        if [ -f "$file" ]; then
+          . "$file"
+        fi
+      done
     fi
   fi
   ;;

@@ -196,5 +196,7 @@ pcsuite
 qBittorrent
 uBlacklist for Safari
 uPic
+zoom.us
 优酷
+小红书
 集换社
