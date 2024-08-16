@@ -205,20 +205,13 @@
     "command": "file-browser.stepIn",
     "when": "inFileBrowser"
   },
+  // TODO
   {
-    "key": "cmd+r",
+    "key": "cmd+b",
     "command": "workbench.action.toggleAuxiliaryBar"
   },
   {
-    "key": "alt+cmd+b",
-    "command": "-workbench.action.toggleAuxiliaryBar"
-  },
-  {
-    "key": "cmd+b",
+    "key": "cmd+r",
     "command": "workbench.action.toggleSidebarVisibility"
-  },
-  {
-    "key": "cmd+b",
-    "command": "-workbench.action.toggleSidebarVisibility"
   }
 ]

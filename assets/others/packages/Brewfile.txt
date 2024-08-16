@@ -84,6 +84,7 @@ navi
 ncdu
 neovim
 nmap
+nnn
 noborus/tap/ov
 node
 ollama
