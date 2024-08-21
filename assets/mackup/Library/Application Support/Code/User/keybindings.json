@@ -205,7 +205,7 @@
     "command": "file-browser.stepIn",
     "when": "inFileBrowser"
   },
-  // TODO
+  // Merge with Zed
   {
     "key": "cmd+b",
     "command": "workbench.action.toggleAuxiliaryBar"
@@ -213,5 +213,20 @@
   {
     "key": "cmd+r",
     "command": "workbench.action.toggleSidebarVisibility"
+  },
+  {
+    "key": "cmd+i",
+    "command": "-composer.startComposerPrompt",
+    "when": "composerIsEnabled"
+  },
+  {
+    "key": "cmd+i",
+    "command": "composer.startComposerControlPanel",
+    "when": "composerIsEnabled"
+  },
+  {
+    "key": "shift+cmd+i",
+    "command": "-composer.startComposerControlPanel",
+    "when": "composerIsEnabled"
   }
 ]

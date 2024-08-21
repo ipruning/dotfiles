@@ -90,8 +90,8 @@
   },
   "assistant": {
     "default_model": {
-      "provider": "openai",
-      "model": "gpt-4o-mini"
+      "provider": "zed.dev",
+      "model": "claude-3-5-sonnet-20240620"
     },
     "dock": "left",
     "version": "2",
