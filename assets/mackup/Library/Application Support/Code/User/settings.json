@@ -1,13 +1,20 @@
 {
-  // "pyproject.toml": ".commitlint*, .dlint.json, .dprint.json*, .editorconfig, .eslint*, .flake8, .flowconfig, .isort.cfg, .jslint*, .lintstagedrc*, .markdownlint*, .pdm-python, .pdm.toml, .prettier*, .pylintrc, .python-version, .ruff.toml, .stylelint*, .textlint*, .xo-config*, .yamllint*, MANIFEST.in, Pipfile, Pipfile.lock, biome.json*, commitlint*, dangerfile*, dlint.json, dprint.json*, eslint*, hatch.toml, lint-staged*, pdm.lock, phpcs.xml, poetry.lock, poetry.toml, prettier*, pyproject.toml, pyrightconfig.json, requirements*.in, requirements*.pip, requirements*.txt, ruff.toml, setup.cfg, setup.py, stylelint*, tox.ini, tslint*, xo.config.*, requirements*.lock, .coverage*,",
+  "cursor.chat.defaultNoContext": true,
+  "cursor.chat.ghostTextAtSymbols": true,
+  "cursor.chat.smoothStreaming": true,
+  "cursor.cmdk.ghostTextAtSymbols": true,
+  "cursor.cmdk.useThemedDiffBackground": true,
+  "cursor.cpp.disabledLanguages": ["plaintext", "markdown"],
+  "cursor.general.enableShadowWorkspace": true,
   // File Nesting
+  // "pyproject.toml": ".commitlint*, .dlint.json, .dprint.json*, .editorconfig, .eslint*, .flake8, .flowconfig, .isort.cfg, .jslint*, .lintstagedrc*, .markdownlint*, .pdm-python, .pdm.toml, .prettier*, .pylintrc, .python-version, .ruff.toml, .stylelint*, .textlint*, .xo-config*, .yamllint*, MANIFEST.in, Pipfile, Pipfile.lock, biome.json*, commitlint*, dangerfile*, dlint.json, dprint.json*, eslint*, hatch.toml, lint-staged*, pdm.lock, phpcs.xml, poetry.lock, poetry.toml, prettier*, pyproject.toml, pyrightconfig.json, requirements*.in, requirements*.pip, requirements*.txt, ruff.toml, setup.cfg, setup.py, stylelint*, tox.ini, tslint*, xo.config.*, requirements*.lock, .coverage*,",
   "fileNestingUpdater.autoUpdate": false,
   "fileNestingUpdater.autoUpdateInterval": 43200,
   "fileNestingUpdater.promptOnAutoUpdate": true,
   "explorer.fileNesting.enabled": true,
   "explorer.fileNesting.expand": false,
   "explorer.fileNesting.patterns": {
-    "//": "Last update at 8/14/2024, 4:00:36 PM",
+    "//": "Last update at 8/21/2024, 10:37:45 AM",
     ".clang-tidy": ".clang-format, .clangd, compile_commands.json",
     ".env": "*.env, .env.*, .envrc, env.d.ts",
     ".gitignore": ".gitattributes, .gitmodules, .gitmessage, .mailmap, .git-blame*",
@@ -142,9 +149,7 @@
   "code-runner.runInTerminal": true,
   "code-runner.saveFileBeforeRun": true,
   "code-runner.executorMap": {
-    // "beancount": "fava -p 4000 $fullFileName",
     "javascript": "bun run $fullFileName",
-    // "markdown": "cd $dir && md-formatter -a $fullFileName",
     "python": "$pythonPath -u $fullFileName",
     "typescript": "bun run $fullFileName"
   },
@@ -254,7 +259,7 @@
   "python.languageServer": "Pylance",
   "python.analysis.autoFormatStrings": true,
   // "python.analysis.inlayHints.variableTypes": true,
-  // "python.analysis.inlayHints.callArgumentNames": "partial",
+  // "python.analysis.inlayHints.callArgumentames": "partial",
   "markdownlint.config": {
     // https://github.com/DavidAnson/markdownlint/blob/main/schema/.markdownlint.jsonc
     // MD004/ul-style - Unordered list style
@@ -282,13 +287,13 @@
     // MD045/no-alt-text - Images should have alternate text (alt text)
     "MD045": false
   },
-  "markdown.extension.toc.levels": "2..6",
-  "markdown.marp.exportType": "html",
-  "markdown.marp.enableHtml": true,
-  "markdown.validate.enabled": true,
   "markdown.extension.italic.indicator": "_",
   "markdown.extension.list.indentationSize": "inherit",
   "markdown.extension.tableFormatter.normalizeIndentation": true,
+  "markdown.extension.toc.levels": "2..6",
+  "markdown.marp.enableHtml": true,
+  "markdown.marp.exportType": "html",
+  "markdown.validate.enabled": true,
   "markdown.suggest.paths.enabled": false,
   "material-icon-theme.files.associations": {
     "*.autocorrectrc": "yaml",
@@ -445,8 +450,6 @@
   "gitlens.defaultDateShortFormat": "YYYY-MM-DD",
   "gitlens.defaultTimeFormat": "hh:mm",
   "json.maxItemsComputed": 10000,
-  "markdown-preview-enhanced.previewTheme": "one-dark.css",
-  "markdown-preview-enhanced.revealjsTheme": "black.css",
   "path-autocomplete.triggerOutsideStrings": true,
   "redhat.telemetry.enabled": false,
   "remote.SSH.connectTimeout": 1000,
@@ -495,6 +498,7 @@
   },
   "platformio-ide.activateOnlyOnPlatformIOProject": true,
   "platformio-ide.useBuiltinPython": false,
+  // vim 2024-08-21
   // nvim (old)
   // "vscode-neovim.neovimExecutablePaths.darwin": "/opt/homebrew/bin/nvim",
   // vim (old)
@@ -547,11 +551,5 @@
       "before": ["<"],
       "commands": ["editor.action.outdentLines"]
     }
-  ],
-  "cursor.chat.defaultNoContext": true,
-  "cursor.chat.ghostTextAtSymbols": true,
-  "cursor.cmdk.useThemedDiffBackground": true,
-  "cursor.cmdk.ghostTextAtSymbols": true,
-  "cursor.chat.smoothStreaming": true,
-  "cursor.general.enableShadowWorkspace": true
+  ]
 }
