@@ -98,12 +98,11 @@ Mini Metro+
 Mochi Diffusion
 Mos
 Motion
+Motrix
 MusicHarbor
 MyCard
 NeteaseMusic
-Notion Calendar
 Notion Mail
-Notion
 Numbers
 OBS
 OmniFocus
@@ -152,6 +151,7 @@ Slack
 Sloth
 Sniffnet
 SoundSource
+Spotify
 Steam
 Surfingkeys
 Surge
@@ -198,5 +198,6 @@ uBlacklist for Safari
 uPic
 zoom.us
 优酷
+小宇宙
 小红书
 集换社

@@ -7,10 +7,12 @@ davidanson.vscode-markdownlint
 devvai.devv
 dongfg.vscode-beancount-formatter
 dorzey.vscode-sqlfluff
+drcika.apc-extension
 eamodio.gitlens
 editorconfig.editorconfig
 edwinkofler.vscode-assorted-languages
 emilast.logfilehighlighter
+enhancedjax.vscode-ayu-zed
 esbenp.prettier-vscode
 fabiospampinato.vscode-highlight
 formulahendry.code-runner
