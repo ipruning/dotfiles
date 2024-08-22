@@ -1,3 +1,4 @@
+FaroSystemAppender constructor
 antfu.file-nesting
 bodil.file-browser
 catppuccin.catppuccin-vsc
@@ -34,6 +35,7 @@ lencerf.beancount
 lmql-team.lmql
 marimo-team.vscode-marimo
 mechatroner.rainbow-csv
+mgt19937.typst-preview
 ms-azuretools.vscode-docker
 ms-python.debugpy
 ms-python.python
@@ -61,6 +63,7 @@ qwtel.sqlite-viewer
 redhat.vscode-xml
 redhat.vscode-yaml
 rust-lang.rust-analyzer
+serayuzgur.crates
 sumneko.lua
 tamasfe.even-better-toml
 tecosaur.latex-utilities
