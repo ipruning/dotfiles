@@ -18,7 +18,7 @@
     "context": "Editor && vim_mode == normal && vim_operator == none && !VimWaiting",
     "bindings": {
       "ctrl-r": "projects::OpenRecent",
-      "space g g": [
+      "space g s": [
         "workspace::SendKeystrokes",
         ": new center terminal enter lazygit enter"
       ],
