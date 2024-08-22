@@ -64,7 +64,7 @@ r-lmql() {
 }
 
 r-chainforge() {
-  docker run -p 8000:8000 chainforge
+  docker run -p 8000:8000 -e OPENAI_API_KEY=${CF_OPENAI_API_KEY} -e ANTHROPIC_API_KEY=${CF_ANTHROPIC_API_KEY} chainforge
 }
 
 r-update() {
@@ -102,16 +102,16 @@ r-upgrade() {
   python -m pip install --upgrade pip
   pipx upgrade-all
 
-  echo -e "\033[33mUpgrading Rye...\033[0m"
-  rye self update
+  # echo -e "\033[33mUpgrading Rye...\033[0m"
+  # rye self update
 
-  echo -e "\033[33mUpdating Rust toolchain...\033[0m"
-  rustup self update
-  rustup update
+  # echo -e "\033[33mUpdating Rust toolchain...\033[0m"
+  # rustup self update
+  # rustup update
 
-  echo -e "\033[33mUpdating mise...\033[0m"
-  mise self-update --verbose
-  mise reshim
+  # echo -e "\033[33mUpdating mise...\033[0m"
+  # mise self-update --verbose
+  # mise reshim
 }
 
 r-backup() {
@@ -132,7 +132,7 @@ r-backup() {
 r-completion() {
   echo -e "\033[33mGenerating completions...\033[0m"
   rustup completions zsh >"$HOME"/dotfiles/config/shell/completions/_rustup
-  rye self completion >"$HOME"/dotfiles/config/shell/completions/_rye
+  # rye self completion >"$HOME"/dotfiles/config/shell/completions/_rye
   zellij setup --generate-completion zsh >"$HOME"/dotfiles/config/shell/completions/_zellij
   rm -f ~/.zcompdump
   compinit
