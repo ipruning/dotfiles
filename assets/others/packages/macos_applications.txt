@@ -53,7 +53,6 @@ FoxTrot Personal Search
 GarageBand
 GitButler
 Goodnotes
-Google Chrome
 Google Docs
 Google Drive
 Google Sheets
@@ -174,7 +173,6 @@ UninstallPKG
 VMware Fusion
 Viable
 VirtualBuddy
-Visual Studio Code
 WeChat
 WechatExporter
 Wooshy
