@@ -1,4 +1,7 @@
 {
+  "features": {
+    "inline_completion_provider": "copilot"
+  },
   "language_models": {
     "openai": {
       "version": "1"
@@ -13,7 +16,7 @@
   "outline_panel": {
     "dock": "left"
   },
-  "vim_mode": true,
+  "vim_mode": false,
   "project_panel": {
     "button": true,
     "dock": "right"
