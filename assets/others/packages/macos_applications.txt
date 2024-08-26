@@ -191,7 +191,6 @@ iMovie
 kindaVim
 logioptionsplus
 pcsuite
-qBittorrent
 uBlacklist for Safari
 uPic
 zoom.us
@@ -199,3 +198,4 @@ zoom.us
 小宇宙
 小红书
 集换社
+哔哩哔哩
