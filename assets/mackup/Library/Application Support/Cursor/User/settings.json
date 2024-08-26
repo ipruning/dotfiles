@@ -4,7 +4,7 @@
   "cursor.chat.smoothStreaming": true,
   "cursor.cmdk.ghostTextAtSymbols": true,
   "cursor.cmdk.useThemedDiffBackground": true,
-  "cursor.cpp.disabledLanguages": ["plaintext", "markdown"],
+  // "cursor.cpp.disabledLanguages": ["plaintext", "markdown"],
   "cursor.general.enableShadowWorkspace": true,
   "fileNestingUpdater.autoUpdate": false,
   "fileNestingUpdater.autoUpdateInterval": 43200,
