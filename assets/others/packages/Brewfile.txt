@@ -42,6 +42,7 @@ genact
 gh
 git-cliff
 git-crypt
+git-delta
 git-extras
 git-lfs
 git-quick-stats
