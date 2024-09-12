@@ -1,11 +1,4 @@
 {
-  "cursor.chat.defaultNoContext": true,
-  "cursor.chat.ghostTextAtSymbols": true,
-  "cursor.chat.smoothStreaming": true,
-  "cursor.cmdk.ghostTextAtSymbols": true,
-  "cursor.cmdk.useThemedDiffBackground": true,
-  // "cursor.cpp.disabledLanguages": ["plaintext", "markdown"],
-  "cursor.general.enableShadowWorkspace": true,
   "fileNestingUpdater.autoUpdate": false,
   "fileNestingUpdater.autoUpdateInterval": 43200,
   "fileNestingUpdater.promptOnAutoUpdate": true,
@@ -140,7 +133,7 @@
   "powershell.startAutomatically": false,
   "code-runner.clearPreviousOutput": false,
   "code-runner.enableAppInsights": false,
-  "code-runner.fileDirectoryAsCwd": true,
+  "code-runner.fileDirectoryAsCwd": false,
   "code-runner.ignoreSelection": true,
   "code-runner.preserveFocus": false,
   "code-runner.runInTerminal": true,
@@ -151,7 +144,7 @@
     "typescript": "bun run $fullFileName"
   },
   "code-runner.executorMapByGlob": {
-    "*.hurl": "hurl --verbose $fullFileName",
+    "*.hurl": "hurl $fullFileName",
     "*.lmql": "lmql run $fullFileName",
     "*.typ": "typst $fullFileName"
   },
@@ -279,6 +272,7 @@
   "material-icon-theme.files.associations": {
     "*.autocorrectrc": "yaml",
     "*.coverage": "log",
+    "*.cursorrules": "markdown",
     "*.hurl": "log",
     "*.lmql": "python",
     "*.log.*": "log",
@@ -518,5 +512,20 @@
       "before": ["<"],
       "commands": ["editor.action.outdentLines"]
     }
-  ]
+  ],
+  "baml.bamlPanelOpen": false,
+  "gitlens.views.commits.avatars": false,
+  "gitlens.views.commits.files.layout": "tree",
+  "vscode-mogami.concurrency": 20,
+  "vscode-mogami.enableCodeLens": true,
+  "vscode-mogami.usePrivateSource": false,
+  "cursor.chat.premiumChatAutoScrollWhenAtBottom": true,
+  "cursor.chat.showSuggestedFiles": true,
+  "cursor.general.enableShadowWorkspace": true,
+  "zig.initialSetupDone": true,
+  "zig.path": "~/.local/share/mise/installs/zig/latest/bin/zig",
+  "zig.zls.path": "~/Library/Application Support/Cursor/User/globalStorage/ziglang.vscode-zig/zls_install/zls",
+  "ruff.configurationPreference": "filesystemFirst",
+  "cursor.chat.narrowScrollbar": false,
+  "sqlfluff.dialect": "sqlite"
 }
