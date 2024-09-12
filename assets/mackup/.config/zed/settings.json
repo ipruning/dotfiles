@@ -7,23 +7,36 @@
       "version": "1"
     }
   },
-  "chat_panel": {
-    "dock": "left"
+  "vim_mode": true,
+  "telemetry": {
+    "diagnostics": true,
+    "metrics": true
+  },
+  "project_panel": {
+    "button": true,
+    "dock": "right",
+    "git_status": true
+  },
+  "outline_panel": {
+    "dock": "right"
   },
   "collaboration_panel": {
     "dock": "left"
   },
-  "outline_panel": {
+  "notification_panel": {
     "dock": "left"
   },
-  "vim_mode": false,
-  "project_panel": {
-    "button": true,
-    "dock": "right"
+  "chat_panel": {
+    "dock": "left"
   },
-  "telemetry": {
-    "diagnostics": true,
-    "metrics": true
+  "assistant": {
+    "default_model": {
+      "provider": "zed.dev",
+      "model": "claude-3-5-sonnet-20240620"
+    },
+    "dock": "right",
+    "version": "2",
+    "provider": null
   },
   "preferred_line_length": 120,
   "base_keymap": "VSCode",
@@ -44,8 +57,10 @@
   "terminal": {
     "dock": "bottom",
     "copy_on_select": true,
-    "font_size": 13,
-    "working_directory": "current_project_directory"
+    "working_directory": "first_project_directory",
+    "env": {
+      "EDITOR": "zed --wait"
+    }
   },
   "inlay_hints": {
     "enabled": false,
@@ -66,13 +81,10 @@
   },
   "languages": {
     "Python": {
-      "format_on_save": "on",
-      "formatter": {
-        "external": {
-          "command": "ruff",
-          "arguments": ["format", "-"]
-        }
-      }
+      //https://github.com/jellydn/zed-101-setup
+      "format_on_save": { "language_server": { "name": "ruff" } },
+      "formatter": { "language_server": { "name": "ruff" } },
+      "language_servers": ["pyright", "ruff"]
     },
     "TypeScript": {
       // Refer https://github.com/jellydn/ts-inlay-hints for how to setup for Neovim and VSCode
@@ -91,16 +103,8 @@
   "jupyter": {
     "enabled": true
   },
-  "assistant": {
-    "default_model": {
-      "provider": "zed.dev",
-      "model": "claude-3-5-sonnet-20240620"
-    },
-    "dock": "left",
-    "version": "2",
-    "provider": null
-  },
   "file_types": {
-    "Dockerfile": ["Dockerfile.*"]
+    "Dockerfile": ["Dockerfile", "Dockerfile.*"],
+    "JSON": ["json", "jsonc", "*.code-snippets"]
   }
 }
