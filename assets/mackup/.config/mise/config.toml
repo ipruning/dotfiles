@@ -1,10 +1,18 @@
 [tools]
-  "go:github.com/Owloops/updo" = "latest"
-  "go:github.com/barthr/redo"  = "latest"
-  go                           = "latest"
-  node                         = "latest"
-  python                       = "latest"
-  rust                         = "latest"
+  "cargo:mdbook"                               = "latest"
+  "cargo:termscp"                              = "latest"
+  "go:github.com/Owloops/updo"                 = "latest"
+  "go:github.com/appleboy/CodeGPT/cmd/codegpt" = "latest"
+  "go:github.com/barthr/redo"                  = "latest"
+  "go:github.com/noborus/ov"                   = "latest"
+  "npm:bun"                                    = "latest"
+  "npm:vercel"                                 = "latest"
+  "npm:zeabur"                                 = "latest"
+  go                                           = "latest"
+  node                                         = "latest"
+  python                                       = "latest"
+  rust                                         = "latest"
+  zig                                          = "latest"
 
 [settings]
   legacy_version_file  = false

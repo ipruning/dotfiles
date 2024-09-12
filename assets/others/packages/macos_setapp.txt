@@ -27,6 +27,7 @@ Meta
 MetaImage
 MindNode
 Mockuuups Studio
+NotchNook
 NotePlan
 Numi
 One Switch
