@@ -1,9 +1,0 @@
-cargo-bundle
-cargo-instruments
-cargo-make
-cargo-update
-cargo-vet
-coreutils
-mdbook
-mdbook-linkcheck
-mdbook-pdf

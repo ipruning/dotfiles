@@ -1,5 +1,4 @@
 1Blocker
-1Password for Safari
 1Password
 A Better Finder Attributes 7
 Alacritty
@@ -97,11 +96,9 @@ Mini Metro+
 Mochi Diffusion
 Mos
 Motion
-Motrix
 MusicHarbor
 MyCard
 NeteaseMusic
-Notion Mail
 Numbers
 OBS
 OmniFocus
@@ -191,6 +188,7 @@ iMovie
 kindaVim
 logioptionsplus
 pcsuite
+qbittorrent
 uBlacklist for Safari
 uPic
 zoom.us

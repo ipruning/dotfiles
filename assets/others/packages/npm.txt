@@ -1,5 +1,2 @@
-bun
 corepack
 npm
-vercel
-zeabur

@@ -68,9 +68,6 @@ r-chainforge() {
 }
 
 r-update() {
-  echo -e "\033[33mChecking for outdated Homebrew formulas...\033[0m"
-  brew cu
-
   echo -e "\033[33mUpdating Homebrew...\033[0m"
   brew update
 
@@ -102,16 +99,9 @@ r-upgrade() {
   python -m pip install --upgrade pip
   pipx upgrade-all
 
-  # echo -e "\033[33mUpgrading Rye...\033[0m"
-  # rye self update
-
-  # echo -e "\033[33mUpdating Rust toolchain...\033[0m"
-  # rustup self update
-  # rustup update
-
-  # echo -e "\033[33mUpdating mise...\033[0m"
-  # mise self-update --verbose
-  # mise reshim
+  echo -e "\033[33mUpdating mise...\033[0m"
+  mise self-update --verbose
+  mise reshim
 }
 
 r-backup() {
@@ -132,7 +122,6 @@ r-backup() {
 r-completion() {
   echo -e "\033[33mGenerating completions...\033[0m"
   rustup completions zsh >"$HOME"/dotfiles/config/shell/completions/_rustup
-  # rye self completion >"$HOME"/dotfiles/config/shell/completions/_rye
   zellij setup --generate-completion zsh >"$HOME"/dotfiles/config/shell/completions/_zellij
   rm -f ~/.zcompdump
   compinit
