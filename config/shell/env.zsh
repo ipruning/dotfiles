@@ -42,9 +42,11 @@ fi
 source "${HOME}"/.config/broot/launcher/bash/br
 
 #===============================================================================
-# 👇 zsh-vi-mode https://github.com/jeffreytse/zsh-vi-mode/issues/24
+# 👇 zsh-vi-mode
+# https://github.com/jeffreytse/zsh-vi-mode/issues/24
 #===============================================================================
-# export ZVM_INIT_MODE=sourcing
+export ZVM_INIT_MODE=sourcing
+source "${ZSH_CUSTOM}"/plugins/zsh-vi-mode/zsh-vi-mode.plugin.zsh
 
 #===============================================================================
 # 👇 oh-my-zsh autoupdate-zsh-plugin
