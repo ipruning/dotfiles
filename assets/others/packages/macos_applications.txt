@@ -147,13 +147,11 @@ Slack
 Sloth
 Sniffnet
 SoundSource
-Spotify
 Steam
 Surfingkeys
 Surge
 Suspicious Package
 Syntax Highlight
-Tailscale
 Tampermonkey
 Tana
 Telegram
@@ -193,7 +191,7 @@ uBlacklist for Safari
 uPic
 zoom.us
 优酷
+哔哩哔哩
 小宇宙
 小红书
 集换社
-哔哩哔哩

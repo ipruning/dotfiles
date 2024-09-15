@@ -16,7 +16,6 @@ cocoapods
 cyme
 dasel
 difftastic
-direnv
 docker
 duf
 dust
@@ -72,7 +71,6 @@ libmagic
 llama.cpp
 llvm
 lnav
-logdy
 lsd
 m-cli
 mactop
@@ -81,8 +79,8 @@ media-info
 modularml/packages/modular
 monolith
 moreutils
-navi
 ncdu
+neonctl
 neovim
 nmap
 nnn
@@ -121,6 +119,7 @@ tor
 tree
 trippy
 trufflehog
+tursodatabase/tap/turso
 typos-cli
 typst
 ugit
