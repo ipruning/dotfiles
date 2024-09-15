@@ -1,5 +1,3 @@
-#!/bin/bash
-
 #===============================================================================
 # 👇 Aliases
 # 👇 For a full list of active aliases, run `alias`.
@@ -13,38 +11,34 @@ mac_arm64)
 esac
 
 #===============================================================================
-# 👇
+# 👇 ..
 #===============================================================================
-alias cpi='cp -i'
-alias mvi='mv -i'
+alias ..='cd ..'
 
 #===============================================================================
 # 👇
 #===============================================================================
-alias bat='bat --paging=never'
+alias cpi='cp -i'
+alias mvi='mv -i'
+alias rmi='rm -i'
+
 alias l='lsd'
 alias la='lsd -a'
 alias ll='lsd -lh'
 alias lla='lsd -la'
 alias lt='lsd --tree'
-if [[ -n $SSH_CONNECTION ]]; then
-  alias lsd='lsd --icon never'
-fi
-alias rmi='rm -i'
-alias v='cursor'
+
+alias cpwd='printf "%q\n" "$(pwd)" | pbcopy'
+alias ehost='${=EDITOR} /etc/hosts'
+alias eohmyzsh='${=EDITOR} ~/.oh-my-zsh'
+alias ezshrc='${=EDITOR} ~/.zshrc'
+alias szshrc='source ~/.zshrc'
+alias ip='curl -4 ip.sb'
+alias ipv6='curl -6 ip.sb'
 
 #===============================================================================
 # 👇
 #===============================================================================
-alias c-wd='printf "%q\n" "$(pwd)" | pbcopy'
-alias e-host='${=EDITOR} /etc/hosts'
-alias e-ohmyzsh='${=EDITOR} ~/.oh-my-zsh'
-alias e-zshrc='${=EDITOR} ~/.zshrc'
-alias s-zshrc='source ~/.zshrc'
-
-alias g-ip='curl -4 ip.sb'
-alias g-ipv6='curl -6 ip.sb'
-
 g-i() {
   git init
   git commit --allow-empty -m "init"
@@ -56,15 +50,6 @@ g-sync() {
 
 r-fava() {
   fava ${HOME}/Databases/Ledger/main.bean -p 4000
-}
-
-r-lmql() {
-  emulate bash -c '. ~/Coding/qkvlab.com/langmax/.venv/bin/activate'
-  ${HOME}/Coding/qkvlab.com/langmax/.venv/bin/lmql playground
-}
-
-r-chainforge() {
-  docker run -p 8000:8000 -e OPENAI_API_KEY=${CF_OPENAI_API_KEY} -e ANTHROPIC_API_KEY=${CF_ANTHROPIC_API_KEY} chainforge
 }
 
 r-update() {
@@ -92,8 +77,8 @@ r-upgrade() {
   echo -e "\033[33mChecking and updating global npm packages...\033[0m"
   npx npm-check --global --update-all
 
-  echo -e "\033[33mUpdating Oh My Zsh...\033[0m"
-  omz update
+  # echo -e "\033[33mUpdating Oh My Zsh...\033[0m"
+  # omz update
 
   echo -e "\033[33mUpgrading Python pip and all pipx packages...\033[0m"
   python -m pip install --upgrade pip
@@ -109,20 +94,17 @@ r-backup() {
   brew bundle dump --file="$HOME"/dotfiles/assets/others/packages/Brewfile --force
   brew leaves >"$HOME"/dotfiles/assets/others/packages/Brewfile.txt
   brew update
-  cargo install --list | grep -v '^[[:blank:]]' | awk '{print $1}' >"$HOME"/dotfiles/assets/others/packages/cargo.txt
-  code --list-extensions >"$HOME"/dotfiles/assets/others/packages/vscode_extensions.txt
   cp "$HOME"/.zsh_history "$HOME"/Databases/Backup/CLI/zsh_history_$(date +\%Y_\%m_\%d_\%H_\%M_\%S).bak
   gh extension list | awk '{print $3}' >"$HOME"/dotfiles/assets/others/packages/gh_extensions.txt
   ls /Applications | rg '\.app' | sed 's/\.app//g' >"$HOME"/dotfiles/assets/others/packages/macos_applications.txt
   ls /Applications/Setapp | rg '\.app' | sed 's/\.app//g' >"$HOME"/dotfiles/assets/others/packages/macos_setapp.txt
-  npm list --location=global --json | jq ".dependencies | keys[]" -r >"$HOME"/dotfiles/assets/others/packages/npm.txt
   pipx list --json | jq ".venvs | .[] | .metadata.main_package.package" -r >"$HOME"/dotfiles/assets/others/packages/pipx.txt
 }
 
 r-completion() {
   echo -e "\033[33mGenerating completions...\033[0m"
-  rustup completions zsh >"$HOME"/dotfiles/config/shell/completions/_rustup
-  zellij setup --generate-completion zsh >"$HOME"/dotfiles/config/shell/completions/_zellij
+  # rustup completions zsh >"$HOME"/dotfiles/config/shell/completions/_rustup
+  # zellij setup --generate-completion zsh >"$HOME"/dotfiles/config/shell/completions/_zellij
   rm -f ~/.zcompdump
   compinit
 }
