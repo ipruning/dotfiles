@@ -1,4 +1,8 @@
-#!/bin/bash
+#===============================================================================
+# 👇 zprof
+# 👇 在 ~/.zshrc 的头部加上这个，加载 profile 模块
+#===============================================================================
+# zmodload zsh/zprof
 
 #===============================================================================
 # TODO
@@ -42,40 +46,26 @@ esac
 
 export SYSTEM_TYPE
 
-#===============================================================================
-# 👇 zprof
-# 👇 在 ~/.zshrc 的头部加上这个，加载 profile 模块
-#===============================================================================
-# zmodload zsh/zprof
-
-#===============================================================================
-# 👇 script initialization guard
-#===============================================================================
-RED="$(tput setaf 1)"
-
-if [ -z "$_INIT_SH_LOADED" ]; then
-  _INIT_SH_LOADED=1
-else
-  return
-fi
-
-#===============================================================================
-# 👇 custom
-#===============================================================================
 ZSH_CUSTOM=${ZSH_CUSTOM:-~/.oh-my-zsh/custom}
 
-if type brew &>/dev/null; then
-  # custom completions (Oh-My-Zsh will call compinit for you) (should)
-  # https://docs.brew.sh/Shell-Completion
-  FPATH="$(brew --prefix)/share/zsh/site-functions:${FPATH}"
-  FPATH="$HOME/dotfiles/config/shell/completions:$FPATH"
-  autoload -Uz compinit
-  compinit -u
+if command -v brew &>/dev/null; then
+  BREW_PREFIX=$(brew --prefix)
+  FPATH="${BREW_PREFIX}/share/zsh/site-functions:${FPATH}"
+fi
+
+autoload -Uz compinit
+
+if [[ ! -f ~/.zcompdump ]] || [[ $(date +%j) -ne $(date -r ~/.zcompdump +%j) ]]; then
+  compinit
+else
+  compinit -C
 fi
 
 #===============================================================================
 # 👇 env
 #===============================================================================
+ZSH_CUSTOM=${ZSH_CUSTOM:-~/.oh-my-zsh/custom}
+
 case $SYSTEM_TYPE in
 mac_arm64 | mac_x86_64 | linux_x86_64 | raspberry)
   if [ -n "$BASH_VERSION" ] || [ -n "$ZSH_VERSION" ]; then
@@ -91,9 +81,7 @@ mac_arm64 | mac_x86_64 | linux_x86_64 | raspberry)
       )
 
       for file in "${config_files[@]}"; do
-        if [ -f "$file" ]; then
-          . "$file"
-        fi
+        [[ -f "$file" ]] && source "$file"
       done
     fi
   fi
@@ -102,6 +90,8 @@ unknown)
   echo "${RED}Unsupported system architecture.${NORMAL}"
   ;;
 esac
+
+source "$ZSH_CUSTOM"/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
 #===============================================================================
 # 👇 zprof
