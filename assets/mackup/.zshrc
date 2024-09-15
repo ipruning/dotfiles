@@ -22,3 +22,8 @@ if [[ -f "$BOOTSTRAP_FILE" ]]; then
 else
   echo "Warning: $BOOTSTRAP_FILE not found."
 fi
+
+#===============================================================================
+# 👇 zsh-syntax-highlighting must at the end
+#===============================================================================
+source "$ZSH_CUSTOM"/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
