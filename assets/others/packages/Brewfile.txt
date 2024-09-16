@@ -84,6 +84,7 @@ neonctl
 neovim
 nmap
 nnn
+nushell
 ollama
 onefetch
 ouch
@@ -110,7 +111,6 @@ starship
 superfile
 t-rec
 tealdeer
-thefuck
 tmate
 tmuxp
 tokei
