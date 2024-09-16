@@ -1,4 +1,5 @@
 1Blocker
+1Password for Safari
 1Password
 A Better Finder Attributes 7
 Alacritty
@@ -41,7 +42,6 @@ Dropbox
 Eagle for Safari
 Eagle
 Eudic
-Evernote
 ExcalidrawZ
 Figma
 Final Cut Pro
@@ -128,7 +128,6 @@ Raindrop.io
 Raycast
 Rectangle
 Reqable
-Rewind
 Roam Research
 Rond
 Safari
