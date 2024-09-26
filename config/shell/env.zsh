@@ -45,8 +45,8 @@ source "${HOME}"/.config/broot/launcher/bash/br
 # 👇 zsh-vi-mode
 # https://github.com/jeffreytse/zsh-vi-mode/issues/24
 #===============================================================================
-export ZVM_INIT_MODE=sourcing
-source "${ZSH_CUSTOM}"/plugins/zsh-vi-mode/zsh-vi-mode.plugin.zsh
+# export ZVM_INIT_MODE=sourcing
+# source "${ZSH_CUSTOM}"/plugins/zsh-vi-mode/zsh-vi-mode.plugin.zsh
 
 #===============================================================================
 # 👇 oh-my-zsh autoupdate-zsh-plugin
@@ -97,7 +97,7 @@ source "$ZSH_CUSTOM"/plugins/fzf-tab/fzf-tab.plugin.zsh
 zstyle ':completion:*:git-checkout:*' sort false
 zstyle ':completion:*:descriptions' format '[%d]'
 zstyle ':completion:*' menu no
-zstyle ':fzf-tab:complete:cd:*' fzf-preview 'lsd --icon=always $realpath'
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza --icons --all --oneline --ignore-glob=".DS_Store" $realpath'
 zstyle ':fzf-tab:*' switch-group '<' '>'
 zstyle ':fzf-tab:*' fzf-pad 10
 
@@ -110,8 +110,8 @@ bindkey '^S' _sudo-command-line
 bindkey "^[[1;3C" forward-word
 # 👇 Option-Right
 bindkey "^[[1;3D" backward-word
-# 👇 Control-L accept zsh-autosuggestions https://github.com/zsh-users/zsh-autosuggestions#key-bindings
-bindkey '^L' autosuggest-accept
+# 👇 Control-L accept zsh-autosuggestions https://github.com/zsh-users/zsh-autosuggestions#key-bindings (Using Control-F Instead)
+# bindkey '^L' autosuggest-accept
 
 #===============================================================================
 # 👇 forgit https://github.com/wfxr/forgit
@@ -176,11 +176,6 @@ eval "$(atuin init zsh)"
 eval "$(zoxide init zsh)"
 
 #===============================================================================
-# 👇 mise
-#===============================================================================
-eval "$("$HOME"/.local/bin/mise activate zsh)"
-
-#===============================================================================
 # 👇 autodetect architecture (and set `brew` path) (and set `python` path)
 #===============================================================================
 case $SYSTEM_TYPE in
@@ -225,22 +220,6 @@ linux_x86_64)
 esac
 
 #===============================================================================
-# 👇
+# 👇 mise
 #===============================================================================
-autoload -U add-zsh-hook
-
-#===============================================================================
-# 👇 auto-activate and deactivate virtualenv
-#===============================================================================
-auto_activate_venv() {
-  if [[ -n "$VIRTUAL_ENV" && "$VIRTUAL_ENV" != "$PWD/.venv" ]]; then
-    deactivate
-  fi
-
-  if [[ ! -n "$VIRTUAL_ENV" && -d "./.venv" ]]; then
-    source "./.venv/bin/activate"
-  fi
-}
-
-add-zsh-hook chpwd auto_activate_venv
-auto_activate_venv
+eval "$(mise activate zsh)"
