@@ -12,7 +12,7 @@ from typing import Callable, Optional, Tuple, Union
 from urllib import parse, request
 from urllib.error import HTTPError
 
-__version__ = "0.3.2"
+__version__ = "0.3.3"
 
 USD_CNY = 7.260
 FEE_RATE = 1.035
@@ -37,7 +37,7 @@ GPT_4_TURBO_OUTPUT = 30.000
 
 # MODEL = "lmstudio-community/Meta-Llama-3-8B-Instruct-GGUF/Meta-Llama-3-8B-Instruct-Q4_K_M.gguf"
 # MODEL = "llama3:latest"
-MODEL = "gpt-4o-2024-08-06"
+MODEL = "gpt-4o-mini"
 
 # default_params = {
 #     "max_tokens": 80,
