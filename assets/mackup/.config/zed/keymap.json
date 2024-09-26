@@ -16,10 +16,13 @@
     "bindings": {
       // Self
       "ctrl-r": "projects::OpenRecent",
+      "ctrl-alt-n": "task::Spawn",
       "space t g": ["workspace::SendKeystrokes", ": new center terminal enter lazygit enter"],
       "space t m": ["workspace::SendKeystrokes", ": new center terminal enter htop enter"],
       "space t d": ["workspace::SendKeystrokes", ": new center terminal enter git space diff enter"],
       "space t": "task::Spawn",
+      "[ x": "editor::SelectLargerSyntaxNode",
+      "] x": "editor::SelectSmallerSyntaxNode",
       // put key-bindings here if you want them to work in normal & visual mode
       // Git
       "space g h d": "editor::ToggleHunkDiff",
