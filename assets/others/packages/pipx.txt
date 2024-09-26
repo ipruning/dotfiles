@@ -35,6 +35,7 @@ pydeps
 shot-scraper
 socid-extractor
 speedtest-cli
+sphinx
 sqlfluff
 sqlite-utils
 strip-tags
