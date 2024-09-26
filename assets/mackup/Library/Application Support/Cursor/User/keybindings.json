@@ -26,7 +26,10 @@
     "command": "rust-analyzer.toggleInlayHints"
   },
   // Toggle VIM
-  { "key": "ctrl+shift+v", "command": "toggleVim" },
+  {
+    "key": "ctrl+shift+v",
+    "command": "toggleVim"
+  },
   // Toggle panel
   // https://stackoverflow.com/questions/42796887/switch-focus-between-editor-and-integrated-terminal
   {
