@@ -8,6 +8,7 @@
   "npm:bun"                                    = "latest"
   "npm:vercel"                                 = "latest"
   "npm:zeabur"                                 = "latest"
+  elixir                                       = "latest"
   go                                           = "latest"
   node                                         = "latest"
   python                                       = "latest"
