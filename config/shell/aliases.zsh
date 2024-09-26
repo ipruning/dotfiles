@@ -14,6 +14,7 @@ esac
 # 👇 ..
 #===============================================================================
 alias ..='cd ..'
+alias ...='cd ../..'
 
 #===============================================================================
 # 👇
@@ -22,15 +23,14 @@ alias cpi='cp -i'
 alias mvi='mv -i'
 alias rmi='rm -i'
 
-alias l='lsd'
-alias la='lsd -a'
-alias ll='lsd -lh'
-alias lla='lsd -la'
-alias lt='lsd --tree'
+alias l='eza --icons --oneline'
+alias la='eza --icons --all --oneline'
+alias ll='eza --icons --long --git --time-style=long-iso'
+alias lla='eza --icons --long --all --git --time-style=long-iso'
+alias lt='eza --icons --long --all --git --time-style=long-iso --tree --level=3'
 
 alias cpwd='printf "%q\n" "$(pwd)" | pbcopy'
 alias ehost='${=EDITOR} /etc/hosts'
-alias eohmyzsh='${=EDITOR} ~/.oh-my-zsh'
 alias ezshrc='${=EDITOR} ~/.zshrc'
 alias szshrc='source ~/.zshrc'
 alias ip='curl -4 ip.sb'
@@ -77,16 +77,13 @@ r-upgrade() {
   echo -e "\033[33mChecking and updating global npm packages...\033[0m"
   npx npm-check --global --update-all
 
-  # echo -e "\033[33mUpdating Oh My Zsh...\033[0m"
-  # omz update
-
   echo -e "\033[33mUpgrading Python pip and all pipx packages...\033[0m"
   python -m pip install --upgrade pip
   pipx upgrade-all
 
   echo -e "\033[33mUpdating mise...\033[0m"
   mise self-update --verbose
-  mise reshim
+  mise upgrade --verbose
 }
 
 r-backup() {
@@ -103,8 +100,6 @@ r-backup() {
 
 r-completion() {
   echo -e "\033[33mGenerating completions...\033[0m"
-  # rustup completions zsh >"$HOME"/dotfiles/config/shell/completions/_rustup
-  # zellij setup --generate-completion zsh >"$HOME"/dotfiles/config/shell/completions/_zellij
   rm -f ~/.zcompdump
   compinit
 }
