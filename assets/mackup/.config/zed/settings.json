@@ -1,16 +1,37 @@
 {
-  "features": {
-    "inline_completion_provider": "copilot"
-  },
-  "language_models": {
-    "openai": {
-      "version": "1"
-    }
-  },
-  "vim_mode": true,
-  "telemetry": {
-    "diagnostics": true,
-    "metrics": true
+  // "vim_mode": true,
+  // "features": {
+  //   "inline_completion_provider": "supermaven"
+  // },
+  "file_scan_exclusions": [
+    "**/.git",
+    "**/.svn",
+    "**/.hg",
+    "**/CVS",
+    "**/.DS_Store",
+    "**/Thumbs.db",
+    "**/.classpath",
+    "**/.settings",
+    "**/vendor",
+    "**/.tmp*"
+  ],
+  "search.exclude": {
+    "**/*.snap": true,
+    "**/.git": true,
+    "**/.github": false,
+    "**/.nuxt": true,
+    "**/.output": true,
+    "**/.pnpm": true,
+    "**/.vscode": true,
+    "**/.yarn": true,
+    "**/node_modules": true,
+    "**/out/**": true,
+    "**/package-lock.json": true,
+    "**/pnpm-lock.yaml": true,
+    "**/temp": true,
+    "**/yarn.lock": true,
+    "**/CHANGELOG*": true,
+    "**/LICENSE*": true
   },
   "project_panel": {
     "button": true,
@@ -39,23 +60,28 @@
     "provider": null
   },
   "preferred_line_length": 120,
-  "base_keymap": "VSCode",
   "autosave": "on_focus_change",
   "format_on_save": "on",
-  "buffer_font_family": "MonoLisa Nerd Font",
-  "buffer_font_size": 13,
-  "show_copilot_suggestions": true,
   "relative_line_numbers": true,
   "scrollbar": {
-    "show": "auto",
+    "show": "never",
     "cursors": true,
     "git_diff": true,
     "search_results": true,
     "selected_symbol": true,
     "diagnostics": true
   },
+  "buffer_font_family": "MonoLisa Nerd Font",
+  "buffer_font_size": 13,
+  "buffer_font_features": {
+    "zero": true,
+    "ss02": true,
+    "ss04": true,
+    "ss06": true,
+    "calt": false,
+    "liga": false
+  },
   "terminal": {
-    "dock": "bottom",
     "copy_on_select": true,
     "working_directory": "first_project_directory",
     "env": {
@@ -63,7 +89,7 @@
     }
   },
   "inlay_hints": {
-    "enabled": false,
+    "enabled": true,
     "show_type_hints": true,
     "show_parameter_hints": true,
     "show_other_hints": true,
@@ -73,11 +99,6 @@
   "indent_guides": {
     "enabled": true,
     "coloring": "indent_aware"
-  },
-  "git": {
-    "inline_blame": {
-      "enabled": true
-    }
   },
   "languages": {
     "Python": {
@@ -100,11 +121,5 @@
     }
   },
   "theme": "Catppuccin Mocha",
-  "jupyter": {
-    "enabled": true
-  },
-  "file_types": {
-    "Dockerfile": ["Dockerfile", "Dockerfile.*"],
-    "JSON": ["json", "jsonc", "*.code-snippets"]
-  }
+  "restore_on_startup": "last_session"
 }
