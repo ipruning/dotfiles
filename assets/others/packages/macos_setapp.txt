@@ -2,7 +2,6 @@ Aeon Timeline
 BetterZip
 CleanMyMac X
 CleanShot X
-Clobbr
 Clop
 Craft
 Dash

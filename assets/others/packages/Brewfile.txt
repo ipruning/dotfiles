@@ -13,6 +13,7 @@ chafa
 choose-rust
 cmake
 cocoapods
+curl
 cyme
 dasel
 difftastic
@@ -20,6 +21,7 @@ docker
 duf
 dust
 eget
+elixir
 exiftool
 extra-cmake-modules
 fastfetch
@@ -90,7 +92,6 @@ onefetch
 ouch
 pandoc-crossref
 pdfgrep
-php
 pipx
 platformio
 procs

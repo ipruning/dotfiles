@@ -9,8 +9,8 @@ Amie
 Anki
 Apparency
 Arc
-Audio Hijack
 Avenue
+BBackupp
 BaiduNetdisk
 BetterDisplay
 Binance
@@ -43,7 +43,6 @@ Eagle for Safari
 Eagle
 Eudic
 ExcalidrawZ
-Figma
 Final Cut Pro
 Firefox Nightly
 FixTim
@@ -81,7 +80,6 @@ LayAuto3
 Linear
 Logic Pro X
 Longbridge Pro
-Loopback
 LosslessCut
 LyricsX
 MAA
@@ -124,7 +122,6 @@ QLMarkdown
 QQ
 QuickLook Video
 RSSHub Radar
-Raindrop.io
 Raycast
 Rectangle
 Reqable
@@ -145,7 +142,6 @@ Skim
 Slack
 Sloth
 Sniffnet
-SoundSource
 Steam
 Surfingkeys
 Surge
@@ -173,10 +169,10 @@ Wooshy
 WorkFlowy
 XLD
 XPTV
-Xcode
 Xcodes
 YACReader
 YACReaderLibrary
+Z-Library
 Zed
 Zotero
 calibre
@@ -189,6 +185,7 @@ qbittorrent
 uBlacklist for Safari
 uPic
 zoom.us
+企业微信
 优酷
 哔哩哔哩
 小宇宙
