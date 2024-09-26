@@ -2,8 +2,20 @@
   "[beancount]": {
     "editor.defaultFormatter": "dongfg.vscode-beancount-formatter"
   },
+  "[css][scss][less]": {
+    "editor.defaultFormatter": "vscode.css-language-features"
+  },
   "[dockerfile]": {
     "editor.defaultFormatter": "ms-azuretools.vscode-docker"
+  },
+  "[html]": {
+    "editor.defaultFormatter": "vscode.html-language-features"
+  },
+  "[javascript][javascriptreact][typescript]": {
+    "editor.defaultFormatter": "vscode.typescript-language-features"
+  },
+  "[json][jsonc]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
   },
   "[latex]": {
     "editor.acceptSuggestionOnEnter": "on",
@@ -54,6 +66,9 @@
     "editor.formatOnType": false,
     "editor.tabSize": 4
   },
+  "autocorrect.enable": false,
+  "autocorrect.enableLint": true,
+  "autocorrect.formatOnSave": false,
   "baml.bamlPanelOpen": false,
   "beancount.fixedCJKWidth": true,
   "beancount.mainBeanFile": "~/Databases/Ledger/main.bean",
@@ -66,7 +81,7 @@
   "code-runner.enableAppInsights": false,
   "code-runner.executorMap": {
     "javascript": "bun run $fullFileName",
-    "python": "$pythonPath -u $fullFileName",
+    "python": "python -u $fullFileName",
     "typescript": "bun run $fullFileName"
   },
   "code-runner.executorMapByGlob": {
@@ -119,6 +134,9 @@
     "eslint",
     "jshint"
   ],
+  "evenBetterToml.formatter.alignEntries": true,
+  "evenBetterToml.formatter.indentEntries": true,
+  "evenBetterToml.schema.enabled": false,
   "explorer.confirmDelete": false,
   "explorer.confirmDragAndDrop": false,
   "explorer.fileNesting.enabled": true,
@@ -219,6 +237,7 @@
   "fileNestingUpdater.autoUpdateInterval": 43200,
   "fileNestingUpdater.promptOnAutoUpdate": true,
   "files.associations": {
+    "*.toml": "toml",
     ".cforge": "json",
     ".gitconfig": "ini",
     ".gitconfig.local": "ini"
@@ -230,7 +249,22 @@
   "git.confirmSync": false,
   "git.enableSmartCommit": true,
   "git.openRepositoryInParentFolders": "never",
+  "gitlens.defaultDateFormat": "YYYY-MM-DD hh:mm",
+  "gitlens.defaultDateLocale": null,
+  "gitlens.defaultDateShortFormat": "YYYY-MM-DD",
+  "gitlens.defaultTimeFormat": "hh:mm",
   "json.maxItemsComputed": 10000,
+  "jupyter.askForKernelRestart": false,
+  "jupyter.widgetScriptSources": [
+    "jsdelivr.com",
+    "unpkg.com"
+  ],
+  "markdown.extension.italic.indicator": "_",
+  "markdown.extension.list.indentationSize": "inherit",
+  "markdown.extension.tableFormatter.normalizeIndentation": true,
+  "markdown.extension.toc.levels": "2..6",
+  "markdown.marp.enableHtml": true,
+  "markdown.marp.exportType": "html",
   "markdown.suggest.paths.enabled": true,
   "markdown.validate.enabled": true,
   "markdownlint.config": {
@@ -270,11 +304,11 @@
   },
   "notebook.formatOnSave.enabled": true,
   "path-autocomplete.triggerOutsideStrings": true,
-  "prettier.tabWidth": 2,
   "python.analysis.autoFormatStrings": true,
   "python.analysis.typeCheckingMode": "basic",
   "python.defaultInterpreterPath": "~/.conda/envs/ml/bin/python",
   "python.languageServer": "Pylance",
+  "redhat.telemetry.enabled": false,
   "remote.SSH.connectTimeout": 1000,
   "ruff.configurationPreference": "filesystemFirst",
   "shellcheck.customArgs": [],
@@ -317,6 +351,69 @@
     "TODO"
   ],
   "todo-tree.regex.regex": "(//|#|<!--|;|/\\*|^|^\\s*(-|\\d+.))\\s*($TAGS)",
+  "vim.easymotion": true,
+  "vim.normalModeKeyBindingsNonRecursive": [
+    {
+      "before": [
+        "<space>"
+      ],
+      "commands": [
+        "vspacecode.space"
+      ]
+    },
+    {
+      "before": [
+        ","
+      ],
+      "commands": [
+        "vspacecode.space",
+        {
+          "args": "m",
+          "command": "whichkey.triggerKey"
+        }
+      ]
+    }
+  ],
+  "vim.smartRelativeLine": true,
+  "vim.useSystemClipboard": true,
+  "vim.visualModeKeyBindingsNonRecursive": [
+    {
+      "before": [
+        "<space>"
+      ],
+      "commands": [
+        "vspacecode.space"
+      ]
+    },
+    {
+      "before": [
+        ","
+      ],
+      "commands": [
+        "vspacecode.space",
+        {
+          "args": "m",
+          "command": "whichkey.triggerKey"
+        }
+      ]
+    },
+    {
+      "before": [
+        ">"
+      ],
+      "commands": [
+        "editor.action.indentLines"
+      ]
+    },
+    {
+      "before": [
+        "<"
+      ],
+      "commands": [
+        "editor.action.outdentLines"
+      ]
+    }
+  ],
   "vscode-mogami.concurrency": 20,
   "vscode-mogami.enableCodeLens": true,
   "vscode-mogami.usePrivateSource": false,
@@ -333,74 +430,14 @@
     "*.pdf": "latex-workshop-pdf-hook"
   },
   "workbench.iconTheme": "material-icon-theme",
+  "workbench.settings.editor": "json",
+  "workbench.settings.useSplitJSON": true,
   "workbench.sideBar.location": "right",
   "workbench.tree.indent": 22,
   "workbench.tree.renderIndentGuides": "always",
   "xml.symbols.maxItemsComputed": 10000,
-  "jupyter.widgetScriptSources": ["jsdelivr.com", "unpkg.com"],
-  "jupyter.askForKernelRestart": false,
-  "markdown.extension.italic.indicator": "_",
-  "markdown.extension.list.indentationSize": "inherit",
-  "markdown.extension.tableFormatter.normalizeIndentation": true,
-  "markdown.extension.toc.levels": "2..6",
-  "markdown.marp.enableHtml": true,
-  "markdown.marp.exportType": "html",
-  "autocorrect.enable": false,
-  "autocorrect.enableLint": true,
-  "autocorrect.formatOnSave": false,
-  "evenBetterToml.formatter.alignEntries": true,
-  "evenBetterToml.formatter.indentEntries": true,
-  "evenBetterToml.schema.enabled": false,
-  "gitlens.defaultDateFormat": "YYYY-MM-DD hh:mm",
-  "gitlens.defaultDateLocale": null,
-  "gitlens.defaultDateShortFormat": "YYYY-MM-DD",
-  "gitlens.defaultTimeFormat": "hh:mm",
-  "redhat.telemetry.enabled": false,
   "yaml.maxItemsComputed": 10000,
   "yaml.schemas": {
     "https://json.schemastore.org/github-workflow.json": ".github/workflows/*"
-  },
-  "vim.smartRelativeLine": true,
-  "vim.easymotion": true,
-  "vim.useSystemClipboard": true,
-  "vim.normalModeKeyBindingsNonRecursive": [
-    {
-      "before": ["<space>"],
-      "commands": ["vspacecode.space"]
-    },
-    {
-      "before": [","],
-      "commands": [
-        "vspacecode.space",
-        {
-          "command": "whichkey.triggerKey",
-          "args": "m"
-        }
-      ]
-    }
-  ],
-  "vim.visualModeKeyBindingsNonRecursive": [
-    {
-      "before": ["<space>"],
-      "commands": ["vspacecode.space"]
-    },
-    {
-      "before": [","],
-      "commands": [
-        "vspacecode.space",
-        {
-          "command": "whichkey.triggerKey",
-          "args": "m"
-        }
-      ]
-    },
-    {
-      "before": [">"],
-      "commands": ["editor.action.indentLines"]
-    },
-    {
-      "before": ["<"],
-      "commands": ["editor.action.outdentLines"]
-    }
-  ],
+  }
 }
