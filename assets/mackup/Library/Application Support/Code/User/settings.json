@@ -4,7 +4,10 @@
   "cursor.chat.smoothStreaming": true,
   "cursor.cmdk.ghostTextAtSymbols": true,
   "cursor.cmdk.useThemedDiffBackground": true,
-  "cursor.cpp.disabledLanguages": ["plaintext", "markdown"],
+  "cursor.cpp.disabledLanguages": [
+    "plaintext",
+    "markdown"
+  ],
   "cursor.general.enableShadowWorkspace": true,
   // File Nesting
   // "pyproject.toml": ".commitlint*, .dlint.json, .dprint.json*, .editorconfig, .eslint*, .flake8, .flowconfig, .isort.cfg, .jslint*, .lintstagedrc*, .markdownlint*, .pdm-python, .pdm.toml, .prettier*, .pylintrc, .python-version, .ruff.toml, .stylelint*, .textlint*, .xo-config*, .yamllint*, MANIFEST.in, Pipfile, Pipfile.lock, biome.json*, commitlint*, dangerfile*, dlint.json, dprint.json*, eslint*, hatch.toml, lint-staged*, pdm.lock, phpcs.xml, poetry.lock, poetry.toml, prettier*, pyproject.toml, pyrightconfig.json, requirements*.in, requirements*.pip, requirements*.txt, ruff.toml, setup.cfg, setup.py, stylelint*, tox.ini, tslint*, xo.config.*, requirements*.lock, .coverage*, uv.lock",
@@ -133,7 +136,9 @@
   "diffEditor.renderSideBySide": true,
   "diffEditor.ignoreTrimWhitespace": true,
   "diffEditor.maxComputationTime": 10000,
-  "terminal.integrated.commandsToSkipShell": ["language-julia.interrupt"],
+  "terminal.integrated.commandsToSkipShell": [
+    "language-julia.interrupt"
+  ],
   "terminal.integrated.confirmOnExit": "hasChildProcesses",
   "terminal.integrated.defaultProfile.osx": "zsh",
   "terminal.integrated.fontFamily": "'MonoLisa Nerd Font'",
@@ -169,7 +174,9 @@
   "git.enableSmartCommit": true,
   "git.openRepositoryInParentFolders": "never",
   "gitlens.views.repositories.files.layout": "list",
-  "gitlens.codeLens.scopes": ["document"],
+  "gitlens.codeLens.scopes": [
+    "document"
+  ],
   "workbench.colorTheme": "Catppuccin Mocha",
   "workbench.colorCustomizations": {
     "editor.lineHighlightBackground": "#1073cf2d",
@@ -187,7 +194,9 @@
   },
   "workbench.layoutControl.enabled": true,
   "workbench.sideBar.location": "right",
-  "todo-tree.general.tags": ["TODO"],
+  "todo-tree.general.tags": [
+    "TODO"
+  ],
   "todo-tree.regex.regex": "(//|#|<!--|;|/\\*|^|^\\s*(-|\\d+.))\\s*($TAGS)",
   "highlight.regexes": {
     "((?:<!-- *)?(?:#|// @|//|./\\*+|<!--|--|\\* @|{!|{{!--|{{!) *TODO(?:\\s*\\([^)]+\\))?:?)((?!\\w)(?: *-->| *\\*/| *!}| *--}}| *}}|(?= *(?:[^:]//|/\\*+|<!--|@|--|{!|{{!--|{{!))|(?: +[^\\n@]*?)(?= *(?:[^:]//|/\\*+|<!--|@|--(?!>)|{!|{{!--|{{!))|(?: +[^@\\n]+)?))": {
@@ -252,7 +261,10 @@
     }
   },
   "xml.symbols.maxItemsComputed": 10000,
-  "jupyter.widgetScriptSources": ["jsdelivr.com", "unpkg.com"],
+  "jupyter.widgetScriptSources": [
+    "jsdelivr.com",
+    "unpkg.com"
+  ],
   "jupyter.askForKernelRestart": false,
   "python.defaultInterpreterPath": "~/.conda/envs/ml/bin/python",
   "python.analysis.typeCheckingMode": "basic",
@@ -320,7 +332,9 @@
     "/[ \t]* [*]/g", // lines beginning with <whitespace><space>*
     "/[ \t]+[/]{2}/g" // lines beginning with <whitespace>//
   ],
-  "indentRainbow.ignoreErrorLanguages": ["*"],
+  "indentRainbow.ignoreErrorLanguages": [
+    "*"
+  ],
   "indentRainbow.excludedLanguages": [
     "beancount",
     "csv",
@@ -437,8 +451,13 @@
   "beancount.mainBeanFile": "~/Databases/Ledger/main.bean",
   "beancountFormatter.currencyColumn": 72,
   "beancountFormatter.fixedCJKWidth": true,
-  "errorLens.excludeBySource": ["eslint", "jshint"],
-  "errorLens.enabledDiagnosticLevels": ["error"],
+  "errorLens.excludeBySource": [
+    "eslint",
+    "jshint"
+  ],
+  "errorLens.enabledDiagnosticLevels": [
+    "error"
+  ],
   "evenBetterToml.formatter.alignEntries": true,
   "evenBetterToml.formatter.indentEntries": true,
   "evenBetterToml.schema.enabled": false,
@@ -457,7 +476,11 @@
   "shellcheck.enableQuickFix": true,
   "shellcheck.run": "onType",
   "shellcheck.executablePath": "/opt/homebrew/bin/shellcheck",
-  "shellcheck.exclude": ["SC1091", "SC2128", "SC2155"],
+  "shellcheck.exclude": [
+    "SC1091",
+    "SC2128",
+    "SC2155"
+  ],
   "shellcheck.customArgs": [],
   "shellcheck.ignorePatterns": {
     "**/*.xonshrc": true,
@@ -475,7 +498,11 @@
     "**/zshenv": true,
     "**/*.zsh-theme": true
   },
-  "shellcheck.ignoreFileSchemes": ["git", "gitfs", "output"],
+  "shellcheck.ignoreFileSchemes": [
+    "git",
+    "gitfs",
+    "output"
+  ],
   "window.commandCenter": false,
   "yaml.maxItemsComputed": 10000,
   "yaml.schemas": {
@@ -514,11 +541,17 @@
   // https://github.com/stevenguh/spacecode/issues/3
   "vim.normalModeKeyBindingsNonRecursive": [
     {
-      "before": ["<space>"],
-      "commands": ["vspacecode.space"]
+      "before": [
+        "<space>"
+      ],
+      "commands": [
+        "vspacecode.space"
+      ]
     },
     {
-      "before": [","],
+      "before": [
+        ","
+      ],
       "commands": [
         "vspacecode.space",
         {
@@ -530,11 +563,17 @@
   ],
   "vim.visualModeKeyBindingsNonRecursive": [
     {
-      "before": ["<space>"],
-      "commands": ["vspacecode.space"]
+      "before": [
+        "<space>"
+      ],
+      "commands": [
+        "vspacecode.space"
+      ]
     },
     {
-      "before": [","],
+      "before": [
+        ","
+      ],
       "commands": [
         "vspacecode.space",
         {
@@ -544,12 +583,20 @@
       ]
     },
     {
-      "before": [">"],
-      "commands": ["editor.action.indentLines"]
+      "before": [
+        ">"
+      ],
+      "commands": [
+        "editor.action.indentLines"
+      ]
     },
     {
-      "before": ["<"],
-      "commands": ["editor.action.outdentLines"]
+      "before": [
+        "<"
+      ],
+      "commands": [
+        "editor.action.outdentLines"
+      ]
     }
   ]
 }
