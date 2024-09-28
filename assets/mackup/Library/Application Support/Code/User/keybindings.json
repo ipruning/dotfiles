@@ -1,4 +1,10 @@
 [
+  // Remove Default Keybindings
+  {
+    "key": "shift+cmd+c",
+    "command": "-workbench.action.terminal.openNativeConsole",
+    "when": "!terminalFocus"
+  },
   // Toggle Bar
   {
     "key": "cmd+ctrl+h",
