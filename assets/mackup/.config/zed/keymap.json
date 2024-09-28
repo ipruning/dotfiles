@@ -1,5 +1,13 @@
 [
   {
+    "context": "Workspace",
+    "bindings": {
+      "cmd-ctrl-h": "workspace::ToggleLeftDock",
+      "cmd-ctrl-j": "workspace::ToggleBottomDock",
+      "cmd-ctrl-k": "workspace::ToggleRightDock"
+    }
+  },
+  {
     "context": "Workspace && !Terminal",
     "bindings": {
       "ctrl-r": "projects::OpenRecent"
@@ -21,7 +29,6 @@
   {
     "context": "Editor && (vim_mode == normal || vim_mode == visual) && !VimWaiting && !menu",
     "bindings": {
-      // Custom
       "space t g": [
         "workspace::SendKeystrokes",
         ": new center terminal enter lazygit enter"
@@ -36,7 +43,12 @@
       ],
       "space t": "task::Spawn",
       "[ x": "editor::SelectLargerSyntaxNode",
-      "] x": "editor::SelectSmallerSyntaxNode",
+      "] x": "editor::SelectSmallerSyntaxNode"
+    }
+  },
+  {
+    "context": "Editor && (vim_mode == normal || vim_mode == visual) && !VimWaiting && !menu",
+    "bindings": {
       // put key-bindings here if you want them to work in normal & visual mode
       // Git
       "space g h d": "editor::ToggleHunkDiff",
@@ -251,12 +263,15 @@
         "Down"
       ]
     }
-  },
-  {
-    "context": "Workspace",
-    "bindings": {
-      // Map VSCode like keybindings
-      "cmd-b": "workspace::ToggleRightDock"
-    }
   }
+  // Subword motion is not working really nice with `ciw`, disable for now
+  // {
+  //   "context": "VimControl && !menu",
+  //   "bindings": {
+  //     "w": "vim::NextSubwordStart",
+  //     "b": "vim::PreviousSubwordStart",
+  //     "e": "vim::NextSubwordEnd",
+  //     "g e": "vim::PreviousSubwordEnd"
+  //   }
+  // }
 ]

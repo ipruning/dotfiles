@@ -1,8 +1,8 @@
 {
-  // "vim_mode": true,
-  // "features": {
-  //   "inline_completion_provider": "supermaven"
-  // },
+  "features": {
+    "inline_completion_provider": "none"
+  },
+  "vim_mode": true,
   "file_scan_exclusions": [
     "**/.git",
     "**/.svn",
@@ -55,7 +55,7 @@
       "provider": "zed.dev",
       "model": "claude-3-5-sonnet-20240620"
     },
-    "dock": "right",
+    "dock": "left",
     "version": "2",
     "provider": null
   },
