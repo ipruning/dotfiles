@@ -82,7 +82,6 @@ r-upgrade() {
   pipx upgrade-all
 
   echo -e "\033[33mUpdating mise...\033[0m"
-  mise self-update --verbose
   mise upgrade --verbose
 }
 
