@@ -21,9 +21,9 @@ docker
 duf
 dust
 eget
-elixir
 exiftool
 extra-cmake-modules
+eza
 fastfetch
 fcp
 fd
@@ -73,11 +73,11 @@ libmagic
 llama.cpp
 llvm
 lnav
-lsd
 m-cli
 mactop
 mas
 media-info
+mise
 modularml/packages/modular
 monolith
 moreutils
