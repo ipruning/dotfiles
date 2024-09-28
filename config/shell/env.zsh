@@ -47,21 +47,10 @@ zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
 source "${HOME}"/.config/broot/launcher/bash/br
 
 #===============================================================================
-# 👇 zsh-vi-mode
-# https://github.com/jeffreytse/zsh-vi-mode/issues/24
+# 👇 zsh-vi-mode https://github.com/jeffreytse/zsh-vi-mode/issues/24
 #===============================================================================
 # export ZVM_INIT_MODE=sourcing
 # source "${ZSH_CUSTOM}"/plugins/zsh-vi-mode/zsh-vi-mode.plugin.zsh
-
-#===============================================================================
-# 👇 oh-my-zsh autoupdate-zsh-plugin
-#===============================================================================
-# export DISABLE_AUTO_UPDATE=true
-
-#===============================================================================
-# 👇 oh-my-zsh init
-#===============================================================================
-# source "$ZSH"/oh-my-zsh.sh
 
 #===============================================================================
 # 👇 fzf init
