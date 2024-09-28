@@ -12,6 +12,7 @@ Arc
 Avenue
 BBackupp
 BaiduNetdisk
+Balatro
 BetterDisplay
 Binance
 Blackmagic Disk Speed Test
