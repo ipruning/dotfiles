@@ -52,5 +52,5 @@ esac
 # 👇 export homebrew & pipx & other binaries
 #===============================================================================
 export PATH="$HOME/.local/bin:$PATH"
-export PATH="$HOME/dotfiles/bin:$PATH"
 export PATH="$HOME/.modular/bin:$PATH"
+export PATH="$HOME/dotfiles/bin:$PATH"
