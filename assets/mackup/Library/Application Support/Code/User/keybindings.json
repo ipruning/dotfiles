@@ -1,4 +1,34 @@
 [
+  // Toggle Bar
+  {
+    "key": "cmd+ctrl+h",
+    "command": "workbench.action.toggleAuxiliaryBar"
+  },
+  {
+    "key": "cmd+ctrl+j",
+    "command": "workbench.action.terminal.toggleTerminal"
+  },
+  {
+    "key": "cmd+ctrl+k",
+    "command": "workbench.action.toggleSidebarVisibility"
+  },
+  // Toggle Terminal
+  // https://stackoverflow.com/questions/42796887/switch-focus-between-editor-and-integrated-terminal
+  {
+    "key": "cmd+j",
+    "command": "workbench.action.terminal.focus",
+    "when": "!terminalFocus"
+  },
+  {
+    "key": "cmd+j",
+    "command": "workbench.action.togglePanel",
+    "when": "terminalFocus"
+  },
+  // Toggle VIM
+  // {
+  // "key": "ctrl+shift+v",
+  // "command": "toggleVim"
+  // },
   // Jupyter
   {
     "key": "shift+cmd+down",
@@ -19,28 +49,6 @@
     "key": "alt+up",
     "command": "-notebook.cell.moveUp",
     "when": "notebookEditorFocused && !inputFocus"
-  },
-  // Toggle inlay hints
-  {
-    "key": "ctrl+shift+h",
-    "command": "rust-analyzer.toggleInlayHints"
-  },
-  // Toggle VIM
-  {
-    "key": "ctrl+shift+v",
-    "command": "toggleVim"
-  },
-  // Toggle panel
-  // https://stackoverflow.com/questions/42796887/switch-focus-between-editor-and-integrated-terminal
-  {
-    "key": "cmd+j",
-    "command": "workbench.action.terminal.focus",
-    "when": "!terminalFocus"
-  },
-  {
-    "key": "cmd+j",
-    "command": "workbench.action.togglePanel",
-    "when": "terminalFocus"
   },
   // Trigger vspacecode
   {
@@ -208,13 +216,4 @@
     "command": "file-browser.stepIn",
     "when": "inFileBrowser"
   },
-  // Merge with Zed
-  {
-    "key": "cmd+b",
-    "command": "workbench.action.toggleAuxiliaryBar"
-  },
-  {
-    "key": "cmd+r",
-    "command": "workbench.action.toggleSidebarVisibility"
-  }
 ]
