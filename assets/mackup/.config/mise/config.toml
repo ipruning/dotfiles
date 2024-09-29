@@ -1,10 +1,6 @@
 [tools]
-  "cargo:mdbook"                               = "latest"
   "cargo:termscp"                              = "latest"
-  "go:github.com/Owloops/updo"                 = "latest"
   "go:github.com/appleboy/CodeGPT/cmd/codegpt" = "latest"
-  "go:github.com/barthr/redo"                  = "latest"
-  "go:github.com/noborus/ov"                   = "latest"
   "npm:bun"                                    = "latest"
   "npm:vercel"                                 = "latest"
   "npm:zeabur"                                 = "latest"
@@ -16,10 +12,6 @@
   zig                                          = "latest"
 
 [settings]
-  legacy_version_file  = false
-  always_keep_download = false
-  always_keep_install  = false
-
   experimental                          = true
   plugin_autoupdate_last_check_duration = '1 week'
   status                                = { missing_tools = "if_other_versions_installed", show_env = false, show_tools = false }
