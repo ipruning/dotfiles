@@ -1,7 +1,9 @@
 beancount
+chainforge
 datasette
 datasette-studio
 deadlink
+detect-secrets
 fava
 ffsubsync
 git-sim
