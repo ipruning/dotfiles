@@ -65,24 +65,19 @@ r-upgrade() {
   brew upgrade
 
   echo -e "\033[33mCleaning up Homebrew...\033[0m"
-  brew cleanup
-  brew autoremove
-
-  echo -e "\033[33mUpdating Rust crates...\033[0m"
-  cargo install-update --all
+  brew cleanup && brew autoremove
 
   echo -e "\033[33mUpgrading GitHub CLI extensions...\033[0m"
   gh extension upgrade --all
 
-  echo -e "\033[33mChecking and updating global npm packages...\033[0m"
-  npx npm-check --global --update-all
-
-  echo -e "\033[33mUpgrading Python pip and all pipx packages...\033[0m"
-  python -m pip install --upgrade pip
+  echo -e "\033[33mUpgrading pipx packages...\033[0m"
   pipx upgrade-all
 
   echo -e "\033[33mUpdating mise...\033[0m"
   mise upgrade --verbose
+
+  echo -e "\033[33mUpdating rust...\033[0m"
+  rustup update && rustup self update
 }
 
 r-backup() {
