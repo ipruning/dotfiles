@@ -1,4 +1,52 @@
 [
+  // Remove Default Keybindings
+  {
+    "key": "shift+cmd+c",
+    "command": "-workbench.action.terminal.openNativeConsole",
+    "when": "!terminalFocus"
+  },
+  {
+    "key": "cmd+b",
+    "command": "-workbench.action.toggleSidebarVisibility"
+  },
+  // Toggle Bar
+  {
+    "key": "ctrl+shift+a",
+    "command": "workbench.action.previousEditor",
+  },
+  {
+    "key": "ctrl+shift+d",
+    "command": "workbench.action.nextEditor"
+  },
+  {
+    "key": "cmd+ctrl+h",
+    "command": "workbench.action.toggleAuxiliaryBar"
+  },
+  {
+    "key": "cmd+ctrl+j",
+    "command": "workbench.action.terminal.toggleTerminal"
+  },
+  {
+    "key": "cmd+ctrl+l",
+    "command": "workbench.action.toggleSidebarVisibility"
+  },
+  // Toggle Terminal
+  // https://stackoverflow.com/questions/42796887/switch-focus-between-editor-and-integrated-terminal
+  {
+    "key": "cmd+j",
+    "command": "workbench.action.terminal.focus",
+    "when": "!terminalFocus"
+  },
+  {
+    "key": "cmd+j",
+    "command": "workbench.action.togglePanel",
+    "when": "terminalFocus"
+  },
+  // Toggle VIM
+  // {
+  // "key": "ctrl+shift+v",
+  // "command": "toggleVim"
+  // },
   // Jupyter
   {
     "key": "shift+cmd+down",
@@ -19,28 +67,6 @@
     "key": "alt+up",
     "command": "-notebook.cell.moveUp",
     "when": "notebookEditorFocused && !inputFocus"
-  },
-  // Toggle inlay hints
-  {
-    "key": "ctrl+shift+h",
-    "command": "rust-analyzer.toggleInlayHints"
-  },
-  // Toggle VIM
-  {
-    "key": "ctrl+shift+v",
-    "command": "toggleVim"
-  },
-  // Toggle panel
-  // https://stackoverflow.com/questions/42796887/switch-focus-between-editor-and-integrated-terminal
-  {
-    "key": "cmd+j",
-    "command": "workbench.action.terminal.focus",
-    "when": "!terminalFocus"
-  },
-  {
-    "key": "cmd+j",
-    "command": "workbench.action.togglePanel",
-    "when": "terminalFocus"
   },
   // Trigger vspacecode
   {
@@ -208,13 +234,4 @@
     "command": "file-browser.stepIn",
     "when": "inFileBrowser"
   },
-  // TODO
-  {
-    "key": "cmd+b",
-    "command": "workbench.action.toggleAuxiliaryBar"
-  },
-  {
-    "key": "cmd+r",
-    "command": "workbench.action.toggleSidebarVisibility"
-  }
 ]

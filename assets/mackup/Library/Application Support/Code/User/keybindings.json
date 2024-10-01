@@ -5,7 +5,19 @@
     "command": "-workbench.action.terminal.openNativeConsole",
     "when": "!terminalFocus"
   },
+  {
+    "key": "cmd+b",
+    "command": "-workbench.action.toggleSidebarVisibility"
+  },
   // Toggle Bar
+  {
+    "key": "ctrl+shift+a",
+    "command": "workbench.action.previousEditor",
+  },
+  {
+    "key": "ctrl+shift+d",
+    "command": "workbench.action.nextEditor"
+  },
   {
     "key": "cmd+ctrl+h",
     "command": "workbench.action.toggleAuxiliaryBar"
@@ -15,7 +27,7 @@
     "command": "workbench.action.terminal.toggleTerminal"
   },
   {
-    "key": "cmd+ctrl+k",
+    "key": "cmd+ctrl+l",
     "command": "workbench.action.toggleSidebarVisibility"
   },
   // Toggle Terminal
