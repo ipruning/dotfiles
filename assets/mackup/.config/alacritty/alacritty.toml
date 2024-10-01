@@ -96,31 +96,36 @@
   family = "MonoLisa Nerd Font"
   style  = "Regular"
 
-[[keyboard.bindings]]
-  action = "CreateNewWindow"
-  key    = "Return"
-  mods   = "Control"
-
 [scrolling]
-  history    = 10000
-  multiplier = 3
+  history = 0
 
 [shell]
   program = "/bin/zsh"
-  args    = ["-l", "-c", "zellij attach -c hacker || zellij"]
+  args    = ["-l"]
+  # args = ["-l", "-c", "zellij attach -c hacker || zellij"]
 
 [window]
-  decorations   = "buttonless"
-  dynamic_title = true
-  opacity       = 1.0
-  option_as_alt = "Both"
-  startup_mode  = "Windowed"
-  title         = "Alacritty"
+  decorations     = "buttonless"
+  dynamic_title   = true
+  dynamic_padding = true
+  opacity         = 1.0
+  option_as_alt   = "Both"
+  startup_mode    = "Maximized"
+  title           = "Alacritty"
 
 [window.dimensions]
   columns = 100
   lines   = 40
 
 [window.padding]
-  x = 10
-  y = 10
+  x = 5
+  y = 5
+
+[keyboard]
+  bindings = [
+    { key = "A", mods = "Control|Shift", chars = "\uE000" },
+    { key = "W", mods = "Control|Shift", chars = "\uE001" },
+    { key = "S", mods = "Control|Shift", chars = "\uE002" },
+    { key = "D", mods = "Control|Shift", chars = "\uE003" },
+    { key = "N", mods = "Command", chars = "\uE004" },
+  ]
