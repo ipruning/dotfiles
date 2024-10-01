@@ -136,10 +136,12 @@ export FZF_ALT_C_COMMAND="fd --ignore-file ~/.rgignore --hidden --follow --ignor
 #===============================================================================
 # 👇 Preferred editor for local and remote sessions
 #===============================================================================
-if [[ -n $SSH_CONNECTION ]]; then
+if [[ -n $SSH_CONNECTION || -n $ZELLIJ ]]; then
   export EDITOR='nvim'
+  export VISUAL='nvim'
 else
   export EDITOR='zed --wait'
+  export VISUAL='zed --wait'
 fi
 
 #===============================================================================
