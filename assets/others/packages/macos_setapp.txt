@@ -41,6 +41,7 @@ Renamer
 SSH Config Editor
 SnapMotion
 SnippetsLab
+Spark Mail
 TablePlus
 TaskPaper
 Taskheat

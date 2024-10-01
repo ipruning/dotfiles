@@ -56,6 +56,7 @@ Google Docs
 Google Drive
 Google Sheets
 Google Slides
+Granola
 Heptabase
 Homerow
 Hush
@@ -189,6 +190,7 @@ zoom.us
 企业微信
 优酷
 哔哩哔哩
+夸克网盘
 小宇宙
 小红书
 集换社
