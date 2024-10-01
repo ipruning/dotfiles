@@ -28,6 +28,16 @@ set_proxy
 # export ZSH="${HOME}/.oh-my-zsh"
 
 #===============================================================================
+# 👇 Initialize zellij when running in Alacritty
+#===============================================================================
+export ZELLIJ_AUTO_ATTACH="true"
+export ZELLIJ_AUTO_EXIT="true"
+
+if [[ "$__CFBundleIdentifier" == "org.alacritty" ]]; then
+  eval "$(zellij setup --generate-auto-start zsh)"
+fi
+
+#===============================================================================
 # 👇 zsh Theme
 #===============================================================================
 if [[ -n $SSH_CONNECTION ]]; then
