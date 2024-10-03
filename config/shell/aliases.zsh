@@ -74,7 +74,7 @@ r-upgrade() {
   pipx upgrade-all
 
   echo -e "\033[33mUpdating mise...\033[0m"
-  mise upgrade --verbose
+  mise upgrade
 
   echo -e "\033[33mUpdating rust...\033[0m"
   rustup update && rustup self update
