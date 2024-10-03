@@ -1,4 +1,5 @@
 [tools]
+  "cargo:serie"                                = "latest"
   "cargo:termscp"                              = "latest"
   "go:github.com/appleboy/CodeGPT/cmd/codegpt" = "latest"
   "npm:bun"                                    = "latest"
