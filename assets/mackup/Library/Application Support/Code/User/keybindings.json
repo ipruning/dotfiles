@@ -19,19 +19,31 @@
     "command": "workbench.action.nextEditor"
   },
   {
-    "key": "cmd+ctrl+h",
+    "key": "ctrl+shift+h",
     "command": "workbench.action.toggleAuxiliaryBar"
   },
   {
-    "key": "cmd+ctrl+j",
+    "key": "ctrl+cmd+h",
+    "command": "workbench.action.toggleAuxiliaryBar"
+  },
+  {
+    "key": "ctrl+shift+j",
     "command": "workbench.action.terminal.toggleTerminal"
   },
   {
-    "key": "cmd+ctrl+l",
-    "command": "workbench.action.toggleSidebarVisibility"
+    "key": "ctrl+shift+j",
+    "command": "workbench.action.terminal.focus",
+    "when": "!terminalFocus"
   },
-  // Toggle Terminal
-  // https://stackoverflow.com/questions/42796887/switch-focus-between-editor-and-integrated-terminal
+  {
+    "key": "ctrl+cmd+j",
+    "command": "workbench.action.terminal.toggleTerminal"
+  },
+  {
+    "key": "ctrl+cmd+j",
+    "command": "workbench.action.terminal.focus",
+    "when": "!terminalFocus"
+  },
   {
     "key": "cmd+j",
     "command": "workbench.action.terminal.focus",
@@ -41,6 +53,14 @@
     "key": "cmd+j",
     "command": "workbench.action.togglePanel",
     "when": "terminalFocus"
+  },
+  {
+    "key": "ctrl+shift+l",
+    "command": "workbench.action.toggleSidebarVisibility"
+  },
+  {
+    "key": "ctrl+cmd+l",
+    "command": "workbench.action.toggleSidebarVisibility"
   },
   // Toggle VIM
   // {

@@ -2,8 +2,11 @@
   {
     "context": "Workspace",
     "bindings": {
+      "ctrl-shift-h": "workspace::ToggleLeftDock",
       "cmd-ctrl-h": "workspace::ToggleLeftDock",
+      "ctrl-shift-j": "workspace::ToggleBottomDock",
       "cmd-ctrl-j": "workspace::ToggleBottomDock",
+      "ctrl-shift-l": "workspace::ToggleRightDock",
       "cmd-ctrl-l": "workspace::ToggleRightDock"
     }
   },
@@ -31,6 +34,26 @@
   {
     "context": "Editor && (vim_mode == normal || vim_mode == visual) && !VimWaiting && !menu",
     "bindings": {
+      "ctrl-shift-u": "vim::ScrollUp",
+      "ctrl-shift-d": "vim::ScrollDown",
+      "ctrl-u": [
+        "workspace::SendKeystrokes",
+        "ctrl-shift-u z z"
+      ],
+      "ctrl-d": [
+        "workspace::SendKeystrokes",
+        "ctrl-shift-d z z"
+      ],
+      "ctrl-shift-n": "vim::MoveToNextMatch",
+      "n": [
+        "workspace::SendKeystrokes",
+        "ctrl-shift-n z z"
+      ],
+      "ctrl-alt-shift-n": "vim::MoveToNextMatch",
+      "N": [
+        "workspace::SendKeystrokes",
+        "ctrl-alt-shift-n z z"
+      ],
       "space t g": [
         "workspace::SendKeystrokes",
         ": new center terminal enter lazygit enter"
