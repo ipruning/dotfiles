@@ -129,6 +129,7 @@ Rectangle
 Reqable
 Roam Research
 Rond
+Rotato
 Safari
 Save to Raindrop.io
 Save to Reader
