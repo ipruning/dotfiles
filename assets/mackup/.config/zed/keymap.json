@@ -22,7 +22,9 @@
   {
     "context": "Terminal",
     "bindings": {
-      "cmd-n": "workspace::NewTerminal"
+      "cmd-n": "workspace::NewTerminal",
+      "ctrl-shift-a": "pane::ActivatePrevItem",
+      "ctrl-shift-d": "pane::ActivateNextItem"
     }
   },
   {
