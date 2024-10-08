@@ -1,8 +1,25 @@
 {
+  "assistant": {
+    "default_model": {
+      "model": "claude-3-5-sonnet-20240620",
+      "provider": "zed.dev"
+    },
+    "dock": "left",
+    "provider": null,
+    "version": "2"
+  },
+  "autosave": "on_focus_change",
+  "buffer_font_family": "MonoLisa Nerd Font",
+  "buffer_font_size": 13,
+  "chat_panel": {
+    "dock": "left"
+  },
+  "collaboration_panel": {
+    "dock": "left"
+  },
   "features": {
     "inline_completion_provider": "none"
   },
-  "vim_mode": true,
   "file_scan_exclusions": [
     "**/.git",
     "**/.svn",
@@ -15,6 +32,58 @@
     "**/vendor",
     "**/.tmp*"
   ],
+  "indent_guides": {
+    "coloring": "indent_aware",
+    "enabled": true
+  },
+  "inlay_hints": {
+    "edit_debounce_ms": 700,
+    "enabled": true,
+    "scroll_debounce_ms": 50,
+    "show_other_hints": true,
+    "show_parameter_hints": true,
+    "show_type_hints": true
+  },
+  "languages": {
+    "Python": {
+      "language_servers": [
+        "pyright"
+      ]
+    },
+    "Rainbow CSV": {
+      "soft_wrap": "none"
+    },
+    "TypeScript": {
+      "inlay_hints": {
+        "enabled": true,
+        "show_other_hints": true,
+        "show_parameter_hints": false,
+        "show_type_hints": true
+      }
+    }
+  },
+  "notification_panel": {
+    "dock": "left"
+  },
+  "outline_panel": {
+    "dock": "right"
+  },
+  "preferred_line_length": 120,
+  "project_panel": {
+    "button": true,
+    "dock": "right",
+    "git_status": true
+  },
+  "relative_line_numbers": true,
+  "restore_on_startup": "last_session",
+  "scrollbar": {
+    "cursors": true,
+    "diagnostics": true,
+    "git_diff": true,
+    "search_results": true,
+    "selected_symbol": true,
+    "show": "never"
+  },
   "search.exclude": {
     "**/*.snap": true,
     "**/.git": true,
@@ -24,99 +93,22 @@
     "**/.pnpm": true,
     "**/.vscode": true,
     "**/.yarn": true,
+    "**/CHANGELOG*": true,
+    "**/LICENSE*": true,
     "**/node_modules": true,
     "**/out/**": true,
     "**/package-lock.json": true,
     "**/pnpm-lock.yaml": true,
     "**/temp": true,
-    "**/yarn.lock": true,
-    "**/CHANGELOG*": true,
-    "**/LICENSE*": true
-  },
-  "project_panel": {
-    "button": true,
-    "dock": "right",
-    "git_status": true
-  },
-  "outline_panel": {
-    "dock": "right"
-  },
-  "collaboration_panel": {
-    "dock": "left"
-  },
-  "notification_panel": {
-    "dock": "left"
-  },
-  "chat_panel": {
-    "dock": "left"
-  },
-  "assistant": {
-    "default_model": {
-      "provider": "zed.dev",
-      "model": "claude-3-5-sonnet-20240620"
-    },
-    "dock": "left",
-    "version": "2",
-    "provider": null
-  },
-  "preferred_line_length": 120,
-  "autosave": "on_focus_change",
-  "relative_line_numbers": true,
-  "scrollbar": {
-    "show": "never",
-    "cursors": true,
-    "git_diff": true,
-    "search_results": true,
-    "selected_symbol": true,
-    "diagnostics": true
-  },
-  "buffer_font_family": "MonoLisa Nerd Font",
-  "buffer_font_size": 13,
-  "buffer_font_features": {
-    "zero": true,
-    "ss02": true,
-    "ss04": true,
-    "ss06": true,
-    "calt": false,
-    "liga": false
+    "**/yarn.lock": true
   },
   "terminal": {
     "copy_on_select": true,
-    "working_directory": "first_project_directory",
     "env": {
       "EDITOR": "zed --wait"
-    }
-  },
-  "inlay_hints": {
-    "enabled": true,
-    "show_type_hints": true,
-    "show_parameter_hints": true,
-    "show_other_hints": true,
-    "edit_debounce_ms": 700,
-    "scroll_debounce_ms": 50
-  },
-  "indent_guides": {
-    "enabled": true,
-    "coloring": "indent_aware"
-  },
-  "languages": {
-    "Python": {
-      "language_servers": [
-        "pyright"
-      ]
     },
-    "TypeScript": {
-      "inlay_hints": {
-        "enabled": true,
-        "show_parameter_hints": false,
-        "show_other_hints": true,
-        "show_type_hints": true
-      }
-    },
-    "Rainbow CSV": {
-      "soft_wrap": "none"
-    }
+    "working_directory": "first_project_directory"
   },
   "theme": "Catppuccin Mocha",
-  "restore_on_startup": "last_session"
+  "vim_mode": true
 }
