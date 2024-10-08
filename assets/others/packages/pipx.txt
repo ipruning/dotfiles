@@ -12,6 +12,7 @@ kaggle
 llm
 mackup
 open-webui
+pre-commit
 pricehist
 shot-scraper
 sqlite-utils
