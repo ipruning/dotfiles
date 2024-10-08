@@ -11,6 +11,7 @@ huggingface-hub
 kaggle
 llm
 mackup
+open-webui
 pricehist
 shot-scraper
 sqlite-utils
