@@ -184,7 +184,6 @@ iMovie
 kindaVim
 logioptionsplus
 pcsuite
-qbittorrent
 uBlacklist for Safari
 uPic
 zoom.us
