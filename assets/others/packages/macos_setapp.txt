@@ -9,6 +9,7 @@ DevUtils
 Disk Drill
 Downie
 Focus 2
+Folx
 ForkLift
 Gemini
 Gifox
