@@ -1,5 +1,6 @@
 .DS_Store
 assets/mackup/.config/karabiner/automatic_backups/
+bin/clip
 bin/cmd-wrapped
 bin/cwim
 config/shell/env_private.zsh
