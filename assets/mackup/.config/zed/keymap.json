@@ -11,24 +11,18 @@
     }
   },
   {
-    "context": "Workspace && !Terminal",
+    "context": "Editor && !Terminal",
     "bindings": {
-      "ctrl-r": "projects::OpenRecent"
+      "ctrl-r": "projects::OpenRecent",
+      "ctrl-shift-a": "pane::ActivatePrevItem",
+      "ctrl-shift-d": "pane::ActivateNextItem",
+      "ctrl-alt-n": "task::Spawn"
     }
   },
   {
     "context": "Terminal",
     "bindings": {
       "cmd-n": "workspace::NewTerminal"
-    }
-  },
-  {
-    "context": "Editor",
-    "bindings": {
-      "ctrl-shift-a": "pane::ActivatePrevItem",
-      "ctrl-shift-d": "pane::ActivateNextItem",
-      "ctrl-alt-n": "task::Spawn",
-      "ctrl-r": "projects::OpenRecent"
     }
   },
   {
