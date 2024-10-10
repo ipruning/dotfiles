@@ -105,7 +105,7 @@ source "$ZSH_CUSTOM"/plugins/zsh-autosuggestions/zsh-autosuggestions.plugin.zsh
 source "$ZSH_CUSTOM"/plugins/fzf-tab/fzf-tab.plugin.zsh
 
 #===============================================================================
-# ��� fzf-tab config
+# 👇 fzf-tab config
 #===============================================================================
 zstyle ':completion:*:git-checkout:*' sort false
 zstyle ':completion:*:descriptions' format '[%d]'
@@ -189,6 +189,11 @@ eval "$(zoxide init zsh)"
 # 👇 mise
 #===============================================================================
 eval "$(mise activate zsh)"
+
+#===============================================================================
+# 👇 LM Studio CLI tool (lms)
+#===============================================================================
+export PATH="$PATH:/Users/alex/.cache/lm-studio/bin"
 
 #===============================================================================
 # 👇 autodetect architecture (and set `brew` path) (and set `python` path)
