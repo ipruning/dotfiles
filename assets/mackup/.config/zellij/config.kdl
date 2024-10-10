@@ -146,7 +146,7 @@ keybinds clear-defaults=true {
     }
     shared_except "locked" {
         bind "Ctrl g" { SwitchToMode "Locked"; }
-        bind "Ctrl q" { Quit; }
+        // bind "Ctrl q" { Quit; }
         bind "Alt n" "" { NewPane; }
         bind "Alt i" { MoveTab "Left"; }
         bind "Alt o" { MoveTab "Right"; }
@@ -211,7 +211,7 @@ keybinds clear-defaults=true {
                 "go into edit mode"     "ctrl + s + e"
                 "detach session"        "ctrl + o + w"
                 "open session manager"  "ctrl + o + w"
-                "quit zellij"           "ctrl + q"
+                // "quit zellij"           "ctrl + q"
             }
         }
     }
