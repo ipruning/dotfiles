@@ -47,6 +47,7 @@ ExcalidrawZ
 Final Cut Pro
 Firefox Nightly
 FixTim
+Follow
 Fork
 FoxTrot Personal Search
 GarageBand
