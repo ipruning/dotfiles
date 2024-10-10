@@ -23,6 +23,12 @@ set_proxy
 # fi
 
 #===============================================================================
+# 👇 zsh options https://stackoverflow.com/questions/30028730/how-to-prevent-execution-of-command-in-zsh
+#===============================================================================
+setopt NO_NOMATCH
+setopt NO_NULL_GLOB
+
+#===============================================================================
 # 👇 oh-my-zsh init
 #===============================================================================
 # export ZSH="${HOME}/.oh-my-zsh"
@@ -35,6 +41,9 @@ export ZELLIJ_AUTO_EXIT="true"
 
 if [[ "$__CFBundleIdentifier" == "org.alacritty" ]]; then
   eval "$(zellij setup --generate-auto-start zsh)"
+  if [[ "$ZELLIJ_PANE_ID" == "0" ]]; then
+    fastfetch
+  fi
 fi
 
 #===============================================================================
@@ -96,7 +105,7 @@ source "$ZSH_CUSTOM"/plugins/zsh-autosuggestions/zsh-autosuggestions.plugin.zsh
 source "$ZSH_CUSTOM"/plugins/fzf-tab/fzf-tab.plugin.zsh
 
 #===============================================================================
-# 👇 fzf-tab config
+# ��� fzf-tab config
 #===============================================================================
 zstyle ':completion:*:git-checkout:*' sort false
 zstyle ':completion:*:descriptions' format '[%d]'
@@ -143,11 +152,6 @@ else
   export EDITOR='zed --wait'
   export VISUAL='zed --wait'
 fi
-
-#===============================================================================
-# 👇 pipx
-#===============================================================================
-export PIPX_DEFAULT_PYTHON="$(brew --prefix python)/bin/python3"
 
 #===============================================================================
 # 👇 OrbStack
