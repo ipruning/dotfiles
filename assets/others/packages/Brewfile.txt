@@ -11,6 +11,7 @@ btop
 cabextract
 chafa
 choose-rust
+cloudflared
 cmake
 cocoapods
 curl
@@ -18,8 +19,10 @@ cyme
 dasel
 difftastic
 docker
+doggo
+dra
 duf
-dust
+dug
 eget
 exiftool
 extra-cmake-modules
@@ -34,7 +37,6 @@ forgit
 fpp
 frps
 fswatch
-gdu
 genact
 gh
 git
@@ -84,9 +86,9 @@ moreutils
 ncdu
 neonctl
 neovim
-nmap
 nnn
 nushell
+nvtop
 ollama
 onefetch
 ouch
@@ -100,7 +102,7 @@ pueue
 pyenv
 qt
 ripgrep
-rm-improved
+rustscan
 scc
 sd
 sevenzip
@@ -124,11 +126,13 @@ tursodatabase/tap/turso
 typos-cli
 typst
 ugit
+viddy
 vips
 vladkens/tap/macmon
 watchexec
 wgcf
 wget
+wtfutil
 yq
 yt-dlp
 zellij
