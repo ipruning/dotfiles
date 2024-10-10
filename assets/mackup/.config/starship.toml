@@ -3,7 +3,7 @@ format = '''
 '''
 
 add_newline     = false
-command_timeout = 3_000
+command_timeout = 1_000
 
 [conda]
     format      = '[$symbol$environment](dimmed green) '
