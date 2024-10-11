@@ -102,7 +102,6 @@
 [shell]
   program = "/bin/zsh"
   args    = ["-l"]
-  # args = ["-l", "-c", "zellij attach -c hacker || zellij"]
 
 [window]
   decorations     = "buttonless"
