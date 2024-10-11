@@ -34,12 +34,12 @@ setopt NO_NULL_GLOB
 # export ZSH="${HOME}/.oh-my-zsh"
 
 #===============================================================================
-# 👇 Initialize zellij when running in Alacritty
+# 👇 Initialize zellij when running in Alacritty and not in Zed
 #===============================================================================
 export ZELLIJ_AUTO_ATTACH="true"
 export ZELLIJ_AUTO_EXIT="true"
 
-if [[ "$__CFBundleIdentifier" == "org.alacritty" ]]; then
+if [[ "$__CFBundleIdentifier" == "org.alacritty" && "$TERM_PROGRAM" != "zed" ]]; then
   eval "$(zellij setup --generate-auto-start zsh)"
   if [[ "$ZELLIJ_PANE_ID" == "0" ]]; then
     fastfetch
@@ -191,7 +191,7 @@ eval "$(zoxide init zsh)"
 eval "$(mise activate zsh)"
 
 #===============================================================================
-# 👇 LM Studio CLI tool (lms)
+# 👇 LM Studio CLI tool
 #===============================================================================
 export PATH="$PATH:/Users/alex/.cache/lm-studio/bin"
 
@@ -200,14 +200,7 @@ export PATH="$PATH:/Users/alex/.cache/lm-studio/bin"
 #===============================================================================
 case $SYSTEM_TYPE in
 mac_arm64)
-  # python
-  alias 'cvenv'='$(brew --prefix python@3.12)/bin/python3.12 -m venv .venv && source .venv/bin/activate && python3 -m pip install --upgrade -r $HOME/.requirements.txt'
-  alias 'svenv'='source .venv/bin/activate'
-  alias 'cenv'='conda create --prefix ./.env && conda activate ./.env'
-  alias 'senv'='conda activate ./.env'
   # python miniforge
-  # >>> conda initialize >>>
-  # !! Contents within this block are managed by 'conda init' !!
   if ! __conda_setup="$('/opt/homebrew/Caskroom/miniforge/base/bin/conda' 'shell.zsh' 'hook' 2>/dev/null)"; then
     eval "$__conda_setup"
   else
@@ -223,18 +216,13 @@ mac_arm64)
 mac_x86_64)
   # brew
   if [[ -f /usr/local/homebrew/bin/brew ]]; then
-    eval "$(/usr/local/homebrew/bin/brew shellenv)" # homebrew intel shell env
+    eval "$(/usr/local/homebrew/bin/brew shellenv)"
   fi
   # python
-  eval "$(pyenv init --path)" # pyenv intel shell env
-  eval "$(pyenv init -)"      # pyenv intel shell env
-  alias 'cvenv'='python3 -m venv .venv && source .venv/bin/activate && python3 -m pip install --upgrade -r $HOME/.requirements.txt'
-  alias 'svenv'='source .venv/bin/activate'
-  # python miniconda
+  eval "$(pyenv init --path)"
+  eval "$(pyenv init -)"
   ;;
 linux_x86_64)
   # python
-  alias 'cvenv'='python3 -m venv .venv && source .venv/bin/activate && python3 -m pip install --upgrade -r $HOME/.requirements.txt'
-  alias 'svenv'='source .venv/bin/activate'
   ;;
 esac
