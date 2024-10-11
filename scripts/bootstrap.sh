@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # TODO Remove ASDF
+# TODO Change UV install method
 
 set -euo pipefail
 
