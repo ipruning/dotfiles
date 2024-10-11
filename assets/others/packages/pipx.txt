@@ -17,6 +17,5 @@ pricehist
 shot-scraper
 sqlite-utils
 ttok
-uv
 vastai
 yacron
