@@ -173,6 +173,7 @@ Wooshy
 WorkFlowy
 XLD
 XPTV
+Xcode-16.0.0
 Xcodes
 YACReader
 YACReaderLibrary

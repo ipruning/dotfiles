@@ -101,6 +101,7 @@ promptfoo
 pueue
 pyenv
 qt
+rclone
 ripgrep
 rustscan
 scc
@@ -126,6 +127,7 @@ tursodatabase/tap/turso
 typos-cli
 typst
 ugit
+uv
 viddy
 vips
 vladkens/tap/macmon
