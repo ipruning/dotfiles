@@ -24,6 +24,7 @@ Capture One
 ChatGPT
 Chromium
 ClassIn
+Clicknow
 Cloudflare WARP
 Compressor
 Contexts
@@ -33,6 +34,7 @@ Cursor
 DEVONthink 3
 DaisyDisk
 Day One
+DeskPad
 DevCleaner
 Developer
 Dice by PCalc
