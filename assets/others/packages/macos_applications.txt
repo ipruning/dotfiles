@@ -102,6 +102,7 @@ Motion
 MusicHarbor
 MyCard
 NeteaseMusic
+Notion
 Numbers
 OBS
 OmniFocus
