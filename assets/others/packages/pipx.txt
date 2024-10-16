@@ -12,6 +12,7 @@ huggingface-hub
 kaggle
 llm
 mackup
+pre-commit
 pricehist
 shot-scraper
 sqlite-utils
