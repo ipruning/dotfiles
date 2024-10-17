@@ -134,6 +134,7 @@ vladkens/tap/macmon
 watchexec
 wgcf
 wget
+whisperkit-cli
 wtfutil
 yq
 yt-dlp
