@@ -18,7 +18,7 @@
     "dock": "left"
   },
   "features": {
-    "inline_completion_provider": "none"
+    "inline_completion_provider": "supermaven"
   },
   "file_scan_exclusions": [
     "**/.git",
