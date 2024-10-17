@@ -344,6 +344,7 @@
   },
   "shellcheck.run": "onType",
   "sqliteViewer.maxFileSize": 1024,
+  "svelte.enable-ts-plugin": true,
   "terminal.integrated.confirmOnExit": "hasChildProcesses",
   "terminal.integrated.defaultProfile.osx": "zsh",
   "terminal.integrated.fontFamily": "'MonoLisa Nerd Font'",
