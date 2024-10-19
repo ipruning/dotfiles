@@ -3,17 +3,22 @@
     "context": "Workspace",
     "bindings": {
       "ctrl-shift-h": "workspace::ToggleLeftDock",
-      "cmd-ctrl-h": "workspace::ToggleLeftDock",
       "ctrl-shift-j": "workspace::ToggleBottomDock",
-      "cmd-ctrl-j": "workspace::ToggleBottomDock",
       "ctrl-shift-l": "workspace::ToggleRightDock",
+      "cmd-ctrl-h": "workspace::ToggleLeftDock",
+      "cmd-ctrl-j": "workspace::ToggleBottomDock",
       "cmd-ctrl-l": "workspace::ToggleRightDock"
+    }
+  },
+  {
+    "context": "Workspace && !Editor && !Terminal",
+    "bindings": {
+      "ctrl-r": "projects::OpenRecent"
     }
   },
   {
     "context": "Editor && !Terminal",
     "bindings": {
-      "ctrl-r": "projects::OpenRecent",
       "ctrl-shift-a": "pane::ActivatePrevItem",
       "ctrl-shift-d": "pane::ActivateNextItem",
       "ctrl-alt-n": "task::Spawn"
@@ -30,15 +35,15 @@
   {
     "context": "Editor && (vim_mode == normal || vim_mode == visual) && !VimWaiting && !menu",
     "bindings": {
-      "ctrl-shift-u": "vim::ScrollUp",
-      "ctrl-shift-d": "vim::ScrollDown",
+      "ctrl-alt-shift-u": "vim::ScrollUp",
       "ctrl-u": [
         "workspace::SendKeystrokes",
-        "ctrl-shift-u z z"
+        "ctrl-alt-shift-u z z"
       ],
+      "ctrl-alt-shift-d": "vim::ScrollDown",
       "ctrl-d": [
         "workspace::SendKeystrokes",
-        "ctrl-shift-d z z"
+        "ctrl-alt-shift-d z z"
       ],
       "ctrl-shift-n": "vim::MoveToNextMatch",
       "n": [
@@ -50,17 +55,9 @@
         "workspace::SendKeystrokes",
         "ctrl-alt-shift-n z z"
       ],
-      "space t g": [
+      "space g s": [
         "workspace::SendKeystrokes",
-        ": new center terminal enter lazygit enter"
-      ],
-      "space t m": [
-        "workspace::SendKeystrokes",
-        ": new center terminal enter htop enter"
-      ],
-      "space t d": [
-        "workspace::SendKeystrokes",
-        ": new center terminal enter git space diff enter"
+        ": new center terminal enter gitu enter"
       ],
       "space t": "task::Spawn",
       "[ x": "editor::SelectLargerSyntaxNode",
