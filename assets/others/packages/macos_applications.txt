@@ -121,6 +121,7 @@ PasteNow
 Pearcleaner
 Photomator
 Planny
+Play 2
 PlayCover
 PocketTube
 ProNotes
