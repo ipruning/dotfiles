@@ -108,21 +108,33 @@ fkill() {
 #===============================================================================
 # 👇 zellij
 #===============================================================================
-# TODO If an argument is provided, try to attach to the session with that name.
-# TODO With tab completion, this can be used to quickly switch to a session.
 zj() {
-  session=$(zellij list-sessions --no-formatting | awk '{
-        session_name=$1; $1="";
-        if ($0 ~ /EXITED/) print "\033[31m" session_name "\033[0m\t" $0;  # Red for exited sessions
-        else print "\033[32m" session_name "\033[0m\t" $0;  # Green for active sessions
-    }' | column -t -s $'\t' | fzf --ansi --exit-0 --header="Select a session to attach:" | awk '{print $1}')
+  local session=""
 
-  if [ -n "$session" ]; then
+  if [[ $# -eq 1 ]]; then
+    session="$1"
+  else
+    session=$(zellij list-sessions --no-formatting | awk '{
+          session_name=$1; $1="";
+          if ($0 ~ /EXITED/) print "\033[31m" session_name "\033[0m\t" $0;
+          else print "\033[32m" session_name "\033[0m\t" $0;
+      }' | column -t -s $'\t' | fzf --ansi --exit-0 --header="Select a session to attach (or press Esc to create new):" | awk '{print $1}')
+  fi
+
+  if [[ -n "$session" ]]; then
     zellij attach "$session"
   else
-    echo "No sessions found."
+    echo "No session selected"
   fi
 }
+
+# _zj_completion() {
+#   local sessions
+#   sessions=($(zellij list-sessions --no-formatting | awk '{print $1}'))
+#   _describe 'sessions' sessions
+# }
+
+# compdef _zj_completion zj
 
 #===============================================================================
 # 👇 cd
