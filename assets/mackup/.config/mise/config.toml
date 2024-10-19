@@ -6,6 +6,7 @@
   "cargo:termscp"                              = "latest"
   "cargo:ttyper"                               = "latest"
   "go:github.com/appleboy/CodeGPT/cmd/codegpt" = "latest"
+  "go:github.com/melkeydev/go-blueprint"       = "latest"
   "npm:bun"                                    = "latest"
   "npm:pnpm"                                   = "latest"
   "npm:vercel"                                 = "latest"
