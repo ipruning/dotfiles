@@ -2,6 +2,7 @@ aria2
 asciinema
 atuin
 autocorrect
+bash
 bat
 bazelisk
 bore-cli
@@ -127,7 +128,6 @@ trufflehog
 tursodatabase/tap/turso
 typos-cli
 typst
-ugit
 uv
 viddy
 vips
