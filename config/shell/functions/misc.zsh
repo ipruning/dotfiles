@@ -1,40 +1,40 @@
 #===============================================================================
 # 👇 1Password
 #===============================================================================
-opon() {
-  if [[ -z $OP_SESSION_my ]]; then
-    eval "$(op signin --account my)"
-  fi
-}
-opoff() {
-  op signout
-  unset OP_SESSION_my
-}
-getkey() {
-  opon
-  op item get id_rsa_macbook_14 --format json | jq '.fields | map(select(.id == "private_key")) | .[0] | .value' -r | ssh-add -
-  opoff
-}
-remkey() {
-  ssh-add -D
-}
+# opon() {
+#   if [[ -z $OP_SESSION_my ]]; then
+#     eval "$(op signin --account my)"
+#   fi
+# }
+# opoff() {
+#   op signout
+#   unset OP_SESSION_my
+# }
+# getkey() {
+#   opon
+#   op item get id_rsa_macbook_14 --format json | jq '.fields | map(select(.id == "private_key")) | .[0] | .value' -r | ssh-add -
+#   opoff
+# }
+# remkey() {
+#   ssh-add -D
+# }
 
 #===============================================================================
 # 👇 sudo Control-S
 #===============================================================================
-_sudo-command-line() {
-  [[ -z $BUFFER ]] && zle up-history
-  local cmd="sudo "
-  if [[ ${BUFFER} == ${cmd}* ]]; then
-    CURSOR=$((CURSOR - ${#cmd}))
-    BUFFER="${BUFFER#"$cmd"}"
-  else
-    BUFFER="${cmd}${BUFFER}"
-    CURSOR=$((CURSOR + ${#cmd}))
-  fi
-  zle reset-prompt
-}
-zle -N _sudo-command-line
+# _sudo-command-line() {
+#   [[ -z $BUFFER ]] && zle up-history
+#   local cmd="sudo "
+#   if [[ ${BUFFER} == ${cmd}* ]]; then
+#     CURSOR=$((CURSOR - ${#cmd}))
+#     BUFFER="${BUFFER#"$cmd"}"
+#   else
+#     BUFFER="${cmd}${BUFFER}"
+#     CURSOR=$((CURSOR + ${#cmd}))
+#   fi
+#   zle reset-prompt
+# }
+# zle -N _sudo-command-line
 
 #===============================================================================
 # 👇 fzf completion will use == as the trigger sequence instead of the default **
