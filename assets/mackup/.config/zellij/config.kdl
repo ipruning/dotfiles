@@ -190,13 +190,6 @@ keybinds clear-defaults=true {
         bind "Alt 1" { Run "gitu"; }
         bind "Alt 2" { Run "git" "diff"; }
 
-        // bind "Ctrl a" {
-        //     LaunchOrFocusPlugin "file:~/.config/zellij/plugins/harpoon.wasm" {
-        //         floating true;
-        //         move_to_focused_tab true;
-        //     }
-        // }
-
         bind "Ctrl g" {
             LaunchOrFocusPlugin "file:~/.config/zellij/plugins/zellij-session-tree.wasm" {
                 floating true
@@ -209,9 +202,9 @@ keybinds clear-defaults=true {
 
         bind "Ctrl a" {
             LaunchOrFocusPlugin "file:~/.config/zellij/plugins/room.wasm" {
-                floating true;
-                ignore_case true;
-                quick_jump true;
+                floating true
+                ignore_case true
+                quick_jump true
             }
         }
     }
@@ -244,7 +237,7 @@ plugins {
 //    - true
 //    - false (Default)
 //
-simplified_ui true
+// simplified_ui true
 
 // Choose the path to the default shell that zellij will use for opening new panes
 // Default: $SHELL
