@@ -46,6 +46,7 @@ git-delta
 git-extras
 git-lfs
 git-quick-stats
+gitu
 glow
 gping
 graphviz
