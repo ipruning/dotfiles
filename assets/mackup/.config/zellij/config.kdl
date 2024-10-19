@@ -1,4 +1,3 @@
-// If you'd like to override the default keybindings completely, be sure to change "keybinds" to "keybinds clear-defaults=true"
 keybinds clear-defaults=true {
     normal {
         // uncomment this and adjust key if using copy_on_select=false
@@ -144,30 +143,6 @@ keybinds clear-defaults=true {
         bind "Space" { NextSwapLayout; }
         bind "x" { CloseFocus; SwitchToMode "Normal"; }
     }
-    shared_except "locked" {
-        bind "Ctrl g" { SwitchToMode "Locked"; }
-        // bind "Ctrl q" { Quit; }
-        bind "Alt n" "" { NewPane; }
-        bind "Alt i" { MoveTab "Left"; }
-        bind "Alt o" { MoveTab "Right"; }
-        bind "Alt h" "" { MoveFocusOrTab "Left"; }
-        bind "Alt l" "" { MoveFocusOrTab "Right"; }
-        bind "Alt j" "" { MoveFocus "Down"; }
-        bind "Alt k" "" { MoveFocus "Up"; }
-        bind "Alt =" "Alt +" { Resize "Increase"; }
-        bind "Alt -" { Resize "Decrease"; }
-        bind "Alt [" { PreviousSwapLayout; }
-        bind "Alt ]" { NextSwapLayout; }
-        bind "Alt 1" { Run "git" "status"; }
-        bind "Alt 2" { Run "git" "diff"; }
-        bind "Ctrl y" {
-            LaunchOrFocusPlugin "file:~/.config/zellij/plugins/room.wasm" {
-                floating true
-                ignore_case true
-                quick_jump true
-            }
-        }
-    }
     shared_except "normal" "locked" {
         bind "Enter" "Esc" { SwitchToMode "Normal"; }
     }
@@ -191,6 +166,54 @@ keybinds clear-defaults=true {
     }
     shared_except "tmux" "locked" {
         bind "Ctrl b" { SwitchToMode "Tmux"; }
+    }
+    shared_except "locked" {
+        // bind "Ctrl g" { SwitchToMode "Locked"; }
+
+        bind "Alt i" { MoveTab "Left"; }
+        bind "Alt o" { MoveTab "Right"; }
+
+        bind "Alt =" "Alt +" { Resize "Increase"; }
+        bind "Alt -" { Resize "Decrease"; }
+
+        bind "Alt [" { PreviousSwapLayout; }
+        bind "Alt ]" { NextSwapLayout; }
+
+        bind "Alt n" "" { NewPane; }
+        bind "Alt f" { ToggleFloatingPanes; }
+
+        bind "Alt h" "Alt Left" "" { MoveFocusOrTab "Left"; }
+        bind "Alt l" "Alt Right" "" { MoveFocusOrTab "Right"; }
+        bind "Alt j" "Alt Down" "" { MoveFocus "Down"; }
+        bind "Alt k" "Alt Up" "" { MoveFocus "Up"; }
+
+        bind "Alt 1" { Run "gitu"; }
+        bind "Alt 2" { Run "git" "diff"; }
+
+        // bind "Ctrl a" {
+        //     LaunchOrFocusPlugin "file:~/.config/zellij/plugins/harpoon.wasm" {
+        //         floating true;
+        //         move_to_focused_tab true;
+        //     }
+        // }
+
+        bind "Ctrl g" {
+            LaunchOrFocusPlugin "file:~/.config/zellij/plugins/zellij-session-tree.wasm" {
+                floating true
+                move_to_focused_tab true
+                cwd "/"
+                root_dirs "/Users/alex/coding;/Users/alex/developer"
+                session_layout "compact"
+            }
+        }
+
+        bind "Ctrl a" {
+            LaunchOrFocusPlugin "file:~/.config/zellij/plugins/room.wasm" {
+                floating true;
+                ignore_case true;
+                quick_jump true;
+            }
+        }
     }
 }
 
