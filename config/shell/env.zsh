@@ -41,19 +41,12 @@ setopt interactivecomments
 #===============================================================================
 # 👇 Initialize zellij when running in Alacritty and not in Zed
 #===============================================================================
-export ZELLIJ_AUTO_ATTACH="false"
+export ZELLIJ_AUTO_ATTACH="true"
 export ZELLIJ_AUTO_EXIT="true"
 
 if [[ "$__CFBundleIdentifier" == "org.alacritty" && "$TERM_PROGRAM" != "zed" ]]; then
   if [[ -z "$ZELLIJ" ]]; then
-    if [[ "$ZELLIJ_AUTO_ATTACH" == "true" ]]; then
-      zellij attach -c default
-    else
-      zellij
-    fi
-    if [[ "$ZELLIJ_AUTO_EXIT" == "true" ]]; then
-      exit
-    fi
+    eval "$(zellij setup --generate-auto-start zsh)"
   fi
   if [[ "$ZELLIJ_PANE_ID" == "0" ]]; then
     fastfetch
@@ -71,15 +64,15 @@ fi
 # preexec_functions+=(zellij_pane_name_update)
 
 zellij_tab_name_update() {
-    if [[ -n $ZELLIJ ]]; then
-        local current_dir=$PWD
-        if [[ $current_dir == $HOME ]]; then
-            current_dir="~"
-        else
-            current_dir=${current_dir##*/}
-        fi
-        command nohup zellij action rename-tab $current_dir >/dev/null 2>&1
+  if [[ -n $ZELLIJ ]]; then
+    local current_dir=$PWD
+    if [[ $current_dir == $HOME ]]; then
+      current_dir="~"
+    else
+      current_dir=${current_dir##*/}
     fi
+    command nohup zellij action rename-tab $current_dir >/dev/null 2>&1
+  fi
 }
 
 zellij_tab_name_update
