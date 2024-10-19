@@ -110,5 +110,6 @@
     "working_directory": "first_project_directory"
   },
   "theme": "Catppuccin Mocha",
+  "ui_font_size": 15,
   "vim_mode": true
 }
