@@ -84,6 +84,7 @@ brew "git-delta"
 brew "git-extras", link: false
 brew "git-lfs"
 brew "git-quick-stats"
+brew "gitu"
 brew "glow"
 brew "gnupg"
 brew "gping"
