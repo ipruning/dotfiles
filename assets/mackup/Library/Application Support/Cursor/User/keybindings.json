@@ -11,14 +11,6 @@
   },
   // Toggle Bar
   {
-    "key": "ctrl+shift+a",
-    "command": "workbench.action.previousEditor",
-  },
-  {
-    "key": "ctrl+shift+d",
-    "command": "workbench.action.nextEditor"
-  },
-  {
     "key": "cmd+ctrl+h",
     "command": "workbench.action.toggleAuxiliaryBar"
   },

@@ -125,6 +125,23 @@
   "editor.stickyScroll.enabled": true,
   "editor.suggestSelection": "first",
   "editor.tabSize": 2,
+  "editor.tokenColorCustomizations": {
+    "textMateRules": [
+      {
+        "name": "envKeys",
+        "scope": "string.quoted.single.ini,constant.numeric.ini,string.quoted.double.ini",
+        "settings": {
+          "foreground": "#19354900"
+        }
+      },
+      {
+        "scope": "keyword.other.dotenv",
+        "settings": {
+          "foreground": "#FF000000"
+        }
+      }
+    ]
+  },
   "editor.unicodeHighlight.ambiguousCharacters": true,
   "editor.unicodeHighlight.invisibleCharacters": true,
   "editor.wordWrap": "off",
@@ -238,10 +255,23 @@
   "fileNestingUpdater.autoUpdateInterval": 43200,
   "fileNestingUpdater.promptOnAutoUpdate": true,
   "files.associations": {
+    "*.Xresources": "xdefaults",
+    "*.bbmodel": "json",
+    "*.ejs": "html",
+    "*.emu": "html",
+    "*.hbs": "html",
+    "*.rasi": "css",
+    "*.sublime-snippet": "xml",
     "*.toml": "toml",
     ".cforge": "json",
+    ".env*": "dotenv",
     ".gitconfig": "ini",
-    ".gitconfig.local": "ini"
+    ".gitconfig.local": "ini",
+    "i3/*.conf": "i3",
+    "i3/config": "i3",
+    "lesskey": "lesskey",
+    "polybar/*.conf": "ini",
+    "polybar/config": "ini"
   },
   "files.insertFinalNewline": true,
   "files.simpleDialog.enable": true,
