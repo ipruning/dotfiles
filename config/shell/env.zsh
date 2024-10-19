@@ -41,15 +41,49 @@ setopt interactivecomments
 #===============================================================================
 # 👇 Initialize zellij when running in Alacritty and not in Zed
 #===============================================================================
-export ZELLIJ_AUTO_ATTACH="true"
+export ZELLIJ_AUTO_ATTACH="false"
 export ZELLIJ_AUTO_EXIT="true"
 
 if [[ "$__CFBundleIdentifier" == "org.alacritty" && "$TERM_PROGRAM" != "zed" ]]; then
-  eval "$(zellij setup --generate-auto-start zsh)"
+  if [[ -z "$ZELLIJ" ]]; then
+    if [[ "$ZELLIJ_AUTO_ATTACH" == "true" ]]; then
+      zellij attach -c default
+    else
+      zellij
+    fi
+    if [[ "$ZELLIJ_AUTO_EXIT" == "true" ]]; then
+      exit
+    fi
+  fi
   if [[ "$ZELLIJ_PANE_ID" == "0" ]]; then
     fastfetch
   fi
 fi
+
+# zellij_pane_name_update() {
+#   if [[ -n $ZELLIJ && -n $1 ]]; then
+#     local cmd=$(echo "$1" | awk '{print $1}')
+#     if [[ -n $cmd ]]; then
+#       command nohup zellij action rename-pane "$cmd" >/dev/null 2>&1 || true
+#     fi
+#   fi
+# }
+# preexec_functions+=(zellij_pane_name_update)
+
+zellij_tab_name_update() {
+    if [[ -n $ZELLIJ ]]; then
+        local current_dir=$PWD
+        if [[ $current_dir == $HOME ]]; then
+            current_dir="~"
+        else
+            current_dir=${current_dir##*/}
+        fi
+        command nohup zellij action rename-tab $current_dir >/dev/null 2>&1
+    fi
+}
+
+zellij_tab_name_update
+chpwd_functions+=(zellij_tab_name_update)
 
 #===============================================================================
 # 👇 zsh Theme
@@ -103,6 +137,7 @@ export FZF_DEFAULT_COMMAND="fd --ignore-file ~/.rgignore --hidden --follow --ign
 #===============================================================================
 source "$ZSH_CUSTOM"/plugins/git-open/git-open.plugin.zsh
 source "$ZSH_CUSTOM"/plugins/zsh-autosuggestions/zsh-autosuggestions.plugin.zsh
+source "$ZSH_CUSTOM"/plugins/ugit/ugit.plugin.zsh
 
 #===============================================================================
 # 👇 fzf-tab https://github.com/Aloxaf/fzf-tab/wiki/Configuration (fzf-tab needs to be loaded after compinit (oh-my-zsh.sh))
@@ -123,7 +158,7 @@ zstyle ':fzf-tab:*' fzf-pad 10
 # 👇 custom keybindings
 #===============================================================================
 # 👇 Option-S (Control-S)
-bindkey '^S' _sudo-command-line
+# bindkey '^S' _sudo-command-line
 # 👇 Option-Left
 bindkey "^[[1;3C" forward-word
 # 👇 Option-Right
