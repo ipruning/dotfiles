@@ -1,4 +1,5 @@
 [tools]
+  "cargo:kbt"                                  = "latest"
   "cargo:openapi-tui"                          = "latest"
   "cargo:parallel-disk-usage"                  = "latest"
   "cargo:rip2"                                 = "latest"
