@@ -4,17 +4,59 @@
             "complex_modifications": {
                 "rules": [
                     {
-                        "description": "Change left_control+hjkl to arrow keys",
+                        "description": "caps_lock → Hyper",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "caps_lock",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "left_shift",
+                                        "modifiers": ["left_command", "left_control", "left_option"]
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "tab → tab / hyper (if_held_down)",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "tab",
+                                    "modifiers": { "optional": ["caps_lock"] }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "left_shift",
+                                        "lazy": true,
+                                        "modifiers": ["left_command", "left_control", "left_option"]
+                                    }
+                                ],
+                                "to_if_alone": [{ "key_code": "tab" }],
+                                "to_if_held_down": [
+                                    {
+                                        "key_code": "left_shift",
+                                        "modifiers": ["left_command", "left_control", "left_option"]
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "left_control-hjkl → arrow keys",
                         "manipulators": [
                             {
                                 "conditions": [
                                     {
                                         "bundle_identifiers": [
-                                            "org.alacritty",
-                                            "com.todesktop.230313mzl4w4u92",
-                                            "dev.zed.Zed"
+                                            "com.roam-research.desktop-app"
                                         ],
-                                        "type": "frontmost_application_unless"
+                                        "type": "frontmost_application_if"
                                     }
                                 ],
                                 "from": {
@@ -31,11 +73,9 @@
                                 "conditions": [
                                     {
                                         "bundle_identifiers": [
-                                            "org.alacritty",
-                                            "com.todesktop.230313mzl4w4u92",
-                                            "dev.zed.Zed"
+                                            "com.roam-research.desktop-app"
                                         ],
-                                        "type": "frontmost_application_unless"
+                                        "type": "frontmost_application_if"
                                     }
                                 ],
                                 "from": {
@@ -52,11 +92,9 @@
                                 "conditions": [
                                     {
                                         "bundle_identifiers": [
-                                            "org.alacritty",
-                                            "com.todesktop.230313mzl4w4u92",
-                                            "dev.zed.Zed"
+                                            "com.roam-research.desktop-app"
                                         ],
-                                        "type": "frontmost_application_unless"
+                                        "type": "frontmost_application_if"
                                     }
                                 ],
                                 "from": {
@@ -73,11 +111,9 @@
                                 "conditions": [
                                     {
                                         "bundle_identifiers": [
-                                            "org.alacritty",
-                                            "com.todesktop.230313mzl4w4u92",
-                                            "dev.zed.Zed"
+                                            "com.roam-research.desktop-app"
                                         ],
-                                        "type": "frontmost_application_unless"
+                                        "type": "frontmost_application_if"
                                     }
                                 ],
                                 "from": {
@@ -93,7 +129,7 @@
                         ]
                     },
                     {
-                        "description": "Change left_control-b → backward, left_control-f → forward, left_control-n → next line, left_control-p → previous line",
+                        "description": "left_control-bfnp → backward / forward / next line / previous line",
                         "manipulators": [
                             {
                                 "conditions": [
@@ -162,13 +198,12 @@
                         ]
                     },
                     {
-                        "description": "Change left_control-c → escape",
+                        "description": "left_control-c → escape",
                         "manipulators": [
                             {
                                 "conditions": [
                                     {
                                         "bundle_identifiers": [
-                                            "company.thebrowser.Browser",
                                             "com.roam-research.desktop-app"
                                         ],
                                         "type": "frontmost_application_if"
@@ -184,7 +219,7 @@
                         ]
                     },
                     {
-                        "description": "Change right_command → right_command / escape (if_alone)",
+                        "description": "right_command → escape (if_alone) / right_command",
                         "manipulators": [
                             {
                                 "from": {
@@ -193,50 +228,6 @@
                                 },
                                 "to": [{ "key_code": "right_command" }],
                                 "to_if_alone": [{ "key_code": "escape" }],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "Change caps_lock → Hyper",
-                        "manipulators": [
-                            {
-                                "from": {
-                                    "key_code": "caps_lock",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to": [
-                                    {
-                                        "key_code": "left_shift",
-                                        "modifiers": ["left_command", "left_control", "left_option"]
-                                    }
-                                ],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "Chage tab (Holding) → Hyper",
-                        "manipulators": [
-                            {
-                                "from": {
-                                    "key_code": "tab",
-                                    "modifiers": { "optional": ["caps_lock"] }
-                                },
-                                "to": [
-                                    {
-                                        "key_code": "left_shift",
-                                        "lazy": true,
-                                        "modifiers": ["left_command", "left_control", "left_option"]
-                                    }
-                                ],
-                                "to_if_alone": [{ "key_code": "tab" }],
-                                "to_if_held_down": [
-                                    {
-                                        "key_code": "left_shift",
-                                        "modifiers": ["left_command", "left_control", "left_option"]
-                                    }
-                                ],
                                 "type": "basic"
                             }
                         ]
