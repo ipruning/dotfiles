@@ -42,11 +42,29 @@ setopt interactivecomments
 # 👇 Initialize zellij when running in Alacritty and not in Zed
 #===============================================================================
 export ZELLIJ_AUTO_ATTACH="true"
-export ZELLIJ_AUTO_EXIT="true"
+export ZELLIJ_AUTO_EXIT="false"
 
 if [[ "$__CFBundleIdentifier" == "org.alacritty" && "$TERM_PROGRAM" != "zed" ]]; then
   if [[ -z "$ZELLIJ" ]]; then
-    eval "$(zellij setup --generate-auto-start zsh)"
+    # Check if Zellij is installed
+    if command -v zellij >/dev/null 2>&1; then
+      # Get the list of active sessions
+      active_sessions=$(zellij list-sessions --no-formatting | awk '!/EXITED/ {print $1}')
+
+      # Check if there are any active sessions
+      if [[ -z "$active_sessions" ]]; then
+        # No active sessions, start a new one
+        eval "$(zellij setup --generate-auto-start zsh)"
+      else
+        # Get the first active session name
+        first_session=$(echo "$active_sessions" | head -n 1)
+
+        # Attach to the first active session
+        zellij attach "$first_session"
+      fi
+    else
+      echo "Zellij is not installed. Please install it first."
+    fi
   fi
   if [[ "$ZELLIJ_PANE_ID" == "0" ]]; then
     fastfetch
@@ -150,30 +168,35 @@ zstyle ':fzf-tab:*' fzf-pad 10
 #===============================================================================
 # 👇 custom keybindings
 #===============================================================================
-# 👇 Option-S (Control-S)
-# bindkey '^S' _sudo-command-line
-# 👇 Option-Left
+# Option-Left
 bindkey "^[[1;3C" forward-word
-# 👇 Option-Right
+# Option-Right
 bindkey "^[[1;3D" backward-word
-# 👇 Control-L accept zsh-autosuggestions https://github.com/zsh-users/zsh-autosuggestions#key-bindings (Using Control-F Instead)
-# bindkey '^L' autosuggest-accept
+# Option-C 快速查找目录 fuzzily search for a directory in your home directory then cd into it
+bindkey 'ç' fzf-cd-widget
+export FZF_ALT_C_COMMAND="fd --ignore-file ~/.rgignore --hidden --follow --ignore-case --type d"
+# Control-L accept zsh-autosuggestions https://github.com/zsh-users/zsh-autosuggestions#key-bindings (Using Control-F Instead)
+bindkey '^Y' autosuggest-accept
+# Control-T to fuzzily search for a file or directory in your home directory then insert its path at the cursor
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+# Control-I will be used to trigger completion fzf completion will use == as the trigger sequence instead of the default **
+export FZF_COMPLETION_TRIGGER='**'
+export FZF_COMPLETION_OPTS='--border --info=inline'
+_fzf_comprun() {
+  local command=$1
+  shift
+  case "$command" in
+  cd) fzf "$@" --preview 'tree -C {} | head -200' ;;
+  export | unset) fzf "$@" --preview "eval 'echo \$'{}" ;;
+  ssh) fzf "$@" --preview 'dig {}' ;;
+  *) fzf "$@" ;;
+  esac
+}
 
 #===============================================================================
 # 👇 forgit https://github.com/wfxr/forgit
 #===============================================================================
 [ -f "$HOMEBREW_PREFIX"/share/forgit/forgit.plugin.zsh ] && source "$HOMEBREW_PREFIX"/share/forgit/forgit.plugin.zsh
-
-#===============================================================================
-# 👇 fzf Control-T to fuzzily search for a file or directory in your home directory then insert its path at the cursor
-#===============================================================================
-export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
-
-#===============================================================================
-# 👇 fzf Option-C 快速查找目录 fuzzily search for a directory in your home directory then cd into it
-#===============================================================================
-bindkey 'ç' fzf-cd-widget
-export FZF_ALT_C_COMMAND="fd --ignore-file ~/.rgignore --hidden --follow --ignore-case --type d"
 
 #===============================================================================
 # 👇 Preferred editor for local and remote sessions
