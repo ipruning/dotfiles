@@ -117,6 +117,7 @@
   "editor.guides.indentation": true,
   "editor.inlineSuggest.enabled": true,
   "editor.lineHeight": 0,
+  "editor.lineNumbers": "relative",
   "editor.linkedEditing": true,
   "editor.minimap.enabled": false,
   "editor.semanticTokenColorCustomizations": {
