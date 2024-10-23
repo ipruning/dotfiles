@@ -31,24 +31,19 @@ command_timeout = 1_000
     min_time           = 10_000
     min_time_to_notify = 240_000
     show_milliseconds  = false
-    # show_notifications = true
+    show_notifications = true
 
 [directory]
     read_only         = '  '
     read_only_style   = 'red'
-    truncation_length = 3
+    truncation_length = 4
     truncate_to_repo  = true
-    truncation_symbol = '.../'
-
-[hg_branch]
-    format            = 'on [ $branch](bold purple) '
-    truncation_length = 8
-    truncation_symbol = ''
+    truncation_symbol = '…/'
 
 [git_branch]
     symbol            = ' '
-    truncation_length = 8
-    truncation_symbol = ''
+    truncation_length = 16
+    truncation_symbol = '…'
     ignore_branches   = ['master', 'main']
 
 [docker_context]

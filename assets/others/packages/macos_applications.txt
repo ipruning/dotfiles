@@ -55,6 +55,7 @@ FoxTrot Personal Search
 GarageBand
 GitButler
 Goodnotes
+Google Chrome
 Google Docs
 Google Drive
 Google Sheets

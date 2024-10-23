@@ -103,6 +103,7 @@
   "diffEditor.maxComputationTime": 8192,
   "diffEditor.renderSideBySide": true,
   "diffEditor.wordWrap": "off",
+  "dotenv.enableAutocloaking": true,
   "editor.accessibilitySupport": "off",
   "editor.bracketPairColorization.enabled": true,
   "editor.cursorBlinking": "phase",
@@ -126,23 +127,6 @@
   "editor.stickyScroll.enabled": true,
   "editor.suggestSelection": "first",
   "editor.tabSize": 2,
-  "editor.tokenColorCustomizations": {
-    "textMateRules": [
-      {
-        "name": "envKeys",
-        "scope": "string.quoted.single.ini,constant.numeric.ini,string.quoted.double.ini",
-        "settings": {
-          "foreground": "#19354900"
-        }
-      },
-      {
-        "scope": "keyword.other.dotenv",
-        "settings": {
-          "foreground": "#FF000000"
-        }
-      }
-    ]
-  },
   "editor.unicodeHighlight.ambiguousCharacters": true,
   "editor.unicodeHighlight.invisibleCharacters": true,
   "editor.wordWrap": "off",
