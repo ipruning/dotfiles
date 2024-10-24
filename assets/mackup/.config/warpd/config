@@ -4,7 +4,7 @@ screen_activation_key: C-M-s
 activation_key: C-M-c
 hint_oneshot_key: C-M-l
 cursor_size: 10
-hint_size: 50
-hint_border_radius: 10
-hint_chars: qazwsxedcrfv
-hint_font: CaskaydiaCove Nerd Font
+hint_size: 40
+hint_border_radius: 6
+hint_chars: qazwsxedcrfvtgb
+hint_font: MonoLisa Nerd Font
