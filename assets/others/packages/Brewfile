@@ -215,6 +215,7 @@ cask "suspicious-package"
 cask "syntax-highlight"
 cask "tunnelblick"
 cask "uninstallpkg"
+cask "warp"
 cask "wechattweak-cli"
 cask "xcodes"
 cask "xld"
@@ -253,6 +254,7 @@ mas "Numbers", id: 409203825
 mas "OneDrive", id: 823766827
 mas "Pages", id: 409201541
 mas "PasteNow", id: 1552536109
+mas "Perplexity", id: 6714467650
 mas "Photomator", id: 1444636541
 mas "Planny", id: 1515324201
 mas "PocketTube", id: 1533703891
@@ -261,9 +263,11 @@ mas "Save to Raindrop.io", id: 1549370672
 mas "Save to Reader", id: 1640236961
 mas "Shapr3D", id: 1091675654
 mas "Slack", id: 803453959
+mas "Stickies Pro", id: 1482080766
 mas "Surfingkeys", id: 1609752330
 mas "Tailscale", id: 1475387142
 mas "Tampermonkey", id: 1482490089
+mas "Things", id: 904280696
 mas "Tonal", id: 6449281141
 mas "uBlacklist for Safari", id: 1547912640
 mas "uPic", id: 1549159979

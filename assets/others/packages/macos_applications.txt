@@ -120,6 +120,7 @@ Pages
 Parsec
 PasteNow
 Pearcleaner
+Perplexity
 Photomator
 Planny
 Play 2
@@ -152,6 +153,7 @@ Slack
 Sloth
 Sniffnet
 Steam
+Stickies Pro
 Surfingkeys
 Surge
 Suspicious Package
@@ -172,6 +174,7 @@ UninstallPKG
 VMware Fusion
 Viable
 VirtualBuddy
+Warp
 WeChat
 WechatExporter
 Wooshy
