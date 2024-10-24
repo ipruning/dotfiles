@@ -2,10 +2,52 @@
     "profiles": [
         {
             "complex_modifications": {
+                "parameters": {
+                    "basic.to_delayed_action_delay_milliseconds": 200,
+                    "basic.to_if_alone_timeout_milliseconds": 500,
+                    "basic.to_if_held_down_threshold_milliseconds": 200
+                },
                 "rules": [
                     {
+                        "description": "caps_lock → hyper",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "caps_lock",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "left_shift",
+                                        "modifiers": ["left_command", "left_control", "left_option"]
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "left_control → escape / left_control (if_held_down)",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "left_control",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "left_control",
+                                        "lazy": true
+                                    }
+                                ],
+                                "to_if_alone": [{ "key_code": "escape" }],
+                                "to_if_held_down": [{ "key_code": "left_control" }],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
                         "description": "delete_or_backspace → delete_or_backspace / left_command (if_held_down)",
-                        "enabled": false,
                         "manipulators": [
                             {
                                 "from": {
@@ -31,7 +73,6 @@
                     },
                     {
                         "description": "delete_forward → delete_forward / left_option (if_held_down)",
-                        "enabled": false,
                         "manipulators": [
                             {
                                 "from": {
@@ -82,62 +123,7 @@
                         ]
                     },
                     {
-                        "description": "left_control-c → escape",
-                        "enabled": false,
-                        "manipulators": [
-                            {
-                                "conditions": [
-                                    {
-                                        "bundle_identifiers": [
-                                            "com.roam-research.desktop-app"
-                                        ],
-                                        "type": "frontmost_application_if"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "c",
-                                    "modifiers": { "mandatory": ["left_control"] }
-                                },
-                                "to": [{ "key_code": "escape" }],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "right_command → escape (if_alone) / right_command",
-                        "enabled": false,
-                        "manipulators": [
-                            {
-                                "from": {
-                                    "key_code": "right_command",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to": [{ "key_code": "right_command" }],
-                                "to_if_alone": [{ "key_code": "escape" }],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "caps_lock → Hyper",
-                        "manipulators": [
-                            {
-                                "from": {
-                                    "key_code": "caps_lock",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to": [
-                                    {
-                                        "key_code": "left_shift",
-                                        "modifiers": ["left_command", "left_control", "left_option"]
-                                    }
-                                ],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "left_control-hjkl → arrow keys",
+                        "description": "left_control-hjkl → arrow keys (when)",
                         "manipulators": [
                             {
                                 "conditions": [
@@ -218,7 +204,7 @@
                         ]
                     },
                     {
-                        "description": "left_control-bfnp → backward / forward / next line / previous line",
+                        "description": "left_control-bfnp → backward / forward / next line / previous line (when)",
                         "manipulators": [
                             {
                                 "conditions": [
@@ -292,59 +278,10 @@
                 {
                     "identifiers": {
                         "is_keyboard": true,
-                        "is_pointing_device": true,
-                        "product_id": 544,
-                        "vendor_id": 1452
+                        "product_id": 24926,
+                        "vendor_id": 7504
                     },
-                    "ignore": false
-                },
-                {
-                    "identifiers": {
-                        "is_keyboard": true,
-                        "product_id": 12871,
-                        "vendor_id": 6645
-                    },
-                    "ignore": true
-                },
-                {
-                    "disable_built_in_keyboard_if_exists": true,
-                    "identifiers": {
-                        "device_address": "e3-e3-1e-db-04-ce",
-                        "is_keyboard": true,
-                        "is_pointing_device": true
-                    },
-                    "ignore": false
-                },
-                {
-                    "identifiers": {
-                        "is_keyboard": true,
-                        "product_id": 7,
-                        "vendor_id": 12758
-                    },
-                    "simple_modifications": [
-                        {
-                            "from": { "key_code": "left_command" },
-                            "to": [{ "key_code": "left_option" }]
-                        },
-                        {
-                            "from": { "key_code": "left_option" },
-                            "to": [{ "key_code": "left_command" }]
-                        }
-                    ]
-                },
-                {
-                    "identifiers": {
-                        "is_keyboard": true,
-                        "is_pointing_device": true,
-                        "vendor_id": 13
-                    },
-                    "ignore": false,
-                    "simple_modifications": [
-                        {
-                            "from": { "key_code": "q" },
-                            "to": [{ "key_code": "return_or_enter" }]
-                        }
-                    ]
+                    "treat_as_built_in_keyboard": true
                 }
             ],
             "fn_function_keys": [
