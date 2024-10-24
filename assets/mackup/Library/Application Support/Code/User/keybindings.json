@@ -30,88 +30,88 @@
     "command": "vspacecode.space",
     "when": "editorTextFocus && neovim.mode == normal"
   },
-  // {
-  //   "key": "ctrl+d",
-  //   "when": "editorTextFocus && neovim.mode != insert",
-  //   "command": "runCommands",
-  //   "args": {
-  //     "commands": [
-  //       {
-  //         "command": "vscode-neovim.send",
-  //         "args": "<C-d>",
-  //       },
-  //       {
-  //         "command": "vscode-neovim.send",
-  //         "args": ":sleep 20m<CR>",
-  //       },
-  //       {
-  //         "command": "vscode-neovim.send",
-  //         "args": "zz",
-  //       },
-  //     ]
-  //   }
-  // },
-  // {
-  //   "key": "ctrl+u",
-  //   "when": "editorTextFocus && neovim.mode != insert",
-  //   "command": "runCommands",
-  //   "args": {
-  //     "commands": [
-  //       {
-  //         "command": "vscode-neovim.send",
-  //         "args": "<C-u>",
-  //       },
-  //       {
-  //         "command": "vscode-neovim.send",
-  //         "args": ":sleep 20m<CR>",
-  //       },
-  //       {
-  //         "command": "vscode-neovim.send",
-  //         "args": "zz",
-  //       },
-  //     ]
-  //   }
-  // },
-  // {
-  //   "key": "n",
-  //   "when": "editorTextFocus && neovim.mode != insert",
-  //   "command": "runCommands",
-  //   "args": {
-  //     "commands": [
-  //       {
-  //         "command": "vscode-neovim.send",
-  //         "args": "n",
-  //       },
-  //       {
-  //         "command": "vscode-neovim.send",
-  //         "args": ":sleep 20m<CR>",
-  //       },
-  //       {
-  //         "command": "vscode-neovim.send",
-  //         "args": "zz",
-  //       },
-  //     ]
-  //   }
-  // },
-  // {
-  //   "key": "shift+n",
-  //   "when": "editorTextFocus && neovim.mode != insert",
-  //   "command": "runCommands",
-  //   "args": {
-  //     "commands": [
-  //       {
-  //         "command": "vscode-neovim.send",
-  //         "args": "N",
-  //       },
-  //       {
-  //         "command": "vscode-neovim.send",
-  //         "args": ":sleep 20m<CR>",
-  //       },
-  //       {
-  //         "command": "vscode-neovim.send",
-  //         "args": "zz",
-  //       },
-  //     ]
-  //   }
-  // },
+  {
+    "key": "ctrl+d",
+    "when": "editorTextFocus && neovim.mode != insert",
+    "command": "runCommands",
+    "args": {
+      "commands": [
+        {
+          "command": "vscode-neovim.send",
+          "args": "<C-d>",
+        },
+        {
+          "command": "vscode-neovim.send",
+          "args": ":sleep 20m<CR>",
+        },
+        {
+          "command": "vscode-neovim.send",
+          "args": "zz",
+        },
+      ]
+    }
+  },
+  {
+    "key": "ctrl+u",
+    "when": "editorTextFocus && neovim.mode != insert",
+    "command": "runCommands",
+    "args": {
+      "commands": [
+        {
+          "command": "vscode-neovim.send",
+          "args": "<C-u>",
+        },
+        {
+          "command": "vscode-neovim.send",
+          "args": ":sleep 20m<CR>",
+        },
+        {
+          "command": "vscode-neovim.send",
+          "args": "zz",
+        },
+      ]
+    }
+  },
+  {
+    "key": "n",
+    "when": "editorTextFocus && neovim.mode != insert",
+    "command": "runCommands",
+    "args": {
+      "commands": [
+        {
+          "command": "vscode-neovim.send",
+          "args": "n",
+        },
+        {
+          "command": "vscode-neovim.send",
+          "args": ":sleep 20m<CR>",
+        },
+        {
+          "command": "vscode-neovim.send",
+          "args": "zz",
+        },
+      ]
+    }
+  },
+  {
+    "key": "shift+n",
+    "when": "editorTextFocus && neovim.mode != insert",
+    "command": "runCommands",
+    "args": {
+      "commands": [
+        {
+          "command": "vscode-neovim.send",
+          "args": "N",
+        },
+        {
+          "command": "vscode-neovim.send",
+          "args": ":sleep 20m<CR>",
+        },
+        {
+          "command": "vscode-neovim.send",
+          "args": "zz",
+        },
+      ]
+    }
+  },
 ]
