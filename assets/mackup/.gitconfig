@@ -1,7 +1,5 @@
 [alias]
-    dft = difftool
     lg = log --graph --decorate \n-30 --all --date-order --date=format:'%Y-%m-%d %H:%M:%S' \n--pretty=format:'%C(cyan)%h%Creset %C(black bold)%ad%Creset%C(auto)%d %s'
-    gs = onefetch
 [pager]
     difftool = true
 [branch]
@@ -17,11 +15,10 @@
     colorMoved = default
 [interactive]
     diffFilter = delta --color-only
+[diff]
+    external = difft
 [delta]
     navigate = true    # use n and N to move between diff sections
-    # delta detects terminal colors automatically; set one of these to disable auto-detection
-    # dark = true
-    # light = true
 [merge]
     conflictstyle = diff3
 [color]
@@ -69,9 +66,3 @@
     # email = YOUR_EMAIL@example.com
     # signingkey = YOUR_GPG_FINGERPRINT
     # editor = YOUR_EDITOR
-
-# Difftastic configuration (kept for standalone use)
-[diff "difftastic"]
-    command = difft
-[difftool "difftastic"]
-    cmd = difft "$LOCAL" "$REMOTE"
