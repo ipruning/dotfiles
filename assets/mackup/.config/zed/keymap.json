@@ -8,12 +8,6 @@
     }
   },
   {
-    "context": "Workspace && !Editor && !Terminal",
-    "bindings": {
-      "ctrl-r": "projects::OpenRecent"
-    }
-  },
-  {
     "context": "Editor || Terminal",
     "bindings": {
       "ctrl-shift-a": "pane::ActivatePrevItem",
