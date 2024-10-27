@@ -23,7 +23,6 @@
   "[latex]": {
     "editor.acceptSuggestionOnEnter": "on",
     "editor.defaultFormatter": "James-Yu.latex-workshop",
-    "editor.fontSize": 13,
     "editor.formatOnSave": true,
     "editor.quickSuggestions": {
       "comments": "on",
@@ -42,7 +41,6 @@
   "[markdown]": {
     "editor.acceptSuggestionOnEnter": "on",
     "editor.defaultFormatter": "DavidAnson.vscode-markdownlint",
-    "editor.fontSize": 13,
     "editor.formatOnSave": false,
     "editor.quickSuggestions": {
       "comments": "on",
