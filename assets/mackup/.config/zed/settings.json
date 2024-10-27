@@ -1,7 +1,7 @@
 {
   "assistant": {
     "default_model": {
-      "model": "claude-3-5-sonnet-20240620",
+      "model": "claude-3-5-sonnet-latest",
       "provider": "zed.dev"
     },
     "dock": "left",
@@ -46,9 +46,7 @@
   },
   "languages": {
     "Python": {
-      "language_servers": [
-        "pyright"
-      ]
+      "language_servers": ["pyright"]
     },
     "Rainbow CSV": {
       "soft_wrap": "none"
