@@ -120,6 +120,7 @@ brew "llvm"
 brew "lnav"
 brew "lua"
 brew "luajit"
+brew "lychee"
 brew "m-cli"
 brew "mactop"
 brew "mas"
@@ -222,7 +223,7 @@ cask "xld"
 mas "1Blocker", id: 1365531024
 mas "1Password for Safari", id: 1569813296
 mas "Avenue", id: 1523681067
-mas "Balatro", id: 6502451661
+mas "Balatro+", id: 6502451661
 mas "Bob", id: 1630034110
 mas "CapCut", id: 1500855883
 mas "com.kagimacOS.Kagi-Search", id: 1622835804
