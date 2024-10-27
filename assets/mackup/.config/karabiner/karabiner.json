@@ -10,6 +10,7 @@
                 "rules": [
                     {
                         "description": "left_command + double-tap q → close application",
+                        "enabled": false,
                         "manipulators": [
                             {
                                 "conditions": [
