@@ -1,5 +1,6 @@
 beancount
 chainforge
+commitizen
 datasette
 datasette-studio
 deadlink
@@ -14,6 +15,7 @@ llm
 mackup
 pre-commit
 pricehist
+ruff
 shot-scraper
 sqlite-utils
 ttok
