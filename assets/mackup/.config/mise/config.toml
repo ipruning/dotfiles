@@ -10,6 +10,7 @@
   "go:github.com/melkeydev/go-blueprint"       = "latest"
   "npm:bun"                                    = "latest"
   "npm:pnpm"                                   = "latest"
+  "npm:promptfoo"                              = "latest"
   "npm:vercel"                                 = "latest"
   "npm:wrangler"                               = "latest"
   "npm:yarn"                                   = "latest"
@@ -18,6 +19,7 @@
   go                                           = "latest"
   node                                         = "latest"
   python                                       = "latest"
+  ruby                                         = "latest"
   zig                                          = "latest"
 
 [settings]
