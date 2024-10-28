@@ -2,6 +2,7 @@
 1Password for Safari
 1Password
 A Better Finder Attributes 7
+AeroSpace
 Alacritty
 Alfred 5
 Amethyst
