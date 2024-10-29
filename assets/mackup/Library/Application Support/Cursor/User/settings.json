@@ -312,7 +312,7 @@
   "python.analysis.autoFormatStrings": true,
   "python.analysis.typeCheckingMode": "basic",
   "python.defaultInterpreterPath": "~/.conda/envs/ml/bin/python",
-  "python.languageServer": "Pylance",
+  "python.languageServer": "Default",
   "remote.SSH.connectTimeout": 1000,
   "ruff.configurationPreference": "filesystemFirst",
   "shellcheck.customArgs": [],
