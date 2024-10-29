@@ -144,13 +144,13 @@
     }
   },
   // Better escape
-  {
-    "context": "Editor && vim_mode == insert && !menu",
-    "bindings": {
-      "j j": "vim::NormalBefore", // remap jj in insert mode to escape
-      "j k": "vim::NormalBefore" // remap jk in insert mode to escape
-    }
-  },
+  // {
+  //   "context": "Editor && vim_mode == insert && !menu",
+  //   "bindings": {
+  //     "j j": "vim::NormalBefore", // remap jj in insert mode to escape
+  //     "j k": "vim::NormalBefore" // remap jk in insert mode to escape
+  //   }
+  // },
   // Rename
   {
     "context": "Editor && vim_operator == c",

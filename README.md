@@ -14,7 +14,7 @@
 
 ## Bootstrap
 
-If you are a macOS user, you will need to install xcode first or download it here  <https://developer.apple.com/download/more/>.
+If you are a macOS user, you will need to install xcode first or download it here <https://developer.apple.com/download/more/>.
 
 ```shell
 xcode-select --install
