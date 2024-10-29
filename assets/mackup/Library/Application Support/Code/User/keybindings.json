@@ -1,29 +1,37 @@
 [
   {
-    "key": "shift+cmd+c",
     "command": "-workbench.action.terminal.openNativeConsole",
+    "key": "shift+cmd+c",
     "when": "!terminalFocus"
   },
   {
-    "key": "cmd+b",
-    "command": "-workbench.action.toggleSidebarVisibility"
+    "command": "-workbench.action.toggleSidebarVisibility",
+    "key": "cmd+b"
   },
   {
-    "key": "ctrl+cmd+h",
-    "command": "workbench.action.toggleAuxiliaryBar"
+    "command": "workbench.action.toggleAuxiliaryBar",
+    "key": "ctrl+cmd+h"
   },
   {
-    "key": "ctrl+cmd+j",
-    "command": "workbench.action.terminal.toggleTerminal"
+    "command": "workbench.action.terminal.toggleTerminal",
+    "key": "ctrl+cmd+j"
   },
   {
-    "key": "ctrl+cmd+j",
     "command": "workbench.action.terminal.focus",
+    "key": "ctrl+cmd+j",
     "when": "!terminalFocus"
   },
   {
-    "key": "ctrl+cmd+l",
-    "command": "workbench.action.toggleSidebarVisibility"
+    "command": "workbench.action.toggleSidebarVisibility",
+    "key": "ctrl+cmd+l"
+  },
+  {
+    "command": "code-runner.run",
+    "key": "cmd+r cmd+r"
+  },
+  {
+    "command": "code-runner.run",
+    "key": "ctrl+alt+n"
   },
   {
     "key": "space",
