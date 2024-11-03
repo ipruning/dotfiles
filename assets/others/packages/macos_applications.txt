@@ -5,6 +5,7 @@ A Better Finder Attributes 7
 AeroSpace
 Alacritty
 Alfred 5
+AltTab
 Amethyst
 Amie
 Anki
@@ -25,6 +26,7 @@ Capture One
 ChatGPT
 Chromium
 ClassIn
+Claude
 Clicknow
 Cloudflare WARP
 Compressor
@@ -182,7 +184,7 @@ Wooshy
 WorkFlowy
 XLD
 XPTV
-Xcode-16.0.0
+Xcode
 Xcodes
 YACReader
 YACReaderLibrary
