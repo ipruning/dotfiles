@@ -40,6 +40,7 @@ fpp
 frps
 fswatch
 genact
+gfold
 gh
 git
 git-cliff
@@ -47,7 +48,6 @@ git-crypt
 git-delta
 git-extras
 git-lfs
-git-quick-stats
 gitu
 glow
 gping
@@ -89,7 +89,6 @@ monolith
 moreutils
 ncdu
 neonctl
-neovim
 nnn
 nushell
 nvtop

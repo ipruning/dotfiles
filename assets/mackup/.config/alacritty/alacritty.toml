@@ -121,11 +121,8 @@
 
 [keyboard]
   bindings = [
-    # { key = "N", mods = "Command", chars = "\uE004" },
-    # { key = "A", mods = "Control|Shift", chars = "\uE000" },
-    # { key = "W", mods = "Control|Shift", chars = "\uE001" },
-    # { key = "S", mods = "Control|Shift", chars = "\uE002" },
-    # { key = "D", mods = "Control|Shift", chars = "\uE003" },
-    # { key = "Left", mods = "Command", chars = "\uE000" },
-    # { key = "Right", mods = "Command", chars = "\uE003" },
+    # { key = "h", mods = "Command|Shift", chars = "\uE000" },
+    # { key = "j", mods = "Command|Shift", chars = "\uE001" },
+    # { key = "k", mods = "Command|Shift", chars = "\uE002" },
+    # { key = "l", mods = "Command|Shift", chars = "\uE003" },
   ]
