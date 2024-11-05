@@ -199,33 +199,18 @@ keybinds clear-defaults=true {
         bind "Alt n" { NewPane; }
         bind "Alt f" { ToggleFloatingPanes; }
 
-        bind "Alt h" { MoveFocusOrTab "Left"; }
-        bind "Alt l" { MoveFocusOrTab "Right"; }
-        bind "Alt j" { MoveFocus "Down"; }
-        bind "Alt k" { MoveFocus "Up"; }
+        // Alacritty X Zellij
+        bind "Alt h" "" { MoveFocusOrTab "Left"; }
+        bind "Alt j" "" { MoveFocus "Down"; }
+        bind "Alt k" "" { MoveFocus "Up"; }
+        bind "Alt l" "" { MoveFocusOrTab "Right"; }
 
-        // bind "Alt 1" { Run "gitu"; }
-        // bind "Alt 2" { Run "git" "diff"; }
-
-        // bind "Alt i" { MoveTab "Left"; }
-        // bind "Alt o" { MoveTab "Right"; }
-
-        // bind "Alt +" { Resize "Increase"; }
-        // bind "Alt -" { Resize "Decrease"; }
-
-        // bind "Alt [" { PreviousSwapLayout; }
-        // bind "Alt ]" { NextSwapLayout; }
-
-        // bind "Alt n" { NewPane; }
-        // bind "Alt f" { ToggleFloatingPanes; }
-
-        // bind "Alt h" "" { MoveFocusOrTab "Left"; }
-        // bind "Alt l" "" { MoveFocusOrTab "Right"; }
-        // bind "Alt j" "" { MoveFocus "Down"; }
-        // bind "Alt k" "" { MoveFocus "Up"; }
-
-        // bind "Alt 1" { Run "gitu"; }
-        // bind "Alt 2" { Run "git" "diff"; }
+        bind "" { Run "gitu" {
+            direction "Right"
+        }; }
+        bind "" { Run "git" "diff" {
+            direction "Right"
+        }; }
     }
 }
 
