@@ -99,7 +99,9 @@
 [scrolling]
   history = 0
 
-[shell]
+[terminal]
+
+[terminal.shell]
   program = "/bin/zsh"
   args    = ["-l"]
 
@@ -121,8 +123,14 @@
 
 [keyboard]
   bindings = [
-    # { key = "h", mods = "Command|Shift", chars = "\uE000" },
-    # { key = "j", mods = "Command|Shift", chars = "\uE001" },
-    # { key = "k", mods = "Command|Shift", chars = "\uE002" },
-    # { key = "l", mods = "Command|Shift", chars = "\uE003" },
+    # Alacritty X Zellij
+    { key = "N", mods = "Command", chars = "\u001bn" },
+
+    { key = "H", mods = "Control|Shift", chars = "\uE006" },
+    { key = "J", mods = "Control|Shift", chars = "\uE007" },
+    { key = "K", mods = "Control|Shift", chars = "\uE008" },
+    { key = "L", mods = "Control|Shift", chars = "\uE009" },
+
+    { key = "!", mods = "Control|Shift", chars = "\uE001" },
+    { key = "@", mods = "Control|Shift", chars = "\uE002" },
   ]
