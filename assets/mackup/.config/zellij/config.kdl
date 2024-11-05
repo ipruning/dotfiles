@@ -170,23 +170,24 @@ keybinds clear-defaults=true {
     shared_except "locked" {
         bind "Ctrl g" { SwitchToMode "Locked"; }
 
-        bind "Ctrl k" {
-            LaunchOrFocusPlugin "file:~/.config/zellij/plugins/zellij-session-tree.wasm" {
-                floating true
-                move_to_focused_tab true
-                cwd "/"
-                root_dirs "/Users/alex/coding;/Users/alex/developer"
-                session_layout "compact"
-            }
-        }
+        // bind "Ctrl k" {
+        //     LaunchOrFocusPlugin "file:~/.config/zellij/plugins/zellij-sessionizer.wasm" {
+        //         floating true
+        //         move_to_focused_tab true
+        //         cwd "/"
+        //         root_dirs "/Users/alex/Coding/qkvlab.com"
+        //     }
+        //     SwitchToMode "Locked"
+        // }
 
         bind "Ctrl j" {
-            LaunchOrFocusPlugin "file:~/.config/zellij/plugins/room.wasm" {
+            LaunchOrFocusPlugin "file:~/.config/zellij/plugins/zellij-room.wasm" {
                 floating true
                 ignore_case true
                 quick_jump true
             }
         }
+
         bind "Alt i" { MoveTab "Left"; }
         bind "Alt o" { MoveTab "Right"; }
 
