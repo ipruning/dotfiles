@@ -23,6 +23,7 @@ Blender
 Bob
 CapCut
 Capture One
+Chat2DB
 ChatGPT
 Chromium
 ClassIn
@@ -105,6 +106,7 @@ Mos
 Motion
 MusicHarbor
 MyCard
+NeoHtop
 NeteaseMusic
 Notion
 Numbers
