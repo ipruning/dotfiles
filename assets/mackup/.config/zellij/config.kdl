@@ -175,10 +175,10 @@ keybinds clear-defaults=true {
                 floating true
                 move_to_focused_tab true
                 cwd "/"
-                root_dirs "/Users/alex/Coding;/Users/alex/Developer"
+                root_dirs "/Users/alex/Developer;/Users/alex/Developer/orgs"
                 session_layout "compact"
             }
-            SwitchToMode "Locked"
+            // SwitchToMode "Locked"
         }
 
         bind "Ctrl j" {
