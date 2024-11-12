@@ -67,7 +67,7 @@ if [[ "$__CFBundleIdentifier" == "org.alacritty" && "$TERM_PROGRAM" != "zed" ]];
     fi
   fi
   if [[ "$ZELLIJ_PANE_ID" == "0" ]]; then
-    fastfetch
+    # fastfetch
   fi
 fi
 
@@ -124,20 +124,7 @@ source "${HOME}"/.config/broot/launcher/bash/br
 #===============================================================================
 # 👇 fzf init
 #===============================================================================
-case $SYSTEM_TYPE in
-mac_arm64)
-  source "$(brew --prefix fzf)/shell/completion.zsh"
-  source "$(brew --prefix fzf)/shell/key-bindings.zsh"
-  ;;
-mac_x86_64)
-  source "/opt/homebrew/opt/fzf/shell/completion.zsh"
-  source "/opt/homebrew/opt/fzf/shell/key-bindings.zsh"
-  ;;
-linux_x86_64)
-  source "$(brew --prefix fzf)/shell/completion.zsh"
-  source "$(brew --prefix fzf)/shell/key-bindings.zsh"
-  ;;
-esac
+source <(fzf --zsh)
 
 export FZF_DEFAULT_OPTS="--height=100% --layout=reverse --info=inline --border --margin=1 --padding=1"
 export FZF_DEFAULT_COMMAND="fd --ignore-file ~/.rgignore --hidden --follow --ignore-case ."
