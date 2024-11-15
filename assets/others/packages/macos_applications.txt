@@ -1,4 +1,3 @@
-1Blocker
 1Password for Safari
 1Password
 A Better Finder Attributes 7
@@ -6,58 +5,33 @@ AeroSpace
 Alacritty
 Alfred 5
 AltTab
-Amethyst
-Amie
 Anki
 Apparency
-Arc
 Avenue
-BBackupp
-BaiduNetdisk
-Balatro
+BaiduNetdisk_mac
 BetterDisplay
-Binance
-Blackmagic Disk Speed Test
-Blackmagic Media Express
 Blender
 Bob
-CapCut
 Capture One
 Chat2DB
-ChatGPT
 Chromium
-ClassIn
-Claude
 Clicknow
 Cloudflare WARP
-Compressor
 Contexts
 CrossOver
-Cryptomator
 Cursor
 DEVONthink 3
 DaisyDisk
 Day One
 DeskPad
-DevCleaner
-Developer
-Dice by PCalc
-Discord
-DisplayLink Manager
 Drafts
 Dropbox
-Eagle for Safari
 Eagle
 Eudic
 ExcalidrawZ
-Final Cut Pro
-Firefox Nightly
 FixTim
-Follow
 Fork
-FoxTrot Personal Search
 GarageBand
-GitButler
 Goodnotes
 Google Chrome
 Google Docs
@@ -66,14 +40,11 @@ Google Sheets
 Google Slides
 Granola
 Heptabase
-Homerow
 Hush
 IINA
 Ice
-IconChanger
 Immersive Translate
 Input Source Pro
-JetBrains Toolbox
 Jetpack Joyride 2
 Kagi for Safari
 Karabiner-Elements
@@ -81,61 +52,35 @@ Karabiner-EventViewer
 KeyCastr
 Keyboard Maestro
 Keynote
-Klack
 LM Studio
-LTspice
-LanguageTool for Desktop
 Lark
-LayAuto3
-Linear
-Logic Pro X
+LinearMouse
 Longbridge Pro
-LosslessCut
-LyricsX
-MAA
 MWeb Pro
 MainStage
-Mathpix Snipping Tool
 MessAuto
 Microsoft Excel
 Microsoft PowerPoint
 Microsoft Word
 Mini Metro+
-Mochi Diffusion
 Mos
-Motion
 MusicHarbor
-MyCard
-NeoHtop
 NeteaseMusic
 Notion
 Numbers
 OBS
-OmniFocus
-OmniGraffle
-OmniOutliner
-OmniPlan
 OneDrive
 OnyX
-OpenAI Translator
-Optimus Player
 OrbStack
 PDF Expert
 Pages
-Parsec
 PasteNow
 Pearcleaner
-Perplexity
 Photomator
-Planny
 Play 2
 PlayCover
-PocketTube
 ProNotes
-QLMarkdown
 QQ
-QuickLook Video
-RSSHub Radar
 Raycast
 Rectangle
 Reqable
@@ -143,49 +88,30 @@ Roam Research
 Rond
 Rotato
 Safari
-Save to Raindrop.io
-Save to Reader
 Scapple
 Screen Studio
 ScreenFlow
 Scrolla
 Setapp
-Shapr3D
-Shottr
-Silicon
 Skim
 Slack
-Sloth
-Sniffnet
 Steam
-Stickies Pro
 Surfingkeys
 Surge
 Suspicious Package
 Syntax Highlight
 Tampermonkey
-Tana
 Telegram
 TencentMeeting
 Termius
 Things3
 TickTick
-Tito Control
-Tonal
-TopNotch
 TradingView
-Tunnelblick
 UninstallPKG
-VMware Fusion
-Viable
 VirtualBuddy
-Warp
 WeChat
-WechatExporter
 Wooshy
-WorkFlowy
 XLD
-XPTV
 Xcode
 Xcodes
 YACReader
@@ -196,16 +122,10 @@ Zotero
 calibre
 iMazing
 iMovie
-kindaVim
 logioptionsplus
 pcsuite
-uBlacklist for Safari
-uPic
+qBittorrent
 zoom.us
-企业微信
-优酷
-哔哩哔哩
-夸克网盘
 小宇宙
 小红书
 集换社

@@ -3,16 +3,11 @@ BetterZip
 CleanMyMac
 CleanShot X
 Clop
-Craft
-Dash
 DevUtils
 Disk Drill
 Downie
 Focus 2
-Folx
 ForkLift
-Gemini
-Gifox
 Hookmark
 HoudahSpot
 Hustl
@@ -22,37 +17,27 @@ KeyKey Typing Tutor
 Luminar Neo
 Lungo
 MarginNote
-Marked
 MenubarX
 Meta
 MetaImage
 MindNode
 Mockuuups Studio
-NotchNook
-NotePlan
 Numi
 One Switch
 PDF Search
-Paletro
 Permute
 PhotoBulk
 PopClip
 Presentify
 Proxyman
 Renamer
-SSH Config Editor
 SnapMotion
-SnippetsLab
 Spark Mail
 TablePlus
-TaskPaper
-Taskheat
 TextSoap
 Timing
-Tripsy
 Typeface
 Ulysses
-Vivid
 WiFi Explorer
 Yoink
 iBoysoft NTFS for Mac
