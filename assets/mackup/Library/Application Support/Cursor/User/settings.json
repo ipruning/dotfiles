@@ -244,23 +244,10 @@
   "fileNestingUpdater.autoUpdateInterval": 43200,
   "fileNestingUpdater.promptOnAutoUpdate": true,
   "files.associations": {
-    "*.Xresources": "xdefaults",
-    "*.bbmodel": "json",
-    "*.ejs": "html",
-    "*.emu": "html",
-    "*.hbs": "html",
-    "*.rasi": "css",
-    "*.sublime-snippet": "xml",
-    "*.toml": "toml",
     ".cforge": "json",
     ".env*": "dotenv",
     ".gitconfig": "ini",
-    ".gitconfig.local": "ini",
-    "i3/*.conf": "i3",
-    "i3/config": "i3",
-    "lesskey": "lesskey",
-    "polybar/*.conf": "ini",
-    "polybar/config": "ini"
+    ".gitconfig.local": "ini"
   },
   "files.insertFinalNewline": true,
   "files.simpleDialog.enable": true,
@@ -288,16 +275,10 @@
   },
   "material-icon-theme.files.associations": {
     "*.autocorrectrc": "yaml",
-    "*.coverage": "log",
-    "*.cursorrules": "markdown",
-    "*.hurl": "log",
-    "*.lmql": "python",
+    "*.cursorrules": "txt",
     "*.log.*": "log",
     "*.secrets.baseline": "json",
-    "*.strings": "plist",
     "*.typ": "tex",
-    "Brewfile_dev": "ruby",
-    "Brewfile_leaves": "ruby"
   },
   "material-icon-theme.languages.associations": {
     "beancount": "log",
