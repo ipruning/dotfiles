@@ -1,6 +1,0 @@
-jobs:
-  - name: backup zsh_history
-    command: |
-      cp "$HOME"/.zsh_history "$HOME"/Databases/Backup/CLI/zsh_history_$(date +\%Y_\%m_\%d_\%H_\%M_\%S).bak
-    shell: /bin/zsh
-    schedule: "0 * * * *"
