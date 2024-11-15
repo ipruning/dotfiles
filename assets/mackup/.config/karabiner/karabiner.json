@@ -210,7 +210,6 @@
                     },
                     {
                         "description": "left_control → escape / left_control (if_held_down)",
-                        "enabled": false,
                         "manipulators": [
                             {
                                 "from": {
