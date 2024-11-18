@@ -74,4 +74,4 @@ api.mapkey('P', 'Open URL in clipboard at new tab', function () {
 // Edit current URL, and open in new tab
 // api.map('T', ';u');
 
-api.unmapAllExcept(['<Ctrl-d>', '<Ctrl-u>', 'E', 'R', 'e', 'd', 'S', 'D', 'x'], /roamresearch\.com|notion\.so|feishu\.cn|kagi\.com/i);
+api.unmapAllExcept(['<Ctrl-d>', '<Ctrl-u>', 'E', 'R', 'e', 'd', 'S', 'D', 'x', 'X', 't', 'T', 'B', 'F'], /roamresearch\.com|notion\.so|feishu\.cn|kagi\.com/i);

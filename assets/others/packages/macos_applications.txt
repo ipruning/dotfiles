@@ -125,6 +125,7 @@ iMovie
 logioptionsplus
 pcsuite
 qBittorrent
+superwhisper
 zoom.us
 小宇宙
 小红书
