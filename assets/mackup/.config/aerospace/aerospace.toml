@@ -1,0 +1,212 @@
+# Place a copy of this config to ~/.aerospace.toml
+# After that, you can edit ~/.aerospace.toml to your liking
+
+# You can use it to add commands that run after login to macOS user session.
+# 'start-at-login' needs to be 'true' for 'after-login-command' to work
+# Available commands: https://nikitabobko.github.io/AeroSpace/commands
+after-login-command = []
+
+# You can use it to add commands that run after AeroSpace startup.
+# 'after-startup-command' is run after 'after-login-command'
+# Available commands : https://nikitabobko.github.io/AeroSpace/commands
+after-startup-command = [
+  # JankyBorders has a built-in detection of already running process,
+  # so it won't be run twice on AeroSpace restart
+  # 'exec-and-forget borders active_color=0xffe1e3e4 inactive_color=0xff494d64 width=5.0',
+]
+
+# Start AeroSpace at login
+start-at-login = true
+
+# Normalizations. See: https://nikitabobko.github.io/AeroSpace/guide#normalization
+enable-normalization-flatten-containers                         = true
+enable-normalization-opposite-orientation-for-nested-containers = true
+
+# See: https://nikitabobko.github.io/AeroSpace/guide#layouts
+# The 'accordion-padding' specifies the size of accordion padding
+# You can set 0 to disable the padding feature
+accordion-padding = 30
+
+# Possible values: tiles|accordion
+default-root-container-layout = 'tiles'
+
+# Possible values: horizontal|vertical|auto
+# 'auto' means: wide monitor (anything wider than high) gets horizontal orientation,
+#               tall monitor (anything higher than wide) gets vertical orientation
+default-root-container-orientation = 'auto'
+
+# Mouse follows focus when focused monitor changes
+# Drop it from your config, if you don't like this behavior
+# See https://nikitabobko.github.io/AeroSpace/guide#on-focus-changed-callbacks
+# See https://nikitabobko.github.io/AeroSpace/commands#move-mouse
+# Fallback value (if you omit the key): on-focused-monitor-changed = []
+on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
+
+# You can effectively turn off macOS "Hide application" (cmd-h) feature by toggling this flag
+# Useful if you don't use this macOS feature, but accidentally hit cmd-h or cmd-alt-h key
+# Also see: https://nikitabobko.github.io/AeroSpace/goodness#disable-hide-app
+automatically-unhide-macos-hidden-apps = false
+
+# Possible values: (qwerty|dvorak)
+# See https://nikitabobko.github.io/AeroSpace/guide#key-mapping
+[key-mapping]
+  preset = 'qwerty'
+
+# Gaps between windows (inner-*) and between monitor edges (outer-*).
+# Possible values:
+# - Constant:     gaps.outer.top = 8
+# - Per monitor:  gaps.outer.top = [{ monitor.main = 16 }, { monitor."some-pattern" = 32 }, 24]
+#                 In this example, 24 is a default value when there is no match.
+#                 Monitor pattern is the same as for 'workspace-to-monitor-force-assignment'.
+#                 See: https://nikitabobko.github.io/AeroSpace/guide#assign-workspaces-to-monitors
+[gaps]
+  inner.horizontal = 6
+  inner.vertical   = 6
+  outer.left       = 6
+  outer.bottom     = 6
+  outer.top        = 6
+  outer.right      = 6
+
+# 'main' binding mode declaration
+# See: https://nikitabobko.github.io/AeroSpace/guide#binding-modes
+# 'main' binding mode must be always presented
+# Fallback value (if you omit the key): mode.main.binding = {}
+[mode.main.binding]
+  alt-space           = 'mode alt'
+  alt-shift-semicolon = 'mode service'
+
+  alt-slash = 'layout tiles horizontal vertical'
+  alt-comma = 'layout accordion horizontal vertical'
+
+  alt-1 = 'workspace 1'
+  alt-2 = 'workspace 2'
+  alt-3 = 'workspace 3'
+  alt-4 = 'workspace 4'
+  alt-5 = 'workspace 5'
+  alt-6 = 'workspace 6'
+  alt-7 = 'workspace 7'
+  alt-8 = 'workspace 8'
+  alt-9 = 'workspace 9'
+  alt-0 = 'workspace 10'
+  alt-y = 'workspace Y'
+  alt-u = 'workspace U'
+  alt-i = 'workspace I'
+  alt-o = 'workspace O'
+
+  alt-shift-1 = 'move-node-to-workspace 1'
+  alt-shift-2 = 'move-node-to-workspace 2'
+  alt-shift-3 = 'move-node-to-workspace 3'
+  alt-shift-4 = 'move-node-to-workspace 4'
+  alt-shift-5 = 'move-node-to-workspace 5'
+  alt-shift-6 = 'move-node-to-workspace 6'
+  alt-shift-7 = 'move-node-to-workspace 7'
+  alt-shift-8 = 'move-node-to-workspace 8'
+  alt-shift-9 = 'move-node-to-workspace 9'
+  alt-shift-0 = 'move-node-to-workspace 10'
+  alt-shift-y = 'move-node-to-workspace Y'
+  alt-shift-u = 'move-node-to-workspace U'
+  alt-shift-i = 'move-node-to-workspace I'
+  alt-shift-o = 'move-node-to-workspace O'
+
+  alt-h = 'focus left --boundaries all-monitors-outer-frame'
+  alt-j = 'focus down --boundaries all-monitors-outer-frame'
+  alt-k = 'focus up --boundaries all-monitors-outer-frame'
+  alt-l = 'focus right --boundaries all-monitors-outer-frame'
+
+  alt-tab = 'workspace-back-and-forth'
+
+[mode.alt.binding]
+  alt-space       = 'mode main'
+  esc             = 'mode main'
+  shift-semicolon = 'mode service'
+
+  slash = 'layout tiles horizontal vertical'
+  comma = 'layout accordion horizontal vertical'
+
+  h           = 'focus left --boundaries all-monitors-outer-frame'
+  j           = 'focus down --boundaries all-monitors-outer-frame'
+  k           = 'focus up --boundaries all-monitors-outer-frame'
+  l           = 'focus right --boundaries all-monitors-outer-frame'
+  shift-h     = 'move left'
+  shift-j     = 'move down'
+  shift-k     = 'move up'
+  shift-l     = 'move right'
+  alt-shift-h = "move-node-to-monitor left"
+  alt-shift-j = "move-node-to-monitor down"
+  alt-shift-k = "move-node-to-monitor up"
+  alt-shift-l = "move-node-to-monitor right"
+
+  minus = 'resize smart -50'
+  equal = 'resize smart +50'
+
+  shift-1 = 'move-node-to-workspace 1'
+  shift-2 = 'move-node-to-workspace 2'
+  shift-3 = 'move-node-to-workspace 3'
+  shift-4 = 'move-node-to-workspace 4'
+  shift-5 = 'move-node-to-workspace 5'
+  shift-6 = 'move-node-to-workspace 6'
+  shift-7 = 'move-node-to-workspace 7'
+  shift-8 = 'move-node-to-workspace 8'
+  shift-9 = 'move-node-to-workspace 9'
+  shift-0 = 'move-node-to-workspace 10'
+  shift-y = 'move-node-to-workspace Y'
+  shift-u = 'move-node-to-workspace U'
+  shift-i = 'move-node-to-workspace I'
+  shift-o = 'move-node-to-workspace O'
+
+  tab = 'workspace-back-and-forth'
+
+# 'service' binding mode declaration.
+# See: https://nikitabobko.github.io/AeroSpace/guide#binding-modes
+[mode.service.binding]
+  esc = ['reload-config', 'mode main']
+  r = ['flatten-workspace-tree', 'mode main'] # reset layout
+  f = [
+    'layout floating tiling',
+    'mode main',
+  ] # Toggle between floating and tiling layout
+  backspace = ['close-all-windows-but-current', 'mode main']
+
+  # sticky is not yet supported https://github.com/nikitabobko/AeroSpace/issues/2
+  #s = ['layout sticky tiling', 'mode main']
+
+  alt-shift-h = ['join-with left', 'mode main']
+  alt-shift-j = ['join-with down', 'mode main']
+  alt-shift-k = ['join-with up', 'mode main']
+  alt-shift-l = ['join-with right', 'mode main']
+
+[[on-window-detected]]
+  if.app-id = 'com.xingin.discover'
+  run       = 'layout floating'
+
+[[on-window-detected]]
+  if.app-id = 'com.jihuanshe.app'
+  run       = 'layout floating'
+
+[[on-window-detected]]
+  if.app-id = 'com.xfge.LifeEasy'
+  run       = 'layout floating'
+
+[[on-window-detected]]
+  if.app-id = 'app.podcast.cosmos'
+  run       = 'layout floating'
+
+[[on-window-detected]]
+  if.window-title-regex-substring = 'MDPro3'
+  run                             = 'layout floating'
+
+[[on-window-detected]]
+  if.app-id = 'com.TickTick.task.mac'
+  run       = 'layout floating'
+
+[[on-window-detected]]
+  if.app-id = 'org.pqrs.Karabiner-Elements.Settings'
+  run       = 'layout floating'
+
+[[on-window-detected]]
+  if.app-id = 'org.pqrs.Karabiner-EventViewer'
+  run       = 'layout floating'
+
+[[on-window-detected]]
+  if.app-id = 'com.1password.1password'
+  run       = 'layout floating'
