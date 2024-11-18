@@ -1,4 +1,8 @@
 [tools]
+  go     = "latest"
+  node   = "latest"
+  python = "latest"
+
   "cargo:kbt"                                  = "latest"
   "cargo:koji"                                 = "latest"
   "cargo:openapi-tui"                          = "latest"
@@ -16,10 +20,6 @@
   "npm:wrangler"                               = "latest"
   "npm:yarn"                                   = "latest"
   "npm:zeabur"                                 = "latest"
-  elixir                                       = "latest"
-  go                                           = "latest"
-  node                                         = "latest"
-  python                                       = "latest"
 
 [settings]
   experimental                          = true
