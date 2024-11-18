@@ -17,9 +17,7 @@
   "npm:pnpm"                                   = "latest"
   "npm:promptfoo"                              = "latest"
   "npm:vercel"                                 = "latest"
-  "npm:wrangler"                               = "latest"
   "npm:yarn"                                   = "latest"
-  "npm:zeabur"                                 = "latest"
 
 [settings]
   experimental                          = true
