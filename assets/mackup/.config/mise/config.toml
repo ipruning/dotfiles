@@ -1,8 +1,4 @@
 [tools]
-  go     = "latest"
-  node   = "latest"
-  python = "latest"
-
   "cargo:kbt"                                  = "latest"
   "cargo:koji"                                 = "latest"
   "cargo:openapi-tui"                          = "latest"
@@ -18,6 +14,9 @@
   "npm:promptfoo"                              = "latest"
   "npm:vercel"                                 = "latest"
   "npm:yarn"                                   = "latest"
+  go                                           = "latest"
+  node                                         = "latest"
+  python                                       = "3.13.0"
 
 [settings]
   experimental                          = true
