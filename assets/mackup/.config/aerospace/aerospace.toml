@@ -92,6 +92,7 @@ automatically-unhide-macos-hidden-apps = false
   alt-u = 'workspace U'
   alt-i = 'workspace I'
   alt-o = 'workspace O'
+  alt-p = 'workspace P'
 
   alt-shift-1 = 'move-node-to-workspace 1'
   alt-shift-2 = 'move-node-to-workspace 2'
@@ -107,11 +108,11 @@ automatically-unhide-macos-hidden-apps = false
   alt-shift-u = 'move-node-to-workspace U'
   alt-shift-i = 'move-node-to-workspace I'
   alt-shift-o = 'move-node-to-workspace O'
-
-  alt-h = 'focus left --boundaries all-monitors-outer-frame'
-  alt-j = 'focus down --boundaries all-monitors-outer-frame'
-  alt-k = 'focus up --boundaries all-monitors-outer-frame'
-  alt-l = 'focus right --boundaries all-monitors-outer-frame'
+  alt-shift-p = 'move-node-to-workspace P'
+  alt-h       = 'focus left --boundaries all-monitors-outer-frame'
+  alt-j       = 'focus down --boundaries all-monitors-outer-frame'
+  alt-k       = 'focus up --boundaries all-monitors-outer-frame'
+  alt-l       = 'focus right --boundaries all-monitors-outer-frame'
 
   alt-tab = 'workspace-back-and-forth'
 
@@ -153,6 +154,7 @@ automatically-unhide-macos-hidden-apps = false
   shift-u = 'move-node-to-workspace U'
   shift-i = 'move-node-to-workspace I'
   shift-o = 'move-node-to-workspace O'
+  shift-p = 'move-node-to-workspace P'
 
   tab = 'workspace-back-and-forth'
 
