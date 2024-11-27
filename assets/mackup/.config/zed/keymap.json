@@ -17,33 +17,16 @@
     "context": "Editor && (vim_mode == normal || vim_mode == visual) && !VimWaiting && !menu",
     "bindings": {
       "ctrl-alt-shift-u": "vim::ScrollUp",
-      "ctrl-u": [
-        "workspace::SendKeystrokes",
-        "ctrl-alt-shift-u z z"
-      ],
+      "ctrl-u": ["workspace::SendKeystrokes", "ctrl-alt-shift-u z z"],
       "ctrl-alt-shift-d": "vim::ScrollDown",
-      "ctrl-d": [
-        "workspace::SendKeystrokes",
-        "ctrl-alt-shift-d z z"
-      ],
+      "ctrl-d": ["workspace::SendKeystrokes", "ctrl-alt-shift-d z z"],
       "ctrl-shift-n": "vim::MoveToNextMatch",
-      "n": [
-        "workspace::SendKeystrokes",
-        "ctrl-shift-n z z"
-      ],
+      "n": ["workspace::SendKeystrokes", "ctrl-shift-n z z"],
       "ctrl-alt-shift-n": "vim::MoveToNextMatch",
-      "N": [
-        "workspace::SendKeystrokes",
-        "ctrl-alt-shift-n z z"
-      ],
-      "space g s": [
-        "workspace::SendKeystrokes",
-        ": new center terminal enter git space status enter"
-      ],
-      "space g u": [
-        "workspace::SendKeystrokes",
-        ": new center terminal enter gitu enter"
-      ],
+      "N": ["workspace::SendKeystrokes", "ctrl-alt-shift-n z z"],
+      "space g g": ["task::Spawn", { "task_name": "gitu" }],
+      "space g s": ["workspace::SendKeystrokes", ": new center terminal enter git space status enter"],
+      "space g u": ["workspace::SendKeystrokes", ": new center terminal enter gitu enter"],
       "space n": "task::Spawn",
       "cmd-r cmd-r": "task::Spawn",
       "[ x": "editor::SelectLargerSyntaxNode",
@@ -82,22 +65,10 @@
       // put key-bindings here if you want them to work only in normal mode
       // Window movement bindings
       // Ctrl jklk to move between panes
-      "ctrl-h": [
-        "workspace::ActivatePaneInDirection",
-        "Left"
-      ],
-      "ctrl-l": [
-        "workspace::ActivatePaneInDirection",
-        "Right"
-      ],
-      "ctrl-k": [
-        "workspace::ActivatePaneInDirection",
-        "Up"
-      ],
-      "ctrl-j": [
-        "workspace::ActivatePaneInDirection",
-        "Down"
-      ],
+      "ctrl-h": ["workspace::ActivatePaneInDirection", "Left"],
+      "ctrl-l": ["workspace::ActivatePaneInDirection", "Right"],
+      "ctrl-k": ["workspace::ActivatePaneInDirection", "Up"],
+      "ctrl-j": ["workspace::ActivatePaneInDirection", "Down"],
       // +LSP
       "space c a": "editor::ToggleCodeActions",
       "space .": "editor::ToggleCodeActions",
@@ -195,22 +166,10 @@
   {
     "context": "Terminal",
     "bindings": {
-      "ctrl-h": [
-        "workspace::",
-        "Left"
-      ],
-      "ctrl-l": [
-        "workspace::ActivatePaneInDirection",
-        "Right"
-      ],
-      "ctrl-k": [
-        "workspace::ActivatePaneInDirection",
-        "Up"
-      ],
-      "ctrl-j": [
-        "workspace::ActivatePaneInDirection",
-        "Down"
-      ]
+      "ctrl-h": ["workspace::", "Left"],
+      "ctrl-l": ["workspace::ActivatePaneInDirection", "Right"],
+      "ctrl-k": ["workspace::ActivatePaneInDirection", "Up"],
+      "ctrl-j": ["workspace::ActivatePaneInDirection", "Down"]
     }
   },
   // File panel (netrw)
@@ -228,44 +187,20 @@
       "q": "workspace::ToggleRightDock",
       "space e": "workspace::ToggleRightDock",
       // Navigate between panel
-      "ctrl-h": [
-        "workspace::ActivatePaneInDirection",
-        "Left"
-      ],
-      "ctrl-l": [
-        "workspace::ActivatePaneInDirection",
-        "Right"
-      ],
-      "ctrl-k": [
-        "workspace::ActivatePaneInDirection",
-        "Up"
-      ],
-      "ctrl-j": [
-        "workspace::ActivatePaneInDirection",
-        "Down"
-      ]
+      "ctrl-h": ["workspace::ActivatePaneInDirection", "Left"],
+      "ctrl-l": ["workspace::ActivatePaneInDirection", "Right"],
+      "ctrl-k": ["workspace::ActivatePaneInDirection", "Up"],
+      "ctrl-j": ["workspace::ActivatePaneInDirection", "Down"]
     }
   },
   // Panel nagivation
   {
     "context": "Dock",
     "bindings": {
-      "ctrl-w h": [
-        "workspace::ActivatePaneInDirection",
-        "Left"
-      ],
-      "ctrl-w l": [
-        "workspace::ActivatePaneInDirection",
-        "Right"
-      ],
-      "ctrl-w k": [
-        "workspace::ActivatePaneInDirection",
-        "Up"
-      ],
-      "ctrl-w j": [
-        "workspace::ActivatePaneInDirection",
-        "Down"
-      ]
+      "ctrl-w h": ["workspace::ActivatePaneInDirection", "Left"],
+      "ctrl-w l": ["workspace::ActivatePaneInDirection", "Right"],
+      "ctrl-w k": ["workspace::ActivatePaneInDirection", "Up"],
+      "ctrl-w j": ["workspace::ActivatePaneInDirection", "Down"]
     }
   }
   // Subword motion is not working really nice with `ciw`, disable for now
