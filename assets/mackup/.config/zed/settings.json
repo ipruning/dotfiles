@@ -47,7 +47,8 @@
   "languages": {
     "Python": {
       "language_servers": [
-        "pyright"
+        "pyright",
+        "ruff"
       ]
     },
     "Rainbow CSV": {
