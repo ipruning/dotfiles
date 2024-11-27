@@ -65,6 +65,7 @@ monolith
 moreutils
 neonctl
 neovim
+nushell
 ollama
 onefetch
 ouch
