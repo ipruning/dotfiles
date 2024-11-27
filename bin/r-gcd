@@ -1,9 +1,0 @@
-#!/bin/bash
-
-echo "Enter commit date (e.g. Wed Feb 7 12:00 2014 +0100):"
-read -r commit_date
-
-echo "Enter commit message:"
-read -r commit_message
-
-GIT_AUTHOR_DATE="$commit_date" GIT_COMMITTER_DATE="$commit_date" git commit --date "$commit_date" -m "$commit_message"
