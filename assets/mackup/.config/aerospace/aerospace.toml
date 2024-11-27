@@ -212,3 +212,7 @@ automatically-unhide-macos-hidden-apps = false
 [[on-window-detected]]
   if.app-id = 'com.1password.1password'
   run       = 'layout floating'
+
+[[on-window-detected]]
+  if.app-id = 'com.electron.wispr-flow'
+  run       = 'layout floating'
