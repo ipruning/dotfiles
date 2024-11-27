@@ -176,4 +176,16 @@
     "key": "ctrl+l",
     "when": "inFileBrowser"
   },
+  {
+    "key": "cmd+k l",
+    "command": "workbench.action.focusSideBar"
+  },
+  {
+    "key": "cmd+0",
+    "command": "-workbench.action.focusSideBar"
+  },
+  {
+    "key": "cmd+k h",
+    "command": "workbench.action.focusAuxiliaryBar"
+  },
 ]
