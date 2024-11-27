@@ -30,6 +30,7 @@ alias cpwd='printf "%q\n" "$(pwd)" | pbcopy'
 alias ehost='${=EDITOR} /etc/hosts'
 alias ezshrc='${=EDITOR} ~/.zshrc'
 alias szshrc='source ~/.zshrc'
+alias v='nvim'
 alias ip='curl -4 ip.sb'
 alias ipv6='curl -6 ip.sb'
 

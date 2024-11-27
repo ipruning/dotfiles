@@ -190,7 +190,7 @@ _fzf_comprun() {
 #===============================================================================
 # 👇 Preferred editor for local and remote sessions
 #===============================================================================
-if [[ -n $SSH_CONNECTION || -n $ZELLIJ ]]; then
+if [[ -n $SSH_CONNECTION || "$TERM_PROGRAM" != "zed" ]]; then
   export EDITOR='nvim'
   export VISUAL='nvim'
 else
