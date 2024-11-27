@@ -14,7 +14,9 @@ Blender
 Bob
 Capture One
 Chat2DB
+ChatGPT
 Chromium
+Claude
 Clicknow
 Cloudflare WARP
 Contexts
@@ -45,6 +47,7 @@ IINA
 Ice
 Immersive Translate
 Input Source Pro
+Jan
 Jetpack Joyride 2
 Kagi for Safari
 Karabiner-Elements
@@ -69,11 +72,13 @@ NeteaseMusic
 Notion
 Numbers
 OBS
+Obsidian
 OneDrive
 OnyX
 OrbStack
 PDF Expert
 Pages
+Parsec
 PasteNow
 Pearcleaner
 Photomator
@@ -100,7 +105,9 @@ Surfingkeys
 Surge
 Suspicious Package
 Syntax Highlight
-Tampermonkey
+TNAS PC
+TabTab
+Tampermonkey Classic
 Telegram
 TencentMeeting
 Termius
@@ -108,8 +115,10 @@ Things3
 TickTick
 TradingView
 UninstallPKG
+VideoFusion-macOS
 VirtualBuddy
 WeChat
+Wispr Flow
 Wooshy
 XLD
 Xcode
@@ -127,6 +136,7 @@ pcsuite
 qBittorrent
 superwhisper
 zoom.us
+夸克网盘
 小宇宙
 小红书
 集换社

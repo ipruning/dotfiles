@@ -20,7 +20,7 @@ MarginNote
 MenubarX
 Meta
 MetaImage
-MindNode
+MindNode Classic
 Mockuuups Studio
 Numi
 One Switch
@@ -37,6 +37,7 @@ TablePlus
 TextSoap
 Timing
 Typeface
+TypingMind
 Ulysses
 WiFi Explorer
 Yoink
