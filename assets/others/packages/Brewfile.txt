@@ -2,6 +2,7 @@ assimp
 atuin
 autoconf
 autocorrect
+bash
 bat
 cabextract
 cfitsio
@@ -43,6 +44,7 @@ httpie
 hugo
 hurl
 hyperfine
+iperf3
 ipinfo-cli
 jc
 jd

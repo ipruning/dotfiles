@@ -6,6 +6,7 @@ datasette-studio
 deadlink
 detect-secrets
 docling
+dooit
 fava
 ffsubsync
 git-sim
