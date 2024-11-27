@@ -65,6 +65,12 @@ automatically-unhide-macos-hidden-apps = true
   alt-shift-k = 'move up'
   alt-shift-l = 'move right'
 
+  alt-t = 'exec-and-forget open -a /Applications/Alacritty.app'
+  alt-a = 'exec-and-forget open -a /Applications/Google\ Chrome.app'
+  alt-s = 'exec-and-forget open -a /Applications/Roam\ Research.app'
+  alt-d = 'exec-and-forget open -a /Applications/Heptabase.app'
+  alt-f = 'exec-and-forget open -a /Applications/Zotero.app'
+
   alt-tab = 'workspace-back-and-forth'
 
   cmd-h     = []
@@ -107,11 +113,12 @@ automatically-unhide-macos-hidden-apps = true
   alt-space = 'mode main'
   esc       = 'mode main'
 
-  cmd-r = ['reload-config', 'mode main']
-
+  cmd-r     = ['reload-config', 'mode main']
   r         = ['flatten-workspace-tree', 'mode main']
-  f         = ['layout floating tiling', 'mode main']
   backspace = ['close-all-windows-but-current', 'mode main']
+
+  f       = ['layout floating tiling', 'mode main']
+  shift-f = ['fullscreen', 'mode main']
 
 [[on-window-detected]]
   if.app-id = 'com.xingin.discover'
