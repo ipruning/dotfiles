@@ -24,7 +24,6 @@
       "n": ["workspace::SendKeystrokes", "ctrl-shift-n z z"],
       "ctrl-alt-shift-n": "vim::MoveToNextMatch",
       "N": ["workspace::SendKeystrokes", "ctrl-alt-shift-n z z"],
-      "space g g": ["task::Spawn", { "task_name": "gitu" }],
       "space g s": ["workspace::SendKeystrokes", ": new center terminal enter git space status enter"],
       "space g u": ["workspace::SendKeystrokes", ": new center terminal enter gitu enter"],
       "space n": "task::Spawn",
