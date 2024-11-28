@@ -7,9 +7,9 @@ settings.focusAfterClosed = 'last';        // Focus last viewed tab when closing
 settings.focusFirstCandidate = true;       // Focus first item in omnibar
 settings.hintAlign = 'left';               // Align link hints to the left
 settings.modeAfterYank = 'Normal';         // Return to Normal mode after yanking
-settings.digitForRepeat = false;           // Disable digit repeat
 settings.omnibarPosition = 'bottom';
 settings.omnibarMaxResults = 5;
+// settings.digitForRepeat = false;
 
 api.Hints.style(`
   font-family: MonoLisa Nerd Font;
@@ -122,6 +122,8 @@ api.unmapAllExcept([
   // Misc
   'F', 'i', 'p'
 ], EXCLUDED_DOMAINS);
+
+api.map('<Space><Space>', 'T');
 
 // Choose a buffer/tab
 // api.map('b', 'T');
