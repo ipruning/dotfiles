@@ -1,6 +1,7 @@
 1Password for Safari
 1Password
 A Better Finder Attributes 7
+AdGuard for Safari
 AeroSpace
 Alacritty
 Alfred 5
@@ -98,8 +99,10 @@ Screen Studio
 ScreenFlow
 Scrolla
 Setapp
+Shortcat
 Skim
 Slack
+SoundSource
 Steam
 Surfingkeys
 Surge
@@ -107,7 +110,7 @@ Suspicious Package
 Syntax Highlight
 TNAS PC
 TabTab
-Tampermonkey Classic
+Tampermonkey
 Telegram
 TencentMeeting
 Termius
@@ -131,6 +134,7 @@ Zotero
 calibre
 iMazing
 iMovie
+kindaVim
 logioptionsplus
 pcsuite
 qBittorrent
