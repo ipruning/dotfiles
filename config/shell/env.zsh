@@ -151,12 +151,10 @@ zstyle ':fzf-tab:*' fzf-pad 10
 # 👇 custom keybindings
 #===============================================================================
 # Option-F/B Emacs Motion
-if [[ -n "$ZELLIJ" ]]; then
-  bindkey "^F" forward-char
-  bindkey "^B" backward-char
-  bindkey "^P" up-line-or-history
-  bindkey "^N" down-line-or-history
-fi
+bindkey "^F" forward-char
+bindkey "^B" backward-char
+bindkey "^P" up-line-or-history
+bindkey "^N" down-line-or-history
 # Option-Left
 bindkey "^[[1;3C" forward-word
 # Option-Right
