@@ -2,14 +2,14 @@
 const EXCLUDED_DOMAINS = /roamresearch\.com|notion\.so|feishu\.cn|kagi\.com/i;
 const TIMEOUT = 10000;
 
-settings.tabsThreshold = 0;                // Always use omnibar for tab selection
+// settings.digitForRepeat = false;
 settings.focusAfterClosed = 'last';        // Focus last viewed tab when closing current tab
 settings.focusFirstCandidate = true;       // Focus first item in omnibar
 settings.hintAlign = 'left';               // Align link hints to the left
 settings.modeAfterYank = 'Normal';         // Return to Normal mode after yanking
-settings.omnibarPosition = 'bottom';
 settings.omnibarMaxResults = 5;
-// settings.digitForRepeat = false;
+settings.omnibarPosition = 'bottom';
+settings.tabsThreshold = 0;                // Always use omnibar for tab selection
 
 api.Hints.style(`
   font-family: MonoLisa Nerd Font;
@@ -123,7 +123,7 @@ api.unmapAllExcept([
   'F', 'i', 'p'
 ], EXCLUDED_DOMAINS);
 
-api.map('<Space><Space>', 'T');
+api.map('gt', 'T');
 
 // Choose a buffer/tab
 // api.map('b', 'T');
