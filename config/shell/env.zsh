@@ -167,7 +167,7 @@ bindkey '^Y' autosuggest-accept
 # Control-T to fuzzily search for a file or directory in your home directory then insert its path at the cursor
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 # Control-I will be used to trigger completion fzf completion will use == as the trigger sequence instead of the default **
-export FZF_COMPLETION_TRIGGER='**'
+export FZF_COMPLETION_TRIGGER='jk'
 export FZF_COMPLETION_OPTS='--border --info=inline'
 _fzf_comprun() {
   local command=$1
