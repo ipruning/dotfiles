@@ -98,10 +98,10 @@ api.mapkey('gO', 'Open URL in clipboard in new tab', function () {
 });
 
 // Timeout durations for PassThrough mode
-const TIMEOUT_SHORT_MS = 5000;      // 5 seconds
-const TIMEOUT_LONG_MS = 300000;     // 5 minutes
+const TIMEOUT_SHORT_MS = 1500;      // 1.5 seconds
+const TIMEOUT_LONG_MS = 60000;     // 1 minute
 
-api.mapkey('p', 'Enter PassThrough mode (5s)', function () {
+api.mapkey('p', 'Enter PassThrough mode', function () {
   const seconds = TIMEOUT_SHORT_MS / 1000;
   api.Front.showBanner(
     `Entering PassThrough mode for ${seconds}s, press ESC to exit early`,
@@ -110,10 +110,10 @@ api.mapkey('p', 'Enter PassThrough mode (5s)', function () {
   api.Normal.passThrough(TIMEOUT_SHORT_MS);
 });
 
-api.mapkey('P', 'Enter PassThrough mode (5min)', function () {
-  const minutes = TIMEOUT_LONG_MS / 60000;
+api.mapkey('P', 'Enter PassThrough mode', function () {
+  const seconds = TIMEOUT_LONG_MS / 1000;
   api.Front.showBanner(
-    `Entering PassThrough mode for ${minutes}min, press ESC to exit early`,
+    `Entering PassThrough mode for ${seconds}s, press ESC to exit early`,
     1600
   );
   api.Normal.passThrough(TIMEOUT_LONG_MS);
