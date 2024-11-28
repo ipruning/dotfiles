@@ -135,15 +135,3 @@ api.unmapAllExcept([
 ], EXCLUDED_DOMAINS);
 
 api.map('gt', 'T');
-
-// Choose a buffer/tab
-// api.map('b', 'T');
-
-// Open a URL in current tab
-// api.map('o', 'go');
-
-// Edit current URL, and open in same tab
-// api.map('O', ';U');
-
-// Edit current URL, and open in new tab
-// api.map('T', ';u');
