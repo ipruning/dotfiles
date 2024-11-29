@@ -35,7 +35,6 @@ ExcalidrawZ
 FixTim
 Fork
 GarageBand
-Goodnotes
 Google Chrome
 Google Docs
 Google Drive
@@ -67,7 +66,6 @@ MessAuto
 Microsoft Excel
 Microsoft PowerPoint
 Microsoft Word
-Mini Metro+
 Mos
 MusicHarbor
 NeteaseMusic
@@ -83,16 +81,12 @@ Pages
 Parsec
 PasteNow
 Pearcleaner
-Photomator
-Play 2
 PlayCover
 ProNotes
-ProtonVPN
 QQ
 Raycast
 Rectangle
 Reqable
-Rize
 Roam Research
 Rond
 Rotato
