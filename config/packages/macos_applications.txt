@@ -87,10 +87,12 @@ Photomator
 Play 2
 PlayCover
 ProNotes
+ProtonVPN
 QQ
 Raycast
 Rectangle
 Reqable
+Rize
 Roam Research
 Rond
 Rotato
