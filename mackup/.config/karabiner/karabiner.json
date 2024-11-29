@@ -268,14 +268,6 @@
             },
             "devices": [
                 {
-                    "identifiers": {
-                        "is_keyboard": true,
-                        "product_id": 24926,
-                        "vendor_id": 7504
-                    },
-                    "treat_as_built_in_keyboard": true
-                },
-                {
                     "identifiers": { "is_keyboard": true },
                     "simple_modifications": [
                         {
