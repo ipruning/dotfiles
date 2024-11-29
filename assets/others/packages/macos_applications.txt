@@ -59,6 +59,7 @@ Keynote
 LM Studio
 Lark
 LinearMouse
+Logseq
 Longbridge Pro
 MWeb Pro
 MainStage
