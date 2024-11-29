@@ -21,7 +21,6 @@ eza
 fastfetch
 fd
 felixkratz/formulae/borders
-ffmpeg
 fftw
 forgit
 fpp
@@ -78,6 +77,7 @@ rclone
 ripgrep
 rustscan
 scc
+screenpipe
 sd
 shellcheck
 smartmontools
