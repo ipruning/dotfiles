@@ -131,13 +131,8 @@
   "editor.unicodeHighlight.ambiguousCharacters": true,
   "editor.unicodeHighlight.invisibleCharacters": true,
   "editor.wordWrap": "off",
-  "errorLens.enabledDiagnosticLevels": [
-    "error"
-  ],
-  "errorLens.excludeBySource": [
-    "eslint",
-    "jshint"
-  ],
+  "errorLens.enabledDiagnosticLevels": ["error"],
+  "errorLens.excludeBySource": ["eslint", "jshint"],
   "evenBetterToml.formatter.alignEntries": true,
   "evenBetterToml.formatter.indentEntries": true,
   "evenBetterToml.schema.enabled": false,
@@ -278,7 +273,7 @@
     "*.cursorrules": "txt",
     "*.log.*": "log",
     "*.secrets.baseline": "json",
-    "*.typ": "tex",
+    "*.typ": "tex"
   },
   "material-icon-theme.languages.associations": {
     "beancount": "log",
@@ -299,17 +294,9 @@
   "shellcheck.customArgs": [],
   "shellcheck.enable": true,
   "shellcheck.enableQuickFix": true,
-  "shellcheck.exclude": [
-    "SC1091",
-    "SC2128",
-    "SC2155"
-  ],
+  "shellcheck.exclude": ["SC1091", "SC2128", "SC2155"],
   "shellcheck.executablePath": "/opt/homebrew/bin/shellcheck",
-  "shellcheck.ignoreFileSchemes": [
-    "git",
-    "gitfs",
-    "output"
-  ],
+  "shellcheck.ignoreFileSchemes": ["git", "gitfs", "output"],
   "shellcheck.ignorePatterns": {
     "**/*.xonshrc": true,
     "**/*.xsh": true,
@@ -333,24 +320,16 @@
   "terminal.integrated.fontFamily": "'MonoLisa Nerd Font'",
   "terminal.integrated.fontSize": 13,
   "terminal.integrated.inheritEnv": true,
-  "todo-tree.general.tags": [
-    "TODO"
-  ],
+  "todo-tree.general.tags": ["TODO"],
   "todo-tree.regex.regex": "(//|#|<!--|;|/\\*|^|^\\s*(-|\\d+.))\\s*($TAGS)",
   "vim.easymotion": true,
   "vim.normalModeKeyBindingsNonRecursive": [
     {
-      "before": [
-        "<space>"
-      ],
-      "commands": [
-        "vspacecode.space"
-      ]
+      "before": ["<space>"],
+      "commands": ["vspacecode.space"]
     },
     {
-      "before": [
-        ","
-      ],
+      "before": [","],
       "commands": [
         "vspacecode.space",
         {
@@ -364,17 +343,11 @@
   "vim.vimrc.enable": true,
   "vim.visualModeKeyBindingsNonRecursive": [
     {
-      "before": [
-        "<space>"
-      ],
-      "commands": [
-        "vspacecode.space"
-      ]
+      "before": ["<space>"],
+      "commands": ["vspacecode.space"]
     },
     {
-      "before": [
-        ","
-      ],
+      "before": [","],
       "commands": [
         "vspacecode.space",
         {
@@ -384,20 +357,12 @@
       ]
     },
     {
-      "before": [
-        ">"
-      ],
-      "commands": [
-        "editor.action.indentLines"
-      ]
+      "before": [">"],
+      "commands": ["editor.action.indentLines"]
     },
     {
-      "before": [
-        "<"
-      ],
-      "commands": [
-        "editor.action.outdentLines"
-      ]
+      "before": ["<"],
+      "commands": ["editor.action.outdentLines"]
     }
   ],
   "vscode-mogami.concurrency": 20,

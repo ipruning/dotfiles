@@ -8,7 +8,7 @@ repos:
         name: Detect secrets
         language: python
         entry: detect-secrets-hook
-        args: ['--baseline', '.secrets.baseline']
+        args: ["--baseline", ".secrets.baseline"]
   - repo: https://github.com/commitizen-tools/commitizen
     rev: v3.29.0
     hooks:

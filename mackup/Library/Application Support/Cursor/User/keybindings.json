@@ -187,5 +187,5 @@
   {
     "key": "cmd+k h",
     "command": "workbench.action.focusAuxiliaryBar"
-  },
+  }
 ]
