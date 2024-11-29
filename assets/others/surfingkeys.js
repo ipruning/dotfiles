@@ -131,7 +131,7 @@ api.unmapAllExcept([
   // Tabs
   'S', 'D', 'x', 'X', 't', 'T', 'B',
   // Misc
-  'F', 'i', 'p'
+  'F', 'i', 'p', 'P'
 ], EXCLUDED_DOMAINS);
 
 api.map('gt', 'T');
