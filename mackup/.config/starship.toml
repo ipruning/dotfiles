@@ -2,85 +2,85 @@ format = '''
 (bold green)$sudo$directory$python$package$all$custom$character
 '''
 
-add_newline     = false
+add_newline = false
 command_timeout = 1_000
 
 [conda]
-    format      = '[$symbol$environment](dimmed green) '
-    ignore_base = false
+format = '[$symbol$environment](dimmed green) '
+ignore_base = false
 
 [character]
-    success_symbol = '[>](bold green)'
-    vicmd_symbol   = '[>](bold yellow)'
-    error_symbol   = '[>](bold red)'
+success_symbol = '[>](bold green)'
+vicmd_symbol = '[>](bold yellow)'
+error_symbol = '[>](bold red)'
 
 [custom.x86_64]
-    command = 'echo  '
-    when    = 'test "$(uname -m)" = "x86_64"'
+command = 'echo  '
+when = 'test "$(uname -m)" = "x86_64"'
 
 [[battery.display]]
-    threshold = 20
-    style     = 'red'
+threshold = 20
+style = 'red'
 
 [[battery.display]]
-    threshold = 40
-    style     = 'yellow'
+threshold = 40
+style = 'yellow'
 
 [cmd_duration]
-    format             = 'took [$duration]($style) '
-    min_time           = 10_000
-    min_time_to_notify = 240_000
-    show_milliseconds  = false
-    show_notifications = true
+format = 'took [$duration]($style) '
+min_time = 10_000
+min_time_to_notify = 240_000
+show_milliseconds = false
+show_notifications = true
 
 [directory]
-    read_only         = '  '
-    read_only_style   = 'red'
-    truncation_length = 4
-    truncate_to_repo  = true
-    truncation_symbol = '…/'
+read_only = '  '
+read_only_style = 'red'
+truncation_length = 4
+truncate_to_repo = true
+truncation_symbol = '…/'
 
 [git_branch]
-    symbol            = ' '
-    truncation_length = 16
-    truncation_symbol = '…'
-    ignore_branches   = ['master', 'main']
+symbol = ' '
+truncation_length = 16
+truncation_symbol = '…'
+ignore_branches = ['master', 'main']
 
 [docker_context]
-    symbol = ' '
+symbol = ' '
 
 [golang]
-    symbol = ' '
+symbol = ' '
 
 [java]
-    symbol = ' '
+symbol = ' '
 
 [python]
-    format = '[${symbol}${pyenv_prefix}(${version} )(\($virtualenv\) )]($style)'
-    symbol = ' '
+format = '[${symbol}${pyenv_prefix}(${version} )(\($virtualenv\) )]($style)'
+symbol = ' '
 
 [ruby]
-    symbol = ' '
+symbol = ' '
 
 [rust]
-    symbol = ' '
+symbol = ' '
 
 [swift]
-    symbol = ' '
+symbol = ' '
 
 [package]
-    symbol = ' '
+symbol = ' '
 
 [aws]
-    symbol   = ' '
-    disabled = true
+symbol = ' '
+disabled = true
 
 [gcloud]
-    symbol   = ' '
-    disabled = true
+symbol = ' '
+disabled = true
 
 [sudo]
-    format   = '[$symbol]($style)'
-    disabled = false
-    style    = 'bold green'
-    symbol   = ' '
+format = '[$symbol]($style)'
+disabled = false
+style = 'bold green'
+symbol = ' '
