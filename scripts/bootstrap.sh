@@ -164,7 +164,7 @@ setup_packages() {
   print_message "$BLUE" "Installing brew packages..."
   case $SYSTEM_TYPE in
   mac_x86_64 | mac_arm64)
-    brew bundle --file="$HOME/dotfiles/assets/others/packages/Brewfile_dev"
+    brew bundle --file="$HOME/dotfiles/config/packages/Brewfile_dev"
     ;;
   linux_x86_64)
     # TODO: Implement Linux-specific package installation
@@ -172,13 +172,13 @@ setup_packages() {
   esac
 
   print_message "$BLUE" "Installing cargo packages..."
-  xargs <"$HOME/dotfiles/assets/others/packages/cargo.txt" -n 1 cargo install
+  xargs <"$HOME/dotfiles/config/packages/cargo.txt" -n 1 cargo install
 
   print_message "$BLUE" "Installing npm packages..."
-  xargs npm install --location=global <"$HOME/dotfiles/assets/others/packages/npm.txt"
+  xargs npm install --location=global <"$HOME/dotfiles/config/packages/npm.txt"
 
   print_message "$BLUE" "Installing pipx packages..."
-  xargs <"$HOME/dotfiles/assets/others/packages/pipx.txt" -n 1 pipx install
+  xargs <"$HOME/dotfiles/config/packages/pipx.txt" -n 1 pipx install
 }
 
 usage() {
@@ -245,4 +245,4 @@ fi
 
 print_message "$GREEN" "Done"
 print_message "$GREEN" "You can install the VS Code plugin by running the following command."
-print_message "$GREEN" "xargs < $HOME/dotfiles/assets/others/packages/vscode_extensions.txt -n 1 code --install-extension"
+print_message "$GREEN" "xargs < $HOME/dotfiles/config/packages/vscode_extensions.txt -n 1 code --install-extension"

@@ -80,14 +80,14 @@ r-upgrade() {
 
 r-backup() {
   echo -e "\033[33mBacking up all packages...\033[0m"
-  brew bundle dump --file="$HOME"/dotfiles/assets/others/packages/Brewfile --force
-  brew leaves >"$HOME"/dotfiles/assets/others/packages/Brewfile.txt
+  brew bundle dump --file="$HOME"/dotfiles/config/packages/Brewfile --force
+  brew leaves >"$HOME"/dotfiles/config/packages/Brewfile.txt
   brew update
   cp "$HOME"/.zsh_history "$HOME"/Databases/Backup/CLI/zsh_history_$(date +\%Y_\%m_\%d_\%H_\%M_\%S).bak
-  gh extension list | awk '{print $3}' >"$HOME"/dotfiles/assets/others/packages/gh_extensions.txt
-  ls /Applications | rg '\.app' | sed 's/\.app//g' >"$HOME"/dotfiles/assets/others/packages/macos_applications.txt
-  ls /Applications/Setapp | rg '\.app' | sed 's/\.app//g' >"$HOME"/dotfiles/assets/others/packages/macos_setapp.txt
-  pipx list --json | jq ".venvs | .[] | .metadata.main_package.package" -r >"$HOME"/dotfiles/assets/others/packages/pipx.txt
+  gh extension list | awk '{print $3}' >"$HOME"/dotfiles/config/packages/gh_extensions.txt
+  ls /Applications | rg '\.app' | sed 's/\.app//g' >"$HOME"/dotfiles/config/packages/macos_applications.txt
+  ls /Applications/Setapp | rg '\.app' | sed 's/\.app//g' >"$HOME"/dotfiles/config/packages/macos_setapp.txt
+  pipx list --json | jq ".venvs | .[] | .metadata.main_package.package" -r >"$HOME"/dotfiles/config/packages/pipx.txt
 }
 
 r-completion() {
