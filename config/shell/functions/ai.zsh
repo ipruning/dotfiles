@@ -37,7 +37,7 @@ function prompt() {
 
   if ! [ -t 0 ]; then
     while IFS= read -r line; do
-      input+="$line\n"
+      input+="$line"
     done
   fi
 
@@ -45,9 +45,7 @@ function prompt() {
     echo "$prompt_text"
   else
     echo "<context>"
-    echo
     echo -e "$input"
-    echo
     echo "</context>"
     echo
     echo "<prompt>"

@@ -3,8 +3,8 @@ BetterZip
 CleanMyMac
 CleanShot X
 Clop
+Craft
 DevUtils
-Disk Drill
 Downie
 Focus 2
 ForkLift
@@ -13,33 +13,20 @@ HoudahSpot
 Hustl
 Image2icon
 In Your Face
-KeyKey Typing Tutor
 Luminar Neo
-Lungo
 MarginNote
-MenubarX
-Meta
-MetaImage
-MindNode Classic
 Mockuuups Studio
-Numi
 One Switch
-PDF Search
 Permute
 PhotoBulk
-PopClip
 Presentify
 Proxyman
 Renamer
 SnapMotion
 Spark Mail
 TablePlus
-TextSoap
 Timing
-Typeface
-TypingMind
 Ulysses
 WiFi Explorer
 Yoink
-iBoysoft NTFS for Mac
 iStat Menus
