@@ -175,7 +175,7 @@ keybinds clear-defaults=true {
                 floating true
                 move_to_focused_tab true
                 cwd "/"
-                root_dirs "/Users/alex/Developer;/Users/alex/Developer/orgs"
+                root_dirs "/Users/alex/Developer/github;/Users/alex/Developer/ipruning.com;/Users/alex/Developer/jihuanshe.com;/Users/alex/Developer/qkvlab.com"
                 session_layout "compact"
             }
             // SwitchToMode "Locked"
