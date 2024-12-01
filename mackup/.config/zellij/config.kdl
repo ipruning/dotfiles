@@ -202,11 +202,12 @@ keybinds clear-defaults=true {
         bind "Alt f" { ToggleFloatingPanes; }
 
         // Alacritty X Zellij
-        bind "Alt h" "" { MoveFocusOrTab "Left"; }
-        bind "Alt j" "" { MoveFocus "Down"; }
-        bind "Alt k" "" { MoveFocus "Up"; }
-        bind "Alt l" "" { MoveFocusOrTab "Right"; }
+        bind "Alt h" { MoveFocusOrTab "Left"; }
+        bind "Alt j" { MoveFocus "Down"; }
+        bind "Alt k" { MoveFocus "Up"; }
+        bind "Alt l" { MoveFocusOrTab "Right"; }
 
+        // Alacritty X Zellij
         bind "" { Run "gitu" {
             direction "Right"
         }; }

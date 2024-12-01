@@ -124,13 +124,6 @@ y = 5
 [keyboard]
 bindings = [
     # Alacritty X Zellij
-    { key = "N", mods = "Command", chars = "\u001bn" },
-
-    { key = "H", mods = "Control|Shift", chars = "\uE006" },
-    { key = "J", mods = "Control|Shift", chars = "\uE007" },
-    { key = "K", mods = "Control|Shift", chars = "\uE008" },
-    { key = "L", mods = "Control|Shift", chars = "\uE009" },
-
     { key = "!", mods = "Control|Shift", chars = "\uE001" },
     { key = "@", mods = "Control|Shift", chars = "\uE002" },
 ]
