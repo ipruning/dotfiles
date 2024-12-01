@@ -76,10 +76,10 @@ cmd-h = []
 cmd-alt-h = []
 
 [mode.pass.binding]
-esc = 'mode main'
+alt-g = 'mode main'
 
 [mode.move.binding]
-esc = 'mode main'
+alt-space = 'mode main'
 
 h = 'move left'
 j = 'move down'
@@ -152,8 +152,4 @@ run = 'layout floating'
 
 [[on-window-detected]]
 if.app-id = 'com.1password.1password'
-run = 'layout floating'
-
-[[on-window-detected]]
-if.app-id = 'com.electron.wispr-flow'
 run = 'layout floating'
