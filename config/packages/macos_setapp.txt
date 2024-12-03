@@ -26,6 +26,7 @@ SnapMotion
 Spark Mail
 TablePlus
 Timing
+Tripsy
 Ulysses
 WiFi Explorer
 Yoink
