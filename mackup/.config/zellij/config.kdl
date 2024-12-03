@@ -171,7 +171,7 @@ keybinds clear-defaults=true {
         bind "Ctrl g" { SwitchToMode "Locked"; }
 
         bind "Ctrl k" {
-            LaunchOrFocusPlugin "file:~/.config/zellij/plugins/zellij-sessionizer.wasm" {
+            LaunchOrFocusPlugin "file:~/.config/zellij/plugins/sessionizer.wasm" {
                 floating true
                 move_to_focused_tab true
                 cwd "/"
@@ -182,7 +182,7 @@ keybinds clear-defaults=true {
         }
 
         bind "Ctrl j" {
-            LaunchOrFocusPlugin "file:~/.config/zellij/plugins/zellij-room.wasm" {
+            LaunchOrFocusPlugin "file:~/.config/zellij/plugins/room.wasm" {
                 floating true
                 ignore_case true
                 quick_jump true
@@ -313,8 +313,8 @@ pane_frames false
 theme "catppuccin-mocha"
 
 // The name of the default layout to load on startup
-// default_layout "default"
-default_layout "compact"
+default_layout "default"
+// default_layout "compact"
 // default_layout "disable-status-bar"
 // default_layout "strider"
 
