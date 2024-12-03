@@ -4,15 +4,11 @@ after-startup-command = [
 ]
 
 start-at-login = true
-
 enable-normalization-flatten-containers = true
 enable-normalization-opposite-orientation-for-nested-containers = true
-
 accordion-padding = 80
-
 default-root-container-layout = 'tiles'
 default-root-container-orientation = 'auto'
-
 on-focused-monitor-changed = []
 automatically-unhide-macos-hidden-apps = true
 
@@ -154,6 +150,7 @@ run = 'layout floating'
 if.app-id = 'com.1password.1password'
 run = 'layout floating'
 
+# Prevent AeroSpace Crash
 [[on-window-detected]]
-if.app-id = 'com.tencent.xinWeChat'
+if.window-title-regex-substring = 'WeChat'
 run = 'layout floating'
