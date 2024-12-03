@@ -208,7 +208,8 @@ keybinds clear-defaults=true {
         bind "Alt l" { MoveFocusOrTab "Right"; }
 
         // Alacritty X Zellij
-        bind "" { Run "gitu" {
+        bind "" { NewPane; }
+        bind "" { Run "gitu" {
             direction "Right"
         }; }
         bind "" { Run "git" "diff" {
@@ -260,7 +261,7 @@ plugins {
 //   - true (default)
 //   - false
 //
-// pane_frames true
+pane_frames false
 
 // Toggle between having Zellij lay out panes according to a predefined set of layouts whenever possible
 // Options:
