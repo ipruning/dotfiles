@@ -52,7 +52,6 @@ jq
 juliaup
 kondo
 lazydocker
-lazygit
 lf
 libmagic
 lnav
