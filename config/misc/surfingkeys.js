@@ -1,5 +1,5 @@
 // General settings
-const EXCLUDED_DOMAINS = /roamresearch\.com|notion\.so|feishu\.cn|kagi\.com/i;
+const EXCLUDED_DOMAINS = /roamresearch\.com|notion\.so|feishu\.cn|monkeytype\.com|kagi\.com/i;
 
 // settings.digitForRepeat = false;
 settings.focusAfterClosed = 'last';        // Focus last viewed tab when closing current tab
