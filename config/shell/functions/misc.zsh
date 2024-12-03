@@ -76,22 +76,22 @@ zj() {
 #===============================================================================
 # 👇 cd
 #===============================================================================
-cd() {
-  if [[ "$#" != 0 ]]; then
-    builtin cd "$@"
-    return
-  fi
-  while true; do
-    local ls=$(echo ".." && ls -p | grep '/$' | sed 's;/$;;')
-    local dir="$(printf '%s\n' "${ls[@]}" |
-      fzf --reverse --preview '
-                __cd_nxt="$(echo {})";
-                __cd_path="$(echo $(pwd)/${__cd_nxt} | sed "s;//;/;")";
-                echo $__cd_path;
-                echo;
-                eza --icons --oneline --color=always --ignore-glob=".DS_Store" "${__cd_path}";
-        ')"
-    [[ ${#dir} != 0 ]] || return 0
-    builtin cd "$dir" &>/dev/null
-  done
-}
+# cd() {
+#   if [[ "$#" != 0 ]]; then
+#     builtin cd "$@"
+#     return
+#   fi
+#   while true; do
+#     local ls=$(echo ".." && ls -p | grep '/$' | sed 's;/$;;')
+#     local dir="$(printf '%s\n' "${ls[@]}" |
+#       fzf --reverse --preview '
+#                 __cd_nxt="$(echo {})";
+#                 __cd_path="$(echo $(pwd)/${__cd_nxt} | sed "s;//;/;")";
+#                 echo $__cd_path;
+#                 echo;
+#                 eza --icons --oneline --color=always --ignore-glob=".DS_Store" "${__cd_path}";
+#         ')"
+#     [[ ${#dir} != 0 ]] || return 0
+#     builtin cd "$dir" &>/dev/null
+#   done
+# }
