@@ -41,28 +41,15 @@ export ZELLIJ_AUTO_EXIT="false"
 
 if [[ "$__CFBundleIdentifier" == "org.alacritty" && "$TERM_PROGRAM" != "zed" ]]; then
   if [[ -z "$ZELLIJ" ]]; then
-    # Check if Zellij is installed
     if command -v zellij >/dev/null 2>&1; then
-      # Get the list of active sessions
-      active_sessions=$(zellij list-sessions --no-formatting | awk '!/EXITED/ {print $1}')
-
-      # Check if there are any active sessions
-      if [[ -z "$active_sessions" ]]; then
-        # No active sessions, start a new one
-        eval "$(zellij setup --generate-auto-start zsh)"
+      if zellij list-sessions --no-formatting | grep -q "^default"; then
+        zellij attach default
       else
-        # Get the first active session name
-        first_session=$(echo "$active_sessions" | head -n 1)
-
-        # Attach to the first active session
-        zellij attach "$first_session"
+        zellij --session default
       fi
     else
       echo "Zellij is not installed. Please install it first."
     fi
-  fi
-  if [[ "$ZELLIJ_PANE_ID" == "0" ]]; then
-    # fastfetch
   fi
 fi
 
@@ -193,21 +180,6 @@ fi
 source "$HOME"/.orbstack/shell/init.zsh 2>/dev/null || :
 
 #===============================================================================
-# 👇 GitHub Copilot CLl (ghcs, ghce)
-#===============================================================================
-# eval "$(gh copilot alias -- zsh)"
-
-#===============================================================================
-# 👇 tumxp
-#===============================================================================
-export DISABLE_AUTO_TITLE='true'
-
-#===============================================================================
-# 👇 bat
-#===============================================================================
-export BAT_THEME="OneHalfDark"
-
-#===============================================================================
 # 👇 atuin
 #===============================================================================
 eval "$(atuin init zsh)"
@@ -252,11 +224,5 @@ mac_x86_64)
   if [[ -f /usr/local/homebrew/bin/brew ]]; then
     eval "$(/usr/local/homebrew/bin/brew shellenv)"
   fi
-  # python
-  eval "$(pyenv init --path)"
-  eval "$(pyenv init -)"
-  ;;
-linux_x86_64)
-  # python
   ;;
 esac
