@@ -20,7 +20,6 @@ extra-cmake-modules
 eza
 fastfetch
 fd
-felixkratz/formulae/borders
 fftw
 forgit
 fpp
