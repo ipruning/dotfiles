@@ -313,10 +313,11 @@ pane_frames false
 theme "catppuccin-mocha"
 
 // The name of the default layout to load on startup
-default_layout "default"
+// default_layout "default"
 // default_layout "compact"
 // default_layout "disable-status-bar"
 // default_layout "strider"
+default_layout "main"
 
 // Choose the mode that zellij uses when starting up.
 // Default: normal
