@@ -17,7 +17,6 @@
   "collaboration_panel": {
     "dock": "left"
   },
-  "format_on_save": "on",
   "features": {
     "inline_completion_provider": "copilot"
   },
@@ -33,6 +32,7 @@
     "**/vendor",
     "**/.tmp*"
   ],
+  "format_on_save": "on",
   "indent_guides": {
     "coloring": "indent_aware",
     "enabled": true
