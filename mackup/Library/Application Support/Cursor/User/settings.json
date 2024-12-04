@@ -85,11 +85,6 @@
   "code-runner.preserveFocus": false,
   "code-runner.runInTerminal": true,
   "code-runner.saveFileBeforeRun": true,
-  "cursor.chat.collapseInputBoxPills": true,
-  "cursor.chat.premiumChatAutoScrollWhenAtBottom": true,
-  "cursor.chat.showSuggestedFiles": true,
-  "cursor.cmdk.useThemedDiffBackground": true,
-  "cursor.general.enableShadowWorkspace": true,
   "diffEditor.ignoreTrimWhitespace": true,
   "diffEditor.maxComputationTime": 8192,
   "diffEditor.renderSideBySide": true,
@@ -232,7 +227,6 @@
     "asvetliakov.vscode-neovim": 1
   },
   "extensions.ignoreRecommendations": true,
-  "file-browser.hideIgnoredFiles": true,
   "fileNestingUpdater.autoUpdate": false,
   "fileNestingUpdater.autoUpdateInterval": 43200,
   "fileNestingUpdater.promptOnAutoUpdate": true,
@@ -330,69 +324,7 @@
     "TODO"
   ],
   "todo-tree.regex.regex": "(//|#|<!--|;|/\\*|^|^\\s*(-|\\d+.))\\s*($TAGS)",
-  "vim.easymotion": true,
-  "vim.normalModeKeyBindingsNonRecursive": [
-    {
-      "before": [
-        "<space>"
-      ],
-      "commands": [
-        "vspacecode.space"
-      ]
-    },
-    {
-      "before": [
-        ","
-      ],
-      "commands": [
-        "vspacecode.space",
-        {
-          "args": "m",
-          "command": "whichkey.triggerKey"
-        }
-      ]
-    }
-  ],
-  "vim.useSystemClipboard": true,
   "vim.vimrc.enable": true,
-  "vim.visualModeKeyBindingsNonRecursive": [
-    {
-      "before": [
-        "<space>"
-      ],
-      "commands": [
-        "vspacecode.space"
-      ]
-    },
-    {
-      "before": [
-        ","
-      ],
-      "commands": [
-        "vspacecode.space",
-        {
-          "args": "m",
-          "command": "whichkey.triggerKey"
-        }
-      ]
-    },
-    {
-      "before": [
-        ">"
-      ],
-      "commands": [
-        "editor.action.indentLines"
-      ]
-    },
-    {
-      "before": [
-        "<"
-      ],
-      "commands": [
-        "editor.action.outdentLines"
-      ]
-    }
-  ],
   "vscode-mogami.concurrency": 20,
   "vscode-mogami.enableCodeLens": true,
   "vscode-mogami.usePrivateSource": false,
