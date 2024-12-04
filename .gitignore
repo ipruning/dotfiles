@@ -1,7 +1,6 @@
 .DS_Store
 
 bin/clip
-bin/cmd-wrapped
 bin/cwim
 
 config/shell/env_private.zsh
