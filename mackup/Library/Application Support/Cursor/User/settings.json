@@ -23,7 +23,6 @@
   "[latex]": {
     "editor.acceptSuggestionOnEnter": "on",
     "editor.defaultFormatter": "James-Yu.latex-workshop",
-    "editor.formatOnSave": true,
     "editor.quickSuggestions": {
       "comments": "on",
       "other": "on",
@@ -35,13 +34,9 @@
     "editor.tabSize": 2,
     "editor.wordWrap": "on"
   },
-  "[lua]": {
-    "editor.formatOnSave": false
-  },
   "[markdown]": {
     "editor.acceptSuggestionOnEnter": "on",
     "editor.defaultFormatter": "DavidAnson.vscode-markdownlint",
-    "editor.formatOnSave": true,
     "editor.quickSuggestions": {
       "comments": "on",
       "other": "on",
@@ -63,7 +58,6 @@
       "source.organizeImports": "explicit"
     },
     "editor.defaultFormatter": "charliermarsh.ruff",
-    "editor.formatOnType": false,
     "editor.tabSize": 4
   },
   "baml.bamlPanelOpen": false,
@@ -108,7 +102,7 @@
   "editor.fontFamily": "'MonoLisa Nerd Font', 'Source Han Sans SC'",
   "editor.fontLigatures": "'zero' on, 'ss02' on, 'ss04' on, 'ss06' on, 'calt' off, 'liga' off",
   "editor.fontSize": 13,
-  "editor.formatOnSave": false,
+  "editor.formatOnSave": true,
   "editor.guides.bracketPairs": true,
   "editor.guides.bracketPairsHorizontal": "active",
   "editor.guides.highlightActiveIndentation": true,

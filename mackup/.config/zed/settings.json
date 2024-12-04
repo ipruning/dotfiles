@@ -17,6 +17,7 @@
   "collaboration_panel": {
     "dock": "left"
   },
+  "format_on_save": "on",
   "features": {
     "inline_completion_provider": "copilot"
   },
@@ -46,7 +47,10 @@
   },
   "languages": {
     "Python": {
-      "language_servers": ["pyright", "ruff"]
+      "language_servers": [
+        "pyright",
+        "ruff"
+      ]
     },
     "Rainbow CSV": {
       "soft_wrap": "none"
