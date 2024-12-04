@@ -113,11 +113,13 @@ TencentMeeting
 Termius
 Things3
 TickTick
+Todoist
 TradingView
 UninstallPKG
 VideoFusion-macOS
 VirtualBuddy
 WeChat
+Whisper Transcription
 Wispr Flow
 Wooshy
 XLD

@@ -1,3 +1,4 @@
+aider-chat
 chainforge
 commitizen
 datasette
