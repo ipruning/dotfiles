@@ -314,7 +314,7 @@ def run_command(session, pm, prompt):
         result = ""
         # !set verbose True
         if set_key == "verbose":
-            Config.verbose = str_to_value(args[1], bool)
+            Config.verbose = str_to_value(args[1], bool) # type: ignore
             result = f"Config.verbose = {Config.verbose}"
         # !set conversation True
         elif set_key == "conversation":
@@ -404,12 +404,12 @@ def print_info(session):
     s = f"""\
 {magenta_hl(" execution info ")}:
 {c('Config')}
-    {c('api_base_url')}: {Config.api_base_url}
-    {c('api_key')}: {Config.api_key[:5]}******{Config.api_key[-2:]}
+    {c('api_base_url')}: {Config.api_base_url or 'None'}
+    {c('api_key')}: {Config.api_key[:5] + '******' + Config.api_key[-2:] if Config.api_key else 'None'}
 {c('ChatSession')}
     {c('model')}: {session.model}
     {c('params')}: {json.dumps(session.params)}
-    {c('conversation')}: {session.conversation}
+    {c('conversation')}: {session.conversation or 'None'}
     {c('messages')}: {len(session.messages)}\
 """
     print(s + "\n")
