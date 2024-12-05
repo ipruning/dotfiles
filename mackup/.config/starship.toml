@@ -31,7 +31,6 @@ command_timeout = 1_000
   min_time           = 10_000
   min_time_to_notify = 240_000
   show_milliseconds  = false
-  show_notifications = true
 
 [directory]
   read_only         = '  '
