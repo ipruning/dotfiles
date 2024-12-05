@@ -36,47 +36,34 @@ setopt interactivecomments
 #===============================================================================
 # 👇 Initialize zellij when running in Alacritty and not in Zed
 #===============================================================================
-export ZELLIJ_AUTO_ATTACH="true"
-export ZELLIJ_AUTO_EXIT="false"
+if [[ "$__CFBundleIdentifier" == "org.alacritty" && "$TERM_PROGRAM" != "zed" && -z "$ZELLIJ" ]]; then
+  if ! command -v zellij >/dev/null 2>&1; then
+    echo "Zellij is not installed. Please install it first."
+    return
+  fi
 
-if [[ "$__CFBundleIdentifier" == "org.alacritty" && "$TERM_PROGRAM" != "zed" ]]; then
-  if [[ -z "$ZELLIJ" ]]; then
-    if command -v zellij >/dev/null 2>&1; then
-      if zellij list-sessions --no-formatting | grep -q "^default"; then
-        zellij attach default
-      else
-        zellij --session default
-      fi
-    else
-      echo "Zellij is not installed. Please install it first."
-    fi
+  active_sessions=$(zellij list-sessions --short)
+  if [[ -z "$active_sessions" ]]; then
+    zellij --new-session-with-layout main
+  else
+    first_session=$(echo "$active_sessions" | head -n 1)
+    zellij attach "$first_session"
   fi
 fi
 
-# zellij_pane_name_update() {
-#   if [[ -n $ZELLIJ && -n $1 ]]; then
-#     local cmd=$(echo "$1" | awk '{print $1}')
-#     if [[ -n $cmd ]]; then
-#       command nohup zellij action rename-pane "$cmd" >/dev/null 2>&1 || true
-#     fi
-#   fi
-# }
-# preexec_functions+=(zellij_pane_name_update)
+zellij_tab_name_update() {
+  [[ -z $ZELLIJ ]] && return
 
-# zellij_tab_name_update() {
-#   if [[ -n $ZELLIJ ]]; then
-#     local current_dir=$PWD
-#     if [[ $current_dir == $HOME ]]; then
-#       current_dir="~"
-#     else
-#       current_dir=${current_dir##*/}
-#     fi
-#     command nohup zellij action rename-tab $current_dir >/dev/null 2>&1
-#   fi
-# }
+  local current_dir=$PWD
+  case $current_dir in
+  $HOME) current_dir="~" ;;
+  *) current_dir=${current_dir##*/} ;;
+  esac
+  command nohup zellij action rename-tab $current_dir >/dev/null 2>&1
+}
 
-# zellij_tab_name_update
-# chpwd_functions+=(zellij_tab_name_update)
+zellij_tab_name_update
+chpwd_functions+=(zellij_tab_name_update)
 
 #===============================================================================
 # 👇 zsh Theme
