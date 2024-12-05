@@ -1,6 +1,3 @@
-// General settings
-const EXCLUDED_DOMAINS = /roamresearch\.com|notion\.so|feishu\.cn|monkeytype\.com|kagi\.com/i;
-
 // settings.digitForRepeat = false;
 settings.focusAfterClosed = 'last';        // Focus last viewed tab when closing current tab
 settings.focusFirstCandidate = true;       // Focus first item in omnibar
@@ -98,8 +95,8 @@ api.mapkey('gO', 'Open URL in clipboard in new tab', function () {
 });
 
 // Timeout durations for PassThrough mode
-const TIMEOUT_SHORT_MS = 1500;      // 1.5 seconds
-const TIMEOUT_LONG_MS = 60000;     // 1 minute
+const TIMEOUT_SHORT_MS = 3000;      // 3 seconds
+const TIMEOUT_LONG_MS = 120000;     // 2 minutes
 
 api.mapkey('p', 'Enter PassThrough mode', function () {
   const seconds = TIMEOUT_SHORT_MS / 1000;
@@ -119,10 +116,24 @@ api.mapkey('P', 'Enter PassThrough mode', function () {
   api.Normal.passThrough(TIMEOUT_LONG_MS);
 });
 
-// Unmap
-api.iunmap(':');
+// Map gt to T
+api.map('gt', 'T');
 
 // Keep only essential mappings for specific sites
+const ROOT_DOMAINS = [
+  'feishu.cn',
+  'kagi.com',
+  'monkeytype.com',
+  'notion.so',
+  'roamresearch.com',
+  'x.com',
+];
+
+const EXCLUDED_DOMAINS = new RegExp(
+  '\\b(' + ROOT_DOMAINS.map(domain => domain.replace('.', '\\.')).join('|') + ')\\b',
+  'i'
+);
+
 api.unmapAllExcept([
   // Scrolling
   '<Ctrl-d>', '<Ctrl-u>', 'e', 'd',
@@ -133,5 +144,3 @@ api.unmapAllExcept([
   // Misc
   'F', 'i', 'p', 'P'
 ], EXCLUDED_DOMAINS);
-
-api.map('gt', 'T');
