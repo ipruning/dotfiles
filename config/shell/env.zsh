@@ -62,8 +62,8 @@ zellij_tab_name_update() {
   command nohup zellij action rename-tab $current_dir >/dev/null 2>&1
 }
 
-zellij_tab_name_update
-chpwd_functions+=(zellij_tab_name_update)
+# zellij_tab_name_update
+# chpwd_functions+=(zellij_tab_name_update)
 
 #===============================================================================
 # 👇 zsh Theme
