@@ -324,6 +324,7 @@
     "TODO"
   ],
   "todo-tree.regex.regex": "(//|#|<!--|;|/\\*|^|^\\s*(-|\\d+.))\\s*($TAGS)",
+  "vim.useSystemClipboard": true,
   "vim.vimrc.enable": true,
   "vscode-mogami.concurrency": 20,
   "vscode-mogami.enableCodeLens": true,
