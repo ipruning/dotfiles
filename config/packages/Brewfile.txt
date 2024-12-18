@@ -4,6 +4,7 @@ autoconf
 autocorrect
 bash
 bat
+brainfuck
 cabextract
 cfitsio
 cgif
@@ -91,6 +92,7 @@ vladkens/tap/macmon
 watchexec
 wget
 whisperkit-cli
+yazi
 yq
 zellij
 zig

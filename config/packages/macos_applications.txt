@@ -14,11 +14,7 @@ BetterDisplay
 Blender
 Bob
 Capture One
-ChatGPT
 Chromium
-Claude
-Clicknow
-Cloudflare WARP
 Contexts
 CrossOver
 Cursor
@@ -60,6 +56,7 @@ Microsoft Excel
 Microsoft PowerPoint
 Microsoft Word
 Mos
+Mouseless
 MusicHarbor
 NeteaseMusic
 Notion

@@ -1,4 +1,5 @@
 [tools]
+  "cargo:cmd-wrapped"                          = "latest"
   "cargo:kbt"                                  = "latest"
   "cargo:koji"                                 = "latest"
   "cargo:openapi-tui"                          = "latest"
