@@ -142,5 +142,5 @@ api.unmapAllExcept([
   // Tabs
   'S', 'D', 'x', 'X', 't', 'T', 'B',
   // Misc
-  'F', 'i', 'p', 'P'
+  'f', 'F', 'i', 'p', 'P'
 ], EXCLUDED_DOMAINS);
