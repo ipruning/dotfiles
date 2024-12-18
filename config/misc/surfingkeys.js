@@ -4,7 +4,7 @@ settings.focusFirstCandidate = true;       // Focus first item in omnibar
 settings.hintAlign = 'left';               // Align link hints to the left
 settings.modeAfterYank = 'Normal';         // Return to Normal mode after yanking
 settings.omnibarMaxResults = 5;
-settings.omnibarPosition = 'bottom';
+// settings.omnibarPosition = 'bottom';
 settings.tabsThreshold = 0;                // Always use omnibar for tab selection
 
 api.Hints.style(`
