@@ -22,17 +22,11 @@ api.addSearchAlias('k', 'kagi', SEARCH_ENGINE, 's');
 settings.defaultSearchEngine = 'k';
 
 // Scrolling controls
-api.mapkey('<Ctrl-d>', 'Scroll down half page', function () {
-  api.Normal.scroll('pageDown');
-});
-api.mapkey('<Ctrl-u>', 'Scroll up half page', function () {
-  api.Normal.scroll('pageUp');
-});
+api.mapkey('<Ctrl-d>', 'Scroll down half page', () => api.Normal.scroll('pageDown'));
+api.mapkey('<Ctrl-u>', 'Scroll up half page', () => api.Normal.scroll('pageUp'));
 
 // URL and clipboard operations
-api.mapkey('ym', 'Copy current page URL as Markdown link', function () {
-  api.Clipboard.write('[' + document.title + '](' + window.location.href + ')');
-});
+api.mapkey('ym', 'Copy current page URL as Markdown link', () => api.Clipboard.write(`[${document.title}](${window.location.href})`));
 
 // URL validation pattern
 // Matches: domain.com, sub.domain.com, http(s)://domain.com, with optional path
@@ -74,31 +68,27 @@ function processClipboardText(clipText, openInNewTab = false) {
 }
 
 // Clipboard URL opening mappings
-api.mapkey('go', 'Open URL in clipboard', function () {
-  api.Clipboard.read((response) => {
-    if (response && response.data) {
-      processClipboardText(response.data.trim(), false);
-    } else {
-      handleClipboardError(new Error('No content in clipboard'));
-    }
-  });
-});
+api.mapkey('go', 'Open URL in clipboard', () => api.Clipboard.read((response) => {
+  if (response?.data) {
+    processClipboardText(response.data.trim(), false);
+  } else {
+    handleClipboardError(new Error('No content in clipboard'));
+  }
+}));
 
-api.mapkey('gO', 'Open URL in clipboard in new tab', function () {
-  api.Clipboard.read((response) => {
-    if (response && response.data) {
-      processClipboardText(response.data.trim(), true);
-    } else {
-      handleClipboardError(new Error('No content in clipboard'));
-    }
-  });
-});
+api.mapkey('gO', 'Open URL in clipboard in new tab', () => api.Clipboard.read((response) => {
+  if (response?.data) {
+    processClipboardText(response.data.trim(), true);
+  } else {
+    handleClipboardError(new Error('No content in clipboard'));
+  }
+}));
 
 // Timeout durations for PassThrough mode
-const TIMEOUT_SHORT_MS = 3000;      // 3 seconds
-const TIMEOUT_LONG_MS = 120000;     // 2 minutes
+const TIMEOUT_SHORT_MS = 1000;
+const TIMEOUT_LONG_MS = 300000;
 
-api.mapkey('p', 'Enter PassThrough mode', function () {
+api.mapkey('p', 'Enter PassThrough mode', () => {
   const seconds = TIMEOUT_SHORT_MS / 1000;
   api.Front.showBanner(
     `Entering PassThrough mode for ${seconds}s, press ESC to exit early`,
@@ -107,7 +97,7 @@ api.mapkey('p', 'Enter PassThrough mode', function () {
   api.Normal.passThrough(TIMEOUT_SHORT_MS);
 });
 
-api.mapkey('P', 'Enter PassThrough mode', function () {
+api.mapkey('P', 'Enter PassThrough mode', () => {
   const seconds = TIMEOUT_LONG_MS / 1000;
   api.Front.showBanner(
     `Entering PassThrough mode for ${seconds}s, press ESC to exit early`,
@@ -130,7 +120,7 @@ const ROOT_DOMAINS = [
 ];
 
 const EXCLUDED_DOMAINS = new RegExp(
-  '\\b(' + ROOT_DOMAINS.map(domain => domain.replace('.', '\\.')).join('|') + ')\\b',
+  `\\b(${ROOT_DOMAINS.map(domain => domain.replace('.', '\\.')).join('|')})\\b`,
   'i'
 );
 
