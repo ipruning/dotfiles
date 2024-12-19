@@ -44,7 +44,7 @@ if [[ "$__CFBundleIdentifier" == "org.alacritty" && "$TERM_PROGRAM" != "zed" && 
 
   active_sessions=$(zellij list-sessions --no-formatting | grep -v "EXITED" || true)
   if [[ -z "$active_sessions" ]]; then
-    zellij --new-session-with-layout main
+    zellij
   else
     first_session=$(echo "$active_sessions" | head -n 1 | awk '{print $1}')
     zellij attach "$first_session"
