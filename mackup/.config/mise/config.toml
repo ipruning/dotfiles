@@ -11,6 +11,7 @@
   "go:github.com/appleboy/CodeGPT/cmd/codegpt" = "latest"
   "go:github.com/melkeydev/go-blueprint"       = "latest"
   "go:github.com/pouriyajamshidi/tcping/v2"    = "latest"
+  "npm:@biomejs/biome"                         = "latest"
   "npm:bun"                                    = "latest"
   "npm:promptfoo"                              = "latest"
   go                                           = "latest"
