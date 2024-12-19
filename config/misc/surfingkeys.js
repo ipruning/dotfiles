@@ -1,11 +1,8 @@
-// settings.digitForRepeat = false;
-settings.focusAfterClosed = 'last';        // Focus last viewed tab when closing current tab
-settings.focusFirstCandidate = true;       // Focus first item in omnibar
-settings.hintAlign = 'left';               // Align link hints to the left
-settings.modeAfterYank = 'Normal';         // Return to Normal mode after yanking
-settings.omnibarMaxResults = 5;
-// settings.omnibarPosition = 'bottom';
-settings.tabsThreshold = 0;                // Always use omnibar for tab selection
+// settings
+settings.digitForRepeat = false;
+settings.focusAfterClosed = 'last';
+settings.focusFirstCandidate = true;
+settings.tabsThreshold = 0;
 
 api.Hints.style(`
   font-family: MonoLisa Nerd Font;
