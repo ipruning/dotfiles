@@ -1,3 +1,4 @@
+// https://raw.githubusercontent.com/wiraki/dotfiles/refs/heads/main/private_dot_config/zellij/layouts/default.kdl
 layout {
     swap_tiled_layout name="vertical" {
         tab max_panes=5 {
