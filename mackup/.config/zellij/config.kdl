@@ -261,7 +261,7 @@ plugins {
 //   - true (default)
 //   - false
 //
-pane_frames true
+// pane_frames true
 
 // Toggle between having Zellij lay out panes according to a predefined set of layouts whenever possible
 // Options:
@@ -310,14 +310,14 @@ pane_frames true
 // }
 
 // Choose the theme that is specified in the themes section.
-theme "catppuccin-mocha"
+// theme "catppuccin-mocha"
 
 // The name of the default layout to load on startup
 // default_layout "default"
 // default_layout "compact"
 // default_layout "disable-status-bar"
 // default_layout "strider"
-default_layout "main"
+default_layout "demo"
 
 // Choose the mode that zellij uses when starting up.
 // Default: normal

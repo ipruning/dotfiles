@@ -1,4 +1,5 @@
 layout {
+    pane
     pane size=1 borderless=true {
         plugin location="file:~/.config/zellij/plugins/zjstatus.wasm" {
             format_left  "#[fg=#fab387]{session} {mode} {tabs}"
@@ -13,5 +14,4 @@ layout {
             tab_active   "#[fg=#89dceb] {name} "
         }
     }
-    pane
 }
