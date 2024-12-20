@@ -68,9 +68,6 @@ r-upgrade() {
   echo -e "\033[33mUpgrading GitHub CLI extensions...\033[0m"
   gh extension upgrade --all
 
-  echo -e "\033[33mUpgrading pipx packages...\033[0m"
-  pipx upgrade-all
-
   echo -e "\033[33mUpdating mise...\033[0m"
   mise upgrade
 
@@ -87,7 +84,6 @@ r-backup() {
   gh extension list | awk '{print $3}' >"$HOME"/dotfiles/config/packages/gh_extensions.txt
   ls /Applications | rg '\.app' | sed 's/\.app//g' >"$HOME"/dotfiles/config/packages/macos_applications.txt
   ls /Applications/Setapp | rg '\.app' | sed 's/\.app//g' >"$HOME"/dotfiles/config/packages/macos_setapp.txt
-  pipx list --json | jq ".venvs | .[] | .metadata.main_package.package" -r >"$HOME"/dotfiles/config/packages/pipx.txt
 }
 
 r-completion() {
