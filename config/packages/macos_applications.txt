@@ -11,6 +11,7 @@ Apparency
 Avenue
 BaiduNetdisk_mac
 BetterDisplay
+Blackmagic Disk Speed Test
 Blender
 Bob
 Capture One
@@ -101,12 +102,12 @@ TencentMeeting
 Termius
 Things3
 TickTick
-TradingView
 UninstallPKG
 VideoFusion-macOS
 VirtualBuddy
 WeChat
 Whisper Transcription
+Windsurf
 Wispr Flow
 Wooshy
 XLD
