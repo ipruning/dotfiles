@@ -37,8 +37,9 @@ function prompt() {
 
   if ! [ -t 0 ]; then
     while IFS= read -r line; do
-      input+="$line"
+      input+="${line}"$'\n'
     done
+    input=${input%$'\n'}
   fi
 
   if [[ -z "$input" ]]; then
