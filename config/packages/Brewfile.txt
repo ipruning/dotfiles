@@ -1,3 +1,4 @@
+aider
 assimp
 atuin
 autoconf
@@ -34,9 +35,11 @@ git-extras
 git-lfs
 gitu
 glow
+goaccess
 graphviz
 grex
 halp
+harlequin
 hdf5
 htop
 httpie
@@ -52,13 +55,14 @@ jq
 juliaup
 kondo
 lazydocker
+lazygit
 lf
 libmagic
 lnav
 lychee
+macmon
 media-info
 mise
-modularml/packages/modular
 monolith
 moreutils
 neonctl
@@ -68,10 +72,10 @@ ollama
 onefetch
 ouch
 pandoc-crossref
-pipx
 platformio
 procs
 pueue
+python@3.11
 rclone
 ripgrep
 rustscan
@@ -86,9 +90,7 @@ tokei
 tursodatabase/tap/turso
 typos-cli
 typst
-uv
 viddy
-vladkens/tap/macmon
 watchexec
 wget
 whisperkit-cli
