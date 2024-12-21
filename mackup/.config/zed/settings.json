@@ -47,20 +47,41 @@
   },
   "languages": {
     "Python": {
+      "formatter": [
+        {
+          "code_actions": {
+            "source.fixAll.ruff": true,
+            "source.organizeImports.ruff": true
+          }
+        },
+        {
+          "language_server": {
+            "name": "ruff"
+          }
+        }
+      ],
       "language_servers": [
-        "pyright",
-        "ruff"
+        "ruff",
+        "pyright"
       ]
-    },
-    "Rainbow CSV": {
-      "soft_wrap": "none"
-    },
-    "TypeScript": {
-      "inlay_hints": {
-        "enabled": true,
-        "show_other_hints": true,
-        "show_parameter_hints": false,
-        "show_type_hints": true
+    }
+  },
+  "lsp": {
+    "ruff": {
+      "initialization_options": {
+        "settings": {
+          "lineLength": 120,
+          "lint": {
+            "ignore": [
+              "E501",
+              "N807"
+            ],
+            "select": [
+              "ALL"
+            ]
+          },
+          "showSyntaxErrors": true
+        }
       }
     }
   },

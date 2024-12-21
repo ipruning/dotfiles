@@ -10,8 +10,7 @@
       "n": ["workspace::SendKeystrokes", "ctrl-shift-n z z"],
       "ctrl-alt-shift-n": "vim::MoveToNextMatch",
       "N": ["workspace::SendKeystrokes", "ctrl-alt-shift-n z z"],
-      "space g s": ["workspace::SendKeystrokes", ": new center terminal enter git space status enter"],
-      "space g u": ["workspace::SendKeystrokes", ": new center terminal enter gitu enter"],
+      "space o t": ["workspace::SendKeystrokes", ": new center terminal enter"],
       "space n": "task::Spawn",
       "cmd-r cmd-r": "task::Spawn",
       "[ x": "editor::SelectLargerSyntaxNode",
@@ -180,7 +179,7 @@
       "ctrl-j": ["workspace::ActivatePaneInDirection", "Down"]
     }
   },
-  // Panel nagivation
+  // Panel navigation
   {
     "context": "Dock",
     "bindings": {
