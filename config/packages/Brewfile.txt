@@ -23,9 +23,9 @@ eza
 fastfetch
 fd
 fftw
-forgit
 fpp
 frps
+fzf
 genact
 gfold
 gh
@@ -56,7 +56,6 @@ juliaup
 kondo
 lazydocker
 lazygit
-lf
 libmagic
 lnav
 lychee

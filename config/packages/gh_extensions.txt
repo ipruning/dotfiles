@@ -1,8 +1,2 @@
-mintarchit/gh-contribs
-github/gh-copilot
 dlvhdr/gh-dash
 gennaro-tedesco/gh-f
-hectcastro/gh-metrics
-seachicken/gh-poi
-gennaro-tedesco/gh-s
-HaywardMorihara/gh-tidy
