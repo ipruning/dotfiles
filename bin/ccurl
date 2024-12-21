@@ -8,7 +8,12 @@ fi
 
 url="$1"
 
-if ! curl -s "https://r.jina.ai/$url"; then
-  echo "Error: curl command failed" >&2
+if [[ ! "$url" =~ ^[a-zA-Z0-9._/:%-]+$ ]]; then
+  echo "Error: Invalid URL format" >&2
+  exit 1
+fi
+
+if ! curl -fSL "https://r.jina.ai/$url" 2>/dev/null; then
+  echo "Error: Failed to fetch https://r.jina.ai/$url" >&2
   exit 1
 fi

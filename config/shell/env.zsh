@@ -91,7 +91,6 @@ export FZF_DEFAULT_COMMAND="fd --ignore-file ~/.rgignore --hidden --follow --ign
 # 👇 Standard plugins can be found in $ZSH/plugins/
 # 👇 Custom plugins may be added to $ZSH_CUSTOM/plugins/
 #===============================================================================
-source "$ZSH_CUSTOM"/plugins/git-open/git-open.plugin.zsh
 source "$ZSH_CUSTOM"/plugins/zsh-autosuggestions/zsh-autosuggestions.plugin.zsh
 source "$ZSH_CUSTOM"/plugins/ugit/ugit.plugin.zsh
 
@@ -142,11 +141,6 @@ _fzf_comprun() {
   *) fzf "$@" ;;
   esac
 }
-
-#===============================================================================
-# 👇 forgit https://github.com/wfxr/forgit
-#===============================================================================
-[ -f "$HOMEBREW_PREFIX"/share/forgit/forgit.plugin.zsh ] && source "$HOMEBREW_PREFIX"/share/forgit/forgit.plugin.zsh
 
 #===============================================================================
 # 👇 Preferred editor for local and remote sessions
