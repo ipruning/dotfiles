@@ -1,4 +1,5 @@
 [tools]
+  "cargo:bore-cli"                             = "latest"
   "cargo:cmd-wrapped"                          = "latest"
   "cargo:csvlens"                              = "latest"
   "cargo:huniq"                                = "latest"
