@@ -76,6 +76,7 @@ ProNotes
 QQ
 Raycast
 Rectangle
+RepoPrompt
 Reqable
 Roam Research
 Rond
@@ -100,6 +101,7 @@ Tampermonkey
 Telegram
 TencentMeeting
 Termius
+TestFlight
 Things3
 TickTick
 UninstallPKG
@@ -108,6 +110,7 @@ VirtualBuddy
 WeChat
 Whisper Transcription
 Windsurf
+Wireshark
 Wispr Flow
 Wooshy
 XLD
