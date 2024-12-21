@@ -8,6 +8,7 @@
   "cargo:parallel-disk-usage"                  = "latest"
   "cargo:rip2"                                 = "latest"
   "cargo:serie"                                = "latest"
+  "cargo:sshx"                                 = "latest"
   "cargo:termscp"                              = "latest"
   "cargo:ttyper"                               = "latest"
   "go:github.com/appleboy/CodeGPT/cmd/codegpt" = "latest"
