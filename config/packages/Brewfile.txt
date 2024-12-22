@@ -48,6 +48,7 @@ hurl
 hyperfine
 iperf3
 ipinfo-cli
+iredis
 jc
 jd
 jless
@@ -76,6 +77,7 @@ procs
 pueue
 python@3.11
 rclone
+redis
 ripgrep
 rustscan
 scc
