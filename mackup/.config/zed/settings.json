@@ -1,4 +1,5 @@
 {
+  "show_inline_completions": true,
   "assistant": {
     "default_model": {
       "model": "claude-3-5-sonnet-latest",
@@ -60,29 +61,7 @@
           }
         }
       ],
-      "language_servers": [
-        "ruff",
-        "pyright"
-      ]
-    }
-  },
-  "lsp": {
-    "ruff": {
-      "initialization_options": {
-        "settings": {
-          "lineLength": 120,
-          "lint": {
-            "ignore": [
-              "E501",
-              "N807"
-            ],
-            "select": [
-              "ALL"
-            ]
-          },
-          "showSyntaxErrors": true
-        }
-      }
+      "language_servers": ["basedpyright", "ruff"]
     }
   },
   "notification_panel": {
