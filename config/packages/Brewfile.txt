@@ -65,7 +65,6 @@ media-info
 mise
 monolith
 moreutils
-neonctl
 neovim
 nushell
 ollama
@@ -98,6 +97,5 @@ whisperkit-cli
 yazi
 yq
 zellij
-zig
 zola
 zoxide

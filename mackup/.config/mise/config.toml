@@ -16,7 +16,6 @@
   "go:github.com/melkeydev/go-blueprint"       = "latest"
   "go:github.com/pouriyajamshidi/tcping/v2"    = "latest"
   "npm:@biomejs/biome"                         = "latest"
-  "npm:bun"                                    = "latest"
   "npm:promptfoo"                              = "latest"
   "npm:single-file-cli"                        = "latest"
   "pipx:basedpyright"                          = "latest"
@@ -34,11 +33,14 @@
   "pipx:sqlite-utils"                          = "latest"
   "pipx:ttok"                                  = "latest"
   "pipx:vastai"                                = "latest"
+  bun                                          = "latest"
+  deno                                         = "latest"
   go                                           = "latest"
   node                                         = "latest"
   python                                       = "3.13.1"
   rust                                         = "latest"
   uv                                           = "latest"
+zig = "latest"
 
 [settings]
   experimental                          = true
