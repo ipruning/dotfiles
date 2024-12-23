@@ -40,7 +40,7 @@
   python                                       = "3.13.1"
   rust                                         = "latest"
   uv                                           = "latest"
-zig = "latest"
+  zig                                          = "latest"
 
 [settings]
   experimental                          = true
