@@ -10,6 +10,7 @@
                 "rules": [
                     {
                         "description": "caps_lock → hyper",
+                        "enabled": false,
                         "manipulators": [
                             {
                                 "from": {
@@ -256,6 +257,14 @@
                             "to": [{ "key_code": "caps_lock" }]
                         }
                     ]
+                },
+                {
+                    "identifiers": {
+                        "is_keyboard": true,
+                        "product_id": 24926,
+                        "vendor_id": 7504
+                    },
+                    "ignore": true
                 }
             ],
             "fn_function_keys": [
