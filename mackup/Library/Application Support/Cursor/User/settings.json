@@ -9,9 +9,6 @@
     "editor.defaultFormatter": "ms-azuretools.vscode-docker"
   },
   "[html]": {
-    "editor.defaultFormatter": "vscode.html-language-features"
-  },
-  "[typescript]": {
     "editor.defaultFormatter": "denoland.vscode-deno"
   },
   "[json][jsonc]": {
@@ -60,6 +57,10 @@
     "editor.defaultFormatter": "charliermarsh.ruff",
     "editor.tabSize": 4
   },
+  "[typescript]": {
+    "editor.defaultFormatter": "denoland.vscode-deno"
+  },
+  "autocorrect.formatOnSave": false,
   "baml.bamlPanelOpen": false,
   "beancount.fixedCJKWidth": true,
   "beancount.mainBeanFile": "~/Databases/Ledger/main.bean",
@@ -97,7 +98,7 @@
   "editor.fontFamily": "'MonoLisa Nerd Font', 'Source Han Sans SC'",
   "editor.fontLigatures": "'zero' on, 'ss02' on, 'ss04' on, 'ss06' on, 'calt' off, 'liga' off",
   "editor.fontSize": 13,
-  "editor.formatOnSave": true,
+  "editor.formatOnSave": false,
   "editor.guides.bracketPairs": true,
   "editor.guides.bracketPairsHorizontal": "active",
   "editor.guides.highlightActiveIndentation": true,
@@ -283,7 +284,7 @@
   "python.analysis.inlayHints.variableTypes": false,
   "python.analysis.typeCheckingMode": "basic",
   "python.defaultInterpreterPath": "~/.conda/envs/ml/bin/python",
-  "python.languageServer": "Pylance",
+  "python.languageServer": "Default",
   "remote.SSH.connectTimeout": 1000,
   "ruff.configurationPreference": "filesystemFirst",
   "shellcheck.customArgs": [],
@@ -318,6 +319,7 @@
   },
   "shellcheck.run": "onType",
   "sqliteViewer.maxFileSize": 1024,
+  "svelte.enable-ts-plugin": true,
   "terminal.integrated.confirmOnExit": "hasChildProcesses",
   "terminal.integrated.defaultProfile.osx": "zsh",
   "terminal.integrated.fontFamily": "'MonoLisa Nerd Font'",
@@ -350,4 +352,5 @@
   "workbench.sideBar.location": "right",
   "workbench.tree.indent": 22,
   "workbench.tree.renderIndentGuides": "always",
+  "zig.zls.enabled": "on"
 }
