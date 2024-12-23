@@ -6,8 +6,8 @@
 start-at-login                                                  = true
 enable-normalization-flatten-containers                         = true
 enable-normalization-opposite-orientation-for-nested-containers = true
-accordion-padding                                               = 0
-default-root-container-layout                                   = 'tiles'
+accordion-padding                                               = 10
+default-root-container-layout                                   = 'accordion'
 default-root-container-orientation                              = 'auto'
 on-focused-monitor-changed                                      = []
 automatically-unhide-macos-hidden-apps                          = true
@@ -64,8 +64,9 @@ automatically-unhide-macos-hidden-apps                          = true
 
   alt-b = 'exec-and-forget open -a /Applications/Google\ Chrome.app'
   alt-c = 'exec-and-forget open -a /Applications/Cursor.app'
+  alt-f = 'exec-and-forget open -a /Applications/Lark.app'
   alt-t = 'exec-and-forget open -a /Applications/Alacritty.app'
-  alt-r = 'exec-and-forget open -a /Applications/Roam\ Research.app'
+  alt-w = 'exec-and-forget open -a /Applications/WeChat.app'
   alt-z = 'exec-and-forget open -a /Applications/Zed.app'
 
   alt-tab = 'workspace-back-and-forth'
@@ -163,8 +164,8 @@ automatically-unhide-macos-hidden-apps                          = true
 
 [[on-window-detected]]
   if.app-id = 'com.todesktop.230313mzl4w4u92'
-  run       = 'move-node-to-workspace 4'
+  run       = 'move-node-to-workspace 9'
 
 [[on-window-detected]]
-  if.app-id = 'dev.zed.Zed'
-  run       = 'move-node-to-workspace 4'
+  if.app-id = 'com.exafunction.windsurf'
+  run       = 'move-node-to-workspace 9'
