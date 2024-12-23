@@ -24,7 +24,6 @@ DaisyDisk
 Day One
 DeskPad
 Drafts
-Dropbox
 Eagle
 Eudic
 ExcalidrawZ
