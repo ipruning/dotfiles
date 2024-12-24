@@ -127,7 +127,7 @@ logioptionsplus
 pcsuite
 qBittorrent
 zoom.us
+夸克网盘
 小宇宙
 小红书
 集换社
-夸克网盘

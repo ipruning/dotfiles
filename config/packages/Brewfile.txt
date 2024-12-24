@@ -16,6 +16,7 @@ cyme
 dbus
 docker
 dra
+duckdb
 eget
 exiftool
 extra-cmake-modules
