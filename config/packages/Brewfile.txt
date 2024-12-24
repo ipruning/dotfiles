@@ -73,6 +73,7 @@ onefetch
 ouch
 pandoc-crossref
 platformio
+postgresql@17
 procs
 pueue
 python@3.11
@@ -85,6 +86,7 @@ screenpipe
 sd
 shellcheck
 smartmontools
+sqlfluff
 starship
 tealdeer
 tokei

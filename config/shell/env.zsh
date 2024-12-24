@@ -89,8 +89,8 @@ export FZF_DEFAULT_COMMAND="fd --ignore-file ~/.rgignore --hidden --follow --ign
 # 👇 Standard plugins can be found in $ZSH/plugins/
 # 👇 Custom plugins may be added to $ZSH_CUSTOM/plugins/
 #===============================================================================
-source "$ZSH_CUSTOM"/plugins/zsh-autosuggestions/zsh-autosuggestions.plugin.zsh
-source "$ZSH_CUSTOM"/plugins/ugit/ugit.plugin.zsh
+# source "$ZSH_CUSTOM"/plugins/zsh-autosuggestions/zsh-autosuggestions.plugin.zsh
+# source "$ZSH_CUSTOM"/plugins/ugit/ugit.plugin.zsh
 
 #===============================================================================
 # 👇 fzf-tab https://github.com/Aloxaf/fzf-tab/wiki/Configuration (fzf-tab needs to be loaded after compinit (oh-my-zsh.sh))
@@ -111,10 +111,10 @@ zstyle ':fzf-tab:*' fzf-pad 10
 # 👇 custom keybindings
 #===============================================================================
 # Option-F/B Emacs Motion
-bindkey "^F" forward-char
-bindkey "^B" backward-char
-bindkey "^P" up-line-or-history
-bindkey "^N" down-line-or-history
+# bindkey "^F" forward-char
+# bindkey "^B" backward-char
+# bindkey "^P" up-line-or-history
+# bindkey "^N" down-line-or-history
 # Option-Left
 bindkey "^[[1;3C" forward-word
 # Option-Right
@@ -123,7 +123,7 @@ bindkey "^[[1;3D" backward-word
 bindkey 'ç' fzf-cd-widget
 export FZF_ALT_C_COMMAND="fd --ignore-file ~/.rgignore --hidden --follow --ignore-case --type d"
 # Control-L accept zsh-autosuggestions https://github.com/zsh-users/zsh-autosuggestions#key-bindings (Using Control-F Instead)
-bindkey '^Y' autosuggest-accept
+# bindkey '^Y' autosuggest-accept
 # Control-T to fuzzily search for a file or directory in your home directory then insert its path at the cursor
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 # Control-I will be used to trigger completion fzf completion will use == as the trigger sequence instead of the default **

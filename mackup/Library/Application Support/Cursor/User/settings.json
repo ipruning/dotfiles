@@ -262,6 +262,7 @@
     "MD041": false,
     "MD045": false
   },
+  "sqlfluff.executablePath":"/opt/homebrew/bin/sqlfluff",
   "material-icon-theme.files.associations": {
     "*.autocorrectrc": "yaml",
     "*.log.*": "log",
