@@ -12,13 +12,11 @@ unset_proxy() {
 }
 
 #===============================================================================
-# 👇 GPG Signing
+# 👇 PostgreSQL
 #===============================================================================
-# if [ -r ~/.zshrc ]; then
-#   echo "export GPG_TTY=$(tty)" >>~/.zshrc
-# else
-#   echo "export GPG_TTY=$(tty)" >>~/.zprofile
-# fi
+export LDFLAGS="-L/opt/homebrew/opt/postgresql@17/lib"
+export CPPFLAGS="-I/opt/homebrew/opt/postgresql@17/include"
+export PATH="/opt/homebrew/opt/postgresql@17/bin:$PATH"
 
 #===============================================================================
 # 👇 zsh options https://stackoverflow.com/questions/30028730/how-to-prevent-execution-of-command-in-zsh
@@ -60,8 +58,8 @@ zellij_tab_name_update() {
   command nohup zellij action rename-tab $current_dir >/dev/null 2>&1
 }
 
-# zellij_tab_name_update
-# chpwd_functions+=(zellij_tab_name_update)
+zellij_tab_name_update
+chpwd_functions+=(zellij_tab_name_update)
 
 #===============================================================================
 # 👇 zsh Theme

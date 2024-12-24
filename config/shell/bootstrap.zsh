@@ -1,12 +1,3 @@
-#===============================================================================
-# 👇 zprof
-# 👇 在 ~/.zshrc 的头部加上这个，加载 profile 模块
-#===============================================================================
-# zmodload zsh/zprof
-
-#===============================================================================
-# TODO
-#===============================================================================
 SYSTEM_ARCH=$(uname -m)
 
 case "$OSTYPE" in
@@ -61,9 +52,6 @@ else
   compinit -C
 fi
 
-#===============================================================================
-# 👇 env
-#===============================================================================
 ZSH_CUSTOM=${ZSH_CUSTOM:-~/.oh-my-zsh/custom}
 
 case $SYSTEM_TYPE in
@@ -74,7 +62,7 @@ mac_arm64 | mac_x86_64 | linux_x86_64 | raspberry)
         "$HOME/dotfiles/config/shell/env.zsh"
         "$HOME/dotfiles/config/shell/env_private.zsh"
         "$HOME/dotfiles/config/shell/functions/ai.zsh"
-        "$HOME/dotfiles/config/shell/functions/roam.zsh"
+        "$HOME/dotfiles/config/shell/functions/db.zsh"
         "$HOME/dotfiles/config/shell/functions/misc.zsh"
         "$HOME/dotfiles/config/shell/aliases.zsh"
         "$HOME/dotfiles/config/shell/completions.zsh"
@@ -92,8 +80,3 @@ unknown)
 esac
 
 source "$ZSH_CUSTOM"/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-
-#===============================================================================
-# 👇 zprof
-#===============================================================================
-# zprof
