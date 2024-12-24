@@ -155,10 +155,6 @@ automatically-unhide-macos-hidden-apps                          = true
   run       = 'move-node-to-workspace 1'
 
 [[on-window-detected]]
-  if.app-id = 'com.electron.lark'
-  run       = 'move-node-to-workspace 2'
-
-[[on-window-detected]]
   if.app-id = 'com.tencent.xinWeChat'
   run       = 'move-node-to-workspace 2'
 
