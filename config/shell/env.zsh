@@ -47,19 +47,19 @@ if [[ "$__CFBundleIdentifier" == "org.alacritty" && "$TERM_PROGRAM" != "zed" && 
   fi
 fi
 
-zellij_tab_name_update() {
-  [[ -z $ZELLIJ ]] && return
+# zellij_pane_name_update() {
+#   [[ -z $ZELLIJ ]] && return
 
-  local current_dir=$PWD
-  case $current_dir in
-  $HOME) current_dir="~" ;;
-  *) current_dir=${current_dir##*/} ;;
-  esac
-  command nohup zellij action rename-tab $current_dir >/dev/null 2>&1
-}
+#   local current_dir=$PWD
+#   case $current_dir in
+#   $HOME) current_dir="~" ;;
+#   *) current_dir=${current_dir##*/} ;;
+#   esac
+#   command nohup zellij action rename-pane $current_dir >/dev/null 2>&1
+# }
 
-zellij_tab_name_update
-chpwd_functions+=(zellij_tab_name_update)
+# zellij_pane_name_update
+# chpwd_functions+=(zellij_pane_name_update)
 
 #===============================================================================
 # 👇 zsh Theme
@@ -82,8 +82,8 @@ zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
 #===============================================================================
 source <(fzf --zsh)
 
-export FZF_DEFAULT_OPTS="--height=100% --layout=reverse --info=inline --border --margin=1 --padding=1"
-export FZF_DEFAULT_COMMAND="fd --ignore-file ~/.rgignore --hidden --follow --ignore-case ."
+# export FZF_DEFAULT_OPTS="--height=100% --layout=reverse --info=inline -s-border --margin=1 --padding=1"
+# export FZF_DEFAULT_COMMAND="fd --ignore-file ~/.gitignore --hidden --follow --ignore-case ."
 
 #===============================================================================
 # 👇 Standard plugins can be found in $ZSH/plugins/
@@ -100,12 +100,12 @@ source "$ZSH_CUSTOM"/plugins/fzf-tab/fzf-tab.plugin.zsh
 #===============================================================================
 # 👇 fzf-tab config
 #===============================================================================
-zstyle ':completion:*:git-checkout:*' sort false
-zstyle ':completion:*:descriptions' format '[%d]'
-zstyle ':completion:*' menu no
-zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza --icons --all --oneline --ignore-glob=".DS_Store" $realpath'
-zstyle ':fzf-tab:*' switch-group '<' '>'
-zstyle ':fzf-tab:*' fzf-pad 10
+# zstyle ':completion:*:git-checkout:*' sort false
+# zstyle ':completion:*:descriptions' format '[%d]'
+# zstyle ':completion:*' menu no
+# zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza --icons --all --oneline --ignore-glob=".DS_Store" $realpath'
+# zstyle ':fzf-tab:*' switch-group '<' '>'
+# zstyle ':fzf-tab:*' fzf-pad 10
 
 #===============================================================================
 # 👇 custom keybindings
@@ -120,26 +120,28 @@ bindkey "^[[1;3C" forward-word
 # Option-Right
 bindkey "^[[1;3D" backward-word
 # Option-C 快速查找目录 fuzzily search for a directory in your home directory then cd into it
-bindkey 'ç' fzf-cd-widget
-export FZF_ALT_C_COMMAND="fd --ignore-file ~/.rgignore --hidden --follow --ignore-case --type d"
+# bindkey 'ç' fzf-cd-widget
+# export FZF_ALT_C_COMMAND="fd --ignore-file ~/.rgignore --hidden --follow --ignore-case --type d"
 # Control-L accept zsh-autosuggestions https://github.com/zsh-users/zsh-autosuggestions#key-bindings (Using Control-F Instead)
 # bindkey '^Y' autosuggest-accept
 # Control-T to fuzzily search for a file or directory in your home directory then insert its path at the cursor
-export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+# export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 # Control-I will be used to trigger completion fzf completion will use == as the trigger sequence instead of the default **
+export FZF_ALT_C_COMMAND=""
+export FZF_CTRL_T_COMMAND=""
 export FZF_COMPLETION_TRIGGER='jk'
-export FZF_COMPLETION_OPTS='--border --info=inline'
-_fzf_comprun() {
-  local command=$1
-  shift
-  case "$command" in
-  cd) fzf "$@" --preview 'tree -C {} | head -200' ;;
-  export | unset) fzf "$@" --preview "eval 'echo \$'{}" ;;
-  ssh) fzf "$@" --preview 'dig {}' ;;
-  *) fzf "$@" ;;
-  esac
-}
-
+# export FZF_COMPLETION_OPTS='--border --info=inline'
+# _fzf_comprun() {
+#   local command=$1
+#   shift
+#   case "$command" in
+#   cd) fzf "$@" --preview 'eza --icons --oneline --color=always --ignore-glob=".DS_Store" {}' ;;
+#   export | unset) fzf "$@" --preview "eval 'echo \$'{}" ;;
+#   ssh) fzf "$@" --preview 'dig {}' ;;
+#   z) fzf "$@" --preview 'eza --icons --oneline --color=always --ignore-glob=".DS_Store" {}' ;;
+#   *) fzf "$@" ;;
+#   esac
+# }
 #===============================================================================
 # 👇 Preferred editor for local and remote sessions
 #===============================================================================
