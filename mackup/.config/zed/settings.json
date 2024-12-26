@@ -1,42 +1,27 @@
 {
-  "show_inline_completions": true,
+  "outline_panel": {
+    "dock": "right"
+  },
+  "collaboration_panel": {
+    "dock": "right"
+  },
   "assistant": {
     "default_model": {
-      "model": "claude-3-5-sonnet-latest",
-      "provider": "zed.dev"
+      "provider": "zed.dev",
+      "model": "claude-3-5-sonnet-latest"
     },
     "dock": "left",
-    "provider": null,
     "version": "2"
   },
   "autosave": "on_focus_change",
   "buffer_font_family": "MonoLisa Nerd Font",
   "buffer_font_size": 13,
-  "chat_panel": {
-    "dock": "left"
-  },
-  "collaboration_panel": {
-    "dock": "left"
-  },
   "features": {
     "inline_completion_provider": "copilot"
   },
-  "file_scan_exclusions": [
-    "**/.git",
-    "**/.svn",
-    "**/.hg",
-    "**/CVS",
-    "**/.DS_Store",
-    "**/Thumbs.db",
-    "**/.classpath",
-    "**/.settings",
-    "**/vendor",
-    "**/.tmp*"
-  ],
   "format_on_save": "on",
   "indent_guides": {
-    "coloring": "indent_aware",
-    "enabled": true
+    "coloring": "indent_aware"
   },
   "inlay_hints": {
     "edit_debounce_ms": 700,
@@ -64,17 +49,9 @@
       "language_servers": ["basedpyright", "ruff"]
     }
   },
-  "notification_panel": {
-    "dock": "left"
-  },
-  "outline_panel": {
-    "dock": "right"
-  },
   "preferred_line_length": 120,
   "project_panel": {
-    "button": true,
-    "dock": "right",
-    "git_status": true
+    "dock": "right"
   },
   "relative_line_numbers": true,
   "restore_on_startup": "last_session",
@@ -86,30 +63,10 @@
     "selected_symbol": true,
     "show": "never"
   },
-  "search.exclude": {
-    "**/*.snap": true,
-    "**/.git": true,
-    "**/.github": false,
-    "**/.nuxt": true,
-    "**/.output": true,
-    "**/.pnpm": true,
-    "**/.vscode": true,
-    "**/.yarn": true,
-    "**/CHANGELOG*": true,
-    "**/LICENSE*": true,
-    "**/node_modules": true,
-    "**/out/**": true,
-    "**/package-lock.json": true,
-    "**/pnpm-lock.yaml": true,
-    "**/temp": true,
-    "**/yarn.lock": true
-  },
   "terminal": {
-    "copy_on_select": true,
     "env": {
       "EDITOR": "zed --wait"
-    },
-    "working_directory": "first_project_directory"
+    }
   },
   "theme": "Catppuccin Mocha - No Italics",
   "ui_font_size": 15,
