@@ -125,6 +125,4 @@
     bindings = [
         # Alacritty X Zellij 
         { key = "n", mods = "Command", chars = "\uE004" },
-        { key = "!", mods = "Control|Shift", chars = "\uE001" },
-        { key = "@", mods = "Control|Shift", chars = "\uE002" },
     ]
