@@ -1,30 +1,34 @@
 start-at-login                                                  = true
 enable-normalization-flatten-containers                         = true
 enable-normalization-opposite-orientation-for-nested-containers = true
-accordion-padding                                               = 10
+accordion-padding                                               = 20
 default-root-container-layout                                   = 'accordion'
 default-root-container-orientation                              = 'auto'
-on-focused-monitor-changed                                      = []
 automatically-unhide-macos-hidden-apps                          = true
 
 [key-mapping]
   preset = 'qwerty'
 
 [gaps]
-  inner.horizontal = 5
-  inner.vertical   = 5
-  outer.left       = 5
-  outer.bottom     = 5
-  outer.top        = 5
-  outer.right      = 5
+  inner.horizontal = 10
+  inner.vertical   = 10
+  outer.left       = 10
+  outer.bottom     = 10
+  outer.top        = 10
+  outer.right      = 10
 
 [mode.main.binding]
-  alt-space = 'mode move'
+  alt-w     = 'mode window'
   alt-slash = 'mode service'
   alt-g     = 'mode pass'
 
   alt-comma  = 'layout accordion horizontal vertical'
   alt-period = 'layout tiles horizontal vertical'
+
+  alt-b = 'exec-and-forget open -a /Applications/Google\ Chrome.app'
+  alt-c = 'exec-and-forget open -a /Applications/Cursor.app'
+  alt-t = 'exec-and-forget open -a /Applications/Alacritty.app'
+  alt-z = 'exec-and-forget open -a /Applications/Zed.app'
 
   alt-1 = 'workspace 1'
   alt-2 = 'workspace 2'
@@ -48,32 +52,21 @@ automatically-unhide-macos-hidden-apps                          = true
   alt-shift-9 = 'move-node-to-workspace 9'
   alt-shift-0 = 'move-node-to-workspace 10'
 
-  alt-h       = 'focus left --boundaries all-monitors-outer-frame'
-  alt-j       = 'focus down --boundaries all-monitors-outer-frame'
-  alt-k       = 'focus up --boundaries all-monitors-outer-frame'
-  alt-l       = 'focus right --boundaries all-monitors-outer-frame'
-  alt-shift-h = 'move left'
-  alt-shift-j = 'move down'
-  alt-shift-k = 'move up'
-  alt-shift-l = 'move right'
-
-  alt-b = 'exec-and-forget open -a /Applications/Google\ Chrome.app'
-  alt-c = 'exec-and-forget open -a /Applications/Cursor.app'
-  alt-f = 'exec-and-forget open -a /Applications/Lark.app'
-  alt-t = 'exec-and-forget open -a /Applications/Alacritty.app'
-  alt-w = 'exec-and-forget open -a /Applications/WeChat.app'
-  alt-z = 'exec-and-forget open -a /Applications/Zed.app'
+  alt-h = 'focus left --boundaries all-monitors-outer-frame'
+  alt-j = 'focus down --boundaries all-monitors-outer-frame'
+  alt-k = 'focus up --boundaries all-monitors-outer-frame'
+  alt-l = 'focus right --boundaries all-monitors-outer-frame'
 
   alt-tab = 'workspace-back-and-forth'
 
-  cmd-h     = []
-  cmd-alt-h = []
+  cmd-m = []
+  cmd-h = []
 
 [mode.pass.binding]
   alt-g = 'mode main'
 
-[mode.move.binding]
-  alt-space = 'mode main'
+[mode.window.binding]
+  esc = 'mode main'
 
   h       = 'move left'
   j       = 'move down'
@@ -83,11 +76,10 @@ automatically-unhide-macos-hidden-apps                          = true
   shift-j = "move-node-to-monitor down"
   shift-k = "move-node-to-monitor up"
   shift-l = "move-node-to-monitor right"
-
-  alt-h = ['join-with left', 'mode main']
-  alt-j = ['join-with down', 'mode main']
-  alt-k = ['join-with up', 'mode main']
-  alt-l = ['join-with right', 'mode main']
+  alt-h   = ['join-with left', 'mode main']
+  alt-j   = ['join-with down', 'mode main']
+  alt-k   = ['join-with up', 'mode main']
+  alt-l   = ['join-with right', 'mode main']
 
   minus = 'resize smart -50'
   equal = 'resize smart +50'
@@ -101,17 +93,18 @@ automatically-unhide-macos-hidden-apps                          = true
   7 = ['move-node-to-workspace 7', 'mode main']
   8 = ['move-node-to-workspace 8', 'mode main']
   9 = ['move-node-to-workspace 9', 'mode main']
-  0 = ['move-node-to-workspace 10', 'mode main']
+  0 = ['move-node-to-workspace 11', 'mode main']
 
-[mode.service.binding]
-  esc = 'mode main'
-
-  cmd-r     = ['reload-config', 'mode main']
   r         = ['flatten-workspace-tree', 'mode main']
   backspace = ['close-all-windows-but-current', 'mode main']
 
   f       = ['layout floating tiling', 'mode main']
   shift-f = ['fullscreen', 'mode main']
+
+[mode.service.binding]
+  esc = 'mode main'
+
+  cmd-r = ['reload-config', 'mode main']
 
 [[on-window-detected]]
   if.app-id = 'com.xingin.discover'
