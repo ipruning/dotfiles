@@ -14,7 +14,8 @@
     "version": "2"
   },
   "autosave": "on_focus_change",
-  "buffer_font_family": "MonoLisa Nerd Font",
+  "buffer_font_family": "MonoLisa",
+  "buffer_font_fallbacks": ["JetBrainsMono Nerd Font"],
   "buffer_font_size": 13,
   "features": {
     "inline_completion_provider": "copilot"
@@ -68,7 +69,7 @@
       "EDITOR": "zed --wait"
     }
   },
-  "theme": "Catppuccin Mocha - No Italics",
+  "theme": "Catppuccin Mocha",
   "ui_font_size": 15,
   "vim_mode": true
 }
