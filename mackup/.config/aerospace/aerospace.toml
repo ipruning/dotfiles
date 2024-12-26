@@ -3,7 +3,7 @@ enable-normalization-flatten-containers                         = true
 enable-normalization-opposite-orientation-for-nested-containers = true
 accordion-padding                                               = 20
 default-root-container-layout                                   = 'accordion'
-default-root-container-orientation                              = 'auto'
+default-root-container-orientation                              = 'vertical'
 automatically-unhide-macos-hidden-apps                          = true
 
 [key-mapping]
