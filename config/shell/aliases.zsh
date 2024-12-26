@@ -16,33 +16,23 @@ esac
 alias ..='cd ..'
 alias ...='cd ../..'
 
-alias cpi='cp -i'
-alias mvi='mv -i'
-alias rmi='rm -i'
-
 alias l='eza --icons --oneline'
 alias la='eza --icons --all --oneline'
 alias ll='eza --icons --long --git --time-style=long-iso'
 alias lla='eza --icons --long --all --git --time-style=long-iso'
 alias lt='eza --icons --long --all --git --time-style=long-iso --tree --level=3'
 
-alias cpwd='printf "%q\n" "$(pwd)" | pbcopy'
-alias ehost='${=EDITOR} /etc/hosts'
-alias ezshrc='${=EDITOR} ~/.zshrc'
 alias szshrc='source ~/.zshrc'
+
 alias v='nvim'
+
 alias ip='curl -4 ip.sb'
 alias ipv6='curl -6 ip.sb'
 
 #===============================================================================
 # 👇
 #===============================================================================
-g-i() {
-  git init
-  git commit --allow-empty -m "init"
-}
-
-g-sync() {
+gh-sync-fork() {
   gh repo list --fork --visibility public --json owner,name | jq -r 'map(.owner.login + "/" + .name) | .[]' | xargs -t -L1 gh repo sync
 }
 
