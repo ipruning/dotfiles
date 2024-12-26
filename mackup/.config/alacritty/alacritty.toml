@@ -81,19 +81,19 @@
     size = 13
 
 [font.bold]
-    family = "MonoLisa Nerd Font"
+    family = "MonoLisa"
     style  = "Bold ltalic"
 
 [font.bold_italic]
-    family = "MonoLisa Nerd Font"
+    family = "MonoLisa"
     style  = "Bold Italic"
 
 [font.italic]
-    family = "MonoLisa Nerd Font"
+    family = "MonoLisa"
     style  = "Bold ltalic"
 
 [font.normal]
-    family = "MonoLisa Nerd Font"
+    family = "MonoLisa"
     style  = "Regular"
 
 [scrolling]
