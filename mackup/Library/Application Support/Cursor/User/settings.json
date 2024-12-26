@@ -98,7 +98,7 @@
   "editor.fontFamily": "'MonoLisa Nerd Font', 'Source Han Sans SC'",
   "editor.fontLigatures": "'zero' on, 'ss02' on, 'ss04' on, 'ss06' on, 'calt' off, 'liga' off",
   "editor.fontSize": 13,
-  "editor.formatOnSave": false,
+  "editor.formatOnSave": true,
   "editor.guides.bracketPairs": true,
   "editor.guides.bracketPairsHorizontal": "active",
   "editor.guides.highlightActiveIndentation": true,
