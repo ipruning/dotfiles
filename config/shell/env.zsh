@@ -1,6 +1,13 @@
 #===============================================================================
 # 👇 Proxy Configuration
 #===============================================================================
+if [[ -n $GHOSTTY_RESOURCES_DIR ]]; then
+  source "$GHOSTTY_RESOURCES_DIR"/shell-integration/zsh/ghostty-integration
+fi
+
+#===============================================================================
+# 👇 Proxy Configuration
+#===============================================================================
 set_proxy() {
   export https_proxy=http://127.0.0.1:6152
   export http_proxy=http://127.0.0.1:6152
@@ -32,20 +39,20 @@ setopt interactivecomments
 #===============================================================================
 # 👇 Initialize zellij when running in Alacritty and not in Zed
 #===============================================================================
-if [[ "$__CFBundleIdentifier" == "org.alacritty" && "$TERM_PROGRAM" != "zed" && -z "$ZELLIJ" ]]; then
-  if ! command -v zellij >/dev/null 2>&1; then
-    echo "Zellij is not installed. Please install it first."
-    return
-  fi
+# if [[ ("$__CFBundleIdentifier" == "org.alacritty" || "$__CFBundleIdentifier" == "com.mitchellh.ghostty") && "$TERM_PROGRAM" != "zed" && -z "$ZELLIJ" ]]; then
+#   if ! command -v zellij >/dev/null 2>&1; then
+#     echo "Zellij is not installed. Please install it first."
+#     return
+#   fi
 
-  active_sessions=$(zellij list-sessions --no-formatting | grep -v "EXITED" || true)
-  if [[ -z "$active_sessions" ]]; then
-    zellij
-  else
-    first_session=$(echo "$active_sessions" | head -n 1 | awk '{print $1}')
-    zellij attach "$first_session"
-  fi
-fi
+#   active_sessions=$(zellij list-sessions --no-formatting | grep -v "EXITED" || true)
+#   if [[ -z "$active_sessions" ]]; then
+#     zellij
+#   else
+#     first_session=$(echo "$active_sessions" | head -n 1 | awk '{print $1}')
+#     zellij attach "$first_session"
+#   fi
+# fi
 
 # zellij_pane_name_update() {
 #   [[ -z $ZELLIJ ]] && return
