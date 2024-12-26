@@ -198,6 +198,7 @@ keybinds clear-defaults=true {
         bind "Alt ]" { NextSwapLayout; }
 
         bind "Alt n" { NewPane; }
+        bind "Alt N" { NewTab; }
         bind "Alt f" { ToggleFloatingPanes; }
 
         bind "Alt h" { MoveFocusOrTab "Left"; }
