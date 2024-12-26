@@ -5,7 +5,7 @@ settings.focusFirstCandidate = true;
 settings.tabsThreshold = 0;
 
 api.Hints.style(`
-  font-family: MonoLisa Nerd Font;
+  font-family: SF Mono, monospace;
 `);
 settings.theme = `
 .sk_theme #sk_omnibarSearchArea input, #sk_omnibarSearchResult {
@@ -82,7 +82,7 @@ api.mapkey('gO', 'Open URL in clipboard in new tab', () => api.Clipboard.read((r
 }));
 
 // Timeout durations for PassThrough mode
-const TIMEOUT_SHORT_MS = 1000;
+const TIMEOUT_SHORT_MS = 1500;
 const TIMEOUT_LONG_MS = 300000;
 
 api.mapkey('p', 'Enter PassThrough mode', () => {
