@@ -178,7 +178,6 @@ keybinds clear-defaults=true {
                 root_dirs "/Users/alex/Developer/github;/Users/alex/Developer/ipruning.com;/Users/alex/Developer/jihuanshe.com;/Users/alex/Developer/qkvlab.com"
                 session_layout "compact"
             }
-            // SwitchToMode "Locked"
         }
 
         bind "Ctrl j" {
@@ -192,7 +191,7 @@ keybinds clear-defaults=true {
         bind "Alt i" { MoveTab "Left"; }
         bind "Alt o" { MoveTab "Right"; }
 
-        bind "Alt +" { Resize "Increase"; }
+        bind "Alt =" { Resize "Increase"; }
         bind "Alt -" { Resize "Decrease"; }
 
         bind "Alt [" { PreviousSwapLayout; }
@@ -201,20 +200,13 @@ keybinds clear-defaults=true {
         bind "Alt n" { NewPane; }
         bind "Alt f" { ToggleFloatingPanes; }
 
-        // Alacritty X Zellij
         bind "Alt h" { MoveFocusOrTab "Left"; }
         bind "Alt j" { MoveFocus "Down"; }
         bind "Alt k" { MoveFocus "Up"; }
         bind "Alt l" { MoveFocusOrTab "Right"; }
 
         // Alacritty X Zellij
-        bind "" { NewPane; }
-        bind "" { Run "gitu" {
-            direction "Right"
-        }; }
-        bind "" { Run "git" "diff" {
-            direction "Right"
-        }; }
+        bind "" { NewTab; }
     }
 }
 
