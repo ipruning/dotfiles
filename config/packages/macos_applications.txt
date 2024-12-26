@@ -10,6 +10,7 @@ Anki
 Apparency
 Avenue
 BaiduNetdisk_mac
+Balatro
 BetterDisplay
 Blackmagic Disk Speed Test
 Blender

@@ -39,10 +39,10 @@ glow
 goaccess
 graphviz
 grex
-halp
 harlequin
 hdf5
 htop
+httm
 httpie
 hugo
 hurl
@@ -85,6 +85,7 @@ scc
 screenpipe
 sd
 shellcheck
+sk
 smartmontools
 sqlfluff
 starship
