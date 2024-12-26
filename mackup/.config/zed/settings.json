@@ -19,7 +19,7 @@
   "features": {
     "inline_completion_provider": "copilot"
   },
-  "format_on_save": "on",
+  "format_on_save": "off",
   "indent_guides": {
     "coloring": "indent_aware"
   },
