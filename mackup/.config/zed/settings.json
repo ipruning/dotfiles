@@ -7,12 +7,16 @@
     "dock": "left",
     "version": "2"
   },
+  "auto_install_extensions": {
+    "basedpyright": true,
+    "catppuccin": true,
+    "ruff": true,
+    "typos": true
+  },
   "autosave": "on_focus_change",
-  "buffer_font_fallbacks": [
-    "JetBrainsMono Nerd Font"
-  ],
+  "buffer_font_fallbacks": ["JetBrainsMono Nerd Font"],
   "buffer_font_family": "MonoLisa",
-  "buffer_font_size": 14,
+  "buffer_font_size": 13,
   "chat_panel": {
     "dock": "right"
   },
@@ -23,17 +27,12 @@
   "features": {
     "inline_completion_provider": "copilot"
   },
-  "format_on_save": "off",
-  "indent_guides": {
-    "coloring": "indent_aware"
+  "file_finder": {
+    "modal_max_width": "medium"
   },
-  "inlay_hints": {
-    "edit_debounce_ms": 700,
-    "enabled": true,
-    "scroll_debounce_ms": 50,
-    "show_other_hints": true,
-    "show_parameter_hints": true,
-    "show_type_hints": true
+  "indent_guides": {
+    "coloring": "indent_aware",
+    "enabled": true
   },
   "languages": {
     "Python": {
@@ -50,10 +49,12 @@
           }
         }
       ],
-      "language_servers": [
-        "basedpyright",
-        "ruff"
-      ]
+      "indent_guides": {
+        "background_coloring": "indent_aware",
+        "coloring": "indent_aware",
+        "enabled": true
+      },
+      "language_servers": ["basedpyright", "ruff"]
     }
   },
   "outline_panel": {
@@ -66,12 +67,11 @@
   "relative_line_numbers": true,
   "restore_on_startup": "last_session",
   "scrollbar": {
-    "cursors": true,
-    "diagnostics": true,
-    "git_diff": true,
-    "search_results": true,
-    "selected_symbol": true,
     "show": "never"
+  },
+  "tabs": {
+    "file_icons": true,
+    "git_status": true
   },
   "terminal": {
     "env": {
