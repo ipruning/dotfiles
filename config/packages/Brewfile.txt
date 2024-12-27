@@ -89,6 +89,7 @@ smartmontools
 sqlfluff
 starship
 tealdeer
+tmux
 tokei
 tursodatabase/tap/turso
 typos-cli
