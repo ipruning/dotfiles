@@ -1,8 +1,26 @@
-font-family = "MonoLisa"
-font-family = "JetBrainsMono Nerd Font"
-font-style = "SemiBold"
-font-size = 13
+font-family = MonoLisa
+font-family = JetBrainsMono Nerd Font
+font-size = 14
+font-style = Medium
+
 theme = catppuccin-mocha
-cursor-style = block
-cursor-style-blink = false
-shell-integration-features = no-cursor
+window-padding-x = 8, 8
+
+keybind = ctrl+s>0=goto_tab:10
+keybind = ctrl+s>1=goto_tab:1
+keybind = ctrl+s>2=goto_tab:2
+keybind = ctrl+s>3=goto_tab:3
+keybind = ctrl+s>4=goto_tab:4
+keybind = ctrl+s>5=goto_tab:5
+keybind = ctrl+s>6=goto_tab:6
+keybind = ctrl+s>7=goto_tab:7
+keybind = ctrl+s>8=goto_tab:8
+keybind = ctrl+s>9=goto_tab:9
+keybind = ctrl+s>comma=move_tab:-1
+keybind = ctrl+s>e=write_scrollback_file:open
+keybind = ctrl+s>h=previous_tab
+keybind = ctrl+s>l=next_tab
+keybind = ctrl+s>left=new_split:left
+keybind = ctrl+s>n=new_tab
+keybind = ctrl+s>period=move_tab:+1
+keybind = ctrl+s>right=new_split:right
