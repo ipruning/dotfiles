@@ -1,10 +1,18 @@
 font-family = MonoLisa
 font-family = JetBrainsMono Nerd Font
-font-size = 14
+font-size = 15
 font-style = Medium
+
+shell-integration-features = no-cursor
+cursor-style = block
+cursor-style-blink = false
 
 theme = catppuccin-mocha
 window-padding-x = 8, 8
+
+keybind = cmd+t=new_split:right
+keybind = cmd+n=new_split:right
+keybind = cmd+N=new_window
 
 keybind = ctrl+s>0=goto_tab:10
 keybind = ctrl+s>1=goto_tab:1
@@ -17,10 +25,13 @@ keybind = ctrl+s>7=goto_tab:7
 keybind = ctrl+s>8=goto_tab:8
 keybind = ctrl+s>9=goto_tab:9
 keybind = ctrl+s>comma=move_tab:-1
-keybind = ctrl+s>e=write_scrollback_file:open
-keybind = ctrl+s>h=previous_tab
-keybind = ctrl+s>l=next_tab
-keybind = ctrl+s>left=new_split:left
-keybind = ctrl+s>n=new_tab
 keybind = ctrl+s>period=move_tab:+1
+
+keybind = ctrl+s>h=goto_split:left
+keybind = ctrl+s>l=goto_split:right
+keybind = ctrl+s>left=new_split:left
 keybind = ctrl+s>right=new_split:right
+
+keybind = ctrl+s>e=write_screen_file:open
+
+keybind = global:alt+t=toggle_quick_terminal
