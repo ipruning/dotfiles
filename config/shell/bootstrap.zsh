@@ -52,8 +52,6 @@ else
   compinit -C
 fi
 
-ZSH_CUSTOM=${ZSH_CUSTOM:-~/.oh-my-zsh/custom}
-
 case $SYSTEM_TYPE in
 mac_arm64 | mac_x86_64 | linux_x86_64 | raspberry)
   if [ -n "$BASH_VERSION" ] || [ -n "$ZSH_VERSION" ]; then
@@ -78,5 +76,3 @@ unknown)
   echo "${RED}Unsupported system architecture.${NORMAL}"
   ;;
 esac
-
-source "$ZSH_CUSTOM"/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh

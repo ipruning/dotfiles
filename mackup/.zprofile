@@ -1,6 +1,3 @@
-#===============================================================================
-# 👇 Setup System Type
-#===============================================================================
 detect_system() {
   SYSTEM_ARCH=$(uname -m)
   SYSTEM_TYPE="unknown"
@@ -30,9 +27,6 @@ detect_system() {
 
 detect_system
 
-#===============================================================================
-# 👇 Eval Homebrew Shellenv
-#===============================================================================
 case $SYSTEM_TYPE in
 mac_arm64)
   eval "$(/opt/homebrew/bin/brew shellenv)"
@@ -47,10 +41,3 @@ unknown)
   echo "${RED}Unsupported system architecture.${NORMAL}"
   ;;
 esac
-
-#===============================================================================
-# 👇 export homebrew & pipx & other binaries
-#===============================================================================
-export PATH="$HOME/.local/bin:$PATH"
-export PATH="$HOME/.modular/bin:$PATH"
-export PATH="$HOME/dotfiles/bin:$PATH"
