@@ -35,13 +35,13 @@
       "shift-n": ["workspace::SendKeystrokes", "ctrl-alt-shift-n z z"]
     }
   },
-  // {
-  //   "context": "Editor && (vim_mode == normal || vim_mode == visual) && !VimWaiting && !menu",
-  //   "bindings": {
-  //     "tab": "editor::Indent",
-  //     "shift-tab": "editor::TabPrev"
-  //   }
-  // },
+  {
+    "context": "Editor && (vim_mode == normal || vim_mode == visual) && !VimWaiting && !menu",
+    "bindings": {
+      "tab": "editor::Indent",
+      "shift-tab": "editor::TabPrev"
+    }
+  },
   {
     "context": "Editor && (vim_mode == normal || vim_mode == visual) && !VimWaiting && !menu",
     "bindings": {
@@ -66,43 +66,23 @@
       "space g u": ["task::Spawn", { "task_name": "gitu", "reveal_target": "center" }],
       "space a": "assistant::ToggleFocus",
       "space e": "pane::RevealInProjectPanel",
-      "space c t": ["workspace::SendKeystrokes", ": new center terminal enter"]
+      "space c t": ["workspace::SendKeystrokes", ": new center terminal enter"],
+
+      "space x x": "diagnostics::Deploy"
     }
   },
   {
     "context": "Editor && vim_mode == normal && !VimWaiting && !menu",
     "bindings": {
-      "g r": "editor::Rename"
-      //     "g d": "editor::GoToDefinition",
-      //     "g D": "editor::GoToDefinitionSplit",
-      //     "g i": "editor::GoToImplementation",
-      //     "g I": "editor::GoToImplementationSplit",
-      //     "g t": "editor::GoToTypeDefinition",
-      //     "g T": "editor::GoToTypeDefinitionSplit",
-      //     "g r": "editor::FindAllReferences",
-      //     "] d": "editor::GoToDiagnostic",
-      //     "[ d": "editor::GoToPrevDiagnostic",
-      //     // TODO: Go to next/prev error
-      //     "] e": "editor::GoToDiagnostic",
-      //     "[ e": "editor::GoToPrevDiagnostic",
-      //     // Symbol search
-      //     // Diagnostic
-      //     "space x x": "diagnostics::Deploy",
-      //     // +Git
-      //     // Git prev/next hunk
-      //     "] h": "editor::GoToHunk",
-      //     "[ h": "editor::GoToPrevHunk",
-      //     // TODO: git diff is not ready yet, refer https://github.com/zed-industries/zed/issues/8665#issuecomment-2194000497
-      //     // + Buffers
-      //     // Switch between buffers
-      //     "shift-h": "pane::ActivatePrevItem",
-      //     "shift-l": "pane::ActivateNextItem",
-      //     // Close active panel
-      //     "shift-q": "pane::CloseActiveItem",
-      //     "ctrl-q": "pane::CloseActiveItem",
-      //     "space b d": "pane::CloseActiveItem",
-      //     // Close other items
-      //     "space b o": "pane::CloseInactiveItems",
+      "g d": "editor::GoToDefinition",
+      "g D": "editor::GoToDefinitionSplit",
+      "g i": "editor::GoToImplementation",
+      "g I": "editor::GoToImplementationSplit",
+      "g t": "editor::GoToTypeDefinition",
+      "g T": "editor::GoToTypeDefinitionSplit",
+      "g r": "editor::FindAllReferences",
+      "shift-h": "pane::ActivatePrevItem",
+      "shift-l": "pane::ActivateNextItem"
     }
   },
   {
