@@ -3,7 +3,6 @@
 A Better Finder Attributes 7
 AdGuard for Safari
 AeroSpace
-Alacritty
 Alfred 5
 AltTab
 Anki
@@ -120,6 +119,7 @@ Xcodes
 YACReader
 YACReaderLibrary
 Z-Library
+Zed Preview
 Zed
 Zotero
 calibre
