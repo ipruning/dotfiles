@@ -96,8 +96,7 @@
   "editor.cursorBlinking": "phase",
   "editor.cursorSmoothCaretAnimation": "on",
   "editor.fontFamily": "'MonoLisa', 'JetBrainsMono Nerd Font', 'Source Han Sans SC'",
-  "editor.fontLigatures": "'zero' on, 'ss02' on, 'ss04' on, 'ss06' on, 'calt' off, 'liga' off",
-  "editor.fontSize": 13,
+  "editor.fontSize": 14,
   "editor.formatOnSave": true,
   "editor.guides.bracketPairs": true,
   "editor.guides.bracketPairsHorizontal": "active",
@@ -322,7 +321,7 @@
   "terminal.integrated.confirmOnExit": "hasChildProcesses",
   "terminal.integrated.defaultProfile.osx": "zsh",
   "terminal.integrated.fontFamily": "'MonoLisa', 'JetBrainsMono Nerd Font'",
-  "terminal.integrated.fontSize": 13,
+  "terminal.integrated.fontSize": 14,
   "terminal.integrated.inheritEnv": true,
   "todo-tree.general.tags": [
     "TODO"
