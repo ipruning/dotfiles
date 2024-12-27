@@ -3,8 +3,8 @@
     "context": "Terminal",
     "bindings": {
       "ctrl-s e": "terminal::ToggleViMode",
-      "ctrl-n": "workspace::NewTerminal",
-      "ctrl-shift-n": "pane::SplitRight"
+      "ctrl-n": "pane::SplitRight",
+      "ctrl-shift-n": "workspace::NewTerminal"
     }
   },
   {
@@ -63,24 +63,18 @@
       "space p": "projects::OpenRecent",
       "space shift-p": "projects::OpenRemote",
       "space g b": "branches::OpenRecent",
+
       "space g u": ["task::Spawn", { "task_name": "gitu", "reveal_target": "center" }],
       "space a": "assistant::ToggleFocus",
       "space e": "pane::RevealInProjectPanel",
       "space c t": ["workspace::SendKeystrokes", ": new center terminal enter"],
 
-      "space x x": "diagnostics::Deploy"
+      "space x": "diagnostics::Deploy"
     }
   },
   {
     "context": "Editor && vim_mode == normal && !VimWaiting && !menu",
     "bindings": {
-      "g d": "editor::GoToDefinition",
-      "g D": "editor::GoToDefinitionSplit",
-      "g i": "editor::GoToImplementation",
-      "g I": "editor::GoToImplementationSplit",
-      "g t": "editor::GoToTypeDefinition",
-      "g T": "editor::GoToTypeDefinitionSplit",
-      "g r": "editor::FindAllReferences",
       "shift-h": "pane::ActivatePrevItem",
       "shift-l": "pane::ActivateNextItem"
     }
@@ -90,12 +84,7 @@
     "bindings": {
       "space space": "file_finder::Toggle",
       "space p": "projects::OpenRecent",
-      "space shift-p": "projects::OpenRemote",
-      "space g b": "branches::OpenRecent",
-      "space g u": ["task::Spawn", { "task_name": "gitu", "reveal_target": "center" }],
-      "space a": "assistant::ToggleFocus",
-      "space e": "pane::RevealInProjectPanel",
-      "space c t": ["workspace::SendKeystrokes", ": new center terminal enter"]
+      "space shift-p": "projects::OpenRemote"
     }
   },
   {
@@ -121,6 +110,9 @@
     "bindings": {
       "a": "project_panel::NewFile",
       "shift-a": "project_panel::NewDirectory",
+
+      "o": "project_panel::RevealInFileManager",
+
       "r": "project_panel::Rename",
       "d": "project_panel::Delete",
       "x": "project_panel::Cut",
