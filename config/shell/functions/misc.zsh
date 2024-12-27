@@ -53,25 +53,25 @@
 #===============================================================================
 # 👇 zellij
 #===============================================================================
-# zj() {
-#   local session=""
+zj() {
+  local session=""
 
-#   if [[ $# -eq 1 ]]; then
-#     session="$1"
-#   else
-#     session=$(zellij list-sessions --no-formatting | awk '{
-#           session_name=$1; $1="";
-#           if ($0 ~ /EXITED/) print "\033[31m" session_name "\033[0m\t" $0;
-#           else print "\033[32m" session_name "\033[0m\t" $0;
-#       }' | column -t -s $'\t' | fzf --ansi --exit-0 --header="Select a session to attach (or press Esc to create new):" | awk '{print $1}')
-#   fi
+  if [[ $# -eq 1 ]]; then
+    session="$1"
+  else
+    session=$(zellij list-sessions --no-formatting | awk '{
+          session_name=$1; $1="";
+          if ($0 ~ /EXITED/) print "\033[31m" session_name "\033[0m\t" $0;
+          else print "\033[32m" session_name "\033[0m\t" $0;
+      }' | column -t -s $'\t' | fzf --ansi --exit-0 --header="Select a session to attach (or press Esc to create new):" | awk '{print $1}')
+  fi
 
-#   if [[ -n "$session" ]]; then
-#     zellij attach "$session"
-#   else
-#     echo "No session selected"
-#   fi
-# }
+  if [[ -n "$session" ]]; then
+    zellij attach "$session"
+  else
+    echo "No session selected"
+  fi
+}
 
 #===============================================================================
 # 👇 cd
