@@ -35,27 +35,48 @@
       "shift-n": ["workspace::SendKeystrokes", "ctrl-alt-shift-n z z"]
     }
   },
+  // {
+  //   "context": "Editor && (vim_mode == normal || vim_mode == visual) && !VimWaiting && !menu",
+  //   "bindings": {
+  //     "tab": "editor::Indent",
+  //     "shift-tab": "editor::TabPrev"
+  //   }
+  // },
   {
     "context": "Editor && (vim_mode == normal || vim_mode == visual) && !VimWaiting && !menu",
     "bindings": {
-      "space o t": ["workspace::SendKeystrokes", ": new center terminal enter"],
-      "space o g": ["task::Spawn", { "task_name": "start lazygit", "reveal_target": "center" }],
-      "space n": "task::Spawn",
-      "space shift-n": "task::Rerun",
-      "space m p": "markdown::OpenPreview",
-      "space m shift-p": "markdown::OpenPreviewToTheSide",
+      "space 1": ["pane::ActivateItem", 0],
+      "space 2": ["pane::ActivateItem", 1],
+      "space 3": ["pane::ActivateItem", 2],
+      "space 4": ["pane::ActivateItem", 3],
+      "space 5": ["pane::ActivateItem", 4],
+      "space 6": ["pane::ActivateItem", 5],
+      "space 7": ["pane::ActivateItem", 6],
+      "space 8": ["pane::ActivateItem", 7],
+      "space 9": ["pane::ActivateItem", 8],
+      "space 0": "pane::ActivateLastItem",
+
+      "space t r": "task::Rerun",
+      "space t s": "task::Spawn",
+
       "space f f": "file_finder::Toggle",
-      "space f p": "projects::OpenRecent",
+      "space f o": "projects::OpenRecent",
+      "space f r": "projects::OpenRemote",
+      "space f b": "branches::OpenRecent",
+
       "space a": "assistant::ToggleFocus",
+
       "space c f": "editor::Format",
-      "space c a": "editor::ToggleCodeActions",
-      "space c r": "editor::Rename",
-      "space e": "pane::RevealInProjectPanel"
+      "space e": "pane::RevealInProjectPanel",
+
+      "space c t": ["workspace::SendKeystrokes", ": new center terminal enter"],
+      "space l g": ["task::Spawn", { "task_name": "lazygit", "reveal_target": "center" }],
     }
   },
   {
     "context": "Editor && vim_mode == normal && !VimWaiting && !menu",
     "bindings": {
+      "g r": "editor::Rename",
       //     "g d": "editor::GoToDefinition",
       //     "g D": "editor::GoToDefinitionSplit",
       //     "g i": "editor::GoToImplementation",
@@ -69,8 +90,6 @@
       //     "] e": "editor::GoToDiagnostic",
       //     "[ e": "editor::GoToPrevDiagnostic",
       //     // Symbol search
-      "s s": "outline::Toggle",
-      "s shift-s": "project_symbols::Toggle"
       //     // Diagnostic
       //     "space x x": "diagnostics::Deploy",
       //     // +Git
@@ -94,7 +113,7 @@
     "context": "EmptyPane || SharedScreen",
     "bindings": {
       "space f f": "file_finder::Toggle",
-      "space f p": "projects::OpenRecent"
+      "space f o": "projects::OpenRecent"
     }
   },
   {
@@ -109,22 +128,6 @@
       "j k": "vim::NormalBefore"
     }
   },
-  // // Rename
-  // {
-  //   "context": "Editor && vim_operator == c",
-  //   "bindings": {
-  //     "c": "vim::CurrentLine",
-  //     "r": "editor::Rename" // zed specific
-  //   }
-  // },
-  // // Code Action
-  // {
-  //   "context": "Editor && vim_operator == c",
-  //   "bindings": {
-  //     "c": "vim::CurrentLine",
-  //     "a": "editor::ToggleCodeActions" // zed specific
-  //   }
-  // },
   {
     "context": "ProjectPanel || OutlinePanel || CollabPanel || ChatPanel",
     "bindings": {
@@ -143,43 +146,4 @@
       "p": "project_panel::Paste"
     }
   }
-  // // Panel navigation
-  // {
-  //   "context": "Dock",
-  //   "bindings": {
-  //     "ctrl-w h": ["workspace::ActivatePaneInDirection", "Left"],
-  //     "ctrl-w l": ["workspace::ActivatePaneInDirection", "Right"],
-  //     "ctrl-w k": ["workspace::ActivatePaneInDirection", "Up"],
-  //     "ctrl-w j": ["workspace::ActivatePaneInDirection", "Down"]
-  //   }
-  // },
-  // {
-  //   "context": "Workspace",
-  //   "bindings": {
-  //     // Map VSCode like keybindings
-  //     "cmd-b": "workspace::ToggleRightDock"
-  //   }
-  // },
-  // // Run nearest task
-  // {
-  //   "context": "EmptyPane || SharedScreen || vim_mode == normal",
-  //   "bindings": {
-  //     "space r t": [
-  //       "editor::SpawnNearestTask",
-  //       {
-  //         "reveal": "no_focus"
-  //       }
-  //     ]
-  //   }
-  // }
-  // // Subword motion is not working really nice with `ciw`, disable for now
-  // // {
-  // //   "context": "VimControl && !menu",
-  // //   "bindings": {
-  // //     "w": "vim::NextSubwordStart",
-  // //     "b": "vim::PreviousSubwordStart",
-  // //     "e": "vim::NextSubwordEnd",
-  // //     "g e": "vim::PreviousSubwordEnd"
-  // //   }
-  // // }
 ]
