@@ -8,6 +8,7 @@
   "cargo:sshx"                                 = "latest"
   "cargo:termscp"                              = "latest"
   "cargo:ttyper"                               = "latest"
+  "go:github.com/appleboy/CodeGPT/cmd/codegpt" = "latest"
   "go:github.com/pouriyajamshidi/tcping/v2"    = "latest"
   "pipx:basedpyright"                          = "latest"
   "pipx:chainforge"                            = "latest"
