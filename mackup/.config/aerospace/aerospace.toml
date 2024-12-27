@@ -27,7 +27,6 @@ automatically-unhide-macos-hidden-apps                          = true
 
   alt-b = 'exec-and-forget open -a /Applications/Google\ Chrome.app'
   alt-c = 'exec-and-forget open -a /Applications/Cursor.app'
-  alt-t = 'exec-and-forget open -a /Applications/Ghostty.app'
   alt-z = 'exec-and-forget open -a /Applications/Zed.app'
 
   alt-1 = 'workspace 1'
