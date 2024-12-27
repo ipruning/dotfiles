@@ -59,24 +59,20 @@
       "space t r": "task::Rerun",
       "space t s": "task::Spawn",
 
-      "space f f": "file_finder::Toggle",
-      "space f o": "projects::OpenRecent",
-      "space f r": "projects::OpenRemote",
-      "space f b": "branches::OpenRecent",
-
+      "space space": "file_finder::Toggle",
+      "space p": "projects::OpenRecent",
+      "space shift-p": "projects::OpenRemote",
+      "space g b": "branches::OpenRecent",
+      "space g u": ["task::Spawn", { "task_name": "gitu", "reveal_target": "center" }],
       "space a": "assistant::ToggleFocus",
-
-      "space c f": "editor::Format",
       "space e": "pane::RevealInProjectPanel",
-
-      "space c t": ["workspace::SendKeystrokes", ": new center terminal enter"],
-      "space l g": ["task::Spawn", { "task_name": "lazygit", "reveal_target": "center" }],
+      "space c t": ["workspace::SendKeystrokes", ": new center terminal enter"]
     }
   },
   {
     "context": "Editor && vim_mode == normal && !VimWaiting && !menu",
     "bindings": {
-      "g r": "editor::Rename",
+      "g r": "editor::Rename"
       //     "g d": "editor::GoToDefinition",
       //     "g D": "editor::GoToDefinitionSplit",
       //     "g i": "editor::GoToImplementation",
@@ -112,8 +108,14 @@
   {
     "context": "EmptyPane || SharedScreen",
     "bindings": {
-      "space f f": "file_finder::Toggle",
-      "space f o": "projects::OpenRecent"
+      "space space": "file_finder::Toggle",
+      "space p": "projects::OpenRecent",
+      "space shift-p": "projects::OpenRemote",
+      "space g b": "branches::OpenRecent",
+      "space g u": ["task::Spawn", { "task_name": "gitu", "reveal_target": "center" }],
+      "space a": "assistant::ToggleFocus",
+      "space e": "pane::RevealInProjectPanel",
+      "space c t": ["workspace::SendKeystrokes", ": new center terminal enter"]
     }
   },
   {
@@ -123,15 +125,15 @@
     }
   },
   {
-    "context": "Editor && vim_mode == insert && !menu",
-    "bindings": {
-      "j k": "vim::NormalBefore"
-    }
-  },
-  {
     "context": "ProjectPanel || OutlinePanel || CollabPanel || ChatPanel",
     "bindings": {
       "cmd-w": "workspace::ToggleRightDock"
+    }
+  },
+  {
+    "context": "(ProjectPanel || OutlinePanel || CollabPanel || ChatPanel) && not_editing",
+    "bindings": {
+      "q": "workspace::ToggleRightDock"
     }
   },
   {
