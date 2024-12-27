@@ -1,42 +1,4 @@
 #===============================================================================
-# 👇 Proxy Configuration
-#===============================================================================
-if [[ -n $GHOSTTY_RESOURCES_DIR ]]; then
-  source "$GHOSTTY_RESOURCES_DIR"/shell-integration/zsh/ghostty-integration
-fi
-
-#===============================================================================
-# 👇 Proxy Configuration
-#===============================================================================
-set_proxy() {
-  export https_proxy=http://127.0.0.1:6152
-  export http_proxy=http://127.0.0.1:6152
-  export all_proxy=socks5://127.0.0.1:6153
-}
-
-unset_proxy() {
-  unset https_proxy http_proxy all_proxy
-}
-
-#===============================================================================
-# 👇 PostgreSQL
-#===============================================================================
-export LDFLAGS="-L/opt/homebrew/opt/postgresql@17/lib"
-export CPPFLAGS="-I/opt/homebrew/opt/postgresql@17/include"
-export PATH="/opt/homebrew/opt/postgresql@17/bin:$PATH"
-
-#===============================================================================
-# 👇 zsh options https://stackoverflow.com/questions/30028730/how-to-prevent-execution-of-command-in-zsh
-#===============================================================================
-setopt NO_NOMATCH
-setopt NO_NULL_GLOB
-
-#===============================================================================
-# 👇 interactive comments
-#===============================================================================
-setopt interactivecomments
-
-#===============================================================================
 # 👇 Initialize zellij when running in Alacritty and not in Zed
 #===============================================================================
 # if [[ ("$__CFBundleIdentifier" == "org.alacritty" || "$__CFBundleIdentifier" == "com.mitchellh.ghostty") && "$TERM_PROGRAM" != "zed" && -z "$ZELLIJ" ]]; then
@@ -74,83 +36,31 @@ setopt interactivecomments
 eval "$(starship init zsh)"
 
 #===============================================================================
-# 👇 Fix Case Sensitivity
+# 👇 zsh options
 #===============================================================================
-zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
+setopt NO_NOMATCH
+setopt NO_NULL_GLOB
+setopt interactivecomments
 
 #===============================================================================
-# 👇 zsh-vi-mode https://github.com/jeffreytse/zsh-vi-mode/issues/24
+# 👇 zsh-syntax-highlighting
 #===============================================================================
-# export ZVM_INIT_MODE=sourcing
-# source "${ZSH_CUSTOM}"/plugins/zsh-vi-mode/zsh-vi-mode.plugin.zsh
+source "$ZSH_CUSTOM"/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
 #===============================================================================
-# 👇 fzf init
+# 👇 fzf
 #===============================================================================
 source <(fzf --zsh)
-
-# export FZF_DEFAULT_OPTS="--height=100% --layout=reverse --info=inline -s-border --margin=1 --padding=1"
-# export FZF_DEFAULT_COMMAND="fd --ignore-file ~/.gitignore --hidden --follow --ignore-case ."
-
-#===============================================================================
-# 👇 Standard plugins can be found in $ZSH/plugins/
-# 👇 Custom plugins may be added to $ZSH_CUSTOM/plugins/
-#===============================================================================
-# source "$ZSH_CUSTOM"/plugins/zsh-autosuggestions/zsh-autosuggestions.plugin.zsh
-# source "$ZSH_CUSTOM"/plugins/ugit/ugit.plugin.zsh
-
-#===============================================================================
-# 👇 fzf-tab https://github.com/Aloxaf/fzf-tab/wiki/Configuration (fzf-tab needs to be loaded after compinit (oh-my-zsh.sh))
-#===============================================================================
-source "$ZSH_CUSTOM"/plugins/fzf-tab/fzf-tab.plugin.zsh
-
-#===============================================================================
-# 👇 fzf-tab config
-#===============================================================================
-# zstyle ':completion:*:git-checkout:*' sort false
-# zstyle ':completion:*:descriptions' format '[%d]'
-# zstyle ':completion:*' menu no
-# zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza --icons --all --oneline --ignore-glob=".DS_Store" $realpath'
-# zstyle ':fzf-tab:*' switch-group '<' '>'
-# zstyle ':fzf-tab:*' fzf-pad 10
-
-#===============================================================================
-# 👇 custom keybindings
-#===============================================================================
-# Option-F/B Emacs Motion
-# bindkey "^F" forward-char
-# bindkey "^B" backward-char
-# bindkey "^P" up-line-or-history
-# bindkey "^N" down-line-or-history
-# Option-Left
-bindkey "^[[1;3C" forward-word
-# Option-Right
-bindkey "^[[1;3D" backward-word
-# Option-C 快速查找目录 fuzzily search for a directory in your home directory then cd into it
-# bindkey 'ç' fzf-cd-widget
-# export FZF_ALT_C_COMMAND="fd --ignore-file ~/.rgignore --hidden --follow --ignore-case --type d"
-# Control-L accept zsh-autosuggestions https://github.com/zsh-users/zsh-autosuggestions#key-bindings (Using Control-F Instead)
-# bindkey '^Y' autosuggest-accept
-# Control-T to fuzzily search for a file or directory in your home directory then insert its path at the cursor
-# export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
-# Control-I will be used to trigger completion fzf completion will use == as the trigger sequence instead of the default **
 export FZF_ALT_C_COMMAND=""
 export FZF_CTRL_T_COMMAND=""
 export FZF_COMPLETION_TRIGGER='jk'
-# export FZF_COMPLETION_OPTS='--border --info=inline'
-# _fzf_comprun() {
-#   local command=$1
-#   shift
-#   case "$command" in
-#   cd) fzf "$@" --preview 'eza --icons --oneline --color=always --ignore-glob=".DS_Store" {}' ;;
-#   export | unset) fzf "$@" --preview "eval 'echo \$'{}" ;;
-#   ssh) fzf "$@" --preview 'dig {}' ;;
-#   z) fzf "$@" --preview 'eza --icons --oneline --color=always --ignore-glob=".DS_Store" {}' ;;
-#   *) fzf "$@" ;;
-#   esac
-# }
+export FZF_DEFAULT_COMMAND="fd --type file --strip-cwd-prefix --ignore-file ~/.gitignore"
+
+source "$ZSH_CUSTOM"/plugins/fzf-tab/fzf-tab.plugin.zsh
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
+
 #===============================================================================
-# 👇 Preferred editor for local and remote sessions
+# 👇 My preferred editor for local and remote sessions
 #===============================================================================
 if [[ -n $SSH_CONNECTION || "$TERM_PROGRAM" != "zed" ]]; then
   export EDITOR='nvim'
@@ -159,6 +69,31 @@ else
   export EDITOR='zed --wait'
   export VISUAL='zed --wait'
 fi
+
+#===============================================================================
+# 👇 My keybindings
+#===============================================================================
+bindkey "^A" beginning-of-line
+bindkey "^E" end-of-line
+bindkey "^[[1;3C" forward-word
+bindkey "^[[1;3D" backward-word
+
+#===============================================================================
+# 👇 My binaries
+#===============================================================================
+export PATH="$HOME/dotfiles/bin:$PATH"
+
+#===============================================================================
+# 👇 LM Studio CLI tool
+#===============================================================================
+export PATH="$HOME/.cache/lm-studio/bin:$PATH"
+
+#===============================================================================
+# 👇 PostgreSQL
+#===============================================================================
+export LDFLAGS="-L/opt/homebrew/opt/postgresql@17/lib"
+export CPPFLAGS="-I/opt/homebrew/opt/postgresql@17/include"
+export PATH="/opt/homebrew/opt/postgresql@17/bin:$PATH"
 
 #===============================================================================
 # 👇 OrbStack
@@ -178,21 +113,10 @@ eval "$(atuin init zsh)"
 eval "$(zoxide init zsh)"
 
 #===============================================================================
-# 👇 mise
-#===============================================================================
-eval "$(mise activate zsh)"
-
-#===============================================================================
-# 👇 LM Studio CLI tool
-#===============================================================================
-export PATH="$PATH:/Users/alex/.cache/lm-studio/bin"
-
-#===============================================================================
 # 👇 autodetect architecture (and set `brew` path) (and set `python` path)
 #===============================================================================
 case $SYSTEM_TYPE in
 mac_arm64)
-  # python miniforge
   if ! __conda_setup="$('/opt/homebrew/Caskroom/miniforge/base/bin/conda' 'shell.zsh' 'hook' 2>/dev/null)"; then
     eval "$__conda_setup"
   else
@@ -203,12 +127,15 @@ mac_arm64)
     fi
   fi
   unset __conda_setup
-  # <<< conda initialize <<<
   ;;
 mac_x86_64)
-  # brew
   if [[ -f /usr/local/homebrew/bin/brew ]]; then
     eval "$(/usr/local/homebrew/bin/brew shellenv)"
   fi
   ;;
 esac
+
+#===============================================================================
+# 👇 mise
+#===============================================================================
+eval "$(mise activate zsh)"

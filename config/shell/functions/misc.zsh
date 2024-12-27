@@ -116,3 +116,15 @@ function sroam() {
     query="$query" \
     args:="[\"$1\"]" | jq -r '.result[] | .[1]'
 }
+
+#===============================================================================
+# 👇 Proxy Configuration
+#===============================================================================
+function set_proxy() {
+  export https_proxy=http://127.0.0.1:6152
+  export http_proxy=http://127.0.0.1:6152
+  export all_proxy=socks5://127.0.0.1:6153
+}
+function nunset_proxy() {
+  unset https_proxy http_proxy all_proxy
+}
