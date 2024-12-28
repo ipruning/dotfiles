@@ -60,10 +60,10 @@ plus-emph-style = bold syntax "#404f4a"
 # 10% green 90% base
 plus-style = syntax "#2c3239"
 map-styles = \
-	bold purple => syntax "#494060", \
-	bold blue => syntax "#384361", \
-	bold cyan => syntax "#384d5d", \
-	bold yellow => syntax "#544f4e"
+	bold purple = "#494060", \
+	bold blue = "#384361", \
+	bold cyan = "#384d5d", \
+	bold yellow = "#544f4e" >syntax >syntax >syntax >syntax
 # Should match the name of the bat theme
 syntax-theme = Catppuccin Mocha
 

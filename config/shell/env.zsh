@@ -43,9 +43,9 @@ setopt NO_NULL_GLOB
 setopt interactivecomments
 
 #===============================================================================
-# 👇 zsh-syntax-highlighting
+# 👇 fast-syntax-highlighting https://github.com/catppuccin/zsh-fsh
 #===============================================================================
-source "$ZSH_CUSTOM"/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+source "$ZSH_CUSTOM"/plugins/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
 
 #===============================================================================
 # 👇 fzf
@@ -55,6 +55,12 @@ export FZF_ALT_C_COMMAND=""
 export FZF_CTRL_T_COMMAND=""
 export FZF_COMPLETION_TRIGGER='jk'
 export FZF_DEFAULT_COMMAND="fd --type file --strip-cwd-prefix --ignore-file ~/.gitignore"
+export FZF_DEFAULT_OPTS=" \
+--color=bg+:#313244,bg:#1e1e2e,spinner:#f5e0dc,hl:#f38ba8 \
+--color=fg:#cdd6f4,header:#f38ba8,info:#cba6f7,pointer:#f5e0dc \
+--color=marker:#b4befe,fg+:#cdd6f4,prompt:#cba6f7,hl+:#f38ba8 \
+--color=selected-bg:#45475a \
+--multi"
 
 source "$ZSH_CUSTOM"/plugins/fzf-tab/fzf-tab.plugin.zsh
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
