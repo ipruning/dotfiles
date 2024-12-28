@@ -21,7 +21,6 @@ alias lt='eza --icons --long --all --git --time-style=long-iso --tree --level=3'
 
 alias szshrc='source ~/.zshrc'
 
-alias v='nvim'
 alias vim='nvim'
 
 alias ip='curl -4 ip.sb'
