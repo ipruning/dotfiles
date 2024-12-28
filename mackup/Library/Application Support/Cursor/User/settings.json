@@ -126,9 +126,6 @@
     "eslint",
     "jshint"
   ],
-  "evenBetterToml.formatter.alignEntries": true,
-  "evenBetterToml.formatter.indentEntries": true,
-  "evenBetterToml.schema.enabled": false,
   "explorer.confirmDelete": false,
   "explorer.confirmDragAndDrop": false,
   "explorer.fileNesting.enabled": true,
@@ -232,8 +229,8 @@
   "fileNestingUpdater.autoUpdateInterval": 43200,
   "fileNestingUpdater.promptOnAutoUpdate": true,
   "files.associations": {
-    ".cursorrules": "markdown",
     ".cforge": "json",
+    ".cursorrules": "markdown",
     ".env*": "dotenv"
   },
   "files.insertFinalNewline": true,
@@ -260,7 +257,6 @@
     "MD041": false,
     "MD045": false
   },
-  "sqlfluff.executablePath": "/opt/homebrew/bin/sqlfluff",
   "material-icon-theme.files.associations": {
     "*.autocorrectrc": "yaml",
     "*.log.*": "log",
@@ -316,6 +312,7 @@
     "**/zshrc": true
   },
   "shellcheck.run": "onType",
+  "sqlfluff.executablePath": "/opt/homebrew/bin/sqlfluff",
   "sqliteViewer.maxFileSize": 1024,
   "svelte.enable-ts-plugin": true,
   "terminal.integrated.confirmOnExit": "hasChildProcesses",

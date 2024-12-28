@@ -74,13 +74,15 @@
     "git_status": true
   },
   "terminal": {
-    "font_weight": 500,
-    "font_family": "MonoLisa",
     "env": {
       "EDITOR": "zed --wait"
-    }
+    },
+    "font_family": "MonoLisa",
+    "font_weight": 500
   },
   "theme": "Catppuccin Mocha",
-  "vim_mode": true,
-  "vim": { "use_system_clipboard": "on_yank" }
+  "vim": {
+    "use_system_clipboard": "on_yank"
+  },
+  "vim_mode": true
 }
