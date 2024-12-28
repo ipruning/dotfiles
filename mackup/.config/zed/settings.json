@@ -74,6 +74,8 @@
     "git_status": true
   },
   "terminal": {
+    "font_weight": 500,
+    "font_family": "MonoLisa",
     "env": {
       "EDITOR": "zed --wait"
     }
