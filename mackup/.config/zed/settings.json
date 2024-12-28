@@ -79,5 +79,6 @@
     }
   },
   "theme": "Catppuccin Mocha",
-  "vim_mode": true
+  "vim_mode": true,
+  "vim": { "use_system_clipboard": "on_yank" }
 }
