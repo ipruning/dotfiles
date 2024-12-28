@@ -18,15 +18,16 @@ automatically-unhide-macos-hidden-apps                          = true
   outer.right      = 8
 
 [mode.main.binding]
-  alt-w     = 'mode window'
-  alt-slash = 'mode service'
-  alt-g     = 'mode pass'
-
+  alt-w      = 'mode window'
+  alt-slash  = 'mode service'
+  alt-g      = 'mode pass'
+  alt-f      = 'fullscreen'
   alt-comma  = 'layout accordion horizontal vertical'
   alt-period = 'layout tiles horizontal vertical'
 
   alt-b = 'exec-and-forget open -a /Applications/Google\ Chrome.app'
   alt-c = 'exec-and-forget open -a /Applications/Cursor.app'
+  alt-t = 'exec-and-forget open -a /Applications/Ghostty.app'
   alt-z = 'exec-and-forget open -a /Applications/Zed.app'
 
   alt-1 = 'workspace 1'
@@ -56,7 +57,8 @@ automatically-unhide-macos-hidden-apps                          = true
   alt-k = 'focus up --boundaries all-monitors-outer-frame'
   alt-l = 'focus right --boundaries all-monitors-outer-frame'
 
-  alt-tab = 'workspace-back-and-forth'
+  # cmd-tab = 'workspace-back-and-forth'
+  # alt-tab = 'focus-back-and-forth'
 
   cmd-m = []
   cmd-h = []
@@ -151,6 +153,10 @@ automatically-unhide-macos-hidden-apps                          = true
 
 [[on-window-detected]]
   if.app-id = 'com.timpler.screenstudio'
+  run       = 'layout floating'
+
+[[on-window-detected]]
+  if.app-id = 'com.mitchellh.ghostty'
   run       = 'layout floating'
 
 [[on-window-detected]]
