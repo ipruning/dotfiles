@@ -56,20 +56,31 @@
       "space 9": ["pane::ActivateItem", 8],
       "space 0": "pane::ActivateLastItem",
 
-      "space t r": "task::Rerun",
-      "space t s": "task::Spawn",
+      "space t": "task::Spawn",
+      "space shift-t": "task::Rerun",
 
       "space space": "file_finder::Toggle",
-      "space p": "projects::OpenRecent",
-      "space shift-p": "projects::OpenRemote",
+      "space r": "projects::OpenRecent",
+      "space shift-r": "projects::OpenRemote",
       "space g b": "branches::OpenRecent",
 
-      "space g u": ["task::Spawn", { "task_name": "gitu", "reveal_target": "center" }],
       "space a": "assistant::ToggleFocus",
       "space e": "pane::RevealInProjectPanel",
+      "space x": "diagnostics::Deploy",
+
+      "space c g u": ["task::Spawn", { "task_name": "gitu", "reveal_target": "center" }],
+      "space c l g": ["task::Spawn", { "task_name": "lazygit", "reveal_target": "center" }],
       "space c t": ["workspace::SendKeystrokes", ": new center terminal enter"],
 
-      "space x": "diagnostics::Deploy"
+      "ctrl-j": "editor::GoToDiagnostic",
+      "ctrl-k": "editor::GoToPrevDiagnostic"
+    }
+  },
+  {
+    "context": "Pane",
+    "bindings": {
+      "ctrl-shift-j": "search::SelectNextMatch",
+      "ctrl-shift-k": "search::SelectPrevMatch"
     }
   },
   {
@@ -80,11 +91,20 @@
     }
   },
   {
+    "context": "Editor && vim_mode == visual && !VimWaiting && !menu",
+    "bindings": {
+      "shift-j": "editor::MoveLineDown",
+      "shift-k": "editor::MoveLineUp",
+      "space d": "editor::Delete",
+      "space p": "editor::Paste"
+    }
+  },
+  {
     "context": "EmptyPane || SharedScreen",
     "bindings": {
       "space space": "file_finder::Toggle",
-      "space p": "projects::OpenRecent",
-      "space shift-p": "projects::OpenRemote"
+      "space r": "projects::OpenRecent",
+      "space shift-r": "projects::OpenRemote"
     }
   },
   {
