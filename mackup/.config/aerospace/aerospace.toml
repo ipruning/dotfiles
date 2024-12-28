@@ -69,18 +69,34 @@ automatically-unhide-macos-hidden-apps                          = true
 [mode.window.binding]
   esc = 'mode main'
 
-  h       = 'move left'
-  j       = 'move down'
-  k       = 'move up'
-  l       = 'move right'
-  shift-h = "move-node-to-monitor left"
-  shift-j = "move-node-to-monitor down"
-  shift-k = "move-node-to-monitor up"
-  shift-l = "move-node-to-monitor right"
-  alt-h   = ['join-with left', 'mode main']
-  alt-j   = ['join-with down', 'mode main']
-  alt-k   = ['join-with up', 'mode main']
-  alt-l   = ['join-with right', 'mode main']
+  h = ['move left', 'mode main']
+  j = ['move down', 'mode main']
+  k = ['move up', 'mode main']
+  l = ['move right', 'mode main']
+  shift-h = [
+    'move-node-to-monitor left',
+    'focus left --boundaries all-monitors-outer-frame',
+    'mode main',
+  ]
+  shift-j = [
+    'move-node-to-monitor down',
+    'focus down --boundaries all-monitors-outer-frame',
+    'mode main',
+  ]
+  shift-k = [
+    'move-node-to-monitor up',
+    'focus up --boundaries all-monitors-outer-frame',
+    'mode main',
+  ]
+  shift-l = [
+    'move-node-to-monitor right',
+    'focus right --boundaries all-monitors-outer-frame',
+    'mode main',
+  ]
+  alt-h = ['join-with left', 'mode main']
+  alt-j = ['join-with down', 'mode main']
+  alt-k = ['join-with up', 'mode main']
+  alt-l = ['join-with right', 'mode main']
 
   minus = 'resize smart -50'
   equal = 'resize smart +50'
