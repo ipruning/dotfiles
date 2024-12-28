@@ -11,7 +11,8 @@ window-padding-x = 8, 8
 
 quick-terminal-position = center
 quick-terminal-animation-duration = 0
-keybind = global:alt+enter=toggle_quick_terminal
+quick-terminal-screen = macos-menu-bar
+keybind = global:alt+t=toggle_quick_terminal
 
 keybind = cmd+t=new_tab
 keybind = cmd+n=new_split:right
