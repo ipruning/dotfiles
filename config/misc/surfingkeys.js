@@ -1,6 +1,6 @@
 // settings
 settings.digitForRepeat = false;
-settings.focusAfterClosed = "last";
+settings.focusAfterClosed = "right";
 settings.focusFirstCandidate = true;
 settings.tabsThreshold = 0;
 
