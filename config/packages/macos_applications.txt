@@ -115,6 +115,7 @@ Wireshark
 Wispr Flow
 Wooshy
 XLD
+Xcode-16.2.0
 Xcode
 Xcodes
 YACReader

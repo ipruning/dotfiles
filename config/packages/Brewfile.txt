@@ -5,12 +5,14 @@ autoconf
 autocorrect
 bash
 bat
+bore-cli
 brainfuck
 cabextract
 cfitsio
 cgif
 cloudflared
 cmake
+csvlens
 curl
 cyme
 dbus
@@ -72,6 +74,7 @@ ollama
 onefetch
 ouch
 pandoc-crossref
+parallel-disk-usage
 platformio
 postgresql@17
 procs
@@ -79,6 +82,7 @@ pueue
 python@3.11
 rclone
 redis
+rip2
 ripgrep
 rustscan
 scc
@@ -89,6 +93,7 @@ smartmontools
 sqlfluff
 starship
 tealdeer
+termscp
 tmux
 tokei
 tursodatabase/tap/turso
