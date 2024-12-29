@@ -1,36 +1,4 @@
 #===============================================================================
-# 👇 Initialize zellij when running in Alacritty and not in Zed
-#===============================================================================
-# if [[ ("$__CFBundleIdentifier" == "org.alacritty" || "$__CFBundleIdentifier" == "com.mitchellh.ghostty") && "$TERM_PROGRAM" != "zed" && -z "$ZELLIJ" ]]; then
-#   if ! command -v zellij >/dev/null 2>&1; then
-#     echo "Zellij is not installed. Please install it first."
-#     return
-#   fi
-
-#   active_sessions=$(zellij list-sessions --no-formatting | grep -v "EXITED" || true)
-#   if [[ -z "$active_sessions" ]]; then
-#     zellij
-#   else
-#     first_session=$(echo "$active_sessions" | head -n 1 | awk '{print $1}')
-#     zellij attach "$first_session"
-#   fi
-# fi
-
-zellij_pane_name_update() {
-  [[ -z $ZELLIJ ]] && return
-
-  local current_dir=$PWD
-  case $current_dir in
-  $HOME) current_dir="~" ;;
-  *) current_dir=${current_dir##*/} ;;
-  esac
-  command nohup zellij action rename-pane $current_dir >/dev/null 2>&1
-}
-
-zellij_pane_name_update
-chpwd_functions+=(zellij_pane_name_update)
-
-#===============================================================================
 # 👇 zsh Theme
 #===============================================================================
 eval "$(starship init zsh)"

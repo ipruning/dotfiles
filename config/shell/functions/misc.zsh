@@ -1,33 +1,51 @@
+#===============================================================================
 # 👇 zellij
 #===============================================================================
 function zj() {
-  # Check if zellij is installed
   if ! command -v zellij >/dev/null 2>&1; then
-    echo "Zellij is not installed. Please install it first."
+    echo "zellij is not installed. please install it first."
     return 1
   fi
 
-  # If session name is provided as argument, use it directly
-  if [[ $# -eq 1 ]]; then
-    zellij attach "$1" 2>/dev/null || zellij --session "$1"
-    return
+  if [[ "$ZELLIJ" == "0" ]]; then
+    echo "Already in a zellij session. please exit first."
+    return 1
   fi
 
-  # List and format existing sessions
-  local session=$(zellij list-sessions --no-formatting | awk '{
-    session_name=$1; $1="";
-    if ($0 ~ /EXITED/) print "\033[31m" session_name "\033[0m\t" $0;
-    else print "\033[32m" session_name "\033[0m\t" $0;
-  }' | column -t -s $'\t' | fzf --ansi --exit-0 --header="Select a session to attach (or press Esc to create new):" | awk '{print $1}')
+  # get existing sessions
+  local sessions=$(zellij list-sessions --no-formatting)
 
-  # If no session is selected or no sessions exist, create a new one
-  if [[ -z "$session" ]]; then
-    zellij
+  # Different behavior based on number of active sessions
+  if [[ -n "$sessions" ]]; then
+    # Count number of active sessions (excluding EXITED ones)
+    local active_sessions=$(echo "$sessions" | grep -v "EXITED")
+    local active_count=$(echo "$active_sessions" | grep -c "^")
+
+    if [[ "$active_count" -eq 1 ]]; then
+      # If only one active session exists, attach directly
+      local session=$(echo "$active_sessions" | awk '{print $1}')
+      zellij attach "$session"
+    else
+      # Multiple or no active sessions - show selection with all sessions
+      local session=$(echo "$sessions" | awk '{
+        session_name=$1; $1="";
+        if ($0 ~ /EXITED/) print "\033[31m" session_name "\033[0m\t" $0;
+        else print "\033[32m" session_name "\033[0m\t" $0;
+      }' | column -t -s $'\t' | fzf --ansi --exit-0 --header="Select a session to attach (or press Esc to cancel):" | awk '{print $1}')
+
+      [[ -n "$session" ]] && zellij attach "$session"
+    fi
   else
-    zellij attach "$session"
+    # No existing sessions - Esc creates new
+    local session=$(echo "" | fzf --ansi --print-query --header="Enter new session name (or press Esc for unnamed session):" | head -1)
+
+    if [[ -n "$session" ]]; then
+      zellij --session "$session"
+    else
+      zellij
+    fi
   fi
 }
-# 如果 "$ZELLIJ" 是 0 就代表已经在仓库里了
 
 #===============================================================================
 # 👇 Roam Research
