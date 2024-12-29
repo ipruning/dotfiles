@@ -14,26 +14,28 @@ quick-terminal-animation-duration = 0
 quick-terminal-screen = macos-menu-bar
 keybind = global:alt+t=toggle_quick_terminal
 
-keybind = cmd+t=new_tab
+keybind = cmd+r=text:\x7a\x6a\x0a
+
+keybind = cmd+b>r=reload_config
+keybind = cmd+b>e=write_screen_file:open
+
 keybind = cmd+n=new_split:right
 keybind = cmd+shift+n=new_window
+keybind = cmd+b>h=goto_split:left
+keybind = cmd+b>l=goto_split:right
+keybind = cmd+b>left=new_split:left
+keybind = cmd+b>right=new_split:right
 
-keybind = ctrl+b>0=goto_tab:10
-keybind = ctrl+b>1=goto_tab:1
-keybind = ctrl+b>2=goto_tab:2
-keybind = ctrl+b>3=goto_tab:3
-keybind = ctrl+b>4=goto_tab:4
-keybind = ctrl+b>5=goto_tab:5
-keybind = ctrl+b>6=goto_tab:6
-keybind = ctrl+b>7=goto_tab:7
-keybind = ctrl+b>8=goto_tab:8
-keybind = ctrl+b>9=goto_tab:9
-keybind = ctrl+b>comma=move_tab:-1
-keybind = ctrl+b>period=move_tab:+1
-
-keybind = ctrl+b>h=goto_split:left
-keybind = ctrl+b>l=goto_split:right
-keybind = ctrl+b>left=new_split:left
-keybind = ctrl+b>right=new_split:right
-
-keybind = ctrl+b>e=write_screen_file:open
+keybind = cmd+t=ignore
+keybind = cmd+b>0=goto_tab:10
+keybind = cmd+b>1=goto_tab:1
+keybind = cmd+b>2=goto_tab:2
+keybind = cmd+b>3=goto_tab:3
+keybind = cmd+b>4=goto_tab:4
+keybind = cmd+b>5=goto_tab:5
+keybind = cmd+b>6=goto_tab:6
+keybind = cmd+b>7=goto_tab:7
+keybind = cmd+b>8=goto_tab:8
+keybind = cmd+b>9=goto_tab:9
+keybind = cmd+b>comma=move_tab:-1
+keybind = cmd+b>period=move_tab:+1
