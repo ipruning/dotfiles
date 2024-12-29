@@ -7,6 +7,7 @@ bash
 bat
 bore-cli
 brainfuck
+btop
 cabextract
 cfitsio
 cgif
@@ -43,7 +44,6 @@ graphviz
 grex
 harlequin
 hdf5
-htop
 httm
 httpie
 hugo
