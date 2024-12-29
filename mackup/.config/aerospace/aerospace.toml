@@ -180,13 +180,17 @@ if.app-id = 'com.google.Chrome'
 run = 'move-node-to-workspace 1'
 
 [[on-window-detected]]
-if.app-id = 'com.tencent.xinWeChat'
-run = 'move-node-to-workspace 2'
+if.app-id = 'com.mitchellh.ghostty'
+run = 'move-node-to-workspace 9'
 
 [[on-window-detected]]
 if.app-id = 'com.todesktop.230313mzl4w4u92'
-run = 'move-node-to-workspace 9'
+run = 'move-node-to-workspace 10'
 
 [[on-window-detected]]
 if.app-id = 'com.exafunction.windsurf'
-run = 'move-node-to-workspace 9'
+run = 'move-node-to-workspace 10'
+
+[[on-window-detected]]
+if.app-id = 'dev.zed.Zed'
+run = 'move-node-to-workspace 10'
