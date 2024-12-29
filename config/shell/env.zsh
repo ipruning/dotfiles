@@ -16,19 +16,19 @@
 #   fi
 # fi
 
-# zellij_pane_name_update() {
-#   [[ -z $ZELLIJ ]] && return
+zellij_pane_name_update() {
+  [[ -z $ZELLIJ ]] && return
 
-#   local current_dir=$PWD
-#   case $current_dir in
-#   $HOME) current_dir="~" ;;
-#   *) current_dir=${current_dir##*/} ;;
-#   esac
-#   command nohup zellij action rename-pane $current_dir >/dev/null 2>&1
-# }
+  local current_dir=$PWD
+  case $current_dir in
+  $HOME) current_dir="~" ;;
+  *) current_dir=${current_dir##*/} ;;
+  esac
+  command nohup zellij action rename-pane $current_dir >/dev/null 2>&1
+}
 
-# zellij_pane_name_update
-# chpwd_functions+=(zellij_pane_name_update)
+zellij_pane_name_update
+chpwd_functions+=(zellij_pane_name_update)
 
 #===============================================================================
 # 👇 zsh Theme
