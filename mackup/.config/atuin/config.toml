@@ -1,9 +1,39 @@
-db_path        = "~/.local/share/atuin/history.db"
-dialect        = "us"
-enter_accept   = true
-history_filter = ["^secret-cmd", "^innocuous-cmd .*--secret=.+"]
-inline_height  = 21
-search_mode    = "fuzzy"
-style          = "compact"
-sync_frequency = "1h"
-word_jump_mode = "emacs"
+db_path = "~/.local/share/atuin/history.db"
+key_path = "~/.local/share/atuin/key"
+style = "compact"
+enter_accept = true
+inline_height = 14
+history_filter = [
+  # 1. 基础过滤
+  # "^\\s*$", # 空行
+  # "^#",     # 注释
+
+  # 2. Shell 错误信息
+  # "^command not found",
+  # "^(-bash|zsh|fish):",
+  # "^.*: (not found|command not found|No such file or directory)$",
+
+  # 3. 无意义的基础命令
+  # "^(ls|cd|pwd)$",             # 无参数的基础命令
+  # "^cd (-|~)$",                # 简单的 cd 导航
+  # "^(cat|less|more) \\S+$",    # 单文件查看
+  # "^(clear|exit|history)$",    # 系统控制命令
+  # "^[l]$",                     # 单字符命令
+  # "^(\\.|\\.\\.|\\.\\.\\.+)$", # 纯点导航
+  # "^:.*$",                     # vim/less 控制命令
+
+  # 4. 常见错误输入
+  # "^(sl|ll|ls-l)$", # 常见拼写错误
+  # "^cd\\.\\.+",     # cd... 类错误
+
+  # 5. 控制符和特殊字符
+  # "^\\x1b", # ESC 开头
+  # "^\\W+",  # 非单词字符开头
+
+  # 6. 敏感信息 (建议启用)
+  # "^ssh.*",
+  # "^curl.*-u\\s+\\S+:",
+  # "^(aws|gcloud|az)\\s+.*key",
+  # "^git.*(token|key|secret|password)",
+  # "^.*(-p|--password|--token|--key)\\s+\\S+",
+]
