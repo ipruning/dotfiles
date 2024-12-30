@@ -13,7 +13,7 @@ confirm-close-surface = false
 quick-terminal-position = center
 quick-terminal-animation-duration = 0
 quick-terminal-screen = macos-menu-bar
-keybind = global:alt+t=toggle_quick_terminal
+keybind = global:alt+shift+t=toggle_quick_terminal
 
 keybind = cmd+r=text:\x7a\x6a\x0a
 
