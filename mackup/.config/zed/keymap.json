@@ -66,6 +66,8 @@
       "space 9": ["pane::ActivateItem", 8],
       "space 0": "pane::ActivateLastItem",
 
+      "space f": "editor::Format",
+
       "space t": "task::Spawn",
       "space shift-t": "task::Rerun",
 
@@ -100,7 +102,11 @@
       "ctrl-k": "editor::GoToPrevDiagnostic",
 
       "shift-h": "pane::ActivatePrevItem",
-      "shift-l": "pane::ActivateNextItem"
+      "shift-l": "pane::ActivateNextItem",
+
+      "g d": "editor::GoToDefinition",
+      "g D": "editor::GoToDefinitionSplit",
+      "g r": "editor::FindAllReferences"
     }
   },
   {
