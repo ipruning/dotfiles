@@ -1,5 +1,4 @@
 {
-  "show_inline_completions": false,
   "assistant": {
     "default_model": {
       "model": "claude-3-5-sonnet-latest",
@@ -11,8 +10,7 @@
   "auto_install_extensions": {
     "basedpyright": true,
     "catppuccin": true,
-    "ruff": true,
-    "typos": true
+    "ruff": true
   },
   "autosave": "on_focus_change",
   "buffer_font_fallbacks": ["JetBrainsMono Nerd Font"],
@@ -70,6 +68,7 @@
   "scrollbar": {
     "show": "never"
   },
+  "show_inline_completions": true,
   "tabs": {
     "file_icons": true,
     "git_status": true
@@ -82,6 +81,9 @@
     "font_weight": 500
   },
   "theme": "Catppuccin Mocha",
+  "ui_font_family": "MonoLisa",
+  "ui_font_size": 15,
+  "ui_font_weight": 500,
   "vim": {
     "use_system_clipboard": "on_yank"
   },
