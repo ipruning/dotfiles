@@ -15,25 +15,28 @@ function zj() {
   # get existing sessions
   local sessions=$(zellij list-sessions --no-formatting)
 
-  # Different behavior based on number of active sessions
+  # Different behavior based on number of existing sessions
   if [[ -n "$sessions" ]]; then
-    # Count number of active sessions (excluding EXITED ones)
-    local active_sessions=$(echo "$sessions" | grep -v "EXITED")
-    local active_count=$(echo "$active_sessions" | grep -c "^")
+    # Count total number of sessions (including EXITED ones)
+    local session_count=$(echo "$sessions" | grep -c "^")
 
-    if [[ "$active_count" -eq 1 ]]; then
-      # If only one active session exists, attach directly
-      local session=$(echo "$active_sessions" | awk '{print $1}')
+    if [[ "$session_count" -eq 1 ]]; then
+      # If only one session exists, attach directly
+      local session=$(echo "$sessions" | awk '{print $1}')
       zellij attach "$session"
     else
-      # Multiple or no active sessions - show selection with all sessions
+      # Multiple sessions - show selection with all sessions
       local session=$(echo "$sessions" | awk '{
         session_name=$1; $1="";
         if ($0 ~ /EXITED/) print "\033[31m" session_name "\033[0m\t" $0;
         else print "\033[32m" session_name "\033[0m\t" $0;
-      }' | column -t -s $'\t' | fzf --ansi --exit-0 --header="Select a session to attach (or press Esc to cancel):" | awk '{print $1}')
+      }' | column -t -s $'\t' | fzf --ansi --exit-0 --header="Select a session to attach (or press Esc to create new):" | awk '{print $1}')
 
-      [[ -n "$session" ]] && zellij attach "$session"
+      if [[ -n "$session" ]]; then
+        zellij attach "$session"
+      else
+        zellij
+      fi
     fi
   else
     # No existing sessions - Esc creates new
@@ -71,12 +74,12 @@ function sroam() {
 #===============================================================================
 # 👇 Proxy Configuration
 #===============================================================================
-function set_proxy() {
+function set-proxy() {
   export https_proxy=http://127.0.0.1:6152
   export http_proxy=http://127.0.0.1:6152
   export all_proxy=socks5://127.0.0.1:6153
 }
-function nunset_proxy() {
+function unset-proxy() {
   unset https_proxy http_proxy all_proxy
 }
 
