@@ -29,12 +29,14 @@
   "file_finder": {
     "modal_max_width": "medium"
   },
+  "format_on_save": "off",
   "indent_guides": {
     "coloring": "indent_aware",
     "enabled": true
   },
   "languages": {
     "Python": {
+      "format_on_save": "on",
       "formatter": [
         {
           "code_actions": {
@@ -83,7 +85,6 @@
   "theme": "Catppuccin Mocha",
   "ui_font_family": "MonoLisa",
   "ui_font_size": 15,
-  "ui_font_weight": 500,
   "vim": {
     "use_system_clipboard": "on_yank"
   },
