@@ -1,5 +1,12 @@
 [
   {
+    "context": "Workspace",
+    "bindings": {
+      "cmd-b": "workspace::ToggleRightDock",
+      "cmd-shift-b": "workspace::ToggleLeftDock"
+    }
+  },
+  {
     "context": "Terminal",
     "bindings": {
       "ctrl-s e": "terminal::ToggleViMode",
@@ -8,15 +15,29 @@
     }
   },
   {
-    "context": "Workspace",
+    "context": "EmptyPane || SharedScreen",
     "bindings": {
-      "cmd-b": "workspace::ToggleRightDock",
-      "cmd-shift-b": "workspace::ToggleLeftDock"
+      "space space": "file_finder::Toggle",
+      "space r": "projects::OpenRecent",
+      "space shift-r": "projects::OpenRemote"
+    }
+  },
+  {
+    "context": "(ProjectPanel || OutlinePanel) && not_editing",
+    "bindings": {
+      "q": "workspace::ToggleRightDock"
+    }
+  },
+  {
+    "context": "ProjectPanel && not_editing",
+    "bindings": {
+      "cmd-x": "project_panel::Cut",
+      "cmd-c": "project_panel::Copy",
+      "cmd-v": "project_panel::Paste"
     }
   },
   {
     "context": "Editor && mode == full",
-    "use_key_equivalents": true,
     "bindings": {
       "cmd-<": "assistant::QuoteSelection",
       "cmd->": "assistant::InsertIntoEditor"
@@ -32,19 +53,8 @@
       "ctrl-shift-n": "vim::MoveToNextMatch",
       "n": ["workspace::SendKeystrokes", "ctrl-shift-n z z"],
       "ctrl-alt-shift-n": "vim::MoveToNextMatch",
-      "shift-n": ["workspace::SendKeystrokes", "ctrl-alt-shift-n z z"]
-    }
-  },
-  {
-    "context": "Editor && (vim_mode == normal || vim_mode == visual) && !VimWaiting && !menu",
-    "bindings": {
-      "tab": "editor::Indent",
-      "shift-tab": "editor::TabPrev"
-    }
-  },
-  {
-    "context": "Editor && (vim_mode == normal || vim_mode == visual) && !VimWaiting && !menu",
-    "bindings": {
+      "shift-n": ["workspace::SendKeystrokes", "ctrl-alt-shift-n z z"],
+
       "space 1": ["pane::ActivateItem", 0],
       "space 2": ["pane::ActivateItem", 1],
       "space 3": ["pane::ActivateItem", 2],
@@ -72,8 +82,8 @@
       "space c l g": ["task::Spawn", { "task_name": "lazygit", "reveal_target": "center" }],
       "space c t": ["workspace::SendKeystrokes", ": new center terminal enter"],
 
-      "ctrl-j": "editor::GoToDiagnostic",
-      "ctrl-k": "editor::GoToPrevDiagnostic"
+      "tab": "editor::Indent",
+      "shift-tab": "editor::TabPrev"
     }
   },
   {
@@ -86,6 +96,9 @@
   {
     "context": "Editor && vim_mode == normal && !VimWaiting && !menu",
     "bindings": {
+      "ctrl-j": "editor::GoToDiagnostic",
+      "ctrl-k": "editor::GoToPrevDiagnostic",
+
       "shift-h": "pane::ActivatePrevItem",
       "shift-l": "pane::ActivateNextItem"
     }
@@ -93,51 +106,30 @@
   {
     "context": "Editor && vim_mode == visual && !VimWaiting && !menu",
     "bindings": {
-      "shift-j": "editor::MoveLineDown",
-      "shift-k": "editor::MoveLineUp",
       "space d": "editor::Delete",
-      "space p": "editor::Paste"
-    }
-  },
-  {
-    "context": "EmptyPane || SharedScreen",
-    "bindings": {
-      "space space": "file_finder::Toggle",
-      "space r": "projects::OpenRecent",
-      "space shift-r": "projects::OpenRemote"
-    }
-  },
-  {
-    "context": "Editor && vim_mode == visual && !VimWaiting && !menu",
-    "bindings": {
-      "g c": "editor::ToggleComments"
-    }
-  },
-  {
-    "context": "ProjectPanel || OutlinePanel || CollabPanel || ChatPanel",
-    "bindings": {
-      "cmd-w": "workspace::ToggleRightDock"
-    }
-  },
-  {
-    "context": "(ProjectPanel || OutlinePanel || CollabPanel || ChatPanel) && not_editing",
-    "bindings": {
-      "q": "workspace::ToggleRightDock"
-    }
-  },
-  {
-    "context": "ProjectPanel && not_editing",
-    "bindings": {
-      "a": "project_panel::NewFile",
-      "shift-a": "project_panel::NewDirectory",
+      "space p": "editor::Paste",
 
-      "o": "project_panel::RevealInFileManager",
+      "g c": "editor::ToggleComments",
 
-      "r": "project_panel::Rename",
-      "d": "project_panel::Delete",
-      "x": "project_panel::Cut",
-      "c": "project_panel::Copy",
-      "p": "project_panel::Paste"
+      "shift-j": "editor::MoveLineDown",
+      "shift-k": "editor::MoveLineUp"
+    }
+  },
+  {
+    "context": "Editor && showing_completions",
+    "use_key_equivalents": true,
+    "bindings": {
+      "enter": "editor::ConfirmCompletion",
+      "tab": "editor::Tab",
+      "ctrl-y": "editor::ComposeCompletion"
+    }
+  },
+  {
+    "context": "Editor && inline_completion && !showing_completions",
+    "use_key_equivalents": true,
+    "bindings": {
+      "tab": "editor::Tab",
+      "ctrl-y": "editor::AcceptInlineCompletion"
     }
   }
 ]
