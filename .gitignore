@@ -5,4 +5,7 @@ bin/cwim
 
 config/shell/env_private.zsh
 
+config/shell/completions/
+config/shell/plugins/
+
 *backups/
