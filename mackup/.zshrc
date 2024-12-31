@@ -1,3 +1,5 @@
+# zmodload zsh/zprof
+
 if [ -d "$HOME/dotfiles" ]; then
   if [ -n "$ZSH_VERSION" ]; then
     local config_files=(
@@ -14,3 +16,5 @@ if [ -d "$HOME/dotfiles" ]; then
     done
   fi
 fi
+
+# zprof
