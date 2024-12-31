@@ -2,12 +2,6 @@
 "cargo:koji" = "latest"
 "go:github.com/appleboy/CodeGPT/cmd/codegpt" = "latest"
 "go:github.com/pouriyajamshidi/tcping/v2" = "latest"
-"pipx:chainforge" = "latest"
-"pipx:deepl-cli" = "latest"
-"pipx:llm" = "latest"
-"pipx:mackup" = "latest"
-"pipx:ttok" = "latest"
-"pipx:vastai" = "latest"
 bun = "latest"
 deno = "latest"
 go = "latest"
@@ -15,11 +9,11 @@ node = "latest"
 python = "3.13.1"
 ruby = "latest"
 rust = "latest"
-uv = "latest"
+usage = "latest"
 zig = "latest"
 
 [settings]
-experimental = true
-plugin_autoupdate_last_check_duration = '1 week'
-status = { missing_tools = "if_other_versions_installed", show_env = false, show_tools = false }
 trusted_config_paths = ['~/Developer']
+
+[settings.pipx]
+uvx = true
