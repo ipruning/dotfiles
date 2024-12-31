@@ -6,7 +6,7 @@ bun = "latest"
 deno = "latest"
 go = "latest"
 node = "latest"
-python = "3.13.1"
+python = "latest"
 ruby = "latest"
 rust = "latest"
 usage = "latest"
@@ -14,6 +14,7 @@ zig = "latest"
 
 [settings]
 trusted_config_paths = ['~/Developer']
+experimental = true
 
 [settings.pipx]
 uvx = true
