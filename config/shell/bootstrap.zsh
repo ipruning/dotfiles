@@ -37,21 +37,6 @@ esac
 
 export SYSTEM_TYPE
 
-ZSH_CUSTOM=${ZSH_CUSTOM:-~/.oh-my-zsh/custom}
-
-if command -v brew &>/dev/null; then
-  BREW_PREFIX=$(brew --prefix)
-  FPATH="${BREW_PREFIX}/share/zsh/site-functions:${FPATH}"
-fi
-
-autoload -Uz compinit
-
-if [[ ! -f ~/.zcompdump ]] || [[ $(date +%j) -ne $(date -r ~/.zcompdump +%j) ]]; then
-  compinit
-else
-  compinit -C
-fi
-
 case $SYSTEM_TYPE in
 mac_arm64 | mac_x86_64 | linux_x86_64 | raspberry)
   if [ -n "$BASH_VERSION" ] || [ -n "$ZSH_VERSION" ]; then
@@ -59,11 +44,10 @@ mac_arm64 | mac_x86_64 | linux_x86_64 | raspberry)
       local config_files=(
         "$HOME/dotfiles/config/shell/env.zsh"
         "$HOME/dotfiles/config/shell/env_private.zsh"
+        "$HOME/dotfiles/config/shell/aliases.zsh"
         "$HOME/dotfiles/config/shell/functions/ai.zsh"
         "$HOME/dotfiles/config/shell/functions/db.zsh"
         "$HOME/dotfiles/config/shell/functions/misc.zsh"
-        "$HOME/dotfiles/config/shell/aliases.zsh"
-        "$HOME/dotfiles/config/shell/completions.zsh"
       )
 
       for file in "${config_files[@]}"; do

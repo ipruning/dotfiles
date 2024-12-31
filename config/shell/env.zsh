@@ -1,4 +1,11 @@
 #===============================================================================
+# 👇 completions
+#===============================================================================
+fpath=("$HOME/dotfiles/config/shell/completions" $fpath)
+autoload -Uz compinit
+compinit
+
+#===============================================================================
 # 👇 zsh Theme
 #===============================================================================
 eval "$(starship init zsh)"
@@ -13,7 +20,8 @@ setopt interactivecomments
 #===============================================================================
 # 👇 fast-syntax-highlighting https://github.com/catppuccin/zsh-fsh
 #===============================================================================
-source "$ZSH_CUSTOM"/plugins/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
+ZSH_PLUGINS_DIR="$HOME/dotfiles/config/shell/plugins"
+source "$ZSH_PLUGINS_DIR"/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
 
 #===============================================================================
 # 👇 fzf
@@ -30,7 +38,7 @@ export FZF_DEFAULT_OPTS=" \
 --color=selected-bg:#45475a \
 --multi"
 
-source "$ZSH_CUSTOM"/plugins/fzf-tab/fzf-tab.plugin.zsh
+source "$ZSH_PLUGINS_DIR"/fzf-tab/fzf-tab.plugin.zsh
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
 
 #===============================================================================
@@ -70,11 +78,6 @@ export CPPFLAGS="-I/opt/homebrew/opt/postgresql@17/include"
 export PATH="/opt/homebrew/opt/postgresql@17/bin:$PATH"
 
 #===============================================================================
-# 👇 OrbStack
-#===============================================================================
-source "$HOME"/.orbstack/shell/init.zsh 2>/dev/null || :
-
-#===============================================================================
 # 👇 atuin
 #===============================================================================
 eval "$(atuin init zsh)"
@@ -85,29 +88,6 @@ eval "$(atuin init zsh)"
 # z foo<space><tab> # shows interactive completions via zoxide
 #===============================================================================
 eval "$(zoxide init zsh)"
-
-#===============================================================================
-# 👇 autodetect architecture (and set `brew` path) (and set `python` path)
-#===============================================================================
-case $SYSTEM_TYPE in
-mac_arm64)
-  if ! __conda_setup="$('/opt/homebrew/Caskroom/miniforge/base/bin/conda' 'shell.zsh' 'hook' 2>/dev/null)"; then
-    eval "$__conda_setup"
-  else
-    if [ -f "/opt/homebrew/Caskroom/miniforge/base/etc/profile.d/conda.sh" ]; then
-      . "/opt/homebrew/Caskroom/miniforge/base/etc/profile.d/conda.sh"
-    else
-      export PATH="/opt/homebrew/Caskroom/miniforge/base/bin:$PATH"
-    fi
-  fi
-  unset __conda_setup
-  ;;
-mac_x86_64)
-  if [[ -f /usr/local/homebrew/bin/brew ]]; then
-    eval "$(/usr/local/homebrew/bin/brew shellenv)"
-  fi
-  ;;
-esac
 
 #===============================================================================
 # 👇 mise
