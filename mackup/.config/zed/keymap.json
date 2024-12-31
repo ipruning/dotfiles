@@ -67,6 +67,7 @@
       "space 0": "pane::ActivateLastItem",
 
       "space f": "editor::Format",
+      "space b": "editor::ToggleGitBlame",
 
       "space t": "task::Spawn",
       "space shift-t": "task::Rerun",
