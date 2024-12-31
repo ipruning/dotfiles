@@ -3,6 +3,7 @@
 A Better Finder Attributes 7
 AdGuard for Safari
 AeroSpace
+AlexSideBar
 Alfred 5
 AltTab
 Anki

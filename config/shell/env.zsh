@@ -65,6 +65,8 @@ export LDFLAGS="-L/opt/homebrew/opt/postgresql@17/lib"
 export CPPFLAGS="-I/opt/homebrew/opt/postgresql@17/include"
 export PATH="/opt/homebrew/opt/postgresql@17/bin:$PATH"
 
+# 👇 OrbStack
+source ~/.orbstack/shell/init.zsh 2>/dev/null || :
 
 # 👇 atuin
 eval "$(atuin init zsh)"
@@ -73,7 +75,6 @@ eval "$(atuin init zsh)"
 # z foo<tab> # shows the same completions as cd
 # z foo<space><tab> # shows interactive completions via zoxide
 eval "$(zoxide init zsh)"
-
 
 # 👇 mise
 eval "$(mise activate zsh)"
