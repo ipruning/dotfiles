@@ -1,7 +1,12 @@
 # 👇 completions
 fpath=("$HOME/dotfiles/config/shell/completions" $fpath)
+
 autoload -Uz compinit
-compinit
+if [ $(date +'%j') != $(/usr/bin/stat -f '%Sm' -t '%j' $HOME/.zcompdump) ]; then
+  compinit
+else
+  compinit -C
+fi
 
 # 👇 zsh Theme
 eval "$(starship init zsh)"
