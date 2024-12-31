@@ -1,14 +1,6 @@
-#===============================================================================
-# 👇 Aliases
-# 👇 For a full list of active aliases, run `alias`.
-#===============================================================================
-case $SYSTEM_TYPE in
-mac_arm64)
-  alias x86_64='arch -x86_64 zsh --login'
-  alias x86_64_run='arch -x86_64 zsh -c'
-  alias brow='/usr/local/homebrew/bin/brew'
-  ;;
-esac
+alias x86_64='arch -x86_64 zsh --login'
+alias x86_64_run='arch -x86_64 zsh -c'
+alias brow='/usr/local/homebrew/bin/brew'
 
 alias ..='cd ..'
 alias ...='cd ../..'

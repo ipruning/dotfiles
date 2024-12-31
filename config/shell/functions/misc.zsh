@@ -1,6 +1,4 @@
-#===============================================================================
 # 👇 zellij
-#===============================================================================
 function zj() {
   if ! command -v zellij >/dev/null 2>&1; then
     echo "zellij is not installed. please install it first."
@@ -50,9 +48,7 @@ function zj() {
   fi
 }
 
-#===============================================================================
 # 👇 Roam Research
-#===============================================================================
 function sroam() {
   if [ -z "$1" ]; then
     echo "Please provide a search string."
@@ -71,9 +67,7 @@ function sroam() {
     args:="[\"$1\"]" | jq -r '.result[] | .[1]'
 }
 
-#===============================================================================
 # 👇 Proxy Configuration
-#===============================================================================
 function set-proxy() {
   export https_proxy=http://127.0.0.1:6152
   export http_proxy=http://127.0.0.1:6152
@@ -83,23 +77,17 @@ function unset-proxy() {
   unset https_proxy http_proxy all_proxy
 }
 
-#===============================================================================
 # 👇 gh-sync-fork
-#===============================================================================
 functiongh-sync-fork() {
   gh repo list --fork --visibility public --json owner,name | jq -r 'map(.owner.login + "/" + .name) | .[]' | xargs -t -L1 gh repo sync
 }
 
-#===============================================================================
 # 👇 fava
-#===============================================================================
 function r-fava() {
   fava ${HOME}/Databases/Ledger/main.bean -p 4000
 }
 
-#===============================================================================
 # 👇 upgrade / backup
-#===============================================================================
 function r-completion() {
   echo -e "\033[33mGenerating completions...\033[0m"
   rm -f ~/.zcompdump
