@@ -9,7 +9,6 @@ node = "latest"
 python = "latest"
 ruby = "latest"
 rust = "latest"
-usage = "latest"
 zig = "latest"
 
 [settings]
