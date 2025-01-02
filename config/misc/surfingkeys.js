@@ -156,6 +156,7 @@ api.unmap("s", /\b(x\.com)\b/i); // Share post
 api.unmap("u", /\b(x\.com)\b/i); // Mute account
 
 api.unmap("?", /\b(github\.com)\b/i);
-api.unmap("C", /\b(github\.com)\b/i); // Open Copilot Chat
-api.unmap("Z", /\b(github\.com)\b/i); // Expand/collapse Copilot Chat
 api.unmap("/", /\b(github\.com)\b/i); // Search
+
+api.unmap("r", /\b(roamresearch\.com)\b/i);
+api.unmap("esc", /\b(roamresearch\.com)\b/i);
