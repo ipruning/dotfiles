@@ -12,8 +12,7 @@ Avenue
 BaiduNetdisk_mac
 Balatro
 BetterDisplay
-Blackmagic Disk Speed Test
-Blender
+Binance
 Bob
 Capture One
 Chromium
@@ -28,12 +27,10 @@ Drafts
 Eagle
 Eudic
 ExcalidrawZ
-FixTim
 Fork
 Ghostty
 Google Chrome
 Google Drive
-Granola
 Heptabase
 Hush
 IINA
@@ -52,17 +49,15 @@ LM Studio
 Lark
 LinearMouse
 Longbridge Pro
+LyricsX
 MWeb Pro
-MessAuto
 Microsoft Excel
 Microsoft PowerPoint
 Microsoft Word
 MongoDB Compass
 Mos
-Mouseless
 MusicHarbor
 NeteaseMusic
-Notion
 Numbers
 OBS
 OneDrive
@@ -80,19 +75,15 @@ Raycast
 Rectangle
 RepoPrompt
 Reqable
-Roam Research
 Rond
 Rotato
 Safari
 Scapple
 Screen Studio
-ScreenFlow
 Scrolla
 Setapp
 Shortcat
 Skim
-Slack
-SoundSource
 Steam
 Surfingkeys
 Surge
@@ -102,8 +93,8 @@ TabTab
 Tampermonkey
 Telegram
 TencentMeeting
-Termius
 TestFlight
+The Powder Toy
 Things3
 TickTick
 UninstallPKG
@@ -111,7 +102,6 @@ VideoFusion-macOS
 VirtualBuddy
 WeChat
 Whisper Transcription
-Windsurf
 Wireshark
 Wispr Flow
 Wooshy
@@ -122,16 +112,13 @@ Xcodes
 YACReader
 YACReaderLibrary
 Z-Library
-Zed Preview
 Zed
 Zotero
 calibre
 iMazing
 kindaVim
 logioptionsplus
-pcsuite
 qBittorrent
-zoom.us
 小宇宙
 小红书
 集换社
