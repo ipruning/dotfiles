@@ -3,7 +3,7 @@ fpath=("$HOME/dotfiles/config/shell/completions" $fpath)
 
 autoload -Uz compinit
 
-if [ $(date +'%j') != $(/usr/bin/stat -f '%Sm' -t '%j' $HOME/.zcompdump) ]; then
+if [[ -n ~/.zcompdump(#qN.mh+24) ]]; then
   compinit
 else
   compinit -C
