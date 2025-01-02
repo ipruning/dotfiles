@@ -66,25 +66,6 @@
       "space 9": ["pane::ActivateItem", 8],
       "space 0": "pane::ActivateLastItem",
 
-      "space f": "editor::Format",
-      "space b": "editor::ToggleGitBlame",
-
-      "space t": "task::Spawn",
-      "space shift-t": "task::Rerun",
-
-      "space space": "file_finder::Toggle",
-      "space r": "projects::OpenRecent",
-      "space shift-r": "projects::OpenRemote",
-      "space g b": "branches::OpenRecent",
-
-      "space a": "assistant::ToggleFocus",
-      "space e": "pane::RevealInProjectPanel",
-      "space x": "diagnostics::Deploy",
-
-      "space c g u": ["task::Spawn", { "task_name": "gitu", "reveal_target": "center" }],
-      "space c l g": ["task::Spawn", { "task_name": "lazygit", "reveal_target": "center" }],
-      "space c t": ["workspace::SendKeystrokes", ": new center terminal enter"],
-
       "tab": "editor::Indent",
       "shift-tab": "editor::TabPrev"
     }
@@ -107,7 +88,26 @@
 
       "g d": "editor::GoToDefinition",
       "g D": "editor::GoToDefinitionSplit",
-      "g r": "editor::FindAllReferences"
+      "g r": "editor::FindAllReferences",
+
+      "space f": "editor::Format",
+      "space b": "editor::ToggleGitBlame",
+
+      "space t": "task::Spawn",
+      "space shift-t": "task::Rerun",
+
+      "space space": "file_finder::Toggle",
+      "space r": "projects::OpenRecent",
+      "space shift-r": "projects::OpenRemote",
+      "space g b": "branches::OpenRecent",
+
+      "space a": "assistant::ToggleFocus",
+      "space e": "pane::RevealInProjectPanel",
+      "space x": "diagnostics::Deploy",
+
+      "space g u": ["task::Spawn", { "task_name": "gitu", "reveal_target": "center" }],
+      "space l g": ["task::Spawn", { "task_name": "lazygit", "reveal_target": "center" }],
+      "space s t": ["workspace::SendKeystrokes", ": new center terminal enter"],
     }
   },
   {
