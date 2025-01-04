@@ -53,7 +53,6 @@ bindkey "^E" end-of-line
 bindkey "^[[1;3C" forward-word
 bindkey "^[[1;3D" backward-word
 
-
 # 👇 My binaries
 export PATH="$HOME/dotfiles/bin:$PATH"
 

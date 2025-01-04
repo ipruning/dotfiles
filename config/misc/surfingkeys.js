@@ -145,7 +145,7 @@ api.unmap("s", /\b(kagi\.com)\b/i); // Open site info modal on the currently hig
 api.unmap("?", /\b(x\.com)\b/i);
 api.unmap("j", /\b(x\.com)\b/i); // Navigation
 api.unmap("k", /\b(x\.com)\b/i); // Navigation
-api.unmap("g", /\b(x\.com)\b/i); // Navigation 
+api.unmap("g", /\b(x\.com)\b/i); // Navigation
 api.unmap("/", /\b(x\.com)\b/i); // Search
 api.unmap(".", /\b(x\.com)\b/i); // Refresh
 api.unmap("n", /\b(x\.com)\b/i); // New post
@@ -157,6 +157,3 @@ api.unmap("u", /\b(x\.com)\b/i); // Mute account
 
 api.unmap("?", /\b(github\.com)\b/i);
 api.unmap("/", /\b(github\.com)\b/i); // Search
-
-api.unmap("r", /\b(roamresearch\.com)\b/i);
-api.unmap("esc", /\b(roamresearch\.com)\b/i);
