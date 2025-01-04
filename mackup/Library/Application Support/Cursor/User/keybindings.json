@@ -1,9 +1,5 @@
 [
   {
-    "command": "code-runner.run",
-    "key": "cmd+r cmd+r"
-  },
-  {
     "key": "shift+cmd+b",
     "command": "workbench.action.toggleAuxiliaryBar"
   },
@@ -22,11 +18,6 @@
     "when": "editorFocus && !composerBarIsVisible"
   },
   {
-    "key": "cmd+k",
-    "command": "-aipopup.action.modal.generate",
-    "when": "editorFocus && !composerBarIsVisible"
-  },
-  {
     "key": "shift+cmd+,",
     "command": "aichat.insertselectionintochat"
   },
@@ -34,114 +25,4 @@
     "key": "shift+cmd+l",
     "command": "-aichat.insertselectionintochat"
   },
-  {
-    "key": "ctrl+y",
-    "command": "editor.action.inlineEdit.accept",
-    "when": "cursorAtInlineEdit && inlineEditVisible && !editorReadonly"
-  },
-  {
-    "key": "tab",
-    "command": "-editor.action.inlineEdit.accept",
-    "when": "cursorAtInlineEdit && inlineEditVisible && !editorReadonly"
-  },
-  {
-    "key": "ctrl+y",
-    "command": "editor.action.inlineSuggest.commit",
-    "when": "inlineSuggestionHasIndentationLessThanTabSize && inlineSuggestionVisible && !editorHoverFocused && !editorTabMovesFocus && !suggestWidgetVisible"
-  },
-  {
-    "key": "tab",
-    "command": "-editor.action.inlineSuggest.commit",
-    "when": "inlineSuggestionHasIndentationLessThanTabSize && inlineSuggestionVisible && !editorHoverFocused && !editorTabMovesFocus && !suggestWidgetVisible"
-  },
-  {
-    "key": "ctrl+y",
-    "command": "acceptSelectedSuggestion",
-    "when": "suggestWidgetHasFocusedSuggestion && suggestWidgetVisible && textInputFocus"
-  },
-  {
-    "key": "tab",
-    "command": "-acceptSelectedSuggestion",
-    "when": "suggestWidgetHasFocusedSuggestion && suggestWidgetVisible && textInputFocus"
-  },
-  {
-    "key": "ctrl+y",
-    "command": "insertBestCompletion",
-    "when": "atEndOfWord && textInputFocus && !hasOtherSuggestions && !inSnippetMode && !suggestWidgetVisible && config.editor.tabCompletion == 'on'"
-  },
-  {
-    "key": "tab",
-    "command": "-insertBestCompletion",
-    "when": "atEndOfWord && textInputFocus && !hasOtherSuggestions && !inSnippetMode && !suggestWidgetVisible && config.editor.tabCompletion == 'on'"
-  },
-  {
-    "key": "ctrl+y",
-    "command": "insertNextSuggestion",
-    "when": "hasOtherSuggestions && textInputFocus && !inSnippetMode && !suggestWidgetVisible && config.editor.tabCompletion == 'on'"
-  },
-  {
-    "key": "tab",
-    "command": "-insertNextSuggestion",
-    "when": "hasOtherSuggestions && textInputFocus && !inSnippetMode && !suggestWidgetVisible && config.editor.tabCompletion == 'on'"
-  },
-  {
-    "key": "ctrl+y",
-    "command": "insertSnippet",
-    "when": "editorTextFocus && hasSnippetCompletions && !editorTabMovesFocus && !inSnippetMode"
-  },
-  {
-    "key": "tab",
-    "command": "-insertSnippet",
-    "when": "editorTextFocus && hasSnippetCompletions && !editorTabMovesFocus && !inSnippetMode"
-  },
-  {
-    "key": "ctrl+y",
-    "command": "workbench.action.terminal.acceptSelectedSuggestion",
-    "when": "terminalFocus && terminalHasBeenCreated && terminalIsOpen && terminalSuggestWidgetVisible || terminalFocus && terminalIsOpen && terminalProcessSupported && terminalSuggestWidgetVisible"
-  },
-  {
-    "key": "tab",
-    "command": "-workbench.action.terminal.acceptSelectedSuggestion",
-    "when": "terminalFocus && terminalHasBeenCreated && terminalIsOpen && terminalSuggestWidgetVisible || terminalFocus && terminalIsOpen && terminalProcessSupported && terminalSuggestWidgetVisible"
-  },
-  {
-    "key": "ctrl+y",
-    "command": "workbench.action.terminal.focusAccessibleBuffer",
-    "when": "accessibilityModeEnabled && terminalFocus && terminalHasBeenCreated || accessibilityModeEnabled && terminalFocus && terminalProcessSupported"
-  },
-  {
-    "key": "cmd+up",
-    "command": "-workbench.action.terminal.focusAccessibleBuffer",
-    "when": "accessibilityModeEnabled && terminalFocus && terminalHasBeenCreated || accessibilityModeEnabled && terminalFocus && terminalProcessSupported"
-  },
-  {
-    "key": "ctrl+y",
-    "command": "editor.emmet.action.expandAbbreviation",
-    "when": "config.emmet.triggerExpansionOnTab && editorTextFocus && !editorReadonly && !editorTabMovesFocus"
-  },
-  {
-    "key": "tab",
-    "command": "-editor.emmet.action.expandAbbreviation",
-    "when": "config.emmet.triggerExpansionOnTab && editorTextFocus && !editorReadonly && !editorTabMovesFocus"
-  },
-  {
-    "key": "ctrl+y",
-    "command": "editor.action.acceptGPT4",
-    "when": "hasGPT4Diff"
-  },
-  {
-    "key": "tab",
-    "command": "-editor.action.acceptGPT4",
-    "when": "hasGPT4Diff"
-  },
-  {
-    "key": "ctrl+y",
-    "command": "jumpToNextSnippetPlaceholder",
-    "when": "hasNextTabstop && inSnippetMode && textInputFocus"
-  },
-  {
-    "key": "tab",
-    "command": "-jumpToNextSnippetPlaceholder",
-    "when": "hasNextTabstop && inSnippetMode && textInputFocus"
-  }
 ]
