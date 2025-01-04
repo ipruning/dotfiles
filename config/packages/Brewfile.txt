@@ -23,7 +23,6 @@ extra-cmake-modules
 eza
 fastfetch
 fd
-fftw
 fpp
 fzf
 genact
@@ -36,7 +35,6 @@ gitu
 glow
 graphviz
 grex
-harlequin
 hdf5
 htop
 httm
@@ -85,7 +83,6 @@ sqlfluff
 sqlite-utils
 starship
 tealdeer
-termscp
 tmux
 tokei
 tursodatabase/tap/turso
