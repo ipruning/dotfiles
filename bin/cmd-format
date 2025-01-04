@@ -1,0 +1,21 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+
+# Format command arguments for better readability and comparison
+# Usage: cmd-format <command> [arguments...]
+
+my $input = join " ", @ARGV;
+$input =~ s/\s+$//;  # Remove trailing whitespace
+$input =~ s/=/ /g;   # Convert equals to spaces
+$input =~ s/\s+/ /g; # Normalize spaces
+
+# Split into command and args, keeping the -- prefix
+my ($cmd, @args) = split /(?=--)/, $input;
+
+# Remove any leading/trailing spaces from command and args
+$cmd =~ s/^\s+|\s+$//g;
+@args = map { s/^\s+|\s+$//g; $_ } @args;
+
+# Output formatted command
+print join "\\\n", ($cmd, sort @args);
