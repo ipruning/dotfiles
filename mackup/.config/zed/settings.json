@@ -9,11 +9,12 @@
   },
   "auto_install_extensions": {
     "basedpyright": true,
-    "catppuccin": true,
     "ruff": true
   },
   "autosave": "on_focus_change",
-  "buffer_font_fallbacks": ["JetBrainsMono Nerd Font"],
+  "buffer_font_fallbacks": [
+    "JetBrainsMono Nerd Font"
+  ],
   "buffer_font_family": "MonoLisa",
   "buffer_font_size": 13,
   "chat_panel": {
@@ -35,6 +36,12 @@
     "enabled": true
   },
   "languages": {
+    "JavaScript": {
+      "language_servers": [
+        "typescript-language-server",
+        "!vtsls"
+      ]
+    },
     "Python": {
       "format_on_save": "on",
       "formatter": [
@@ -55,7 +62,22 @@
         "coloring": "indent_aware",
         "enabled": true
       },
-      "language_servers": ["basedpyright", "ruff"]
+      "language_servers": [
+        "basedpyright",
+        "ruff"
+      ]
+    },
+    "TSX": {
+      "language_servers": [
+        "typescript-language-server",
+        "!vtsls"
+      ]
+    },
+    "TypeScript": {
+      "language_servers": [
+        "typescript-language-server",
+        "!vtsls"
+      ]
     }
   },
   "outline_panel": {
@@ -71,6 +93,19 @@
     "show": "never"
   },
   "show_inline_completions": true,
+  "ssh_connections": [
+    {
+      "host": "101.126.71.13",
+      "projects": [
+        {
+          "paths": [
+            "~/tcgspider"
+          ]
+        }
+      ],
+      "username": "root"
+    }
+  ],
   "tabs": {
     "file_icons": true,
     "git_status": true
