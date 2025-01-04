@@ -9,9 +9,9 @@
   {
     "context": "Terminal",
     "bindings": {
-      "ctrl-s e": "terminal::ToggleViMode",
-      "ctrl-n": "pane::SplitRight",
-      "ctrl-shift-n": "workspace::NewTerminal"
+      "cmd-b e": "terminal::ToggleViMode",
+      "cmd-n": "pane::SplitRight",
+      "cmd-shift-n": "workspace::NewTerminal"
     }
   },
   {
@@ -107,7 +107,7 @@
 
       "space g u": ["task::Spawn", { "task_name": "gitu", "reveal_target": "center" }],
       "space l g": ["task::Spawn", { "task_name": "lazygit", "reveal_target": "center" }],
-      "space s t": ["workspace::SendKeystrokes", ": new center terminal enter"],
+      "space s t": ["workspace::SendKeystrokes", ": new center terminal enter"]
     }
   },
   {
