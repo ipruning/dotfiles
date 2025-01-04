@@ -12,7 +12,6 @@ Avenue
 BaiduNetdisk_mac
 Balatro
 BetterDisplay
-Binance
 Bob
 Capture One
 Chromium
@@ -73,6 +72,7 @@ ProNotes
 QQ
 Raycast
 Rectangle
+Red Canary Mac Monitor
 RepoPrompt
 Reqable
 Rond

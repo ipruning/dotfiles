@@ -8,6 +8,7 @@ DevUtils
 Downie
 Focus 2
 ForkLift
+HazeOver
 Hookmark
 HoudahSpot
 Hustl
