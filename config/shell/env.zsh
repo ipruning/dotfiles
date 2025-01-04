@@ -37,6 +37,7 @@ export FZF_DEFAULT_OPTS=" \
 # 👇 fzf-tab
 source "$ZSH_PLUGINS_DIR"/fzf-tab/fzf-tab.plugin.zsh
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
+zstyle ':fzf-tab:*' continuous-trigger 'ctrl-y'
 
 # 👇 My preferred editor for local and remote sessions
 if [[ -n $SSH_CONNECTION || "$TERM_PROGRAM" != "zed" ]]; then
@@ -48,10 +49,10 @@ else
 fi
 
 # 👇 My keybindings
+bindkey "^[f" forward-word
+bindkey "^[b" backward-word
 bindkey "^A" beginning-of-line
 bindkey "^E" end-of-line
-bindkey "^[[1;3C" forward-word
-bindkey "^[[1;3D" backward-word
 
 # 👇 My binaries
 export PATH="$HOME/dotfiles/bin:$PATH"

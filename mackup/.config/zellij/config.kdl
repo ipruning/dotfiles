@@ -183,24 +183,15 @@ keybinds clear-defaults=true {
                 quick_jump true
             }
         }
+        bind "Ctrl N" { NewPane; }
+        bind "Ctrl T" { NewTab; }
 
-        bind "Alt i" { MoveTab "Left"; }
-        bind "Alt o" { MoveTab "Right"; }
+        bind "Ctrl F" { ToggleFloatingPanes; }
 
-        bind "Alt =" { Resize "Increase"; }
-        bind "Alt -" { Resize "Decrease"; }
-
-        bind "Alt [" { PreviousSwapLayout; }
-        bind "Alt ]" { NextSwapLayout; }
-
-        bind "Alt n" { NewPane; }
-        bind "Alt N" { NewTab; }
-        bind "Alt f" { ToggleFloatingPanes; }
-
-        bind "Alt h" { MoveFocusOrTab "Left"; }
-        bind "Alt j" { MoveFocus "Down"; }
-        bind "Alt k" { MoveFocus "Up"; }
-        bind "Alt l" { MoveFocusOrTab "Right"; }
+        bind "Ctrl H" { MoveFocusOrTab "Left"; }
+        bind "Ctrl J" { MoveFocus "Down"; }
+        bind "Ctrl K" { MoveFocus "Up"; }
+        bind "Ctrl L" { MoveFocusOrTab "Right"; }
     }
 }
 
