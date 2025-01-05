@@ -3,7 +3,7 @@
     "context": "Workspace",
     "bindings": {
       "cmd-b": "workspace::ToggleRightDock",
-      "cmd-shift-b": "workspace::ToggleLeftDock"
+      "cmd-shift-b": "workspace::ToggleLeftDock",
     }
   },
   {
@@ -11,7 +11,7 @@
     "bindings": {
       "cmd-b e": "terminal::ToggleViMode",
       "cmd-n": "pane::SplitRight",
-      "cmd-shift-n": "workspace::NewTerminal"
+      "cmd-t": "workspace::NewTerminal"
     }
   },
   {
@@ -106,8 +106,9 @@
       "space x": "diagnostics::Deploy",
 
       "space g u": ["task::Spawn", { "task_name": "gitu", "reveal_target": "center" }],
+      "space g f": ["task::Spawn", { "task_name": "gfold", "reveal_target": "center" }],
       "space l g": ["task::Spawn", { "task_name": "lazygit", "reveal_target": "center" }],
-      "space s t": ["workspace::SendKeystrokes", ": new center terminal enter"]
+      "space c t": ["workspace::SendKeystrokes", ": new center terminal enter"]
     }
   },
   {

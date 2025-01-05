@@ -2,12 +2,7 @@
 fpath=("$HOME/dotfiles/config/shell/completions" $fpath)
 
 autoload -Uz compinit
-
-if [[ -n ~/.zcompdump(#qN.mh+24) ]]; then
-  compinit
-else
-  compinit -C
-fi
+compinit
 
 # 👇 zsh Theme
 eval "$(starship init zsh)"
@@ -16,6 +11,7 @@ eval "$(starship init zsh)"
 setopt NO_NOMATCH
 setopt NO_NULL_GLOB
 setopt interactivecomments
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
 
 # 👇 fast-syntax-highlighting https://github.com/catppuccin/zsh-fsh
 ZSH_PLUGINS_DIR="$HOME/dotfiles/config/shell/plugins"
@@ -36,7 +32,6 @@ export FZF_DEFAULT_OPTS=" \
 
 # 👇 fzf-tab
 source "$ZSH_PLUGINS_DIR"/fzf-tab/fzf-tab.plugin.zsh
-zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
 zstyle ':fzf-tab:*' continuous-trigger 'ctrl-y'
 
 # 👇 My preferred editor for local and remote sessions
