@@ -169,6 +169,10 @@ if.app-id = 'com.apple.ScreenSharing'
 run = 'layout floating'
 
 [[on-window-detected]]
+if.app-id = 'codes.rambo.VirtualBuddy'
+run = 'layout floating'
+
+[[on-window-detected]]
 if.app-id = 'com.todesktop.230313mzl4w4u92'
 run = 'move-node-to-workspace a'
 

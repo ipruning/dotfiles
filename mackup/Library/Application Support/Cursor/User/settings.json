@@ -298,7 +298,6 @@
   "sqlfluff.executablePath": "/opt/homebrew/bin/sqlfluff",
   "terminal.integrated.confirmOnExit": "hasChildProcesses",
   "terminal.integrated.defaultProfile.osx": "zsh",
-  "terminal.integrated.fontFamily": "'MonoLisa', 'JetBrainsMono Nerd Font'",
   "terminal.integrated.fontSize": 13,
   "terminal.integrated.inheritEnv": true,
   "vim.leader": "<space>",

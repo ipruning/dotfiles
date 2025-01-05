@@ -1,7 +1,5 @@
 palette = "catppuccin_mocha"
-format = '''
-(bold green)$sudo$directory$python$package$all$custom$character
-'''
+format = "$sudo$directory$package$all$custom$character"
 add_newline = false
 command_timeout = 1_000
 
@@ -34,7 +32,6 @@ mantle = "#181825"
 crust = "#11111b"
 
 [conda]
-format = '[$symbol$environment](dimmed green) '
 ignore_base = false
 
 [character]
@@ -85,7 +82,6 @@ symbol = ' '
 symbol = ' '
 
 [python]
-format = '[${symbol}${pyenv_prefix}(${version} )(\($virtualenv\) )]($style)'
 symbol = ' '
 
 [ruby]
@@ -99,14 +95,6 @@ symbol = ' '
 
 [package]
 symbol = ' '
-
-[aws]
-symbol = ' '
-disabled = true
-
-[gcloud]
-symbol = ' '
-disabled = true
 
 [sudo]
 format = '[$symbol]($style)'
