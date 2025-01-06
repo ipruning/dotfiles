@@ -1,11 +1,8 @@
 .DS_Store
-
+*backups/
+*private.bash
+*private.zsh
 bin/clip
 bin/cwim
-
-config/shell/env_private.zsh
-
 config/shell/completions/
 config/shell/plugins/
-
-*backups/

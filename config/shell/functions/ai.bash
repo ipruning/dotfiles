@@ -1,21 +1,21 @@
-function catfiles() {
-  local file_count=0
-  for file in "$@"; do
-    if [ -d "$file" ]; then
-      echo "Skipping directory: $file" >&2
-      continue
-    fi
-    if [[ -r "$file" ]]; then
-      echo "File Name: $(basename "$file")"
-      echo "File Content:"
-      cat "$file"
-      echo ""
-      ((file_count++))
-    else
-      echo "Error: Cannot read $file" >&2
-    fi
-  done
-  echo "Total files processed: $file_count"
+function ccurl() {
+  if [ $# -eq 0 ]; then
+    echo "Error: No URL provided" >&2
+    echo "Usage: ccurl <URL>" >&2
+    exit 1
+  fi
+
+  url="$1"
+
+  if [[ ! "$url" =~ ^[a-zA-Z0-9._/:%-]+$ ]]; then
+    echo "Error: Invalid URL format" >&2
+    exit 1
+  fi
+
+  if ! curl -fSL "https://r.jina.ai/$url" 2>/dev/null; then
+    echo "Error: Failed to fetch https://r.jina.ai/$url" >&2
+    exit 1
+  fi
 }
 
 function buffit() {
@@ -53,6 +53,26 @@ function prompt() {
     echo "$prompt_text"
     echo "</prompt>"
   fi
+}
+
+function catfiles() {
+  local file_count=0
+  for file in "$@"; do
+    if [ -d "$file" ]; then
+      echo "Skipping directory: $file" >&2
+      continue
+    fi
+    if [[ -r "$file" ]]; then
+      echo "File Name: $(basename "$file")"
+      echo "File Content:"
+      cat "$file"
+      echo ""
+      ((file_count++))
+    else
+      echo "Error: Cannot read $file" >&2
+    fi
+  done
+  echo "Total files processed: $file_count"
 }
 
 function catscreen() {

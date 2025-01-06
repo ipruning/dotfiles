@@ -12,11 +12,11 @@ trap 'rm -f "$tmp1" "$tmp2"' EXIT
 
 echo "Enter first command:"
 read -r cmd1
-cmd-format $cmd1 > "$tmp1"
+cmd-format "$cmd1" > "$tmp1"
 
 echo "Enter second command:"
 read -r cmd2
-cmd-format $cmd2 > "$tmp2"
+cmd-format "$cmd2" > "$tmp2"
 
 # Show diff with colors
 diff --color=always "$tmp1" "$tmp2" || true 

@@ -7,7 +7,6 @@ AlexSideBar
 Alfred 5
 AltTab
 Anki
-Apparency
 Avenue
 BaiduNetdisk_mac
 Balatro
@@ -31,13 +30,12 @@ Ghostty
 Google Chrome
 Google Drive
 Heptabase
+Homerow
 Hush
 IINA
 Ice
 Immersive Translate
 Input Source Pro
-Jan
-Jetpack Joyride 2
 Kagi for Safari
 Karabiner-Elements
 Karabiner-EventViewer
@@ -64,7 +62,6 @@ OnyX
 OrbStack
 PDF Expert
 Pages
-Parsec
 PasteNow
 Pearcleaner
 PlayCover
@@ -87,7 +84,6 @@ Skim
 Steam
 Surfingkeys
 Surge
-Suspicious Package
 Syntax Highlight
 TabTab
 Tampermonkey
@@ -103,7 +99,6 @@ VirtualBuddy
 WeChat
 Whisper Transcription
 Wireshark
-Wispr Flow
 Wooshy
 XLD
 Xcode-16.2.0

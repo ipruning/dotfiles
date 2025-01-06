@@ -1,7 +1,3 @@
-function r-fava() {
-  fava ${HOME}/Databases/Ledger/main.bean -p 4000
-}
-
 function r-completion() {
   echo -e "\033[33mGenerating completions...\033[0m"
   rm -f ~/.zcompdump
@@ -38,10 +34,9 @@ function r-backup() {
   brew bundle dump --file="$HOME"/dotfiles/config/packages/Brewfile --force
   brew leaves >"$HOME"/dotfiles/config/packages/Brewfile.txt
   brew update
-  cp "$HOME"/.zsh_history "$HOME"/Databases/Backup/CLI/zsh_history_$(date +\%Y_\%m_\%d_\%H_\%M_\%S).bak
   gh extension list | awk '{print $3}' >"$HOME"/dotfiles/config/packages/gh_extensions.txt
-  ls /Applications | rg '\.app' | sed 's/\.app//g' >"$HOME"/dotfiles/config/packages/macos_applications.txt
-  ls /Applications/Setapp | rg '\.app' | sed 's/\.app//g' >"$HOME"/dotfiles/config/packages/macos_setapp.txt
+  find /Applications -maxdepth 1 -name "*.app" -exec basename {} .app \; >"$HOME"/dotfiles/config/packages/macos_applications.txt
+  find /Applications/Setapp -maxdepth 1 -name "*.app" -exec basename {} .app \; >"$HOME"/dotfiles/config/packages/macos_setapp.txt
 }
 
 function zj() {
@@ -66,7 +61,7 @@ function zj() {
     if [[ "$session_count" -eq 1 ]]; then
       # If only one session exists, attach directly
       local session=$(echo "$sessions" | awk '{print $1}')
-      zellij attach "$session"
+      zellij attach "${session}"
     else
       # Multiple sessions - show selection with all sessions
       local session=$(echo "$sessions" | awk '{
@@ -76,7 +71,7 @@ function zj() {
       }' | column -t -s $'\t' | fzf --ansi --exit-0 --header="Select a session to attach (or press Esc to create new):" | awk '{print $1}')
 
       if [[ -n "$session" ]]; then
-        zellij attach "$session"
+        zellij attach "${session}"
       else
         zellij
       fi
