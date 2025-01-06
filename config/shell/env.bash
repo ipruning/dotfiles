@@ -1,5 +1,5 @@
 # 👇 completions
-fpath=("$HOME/dotfiles/config/shell/completions" $fpath)
+fpath=("$HOME/dotfiles/config/shell/completions" "${fpath[@]}")
 
 autoload -Uz compinit
 compinit
@@ -11,18 +11,17 @@ eval "$(starship init zsh)"
 setopt NO_NOMATCH
 setopt NO_NULL_GLOB
 setopt interactivecomments
-zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
+zstyle ":completion:*" matcher-list "m:{a-z}={A-Za-z}"
 
 # 👇 fast-syntax-highlighting https://github.com/catppuccin/zsh-fsh
 ZSH_PLUGINS_DIR="$HOME/dotfiles/config/shell/plugins"
 source "$ZSH_PLUGINS_DIR"/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
 
 # 👇 fzf
+# shellcheck disable=SC1090
 source <(fzf --zsh)
-export FZF_ALT_C_COMMAND=""
-export FZF_CTRL_T_COMMAND=""
-export FZF_COMPLETION_TRIGGER='jk'
-export FZF_DEFAULT_COMMAND="fd --type file --strip-cwd-prefix --ignore-file ~/.gitignore"
+export FZF_COMPLETION_TRIGGER="jk"
+export FZF_DEFAULT_COMMAND="fd --type file --strip-cwd-prefix --hidden --follow --exclude .git --exclude .DS_Store"
 export FZF_DEFAULT_OPTS=" \
 --color=bg+:#313244,bg:#1e1e2e,spinner:#f5e0dc,hl:#f38ba8 \
 --color=fg:#cdd6f4,header:#f38ba8,info:#cba6f7,pointer:#f5e0dc \
@@ -32,22 +31,18 @@ export FZF_DEFAULT_OPTS=" \
 
 # 👇 fzf-tab
 source "$ZSH_PLUGINS_DIR"/fzf-tab/fzf-tab.plugin.zsh
-zstyle ':fzf-tab:*' continuous-trigger 'ctrl-y'
+zstyle ":fzf-tab:*" continuous-trigger "ctrl-y"
 
 # 👇 My preferred editor for local and remote sessions
-if [[ -n $SSH_CONNECTION || "$TERM_PROGRAM" != "zed" ]]; then
-  export EDITOR='nvim'
-  export VISUAL='nvim'
-else
-  export EDITOR='zed --wait'
-  export VISUAL='zed --wait'
-fi
+export EDITOR="zed --wait"
+export VISUAL="zed --wait"
 
 # 👇 My keybindings
 bindkey "^[f" forward-word
 bindkey "^[b" backward-word
 bindkey "^A" beginning-of-line
 bindkey "^E" end-of-line
+bindkey "^D" delete-word
 
 # 👇 My binaries
 export PATH="$HOME/dotfiles/bin:$PATH"
@@ -61,7 +56,7 @@ export CPPFLAGS="-I/opt/homebrew/opt/postgresql@17/include"
 export PATH="/opt/homebrew/opt/postgresql@17/bin:$PATH"
 
 # 👇 OrbStack
-source ~/.orbstack/shell/init.zsh 2>/dev/null || :
+source "$HOME/.orbstack/shell/init.zsh" 2>/dev/null || :
 
 # 👇 atuin
 eval "$(atuin init zsh)"

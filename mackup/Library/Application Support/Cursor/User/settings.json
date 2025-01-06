@@ -89,6 +89,7 @@
   "code-runner.preserveFocus": false,
   "code-runner.runInTerminal": true,
   "code-runner.saveFileBeforeRun": true,
+  "cursor.cpp.disabledLanguages": [],
   "diffEditor.ignoreTrimWhitespace": false,
   "diffEditor.maxComputationTime": 8192,
   "diffEditor.renderSideBySide": true,
