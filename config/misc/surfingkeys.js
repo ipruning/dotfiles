@@ -18,10 +18,6 @@ const SEARCH_ENGINE = "https://kagi.com/search?q=";
 api.addSearchAlias("k", "kagi", SEARCH_ENGINE, "s");
 settings.defaultSearchEngine = "k";
 
-// Scrolling controls
-api.mapkey("<Ctrl-d>", "Scroll down half page", () => api.Normal.scroll("pageDown"));
-api.mapkey("<Ctrl-u>", "Scroll up half page", () => api.Normal.scroll("pageUp"));
-
 // URL and clipboard operations
 api.mapkey("ym", "Copy current page URL as Markdown link", () =>
   api.Clipboard.write(`[${document.title}](${window.location.href})`),
@@ -103,36 +99,6 @@ api.mapkey("P", "Enter PassThrough mode", () => {
   api.Normal.passThrough(TIMEOUT_LONG_MS);
 });
 
-const UNMAP_ALL_DOMAINS_REGEX = /\b(feishu\.cn|monkeytype\.com|notion\.so|roamresearch\.com)\b/i;
-
-api.unmapAllExcept(
-  [
-    // Scrolling
-    "<Ctrl-d>",
-    "<Ctrl-u>",
-    "e",
-    "d",
-    // Navigation
-    "E",
-    "R",
-    "B",
-    "F",
-    // Tabs
-    "S",
-    "D",
-    "x",
-    "X",
-    // Misc
-    ";",
-    "t",
-    "T",
-    "i",
-    "p",
-    "P",
-  ],
-  UNMAP_ALL_DOMAINS_REGEX,
-);
-
 api.unmap("?", /\b(kagi\.com)\b/i);
 api.unmap("h", /\b(kagi\.com)\b/i); // Navigation
 api.unmap("j", /\b(kagi\.com)\b/i); // Navigation
@@ -155,5 +121,24 @@ api.unmap("r", /\b(x\.com)\b/i); // Reply
 api.unmap("s", /\b(x\.com)\b/i); // Share post
 api.unmap("u", /\b(x\.com)\b/i); // Mute account
 
-api.unmap("?", /\b(github\.com)\b/i);
-api.unmap("/", /\b(github\.com)\b/i); // Search
+api.unmapAllExcept(
+  [
+    // Scrolling
+    "e",
+    "d",
+    // Navigation
+    "E",
+    "R",
+    "B",
+    "F",
+    // Tabs
+    "S",
+    "D",
+    // Misc
+    "t",
+    "T",
+    "p",
+    "P",
+  ],
+  /roamresearch.com|monkeytype.com/,
+);

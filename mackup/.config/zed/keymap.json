@@ -9,7 +9,7 @@
   {
     "context": "Terminal",
     "bindings": {
-      "cmd-b e": "terminal::ToggleViMode",
+      "ctrl-shift-e": "terminal::ToggleViMode",
       "cmd-n": "pane::SplitRight",
       "cmd-t": "workspace::NewTerminal"
     }
@@ -19,7 +19,8 @@
     "bindings": {
       "space space": "file_finder::Toggle",
       "space r": "projects::OpenRecent",
-      "space shift-r": "projects::OpenRemote"
+      "space shift-r": "projects::OpenRemote",
+      "ctrl-shift-r": "projects::OpenRecent"
     }
   },
   {
@@ -99,6 +100,7 @@
       "space space": "file_finder::Toggle",
       "space r": "projects::OpenRecent",
       "space shift-r": "projects::OpenRemote",
+      "ctrl-shift-r": "projects::OpenRecent",
       "space g b": "branches::OpenRecent",
 
       "space a": "assistant::ToggleFocus",
