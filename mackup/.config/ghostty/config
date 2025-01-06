@@ -15,10 +15,10 @@ quick-terminal-animation-duration = 0
 quick-terminal-screen = macos-menu-bar
 keybind = global:alt+shift+t=toggle_quick_terminal
 
-keybind = cmd+r=text:\x7a\x6a\x0a
-
-keybind = cmd+b>r=reload_config
-keybind = cmd+b>e=write_screen_file:open
+keybind = ctrl+shift+r=text:\x7a\x6a\x0a
+keybind = ctrl+shift+u=scroll_page_up
+keybind = ctrl+shift+d=scroll_page_down
+keybind = ctrl+shift+e=write_screen_file:open
 
 keybind = cmd+n=new_split:right
 keybind = cmd+shift+n=new_window

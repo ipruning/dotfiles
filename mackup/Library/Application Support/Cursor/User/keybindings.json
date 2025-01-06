@@ -25,4 +25,12 @@
     "key": "shift+cmd+l",
     "command": "-aichat.insertselectionintochat"
   },
+  {
+    "key": "ctrl+shift+r",
+    "command": "workbench.action.openRecent"
+  },
+  {
+    "key": "ctrl+r",
+    "command": "-workbench.action.openRecent"
+  },
 ]
