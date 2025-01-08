@@ -1,5 +1,6 @@
-1Password for Safari
+.Karabiner-VirtualHIDDevice-Manager
 1Password
+1Password for Safari
 A Better Finder Attributes 7
 AdGuard for Safari
 AeroSpace
@@ -13,6 +14,7 @@ Balatro
 BetterDisplay
 Bob
 Capture One
+ChatGPT
 Chromium
 Contexts
 CrossOver
@@ -55,9 +57,9 @@ MongoDB Compass
 Mos
 MusicHarbor
 NeteaseMusic
+Notion Calendar
 Numbers
 OBS
-OneDrive
 OnyX
 OrbStack
 PDF Expert
@@ -72,6 +74,7 @@ Rectangle
 Red Canary Mac Monitor
 RepoPrompt
 Reqable
+Roam Research
 Rond
 Rotato
 Safari
@@ -101,8 +104,8 @@ Whisper Transcription
 Wireshark
 Wooshy
 XLD
-Xcode-16.2.0
 Xcode
+Xcode-16.2.0
 Xcodes
 YACReader
 YACReaderLibrary

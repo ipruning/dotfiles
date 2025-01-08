@@ -4,7 +4,6 @@ atuin
 autoconf
 autocorrect
 basedpyright
-bash
 bat
 bore-cli
 btop
@@ -24,7 +23,6 @@ eza
 fastfetch
 fd
 fpp
-fzf
 genact
 gfold
 gh
@@ -68,7 +66,6 @@ parallel-disk-usage
 pre-commit
 procs
 pueue
-pyright
 python@3.11
 rclone
 rip2
@@ -88,6 +85,7 @@ tokei
 tursodatabase/tap/turso
 typos-cli
 typst
+ugit
 uv
 whisperkit-cli
 yazi
