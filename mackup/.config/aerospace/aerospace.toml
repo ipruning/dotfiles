@@ -17,8 +17,8 @@ outer.top = 8
 outer.right = 8
 
 [mode.main.binding]
-alt-g = 'mode pass'
-alt-w = 'mode prefix'
+alt-p = 'mode pass'
+alt-g = 'mode prefix'
 
 alt-comma = 'layout accordion vertical horizontal'
 alt-period = 'layout tiles vertical horizontal'
@@ -29,25 +29,25 @@ alt-t =  'exec-and-forget open -a /Applications/Ghostty.app'
 alt-v = 'exec-and-forget open -a /Applications/Cursor.app'
 alt-z = 'exec-and-forget open -a /Applications/Zed.app'
 
-alt-1 = 'workspace 1'
-alt-2 = 'workspace 2'
-alt-3 = 'workspace 3'
-alt-4 = 'workspace 4'
-alt-5 = 'workspace 5'
-alt-a = 'workspace a'
-alt-s = 'workspace s'
-alt-d = 'workspace d'
-alt-f = 'workspace f'
+alt-6 = 'workspace 6'
+alt-7 = 'workspace 7'
+alt-8 = 'workspace 8'
+alt-9 = 'workspace 9'
+alt-0 = 'workspace 0'
+alt-y = 'workspace y'
+alt-u = 'workspace u'
+alt-i = 'workspace i'
+alt-o = 'workspace o'
 
-alt-shift-1 = 'move-node-to-workspace 1'
-alt-shift-2 = 'move-node-to-workspace 2'
-alt-shift-3 = 'move-node-to-workspace 3'
-alt-shift-4 = 'move-node-to-workspace 4'
-alt-shift-5 = 'move-node-to-workspace 5'
-alt-shift-a = 'move-node-to-workspace a'
-alt-shift-s = 'move-node-to-workspace s'
-alt-shift-d = 'move-node-to-workspace d'
-alt-shift-f = 'move-node-to-workspace f'
+alt-shift-6 = 'move-node-to-workspace 6'
+alt-shift-7 = 'move-node-to-workspace 7'
+alt-shift-8 = 'move-node-to-workspace 8'
+alt-shift-9 = 'move-node-to-workspace 9'
+alt-shift-0 = 'move-node-to-workspace 0'
+alt-shift-y = 'move-node-to-workspace y'
+alt-shift-u = 'move-node-to-workspace u'
+alt-shift-i = 'move-node-to-workspace i'
+alt-shift-o = 'move-node-to-workspace o'
 
 alt-h = 'focus left --boundaries all-monitors-outer-frame'
 alt-j = 'focus down --boundaries all-monitors-outer-frame'
@@ -63,7 +63,7 @@ cmd-m = []
 cmd-h = []
 
 [mode.pass.binding]
-alt-g = 'mode main'
+alt-p = 'mode main'
 
 [mode.prefix.binding]
 esc = 'mode main'
@@ -174,16 +174,36 @@ run = 'layout floating'
 
 [[on-window-detected]]
 if.app-id = 'com.todesktop.230313mzl4w4u92'
-run = 'move-node-to-workspace a'
+run = 'move-node-to-workspace 6'
 
 [[on-window-detected]]
 if.app-id = 'com.exafunction.windsurf'
-run = 'move-node-to-workspace a'
+run = 'move-node-to-workspace 6'
+
+[[on-window-detected]]
+if.app-id = 'dev.zed.Zed'
+run = 'move-node-to-workspace 6'
+
+[[on-window-detected]]
+if.app-id = 'com.electron.lark'
+run = 'move-node-to-workspace 7'
+
+[[on-window-detected]]
+if.app-id = 'com.tencent.xinWeChat'
+run = 'move-node-to-workspace 7'
+
+[[on-window-detected]]
+if.app-id = 'com.apple.Safari'
+run = 'move-node-to-workspace 9'
+
+[[on-window-detected]]
+if.app-id = 'com.google.Chrome'
+run = 'move-node-to-workspace 9'
 
 [[on-window-detected]]
 if.app-id = 'com.TickTick.task.mac'
-run = 'move-node-to-workspace 6'
+run = 'move-node-to-workspace 1'
 
 [[on-window-detected]]
 if.app-id = 'com.nssurge.surge-dashboard'
-run = 'move-node-to-workspace 6'
+run = 'move-node-to-workspace 1'

@@ -22,21 +22,21 @@ keybind = ctrl+shift+e=write_screen_file:open
 
 keybind = cmd+n=new_split:right
 keybind = cmd+shift+n=new_window
-keybind = cmd+b>h=goto_split:left
-keybind = cmd+b>l=goto_split:right
-keybind = cmd+b>left=new_split:left
-keybind = cmd+b>right=new_split:right
+keybind = cmd+g>h=goto_split:left
+keybind = cmd+g>l=goto_split:right
+keybind = cmd+g>left=new_split:left
+keybind = cmd+g>right=new_split:right
 
 keybind = cmd+t=ignore
-keybind = cmd+b>0=goto_tab:10
-keybind = cmd+b>1=goto_tab:1
-keybind = cmd+b>2=goto_tab:2
-keybind = cmd+b>3=goto_tab:3
-keybind = cmd+b>4=goto_tab:4
-keybind = cmd+b>5=goto_tab:5
-keybind = cmd+b>6=goto_tab:6
-keybind = cmd+b>7=goto_tab:7
-keybind = cmd+b>8=goto_tab:8
-keybind = cmd+b>9=goto_tab:9
-keybind = cmd+b>comma=move_tab:-1
-keybind = cmd+b>period=move_tab:+1
+keybind = cmd+g>0=goto_tab:10
+keybind = cmd+g>1=goto_tab:1
+keybind = cmd+g>2=goto_tab:2
+keybind = cmd+g>3=goto_tab:3
+keybind = cmd+g>4=goto_tab:4
+keybind = cmd+g>5=goto_tab:5
+keybind = cmd+g>6=goto_tab:6
+keybind = cmd+g>7=goto_tab:7
+keybind = cmd+g>8=goto_tab:8
+keybind = cmd+g>9=goto_tab:9
+keybind = cmd+g>comma=move_tab:-1
+keybind = cmd+g>period=move_tab:+1
