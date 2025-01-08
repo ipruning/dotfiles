@@ -1,6 +1,7 @@
 [tools]
 "cargo:koji" = "latest"
 "go:github.com/appleboy/CodeGPT/cmd/codegpt" = "latest"
+"go:github.com/merschformann/gotz" = "latest"
 bun = "latest"
 deno = "latest"
 go = "latest"
