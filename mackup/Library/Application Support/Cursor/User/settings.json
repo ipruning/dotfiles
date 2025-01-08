@@ -305,6 +305,15 @@
   "vim.normalModeKeyBindings": [
     {
       "before": [
+        "<leader>",
+        "t"
+      ],
+      "commands": [
+        "workbench.action.tasks.runTask"
+      ]
+    },
+    {
+      "before": [
         ":"
       ],
       "commands": [
