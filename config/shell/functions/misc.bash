@@ -35,8 +35,8 @@ function r-backup() {
   brew leaves >"$HOME"/dotfiles/config/packages/Brewfile.txt
   brew update
   gh extension list | awk '{print $3}' >"$HOME"/dotfiles/config/packages/gh_extensions.txt
-  find /Applications -maxdepth 1 -name "*.app" -exec basename {} .app \; >"$HOME"/dotfiles/config/packages/macos_applications.txt
-  find /Applications/Setapp -maxdepth 1 -name "*.app" -exec basename {} .app \; >"$HOME"/dotfiles/config/packages/macos_setapp.txt
+  find /Applications -maxdepth 1 -name "*.app" -exec basename {} .app \; | sort >"$HOME"/dotfiles/config/packages/macos_applications.txt
+  find /Applications/Setapp -maxdepth 1 -name "*.app" -exec basename {} .app \; | sort >"$HOME"/dotfiles/config/packages/macos_setapp.txt
 }
 
 function zj() {
