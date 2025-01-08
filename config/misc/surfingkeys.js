@@ -133,6 +133,8 @@ api.unmapAllExcept(
     "D",
     "t",
     "T",
+    "p",
+    "P",
   ],
-  /roamresearch.com|monkeytype.com|feishu.cn/,
+  /roamresearch.com|monkeytype.com|boot.dev|feishu.cn/,
 );
