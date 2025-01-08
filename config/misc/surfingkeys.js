@@ -123,22 +123,16 @@ api.unmap("u", /\b(x\.com)\b/i); // Mute account
 
 api.unmapAllExcept(
   [
-    // Scrolling
     "e",
     "d",
-    // Navigation
     "E",
     "R",
     "B",
     "F",
-    // Tabs
     "S",
     "D",
-    // Misc
     "t",
     "T",
-    "p",
-    "P",
   ],
-  /roamresearch.com|monkeytype.com/,
+  /roamresearch.com|monkeytype.com|feishu.cn/,
 );
