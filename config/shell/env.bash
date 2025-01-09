@@ -1,15 +1,52 @@
+# 👇 completions
+fpath=("$HOME/dotfiles/config/shell/completions" "${fpath[@]}")
+autoload -Uz compinit
+compinit -d ~/.zcompdump-"$ZSH_VERSION"
+
 # 👇 plugins
 ZSH_PLUGINS_DIR="$HOME/dotfiles/config/shell/plugins"
 
+# 👇 fast-syntax-highlighting
+source "$ZSH_PLUGINS_DIR"/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
+
 # 👇 zsh-autosuggestions
-source "$ZSH_PLUGINS_DIR"/zsh-autosuggestions/zsh-autosuggestions.plugin.zsh
+# source "$ZSH_PLUGINS_DIR"/zsh-autosuggestions/zsh-autosuggestions.plugin.zsh
 # bindkey '^Y' autosuggest-accept
 
 # 👇 zsh-autocomplete
-# source "$ZSH_PLUGINS_DIR"/zsh-autocomplete/zsh-autocomplete.plugin.zsh
+source "$ZSH_PLUGINS_DIR"/zsh-autocomplete/zsh-autocomplete.plugin.zsh
+bindkey -M menuselect '^N' down-line-or-history
+bindkey -M menuselect '^P' up-line-or-history
 
-# 👇 fast-syntax-highlighting
-source "$ZSH_PLUGINS_DIR"/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
+function accept-autocomplete-suggestion() {
+  zle .complete-word
+
+  if [[ "$LBUFFER" != *' ' ]]; then
+    LBUFFER="$LBUFFER "
+  fi
+
+  zle -M "🔥 Let's go!"
+  return 0
+}
+zle -N accept-autocomplete-suggestion
+
+bindkey -M emacs '^Y' accept-autocomplete-suggestion
+bindkey -M menuselect '^Y' accept-autocomplete-suggestion
+
+function remove-trailing-whitespace() {
+  LBUFFER="${LBUFFER%"${LBUFFER##*[![:space:]]}"}"
+}
+
+function accept-line-without-trailing-whitespace() {
+  remove-trailing-whitespace
+  zle accept-line
+}
+
+zle -N accept-line-without-trailing-whitespace
+bindkey '^M' accept-line-without-trailing-whitespace
+# bindkey $'\r' accept-line-without-trailing-whitespace
+# bindkey '^J' accept-line-without-trailing-whitespace
+
 
 # 👇 fzf
 # shellcheck disable=SC1090
@@ -26,7 +63,8 @@ export FZF_DEFAULT_OPTS=" \
 --color=selected-bg:#45475a \
 --multi"
 _fzf_compgen_path() {
-    fd --type f --hidden --follow \
+    fd --type f \
+       --hidden \
        --follow \
        --exclude .git \
        --exclude .venv \
@@ -34,7 +72,8 @@ _fzf_compgen_path() {
        . "$1"
 }
 _fzf_compgen_dir() {
-    fd --type d --hidden --follow \
+    fd --type d \
+       --hidden \
        --follow \
        --exclude .git \
        --exclude .venv \
@@ -43,12 +82,7 @@ _fzf_compgen_dir() {
 }
 
 # 👇 fzf-tab
-source "$ZSH_PLUGINS_DIR"/fzf-tab/fzf-tab.plugin.zsh
-
-# 👇 completions
-fpath=("$HOME/dotfiles/config/shell/completions" "${fpath[@]}")
-autoload -Uz compinit
-compinit -d ~/.zcompdump-"$ZSH_VERSION"
+# source "$ZSH_PLUGINS_DIR"/fzf-tab/fzf-tab.plugin.zsh
 
 # 👇 zsh Theme
 eval "$(starship init zsh)"
