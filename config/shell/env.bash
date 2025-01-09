@@ -3,13 +3,13 @@ ZSH_PLUGINS_DIR="$HOME/dotfiles/config/shell/plugins"
 
 # 👇 zsh-autosuggestions
 source "$ZSH_PLUGINS_DIR"/zsh-autosuggestions/zsh-autosuggestions.plugin.zsh
-bindkey '^Y' autosuggest-accept
-
-# 👇 fast-syntax-highlighting https://github.com/catppuccin/zsh-fsh
-source "$ZSH_PLUGINS_DIR"/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
+# bindkey '^Y' autosuggest-accept
 
 # 👇 zsh-autocomplete
 # source "$ZSH_PLUGINS_DIR"/zsh-autocomplete/zsh-autocomplete.plugin.zsh
+
+# 👇 fast-syntax-highlighting
+source "$ZSH_PLUGINS_DIR"/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
 
 # 👇 fzf
 # shellcheck disable=SC1090
@@ -18,6 +18,7 @@ export FZF_COMPLETION_TRIGGER="jk"
 export FZF_DEFAULT_COMMAND="fd --type file \
 --strip-cwd-prefix \
 --follow"
+# theme https://github.com/catppuccin/zsh-fsh
 export FZF_DEFAULT_OPTS=" \
 --color=bg+:#313244,bg:#1e1e2e,spinner:#f5e0dc,hl:#f38ba8 \
 --color=fg:#cdd6f4,header:#f38ba8,info:#cba6f7,pointer:#f5e0dc \
