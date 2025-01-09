@@ -87,6 +87,7 @@ typos-cli
 typst
 ugit
 uv
+wget
 whisperkit-cli
 yazi
 zellij
