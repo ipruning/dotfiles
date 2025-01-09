@@ -63,7 +63,7 @@
         "enabled": true
       },
       "language_servers": [
-        "basedpyright",
+        "pyright",
         "ruff"
       ]
     },

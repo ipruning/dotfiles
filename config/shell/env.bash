@@ -25,7 +25,7 @@ function accept-autocomplete-suggestion() {
     LBUFFER="$LBUFFER "
   fi
 
-  zle -M "🔥 Let's go!"
+  zle -M "🔥 Let's go 🔥"
   return 0
 }
 zle -N accept-autocomplete-suggestion
