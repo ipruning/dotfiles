@@ -51,7 +51,7 @@ autoload -Uz compinit
 compinit -d ~/.zcompdump-"$ZSH_VERSION"
 
 # 👇 zsh Theme
-# eval "$(starship init zsh)"
+eval "$(starship init zsh)"
 
 # 👇 zsh options
 setopt NO_NOMATCH
