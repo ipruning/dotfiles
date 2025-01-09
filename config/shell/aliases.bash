@@ -13,20 +13,16 @@ alias ll='eza --icons --long --git --time-style=long-iso'
 alias lla='eza --icons --long --all --git --time-style=long-iso'
 alias lt='eza --icons --long --all --git --time-style=long-iso --tree --level=3'
 
-alias szsh='source ~/.zshrc'
-
 alias gs='git status'
 
 alias ip='curl -4 ip.sb'
 alias ipv6='curl -6 ip.sb'
 
-alias cat='bat'
 alias vim='nvim'
 
-alias rm='rm -i'
 alias cp='cp -i'
-alias mv='mv -i'
-
-alias mkdir='mkdir -p'
 alias df='df -h'
 alias du='du -h'
+alias mkdir='mkdir -p'
+alias mv='mv -i'
+alias rm='rm -i'
