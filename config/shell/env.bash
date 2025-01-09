@@ -1,3 +1,49 @@
+# 👇 plugins
+ZSH_PLUGINS_DIR="$HOME/dotfiles/config/shell/plugins"
+
+# 👇 zsh-autosuggestions
+source "$ZSH_PLUGINS_DIR"/zsh-autosuggestions/zsh-autosuggestions.plugin.zsh
+bindkey '^Y' autosuggest-accept
+
+# 👇 fast-syntax-highlighting https://github.com/catppuccin/zsh-fsh
+source "$ZSH_PLUGINS_DIR"/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
+
+# 👇 zsh-autocomplete
+# source "$ZSH_PLUGINS_DIR"/zsh-autocomplete/zsh-autocomplete.plugin.zsh
+
+# 👇 fzf
+# shellcheck disable=SC1090
+FZF_CTRL_R_OPTS="" FZF_CTRL_T_COMMAND="" FZF_ALT_C_COMMAND="" source <(fzf --zsh)
+export FZF_COMPLETION_TRIGGER="jk"
+export FZF_DEFAULT_COMMAND="fd --type file \
+--strip-cwd-prefix \
+--follow"
+export FZF_DEFAULT_OPTS=" \
+--color=bg+:#313244,bg:#1e1e2e,spinner:#f5e0dc,hl:#f38ba8 \
+--color=fg:#cdd6f4,header:#f38ba8,info:#cba6f7,pointer:#f5e0dc \
+--color=marker:#b4befe,fg+:#cdd6f4,prompt:#cba6f7,hl+:#f38ba8 \
+--color=selected-bg:#45475a \
+--multi"
+_fzf_compgen_path() {
+    fd --type f --hidden --follow \
+       --follow \
+       --exclude .git \
+       --exclude .venv \
+       --exclude .DS_Store \
+       . "$1"
+}
+_fzf_compgen_dir() {
+    fd --type d --hidden --follow \
+       --follow \
+       --exclude .git \
+       --exclude .venv \
+       --exclude .DS_Store \
+       . "$1"
+}
+
+# 👇 fzf-tab
+source "$ZSH_PLUGINS_DIR"/fzf-tab/fzf-tab.plugin.zsh
+
 # 👇 completions
 fpath=("$HOME/dotfiles/config/shell/completions" "${fpath[@]}")
 autoload -Uz compinit
@@ -45,45 +91,6 @@ eval "$(zoxide init zsh --cmd j)"
 
 # 👇 mise
 eval "$(mise activate zsh)"
-
-# 👇 fzf
-# shellcheck disable=SC1090
-FZF_CTRL_R_OPTS="" FZF_CTRL_T_COMMAND="" FZF_ALT_C_COMMAND="" source <(fzf --zsh)
-export FZF_COMPLETION_TRIGGER="jk"
-export FZF_DEFAULT_COMMAND="fd --type file \
---strip-cwd-prefix \
---follow"
-export FZF_DEFAULT_OPTS=" \
---color=bg+:#313244,bg:#1e1e2e,spinner:#f5e0dc,hl:#f38ba8 \
---color=fg:#cdd6f4,header:#f38ba8,info:#cba6f7,pointer:#f5e0dc \
---color=marker:#b4befe,fg+:#cdd6f4,prompt:#cba6f7,hl+:#f38ba8 \
---color=selected-bg:#45475a \
---multi"
-_fzf_compgen_path() {
-    fd --type f --hidden --follow \
-       --follow \
-       --exclude .git \
-       --exclude .venv \
-       --exclude .DS_Store \
-       . "$1"
-}
-_fzf_compgen_dir() {
-    fd --type d --hidden --follow \
-       --follow \
-       --exclude .git \
-       --exclude .venv \
-       --exclude .DS_Store \
-       . "$1"
-}
-
-# 👇 plugins
-ZSH_PLUGINS_DIR="$HOME/dotfiles/config/shell/plugins"
-
-# 👇 fzf-tab
-source "$ZSH_PLUGINS_DIR"/fzf-tab/fzf-tab.plugin.zsh
-
-# 👇 fast-syntax-highlighting https://github.com/catppuccin/zsh-fsh
-source "$ZSH_PLUGINS_DIR"/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
 
 # 👇 atuin
 eval "$(atuin init zsh)"
