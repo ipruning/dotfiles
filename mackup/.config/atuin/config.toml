@@ -1,8 +1,14 @@
 db_path = "~/.local/share/atuin/history.db"
 key_path = "~/.local/share/atuin/key"
-style = "compact"
-enter_accept = true
+
+enter_accept = false
+filter_mode = "host"
+search_mode_shell_up_key_binding = "prefix"
+
 inline_height = 14
+style = "full"
+workspaces = true
+
 history_filter = [
   # 1. 基础过滤
   # "^\\s*$", # 空行
