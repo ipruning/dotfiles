@@ -19,6 +19,8 @@
     "bindings": {
       "space space": "file_finder::Toggle",
       "space r": "projects::OpenRecent",
+      "space a": "workspace::ToggleLeftDock",
+      "space e": "workspace::ToggleRightDock",
       "space shift-r": "projects::OpenRemote",
       "ctrl-shift-r": "projects::OpenRecent"
     }
