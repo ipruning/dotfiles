@@ -106,6 +106,9 @@ export PATH="$HOME/.cache/lm-studio/bin:$PATH"
 # 👇 Mojo
 export PATH="$HOME/.modular/bin:$PATH"
 
+# 👇 Java
+export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"
+
 # 👇 PostgreSQL
 export LDFLAGS="-L/opt/homebrew/opt/postgresql@17/lib"
 export CPPFLAGS="-I/opt/homebrew/opt/postgresql@17/include"
