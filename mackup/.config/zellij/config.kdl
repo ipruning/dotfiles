@@ -2,7 +2,15 @@ keybinds clear-defaults=true {
     locked {
         bind "Ctrl g" { SwitchToMode "normal"; }
 
-        bind "Ctrl k" {
+        bind "Ctrl h" {
+            LaunchOrFocusPlugin "file:~/.config/zellij/plugins/room.wasm" {
+                floating true
+                ignore_case true
+                quick_jump true
+            }
+        }
+
+        bind "Ctrl j" {
             LaunchOrFocusPlugin "file:~/.config/zellij/plugins/sessionizer.wasm" {
                 floating true
                 move_to_focused_tab true
@@ -12,13 +20,6 @@ keybinds clear-defaults=true {
             }
         }
 
-        bind "Ctrl j" {
-            LaunchOrFocusPlugin "file:~/.config/zellij/plugins/room.wasm" {
-                floating true
-                ignore_case true
-                quick_jump true
-            }
-        }
         bind "Ctrl N" { NewPane; }
         bind "Ctrl T" { NewTab; }
 
