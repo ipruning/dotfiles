@@ -24,10 +24,13 @@ alt-comma = 'layout accordion vertical horizontal'
 alt-period = 'layout tiles vertical horizontal'
 alt-slash = 'mode service'
 
-alt-c = 'exec-and-forget open -a /Applications/Google\ Chrome.app'
-alt-t =  'exec-and-forget open -a /Applications/Ghostty.app'
-alt-v = 'exec-and-forget open -a /Applications/Cursor.app'
+alt-e = 'exec-and-forget open -a /Applications/ChatGPT.app'
+alt-r = 'exec-and-forget open -a /Applications/RepoPrompt.app'
+alt-t = 'exec-and-forget open -a /Applications/Ghostty.app'
+
 alt-z = 'exec-and-forget open -a /Applications/Zed.app'
+alt-x = 'exec-and-forget open -a /Applications/Cursor.app'
+alt-b = 'exec-and-forget open -a /Applications/Google\ Chrome.app'
 
 alt-6 = 'workspace 6'
 alt-7 = 'workspace 7'
@@ -57,7 +60,6 @@ alt-shift-h = ['move left', 'mode main']
 alt-shift-j = ['move down', 'mode main']
 alt-shift-k = ['move up', 'mode main']
 alt-shift-l = ['move right', 'mode main']
-
 
 cmd-m = []
 cmd-h = []
@@ -212,3 +214,11 @@ run = 'move-node-to-workspace 1'
 [[on-window-detected]]
 if.app-id = 'com.nssurge.surge-dashboard'
 run = 'move-node-to-workspace 1'
+
+[[on-window-detected]]
+if.app-id = 'com.pvncher.repoprompt'
+run = 'move-node-to-workspace 1'
+
+# [[on-window-detected]]
+# if.app-id = 'com.openai.chat'
+# run = 'move-node-to-workspace 1'
