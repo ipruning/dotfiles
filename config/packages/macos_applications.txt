@@ -28,6 +28,7 @@ Eagle
 Eudic
 ExcalidrawZ
 Fork
+Frame0
 Ghostty
 Google Chrome
 Google Drive
