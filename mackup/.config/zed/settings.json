@@ -63,8 +63,9 @@
         "enabled": true
       },
       "language_servers": [
-        "pyright",
-        "ruff"
+        "basedpyright",
+        "ruff",
+        "-pyright"
       ]
     },
     "TSX": {
@@ -78,6 +79,21 @@
         "typescript-language-server",
         "!vtsls"
       ]
+    }
+  },
+  "lsp": {
+    "basedpyright": {
+      "settings": {
+        "basedpyright.analysis": {
+          "diagnosticMode": "workspace",
+          "inlayHints": {
+            "callArgumentNames": false
+          }
+        },
+        "python": {
+          "pythonPath": ".venv/bin/python"
+        }
+      }
     }
   },
   "outline_panel": {
