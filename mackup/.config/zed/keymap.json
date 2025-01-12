@@ -3,13 +3,13 @@
     "context": "Workspace",
     "bindings": {
       "cmd-b": "workspace::ToggleRightDock",
-      "cmd-shift-b": "workspace::ToggleLeftDock",
+      "cmd-shift-b": "workspace::ToggleLeftDock"
     }
   },
   {
     "context": "Terminal",
     "bindings": {
-      "ctrl-shift-e": "terminal::ToggleViMode",
+      "cmd-e": "terminal::ToggleViMode",
       "cmd-n": "pane::SplitRight",
       "cmd-t": "workspace::NewTerminal"
     }
@@ -21,8 +21,7 @@
       "space r": "projects::OpenRecent",
       "space a": "workspace::ToggleLeftDock",
       "space e": "workspace::ToggleRightDock",
-      "space shift-r": "projects::OpenRemote",
-      "ctrl-shift-r": "projects::OpenRecent"
+      "space shift-r": "projects::OpenRemote"
     }
   },
   {
@@ -93,8 +92,10 @@
       "g D": "editor::GoToDefinitionSplit",
       "g r": "editor::FindAllReferences",
 
-      "space f": "editor::Format",
       "space b": "editor::ToggleGitBlame",
+      "space f": "editor::Format",
+      "space q": "pane::CloseActiveItem",
+      "space w": "workspace::Save",
 
       "space t": "task::Spawn",
       "space shift-t": "task::Rerun",
@@ -102,7 +103,6 @@
       "space space": "file_finder::Toggle",
       "space r": "projects::OpenRecent",
       "space shift-r": "projects::OpenRemote",
-      "ctrl-shift-r": "projects::OpenRecent",
       "space g b": "branches::OpenRecent",
 
       "space a": "assistant::ToggleFocus",
