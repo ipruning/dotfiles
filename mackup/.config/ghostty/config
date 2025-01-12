@@ -15,16 +15,22 @@ quick-terminal-animation-duration = 0
 quick-terminal-screen = macos-menu-bar
 keybind = global:alt+shift+t=toggle_quick_terminal
 
-keybind = ctrl+shift+r=text:\x7a\x6a\x0a
-keybind = ctrl+shift+u=scroll_page_up
-keybind = ctrl+shift+d=scroll_page_down
-keybind = ctrl+shift+e=write_screen_file:open
+keybind = cmd+r=text:\x7a\x6a\x0a
 
-keybind = cmd+n=new_split:right
+keybind = cmd+u=scroll_page_up
+keybind = cmd+d=scroll_page_down
+
+keybind = cmd+e=write_screen_file:open
+
+keybind = cmd+n=new_split:down
 keybind = cmd+shift+n=new_window
 keybind = cmd+g>h=goto_split:left
+keybind = cmd+g>j=goto_split:bottom
+keybind = cmd+g>k=goto_split:top
 keybind = cmd+g>l=goto_split:right
 keybind = cmd+g>left=new_split:left
+keybind = cmd+g>down=new_split:down
+keybind = cmd+g>up=new_split:up
 keybind = cmd+g>right=new_split:right
 
 keybind = cmd+t=ignore
