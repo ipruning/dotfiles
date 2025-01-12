@@ -16,11 +16,13 @@ Bob
 Capture One
 ChatGPT
 Chromium
+Claude
 Contexts
 CrossOver
 Cursor
 DEVONthink 3
 DaisyDisk
+Dark Reader for Safari
 Day One
 DeskPad
 Drafts

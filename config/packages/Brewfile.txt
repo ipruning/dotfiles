@@ -59,10 +59,12 @@ monolith
 neovim
 ollama
 onefetch
+openjdk
 ouch
 pandoc-crossref
 parallel
 parallel-disk-usage
+pkl
 pre-commit
 procs
 pueue
