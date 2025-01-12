@@ -18,39 +18,29 @@ outer.right = 8
 
 [mode.main.binding]
 alt-p = 'mode pass'
-alt-g = 'mode prefix'
 
 alt-comma = 'layout accordion vertical horizontal'
 alt-period = 'layout tiles vertical horizontal'
 alt-slash = 'mode service'
 
-alt-e = 'exec-and-forget open -a /Applications/ChatGPT.app'
-alt-r = 'exec-and-forget open -a /Applications/RepoPrompt.app'
-alt-t = 'exec-and-forget open -a /Applications/Ghostty.app'
+alt-y = 'exec-and-forget open -a /Applications/Ghostty.app'
+alt-u = 'exec-and-forget open -a /Applications/Zed.app'
+alt-i = 'exec-and-forget open -a /Applications/Cursor.app'
 
-alt-z = 'exec-and-forget open -a /Applications/Zed.app'
-alt-x = 'exec-and-forget open -a /Applications/Cursor.app'
-alt-b = 'exec-and-forget open -a /Applications/Google\ Chrome.app'
+alt-n = 'exec-and-forget open -a /Applications/Google\ Chrome.app'
+alt-m = 'exec-and-forget open -a /Applications/Safari.app'
 
 alt-6 = 'workspace 6'
 alt-7 = 'workspace 7'
 alt-8 = 'workspace 8'
 alt-9 = 'workspace 9'
 alt-0 = 'workspace 0'
-alt-y = 'workspace y'
-alt-u = 'workspace u'
-alt-i = 'workspace i'
-alt-o = 'workspace o'
 
 alt-shift-6 = 'move-node-to-workspace 6'
 alt-shift-7 = 'move-node-to-workspace 7'
 alt-shift-8 = 'move-node-to-workspace 8'
 alt-shift-9 = 'move-node-to-workspace 9'
 alt-shift-0 = 'move-node-to-workspace 0'
-alt-shift-y = 'move-node-to-workspace y'
-alt-shift-u = 'move-node-to-workspace u'
-alt-shift-i = 'move-node-to-workspace i'
-alt-shift-o = 'move-node-to-workspace o'
 
 alt-h = 'focus left --boundaries all-monitors-outer-frame'
 alt-j = 'focus down --boundaries all-monitors-outer-frame'
@@ -67,8 +57,10 @@ cmd-h = []
 [mode.pass.binding]
 alt-p = 'mode main'
 
-[mode.prefix.binding]
+[mode.service.binding]
 esc = 'mode main'
+
+cmd-r = ['reload-config', 'mode main']
 
 alt-h = [
   'move-node-to-monitor left',
@@ -104,11 +96,6 @@ backspace = ['close-all-windows-but-current', 'mode main']
 
 f = ['layout floating tiling', 'mode main']
 shift-f = ['fullscreen', 'mode main']
-
-[mode.service.binding]
-esc = 'mode main'
-
-cmd-r = ['reload-config', 'mode main']
 
 [[on-window-detected]]
 if.app-id = 'com.xingin.discover'
