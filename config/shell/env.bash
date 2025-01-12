@@ -10,7 +10,7 @@ ZSH_PLUGINS_DIR="$HOME/dotfiles/config/shell/plugins"
 source "$ZSH_PLUGINS_DIR"/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
 
 # 👇 zsh-autosuggestions
-source "$ZSH_PLUGINS_DIR"/zsh-autosuggestions/zsh-autosuggestions.plugin.zsh
+# source "$ZSH_PLUGINS_DIR"/zsh-autosuggestions/zsh-autosuggestions.plugin.zsh
 
 # 👇 zsh-autocomplete
 source "$ZSH_PLUGINS_DIR"/zsh-autocomplete/zsh-autocomplete.plugin.zsh
@@ -18,28 +18,8 @@ zstyle ':autocomplete:*' add-space \
     executables aliases functions builtins reserved-words commands
 zstyle ':autocomplete:*:*' list-lines 5
 
-function accept-autocomplete-suggestion() {
-  zle .complete-word
-
-  zle -M "🔥 Let's go 🔥"
-
-  return 0
-}
-zle -N accept-autocomplete-suggestion
-bindkey -M menuselect '^N' down-line-or-history
-bindkey -M menuselect '^P' up-line-or-history
-bindkey -M emacs '^Y' accept-autocomplete-suggestion
-bindkey -M menuselect '^Y' accept-autocomplete-suggestion
-
-function remove-trailing-whitespace() {
-  LBUFFER="${LBUFFER%"${LBUFFER##*[![:space:]]}"}"
-}
-function accept-line-without-trailing-whitespace() {
-  remove-trailing-whitespace
-  zle accept-line
-}
-zle -N accept-line-without-trailing-whitespace
-bindkey '^M' accept-line-without-trailing-whitespace
+bindkey -M emacs '^Y' .complete-word
+bindkey -M menuselect '^Y' .complete-word
 
 # 👇 fzf
 # shellcheck disable=SC1090
