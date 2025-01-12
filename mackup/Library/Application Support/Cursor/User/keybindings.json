@@ -26,12 +26,12 @@
     "command": "-aichat.insertselectionintochat"
   },
   {
-    "key": "ctrl+shift+r",
-    "command": "workbench.action.openRecent"
+    "key": "ctrl+r",
+    "command": "-workbench.action.openRecent"
   },
   {
     "key": "ctrl+r",
-    "command": "-workbench.action.openRecent"
+    "command": "workbench.action.openRecent"
   },
   {
     "key": "ctrl+w",
