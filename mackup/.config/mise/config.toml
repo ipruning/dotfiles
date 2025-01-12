@@ -1,6 +1,6 @@
 [tools]
 "cargo:koji" = "latest"
-"go:github.com/appleboy/CodeGPT/cmd/codegpt" = "v0.14.6"
+"go:github.com/appleboy/CodeGPT/cmd/codegpt" = "0.14.6"
 "go:github.com/merschformann/gotz" = "latest"
 "pipx:ttok" = "latest"
 bun = "latest"
