@@ -64,8 +64,7 @@
       },
       "language_servers": [
         "basedpyright",
-        "ruff",
-        "-pyright"
+        "ruff"
       ]
     },
     "TSX": {
