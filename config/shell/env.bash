@@ -10,16 +10,15 @@ ZSH_PLUGINS_DIR="$HOME/dotfiles/config/shell/plugins"
 source "$ZSH_PLUGINS_DIR"/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
 
 # 👇 zsh-autosuggestions
-# source "$ZSH_PLUGINS_DIR"/zsh-autosuggestions/zsh-autosuggestions.plugin.zsh
+source "$ZSH_PLUGINS_DIR"/zsh-autosuggestions/zsh-autosuggestions.plugin.zsh
 
 # 👇 zsh-autocomplete
-source "$ZSH_PLUGINS_DIR"/zsh-autocomplete/zsh-autocomplete.plugin.zsh
-zstyle ':autocomplete:*' add-space \
-    executables aliases functions builtins reserved-words commands
-zstyle ':autocomplete:*:*' list-lines 5
-
-bindkey -M emacs '^Y' .complete-word
-bindkey -M menuselect '^Y' .complete-word
+# source "$ZSH_PLUGINS_DIR"/zsh-autocomplete/zsh-autocomplete.plugin.zsh
+# zstyle ':autocomplete:*' add-space \
+#     executables aliases functions builtins reserved-words commands
+# zstyle ':autocomplete:*:*' list-lines 5
+# bindkey -M emacs '^Y' .complete-word
+# bindkey -M menuselect '^Y' .complete-word
 
 # 👇 fzf
 # shellcheck disable=SC1090
@@ -30,6 +29,7 @@ export FZF_DEFAULT_COMMAND="fd --type file \
 --follow"
 # theme https://github.com/catppuccin/zsh-fsh
 export FZF_DEFAULT_OPTS=" \
+--bind 'ctrl-y:accept' \
 --color=bg+:#313244,bg:#1e1e2e,spinner:#f5e0dc,hl:#f38ba8 \
 --color=fg:#cdd6f4,header:#f38ba8,info:#cba6f7,pointer:#f5e0dc \
 --color=marker:#b4befe,fg+:#cdd6f4,prompt:#cba6f7,hl+:#f38ba8 \
@@ -55,7 +55,9 @@ _fzf_compgen_dir() {
 }
 
 # 👇 fzf-tab
-# source "$ZSH_PLUGINS_DIR"/fzf-tab/fzf-tab.plugin.zsh
+source "$ZSH_PLUGINS_DIR"/fzf-tab/fzf-tab.plugin.zsh
+zstyle ':fzf-tab:*' fzf-bindings 'ctrl-y:accept'
+zstyle ':fzf-tab:*' accept-line enter
 
 # 👇 zsh Theme
 eval "$(starship init zsh)"
