@@ -16,9 +16,17 @@ outer.bottom = 8
 outer.top = 8
 outer.right = 8
 
+[workspace-to-monitor-force-assignment]
+6 = "main"
+7 = "main"
+8 = "main"
+9 = "main"
+0 = "main"
+
 [mode.main.binding]
 alt-p = 'mode pass'
 
+alt-backslash = 'workspace-back-and-forth'
 alt-comma = 'layout accordion vertical horizontal'
 alt-period = 'layout tiles vertical horizontal'
 alt-slash = 'mode service'
@@ -162,37 +170,32 @@ if.app-id = 'codes.rambo.VirtualBuddy'
 run = 'layout floating'
 
 [[on-window-detected]]
-if.app-id = 'com.yacreader.YACReader'
-run = 'layout floating'
+if.app-id = 'com.todesktop.230313mzl4w4u92'
+run = 'move-node-to-workspace 6'
 
+[[on-window-detected]]
+if.app-id = 'com.exafunction.windsurf'
+run = 'move-node-to-workspace 6'
 
-# [[on-window-detected]]
-# if.app-id = 'com.todesktop.230313mzl4w4u92'
-# run = 'move-node-to-workspace 6'
+[[on-window-detected]]
+if.app-id = 'dev.zed.Zed'
+run = 'move-node-to-workspace 6'
 
-# [[on-window-detected]]
-# if.app-id = 'com.exafunction.windsurf'
-# run = 'move-node-to-workspace 6'
+[[on-window-detected]]
+if.app-id = 'com.electron.lark'
+run = 'move-node-to-workspace 7'
 
-# [[on-window-detected]]
-# if.app-id = 'dev.zed.Zed'
-# run = 'move-node-to-workspace 6'
+[[on-window-detected]]
+if.app-id = 'com.tencent.xinWeChat'
+run = 'move-node-to-workspace 7'
 
-# [[on-window-detected]]
-# if.app-id = 'com.electron.lark'
-# run = 'move-node-to-workspace 7'
+[[on-window-detected]]
+if.app-id = 'com.apple.Safari'
+run = 'move-node-to-workspace 9'
 
-# [[on-window-detected]]
-# if.app-id = 'com.tencent.xinWeChat'
-# run = 'move-node-to-workspace 7'
-
-# [[on-window-detected]]
-# if.app-id = 'com.apple.Safari'
-# run = 'move-node-to-workspace 9'
-
-# [[on-window-detected]]
-# if.app-id = 'com.google.Chrome'
-# run = 'move-node-to-workspace 9'
+[[on-window-detected]]
+if.app-id = 'com.google.Chrome'
+run = 'move-node-to-workspace 9'
 
 [[on-window-detected]]
 if.app-id = 'com.TickTick.task.mac'
@@ -206,6 +209,9 @@ run = 'move-node-to-workspace 1'
 if.app-id = 'com.pvncher.repoprompt'
 run = 'move-node-to-workspace 1'
 
-# [[on-window-detected]]
-# if.app-id = 'com.openai.chat'
-# run = 'move-node-to-workspace 1'
+[[on-window-detected]]
+if.app-id = 'com.openai.chat'
+run = 'move-node-to-workspace 1'
+
+[[on-window-detected]]
+run = 'move-node-to-workspace 0'
