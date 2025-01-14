@@ -1,45 +1,45 @@
 [
   {
-    "key": "shift+cmd+b",
-    "command": "workbench.action.toggleAuxiliaryBar"
+    "command": "workbench.action.toggleAuxiliaryBar",
+    "key": "cmd+b"
   },
   {
-    "key": "alt+cmd+b",
-    "command": "-workbench.action.toggleAuxiliaryBar"
+    "command": "-workbench.action.toggleAuxiliaryBar",
+    "key": "alt+cmd+b"
   },
   {
-    "key": "ctrl+enter",
     "command": "aipopup.action.modal.generate",
+    "key": "ctrl+enter",
     "when": "editorFocus && !composerBarIsVisible"
   },
   {
-    "key": "shift+cmd+k",
     "command": "-aipopup.action.modal.generate",
+    "key": "shift+cmd+k",
     "when": "editorFocus && !composerBarIsVisible"
   },
   {
-    "key": "shift+cmd+,",
-    "command": "aichat.insertselectionintochat"
+    "command": "aichat.insertselectionintochat",
+    "key": "shift+cmd+,"
   },
   {
-    "key": "shift+cmd+l",
-    "command": "-aichat.insertselectionintochat"
+    "command": "-aichat.insertselectionintochat",
+    "key": "shift+cmd+l"
   },
   {
-    "key": "ctrl+r",
-    "command": "-workbench.action.openRecent"
-  },
-  {
-    "key": "ctrl+r",
-    "command": "workbench.action.openRecent"
-  },
-  {
-    "key": "ctrl+w",
     "command": "-extension.vim_ctrl+w",
+    "key": "ctrl+w",
     "when": "editorTextFocus && vim.active && vim.use<C-w> && !inDebugRepl"
   },
   {
-    "key": "ctrl+w",
-    "command": "-workbench.action.switchWindow"
+    "command": "-workbench.action.switchWindow",
+    "key": "ctrl+w"
+  },
+  {
+    "command": "workbench.action.toggleSidebarVisibility",
+    "key": "shift+cmd+b"
+  },
+  {
+    "command": "-workbench.action.toggleSidebarVisibility",
+    "key": "cmd+b"
   },
 ]

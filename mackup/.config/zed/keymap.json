@@ -2,8 +2,8 @@
   {
     "context": "Workspace",
     "bindings": {
-      "cmd-b": "workspace::ToggleRightDock",
-      "cmd-shift-b": "workspace::ToggleLeftDock"
+      "cmd-b": "workspace::ToggleLeftDock",
+      "cmd-shift-b": "workspace::ToggleRightDock"
     }
   },
   {
@@ -19,8 +19,6 @@
     "bindings": {
       "space space": "file_finder::Toggle",
       "space r": "projects::OpenRecent",
-      "space a": "workspace::ToggleLeftDock",
-      "space e": "workspace::ToggleRightDock",
       "space shift-r": "projects::OpenRemote"
     }
   },
