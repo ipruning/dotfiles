@@ -36,7 +36,6 @@ grex
 hdf5
 htop
 httm
-httpie
 huggingface-cli
 hurl
 hyperfine
@@ -49,7 +48,6 @@ lazydocker
 lazygit
 libmagic
 llm
-lnav
 lychee
 mackup
 macmon
@@ -81,7 +79,9 @@ smartmontools
 sqlfluff
 sqlite-utils
 starship
+tailspin
 tealdeer
+television
 tmux
 tokei
 tursodatabase/tap/turso
@@ -89,8 +89,10 @@ typos-cli
 typst
 ugit
 uv
+viddy
 wget
 whisperkit-cli
+xh
 yazi
 zellij
 zoxide

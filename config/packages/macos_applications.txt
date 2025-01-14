@@ -2,6 +2,7 @@
 1Password
 1Password for Safari
 A Better Finder Attributes 7
+API Parrot
 AdGuard for Safari
 AeroSpace
 AlexSideBar
