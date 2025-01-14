@@ -136,5 +136,5 @@ api.unmapAllExcept(
     "p",
     "P",
   ],
-  /roamresearch.com|monkeytype.com|boot.dev|feishu.cn/,
+  /roamresearch.com|monkeytype.com|boot.dev|feishu.cn|excalidraw.com/,
 );
