@@ -10,7 +10,7 @@ ZSH_PLUGINS_DIR="$HOME/dotfiles/config/shell/plugins"
 source "$ZSH_PLUGINS_DIR"/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
 
 # 👇 zsh-autosuggestions
-source "$ZSH_PLUGINS_DIR"/zsh-autosuggestions/zsh-autosuggestions.plugin.zsh
+# source "$ZSH_PLUGINS_DIR"/zsh-autosuggestions/zsh-autosuggestions.plugin.zsh
 
 # 👇 zsh-autocomplete
 # source "$ZSH_PLUGINS_DIR"/zsh-autocomplete/zsh-autocomplete.plugin.zsh
@@ -27,7 +27,6 @@ export FZF_COMPLETION_TRIGGER="jk"
 export FZF_DEFAULT_COMMAND="fd --type file \
 --strip-cwd-prefix \
 --follow"
-# theme https://github.com/catppuccin/zsh-fsh
 export FZF_DEFAULT_OPTS=" \
 --bind 'ctrl-y:accept' \
 --color=bg+:#313244,bg:#1e1e2e,spinner:#f5e0dc,hl:#f38ba8 \
@@ -63,8 +62,8 @@ zstyle ':fzf-tab:*' accept-line enter
 eval "$(starship init zsh)"
 
 # 👇 zsh options
-setopt NO_NOMATCH
-setopt NO_NULL_GLOB
+# setopt NO_NOMATCH
+# setopt NO_NULL_GLOB
 setopt interactivecomments
 zstyle ":completion:*" matcher-list "m:{a-z}={A-Za-z}"
 

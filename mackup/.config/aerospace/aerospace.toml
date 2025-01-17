@@ -31,12 +31,8 @@ alt-comma = 'layout accordion vertical horizontal'
 alt-period = 'layout tiles vertical horizontal'
 alt-slash = 'mode service'
 
-alt-y = 'exec-and-forget open -a /Applications/Ghostty.app'
-alt-u = 'exec-and-forget open -a /Applications/Zed.app'
-alt-i = 'exec-and-forget open -a /Applications/Cursor.app'
-
-alt-n = 'exec-and-forget open -a /Applications/Google\ Chrome.app'
-alt-m = 'exec-and-forget open -a /Applications/Safari.app'
+alt-n = 'exec-and-forget open -a /Applications/Ghostty.app'
+alt-m = 'exec-and-forget open -a /Applications/Zed.app'
 
 alt-6 = 'workspace 6'
 alt-7 = 'workspace 7'
@@ -213,5 +209,5 @@ run = 'move-node-to-workspace 1'
 if.app-id = 'com.openai.chat'
 run = 'move-node-to-workspace 1'
 
-[[on-window-detected]]
-run = 'move-node-to-workspace 0'
+# [[on-window-detected]]
+# run = 'move-node-to-workspace 0'
