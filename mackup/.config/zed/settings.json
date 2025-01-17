@@ -7,10 +7,6 @@
     "dock": "left",
     "version": "2"
   },
-  "auto_install_extensions": {
-    "basedpyright": true,
-    "ruff": true
-  },
   "autosave": "on_focus_change",
   "buffer_font_fallbacks": [
     "JetBrainsMono Nerd Font"
@@ -63,7 +59,7 @@
         "enabled": true
       },
       "language_servers": [
-        "basedpyright",
+        "pyright",
         "ruff"
       ]
     },
