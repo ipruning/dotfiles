@@ -1,7 +1,7 @@
 # 👇 completions
 fpath=("$HOME/dotfiles/config/shell/completions" "${fpath[@]}")
 autoload -Uz compinit
-compinit -d ~/.zcompdump-"$ZSH_VERSION"
+compinit -d ~/.zcompdump
 
 # 👇 plugins
 ZSH_PLUGINS_DIR="$HOME/dotfiles/config/shell/plugins"
