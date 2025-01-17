@@ -1,6 +1,6 @@
 palette = "catppuccin_mocha"
 format = "$sudo$directory$package$all$custom$character"
-add_newline = false
+# add_newline = false
 command_timeout = 1_000
 
 [palettes.catppuccin_mocha]
@@ -35,13 +35,12 @@ crust = "#11111b"
 ignore_base = false
 
 [character]
-success_symbol = '[>](bold peach)'
-error_symbol = '[>](bold peach)'
-vicmd_symbol = '[>](bold subtext1)'
+success_symbol = '[➜](bold green)'
+error_symbol = '[✗](bold red)'
 
-[custom.x86_64]
-command = 'echo  '
-when = 'test "$(uname -m)" = "x86_64"'
+# [custom.x86_64]
+# command = 'echo  '
+# when = 'test "$(uname -m)" = "x86_64"'
 
 [[battery.display]]
 threshold = 20
@@ -54,8 +53,14 @@ style = 'yellow'
 [cmd_duration]
 format = 'took [$duration]($style) '
 min_time = 10_000
-min_time_to_notify = 240_000
+min_time_to_notify = 100_000
 show_milliseconds = false
+
+[sudo]
+format = '[$symbol]($style)'
+disabled = false
+style = 'bold green'
+symbol = ' '
 
 [directory]
 read_only = '  '
@@ -78,26 +83,11 @@ symbol = ' '
 [golang]
 symbol = ' '
 
-[java]
-symbol = ' '
-
 [python]
 symbol = ' '
-
-[ruby]
-symbol = ' '
-
-[rust]
-symbol = ' '
-
-[swift]
-symbol = ' '
 
 [package]
 symbol = ' '
 
-[sudo]
-format = '[$symbol]($style)'
-disabled = false
-style = 'bold green'
-symbol = ' '
+[aws]
+disabled = true
