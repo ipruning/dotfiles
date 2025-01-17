@@ -166,40 +166,24 @@ if.app-id = 'codes.rambo.VirtualBuddy'
 run = 'layout floating'
 
 [[on-window-detected]]
-if.app-id = 'com.todesktop.230313mzl4w4u92'
+if.app-id = 'com.google.Chrome'
 run = 'move-node-to-workspace 6'
-
-[[on-window-detected]]
-if.app-id = 'com.exafunction.windsurf'
-run = 'move-node-to-workspace 6'
-
-[[on-window-detected]]
-if.app-id = 'dev.zed.Zed'
-run = 'move-node-to-workspace 6'
-
-[[on-window-detected]]
-if.app-id = 'com.electron.lark'
-run = 'move-node-to-workspace 7'
-
-[[on-window-detected]]
-if.app-id = 'com.tencent.xinWeChat'
-run = 'move-node-to-workspace 7'
 
 [[on-window-detected]]
 if.app-id = 'com.apple.Safari'
-run = 'move-node-to-workspace 9'
+run = 'move-node-to-workspace 6'
 
 [[on-window-detected]]
-if.app-id = 'com.google.Chrome'
-run = 'move-node-to-workspace 9'
+if.app-id = 'com.todesktop.230313mzl4w4u92'
+run = 'move-node-to-workspace 7'
 
 [[on-window-detected]]
-if.app-id = 'com.TickTick.task.mac'
-run = 'move-node-to-workspace 1'
+if.app-id = 'com.exafunction.windsurf'
+run = 'move-node-to-workspace 7'
 
 [[on-window-detected]]
-if.app-id = 'com.nssurge.surge-dashboard'
-run = 'move-node-to-workspace 1'
+if.app-id = 'dev.zed.Zed'
+run = 'move-node-to-workspace 7'
 
 [[on-window-detected]]
 if.app-id = 'com.pvncher.repoprompt'
@@ -209,5 +193,10 @@ run = 'move-node-to-workspace 1'
 if.app-id = 'com.openai.chat'
 run = 'move-node-to-workspace 1'
 
-# [[on-window-detected]]
-# run = 'move-node-to-workspace 0'
+[[on-window-detected]]
+if.app-id = 'com.TickTick.task.mac'
+run = 'move-node-to-workspace 1'
+
+[[on-window-detected]]
+if.app-id = 'com.nssurge.surge-dashboard'
+run = 'move-node-to-workspace 1'
