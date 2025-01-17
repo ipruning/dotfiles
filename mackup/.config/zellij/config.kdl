@@ -250,9 +250,8 @@ plugins {
     }
 }
 
-theme "catppuccin-mocha"
-// default_layout "demo"
+default_layout "compact"
 default_mode "locked"
-mouse_mode true
+pane_frames false
 scroll_buffer_size 100000
-scrollback_editor "zed"
+theme "catppuccin-mocha"
