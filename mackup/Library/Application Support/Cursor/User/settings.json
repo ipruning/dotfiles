@@ -63,6 +63,12 @@
   "[typescript]": {
     "editor.defaultFormatter": "denoland.vscode-deno"
   },
+  "[typst-code]": {
+    "editor.wordSeparators": "`~!@#$%^&*()=+[{]}\\|;:'\",.<>/?"
+  },
+  "[typst]": {
+    "editor.wordSeparators": "`~!@#$%^&*()=+[{]}\\|;:'\",.<>/?"
+  },
   "autocorrect.formatOnSave": false,
   "baml.bamlPanelOpen": false,
   "beancount.fixedCJKWidth": true,
@@ -125,6 +131,7 @@
   "editor.unicodeHighlight.ambiguousCharacters": true,
   "editor.unicodeHighlight.invisibleCharacters": true,
   "editor.wordWrap": "off",
+  "excalidraw.theme": "dark",
   "explorer.confirmDelete": false,
   "explorer.confirmDragAndDrop": false,
   "explorer.fileNesting.enabled": true,
@@ -310,7 +317,7 @@
         "t"
       ],
       "commands": [
-        "workbench.action.tasks.runTask"
+        "code-runner.run"
       ]
     },
     {
