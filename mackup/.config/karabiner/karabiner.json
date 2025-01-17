@@ -240,6 +240,7 @@
                     },
                     {
                         "description": "TEST alt-arrow to ctrl-arrow",
+                        "enabled": false,
                         "manipulators": [
                             {
                                 "from": {
@@ -276,7 +277,7 @@
                         ]
                     },
                     {
-                        "description": "TEST meh-s to cmd-[ with conditions",
+                        "description": "TEST meh-s to cmd-bracket with conditions",
                         "manipulators": [
                             {
                                 "conditions": [
@@ -305,7 +306,6 @@
                                     {
                                         "bundle_identifiers": [
                                             "com.google.Chrome",
-                                            "com.apple.Safari",
                                             "com.roam-research.desktop-app"
                                         ],
                                         "type": "frontmost_application_if"
@@ -319,6 +319,87 @@
                                     {
                                         "key_code": "close_bracket",
                                         "modifiers": ["left_command"]
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "TEST meh-shift-f to option-shift-right with condition",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "bundle_identifiers": [
+                                            "com.google.Chrome",
+                                            "com.roam-research.desktop-app"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "b",
+                                    "modifiers": {
+                                        "mandatory": ["left_command", "left_control", "left_option"],
+                                        "optional": []
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "left_arrow",
+                                        "modifiers": ["left_option"]
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "from": {
+                                    "key_code": "b",
+                                    "modifiers": { "mandatory": ["left_command", "left_control", "left_option", "left_shift"] }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "left_arrow",
+                                        "modifiers": ["left_option", "left_shift"]
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "bundle_identifiers": [
+                                            "com.google.Chrome",
+                                            "com.roam-research.desktop-app"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "f",
+                                    "modifiers": {
+                                        "mandatory": ["left_command", "left_control", "left_option"],
+                                        "optional": []
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "right_arrow",
+                                        "modifiers": ["left_option"]
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "from": {
+                                    "key_code": "f",
+                                    "modifiers": { "mandatory": ["left_command", "left_control", "left_option", "left_shift"] }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "right_arrow",
+                                        "modifiers": ["left_option", "left_shift"]
                                     }
                                 ],
                                 "type": "basic"
