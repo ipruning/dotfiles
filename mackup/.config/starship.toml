@@ -1,6 +1,6 @@
 palette = "catppuccin_mocha"
 format = "$sudo$directory$package$all$custom$character"
-# add_newline = false
+add_newline = false
 command_timeout = 1_000
 
 [palettes.catppuccin_mocha]

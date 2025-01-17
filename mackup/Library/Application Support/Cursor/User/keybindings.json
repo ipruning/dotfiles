@@ -8,29 +8,6 @@
     "key": "alt+cmd+b"
   },
   {
-    "command": "aipopup.action.modal.generate",
-    "key": "ctrl+enter",
-    "when": "editorFocus && !composerBarIsVisible"
-  },
-  {
-    "command": "-aipopup.action.modal.generate",
-    "key": "shift+cmd+k",
-    "when": "editorFocus && !composerBarIsVisible"
-  },
-  {
-    "command": "aichat.insertselectionintochat",
-    "key": "shift+cmd+,"
-  },
-  {
-    "command": "-aichat.insertselectionintochat",
-    "key": "shift+cmd+l"
-  },
-  {
-    "command": "-extension.vim_ctrl+w",
-    "key": "ctrl+w",
-    "when": "editorTextFocus && vim.active && vim.use<C-w> && !inDebugRepl"
-  },
-  {
     "command": "-workbench.action.switchWindow",
     "key": "ctrl+w"
   },
