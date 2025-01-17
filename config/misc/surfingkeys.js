@@ -138,5 +138,3 @@ api.unmapAllExcept(
   ],
   /roamresearch.com|monkeytype.com|boot.dev|feishu.cn|excalidraw.com/,
 );
-
-// api.unmap("<Alt-s>");
