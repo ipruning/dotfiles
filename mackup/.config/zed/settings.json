@@ -54,7 +54,7 @@
         }
       ],
       "indent_guides": {
-        "background_coloring": "indent_aware",
+        "background_coloring": "disabled",
         "coloring": "indent_aware",
         "enabled": true
       },
