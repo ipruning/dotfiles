@@ -277,6 +277,69 @@
                         ]
                     },
                     {
+                        "description": "TEST meh-b/f to alt-left/right",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "b",
+                                    "modifiers": {
+                                        "mandatory": ["left_command", "left_control", "left_option"],
+                                        "optional": []
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "left_arrow",
+                                        "modifiers": ["left_option"]
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "from": {
+                                    "key_code": "b",
+                                    "modifiers": { "mandatory": ["left_command", "left_control", "left_option", "left_shift"] }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "left_arrow",
+                                        "modifiers": ["left_option", "left_shift"]
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "from": {
+                                    "key_code": "f",
+                                    "modifiers": {
+                                        "mandatory": ["left_command", "left_control", "left_option"],
+                                        "optional": []
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "right_arrow",
+                                        "modifiers": ["left_option"]
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "from": {
+                                    "key_code": "f",
+                                    "modifiers": { "mandatory": ["left_command", "left_control", "left_option", "left_shift"] }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "right_arrow",
+                                        "modifiers": ["left_option", "left_shift"]
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
                         "description": "TEST meh-s to cmd-bracket with conditions",
                         "manipulators": [
                             {
@@ -326,7 +389,7 @@
                         ]
                     },
                     {
-                        "description": "TEST meh-shift-f to option-shift-right with condition",
+                        "description": "TEST meh-e to cmd-shift-bracket with conditions",
                         "manipulators": [
                             {
                                 "conditions": [
@@ -339,29 +402,13 @@
                                     }
                                 ],
                                 "from": {
-                                    "key_code": "b",
-                                    "modifiers": {
-                                        "mandatory": ["left_command", "left_control", "left_option"],
-                                        "optional": []
-                                    }
+                                    "key_code": "e",
+                                    "modifiers": { "mandatory": ["left_command", "left_control", "left_option"] }
                                 },
                                 "to": [
                                     {
-                                        "key_code": "left_arrow",
-                                        "modifiers": ["left_option"]
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "from": {
-                                    "key_code": "b",
-                                    "modifiers": { "mandatory": ["left_command", "left_control", "left_option", "left_shift"] }
-                                },
-                                "to": [
-                                    {
-                                        "key_code": "left_arrow",
-                                        "modifiers": ["left_option", "left_shift"]
+                                        "key_code": "open_bracket",
+                                        "modifiers": ["left_command", "left_shift"]
                                     }
                                 ],
                                 "type": "basic"
@@ -377,29 +424,34 @@
                                     }
                                 ],
                                 "from": {
-                                    "key_code": "f",
-                                    "modifiers": {
-                                        "mandatory": ["left_command", "left_control", "left_option"],
-                                        "optional": []
-                                    }
+                                    "key_code": "r",
+                                    "modifiers": { "mandatory": ["left_command", "left_control", "left_option"] }
                                 },
                                 "to": [
                                     {
-                                        "key_code": "right_arrow",
-                                        "modifiers": ["left_option"]
+                                        "key_code": "close_bracket",
+                                        "modifiers": ["left_command", "left_shift"]
                                     }
                                 ],
                                 "type": "basic"
-                            },
+                            }
+                        ]
+                    },
+                    {
+                        "description": "TEST shift-backspace to alt-backspace",
+                        "manipulators": [
                             {
                                 "from": {
-                                    "key_code": "f",
-                                    "modifiers": { "mandatory": ["left_command", "left_control", "left_option", "left_shift"] }
+                                    "key_code": "delete_or_backspace",
+                                    "modifiers": {
+                                        "mandatory": ["shift"],
+                                        "optional": ["any"]
+                                    }
                                 },
                                 "to": [
                                     {
-                                        "key_code": "right_arrow",
-                                        "modifiers": ["left_option", "left_shift"]
+                                        "key_code": "delete_or_backspace",
+                                        "modifiers": ["left_option"]
                                     }
                                 ],
                                 "type": "basic"
@@ -408,6 +460,7 @@
                     },
                     {
                         "description": "TEST ctrl-w to alt-backspace with conditions",
+                        "enabled": false,
                         "manipulators": [
                             {
                                 "conditions": [
