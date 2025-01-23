@@ -11,7 +11,9 @@
     "bindings": {
       "cmd-e": "terminal::ToggleViMode",
       "cmd-n": "pane::SplitRight",
-      "cmd-t": "workspace::NewTerminal"
+      "cmd-t": "workspace::NewTerminal",
+      "cmd-u": "terminal::ScrollPageUp",
+      "cmd-d": "terminal::ScrollPageDown"
     }
   },
   {
