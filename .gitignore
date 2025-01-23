@@ -1,3 +1,5 @@
-*backups/
+*backups
+*private.*
+
 config/shell/completions/
 config/shell/plugins/
