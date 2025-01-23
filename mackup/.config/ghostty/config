@@ -14,7 +14,7 @@ confirm-close-surface = false
 quick-terminal-position = center
 quick-terminal-animation-duration = 0
 quick-terminal-screen = macos-menu-bar
-keybind = global:alt+shift+t=toggle_quick_terminal
+keybind = global:cmd+alt+ctrl+n=toggle_quick_terminal
 
 keybind = cmd+r=text:j $(tv git-repos)\x0a
 
