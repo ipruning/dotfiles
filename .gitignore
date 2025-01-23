@@ -4,5 +4,6 @@
 *private.zsh
 bin/clip
 bin/cwim
+bin/qshell
 config/shell/completions/
 config/shell/plugins/
