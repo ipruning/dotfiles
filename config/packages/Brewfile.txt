@@ -22,6 +22,7 @@ extra-cmake-modules
 eza
 fastfetch
 fd
+fossil
 fpp
 genact
 gfold
@@ -48,6 +49,7 @@ just
 lazydocker
 lazygit
 libmagic
+llama.cpp
 llm
 lychee
 mackup
@@ -64,9 +66,11 @@ pandoc-crossref
 parallel
 parallel-disk-usage
 pkl
+postgresql@17
 pre-commit
 procs
 pueue
+py3cairo
 python@3.11
 rclone
 rip2
@@ -83,7 +87,6 @@ starship
 tailspin
 tealdeer
 television
-tmux
 tokei
 tursodatabase/tap/turso
 typos-cli
@@ -95,5 +98,4 @@ wget
 whisperkit-cli
 xh
 yazi
-zellij
 zoxide
