@@ -1,8 +1,3 @@
-# 👇 completions
-fpath=("$HOME/dotfiles/config/shell/completions" "${fpath[@]}")
-autoload -Uz compinit
-compinit -d ~/.zcompdump
-
 # 👇 plugins
 ZSH_PLUGINS_DIR="$HOME/dotfiles/config/shell/plugins"
 
@@ -68,8 +63,10 @@ setopt interactivecomments
 zstyle ":completion:*" matcher-list "m:{a-z}={A-Za-z}"
 
 # 👇 My preferred editor for local and remote sessions
-export EDITOR="zed --wait"
-export VISUAL="zed --wait"
+# export EDITOR="zed --wait"
+# export VISUAL="zed --wait"
+export EDITOR="nvim"
+export VISUAL="nvim"
 
 # 👇 My keybindings
 bindkey "^[f" forward-word
@@ -77,6 +74,11 @@ bindkey "^[b" backward-word
 bindkey "^A" beginning-of-line
 bindkey "^E" end-of-line
 bindkey "^D" delete-word
+
+# 👇 Edit command line
+autoload -U edit-command-line
+zle -N edit-command-line
+bindkey "^v" edit-command-line
 
 # 👇 My binaries
 export PATH="$HOME/dotfiles/bin:$PATH"
