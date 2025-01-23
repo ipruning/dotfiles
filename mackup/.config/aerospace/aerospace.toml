@@ -185,18 +185,18 @@ run = 'move-node-to-workspace 7'
 if.app-id = 'dev.zed.Zed'
 run = 'move-node-to-workspace 7'
 
-[[on-window-detected]]
-if.app-id = 'com.pvncher.repoprompt'
-run = 'move-node-to-workspace 1'
+# [[on-window-detected]]
+# if.app-id = 'com.pvncher.repoprompt'
+# run = 'move-node-to-workspace 1'
 
-[[on-window-detected]]
-if.app-id = 'com.openai.chat'
-run = 'move-node-to-workspace 1'
+# [[on-window-detected]]
+# if.app-id = 'com.openai.chat'
+# run = 'move-node-to-workspace 1'
 
-[[on-window-detected]]
-if.app-id = 'com.TickTick.task.mac'
-run = 'move-node-to-workspace 1'
+# [[on-window-detected]]
+# if.app-id = 'com.TickTick.task.mac'
+# run = 'move-node-to-workspace 1'
 
-[[on-window-detected]]
-if.app-id = 'com.nssurge.surge-dashboard'
-run = 'move-node-to-workspace 1'
+# [[on-window-detected]]
+# if.app-id = 'com.nssurge.surge-dashboard'
+# run = 'move-node-to-workspace 1'
