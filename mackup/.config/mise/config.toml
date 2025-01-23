@@ -1,12 +1,12 @@
 [tools]
 "cargo:koji" = "latest"
 "go:github.com/appleboy/CodeGPT/cmd/codegpt" = "0.14.6"
+"go:github.com/josephburnett/jd" = "latest"
 "go:github.com/merschformann/gotz" = "latest"
 "pipx:ttok" = "latest"
 bun = "latest"
 deno = "latest"
 go = "latest"
-node = "latest"
 python = "latest"
 rust = "latest"
 zig = "latest"
