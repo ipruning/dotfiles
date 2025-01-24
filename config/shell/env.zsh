@@ -79,9 +79,10 @@ autoload -U edit-command-line
 zle -N edit-command-line
 bindkey "^v" edit-command-line
 
-# 👇 My binaries
+# 👇 My paths
 export PATH="$HOME/dotfiles/bin:$PATH"
 export PATH="$HOME/developer/localhost/prototypes/utils/bin:$PATH"
+export PATH="$HOME/developer/localhost/prototypes/utils/shell-scripts:$PATH"
 
 # 👇 LM Studio CLI tool
 export PATH="$HOME/.cache/lm-studio/bin:$PATH"
