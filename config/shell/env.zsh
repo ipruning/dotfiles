@@ -5,13 +5,12 @@ ZSH_PLUGINS_DIR="$HOME/dotfiles/config/shell/plugins"
 source "$ZSH_PLUGINS_DIR"/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
 
 # 👇 zsh-autosuggestions
-# source "$ZSH_PLUGINS_DIR"/zsh-autosuggestions/zsh-autosuggestions.plugin.zsh
+source "$ZSH_PLUGINS_DIR"/zsh-autosuggestions/zsh-autosuggestions.plugin.zsh
 
 # 👇 zsh-autocomplete
 source "$ZSH_PLUGINS_DIR"/zsh-autocomplete/zsh-autocomplete.plugin.zsh
 zstyle ':autocomplete:*' add-space \
     executables aliases functions builtins reserved-words commands
-zstyle ':autocomplete:*:*' list-lines 5
 bindkey -M emacs '^Y' .complete-word
 bindkey -M menuselect '^Y' .complete-word
 
