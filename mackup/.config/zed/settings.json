@@ -107,14 +107,18 @@
   "ssh_connections": [
     {
       "host": "101.126.71.13",
+      "username": "root",
+      "projects": []
+    },
+    {
+      "host": "jihuanshe-hetzner-1",
       "projects": [
         {
           "paths": [
-            "~/tcgspider"
+            "~/jihuanshe.com/tcgspider"
           ]
         }
-      ],
-      "username": "root"
+      ]
     }
   ],
   "tabs": {
