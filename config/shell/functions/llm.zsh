@@ -1,7 +1,7 @@
-function ccurl() {
+function readit() {
   if [ $# -eq 0 ]; then
     echo "Error: No URL provided" >&2
-    echo "Usage: ccurl <URL>" >&2
+    echo "Usage: readit <URL>" >&2
     exit 1
   fi
 
