@@ -87,8 +87,9 @@ starship
 tailspin
 tealdeer
 television
+tmux
 tokei
-tursodatabase/tap/turso
+trzsz-go
 typos-cli
 typst
 ugit
@@ -98,4 +99,5 @@ wget
 whisperkit-cli
 xh
 yazi
+zellij
 zoxide
