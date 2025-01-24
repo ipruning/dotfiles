@@ -5,10 +5,10 @@ if [[ $OSTYPE = darwin* ]]; then
         "$HOME/dotfiles/config/shell/env.zsh"
         "$HOME/dotfiles/config/shell/env.private.zsh"
         "$HOME/dotfiles/config/shell/aliases.zsh"
-        "$HOME/dotfiles/config/shell/functions/db.zsh"
-        "$HOME/dotfiles/config/shell/functions/git.zsh"
-        "$HOME/dotfiles/config/shell/functions/llm.zsh"
         "$HOME/dotfiles/config/shell/functions/misc.zsh"
+
+        "$HOME/developer/localhost/prototypes/utils/zsh-functions/db.zsh"
+        "$HOME/developer/localhost/prototypes/utils/zsh-functions/g.zsh"
       )
 
       for file in "${config_files[@]}"; do
@@ -17,5 +17,3 @@ if [[ $OSTYPE = darwin* ]]; then
     fi
   fi
 fi
-
-# sproxy

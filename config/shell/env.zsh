@@ -81,7 +81,7 @@ bindkey "^v" edit-command-line
 
 # 👇 My binaries
 export PATH="$HOME/dotfiles/bin:$PATH"
-export PATH="$HOME/developer/localhost/prototypes/bin:$PATH"
+export PATH="$HOME/developer/localhost/prototypes/utils/bin:$PATH"
 
 # 👇 LM Studio CLI tool
 export PATH="$HOME/.cache/lm-studio/bin:$PATH"
