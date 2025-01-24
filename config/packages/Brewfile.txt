@@ -3,6 +3,7 @@ assimp
 atuin
 autoconf
 autocorrect
+awscli
 basedpyright
 bat
 bore-cli
