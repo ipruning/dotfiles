@@ -5,14 +5,14 @@ ZSH_PLUGINS_DIR="$HOME/dotfiles/config/shell/plugins"
 source "$ZSH_PLUGINS_DIR"/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
 
 # 👇 zsh-autosuggestions
-source "$ZSH_PLUGINS_DIR"/zsh-autosuggestions/zsh-autosuggestions.plugin.zsh
+# source "$ZSH_PLUGINS_DIR"/zsh-autosuggestions/zsh-autosuggestions.plugin.zsh
 
 # 👇 zsh-autocomplete
-source "$ZSH_PLUGINS_DIR"/zsh-autocomplete/zsh-autocomplete.plugin.zsh
-zstyle ':autocomplete:*' add-space \
-    executables aliases functions builtins reserved-words commands
-bindkey -M emacs '^Y' .complete-word
-bindkey -M menuselect '^Y' .complete-word
+# source "$ZSH_PLUGINS_DIR"/zsh-autocomplete/zsh-autocomplete.plugin.zsh
+# zstyle ':autocomplete:*' add-space \
+#     executables aliases functions builtins reserved-words commands
+# bindkey -M emacs '^Y' .complete-word
+# bindkey -M menuselect '^Y' .complete-word
 
 # 👇 fzf
 # shellcheck disable=SC1090
@@ -48,9 +48,9 @@ _fzf_compgen_dir() {
 }
 
 # 👇 fzf-tab
-# source "$ZSH_PLUGINS_DIR"/fzf-tab/fzf-tab.plugin.zsh
-# zstyle ':fzf-tab:*' fzf-bindings 'ctrl-y:accept'
-# zstyle ':fzf-tab:*' accept-line enter
+source "$ZSH_PLUGINS_DIR"/fzf-tab/fzf-tab.plugin.zsh
+zstyle ':fzf-tab:*' fzf-bindings 'ctrl-y:accept'
+zstyle ':fzf-tab:*' accept-line enter
 
 # 👇 zsh Theme
 eval "$(starship init zsh)"

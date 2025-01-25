@@ -142,14 +142,6 @@ if.app-id = 'org.pqrs.Karabiner-EventViewer'
 run = 'layout floating'
 
 [[on-window-detected]]
-if.app-id = 'com.1password.1password'
-run = 'layout floating'
-
-[[on-window-detected]]
-if.app-id = 'com.timpler.screenstudio'
-run = 'layout floating'
-
-[[on-window-detected]]
 if.app-id = 'com.apple.audio.AudioMIDISetup'
 run = 'layout floating'
 
