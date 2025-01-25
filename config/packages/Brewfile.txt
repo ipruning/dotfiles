@@ -23,6 +23,7 @@ extra-cmake-modules
 eza
 fastfetch
 fd
+flyctl
 fossil
 fpp
 genact
@@ -84,6 +85,7 @@ shfmt
 smartmontools
 sqlfluff
 sqlite-utils
+sshpass
 starship
 tailspin
 tealdeer
