@@ -1,3 +1,7 @@
+fpath=("$HOME/dotfiles/config/shell/completions" "${fpath[@]}")
+autoload -Uz compinit
+compinit -d ~/.zcompdump
+
 if [[ $OSTYPE = darwin* ]]; then
   if [ -d "$HOME/dotfiles" ]; then
     if [ -n "$ZSH_VERSION" ]; then
