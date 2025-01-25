@@ -4,10 +4,6 @@ if [[ $OSTYPE = darwin* ]]; then
   fi
 fi
 
-fpath=("$HOME/dotfiles/config/shell/completions" "${fpath[@]}")
-autoload -Uz compinit
-compinit -d ~/.zcompdump
-
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
 __conda_setup="$('/opt/homebrew/Caskroom/miniforge/base/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
