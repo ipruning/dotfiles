@@ -148,3 +148,40 @@ function set-surge-proxy() {
 function unset-surge-proxy() {
   unset https_proxy http_proxy all_proxy
 }
+
+function _self_completion() {
+  echo -e "\033[33mGenerating completions...\033[0m"
+  rm -f ~/.zcompdump
+  compinit
+}
+
+function _self_update() {
+  echo -e "\033[33mUpdating Homebrew...\033[0m"
+  brew update
+
+  echo -e "\033[33mUpdating tldr pages...\033[0m"
+  tldr --update
+}
+
+function _self_upgrade() {
+  echo -e "\033[33mUpgrading Homebrew formulas...\033[0m"
+  brew upgrade
+
+  echo -e "\033[33mCleaning up Homebrew...\033[0m"
+  brew cleanup && brew autoremove
+
+  echo -e "\033[33mUpgrading GitHub CLI extensions...\033[0m"
+  gh extension upgrade --all
+
+  echo -e "\033[33mUpdating mise...\033[0m"
+  mise upgrade --bump
+}
+
+function _self_backup() {
+  echo -e "\033[33mBacking up all packages...\033[0m"
+  brew bundle dump --file="$HOME"/dotfiles/config/packages/Brewfile --force
+  brew leaves >"$HOME"/dotfiles/config/packages/Brewfile.txt
+  gh extension list | awk '{print $3}' >"$HOME"/dotfiles/config/packages/gh_extensions.txt
+  find /Applications -maxdepth 1 -name "*.app" -exec basename {} .app \; | sort >"$HOME"/dotfiles/config/packages/macos_applications.txt
+  find /Applications/Setapp -maxdepth 1 -name "*.app" -exec basename {} .app \; | sort >"$HOME"/dotfiles/config/packages/macos_setapp.txt
+}
