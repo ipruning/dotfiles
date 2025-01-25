@@ -35,8 +35,8 @@ crust = "#11111b"
 ignore_base = false
 
 [character]
-success_symbol = '[➜](bold green)'
-error_symbol = '[✗](bold red)'
+success_symbol = '[>](bold green)'
+error_symbol = '[X](bold red)'
 
 # [custom.x86_64]
 # command = 'echo  '
