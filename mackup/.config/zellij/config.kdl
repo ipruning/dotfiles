@@ -15,8 +15,8 @@ keybinds clear-defaults=true {
                 floating true
                 move_to_focused_tab true
                 cwd "/"
-                root_dirs "/Users/alex/Developer/localhost;/Users/alex/Developer/jihuanshe.com;/Users/alex/Developer/github.com"
-                session_layout "demo"
+                root_dirs "/Users/alex/Developer/localhost;/Users/alex/Developer/jihuanshe.com;/Users/alex/Downloads"
+                session_layout "compact"
             }
         }
 
@@ -255,3 +255,5 @@ default_mode "locked"
 pane_frames false
 scroll_buffer_size 100000
 theme "catppuccin-mocha"
+
+session_serialization false
