@@ -16,7 +16,7 @@ quick-terminal-animation-duration = 0
 quick-terminal-screen = macos-menu-bar
 keybind = global:cmd+alt+ctrl+n=toggle_quick_terminal
 
-keybind = cmd+r=text:j $(tv git-repos)\x0a
+keybind = cmd+j=text:\x0c g j\x0a 
 
 keybind = cmd+u=scroll_page_up
 keybind = cmd+d=scroll_page_down
