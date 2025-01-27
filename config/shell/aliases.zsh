@@ -1,14 +1,14 @@
 alias ..='cd ..'
 alias ...='cd ../..'
 
-alias x86_64='arch -x86_64 zsh --login'
-alias x86_64_run='arch -x86_64 zsh -c'
 alias brow='/usr/local/homebrew/bin/brew'
-
 alias ip='curl -4 ip.sb'
 alias ipv6='curl -6 ip.sb'
-
+# alias l='eza --all --group-directories-first --header --long --time-style long-iso'
+# alias ll='eza --all --git --git-repos --group-directories-first --header --long --time-style long-iso'
 alias vim='nvim'
+alias x86_64_run='arch -x86_64 zsh -c'
+alias x86_64='arch -x86_64 zsh --login'
 
 alias cp='cp -i'
 alias df='df -h'
