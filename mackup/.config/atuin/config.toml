@@ -2,7 +2,6 @@ db_path = "~/.local/share/atuin/history.db"
 key_path = "~/.local/share/atuin/key"
 
 enter_accept = true
-filter_mode = "host"
 
 inline_height = 24
 style = "compact"
