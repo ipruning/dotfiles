@@ -28,8 +28,18 @@ export FZF_DEFAULT_OPTS=" \
 --color=marker:#b4befe,fg+:#cdd6f4,prompt:#cba6f7,hl+:#f38ba8 \
 --color=selected-bg:#45475a \
 --multi"
+_fzf_comprun() {
+  local command=$1
+  shift
+
+  case "$command" in
+    export|unset) fzf --preview-window=noborder --preview "eval 'echo \$'{}" "$@" ;;
+    ssh)          fzf --preview-window=noborder --preview 'dig {}' "$@" ;;
+    *)            fzf --preview-window=noborder --preview '' "$@" ;;
+  esac
+}
 _fzf_compgen_path() {
-    fd --type f \
+    fd --type file \
        --hidden \
        --follow \
        --exclude .git \
@@ -38,13 +48,24 @@ _fzf_compgen_path() {
        . "$1"
 }
 _fzf_compgen_dir() {
-    fd --type d \
+    fd --type directory \
        --hidden \
        --follow \
        --exclude .git \
        --exclude .venv \
        --exclude .DS_Store \
        . "$1"
+}
+_fzf_complete_j() {
+  _fzf_complete --reverse --prompt="fd> " -- "$@" < <(
+    fd --type directory \
+       --hidden \
+       --follow \
+       --exclude .git \
+       --exclude .venv \
+       --exclude .DS_Store \
+       .
+  )
 }
 
 # 👇 fzf-tab
@@ -53,7 +74,7 @@ zstyle ':fzf-tab:*' fzf-bindings 'ctrl-y:accept'
 zstyle ':fzf-tab:*' accept-line enter
 
 # 👇 zsh Theme
-eval "$(starship init zsh)"
+# eval "$(starship init zsh)"
 
 # 👇 zsh options
 # setopt NO_NOMATCH
@@ -71,15 +92,17 @@ export VISUAL="nvim"
 bindkey "^[f" forward-word
 bindkey "^[b" backward-word
 bindkey "^A" beginning-of-line
-bindkey "^E" end-of-line
+bindkey "^B" backward-char
 bindkey "^D" delete-word
+bindkey "^E" end-of-line
+bindkey "^F" forward-char
 
 # 👇 Edit command line
 autoload -U edit-command-line
 zle -N edit-command-line
 bindkey "^v" edit-command-line
 
-# 👇 My paths
+# 👇 Custom paths
 export PATH="$HOME/dotfiles/bin:$PATH"
 export PATH="$HOME/developer/localhost/prototypes/utils/bin:$PATH"
 export PATH="$HOME/developer/localhost/prototypes/utils/shell-scripts:$PATH"
@@ -92,11 +115,6 @@ export PATH="$HOME/.modular/bin:$PATH"
 
 # 👇 Java
 export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"
-
-# 👇 PostgreSQL
-export LDFLAGS="-L/opt/homebrew/opt/postgresql@17/lib"
-export CPPFLAGS="-I/opt/homebrew/opt/postgresql@17/include"
-export PATH="/opt/homebrew/opt/postgresql@17/bin:$PATH"
 
 # 👇 OrbStack
 source "$HOME/.orbstack/shell/init.zsh" 2>/dev/null || :

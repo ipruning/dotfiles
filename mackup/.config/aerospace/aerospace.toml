@@ -1,4 +1,4 @@
-start-at-login = true
+start-at-login = false
 enable-normalization-flatten-containers = true
 enable-normalization-opposite-orientation-for-nested-containers = true
 accordion-padding = 38
