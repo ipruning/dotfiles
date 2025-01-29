@@ -28,7 +28,6 @@
     "editor.renderWhitespace": "selection",
     "editor.snippetSuggestions": "top",
     "editor.tabCompletion": "on",
-    "editor.tabSize": 2,
     "editor.wordWrap": "on"
   },
   "[markdown]": {
@@ -42,7 +41,6 @@
     "editor.renderWhitespace": "selection",
     "editor.snippetSuggestions": "top",
     "editor.tabCompletion": "on",
-    "editor.tabSize": 2,
     "editor.wordWrap": "on"
   },
   "[plaintext]": {
@@ -126,7 +124,6 @@
   },
   "editor.stickyScroll.enabled": true,
   "editor.suggestSelection": "first",
-  "editor.tabSize": 4,
   "editor.tokenColorCustomizations": {
     "textMateRules": []
   },

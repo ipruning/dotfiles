@@ -100,6 +100,8 @@
       "space t": "task::Spawn",
       "space shift-t": "task::Rerun",
 
+      "space /": ["task::Spawn", { "task_name": "Live Grep", "reveal_target": "center" }],
+
       "space space": "file_finder::Toggle",
       "space r": "projects::OpenRecent",
       "space shift-r": "projects::OpenRemote",

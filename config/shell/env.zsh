@@ -39,32 +39,32 @@ _fzf_comprun() {
   esac
 }
 _fzf_compgen_path() {
-    fd --type file \
-       --hidden \
-       --follow \
-       --exclude .git \
-       --exclude .venv \
-       --exclude .DS_Store \
-       . "$1"
+  fd --type file \
+  --hidden \
+  --follow \
+  --exclude .git \
+  --exclude .venv \
+  --exclude .DS_Store \
+  . "$1"
 }
 _fzf_compgen_dir() {
-    fd --type directory \
-       --hidden \
-       --follow \
-       --exclude .git \
-       --exclude .venv \
-       --exclude .DS_Store \
-       . "$1"
+  fd --type directory \
+  --hidden \
+  --follow \
+  --exclude .git \
+  --exclude .venv \
+  --exclude .DS_Store \
+  . "$1"
 }
 _fzf_complete_j() {
   _fzf_complete --reverse --prompt="fd> " -- "$@" < <(
     fd --type directory \
-       --hidden \
-       --follow \
-       --exclude .git \
-       --exclude .venv \
-       --exclude .DS_Store \
-       .
+    --hidden \
+    --follow \
+    --exclude .git \
+    --exclude .venv \
+    --exclude .DS_Store \
+    .
   )
 }
 
