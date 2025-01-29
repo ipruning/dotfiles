@@ -1,5 +1,16 @@
 palette = "catppuccin_mocha"
-format = "$sudo$directory$package$all$custom$character"
+# format = "$sudo$directory$package$all$custom$character"
+format = """
+$username\
+$hostname\
+$directory\
+$git_branch\
+$git_state\
+$git_status\
+$package\
+$cmd_duration\
+$line_break\
+$character"""
 add_newline = false
 command_timeout = 1_000
 
@@ -37,14 +48,10 @@ ignore_base = false
 [character]
 success_symbol = '[>](bold green)'
 error_symbol = '[X](bold red)'
-vimcmd_symbol = '[<](bold green)'
-vimcmd_replace_one_symbol = '[<](bold purple)'
-vimcmd_replace_symbol = '[<](bold purple)'
+vimcmd_symbol = '[<](bold sapphire)'
+vimcmd_replace_one_symbol = '[<](bold mauve)'
+vimcmd_replace_symbol = '[<](bold mauve)'
 vimcmd_visual_symbol = '[<](bold yellow)'
-
-# [custom.x86_64]
-# command = 'echo  '
-# when = 'test "$(uname -m)" = "x86_64"'
 
 [[battery.display]]
 threshold = 20
@@ -59,11 +66,12 @@ format = 'took [$duration]($style) '
 min_time = 10_000
 min_time_to_notify = 100_000
 show_milliseconds = false
+style = "yellow"
 
 [sudo]
 format = '[$symbol]($style)'
 disabled = false
-style = 'bold green'
+style = 'bold teal'
 symbol = ' '
 
 [directory]
@@ -72,26 +80,20 @@ read_only_style = 'red'
 truncation_length = 4
 truncate_to_repo = true
 truncation_symbol = '…/'
-style = "bold lavender"
+style = "blue"
 
 [git_branch]
-symbol = ' '
-truncation_length = 16
-truncation_symbol = '…'
-ignore_branches = ['master', 'main']
-style = "bold mauve"
+format = "[$branch]($style) "
+style = "mauve"
 
-[docker_context]
-symbol = ' '
+[git_state]
+format = '\([$state( $progress_current/$progress_total)]($style)\) '
+style = "mauve"
 
-[golang]
-symbol = ' '
-
-[python]
-symbol = ' '
+[git_status]
+format = "[[(*$conflicted$untracked$modified$staged$renamed$deleted)](218) ($ahead_behind$stashed)]($style) "
+style = "peach"
 
 [package]
-symbol = ' '
-
-[aws]
-disabled = true
+format = '[$version]($style) '
+style = "yellow"
