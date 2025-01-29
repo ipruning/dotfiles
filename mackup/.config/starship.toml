@@ -7,6 +7,7 @@ $directory\
 $git_branch\
 $package\
 $cmd_duration\
+$battery\
 $character"""
 add_newline = false
 command_timeout = 1_000
@@ -39,37 +40,16 @@ base = "#1e1e2e"
 mantle = "#181825"
 crust = "#11111b"
 
-[conda]
-ignore_base = false
-
-[character]
-success_symbol = '[>](bold green)'
-error_symbol = '[X](bold red)'
-vimcmd_symbol = '[<](bold sapphire)'
-vimcmd_replace_one_symbol = '[<](bold mauve)'
-vimcmd_replace_symbol = '[<](bold mauve)'
-vimcmd_visual_symbol = '[<](bold yellow)'
-
-[[battery.display]]
-threshold = 20
-style = 'red'
-
-[[battery.display]]
-threshold = 40
-style = 'yellow'
-
-[cmd_duration]
-format = 'took [$duration]($style) '
-min_time = 10_000
-min_time_to_notify = 100_000
-show_milliseconds = false
-style = "yellow"
-
 [sudo]
 format = '[$symbol]($style)'
 disabled = false
 style = 'bold teal'
 symbol = ' '
+
+
+[hostname]
+format = '[$hostname](bold red) '
+style = "red"
 
 [directory]
 read_only = '  '
@@ -87,3 +67,26 @@ ignore_branches = ["main", "master", "develop", "dev"]
 [package]
 format = '[$version]($style) '
 style = "yellow"
+
+[cmd_duration]
+format = 'took [$duration]($style) '
+min_time = 10_000
+min_time_to_notify = 100_000
+show_milliseconds = false
+style = "yellow"
+
+[character]
+success_symbol = '[>](bold green)'
+error_symbol = '[X](bold red)'
+vimcmd_symbol = '[<](bold sapphire)'
+vimcmd_replace_one_symbol = '[<](bold mauve)'
+vimcmd_replace_symbol = '[<](bold mauve)'
+vimcmd_visual_symbol = '[<](bold yellow)'
+
+[[battery.display]]
+threshold = 20
+style = 'red'
+
+[[battery.display]]
+threshold = 40
+style = 'yellow'
