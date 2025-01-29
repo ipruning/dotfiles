@@ -149,13 +149,21 @@ function unset-surge-proxy() {
   unset https_proxy http_proxy all_proxy
 }
 
-function _self_completion() {
+function x86_64_zsh_login() {
+  arch -x86_64 zsh --login
+}
+
+function x86_64_zsh_run() {
+  arch -x86_64 zsh -c "$@"
+}
+
+function self-completion() {
   echo -e "\033[33mGenerating completions...\033[0m"
   rm -f ~/.zcompdump
   compinit
 }
 
-function _self_update() {
+function self-update() {
   echo -e "\033[33mUpdating Homebrew...\033[0m"
   brew update
 
@@ -163,7 +171,7 @@ function _self_update() {
   tldr --update
 }
 
-function _self_upgrade() {
+function self-upgrade() {
   echo -e "\033[33mUpgrading Homebrew formulas...\033[0m"
   brew upgrade
 
@@ -177,7 +185,7 @@ function _self_upgrade() {
   mise upgrade --bump
 }
 
-function _self_backup() {
+function self-backup() {
   echo -e "\033[33mBacking up all packages...\033[0m"
   brew bundle dump --file="$HOME"/dotfiles/config/packages/Brewfile --force
   brew leaves >"$HOME"/dotfiles/config/packages/Brewfile.txt

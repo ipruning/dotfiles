@@ -83,10 +83,8 @@ setopt interactivecomments
 zstyle ":completion:*" matcher-list "m:{a-z}={A-Za-z}"
 
 # 👇 My preferred editor for local and remote sessions
-# export EDITOR="zed --wait"
-# export VISUAL="zed --wait"
-export EDITOR="nvim"
-export VISUAL="nvim"
+export EDITOR="zed --wait"
+export VISUAL="zed --wait"
 
 # 👇 My keybindings
 bindkey "^[f" forward-word

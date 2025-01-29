@@ -108,7 +108,7 @@
   "editor.cursorBlinking": "solid",
   "editor.cursorSmoothCaretAnimation": "on",
   "editor.fontFamily": "'MonoLisa', 'JetBrainsMono Nerd Font', 'Source Han Sans SC'",
-  "editor.fontSize": 13,
+  "editor.fontSize": 12,
   "editor.formatOnSave": false,
   "editor.guides.bracketPairs": true,
   "editor.guides.bracketPairsHorizontal": "active",
@@ -126,7 +126,7 @@
   },
   "editor.stickyScroll.enabled": true,
   "editor.suggestSelection": "first",
-  "editor.tabSize": 2,
+  "editor.tabSize": 4,
   "editor.tokenColorCustomizations": {
     "textMateRules": []
   },
@@ -311,7 +311,7 @@
   "sqlfluff.executablePath": "/opt/homebrew/bin/sqlfluff",
   "terminal.integrated.confirmOnExit": "hasChildProcesses",
   "terminal.integrated.defaultProfile.osx": "zsh",
-  "terminal.integrated.fontSize": 13,
+  "terminal.integrated.fontSize": 12,
   "terminal.integrated.inheritEnv": true,
   "vim.hlsearch": true,
   "vim.incsearch": true,
