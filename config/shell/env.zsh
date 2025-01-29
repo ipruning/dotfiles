@@ -74,7 +74,7 @@ source "$ZSH_PLUGINS_DIR"/fast-syntax-highlighting/fast-syntax-highlighting.plug
 # zstyle ':fzf-tab:*' accept-line enter
 
 # 👇 zsh Theme
-# eval "$(starship init zsh)"
+eval "$(starship init zsh)"
 
 # 👇 zsh options
 # setopt NO_NOMATCH
