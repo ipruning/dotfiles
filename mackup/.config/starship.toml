@@ -1,15 +1,12 @@
 palette = "catppuccin_mocha"
-# format = "$sudo$directory$package$all$custom$character"
 format = """
+$sudo\
 $username\
 $hostname\
 $directory\
 $git_branch\
-$git_state\
-$git_status\
 $package\
 $cmd_duration\
-$line_break\
 $character"""
 add_newline = false
 command_timeout = 1_000
@@ -77,7 +74,7 @@ symbol = ' '
 [directory]
 read_only = '  '
 read_only_style = 'red'
-truncation_length = 4
+truncation_length = 4 
 truncate_to_repo = true
 truncation_symbol = '…/'
 style = "blue"
@@ -85,14 +82,7 @@ style = "blue"
 [git_branch]
 format = "[$branch]($style) "
 style = "mauve"
-
-[git_state]
-format = '\([$state( $progress_current/$progress_total)]($style)\) '
-style = "mauve"
-
-[git_status]
-format = "[[(*$conflicted$untracked$modified$staged$renamed$deleted)](218) ($ahead_behind$stashed)]($style) "
-style = "peach"
+ignore_branches = ["main", "master", "develop", "dev"]
 
 [package]
 format = '[$version]($style) '
