@@ -46,10 +46,14 @@ disabled = false
 style = 'bold teal'
 symbol = ' '
 
+[username]
+style_user = 'bold red'
+style_root = 'bold yellow'
+format = '[$user]($style) '
 
 [hostname]
-format = '[$hostname](bold red) '
-style = "red"
+format = '[$hostname]($style) '
+style = "bold red"
 
 [directory]
 read_only = '  '
@@ -69,7 +73,7 @@ format = '[$version]($style) '
 style = "yellow"
 
 [cmd_duration]
-format = 'took [$duration]($style) '
+format = '[$duration]($style) '
 min_time = 10_000
 min_time_to_notify = 100_000
 show_milliseconds = false
