@@ -49,7 +49,7 @@ symbol = ' '
 [username]
 style_user = 'bold red'
 style_root = 'bold yellow'
-format = '[$user]($style) '
+format = '[$user]($style)@'
 
 [hostname]
 format = '[$hostname]($style) '
