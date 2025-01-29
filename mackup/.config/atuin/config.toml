@@ -5,6 +5,3 @@ enter_accept = true
 
 inline_height = 24
 style = "compact"
-
-history_filter = [
-]

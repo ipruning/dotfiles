@@ -8,9 +8,7 @@
     "version": "2"
   },
   "autosave": "on_focus_change",
-  "buffer_font_fallbacks": [
-    "JetBrainsMono Nerd Font"
-  ],
+  "buffer_font_fallbacks": ["JetBrainsMono Nerd Font"],
   "buffer_font_family": "MonoLisa",
   "buffer_font_size": 12,
   "chat_panel": {
@@ -33,10 +31,7 @@
   },
   "languages": {
     "JavaScript": {
-      "language_servers": [
-        "typescript-language-server",
-        "!vtsls"
-      ]
+      "language_servers": ["typescript-language-server", "!vtsls"]
     },
     "Python": {
       "format_on_save": "on",
@@ -58,22 +53,13 @@
         "coloring": "indent_aware",
         "enabled": true
       },
-      "language_servers": [
-        "pyright",
-        "ruff"
-      ]
+      "language_servers": ["pyright", "ruff"]
     },
     "TSX": {
-      "language_servers": [
-        "typescript-language-server",
-        "!vtsls"
-      ]
+      "language_servers": ["typescript-language-server", "!vtsls"]
     },
     "TypeScript": {
-      "language_servers": [
-        "typescript-language-server",
-        "!vtsls"
-      ]
+      "language_servers": ["typescript-language-server", "!vtsls"]
     }
   },
   "lsp": {
@@ -107,20 +93,19 @@
   "ssh_connections": [
     {
       "host": "101.126.71.13",
-      "username": "root",
-      "projects": []
+      "projects": [],
+      "username": "root"
     },
     {
       "host": "jihuanshe-hetzner-1",
       "projects": [
         {
-          "paths": [
-            "~/jihuanshe.com/tcgspider"
-          ]
+          "paths": ["~/jihuanshe.com/tcgspider"]
         }
       ]
     }
   ],
+  "tab_size": 2,
   "tabs": {
     "file_icons": true,
     "git_status": true
