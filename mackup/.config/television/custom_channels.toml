@@ -40,3 +40,8 @@ preview_command = "curl -s {0}"
 [[cable_channel]]
 name = "tv-channels"
 source_command = "tv list-channels | grep -v 'channels:' | sed '/^[[:space:]]*$/d' | sed 's/^[[:space:]]*//'"
+
+[[cable_channel]]
+name = "notes"
+source_command = "fd . '/Users/alex/Databases/Roam' --type file --extension md"
+preview_command = ":files:"
