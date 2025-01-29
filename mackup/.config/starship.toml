@@ -47,13 +47,13 @@ style = 'bold teal'
 symbol = ' '
 
 [username]
-style_user = 'bold red'
+style_user = 'bold yellow'
 style_root = 'bold yellow'
-format = '[$user]($style)@'
+format = '[$user@]($style)'
 
 [hostname]
 format = '[$hostname]($style) '
-style = "bold red"
+style = "bold yellow"
 
 [directory]
 read_only = '  '
