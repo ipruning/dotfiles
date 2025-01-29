@@ -127,3 +127,54 @@ eval "$(mise activate zsh)"
 
 # 👇 atuin
 eval "$(atuin init zsh)"
+
+# 👇 session utils
+# https://github.com/zellij-org/zellij/issues/2744
+# https://github.com/zellij-org/zellij/issues/3081#issuecomment-1904349853
+function jump_to_repo() {
+  local repo_path
+  
+  repo_path=$(tv git-repos)
+  [[ -z "$repo_path" ]] && return
+  cd "${repo_path}"
+  
+  local repo_name=$(basename "${repo_path}")
+
+  # if [[ -n "$ZELLIJ" ]]; then
+  #   zellij action rename-session "${repo_name}"
+  # fi
+}
+
+function jump_to_repo_with_zellij_session() {
+  if [[ -n "$ZELLIJ" ]]; then
+  else
+    local repo_path
+    repo_path=$(tv git-repos)
+    [[ -z "$repo_path" ]] && return
+    cd "${repo_path}"
+    local repo_name=$(basename "${repo_path}")
+    zellij attach "${repo_name}" 2>/dev/null || zellij --session "${repo_name}"
+  fi
+}
+
+function jump_to_zellij_session() {
+  if [[ -n "$ZELLIJ" ]]; then
+  else
+    if [[ "$TERM" == "xterm-ghostty" ]]; then
+      zj_sessions=$(zellij list-sessions --no-formatting --short)
+      
+      case $(echo "$zj_sessions" | grep -c '^.') in
+        0) 
+          zellij 
+          ;;
+        1) 
+          zellij attach "$zj_sessions" 
+          ;;
+        *) 
+          selected_session=$(echo "$zj_sessions" | tv --no-preview) &&
+          [[ -n "$selected_session" ]] && zellij attach "$selected_session"
+          ;;
+      esac
+    fi
+  fi
+}

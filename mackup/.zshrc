@@ -1,3 +1,11 @@
+# echo ">>> .zshrc is loaded. Shell: $SHELL, Options: $-"
+
+if [[ $OSTYPE = darwin* ]]; then
+  if [ -d "/opt/homebrew/bin" ]; then
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+  fi
+fi
+
 fpath=("$HOME/dotfiles/config/shell/completions" "${fpath[@]}")
 autoload -Uz compinit
 compinit -d ~/.zcompdump

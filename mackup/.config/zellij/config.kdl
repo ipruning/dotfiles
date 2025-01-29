@@ -2,33 +2,13 @@ keybinds clear-defaults=true {
     locked {
         bind "Ctrl g" { SwitchToMode "normal"; }
 
-        bind "Ctrl h" {
-            LaunchOrFocusPlugin "file:~/.config/zellij/plugins/room.wasm" {
-                floating true
-                ignore_case true
-                quick_jump true
-            }
-        }
-
-        bind "Ctrl j" {
-            LaunchOrFocusPlugin "file:~/.config/zellij/plugins/sessionizer.wasm" {
-                floating true
-                move_to_focused_tab true
-                cwd "/"
-                root_dirs "/Users/alex/Developer/localhost;/Users/alex/Developer/jihuanshe.com;/Users/alex/Downloads"
-                session_layout "compact"
-            }
-        }
-
-        bind "Ctrl N" { NewPane; }
-        bind "Ctrl T" { NewTab; }
-
-        bind "Ctrl F" { ToggleFloatingPanes; }
-
-        bind "Ctrl H" { MoveFocusOrTab "Left"; }
-        bind "Ctrl J" { MoveFocus "Down"; }
-        bind "Ctrl K" { MoveFocus "Up"; }
-        bind "Ctrl L" { MoveFocusOrTab "Right"; }
+        // bind "Ctrl h" {
+        //     LaunchOrFocusPlugin "file:~/.config/zellij/plugins/room.wasm" {
+        //         floating true
+        //         ignore_case true
+        //         quick_jump true
+        //     }
+        // }
     }
     pane {
         bind "left" { MoveFocus "left"; }
@@ -112,16 +92,16 @@ keybinds clear-defaults=true {
         bind "tab" { MovePane; }
     }
     scroll {
-        bind "Alt left" { MoveFocusOrTab "left"; SwitchToMode "locked"; }
-        bind "Alt down" { MoveFocus "down"; SwitchToMode "locked"; }
-        bind "Alt up" { MoveFocus "up"; SwitchToMode "locked"; }
-        bind "Alt right" { MoveFocusOrTab "right"; SwitchToMode "locked"; }
+        bind "left" { MoveFocusOrTab "left"; SwitchToMode "locked"; }
+        bind "down" { MoveFocus "down"; SwitchToMode "locked"; }
+        bind "up" { MoveFocus "up"; SwitchToMode "locked"; }
+        bind "right" { MoveFocusOrTab "right"; SwitchToMode "locked"; }
         bind "e" { EditScrollback; SwitchToMode "locked"; }
         bind "f" { SwitchToMode "entersearch"; SearchInput 0; }
-        bind "Alt h" { MoveFocusOrTab "left"; SwitchToMode "locked"; }
-        bind "Alt j" { MoveFocus "down"; SwitchToMode "locked"; }
-        bind "Alt k" { MoveFocus "up"; SwitchToMode "locked"; }
-        bind "Alt l" { MoveFocusOrTab "right"; SwitchToMode "locked"; }
+        // bind "Alt h" { MoveFocusOrTab "left"; SwitchToMode "locked"; }
+        // bind "Alt j" { MoveFocus "down"; SwitchToMode "locked"; }
+        // bind "Alt k" { MoveFocus "up"; SwitchToMode "locked"; }
+        // bind "Alt l" { MoveFocusOrTab "right"; SwitchToMode "locked"; }
         bind "s" { SwitchToMode "normal"; }
     }
     search {
@@ -157,27 +137,63 @@ keybinds clear-defaults=true {
         }
     }
     shared_among "normal" "locked" {
-        bind "Alt left" { MoveFocusOrTab "left"; }
-        bind "Alt down" { MoveFocus "down"; }
-        bind "Alt up" { MoveFocus "up"; }
-        bind "Alt right" { MoveFocusOrTab "right"; }
-        bind "Alt +" { Resize "Increase"; }
-        bind "Alt -" { Resize "Decrease"; }
-        bind "Alt =" { Resize "Increase"; }
-        bind "Alt [" { PreviousSwapLayout; }
-        bind "Alt ]" { NextSwapLayout; }
-        bind "Alt f" { ToggleFloatingPanes; }
-        bind "Alt h" { MoveFocusOrTab "left"; }
-        bind "Alt i" { MoveTab "left"; }
-        bind "Alt j" { MoveFocus "down"; }
-        bind "Alt k" { MoveFocus "up"; }
-        bind "Alt l" { MoveFocusOrTab "right"; }
-        bind "Alt n" { NewPane; }
-        bind "Alt o" { MoveTab "right"; }
+        // bind "Alt left" { MoveFocusOrTab "left"; }
+        // bind "Alt down" { MoveFocus "down"; }
+        // bind "Alt up" { MoveFocus "up"; }
+        // bind "Alt right" { MoveFocusOrTab "right"; }
+        // bind "Alt +" { Resize "Increase"; }
+        // bind "Alt -" { Resize "Decrease"; }
+        // bind "Alt =" { Resize "Increase"; }
+        // bind "Alt [" { PreviousSwapLayout; }
+        // bind "Alt ]" { NextSwapLayout; }
+        // bind "Alt f" { ToggleFloatingPanes; }
+        // bind "Alt h" { MoveFocusOrTab "left"; }
+        // bind "Alt i" { MoveTab "left"; }
+        // bind "Alt j" { MoveFocus "down"; }
+        // bind "Alt k" { MoveFocus "up"; }
+        // bind "Alt l" { MoveFocusOrTab "right"; }
+        // bind "Alt n" { NewPane; }
+        // bind "Alt o" { MoveTab "right"; }
     }
     shared_except "locked" "renametab" "renamepane" {
         bind "Ctrl g" { SwitchToMode "locked"; }
-        bind "Ctrl q" { Quit; }
+        bind "q" { Quit; }
+
+        bind "1" { GoToTab 1; SwitchToMode "locked"; }
+        bind "2" { GoToTab 2; SwitchToMode "locked"; }
+        bind "3" { GoToTab 3; SwitchToMode "locked"; }
+        bind "4" { GoToTab 4; SwitchToMode "locked"; }
+        bind "5" { GoToTab 5; SwitchToMode "locked"; }
+        bind "6" { GoToTab 6; SwitchToMode "locked"; }
+        bind "7" { GoToTab 7; SwitchToMode "locked"; }
+        bind "8" { GoToTab 8; SwitchToMode "locked"; }
+        bind "9" { GoToTab 9; SwitchToMode "locked"; }
+        bind "d" { Detach; }
+        bind "h" { MoveFocusOrTab "left"; }
+        bind "j" { MoveFocus "down"; }
+        bind "k" { MoveFocus "up"; }
+        bind "l" { MoveFocusOrTab "right"; }
+        bind "n" { NewPane; SwitchToMode "locked"; }
+        bind "N" { NewTab; SwitchToMode "locked"; }
+
+        
+        bind "w" {
+            LaunchOrFocusPlugin "file:~/.config/zellij/plugins/sessionizer.wasm" {
+                floating true
+                move_to_focused_tab true
+                cwd "/"
+                root_dirs "/Users/alex/Developer/localhost;/Users/alex/Developer/jihuanshe.com"
+                session_layout "compact"
+            }
+            SwitchToMode "locked"
+        }
+        bind "W" {
+            LaunchOrFocusPlugin "session-manager" {
+                floating true
+                move_to_focused_tab true
+            }
+            SwitchToMode "locked"
+        }
     }
     shared_except "locked" "entersearch" {
         bind "enter" { SwitchToMode "locked"; }
@@ -185,9 +201,9 @@ keybinds clear-defaults=true {
     shared_except "locked" "entersearch" "renametab" "renamepane" {
         bind "esc" { SwitchToMode "locked"; }
     }
-    shared_except "locked" "entersearch" "renametab" "renamepane" "move" {
-        bind "m" { SwitchToMode "move"; }
-    }
+    // shared_except "locked" "entersearch" "renametab" "renamepane" "move" {
+    //     bind "m" { SwitchToMode "move"; }
+    // }
     shared_except "locked" "entersearch" "search" "renametab" "renamepane" "session" {
         bind "o" { SwitchToMode "session"; }
     }
@@ -200,9 +216,9 @@ keybinds clear-defaults=true {
     shared_among "normal" "resize" "tab" "scroll" "prompt" "tmux" {
         bind "p" { SwitchToMode "pane"; }
     }
-    shared_except "locked" "resize" "pane" "tab" "entersearch" "renametab" "renamepane" {
-        bind "r" { SwitchToMode "resize"; }
-    }
+    // shared_except "locked" "resize" "pane" "tab" "entersearch" "renametab" "renamepane" {
+    //     bind "r" { SwitchToMode "resize"; }
+    // }
     shared_among "scroll" "search" {
         bind "PageDown" { PageScrollDown; }
         bind "PageUp" { PageScrollUp; }
@@ -250,10 +266,8 @@ plugins {
     }
 }
 
-default_layout "compact"
+// default_layout "compact"
 default_mode "locked"
-pane_frames false
 scroll_buffer_size 100000
-theme "catppuccin-mocha"
-
 session_serialization false
+theme "catppuccin-mocha"
