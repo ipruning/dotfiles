@@ -1,0 +1,134 @@
+tick_rate = 144
+
+[ui]
+use_nerd_font_icons = false
+ui_scale = 100
+show_help_bar = false
+show_preview_panel = true
+input_bar_position = "bottom"
+theme = "catppuccin"
+
+[previewers.file]
+theme = "Catppuccin Mocha"
+
+# Keybindings
+# ----------------------------------------------------------------------------
+#
+# Channel mode
+# ------------------------
+[keybindings.Channel]
+# Quit the application
+quit = "esc"
+# Scrolling through entries
+select_next_entry = ["down", "ctrl-n", "ctrl-j"]
+select_prev_entry = ["up", "ctrl-p", "ctrl-k"]
+select_next_page = "pagedown"
+select_prev_page = "pageup"
+# Scrolling the preview pane
+scroll_preview_half_page_down = "ctrl-d"
+scroll_preview_half_page_up = "ctrl-u"
+# Add entry to selection and move to the next entry
+toggle_selection_down = "tab"
+# Add entry to selection and move to the previous entry
+toggle_selection_up = "backtab"
+# Confirm selection
+confirm_selection = "enter"
+# Copy the selected entry to the clipboard
+copy_entry_to_clipboard = "ctrl-y"
+# Toggle the remote control mode
+toggle_remote_control = "ctrl-r"
+# Toggle the send to channel mode
+toggle_send_to_channel = "ctrl-s"
+# Toggle the help bar
+toggle_help = "ctrl-g"
+# Toggle the preview panel
+toggle_preview = "ctrl-o"
+
+
+# Remote control mode
+# -------------------------------
+[keybindings.RemoteControl]
+# Quit the application
+quit = "esc"
+# Scrolling through entries
+select_next_entry = ["down", "ctrl-n", "ctrl-j"]
+select_prev_entry = ["up", "ctrl-p", "ctrl-k"]
+select_next_page = "pagedown"
+select_prev_page = "pageup"
+# Select an entry
+select_entry = "enter"
+# Toggle the remote control mode
+toggle_remote_control = "ctrl-r"
+# Toggle the help bar
+toggle_help = "ctrl-g"
+# Toggle the preview panel
+toggle_preview = "ctrl-o"
+
+
+# Send to channel mode
+# --------------------------------
+[keybindings.SendToChannel]
+# Quit the application
+quit = "esc"
+# Scrolling through entries
+select_next_entry = ["down", "ctrl-n", "ctrl-j"]
+select_prev_entry = ["up", "ctrl-p", "ctrl-k"]
+select_next_page = "pagedown"
+select_prev_page = "pageup"
+# Select an entry
+select_entry = "enter"
+# Toggle the send to channel mode
+toggle_send_to_channel = "ctrl-s"
+# Toggle the help bar
+toggle_help = "ctrl-g"
+# Toggle the preview panel
+toggle_preview = "ctrl-o"
+
+
+# Shell integration
+# ----------------------------------------------------------------------------
+#
+# The shell integration feature allows you to use television as a picker for
+# your shell commands (as well as your shell history with <CTRL-R>).
+# E.g. typing `git checkout <CTRL-T>` will open television with a list of
+# branches to choose from.
+
+[shell_integration.commands]
+# Add your commands here. Each key is a command that will trigger tv with the
+# corresponding channel as value.
+# Example: say you want the following prompts to trigger the following channels
+# when pressing <CTRL-T>:
+#          `git checkout` should trigger the `git-branches` channel
+#          `ls`           should trigger the `dirs` channel
+#          `cat`          should trigger the `files` channel
+#
+# You would add the following to your configuration file:
+# ```
+# [shell_integration.commands]
+# "git checkout" = "git-branch"
+# "ls" = "dirs"
+# "cat" = "files"
+# ```
+
+"bat" = "files"
+"cat" = "files"
+"cd" = "dirs"
+"docker run" = "docker-images"
+"export" = "env"
+"git add" = "git-diff"
+"git switch" = "git-branch"
+"head" = "files"
+"j" = "dirs"
+"less" = "files"
+"ls" = "dirs"
+"nvim" = "git-repos"
+"python" = "py-files"
+"ssh" = "hosts"
+"tail" = "files"
+"tv" = "tv-channels"
+"unset" = "env"
+"uv run" = "py-files"
+"vim" = "files"
+"zed" = "git-repos"
+"zellij a" = "sessions"
+"zellij attach" = "sessions"
