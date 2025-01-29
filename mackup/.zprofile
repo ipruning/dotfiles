@@ -1,8 +1,4 @@
-if [[ $OSTYPE = darwin* ]]; then
-  if [ -d "/opt/homebrew/bin" ]; then
-    eval "$(/opt/homebrew/bin/brew shellenv)"
-  fi
-fi
+# echo ">>> .zprofile is loaded. Shell: $SHELL, Options: $-"
 
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!

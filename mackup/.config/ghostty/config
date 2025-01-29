@@ -1,41 +1,32 @@
 cursor-style = block
 cursor-style-blink = false
 font-family = MonoLisa
-font-size = 13
+font-size = 12
 font-style = Medium
 macos-titlebar-style = hidden
 shell-integration-features = no-cursor
 theme = catppuccin-mocha
-window-padding-x = 8, 8
+window-padding-x = 10, 10
+window-padding-y = 10, 10
 
 macos-option-as-alt = true
 confirm-close-surface = false
 
-quick-terminal-position = center
-quick-terminal-animation-duration = 0
-quick-terminal-screen = macos-menu-bar
-keybind = global:cmd+alt+ctrl+n=toggle_quick_terminal
-
-keybind = cmd+j=text:\x0c g j\x0a 
+keybind = cmd+j=text: jump_to_zellij_session\x0a
+keybind = cmd+shift+j=text: jump_to_repo_with_zellij_session\x0a
 
 keybind = cmd+u=scroll_page_up
 keybind = cmd+d=scroll_page_down
 keybind = cmd+e=write_screen_file:open
 
-keybind = cmd+n=new_split:down
-keybind = cmd+shift+n=new_window
+# keybind = cmd+n=ignore
+# keybind = cmd+t=ignore
 
-keybind = cmd+g>left=new_split:left
-keybind = cmd+g>down=new_split:down
-keybind = cmd+g>up=new_split:up
-keybind = cmd+g>right=new_split:right
+quick-terminal-position = center
+quick-terminal-animation-duration = 0
+quick-terminal-screen = macos-menu-bar
+keybind = global:cmd+alt+ctrl+m=toggle_quick_terminal
 
-keybind = cmd+g>h=goto_split:left
-keybind = cmd+g>j=goto_split:bottom
-keybind = cmd+g>k=goto_split:top
-keybind = cmd+g>l=goto_split:right
-
-keybind = cmd+t=ignore
 keybind = cmd+g>0=goto_tab:10
 keybind = cmd+g>1=goto_tab:1
 keybind = cmd+g>2=goto_tab:2
@@ -47,4 +38,15 @@ keybind = cmd+g>7=goto_tab:7
 keybind = cmd+g>8=goto_tab:8
 keybind = cmd+g>9=goto_tab:9
 keybind = cmd+g>comma=move_tab:-1
+keybind = cmd+g>down=new_split:down
+keybind = cmd+g>h=goto_split:left
+keybind = cmd+g>j=goto_split:bottom
+keybind = cmd+g>k=goto_split:top
+keybind = cmd+g>l=goto_split:right
+keybind = cmd+g>left=new_split:left
 keybind = cmd+g>period=move_tab:+1
+keybind = cmd+g>right=new_split:right
+keybind = cmd+g>up=new_split:up
+keybind = cmd+n=new_split:down
+keybind = cmd+shift+n=new_window
+keybind = cmd+t=ignore
