@@ -1,17 +1,27 @@
 [[cable_channel]]
 name = "hidden-files"
-source_command = "fd --type file --hidden --follow --exclude .git --exclude .venv --exclude .DS_Store"
+source_command = "fd --type file --hidden --follow --exclude .git --exclude node_modules --exclude .venv --exclude .DS_Store"
 preview_command = ":files:"
 
 [[cable_channel]]
-name = "py-files"
-source_command = "fd --type file --extension py --follow --exclude .git --exclude .venv --exclude .DS_Store"
+name = "shell-scripts"
+source_command = "fd --type file --extension sh"
+preview_command = ":files:"
+
+[[cable_channel]]
+name = "python-scripts"
+source_command = "fd --type file --extension py --exclude .venv"
 preview_command = ":files:"
 
 [[cable_channel]]
 name = "brew-packages"
 source_command = "brew list --installed-on-request"
 preview_command = "brew info {0}"
+
+[[cable_channel]]
+name = "brew-bins"
+source_command = "ls /opt/homebrew/bin 2>/dev/null | sort -u"
+preview_command = "man {0}"
 
 [[cable_channel]]
 name = "hosts"
@@ -24,7 +34,7 @@ source_command = "cat ~/.ssh/known_hosts | awk '{print $1}' | sort -u"
 preview_command = "dig {0}"
 
 [[cable_channel]]
-name = "sessions"
+name = "zellij-sessions"
 source_command = "zellij list-sessions --no-formatting --short"
 
 [[cable_channel]]
@@ -38,10 +48,20 @@ source_command = "gh api --paginate /gists | jq -r '.[] .files[] | select(.filen
 preview_command = "curl --silent {0}"
 
 [[cable_channel]]
-name = "tv-channels"
+name = "channels"
 source_command = "tv list-channels | grep -v 'channels:' | sed '/^[[:space:]]*$/d' | sed 's/^[[:space:]]*//'"
 
 [[cable_channel]]
-name = "notes"
+name = "roam-notes"
 source_command = "fd . '/Users/alex/Databases/Roam' --type file --extension md"
+preview_command = ":files:"
+
+[[cable_channel]]
+name = "custom-shell-scripts"
+source_command = "fd . /Users/alex/Developer/localhost/prototypes/utils --type file --extension sh"
+preview_command = ":files:"
+
+[[cable_channel]]
+name = "custom-python-scripts"
+source_command = "fd . /Users/alex/Developer/localhost/prototypes/utils --type file --extension py"
 preview_command = ":files:"

@@ -236,7 +236,8 @@
   "fileNestingUpdater.promptOnAutoUpdate": true,
   "files.associations": {
     ".cforge": "json",
-    ".cursorrules": "markdown",
+    "*.cursorrules*": "markdown",
+    "*.env*": "dotenv",
     ".env*": "dotenv"
   },
   "files.insertFinalNewline": true,
