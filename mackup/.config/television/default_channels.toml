@@ -25,8 +25,8 @@ preview_command = "docker image inspect {0} | jq -C"
 
 [[cable_channel]]
 name = "s3-buckets"
-source_command = "aws s3 ls | cut -d \" \" -f 3"
-preview_command = "aws s3 ls s3://{0}"
+source_command = "op run -- aws s3 ls | cut -d \" \" -f 3"
+preview_command = "op run -- aws s3 ls s3://{0}"
 
 [[cable_channel]]
 name = "my-dotfiles"

@@ -30,12 +30,12 @@ source_command = "zellij list-sessions --no-formatting --short"
 [[cable_channel]]
 name = "gists"
 source_command = "gh api --paginate /gists | jq -r '.[] .files[] | .raw_url'"
-preview_command = "curl -s {0}"
+preview_command = "curl --silent {0}"
 
 [[cable_channel]]
 name = "py-gists"
 source_command = "gh api --paginate /gists | jq -r '.[] .files[] | select(.filename | endswith(\".py\")) | .raw_url'"
-preview_command = "curl -s {0}"
+preview_command = "curl --silent {0}"
 
 [[cable_channel]]
 name = "tv-channels"
