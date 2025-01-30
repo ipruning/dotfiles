@@ -6,12 +6,13 @@ font-style = Medium
 macos-titlebar-style = hidden
 shell-integration-features = no-cursor
 theme = catppuccin-mocha
+unfocused-split-opacity = 1
 window-padding-x = 10, 10
 window-padding-y = 10, 10
 
 macos-option-as-alt = true
-confirm-close-surface = false
 
+# confirm-close-surface = false
 keybind = cmd+j=text: jump_to_zellij_session\x0a
 keybind = cmd+shift+j=text: jump_to_repo_with_zellij_session\x0a
 
@@ -19,34 +20,45 @@ keybind = cmd+u=scroll_page_up
 keybind = cmd+d=scroll_page_down
 keybind = cmd+e=write_screen_file:open
 
-# keybind = cmd+n=ignore
-# keybind = cmd+t=ignore
-
 quick-terminal-position = center
 quick-terminal-animation-duration = 0
 quick-terminal-screen = macos-menu-bar
 keybind = global:cmd+alt+ctrl+m=toggle_quick_terminal
 
-keybind = cmd+g>0=goto_tab:10
-keybind = cmd+g>1=goto_tab:1
-keybind = cmd+g>2=goto_tab:2
-keybind = cmd+g>3=goto_tab:3
-keybind = cmd+g>4=goto_tab:4
-keybind = cmd+g>5=goto_tab:5
-keybind = cmd+g>6=goto_tab:6
-keybind = cmd+g>7=goto_tab:7
-keybind = cmd+g>8=goto_tab:8
-keybind = cmd+g>9=goto_tab:9
-keybind = cmd+g>comma=move_tab:-1
-keybind = cmd+g>down=new_split:down
-keybind = cmd+g>h=goto_split:left
-keybind = cmd+g>j=goto_split:bottom
-keybind = cmd+g>k=goto_split:top
-keybind = cmd+g>l=goto_split:right
-keybind = cmd+g>left=new_split:left
-keybind = cmd+g>period=move_tab:+1
-keybind = cmd+g>right=new_split:right
-keybind = cmd+g>up=new_split:up
-keybind = cmd+n=new_split:down
+keybind = cmd+left=goto_split:left
+keybind = cmd+down=goto_split:bottom
+keybind = cmd+up=goto_split:top
+keybind = cmd+right=goto_split:right
+
+keybind = cmd+shift+left=new_split:left
+keybind = cmd+shift+down=new_split:down
+keybind = cmd+shift+up=new_split:up
+keybind = cmd+shift+right=new_split:right
+
+keybind = cmd+n=new_split:auto
 keybind = cmd+shift+n=new_window
 keybind = cmd+t=ignore
+
+# keybind = cmd+ctrl+alt+h=goto_split:left
+# keybind = cmd+ctrl+alt+j=goto_split:bottom
+# keybind = cmd+ctrl+alt+k=goto_split:top
+# keybind = cmd+ctrl+alt+l=goto_split:right
+
+# keybind = cmd+ctrl+alt+shift+h=new_split:left
+# keybind = cmd+ctrl+alt+shift+j=new_split:down
+# keybind = cmd+ctrl+alt+shift+k=new_split:up
+# keybind = cmd+ctrl+alt+shift+l=new_split:right
+
+# keybind = cmd+g>0=goto_tab:10
+# keybind = cmd+g>1=goto_tab:1
+# keybind = cmd+g>2=goto_tab:2
+# keybind = cmd+g>3=goto_tab:3
+# keybind = cmd+g>4=goto_tab:4
+# keybind = cmd+g>5=goto_tab:5
+# keybind = cmd+g>6=goto_tab:6
+# keybind = cmd+g>7=goto_tab:7
+# keybind = cmd+g>8=goto_tab:8
+# keybind = cmd+g>9=goto_tab:9
+
+# keybind = cmd+g>comma=move_tab:-1
+# keybind = cmd+g>period=move_tab:+1
