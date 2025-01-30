@@ -18,9 +18,6 @@ if [[ $OSTYPE = darwin* ]]; then
         "$HOME/dotfiles/config/shell/env.private.zsh"
         "$HOME/dotfiles/config/shell/aliases.zsh"
         "$HOME/dotfiles/config/shell/functions/misc.zsh"
-
-        "$HOME/developer/localhost/prototypes/utils/zsh-functions/db.zsh"
-        "$HOME/developer/localhost/prototypes/utils/zsh-functions/g.zsh"
       )
 
       for file in "${config_files[@]}"; do
