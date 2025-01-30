@@ -193,3 +193,123 @@ function self-backup() {
   find /Applications -maxdepth 1 -name "*.app" -exec basename {} .app \; | sort >"$HOME"/dotfiles/config/packages/macos_applications.txt
   find /Applications/Setapp -maxdepth 1 -name "*.app" -exec basename {} .app \; | sort >"$HOME"/dotfiles/config/packages/macos_setapp.txt
 }
+
+# extract() {
+#   ########################################################################
+#   # 1. If you want all extracted content to be placed in a subdirectory with the same name as the file,
+#   #    set CREATE_SUBDIR="true". Set to "false" to disable this feature.
+#   ########################################################################
+#   CREATE_SUBDIR="false"
+
+#   ########################################################################
+#   # 2. If no parameters provided or want to show usage instructions
+#   ########################################################################
+#   if [ $# -eq 0 ]; then
+#     echo "Usage: extract <file1> [file2 ...]"
+#     echo "Supported formats: .tar .tar.gz .tar.bz2 .tar.xz .tgz .tbz2 .txz .gz .bz2 .xz .Z .zip .rar .7z etc."
+#     return 0
+#   fi
+
+#   # Helper function to check if a command exists
+#   check_command() {
+#     if ! command -v "$1" &>/dev/null; then
+#       echo "Error: Command '$1' not found. Please install it to extract this type of archive."
+#       return 1
+#     fi
+#     return 0
+#   }
+
+#   ########################################################################
+#   # 3. Start processing parameters one by one
+#   ########################################################################
+#   for archive in "$@"; do
+
+#     # Check if file exists
+#     if [ ! -f "$archive" ]; then
+#       echo "Error: '$archive' is not a valid file!"
+#       continue
+#     fi
+
+#     # If need to place extracted files in separate directory, first parse target directory name
+#     # (Here we use the name without the last extension as subdirectory name, you can use more complex methods)
+#     if [ "$CREATE_SUBDIR" = "true" ]; then
+#       # Use basename to remove path, sed to remove common compression extensions
+#       extractDir="$(basename "$archive" | sed -E 's/(\.tar\.gz|\.tar\.bz2|\.tar\.xz|\.tar|\.tgz|\.tbz2|\.txz|\.zip|\.rar|\.7z|\.Z|\.bz2|\.gz|\.xz)$//')"
+#       mkdir -p "$extractDir"
+#     else
+#       extractDir="."
+#     fi
+
+#     # Determine extraction command based on extension, note "--" to prevent ambiguity if filename starts with "-"
+#     case "$archive" in
+
+#       # ------------------- Common tar series -------------------
+#       *.tar.bz2|*.tbz2)
+#         check_command tar || continue
+#         tar xjf -- "$archive" -C "$extractDir"
+#         ;;
+#       *.tar.gz|*.tgz)
+#         check_command tar || continue
+#         tar xzf -- "$archive" -C "$extractDir"
+#         ;;
+#       *.tar.xz|*.txz)
+#         check_command tar || continue
+#         tar xJf -- "$archive" -C "$extractDir"
+#         ;;
+#       *.tar)
+#         check_command tar || continue
+#         tar xf -- "$archive" -C "$extractDir"
+#         ;;
+
+#       # ------------------- Single file compression -------------------
+#       *.bz2)
+#         check_command bunzip2 || continue
+#         bunzip2 -- "$archive"
+#         if [ "$CREATE_SUBDIR" = "true" ]; then
+#           mv "${archive%.bz2}" "$extractDir"/ 2>/dev/null
+#         fi
+#         ;;
+#       *.gz)
+#         check_command gunzip || continue
+#         gunzip -- "$archive"
+#         if [ "$CREATE_SUBDIR" = "true" ]; then
+#           mv "${archive%.gz}" "$extractDir"/ 2>/dev/null
+#         fi
+#         ;;
+#       *.xz)
+#         check_command unxz || continue
+#         unxz -- "$archive"
+#         if [ "$CREATE_SUBDIR" = "true" ]; then
+#           mv "${archive%.xz}" "$extractDir"/ 2>/dev/null
+#         fi
+#         ;;
+#       *.Z)
+#         check_command uncompress || continue
+#         uncompress -- "$archive"
+#         if [ "$CREATE_SUBDIR" = "true" ]; then
+#           mv "${archive%.Z}" "$extractDir"/ 2>/dev/null
+#         fi
+#         ;;
+
+#       # ------------------- Archive formats -------------------
+#       *.zip)
+#         check_command unzip || continue
+#         unzip -d "$extractDir" -- "$archive"
+#         ;;
+#       *.rar)
+#         check_command unrar || continue
+#         unrar x -o+ -idq -- "$archive" "$extractDir"
+#         ;;
+#       *.7z)
+#         check_command 7z || continue
+#         7z x "$archive" -o"$extractDir"
+#         ;;
+
+#       # ------------------- Unknown format -------------------
+#       *)
+#         echo "Cannot extract: Unsupported compression format for '$archive'"
+#       ;;
+#     esac
+
+#   done
+# }
