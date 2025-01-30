@@ -102,11 +102,10 @@ bindkey "^v" edit-command-line
 
 # 👇 Custom paths
 export PATH="$HOME/dotfiles/bin:$PATH"
+source "$HOME/dotfiles/config/shell/functions/db.zsh"
+source "$HOME/dotfiles/config/shell/functions/g.zsh"
 
 export PATH="$HOME/developer/localhost/prototypes/utils/bash-scripts:$PATH"
-
-source "$HOME/developer/localhost/prototypes/utils/zsh-functions/db.zsh"
-source "$HOME/developer/localhost/prototypes/utils/zsh-functions/g.zsh"
 
 # 👇 LM Studio CLI tool
 export PATH="$HOME/.cache/lm-studio/bin:$PATH"
