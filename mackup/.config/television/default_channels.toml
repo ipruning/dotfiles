@@ -29,8 +29,8 @@ source_command = "op run -- aws s3 ls | cut -d \" \" -f 3"
 preview_command = "op run -- aws s3 ls s3://{0}"
 
 [[cable_channel]]
-name = "my-dotfiles"
-source_command = "fd -t f . $HOME/.config"
+name = "dotfiles"
+source_command = "fd --hidden --type file . $HOME/.config --exclude raycast --exclude .DS_Store"
 preview_command = ":files:"
 
 [[cable_channel]]
