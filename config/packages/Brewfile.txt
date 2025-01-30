@@ -6,6 +6,7 @@ autocorrect
 awscli
 basedpyright
 bat
+bats-core
 bore-cli
 btop
 cfitsio
@@ -17,6 +18,7 @@ cyme
 datasette
 detect-secrets
 docker
+doggo
 duckdb
 eget
 extra-cmake-modules
@@ -85,7 +87,6 @@ shfmt
 smartmontools
 sqlfluff
 sqlite-utils
-sshpass
 starship
 tailspin
 tealdeer

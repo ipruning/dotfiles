@@ -92,6 +92,7 @@ Setapp
 Shortcat
 Skim
 Steam
+Stratoshark
 Surfingkeys
 Surge
 Syntax Highlight
