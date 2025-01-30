@@ -266,7 +266,7 @@ plugins {
     }
 }
 
-// default_layout "compact"
+default_layout "demo"
 default_mode "locked"
 scroll_buffer_size 100000
 session_serialization false
