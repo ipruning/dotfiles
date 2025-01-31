@@ -1,7 +1,8 @@
 [tools]
 "cargo:koji" = "latest"
+"cargo:netscanner" = "latest"
 "cargo:pik" = "latest"
-"go:github.com/appleboy/CodeGPT/cmd/codegpt" = "latest"
+"cargo:tantivy-cli" = "latest"
 "go:github.com/josephburnett/jd" = "latest"
 "go:github.com/merschformann/gotz" = "latest"
 "pipx:ttok" = "latest"
