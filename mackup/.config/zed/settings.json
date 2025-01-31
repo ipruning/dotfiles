@@ -89,7 +89,7 @@
   "scrollbar": {
     "show": "never"
   },
-  "show_inline_completions": true,
+  "show_inline_completions": false,
   "tab_size": 2,
   "tabs": {
     "file_icons": true,
