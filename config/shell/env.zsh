@@ -165,9 +165,8 @@ function jump_to_repo_with_zellij_session() {
 function jump_to_zellij_session() {
   if [[ -n "$ZELLIJ" ]]; then
   else
-    if [[ "$TERM" == "xterm-ghostty" ]]; then
+    if [[ "$TERM_PROGRAM" == "ghostty" ]]; then
       zj_sessions=$(zellij list-sessions --no-formatting --short)
-
       case $(echo "$zj_sessions" | grep -c '^.') in
         0)
           zellij
