@@ -1,7 +1,7 @@
 typeset -A git_commands=(
   a  'git add'
   aa 'git add --all'
-  ac 'op run -- codegpt commit --no_confirm'
+  ac 'codegpt commit --no_confirm'
   c  'git commit -m'
   cc 'koji'
   d  'git diff'
