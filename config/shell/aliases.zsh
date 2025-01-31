@@ -24,7 +24,6 @@ alias ports="ss -tulpn"
 # macOS Aliases Part 1
 alias brow="/usr/local/homebrew/bin/brew"
 alias n="nvim"
-alias cat="bat"
 alias rg="rg --ignore-case"
 alias ls="eza"
 alias ll="eza --all --git --group-directories-first --header --long --time-style long-iso"
