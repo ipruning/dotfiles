@@ -110,8 +110,8 @@ toggle_preview = "ctrl-o"
 # "cat" = "files"
 # ```
 
-"bat" = "files"
-"cat" = "files"
+"bat" = "hidden-files"
+"cat" = "hidden-files"
 "cd" = "dirs"
 "cmd-execute" = "custom-shell-scripts"
 "docker run" = "docker-images"
