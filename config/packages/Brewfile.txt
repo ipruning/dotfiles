@@ -1,5 +1,6 @@
 aider
 assimp
+ast-grep
 atuin
 autoconf
 autocorrect
