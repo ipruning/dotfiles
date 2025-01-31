@@ -11,7 +11,6 @@ bore-cli
 btop
 cfitsio
 cgif
-cloudflared
 cmake
 csvlens
 cyme
@@ -61,6 +60,7 @@ macmon
 media-info
 mise
 monolith
+mtr
 neovim
 ollama
 onefetch
@@ -93,6 +93,7 @@ tealdeer
 television
 tmux
 tokei
+trippy
 trzsz-go
 typos-cli
 typst
