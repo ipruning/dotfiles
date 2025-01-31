@@ -130,37 +130,6 @@ function repo-fork-sync() {
   gh repo list --fork --visibility public --json owner,name | jq -r 'map(.owner.login + "/" + .name) | .[]' | xargs -t -L1 gh repo sync
 }
 
-function set-all-proxy() {
-  export https_proxy=http://127.0.0.1:6152
-  export http_proxy=http://127.0.0.1:6152
-  export all_proxy=socks5://127.0.0.1:6153
-}
-
-function surge-proxy() {
-  local x_key=$(cat "$HOME/Library/Application Support/Surge/Profiles/default.conf" | perl -ne 'print $1 if /http-api = (.*?)@/')
-  xh --body GET https://localhost:6171/v1/features/enhanced_mode X-Key:$x_key | jq
-}
-
-function set-surge-enhance() {
-  local x_key=$(cat "$HOME/Library/Application Support/Surge/Profiles/default.conf" | perl -ne 'print $1 if /http-api = (.*?)@/')
-  xh --quiet POST https://localhost:6171/v1/features/enhanced_mode X-Key:$x_key enabled:=true
-  surge-proxy
-}
-
-function toggle-surge-enhance() {
-  local x_key=$(cat "$HOME/Library/Application Support/Surge/Profiles/default.conf" | perl -ne 'print $1 if /http-api = (.*?)@/')
-  local current_status=$(surge-proxy | jq -r '.enabled')
-  
-  if [[ "$current_status" == "false" ]]; then
-    xh --quiet POST "https://localhost:6171/v1/features/enhanced_mode" "X-Key:$x_key" enabled:=true
-  else
-    xh --quiet POST "https://localhost:6171/v1/features/enhanced_mode" "X-Key:$x_key" enabled:=false
-  fi
-  
-  sleep 0.5
-  surge-proxy
-}
-
 function x86_64-zsh-login() {
   arch -x86_64 zsh --login
 }

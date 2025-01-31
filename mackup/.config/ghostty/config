@@ -12,7 +12,7 @@ window-padding-y = 10, 10
 
 macos-option-as-alt = true
 
-# confirm-close-surface = false
+confirm-close-surface = false
 keybind = cmd+j=text: jump_to_zellij_session\x0a
 keybind = cmd+shift+j=text: jump_to_repo_with_zellij_session\x0a
 

@@ -1,7 +1,4 @@
 # Linux Aliases Part 1
-alias chgrp="chgrp --preserve-root"
-alias chmod="chmod --preserve-root"
-alias chown="chown --preserve-root"
 alias cp="cp -i"
 alias df="df -h"
 alias du="du -h"

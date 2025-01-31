@@ -105,6 +105,8 @@ export PATH="$HOME/dotfiles/bin:$PATH"
 source "$HOME/dotfiles/config/shell/functions/misc.zsh"
 source "$HOME/dotfiles/config/shell/functions/db.zsh"
 source "$HOME/dotfiles/config/shell/functions/g.zsh"
+source "$HOME/dotfiles/config/shell/functions/surge.zsh"
+export PATH="$HOME/developer/localhost/prototypes/utils/bin:$PATH"
 export PATH="$HOME/developer/localhost/prototypes/utils/bash-scripts:$PATH"
 
 # 👇 LM Studio CLI tool
