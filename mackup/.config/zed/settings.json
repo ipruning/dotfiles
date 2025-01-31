@@ -90,21 +90,6 @@
     "show": "never"
   },
   "show_inline_completions": true,
-  "ssh_connections": [
-    {
-      "host": "101.126.71.13",
-      "projects": [],
-      "username": "root"
-    },
-    {
-      "host": "jihuanshe-hetzner-1",
-      "projects": [
-        {
-          "paths": ["~/jihuanshe.com/tcgspider"]
-        }
-      ]
-    }
-  ],
   "tab_size": 2,
   "tabs": {
     "file_icons": true,
