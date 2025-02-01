@@ -1,7 +1,10 @@
 db_path = "~/.local/share/atuin/history.db"
 key_path = "~/.local/share/atuin/key"
 
-enter_accept = true
-
-inline_height = 24
-style = "compact"
+enter_accept = false
+exit_mode = "return-query"
+inline_height = 16
+invert = true
+show_help = false
+show_tabs = false
+style = "auto"

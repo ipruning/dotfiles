@@ -2,10 +2,10 @@ tick_rate = 144
 
 [ui]
 use_nerd_font_icons = false
-ui_scale = 100
+ui_scale = 75
 show_help_bar = false
-show_preview_panel = true
-input_bar_position = "bottom"
+show_preview_panel = false
+input_bar_position = "top"
 theme = "catppuccin"
 
 [previewers.file]
