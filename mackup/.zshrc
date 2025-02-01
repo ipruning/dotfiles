@@ -6,9 +6,11 @@ if [[ $OSTYPE = darwin* ]]; then
   fi
 fi
 
-fpath=("$HOME/dotfiles/config/shell/completions" "${fpath[@]}")
-autoload -Uz compinit
-compinit -d ~/.zcompdump
+if [[ $OSTYPE = darwin* ]]; then
+  fpath=("$HOME/dotfiles/config/shell/completions" "${fpath[@]}")
+  autoload -Uz compinit
+  compinit -d ~/.zcompdump
+fi
 
 if [[ $OSTYPE = darwin* ]]; then
   if [ -d "$HOME/dotfiles" ]; then
