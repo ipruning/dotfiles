@@ -76,7 +76,6 @@ procs
 pueue
 py3cairo
 python@3.11
-qt@5
 rclone
 rip2
 ripgrep
