@@ -19,6 +19,7 @@ keybind = cmd+shift+j=text: jump_to_repo_with_zellij_session\x0a
 keybind = cmd+u=scroll_page_up
 keybind = cmd+d=scroll_page_down
 keybind = cmd+e=write_screen_file:open
+keybind = cmd+shift+e=write_screen_file:paste
 
 # quick-terminal-position = center
 # quick-terminal-animation-duration = 0

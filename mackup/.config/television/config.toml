@@ -2,7 +2,7 @@ tick_rate = 144
 
 [ui]
 use_nerd_font_icons = false
-ui_scale = 75
+ui_scale = 90
 show_help_bar = false
 show_preview_panel = false
 input_bar_position = "top"

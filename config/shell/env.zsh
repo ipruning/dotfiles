@@ -62,8 +62,10 @@ zle -N edit-command-line
 bindkey "^v" edit-command-line
 
 # 👇 My preferred editor for local and remote sessions
-export EDITOR="zed --wait"
-export VISUAL="zed --wait"
+# export EDITOR="zed --wait"
+# export VISUAL="zed --wait"
+export EDITOR="nvim"
+export VISUAL="nvim"
 
 # 👇 My keybindings
 bindkey "^[f" forward-word
@@ -93,7 +95,7 @@ source "$HOME/.orbstack/shell/init.zsh" 2>/dev/null || :
 eval "$(zoxide init zsh --cmd j)"
 
 # 👇 atuin
-eval "$(atuin init zsh)"
+eval "$(atuin init zsh --disable-up-arrow)"
 
 # 👇 mise
 eval "$(mise activate zsh)"

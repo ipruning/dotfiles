@@ -1,22 +1,6 @@
 [
   {
-    "command": "-workbench.action.toggleAuxiliaryBar",
-    "key": "alt+cmd+b"
-  },
-  {
     "command": "-workbench.action.switchWindow",
     "key": "ctrl+w"
-  },
-  {
-    "command": "workbench.action.toggleAuxiliaryBar",
-    "key": "cmd+g"
-  },
-  {
-    "command": "workbench.action.toggleSidebarVisibility",
-    "key": "cmd+b"
-  },
-  {
-    "command": "-workbench.action.toggleSidebarVisibility",
-    "key": "cmd+b"
   },
 ]

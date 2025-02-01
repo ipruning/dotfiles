@@ -1,12 +1,5 @@
 [
   {
-    "context": "Workspace",
-    "bindings": {
-      "cmd-g": "workspace::ToggleLeftDock",
-      "cmd-b": "workspace::ToggleRightDock"
-    }
-  },
-  {
     "context": "Terminal",
     "bindings": {
       "cmd-e": "terminal::ToggleViMode",
