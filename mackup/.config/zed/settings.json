@@ -4,16 +4,12 @@
       "model": "claude-3-5-sonnet-latest",
       "provider": "zed.dev"
     },
-    "dock": "left",
     "version": "2"
   },
   "autosave": "on_focus_change",
   "buffer_font_fallbacks": ["JetBrainsMono Nerd Font"],
   "buffer_font_family": "MonoLisa",
   "buffer_font_size": 12.0,
-  "chat_panel": {
-    "dock": "right"
-  },
   "collaboration_panel": {
     "dock": "right"
   },
@@ -81,9 +77,6 @@
     "dock": "right"
   },
   "preferred_line_length": 120,
-  "project_panel": {
-    "dock": "right"
-  },
   "relative_line_numbers": true,
   "restore_on_startup": "last_session",
   "scrollbar": {
@@ -104,7 +97,7 @@
   },
   "theme": "Catppuccin Mocha",
   "ui_font_family": "MonoLisa",
-  "ui_font_size": 15,
+  "ui_font_size": 14,
   "vim": {
     "use_system_clipboard": "on_yank"
   },

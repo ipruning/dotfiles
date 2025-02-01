@@ -158,8 +158,8 @@ keybinds clear-defaults=true {
     shared_except "locked" "renametab" "renamepane" {
         bind "Ctrl g" { SwitchToMode "locked"; }
 
-        bind "q" { Quit; }
-        bind "d" { Detach; }
+        bind "Ctrl q" { Quit; }
+        bind "Ctrl d" { Detach; }
 
         bind "1" { GoToTab 1; SwitchToMode "locked"; }
         bind "2" { GoToTab 2; SwitchToMode "locked"; }

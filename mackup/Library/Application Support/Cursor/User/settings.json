@@ -407,7 +407,6 @@
   },
   "workbench.iconTheme": "catppuccin-mocha",
   "workbench.settings.editor": "json",
-  "workbench.sideBar.location": "right",
   "workbench.tree.indent": 22,
   "workbench.tree.renderIndentGuides": "always",
   "zig.zls.enabled": "on"
