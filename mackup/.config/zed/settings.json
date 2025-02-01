@@ -10,7 +10,7 @@
   "autosave": "on_focus_change",
   "buffer_font_fallbacks": ["JetBrainsMono Nerd Font"],
   "buffer_font_family": "MonoLisa",
-  "buffer_font_size": 12,
+  "buffer_font_size": 12.0,
   "chat_panel": {
     "dock": "right"
   },

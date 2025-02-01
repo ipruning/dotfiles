@@ -1,9 +1,5 @@
 [
   {
-    "command": "workbench.action.toggleAuxiliaryBar",
-    "key": "cmd+b"
-  },
-  {
     "command": "-workbench.action.toggleAuxiliaryBar",
     "key": "alt+cmd+b"
   },
@@ -12,8 +8,12 @@
     "key": "ctrl+w"
   },
   {
+    "command": "workbench.action.toggleAuxiliaryBar",
+    "key": "cmd+g"
+  },
+  {
     "command": "workbench.action.toggleSidebarVisibility",
-    "key": "shift+cmd+b"
+    "key": "cmd+b"
   },
   {
     "command": "-workbench.action.toggleSidebarVisibility",
