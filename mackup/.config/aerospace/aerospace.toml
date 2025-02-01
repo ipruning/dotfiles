@@ -31,9 +31,6 @@ alt-comma = 'layout accordion vertical horizontal'
 alt-period = 'layout tiles vertical horizontal'
 alt-slash = 'mode service'
 
-alt-n = 'exec-and-forget open -a /Applications/Ghostty.app'
-alt-m = 'exec-and-forget open -a /Applications/Zed.app'
-
 alt-6 = 'workspace 6'
 alt-7 = 'workspace 7'
 alt-8 = 'workspace 8'
@@ -159,36 +156,32 @@ run = 'layout floating'
 
 [[on-window-detected]]
 if.app-id = 'com.google.Chrome'
-run = 'move-node-to-workspace 6'
+run = 'move-node-to-workspace 0'
 
 [[on-window-detected]]
 if.app-id = 'com.apple.Safari'
-run = 'move-node-to-workspace 6'
+run = 'move-node-to-workspace 0'
 
 [[on-window-detected]]
 if.app-id = 'com.todesktop.230313mzl4w4u92'
-run = 'move-node-to-workspace 7'
+run = 'move-node-to-workspace 9'
 
 [[on-window-detected]]
 if.app-id = 'com.exafunction.windsurf'
-run = 'move-node-to-workspace 7'
+run = 'move-node-to-workspace 9'
 
 [[on-window-detected]]
-if.app-id = 'dev.zed.Zed'
-run = 'move-node-to-workspace 7'
+if.app-id = 'com.pvncher.repoprompt'
+run = 'move-node-to-workspace 1'
 
-# [[on-window-detected]]
-# if.app-id = 'com.pvncher.repoprompt'
-# run = 'move-node-to-workspace 1'
+[[on-window-detected]]
+if.app-id = 'com.openai.chat'
+run = 'move-node-to-workspace 1'
 
-# [[on-window-detected]]
-# if.app-id = 'com.openai.chat'
-# run = 'move-node-to-workspace 1'
+[[on-window-detected]]
+if.app-id = 'com.TickTick.task.mac'
+run = 'move-node-to-workspace 1'
 
-# [[on-window-detected]]
-# if.app-id = 'com.TickTick.task.mac'
-# run = 'move-node-to-workspace 1'
-
-# [[on-window-detected]]
-# if.app-id = 'com.nssurge.surge-dashboard'
-# run = 'move-node-to-workspace 1'
+[[on-window-detected]]
+if.app-id = 'com.nssurge.surge-dashboard'
+run = 'move-node-to-workspace 1'
