@@ -157,7 +157,9 @@ keybinds clear-defaults=true {
     }
     shared_except "locked" "renametab" "renamepane" {
         bind "Ctrl g" { SwitchToMode "locked"; }
+
         bind "q" { Quit; }
+        bind "d" { Detach; }
 
         bind "1" { GoToTab 1; SwitchToMode "locked"; }
         bind "2" { GoToTab 2; SwitchToMode "locked"; }
@@ -168,15 +170,21 @@ keybinds clear-defaults=true {
         bind "7" { GoToTab 7; SwitchToMode "locked"; }
         bind "8" { GoToTab 8; SwitchToMode "locked"; }
         bind "9" { GoToTab 9; SwitchToMode "locked"; }
-        bind "d" { Detach; }
+ 
+
         bind "h" { MoveFocusOrTab "left"; }
         bind "j" { MoveFocus "down"; }
         bind "k" { MoveFocus "up"; }
         bind "l" { MoveFocusOrTab "right"; }
+
         bind "n" { NewPane; SwitchToMode "locked"; }
         bind "N" { NewTab; SwitchToMode "locked"; }
 
-        
+        bind "e" { EditScrollback; SwitchToMode "locked"; }
+
+        bind "u" { HalfPageScrollUp; }
+        bind "d" { HalfPageScrollDown; }
+
         bind "w" {
             LaunchOrFocusPlugin "file:~/.config/zellij/plugins/sessionizer.wasm" {
                 floating true
@@ -269,5 +277,6 @@ plugins {
 default_layout "default"
 default_mode "locked"
 scroll_buffer_size 100000
+scrollback_editor "/opt/homebrew/bin/zed --wait"
 session_serialization false
 theme "catppuccin-mocha"
