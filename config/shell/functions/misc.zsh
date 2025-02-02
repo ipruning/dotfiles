@@ -3,33 +3,50 @@ function my_logger() {
   local YELLOW='\033[1;33m'
   local GRAY='\033[0;90m'
   local NC='\033[0m'
-  
+
   local message=$1
-  local is_error=${2:-false}
-    
-  if [ "$is_error" = true ]; then
-    printf "${RED}[ERROR] %s${NC}\n" "$message" >&2
-  elif [ "$DRY_RUN" = true ]; then
-    printf "${YELLOW}[INFO] [DRY-RUN] %s${NC}\n" "$message"
-  else
-    printf "${GRAY}[INFO] %s${NC}\n" "$message"
-  fi
+  local loglevel=${2:-"INFO"}
+  local timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+  local color=$GRAY
+
+  case "${loglevel:u}" in
+    "ERROR")
+      color=$RED
+      ;;
+    "WARN")
+      color=$YELLOW
+      ;;
+    "INFO")
+      if [ "$DRY_RUN" = true ]; then
+        color=$YELLOW
+      else
+        color=$GRAY
+      fi
+      ;;
+    *)
+      loglevel="INFO"
+      color=$GRAY
+      ;;
+  esac
+
+  printf "${color}[%s] [%s] %s${NC}\n" "$timestamp" "${loglevel:u}" "$message"
 }
 
 function readit() {
   if [ $# -eq 0 ]; then
-    my_logger "No URL provided" "true"
+    my_logger "No URL provided" "ERROR"
   fi
 
   url="$1"
 
   if [[ ! "$url" =~ ^[a-zA-Z0-9._/:%-]+$ ]]; then
-    my_logger "Invalid URL format" "true"
+    my_logger "Invalid URL format" "ERROR"
     exit 1
   fi
 
   if ! curl -fSL "https://r.jina.ai/$url" 2>/dev/null; then
-    my_logger "Failed to fetch https://r.jina.ai/$url" "true"
+    my_logger "Failed to fetch https://r.jina.ai/$url" "ERROR"
     exit 1
   fi
 }
@@ -39,7 +56,7 @@ function buffit() {
     if [ -n "$my_buff" ]; then
       echo "$my_buff"
     else
-      my_logger "No data piped and 'my_buff' is empty." "true"
+      my_logger "No data piped and 'my_buff' is empty." "WARN"
     fi
   else
     read -r -d '' my_buff
@@ -73,7 +90,7 @@ function prompt() {
 
 function catscreen() {
   if [[ -z "$ZELLIJ" ]]; then
-    my_logger "Not running inside a Zellij session." "true"
+    my_logger "Not running inside a Zellij session." "WARN"
     return 1
   fi
 
@@ -90,7 +107,7 @@ function wtf() {
   if [[ -n "$ZELLIJ" ]]; then
     terminal_context=$(catscreen | sed '/^.*>.*wtf/,$d')
   else
-    my_logger "Not running inside a Zellij session." "true"
+    my_logger "Not running inside a Zellij session." "WARN"
     return 1
   fi
 
@@ -120,7 +137,7 @@ function wtf() {
     echo "$user_instructions"
     echo "</user_instructions>"
   )
-  
+
   echo "$prompt"
   echo
   llm $prompt | uv run https://gist.githubusercontent.com/ipruning/ae517e5ca8eda986a090617d5ea717d9/raw/ae44c828cf25bccd7836e339c3c442ac31c73269/richify.py
@@ -142,14 +159,14 @@ function upgrade-all() {
   my_logger "Updating Homebrew..."
   brew update
   brew upgrade
-  
+
   my_logger "Pruning Homebrew..."
   brew cleanup
   brew autoremove
 
   my_logger "Updating mise..."
   mise upgrade
-  
+
   my_logger "Pruning mise..."
   mise prune
   mise reshim
@@ -159,7 +176,7 @@ function upgrade-all() {
 
   my_logger "Updating tldr pages..."
   tldr --update
-  
+
   my_logger "Backing up all packages..."
   brew bundle dump --file="$HOME"/dotfiles/config/packages/Brewfile --force
   brew leaves >"$HOME"/dotfiles/config/packages/Brewfile.txt
