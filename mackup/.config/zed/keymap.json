@@ -12,12 +12,14 @@
   {
     "context": "EmptyPane || SharedScreen",
     "bindings": {
-      "space space": "file_finder::Toggle",
+      "space /": ["task::Spawn", { "task_name": "Live Grep", "reveal_target": "center" }],
+      "space c t": ["workspace::SendKeystrokes", ": new center terminal enter"],
+      "space e": ["task::Spawn", { "task_name": "yazi", "reveal_target": "center" }],
+      "space g": ["task::Spawn", { "task_name": "lazygit", "reveal_target": "center" }],
+      "space p": ["task::Spawn", { "task_name": "File Finder", "reveal_target": "center" }],
       "space r": "projects::OpenRecent",
       "space shift-r": "projects::OpenRemote",
-      "space c t": ["workspace::SendKeystrokes", ": new center terminal enter"],
-      "space p": ["task::Spawn", { "task_name": "File Finder", "reveal_target": "center" }],
-      "space /": ["task::Spawn", { "task_name": "Live Grep", "reveal_target": "center" }]
+      "space space": "file_finder::Toggle"
     }
   },
   {

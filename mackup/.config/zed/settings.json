@@ -89,12 +89,7 @@
     "git_status": true
   },
   "terminal": {
-    "env": {
-      "EDITOR": "zed --wait",
-      "VISUAL": "zed --wait"
-    },
-    "font_family": "MonoLisa",
-    "font_weight": 500
+    "font_size": 12.0
   },
   "theme": "Catppuccin Mocha",
   "ui_font_family": "MonoLisa",
