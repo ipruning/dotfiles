@@ -18,7 +18,6 @@ alias ..="cd .."
 alias hg="history | grep"
 alias ll="ls -lAh"
 alias lzd="lazydocker"
-alias lzg="lazygit"
 alias ports="ss -tulpn"
 
 # macOS Aliases Part 1

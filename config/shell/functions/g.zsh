@@ -1,5 +1,6 @@
 typeset -A git_commands=(
-  a  "git add --all --verbose"
+  aa "git add --all --verbose"
+  ac "codegpt commit --no_confirm"
   c  "git commit"
   d  "git diff"
   j  "jump_to_repo"
