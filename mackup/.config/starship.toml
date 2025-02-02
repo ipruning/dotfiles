@@ -47,9 +47,12 @@ symbol = 'SUDO '
 
 [username]
 format = '[$user@]($style)'
+style_root = "bold red"
+style_user = "bold yellow"
 
 [hostname]
 format = '[$hostname]($style) '
+style = "bold hostname"
 
 [directory]
 truncation_length = 4 
@@ -71,11 +74,11 @@ min_time_to_notify = 100_000
 show_milliseconds = false
 
 [character]
-success_symbol = '[>](bold green)'
+success_symbol = '[\$](bold green)'
 error_symbol = '[?](bold red)'
-vimcmd_symbol = '[<](bold sapphire)'
-vimcmd_replace_one_symbol = '[<](bold mauve)'
-vimcmd_replace_symbol = '[<](bold mauve)'
+vimcmd_symbol = '[<](bold green)'
+vimcmd_replace_one_symbol = '[<](bold purple)'
+vimcmd_replace_symbol = '[<](bold bold purple)'
 vimcmd_visual_symbol = '[<](bold yellow)'
 
 [[battery.display]]
