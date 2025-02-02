@@ -65,9 +65,12 @@ bindkey "^v" edit-command-line
 if [[ "$TERM_PROGRAM" == "ghostty" ]]; then
     export EDITOR="nvim"
     export VISUAL="nvim"
-else
+elif [[ "$TERM_PROGRAM" == "zed" ]]; then
     export EDITOR="zed --wait"
     export VISUAL="zed --wait"
+else
+    export EDITOR="nvim"
+    export VISUAL="nvim"
 fi
 
 # 👇 My keybindings
