@@ -7,6 +7,10 @@ ZSH_PLUGINS_DIR="$HOME/dotfiles/config/shell/plugins"
 # 👇 fzf
 # The user interface of fzf is fully customizable with a large number of configuration options.
 # For a quick setup, you can start with one of the style presets — default, full, or minimal — using the --style option.
+__TREE_IGNORE="-I '.git' -I '*.py[co]' -I '__pycache__' $__TREE_IGNORE"
+__FD_COMMAND="-L -H --no-ignore-vcs ${__TREE_IGNORE//-I/-E} $__FD_COMMAND"
+
+export FZF_DEFAULT_COMMAND="fd $__FD_COMMAND"
 export FZF_DEFAULT_OPTS=" \
 --style minimal \
 --reverse \
@@ -23,6 +27,9 @@ source "$ZSH_PLUGINS_DIR"/fzf-tab/fzf-tab.plugin.zsh
 zstyle ':completion:*:descriptions' format '[%d]'
 zstyle ':completion:*' menu no
 zstyle ':fzf-tab:*' use-fzf-default-opts yes
+
+unset __TREE_IGNORE
+unset __FD_COMMAND
 
 # 👇 tv
 _tv_search() {
@@ -90,6 +97,9 @@ source "$HOME/dotfiles/config/shell/functions/g.zsh"
 source "$HOME/dotfiles/config/shell/functions/surge.zsh"
 export PATH="$HOME/developer/localhost/prototypes/utils/bin:$PATH"
 export PATH="$HOME/developer/localhost/prototypes/utils/bash-scripts:$PATH"
+
+# 👇 Brew
+export HOMEBREW_NO_ANALYTICS=1
 
 # 👇 Mojo
 export PATH="$HOME/.modular/bin:$PATH"
