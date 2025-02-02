@@ -90,7 +90,8 @@
   },
   "terminal": {
     "env": {
-      "EDITOR": "zed --wait"
+      "EDITOR": "zed --wait",
+      "VISUAL": "zed --wait"
     },
     "font_family": "MonoLisa",
     "font_weight": 500

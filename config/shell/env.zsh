@@ -62,10 +62,13 @@ zle -N edit-command-line
 bindkey "^v" edit-command-line
 
 # 👇 My preferred editor for local and remote sessions
-# export EDITOR="zed --wait"
-# export VISUAL="zed --wait"
-export EDITOR="nvim"
-export VISUAL="nvim"
+if [[ "$TERM_PROGRAM" == "ghostty" ]]; then
+    export EDITOR="nvim"
+    export VISUAL="nvim"
+else
+    export EDITOR="zed --wait"
+    export VISUAL="zed --wait"
+fi
 
 # 👇 My keybindings
 bindkey "^[f" forward-word

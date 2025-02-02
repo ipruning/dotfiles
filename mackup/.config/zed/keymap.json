@@ -15,21 +15,15 @@
       "space space": "file_finder::Toggle",
       "space r": "projects::OpenRecent",
       "space shift-r": "projects::OpenRemote",
-
       "space c t": ["workspace::SendKeystrokes", ": new center terminal enter"],
       "space p": ["task::Spawn", { "task_name": "File Finder", "reveal_target": "center" }],
       "space /": ["task::Spawn", { "task_name": "Live Grep", "reveal_target": "center" }]
     }
   },
   {
-    "context": "(ProjectPanel || OutlinePanel) && not_editing",
-    "bindings": {
-      "q": "workspace::ToggleRightDock"
-    }
-  },
-  {
     "context": "ProjectPanel && not_editing",
     "bindings": {
+      "q": "workspace::ToggleLeftDock",
       "cmd-x": "project_panel::Cut",
       "cmd-c": "project_panel::Copy",
       "cmd-v": "project_panel::Paste"
@@ -103,15 +97,15 @@
       "space space": "file_finder::Toggle",
       "space r": "projects::OpenRecent",
       "space shift-r": "projects::OpenRemote",
-      "space g b": "branches::OpenRecent",
+      "space s b": "branches::OpenRecent",
 
       "space a": "assistant::ToggleFocus",
-      "space e": "pane::RevealInProjectPanel",
+      "space shift-e": "pane::RevealInProjectPanel",
+      "space e": ["task::Spawn", { "task_name": "yazi", "reveal_target": "center" }],
       "space x": "diagnostics::Deploy",
 
-      "space g u": ["task::Spawn", { "task_name": "gitu", "reveal_target": "center" }],
-      "space g f": ["task::Spawn", { "task_name": "gfold", "reveal_target": "center" }],
-      "space l g": ["task::Spawn", { "task_name": "lazygit", "reveal_target": "center" }],
+      // "space g": ["task::Spawn", { "task_name": "gitu", "reveal_target": "center" }],
+      "space g": ["task::Spawn", { "task_name": "lazygit", "reveal_target": "center" }],
       "space c t": ["workspace::SendKeystrokes", ": new center terminal enter"]
     }
   },
