@@ -1,7 +1,7 @@
 # Core Configuration
 [core]
 excludesfile = ~/.gitignore
-pager = delta
+pager = delta --paging=never
 
 [init]
 defaultBranch = main
