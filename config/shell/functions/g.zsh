@@ -1,4 +1,4 @@
-typeset -A git_commands=(
+typeset -A g_commands=(
   aa "git add --all --verbose"
   ac "codegpt commit"
   ak "koji"
@@ -21,23 +21,16 @@ function g() {
 
   if [[ $1 == "help" ]]; then
     echo "Usage: g [subcommand]"
-    for key desc in ${(kv)git_commands}; do
+    for key desc in ${(kv)g_commands}; do
       printf "  %-3s = %s\n" "$key" "$desc"
     done
     return
   fi
 
   local cmd=$1
-  if (( ${+git_commands[$cmd]} )); then
+  if (( ${+g_commands[$cmd]} )); then
     shift
-
-    if [[ $cmd == "j" ]]; then
-      local command=(${=git_commands[$cmd]})
-      "$command[@]" "$@"
-      return
-    fi
- 
-    local command=(${=git_commands[$cmd]})
+    local command=(${=g_commands[$cmd]})
     "$command[@]" "$@"
     return
   fi
@@ -48,18 +41,23 @@ function g() {
 compdef _g g
 
 function _g() {
-  local -a subcommands
-
-  for key desc in ${(kv)git_commands}; do
-    subcommands+=("$key:${(q)desc}")
-  done
-
   if (( CURRENT == 2 )); then
+    local -a subcommands
+    for key desc in ${(kv)git_commands}; do
+      subcommands+=("$key:${(q)desc}")
+    done
     _describe -t commands "g subcommands" subcommands
-    return
+  fi
+}
+
+function jump_to_repo() {
+  local repo_path
+  repo_path=$(tv git-repos)
+  [[ -z "$repo_path" ]] && return
+  if [[ -n "$ZELLIJ" ]]; then
+    cd "${repo_path}"
   else
-    shift words
-    (( CURRENT-- ))
-    _git
+    local repo_name=$(basename "${repo_path}")
+    zellij attach "${repo_name}" 2>/dev/null || zellij --session "${repo_name}"
   fi
 }
