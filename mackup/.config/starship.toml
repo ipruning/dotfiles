@@ -5,6 +5,7 @@ $username\
 $hostname\
 $directory\
 $git_branch\
+$git_status\
 $package\
 $cmd_duration\
 $battery\
@@ -59,7 +60,8 @@ style = "bold yellow"
 truncation_length = 4 
 truncate_to_repo = true
 truncation_symbol = '…/'
-read_only = ' RO'
+read_only_style = "bold red"
+read_only = ' [RO]'
 
 [git_branch]
 format = "[$branch]($style) "
