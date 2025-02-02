@@ -33,24 +33,24 @@ unset __FD_COMMAND
 
 # 👇 tv
 _tv_search() {
-    emulate -L zsh
-    zle -I
+  emulate -L zsh
+  zle -I
 
-    local current_prompt
-    current_prompt=$LBUFFER
+  local current_prompt
+  current_prompt=$LBUFFER
 
-    local output
+  local output
 
-    output=$(tv --autocomplete-prompt "$current_prompt" $*)
+  output=$(tv --autocomplete-prompt "$current_prompt" $*)
 
-    zle reset-prompt
+  zle reset-prompt
 
-    if [[ -n $output ]]; then
-        RBUFFER=""
-        LBUFFER=$current_prompt$output
+  if [[ -n $output ]]; then
+    RBUFFER=""
+    LBUFFER=$current_prompt$output
 
-        # zle accept-line
-    fi
+    # zle accept-line
+  fi
 }
 
 zle -N tv-search _tv_search
@@ -70,14 +70,14 @@ bindkey "^v" edit-command-line
 
 # 👇 My preferred editor for local and remote sessions
 if [[ "$TERM_PROGRAM" == "ghostty" ]]; then
-    export EDITOR="nvim"
-    export VISUAL="nvim"
+  export EDITOR="nvim"
+  export VISUAL="nvim"
 elif [[ "$TERM_PROGRAM" == "zed" ]]; then
-    export EDITOR="zed --wait"
-    export VISUAL="zed --wait"
+  export EDITOR="zed --wait"
+  export VISUAL="zed --wait"
 else
-    export EDITOR="nvim"
-    export VISUAL="nvim"
+  export EDITOR="nvim"
+  export VISUAL="nvim"
 fi
 
 # 👇 My keybindings
@@ -112,12 +112,12 @@ eval "$(zoxide init zsh --cmd j)"
 
 # 👇 yazi
 function y() {
-	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
-	yazi "$@" --cwd-file="$tmp"
-	if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
-		builtin cd -- "$cwd"
-	fi
-	rm -f -- "$tmp"
+  local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+  yazi "$@" --cwd-file="$tmp"
+  if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+    builtin cd -- "$cwd"
+  fi
+  rm -f -- "$tmp"
 }
 
 # 👇 atuin

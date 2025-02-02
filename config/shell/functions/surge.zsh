@@ -13,13 +13,13 @@ function unset-all-proxy() {
 function toggle-enhanced-mode() {
   local x_key=$(cat "$HOME/Library/Application Support/Surge/Profiles/default.conf" | perl -ne 'print $1 if /http-api = (.*?)@/')
   local current_status=$(xh --body GET https://localhost:6171/v1/features/enhanced_mode X-Key:$x_key | jq -r '.enabled')
-  
+
   if [[ "$current_status" == "false" ]]; then
     xh --quiet POST https://localhost:6171/v1/features/enhanced_mode X-Key:$x_key enabled:=true
   else
     xh --quiet POST https://localhost:6171/v1/features/enhanced_mode X-Key:$x_key enabled:=false
   fi
-  
+
   sleep 0.5
   echo "Enhanced Mode Status: $(xh --body GET https://localhost:6171/v1/features/enhanced_mode X-Key:$x_key | jq -r '.enabled')"
 }
