@@ -16,6 +16,7 @@ csvlens
 cyme
 datasette
 detect-secrets
+difftastic
 docker
 doggo
 duckdb
@@ -46,6 +47,7 @@ hurl
 hyperfine
 iperf3
 ipinfo-cli
+jc
 jless
 jq
 just
