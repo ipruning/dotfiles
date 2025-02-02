@@ -43,7 +43,8 @@ crust = "#11111b"
 [sudo]
 disabled = false
 format = '[$symbol]($style)'
-symbol = 'SUDO '
+style = "bold red"
+symbol = 'SU '
 
 [username]
 format = '[$user@]($style)'
@@ -75,7 +76,7 @@ show_milliseconds = false
 
 [character]
 success_symbol = '[\$](bold green)'
-error_symbol = '[?](bold red)'
+error_symbol = '[\$](bold red)'
 vimcmd_symbol = '[<](bold green)'
 vimcmd_replace_one_symbol = '[<](bold purple)'
 vimcmd_replace_symbol = '[<](bold bold purple)'

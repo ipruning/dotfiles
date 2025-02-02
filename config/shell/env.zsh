@@ -94,6 +94,16 @@ source "$HOME/.orbstack/shell/init.zsh" 2>/dev/null || :
 # 👇 zoxide
 eval "$(zoxide init zsh --cmd j)"
 
+# 👇 yazi
+function y() {
+	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+	yazi "$@" --cwd-file="$tmp"
+	if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+		builtin cd -- "$cwd"
+	fi
+	rm -f -- "$tmp"
+}
+
 # 👇 atuin
 eval "$(atuin init zsh --disable-up-arrow)"
 
