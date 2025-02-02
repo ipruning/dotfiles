@@ -1,7 +1,7 @@
 # Core Configuration
 [core]
 excludesfile = ~/.gitignore
-pager = delta --paging=never
+pager = delta
 
 [init]
 defaultBranch = main
@@ -29,6 +29,9 @@ autoStash = true
 # Diff and Merge Display
 [diff]
 colorMoved = default
+
+[interactive]
+diffFilter = delta --color-only
 
 [delta]
 navigate = true
@@ -65,9 +68,6 @@ map-styles = \
 	bold yellow = "#544f4e" >syntax >syntax >syntax >syntax
 # Should match the name of the bat theme
 syntax-theme = Catppuccin Mocha
-
-[interactive]
-diffFilter = delta --color-only
 
 [merge]
 conflictstyle = diff3

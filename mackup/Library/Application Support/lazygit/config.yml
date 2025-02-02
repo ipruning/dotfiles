@@ -1,7 +1,7 @@
 git:
   paging:
     colorArg: always
-    useConfig: true
+    pager: delta --paging=never
 gui:
   theme:
     activeBorderColor:
