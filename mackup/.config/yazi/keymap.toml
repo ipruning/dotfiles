@@ -427,3 +427,18 @@ desc = "lazygit"
 on   = "<C-`>"
 run  = 'shell "$SHELL" --confirm --block'
 desc = "shell"
+
+[[manager.prepend_keymap]]
+on   = [ "g", "d" ]
+run  = "cd ~/Downloads"
+desc = "Goto Downloads"
+
+[[manager.prepend_keymap]]
+on   = [ "g", "l"]
+run  = "cd ~/Developer/localhost"
+desc = "Goto localhost"
+
+[[manager.prepend_keymap]]
+on   = [ "c", "C" ]
+run  = '''shell 'clip "$@"' '''
+desc = "Clip selected files and directories"
