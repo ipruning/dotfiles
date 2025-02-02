@@ -4,7 +4,7 @@ tick_rate = 144
 use_nerd_font_icons = false
 ui_scale = 90
 show_help_bar = false
-show_preview_panel = false
+show_preview_panel = true
 input_bar_position = "top"
 theme = "catppuccin"
 
