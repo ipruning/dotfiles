@@ -34,8 +34,8 @@
   {
     "context": "Editor && mode == full",
     "bindings": {
-      "cmd-<": "assistant::QuoteSelection",
-      "cmd->": "assistant::InsertIntoEditor"
+      "cmd->": "assistant::QuoteSelection",
+      "cmd-<": "assistant::InsertIntoEditor"
     }
   },
   {
