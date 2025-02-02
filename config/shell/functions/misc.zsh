@@ -11,23 +11,23 @@ function my_logger() {
   local color=$GRAY
 
   case "${loglevel:u}" in
-    "ERROR")
-      color=$RED
-      ;;
-    "WARN")
+  "ERROR")
+    color=$RED
+    ;;
+  "WARN")
+    color=$YELLOW
+    ;;
+  "INFO")
+    if [ "$DRY_RUN" = true ]; then
       color=$YELLOW
-      ;;
-    "INFO")
-      if [ "$DRY_RUN" = true ]; then
-        color=$YELLOW
-      else
-        color=$GRAY
-      fi
-      ;;
-    *)
-      loglevel="INFO"
+    else
       color=$GRAY
-      ;;
+    fi
+    ;;
+  *)
+    loglevel="INFO"
+    color=$GRAY
+    ;;
   esac
 
   printf "${color}[%s] [%s] %s${NC}\n" "$timestamp" "${loglevel:u}" "$message"

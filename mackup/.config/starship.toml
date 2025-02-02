@@ -57,7 +57,7 @@ format = '[$hostname]($style) '
 style = "bold yellow"
 
 [directory]
-truncation_length = 4 
+truncation_length = 4
 truncate_to_repo = true
 truncation_symbol = '…/'
 read_only_style = "bold red"
