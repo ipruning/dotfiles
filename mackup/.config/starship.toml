@@ -52,7 +52,7 @@ style_user = "bold yellow"
 
 [hostname]
 format = '[$hostname]($style) '
-style = "bold hostname"
+style = "bold yellow"
 
 [directory]
 truncation_length = 4 
