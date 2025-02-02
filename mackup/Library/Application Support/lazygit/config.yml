@@ -1,8 +1,11 @@
+notARepository: "quit"
+promptToReturnFromSubprocess: false
 git:
   paging:
-    colorArg: always
-    pager: delta --paging=never
+    externalDiffCommand: difft --color=always --display=side-by-side-show-both --syntax-highlight=off
 gui:
+  mouseEvents: false
+  sidePanelWidth: 0.3
   theme:
     activeBorderColor:
       - "#a6e3a1"
@@ -25,3 +28,4 @@ gui:
       - "#f9e2af"
   authorColors:
     "*": "#b4befe"
+  nerdFontsVersion: "3"
