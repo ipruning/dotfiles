@@ -417,3 +417,13 @@ desc = "Enter the child directory, or open the file"
 on   = "<Enter>"
 run  = "plugin smart-enter"
 desc = "Enter the child directory, or open the file"
+
+[[manager.prepend_keymap]]
+on   = "<C-g>"
+run  = "shell --confirm --block lazygit"
+desc = "lazygit"
+
+[[manager.prepend_keymap]]
+on   = "<C-`>"
+run  = 'shell "$SHELL" --confirm --block'
+desc = "shell"
