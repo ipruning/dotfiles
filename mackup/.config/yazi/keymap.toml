@@ -357,3 +357,58 @@ keymap = [
 	# Filtering
 	{ on = "f", run = "filter", desc = "Apply a filter for the help items" },
 ]
+
+[[manager.prepend_keymap]]
+on = [ "1" ]
+run = "plugin relative-motions --args=1"
+desc = "Move in relative steps"
+
+[[manager.prepend_keymap]]
+on = [ "2" ]
+run = "plugin relative-motions --args=2"
+desc = "Move in relative steps"
+
+[[manager.prepend_keymap]]
+on = [ "3" ]
+run = "plugin relative-motions --args=3"
+desc = "Move in relative steps"
+
+[[manager.prepend_keymap]]
+on = [ "4" ]
+run = "plugin relative-motions --args=4"
+desc = "Move in relative steps"
+
+[[manager.prepend_keymap]]
+on = [ "5" ]
+run = "plugin relative-motions --args=5"
+desc = "Move in relative steps"
+
+[[manager.prepend_keymap]]
+on = [ "6" ]
+run = "plugin relative-motions --args=6"
+desc = "Move in relative steps"
+
+[[manager.prepend_keymap]]
+on = [ "7" ]
+run = "plugin relative-motions --args=7"
+desc = "Move in relative steps"
+
+[[manager.prepend_keymap]]
+on = [ "8" ]
+run = "plugin relative-motions --args=8"
+desc = "Move in relative steps"
+
+[[manager.prepend_keymap]]
+on = [ "9" ]
+run = "plugin relative-motions --args=9"
+desc = "Move in relative steps"
+
+[[manager.prepend_keymap]]
+on   = [ "c", "a" ]
+run  = "plugin compress"
+desc = "Archive selected files"
+
+[[manager.prepend_keymap]]
+on   = "l"
+run  = "plugin smart-enter"
+desc = "Enter the child directory, or open the file"

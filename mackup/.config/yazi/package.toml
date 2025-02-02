@@ -1,5 +1,5 @@
 [plugin]
-deps = [{ use = "dedukun/relative-motions", rev = "0d9c8cf" }]
+deps = [{ use = "dedukun/relative-motions", rev = "0d9c8cf" }, { use = "yazi-rs/plugins:git", rev = "02d18be" }, { use = "KKV9/compress", rev = "60b24af" }, { use = "yazi-rs/plugins:smart-enter", rev = "02d18be" }]
 
 [flavor]
 deps = []
