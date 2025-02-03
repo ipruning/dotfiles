@@ -57,6 +57,7 @@ function jump_to_repo() {
   if [[ -n "$ZELLIJ" ]]; then
     cd "${repo_path}"
   else
+    cd "${repo_path}"
     local repo_name=$(basename "${repo_path}")
     zellij attach "${repo_name}" 2>/dev/null || zellij --session "${repo_name}"
   fi
