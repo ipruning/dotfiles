@@ -180,15 +180,17 @@ keybinds clear-defaults=true {
         bind "7" { GoToTab 7; SwitchToMode "locked"; }
         bind "8" { GoToTab 8; SwitchToMode "locked"; }
         bind "9" { GoToTab 9; SwitchToMode "locked"; }
- 
 
         bind "h" { MoveFocusOrTab "left"; }
         bind "j" { MoveFocus "down"; }
         bind "k" { MoveFocus "up"; }
         bind "l" { MoveFocusOrTab "right"; }
-
-        bind "n" { NewPane; SwitchToMode "locked"; }
-        bind "N" { NewTab; SwitchToMode "locked"; }
+        bind "left" { NewPane "left"; SwitchToMode "locked"; }
+        bind "down" { NewPane "down"; SwitchToMode "locked"; }
+        bind "up" { NewPane "up"; SwitchToMode "locked"; }
+        bind "right" { NewPane "right"; SwitchToMode "locked"; }
+        bind "n" { NewTab; SwitchToMode "locked"; }
+        bind "t" { NewTab; SwitchToMode "locked"; }
 
         bind "e" { EditScrollback; SwitchToMode "locked"; }
 
