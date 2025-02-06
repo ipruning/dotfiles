@@ -21,6 +21,7 @@
     "modal_max_width": "medium"
   },
   "format_on_save": "off",
+  "icon_theme": "Catppuccin Mocha",
   "indent_guides": {
     "coloring": "indent_aware",
     "enabled": true

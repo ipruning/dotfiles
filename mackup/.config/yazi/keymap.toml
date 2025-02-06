@@ -562,8 +562,8 @@ desc = "Goto Downloads"
 
 [[manager.prepend_keymap]]
 on = ["g", "l"]
-run = "cd ~/Developer/localhost"
-desc = "Goto localhost"
+run = "cd ~/Developer/local"
+desc = "Goto local"
 
 [[manager.prepend_keymap]]
 on = ["c", "C"]

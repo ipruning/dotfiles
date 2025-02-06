@@ -1,8 +1,10 @@
 typeset -A db_commands=(
-  c2p 'csv-to-parquet'
-  cs 'csv-schema'
-  ss 'sqlite-schema'
-  qsb 'sqlite-query'
+  csv-schema 'csv-schema'
+  csv-to-parquet 'csv-to-parquet'
+  json-schema 'json-schema'
+  json-sqlite 'json-sqlite'
+  sqlite-query 'sqlite-query'
+  sqlite-schema 'sqlite-schema'
 )
 
 function csv-to-parquet() {
@@ -13,6 +15,11 @@ function csv-to-parquet() {
 function csv-schema() {
   file_path="$1"
   duckdb -c "CREATE TEMP TABLE temp_csv_dump AS SELECT * FROM read_csv_auto('$file_path'); SELECT * FROM PRAGMA_TABLE_INFO('temp_csv_dump');"
+}
+
+function json-schema() {
+  file_path="$1"
+  duckdb -c "CREATE TEMP TABLE temp_json_dump AS SELECT * FROM read_json_auto('$file_path'); SELECT * FROM PRAGMA_TABLE_INFO('temp_json_dump');"
 }
 
 function sqlite-schema() {
