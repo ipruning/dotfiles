@@ -93,9 +93,6 @@
   },
   "theme": "Catppuccin Mocha",
   "ui_font_family": "MonoLisa",
-  "ui_font_size": 14,
-  "vim": {
-    "use_system_clipboard": "on_yank"
-  },
+  "ui_font_size": 14.0,
   "vim_mode": true
 }

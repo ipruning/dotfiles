@@ -98,7 +98,7 @@
   "cursor.composer.renderPillsInsteadOfBlocks": true,
   "diffEditor.ignoreTrimWhitespace": false,
   "diffEditor.maxComputationTime": 8192,
-  "diffEditor.renderSideBySide": false,
+  "diffEditor.renderSideBySide": true,
   "diffEditor.wordWrap": "off",
   "dotenv.enableAutocloaking": false,
   "editor.accessibilitySupport": "off",
@@ -236,9 +236,8 @@
   "fileNestingUpdater.autoUpdateInterval": 43200,
   "fileNestingUpdater.promptOnAutoUpdate": true,
   "files.associations": {
-    "*.cursorrules*": "markdown",
-    "*.env*": "dotenv",
     ".cforge": "json",
+    ".cursorrules*": "markdown",
     ".env*": "dotenv",
     "secrets": "dotenv"
   },
