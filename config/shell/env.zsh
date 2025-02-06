@@ -95,8 +95,8 @@ source "$HOME/dotfiles/config/shell/functions/misc.zsh"
 source "$HOME/dotfiles/config/shell/functions/db.zsh"
 source "$HOME/dotfiles/config/shell/functions/g.zsh"
 source "$HOME/dotfiles/config/shell/functions/surge.zsh"
-export PATH="$HOME/developer/localhost/prototypes/utils/bin:$PATH"
-export PATH="$HOME/developer/localhost/prototypes/utils/bash-scripts:$PATH"
+export PATH="$HOME/Developer/local/prototypes/utils/bin:$PATH"
+export PATH="$HOME/Developer/local/prototypes/utils/bash-scripts:$PATH"
 
 # 👇 Brew
 export HOMEBREW_NO_ANALYTICS=1

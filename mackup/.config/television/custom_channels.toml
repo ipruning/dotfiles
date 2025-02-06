@@ -58,10 +58,10 @@ preview_command = ":files:"
 
 [[cable_channel]]
 name = "custom-shell-scripts"
-source_command = "fd . /Users/alex/Developer/localhost/prototypes/utils --type file --extension sh"
+source_command = "fd . /Users/alex/Developer/local/prototypes/utils --type file --extension sh"
 preview_command = ":files:"
 
 [[cable_channel]]
 name = "custom-python-scripts"
-source_command = "fd . /Users/alex/Developer/localhost/prototypes/utils --type file --extension py"
+source_command = "fd . /Users/alex/Developer/local/prototypes/utils --type file --extension py"
 preview_command = ":files:"

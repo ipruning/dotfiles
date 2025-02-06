@@ -2,6 +2,7 @@ typeset -A g_commands=(
   aa "git add --all --verbose"
   ac "codegpt commit"
   ak "koji"
+  b  "git browse"
   c  "git commit"
   d  "git diff"
   j  "jump_to_repo"
