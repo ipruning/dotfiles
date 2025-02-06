@@ -15,7 +15,7 @@
   },
   "cursor_blink": false,
   "features": {
-    "inline_completion_provider": "copilot"
+    "inline_completion_provider": "zed"
   },
   "file_finder": {
     "modal_max_width": "medium"
@@ -82,7 +82,7 @@
   "scrollbar": {
     "show": "never"
   },
-  "show_inline_completions": false,
+  "show_inline_completions": true,
   "tab_size": 2,
   "tabs": {
     "file_icons": true,
