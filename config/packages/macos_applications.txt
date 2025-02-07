@@ -116,8 +116,6 @@ Whisper Transcription
 Wireshark
 Wooshy
 XLD
-Xcode
-Xcode-16.2.0
 Xcodes
 YACReader
 YACReaderLibrary
