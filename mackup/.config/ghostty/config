@@ -1,7 +1,7 @@
 cursor-style = block
 cursor-style-blink = false
 font-family = MonoLisa
-font-size = 14
+font-size = 13
 font-style = Medium
 macos-titlebar-style = hidden
 shell-integration-features = no-cursor
