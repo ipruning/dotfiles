@@ -25,7 +25,7 @@ count_selected = { fg = "#1e1e2e", bg = "#89b4fa" }
 border_symbol = "│"
 border_style = { fg = "#7f849c" }
 
-syntect_theme = "~/.config/yazi/Catppuccin-mocha.tmTheme"
+# syntect_theme = "~/.config/yazi/Catppuccin-mocha.tmTheme"
 
 [mode]
 normal_main = { fg = "#1e1e2e", bg = "#89b4fa", bold = true }

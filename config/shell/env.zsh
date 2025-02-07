@@ -15,11 +15,11 @@ export FZF_DEFAULT_OPTS=" \
 --style minimal \
 --reverse \
 --multi \
---bind 'ctrl-y:accept' \
---color=bg+:#313244,bg:#1e1e2e,spinner:#f5e0dc,hl:#f38ba8 \
---color=fg:#cdd6f4,header:#f38ba8,info:#cba6f7,pointer:#f5e0dc \
---color=marker:#b4befe,fg+:#cdd6f4,prompt:#cba6f7,hl+:#f38ba8 \
---color=selected-bg:#45475a"
+--bind 'ctrl-y:accept'
+# --color=bg+:#313244,bg:#1e1e2e,spinner:#f5e0dc,hl:#f38ba8 \
+# --color=fg:#cdd6f4,header:#f38ba8,info:#cba6f7,pointer:#f5e0dc \
+# --color=marker:#b4befe,fg+:#cdd6f4,prompt:#cba6f7,hl+:#f38ba8 \
+# --color=selected-bg:#45475a"
 
 # 👇 fzf-tab
 source "$ZSH_PLUGINS_DIR"/fzf-tab/fzf-tab.plugin.zsh
@@ -125,3 +125,6 @@ eval "$(atuin init zsh --disable-up-arrow)"
 
 # 👇 mise
 eval "$(mise activate zsh)"
+
+# 👇 bat
+export BAT_THEME="Catppuccin Mocha"
