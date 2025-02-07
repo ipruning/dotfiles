@@ -6,10 +6,9 @@ ui_scale = 90
 show_help_bar = false
 show_preview_panel = true
 input_bar_position = "top"
-theme = "catppuccin"
 
 [previewers.file]
-theme = "Catppuccin Mocha"
+# theme = "Catppuccin Mocha"
 
 # Keybindings
 # ----------------------------------------------------------------------------
