@@ -13,12 +13,11 @@
     "context": "EmptyPane || SharedScreen",
     "bindings": {
       "space /": ["task::Spawn", { "task_name": "Live Grep", "reveal_target": "center" }],
-      "space c t": ["workspace::SendKeystrokes", ": new center terminal enter"],
-      "space e": ["task::Spawn", { "task_name": "yazi", "reveal_target": "center" }],
+      "space m": ["workspace::SendKeystrokes", ": new center terminal enter"],
       "space g": ["task::Spawn", { "task_name": "lazygit", "reveal_target": "center" }],
-      "space j": ["task::Spawn", { "task_name": "Project Finder", "reveal_target": "center"}],
       "space r": "projects::OpenRecent",
-      "space shift-r": "projects::OpenRemote",
+      "space shift-r": ["task::Spawn", { "task_name": "Project Finder", "reveal_target": "center"}],
+      "space shift-e": ["task::Spawn", { "task_name": "yazi", "reveal_target": "center" }],
       "space space": ["task::Spawn", { "task_name": "File Finder", "reveal_target": "center" }]
     }
   },
@@ -96,16 +95,15 @@
       "space s b": "branches::OpenRecent",
 
       "space a": "assistant::ToggleFocus",
-      "space shift-e": "pane::RevealInProjectPanel",
+      "space e": "pane::RevealInProjectPanel",
       "space x": "diagnostics::Deploy",
 
       "space /": ["task::Spawn", { "task_name": "Live Grep", "reveal_target": "center" }],
-      "space c t": ["workspace::SendKeystrokes", ": new center terminal enter"],
-      "space e": ["task::Spawn", { "task_name": "yazi", "reveal_target": "center" }],
+      "space m": ["workspace::SendKeystrokes", ": new center terminal enter"],
       "space g": ["task::Spawn", { "task_name": "lazygit", "reveal_target": "center" }],
-      "space j": ["task::Spawn", { "task_name": "Project Finder", "reveal_target": "center"}],
       "space r": "projects::OpenRecent",
-      "space shift-r": "projects::OpenRemote",
+      "space shift-r": ["task::Spawn", { "task_name": "Project Finder", "reveal_target": "center"}],
+      "space shift-e": ["task::Spawn", { "task_name": "yazi", "reveal_target": "center" }],
       "space space": ["task::Spawn", { "task_name": "File Finder", "reveal_target": "center" }]
     }
   },

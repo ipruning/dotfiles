@@ -21,7 +21,7 @@
   "file_finder": {
     "modal_max_width": "medium"
   },
-  "format_on_save": "off",
+  "format_on_save": "on",
   "icon_theme": "Zed (Default)",
   "indent_guides": {
     "coloring": "indent_aware",

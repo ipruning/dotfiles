@@ -177,3 +177,7 @@ run = 'move-node-to-workspace 1'
 [[on-window-detected]]
 if.app-id = 'com.nssurge.surge-dashboard'
 run = 'move-node-to-workspace 1'
+
+[[on-window-detected]]
+if.app-id = 'com.pvncher.repoprompt'
+run = 'move-node-to-workspace 1'

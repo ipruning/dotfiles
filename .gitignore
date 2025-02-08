@@ -1,7 +1,4 @@
 *backups
-*private.*
-
-Brewfile.lock.json
-
+*private*
 config/shell/completions/
 config/shell/plugins/
