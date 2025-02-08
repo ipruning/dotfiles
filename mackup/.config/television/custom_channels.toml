@@ -1,6 +1,6 @@
 [[cable_channel]]
 name = "hidden-files"
-source_command = "fd --no-ignore-vcs --type file --hidden --follow --exclude .git --exclude node_modules --exclude .venv --exclude .DS_Store"
+source_command = "fd --no-ignore-vcs --type file --hidden --follow"
 preview_command = ":files:"
 
 [[cable_channel]]
@@ -10,7 +10,7 @@ preview_command = ":files:"
 
 [[cable_channel]]
 name = "python-scripts"
-source_command = "fd --no-ignore-vcs --type file --extension py --exclude .venv"
+source_command = "fd --no-ignore-vcs --type file --extension py"
 preview_command = ":files:"
 
 [[cable_channel]]
