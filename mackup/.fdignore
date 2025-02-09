@@ -1,16 +1,16 @@
-# Cache
+# cache
 *cache*
 
-# macOS
+# macos
 .DS_Store
 
-# Git
+# git
 .git
 
-# Node
+# node
 node_modules
 
-# Python
+# python
 *.egg*
 *.py[cod]
 *.so
@@ -27,15 +27,16 @@ share/python-wheels/
 var/
 wheels/
 
-# Environments
+# env
 *env/
 .*env
 
-# Logging
+# log
 *.log*
 
-# LLM
+# llm
 *.cforge
 *.safetensors
 *lance
+cachedir/
 logdir/
