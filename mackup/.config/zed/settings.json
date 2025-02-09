@@ -14,6 +14,13 @@
   "collaboration_panel": {
     "dock": "right"
   },
+  "context_servers": {
+    "postgres-context-server": {
+      "settings": {
+        "database_url": "postgresql://myuser:mypassword@localhost:5432/mydatabase"
+      }
+    }
+  },
   "cursor_blink": false,
   "features": {
     "inline_completion_provider": "zed"
