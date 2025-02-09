@@ -270,7 +270,9 @@ plugins {
 
 default_layout "compact"
 default_mode "locked"
-scroll_buffer_size 100000
+pane_frames false
+scroll_buffer_size 10000
 scrollback_editor "/opt/homebrew/bin/zed --wait"
 session_serialization false
+simplified_ui true
 theme "catppuccin-mocha"
