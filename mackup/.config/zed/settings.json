@@ -18,11 +18,8 @@
   "features": {
     "inline_completion_provider": "zed"
   },
-  "file_finder": {
-    "modal_max_width": "medium"
-  },
   "format_on_save": "on",
-  "icon_theme": "Zed (Default)",
+  "icon_theme": "Catppuccin Mocha",
   "indent_guides": {
     "coloring": "indent_aware",
     "enabled": true
