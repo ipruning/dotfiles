@@ -125,6 +125,3 @@ eval "$(atuin init zsh --disable-up-arrow)"
 
 # 👇 mise
 eval "$(mise activate zsh)"
-
-# 👇 bat
-export BAT_THEME="Catppuccin Mocha"
