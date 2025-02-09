@@ -268,7 +268,7 @@ plugins {
     }
 }
 
-default_layout "default"
+default_layout "compact"
 default_mode "locked"
 scroll_buffer_size 100000
 scrollback_editor "/opt/homebrew/bin/zed --wait"

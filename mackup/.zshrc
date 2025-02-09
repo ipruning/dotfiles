@@ -4,15 +4,11 @@ if [[ $OSTYPE = darwin* ]]; then
   if [ -d "/opt/homebrew/bin" ]; then
     eval "$(/opt/homebrew/bin/brew shellenv)"
   fi
-fi
 
-if [[ $OSTYPE = darwin* ]]; then
   fpath=("$HOME/dotfiles/config/shell/completions" "${fpath[@]}")
   autoload -Uz compinit
   compinit -d ~/.zcompdump
-fi
 
-if [[ $OSTYPE = darwin* ]]; then
   if [ -d "$HOME/dotfiles" ]; then
     if [ -n "$ZSH_VERSION" ]; then
       local config_files=(
