@@ -3,9 +3,6 @@ use_nerd_font_icons = false
 ui_scale = 100
 show_preview_panel = false
 
-[previewers.file]
-theme = "Catppuccin Mocha"
-
 # Keybindings
 # ----------------------------------------------------------------------------
 #
@@ -80,7 +77,7 @@ toggle_help = "ctrl-g"
 toggle_preview = "ctrl-o"
 
 [shell_integration.commands]
-""="files"
+"" = "files"
 "bat" = "hidden-files"
 "cat" = "hidden-files"
 "cd" = "dirs"

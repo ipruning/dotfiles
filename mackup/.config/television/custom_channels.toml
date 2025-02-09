@@ -1,21 +1,21 @@
 [[cable_channel]]
 name = "hidden-files"
-source_command = "fd --no-ignore-vcs --type file --hidden --follow"
+source_command = "fd --no-ignore-vcs --type file --hidden --follow -0 | xargs -0 gprintf '%q\n'"
 preview_command = ":files:"
 
 [[cable_channel]]
 name = "csv-files"
-source_command = "fd --no-ignore-vcs --type file --extension csv"
+source_command = "fd --no-ignore-vcs --type file --extension csv -0 | xargs -0 gprintf '%q\n'"
 preview_command = ":files:"
 
 [[cable_channel]]
 name = "sh-files"
-source_command = "fd --no-ignore-vcs --type file --extension sh"
+source_command = "fd --no-ignore-vcs --type file --hidden --extension sh -0 | xargs -0 gprintf '%q\n'"
 preview_command = ":files:"
 
 [[cable_channel]]
 name = "py-files"
-source_command = "fd --no-ignore-vcs --type file --extension py"
+source_command = "fd --no-ignore-vcs --type file --hidden --extension py -0 | xargs -0 gprintf '%q\n'"
 preview_command = ":files:"
 
 [[cable_channel]]
@@ -58,12 +58,12 @@ source_command = "tv list-channels | grep -v 'channels:' | sed '/^[[:space:]]*$/
 
 [[cable_channel]]
 name = "my-md-files"
-source_command = "fd . '/Users/alex/Databases/Roam' --type file --extension md"
+source_command = "fd . '/Users/alex/Databases/Roam' --type file --extension md -0 | xargs -0 gprintf '%q\n'"
 preview_command = ":files:"
 
 [[cable_channel]]
 name = "my-sh-files"
-source_command = "fd . /Users/alex/Developer/local/prototypes/utils --type file --extension sh"
+source_command = "fd . /Users/alex/Developer/local/prototypes/utils --type file --extension sh -0 | xargs -0 gprintf '%q\n'"
 preview_command = ":files:"
 
 [[cable_channel]]
