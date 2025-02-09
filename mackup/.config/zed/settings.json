@@ -97,6 +97,9 @@
   },
   "terminal": {
     "button": false,
+    "font_family": "MonoLisa",
+    "font_size": 12.0,
+    "font_weight": 400,
     "toolbar": {
       "breadcrumbs": false
     }
