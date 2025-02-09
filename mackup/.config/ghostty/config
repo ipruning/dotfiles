@@ -1,7 +1,9 @@
+# custom-shader = ~/.config/ghostty/crt-shader-with-chromatic-aberration-glow-scanlines-dot-matrix/crt-shader-with-chromatic-aberration-glow-scanlines-dot-matrix.glsl
+
 cursor-style = block
 cursor-style-blink = false
 font-family = MonoLisa
-font-size = 12
+font-size = 14
 font-style = Medium
 macos-titlebar-style = hidden
 shell-integration-features = no-cursor
