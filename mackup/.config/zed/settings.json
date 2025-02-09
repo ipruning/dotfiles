@@ -11,6 +11,7 @@
   "buffer_font_family": "MonoLisa",
   "buffer_font_size": 12.0,
   "buffer_font_weight": 400,
+  "buffer_line_height": "comfortable",
   "collaboration_panel": {
     "dock": "right"
   },
@@ -95,8 +96,10 @@
     "git_status": true
   },
   "terminal": {
-    "font_size": 12.0,
-    "font_weight": 400
+    "button": false,
+    "toolbar": {
+      "breadcrumbs": false
+    }
   },
   "theme": "Catppuccin Mocha",
   "ui_font_family": "MonoLisa",
