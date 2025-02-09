@@ -2,7 +2,7 @@
 show_preview_panel = false
 theme = "dark"
 ui_scale = 100
-use_nerd_font_icons = true
+use_nerd_font_icons = false
 
 # Keybindings
 # ----------------------------------------------------------------------------

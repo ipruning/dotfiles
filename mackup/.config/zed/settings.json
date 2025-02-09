@@ -86,6 +86,7 @@
   "preferred_line_length": 120,
   "relative_line_numbers": true,
   "restore_on_startup": "last_session",
+  "scroll_beyond_last_line": "off",
   "scrollbar": {
     "show": "never"
   },
