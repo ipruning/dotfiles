@@ -1,14 +1,10 @@
-tick_rate = 144
-
 [ui]
 use_nerd_font_icons = false
-ui_scale = 90
-show_help_bar = false
-show_preview_panel = true
-input_bar_position = "top"
+ui_scale = 100
+show_preview_panel = false
 
 [previewers.file]
-# theme = "Catppuccin Mocha"
+theme = "Catppuccin Mocha"
 
 # Keybindings
 # ----------------------------------------------------------------------------
@@ -17,7 +13,7 @@ input_bar_position = "top"
 # ------------------------
 [keybindings.Channel]
 # Quit the application
-quit = "esc"
+quit = ["esc", "ctrl-c"]
 # Scrolling through entries
 select_next_entry = ["down", "ctrl-n", "ctrl-j"]
 select_prev_entry = ["up", "ctrl-p", "ctrl-k"]
@@ -83,36 +79,13 @@ toggle_help = "ctrl-g"
 # Toggle the preview panel
 toggle_preview = "ctrl-o"
 
-
-# Shell integration
-# ----------------------------------------------------------------------------
-#
-# The shell integration feature allows you to use television as a picker for
-# your shell commands (as well as your shell history with <CTRL-R>).
-# E.g. typing `git checkout <CTRL-T>` will open television with a list of
-# branches to choose from.
-
 [shell_integration.commands]
-# Add your commands here. Each key is a command that will trigger tv with the
-# corresponding channel as value.
-# Example: say you want the following prompts to trigger the following channels
-# when pressing <CTRL-T>:
-#          `git checkout` should trigger the `git-branches` channel
-#          `ls`           should trigger the `dirs` channel
-#          `cat`          should trigger the `files` channel
-#
-# You would add the following to your configuration file:
-# ```
-# [shell_integration.commands]
-# "git checkout" = "git-branch"
-# "ls" = "dirs"
-# "cat" = "files"
-# ```
-
+""="files"
 "bat" = "hidden-files"
 "cat" = "hidden-files"
 "cd" = "dirs"
-"cmd-execute" = "custom-shell-scripts"
+"cmd-execute" = "my-sh-files"
+"csvlens" = "csv-files"
 "docker run" = "docker-images"
 "export" = "env"
 "eza" = "dirs"
@@ -125,13 +98,13 @@ toggle_preview = "ctrl-o"
 "n" = "hidden-files"
 "nvim" = "hidden-files"
 "open" = "hidden-files"
-"python" = "python-scripts"
-"sh" = "shell-scripts"
+"python" = "py-files"
+"sh" = "sh-files"
 "ssh" = "hosts"
 "tail" = "files"
 "tv" = "channels"
 "unset" = "env"
-"uv run" = "python-scripts"
+"uv run" = "py-files"
 "vim" = "hidden-files"
 "wget" = "gists"
 "zed" = "hidden-files"

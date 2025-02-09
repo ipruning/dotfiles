@@ -4,12 +4,17 @@ source_command = "fd --no-ignore-vcs --type file --hidden --follow"
 preview_command = ":files:"
 
 [[cable_channel]]
-name = "shell-scripts"
+name = "csv-files"
+source_command = "fd --no-ignore-vcs --type file --extension csv"
+preview_command = ":files:"
+
+[[cable_channel]]
+name = "sh-files"
 source_command = "fd --no-ignore-vcs --type file --extension sh"
 preview_command = ":files:"
 
 [[cable_channel]]
-name = "python-scripts"
+name = "py-files"
 source_command = "fd --no-ignore-vcs --type file --extension py"
 preview_command = ":files:"
 
@@ -52,16 +57,16 @@ name = "channels"
 source_command = "tv list-channels | grep -v 'channels:' | sed '/^[[:space:]]*$/d' | sed 's/^[[:space:]]*//'"
 
 [[cable_channel]]
-name = "roam-notes"
+name = "my-md-files"
 source_command = "fd . '/Users/alex/Databases/Roam' --type file --extension md"
 preview_command = ":files:"
 
 [[cable_channel]]
-name = "custom-shell-scripts"
+name = "my-sh-files"
 source_command = "fd . /Users/alex/Developer/local/prototypes/utils --type file --extension sh"
 preview_command = ":files:"
 
 [[cable_channel]]
-name = "custom-python-scripts"
+name = "my-py-files"
 source_command = "fd . /Users/alex/Developer/local/prototypes/utils --type file --extension py"
 preview_command = ":files:"
