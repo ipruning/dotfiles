@@ -27,4 +27,3 @@ alias ll="eza --all --git --group-directories-first --header --long --time-style
 alias n="nvim"
 alias ping="ping"
 alias ports="viddy --interval 1s 'lsof -i @127.0.0.1 | grep LISTEN'"
-alias rg="rg --ignore-case"

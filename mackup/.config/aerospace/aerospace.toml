@@ -27,8 +27,8 @@ outer.right = 8
 alt-p = 'mode pass'
 
 alt-backslash = 'workspace-back-and-forth'
-alt-comma = 'layout accordion vertical horizontal'
-alt-period = 'layout tiles vertical horizontal'
+alt-comma = 'layout tiles vertical horizontal'
+alt-period = 'layout accordion vertical horizontal'
 alt-slash = 'mode service'
 
 alt-6 = 'workspace 6'
