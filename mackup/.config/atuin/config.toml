@@ -7,4 +7,4 @@ inline_height = 23
 invert = true
 show_help = false
 show_tabs = false
-style = "auto"
+style = "compact"
