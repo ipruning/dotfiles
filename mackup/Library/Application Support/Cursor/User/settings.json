@@ -106,7 +106,7 @@
   "editor.cursorBlinking": "solid",
   "editor.cursorSmoothCaretAnimation": "on",
   "editor.fontFamily": "'MonoLisa', 'JetBrainsMono Nerd Font', 'Source Han Sans SC'",
-  "editor.fontSize": 12,
+  "editor.fontSize": 13,
   "editor.fontWeight": "400",
   "editor.formatOnSave": true,
   "editor.guides.bracketPairs": true,
@@ -139,7 +139,10 @@
   "editor.unicodeHighlight.ambiguousCharacters": true,
   "editor.unicodeHighlight.invisibleCharacters": true,
   "editor.wordWrap": "off",
-  "errorLens.enabledDiagnosticLevels": ["error", "warning"],
+  "errorLens.enabledDiagnosticLevels": [
+    "error",
+    "warning"
+  ],
   "excalidraw.theme": "dark",
   "explorer.confirmDelete": false,
   "explorer.confirmDragAndDrop": false,
@@ -284,9 +287,17 @@
   "shellcheck.customArgs": [],
   "shellcheck.enable": true,
   "shellcheck.enableQuickFix": true,
-  "shellcheck.exclude": ["SC1091", "SC2128", "SC2155"],
+  "shellcheck.exclude": [
+    "SC1091",
+    "SC2128",
+    "SC2155"
+  ],
   "shellcheck.executablePath": "/opt/homebrew/bin/shellcheck",
-  "shellcheck.ignoreFileSchemes": ["git", "gitfs", "output"],
+  "shellcheck.ignoreFileSchemes": [
+    "git",
+    "gitfs",
+    "output"
+  ],
   "shellcheck.ignorePatterns": {
     "**/*.xonshrc": true,
     "**/*.xsh": true,
@@ -307,7 +318,7 @@
   "sqlfluff.executablePath": "/opt/homebrew/bin/sqlfluff",
   "terminal.integrated.confirmOnExit": "hasChildProcesses",
   "terminal.integrated.defaultProfile.osx": "zsh",
-  "terminal.integrated.fontSize": 12,
+  "terminal.integrated.fontSize": 13,
   "terminal.integrated.fontWeight": "400",
   "terminal.integrated.inheritEnv": true,
   "vim.hlsearch": true,
@@ -315,37 +326,74 @@
   "vim.leader": "<space>",
   "vim.normalModeKeyBindings": [
     {
-      "before": ["<leader>", "t"],
-      "commands": ["code-runner.run"]
+      "before": [
+        "<leader>",
+        "t"
+      ],
+      "commands": [
+        "code-runner.run"
+      ]
     },
     {
-      "before": [":"],
-      "commands": ["workbench.action.showCommands"],
+      "before": [
+        ":"
+      ],
+      "commands": [
+        "workbench.action.showCommands"
+      ],
       "silent": true
     },
     {
-      "before": ["<leader>", "r"],
-      "commands": ["workbench.action.openRecent"]
+      "before": [
+        "<leader>",
+        "r"
+      ],
+      "commands": [
+        "workbench.action.openRecent"
+      ]
     },
     {
-      "before": ["<leader>", "<leader>"],
-      "commands": ["workbench.action.quickOpen"]
+      "before": [
+        "<leader>",
+        "<leader>"
+      ],
+      "commands": [
+        "workbench.action.quickOpen"
+      ]
     },
     {
-      "before": ["<leader>", "a"],
-      "commands": ["workbench.action.toggleAuxiliaryBar"]
+      "before": [
+        "<leader>",
+        "a"
+      ],
+      "commands": [
+        "workbench.action.toggleAuxiliaryBar"
+      ]
     },
     {
-      "before": ["<leader>", "e"],
-      "commands": ["workbench.action.toggleSidebarVisibility"]
+      "before": [
+        "<leader>",
+        "e"
+      ],
+      "commands": [
+        "workbench.action.toggleSidebarVisibility"
+      ]
     },
     {
-      "before": ["<C-j>"],
-      "commands": ["editor.action.marker.nextInFiles"]
+      "before": [
+        "<C-j>"
+      ],
+      "commands": [
+        "editor.action.marker.nextInFiles"
+      ]
     },
     {
-      "before": ["<C-k>"],
-      "commands": ["editor.action.marker.prevInFiles"]
+      "before": [
+        "<C-k>"
+      ],
+      "commands": [
+        "editor.action.marker.prevInFiles"
+      ]
     }
   ],
   "vim.useSystemClipboard": true,
