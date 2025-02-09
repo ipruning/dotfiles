@@ -9,7 +9,7 @@
     "editor.defaultFormatter": "ms-azuretools.vscode-docker"
   },
   "[html]": {
-    "editor.defaultFormatter": "denoland.vscode-deno"
+    "editor.defaultFormatter": "oven.bun-vscode"
   },
   "[json][jsonc]": {
     "editor.defaultFormatter": "vscode.json-language-features"
@@ -59,7 +59,7 @@
     "editor.defaultFormatter": "foxundermoon.shell-format"
   },
   "[typescript]": {
-    "editor.defaultFormatter": "denoland.vscode-deno"
+    "editor.defaultFormatter": "oven.bun-vscode"
   },
   "[typst-code]": {
     "editor.wordSeparators": "`~!@#$%^&*()=+[{]}\\|;:'\",.<>/?"
@@ -100,7 +100,7 @@
   "diffEditor.maxComputationTime": 8192,
   "diffEditor.renderSideBySide": true,
   "diffEditor.wordWrap": "off",
-  "dotenv.enableAutocloaking": false,
+  "dotenv.enableAutocloaking": true,
   "editor.accessibilitySupport": "off",
   "editor.bracketPairColorization.enabled": true,
   "editor.cursorBlinking": "solid",
@@ -127,7 +127,14 @@
   "editor.suggestSelection": "first",
   "editor.tabSize": 2,
   "editor.tokenColorCustomizations": {
-    "textMateRules": []
+    "textMateRules": [
+      {
+        "scope": "keyword.other.dotenv",
+        "settings": {
+          "foreground": "#FF000000"
+        }
+      }
+    ]
   },
   "editor.unicodeHighlight.ambiguousCharacters": true,
   "editor.unicodeHighlight.invisibleCharacters": true,
@@ -189,7 +196,7 @@
     ".env": "*.env, .env.*, .envrc, env.d.ts",
     ".gitignore": ".gitattributes, .gitmodules, .gitmessage, .mailmap, .git-blame*",
     ".project": ".classpath",
-    "//": "Last update at 2/2/2025, 4:17:59 PM",
+    "//": "Last update at 2/9/2025, 1:55:26 PM",
     "BUILD.bazel": "*.bzl, *.bazel, *.bazelrc, bazel.rc, .bazelignore, .bazelproject, WORKSPACE",
     "CMakeLists.txt": "*.cmake, *.cmake.in, .cmake-format.yaml, CMakePresets.json, CMakeCache.txt",
     "Cargo.toml": ".clippy.toml, .rustfmt.toml, cargo.lock, clippy.toml, cross.toml, rust-toolchain.toml, rustfmt.toml",
@@ -275,7 +282,7 @@
   "python.analysis.autoFormatStrings": true,
   "python.analysis.inlayHints.variableTypes": false,
   "python.analysis.typeCheckingMode": "basic",
-  "python.languageServer": "Default",
+  "python.languageServer": "Pylance",
   "ruff.configurationPreference": "filesystemFirst",
   "shellcheck.customArgs": [],
   "shellcheck.enable": true,
