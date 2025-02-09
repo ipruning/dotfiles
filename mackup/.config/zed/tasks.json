@@ -1,0 +1,56 @@
+[
+  {
+    "label": "Live Grep",
+    "command": "selection=$(tv text); [ -n \"$selection\" ] && zed \"$selection\"",
+    "hide": "always",
+    "allow_concurrent_runs": true,
+    "use_new_terminal": true,
+    "shell": {
+      "with_arguments": {
+        "program": "sh",
+        "args": ["--noediting", "--norc", "--noprofile"]
+      }
+    }
+  },
+  {
+    "label": "File Finder",
+    "command": "selection=$([[ $(pwd) == \"$HOME\" ]] && fd . --no-ignore-vcs --hidden --max-depth 3 | tv || tv hidden-files); [ -n \"$selection\" ] && zed \"$selection\"",
+    "hide": "always",
+    "allow_concurrent_runs": true,
+    "use_new_terminal": true,
+    "shell": {
+      "with_arguments": {
+        "program": "sh",
+        "args": ["--noediting", "--norc", "--noprofile"]
+      }
+    }
+  },
+  {
+    "label": "Project Finder",
+    "command": "selection=$(tv git-repos); [ -n \"$selection\" ] && zed \"$selection\"",
+    "hide": "always",
+    "allow_concurrent_runs": true,
+    "use_new_terminal": true,
+    "shell": {
+      "with_arguments": {
+        "program": "sh",
+        "args": ["--noediting", "--norc", "--noprofile"]
+      }
+    }
+  },
+  {
+    "label": "yazi",
+    "command": "yazi",
+    "hide": "always"
+  },
+  {
+    "label": "lazygit",
+    "command": "lazygit",
+    "hide": "always"
+  },
+  {
+    "label": "gitu",
+    "command": "gitu",
+    "hide": "always"
+  }
+]
