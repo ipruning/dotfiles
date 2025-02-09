@@ -14,7 +14,7 @@
   },
   {
     "label": "File Finder",
-    "command": "selection=$([[ $(pwd) == \"$HOME\" ]] && fd . --no-ignore-vcs --hidden --max-depth 3 | tv || tv hidden-files-v1); [ -n \"$selection\" ] && zed \"$selection\"",
+    "command": "selection=$([[ $(pwd) == \"$HOME\" ]] && fd . --no-ignore-vcs --hidden --max-depth 3 | tv || tv hidden-files-zed); [ -n \"$selection\" ] && zed \"$selection\"",
     "hide": "always",
     "allow_concurrent_runs": true,
     "use_new_terminal": true,

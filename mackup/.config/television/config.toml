@@ -78,7 +78,7 @@ toggle_help = "ctrl-g"
 toggle_preview = "ctrl-o"
 
 [shell_integration.commands]
-"" = "files"
+"" = "hidden-files-max-depth-3"
 "bat" = "hidden-files"
 "cat" = "hidden-files"
 "cd" = "dirs"
