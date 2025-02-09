@@ -1,7 +1,7 @@
 [ui]
-use_nerd_font_icons = false
-ui_scale = 100
 show_preview_panel = false
+ui_scale = 95
+use_nerd_font_icons = false
 
 # Keybindings
 # ----------------------------------------------------------------------------

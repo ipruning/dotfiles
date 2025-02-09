@@ -2,5 +2,5 @@
   {
     "command": "-workbench.action.switchWindow",
     "key": "ctrl+w"
-  },
+  }
 ]

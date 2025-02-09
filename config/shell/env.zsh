@@ -5,8 +5,6 @@ eval "$(starship init zsh)"
 ZSH_PLUGINS_DIR="$HOME/dotfiles/config/shell/plugins"
 
 # 👇 fzf
-# The user interface of fzf is fully customizable with a large number of configuration options.
-# For a quick setup, you can start with one of the style presets — default, full, or minimal — using the --style option.
 __TREE_IGNORE="-I '.git' -I '*.py[co]' -I '__pycache__' $__TREE_IGNORE"
 __FD_COMMAND="-L -H --no-ignore-vcs ${__TREE_IGNORE//-I/-E} $__FD_COMMAND"
 
@@ -16,10 +14,10 @@ export FZF_DEFAULT_OPTS=" \
 --reverse \
 --multi \
 --bind 'ctrl-y:accept'
-# --color=bg+:#313244,bg:#1e1e2e,spinner:#f5e0dc,hl:#f38ba8 \
-# --color=fg:#cdd6f4,header:#f38ba8,info:#cba6f7,pointer:#f5e0dc \
-# --color=marker:#b4befe,fg+:#cdd6f4,prompt:#cba6f7,hl+:#f38ba8 \
-# --color=selected-bg:#45475a"
+--color=bg+:#313244,bg:#1e1e2e,spinner:#f5e0dc,hl:#f38ba8 \
+--color=fg:#cdd6f4,header:#f38ba8,info:#cba6f7,pointer:#f5e0dc \
+--color=marker:#b4befe,fg+:#cdd6f4,prompt:#cba6f7,hl+:#f38ba8 \
+--color=selected-bg:#45475a"
 
 # 👇 fzf-tab
 source "$ZSH_PLUGINS_DIR"/fzf-tab/fzf-tab.plugin.zsh
@@ -48,8 +46,6 @@ _tv_search() {
   if [[ -n $output ]]; then
     RBUFFER=""
     LBUFFER=$current_prompt$output
-
-    # zle accept-line
   fi
 }
 
