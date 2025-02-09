@@ -105,5 +105,12 @@
   "ui_font_family": "MonoLisa",
   "ui_font_size": 15,
   "ui_font_weight": 500,
+  "vim": {
+    "highlight_on_yank_duration": 400,
+    "toggle_relative_line_numbers": true,
+    "use_multiline_find": true,
+    "use_smartcase_find": true,
+    "use_system_clipboard": "on_yank"
+  },
   "vim_mode": true
 }
