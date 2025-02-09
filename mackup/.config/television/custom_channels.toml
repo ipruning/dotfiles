@@ -4,6 +4,11 @@ source_command = "fd --no-ignore-vcs --type file --hidden --follow -0 | xargs -0
 preview_command = ":files:"
 
 [[cable_channel]]
+name = "hidden-files-v1"
+source_command = "fd --no-ignore-vcs --type file --hidden --follow"
+preview_command = ":files:"
+
+[[cable_channel]]
 name = "csv-files"
 source_command = "fd --no-ignore-vcs --type file --extension csv -0 | xargs -0 gprintf '%q\n'"
 preview_command = ":files:"
