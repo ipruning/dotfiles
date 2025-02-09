@@ -1,0 +1,41 @@
+# Cache
+*cache*
+
+# macOS
+.DS_Store
+
+# Git
+.git
+
+# Node
+node_modules
+
+# Python
+*.egg*
+*.py[cod]
+*.so
+.Python
+build/
+dist/
+downloads/
+htmlcov/
+lib/
+lib64/
+parts/
+sdist/
+share/python-wheels/
+var/
+wheels/
+
+# Environments
+*env/
+.*env
+
+# Logging
+*.log*
+
+# LLM
+*.cforge
+*.safetensors
+*lance
+logdir/
