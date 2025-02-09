@@ -4,7 +4,12 @@ source_command = "fd --no-ignore-vcs --type file --hidden --follow -0 | xargs -0
 preview_command = ":files:"
 
 [[cable_channel]]
-name = "hidden-files-v1"
+name = "hidden-files-max-depth-3"
+source_command = "fd --no-ignore-vcs --type file --hidden --follow --max-depth 3 -0 | xargs -0 gprintf '%q\n'"
+preview_command = ":files:"
+
+[[cable_channel]]
+name = "hidden-files-zed"
 source_command = "fd --no-ignore-vcs --type file --hidden --follow"
 preview_command = ":files:"
 
