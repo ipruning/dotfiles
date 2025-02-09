@@ -12,7 +12,7 @@
     "context": "EmptyPane || SharedScreen",
     "bindings": {
       "space /": ["task::Spawn", { "task_name": "Live Grep", "reveal_target": "center" }],
-      "space g": ["task::Spawn", { "task_name": "lazygit", "reveal_target": "center" }],
+      "space g": ["task::Spawn", { "task_name": "gitu", "reveal_target": "center" }],
       "space n t": ["workspace::SendKeystrokes", ": new center terminal enter"],
       "space r": "projects::OpenRecent",
       "space shift-e": ["task::Spawn", { "task_name": "yazi", "reveal_target": "center" }],
@@ -98,7 +98,7 @@
       "space x": "diagnostics::Deploy",
 
       "space /": ["task::Spawn", { "task_name": "Live Grep", "reveal_target": "center" }],
-      "space g": ["task::Spawn", { "task_name": "lazygit", "reveal_target": "center" }],
+      "space g": ["task::Spawn", { "task_name": "gitu", "reveal_target": "center" }],
       "space n t": ["workspace::SendKeystrokes", ": new center terminal enter"],
       "space r": "projects::OpenRecent",
       "space shift-e": ["task::Spawn", { "task_name": "yazi", "reveal_target": "center" }],

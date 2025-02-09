@@ -9,7 +9,7 @@
   "autosave": "on_focus_change",
   "buffer_font_fallbacks": ["JetBrainsMono Nerd Font"],
   "buffer_font_family": "MonoLisa",
-  "buffer_font_size": 12.0,
+  "buffer_font_size": 13.0,
   "buffer_font_weight": 400,
   "buffer_line_height": "comfortable",
   "collaboration_panel": {
@@ -97,16 +97,13 @@
   },
   "terminal": {
     "button": false,
-    "font_family": "MonoLisa",
-    "font_size": 12.0,
-    "font_weight": 400,
     "toolbar": {
       "breadcrumbs": false
     }
   },
   "theme": "Catppuccin Mocha",
   "ui_font_family": "MonoLisa",
-  "ui_font_size": 14.0,
-  "ui_font_weight": 400,
+  "ui_font_size": 15,
+  "ui_font_weight": 500,
   "vim_mode": true
 }
