@@ -38,7 +38,7 @@ function readit() {
     my_logger "No URL provided" "ERROR"
   fi
 
-  url="$1"
+  local url="$1"
 
   if [[ ! "$url" =~ ^[a-zA-Z0-9._/:%-]+$ ]]; then
     my_logger "Invalid URL format" "ERROR"
@@ -76,31 +76,7 @@ function catscreen() {
 }
 
 function prompt() {
-  local context=""
-
-  if ! [ -t 0 ]; then
-    while IFS= read -r line; do
-      context+="${line}"$'\n'
-    done
-    context=${context%$'\n'}
-  fi
-
-  if [[ -n "$context" ]]; then
-    echo "<context>"
-    echo -e "$context"
-    echo "</context>"
-    echo
-  fi
-
-  if (( $# > 0 )); then
-    echo "<user_instructions>"
-    printf "%s " "$@"
-    echo
-    echo "</user_instructions>"
-  fi
-}
-
-function wtf() {
+  local args=("$@")
   local terminal_context=""
   local other_context=""
 
@@ -130,16 +106,15 @@ function wtf() {
         echo
       fi
 
-      if (( $# > 0 )); then
+      if ((${#args[@]} > 0)); then
         echo "<user_instructions>"
-        printf "%s " "$@"
+        printf "%s " "${args[@]}"
         echo
         echo "</user_instructions>"
       fi
     )
-    else
-      my_logger "Not in Zellij session - skipping context building..."
-      prompt=$(
+  else
+    prompt=$(
       if [[ -n "$other_context" ]]; then
         echo "<other_context>"
         echo -e "$other_context"
@@ -147,18 +122,49 @@ function wtf() {
         echo
       fi
 
-      if (( $# > 0 )); then
+      if ((${#args[@]} > 0)); then
         echo "<user_instructions>"
-        printf "%s " "$@"
+        printf "%s " "${args[@]}"
         echo
         echo "</user_instructions>"
       fi
     )
   fi
 
-  my_logger "Context constructed..."
-  llm "$prompt" | uv run https://gist.githubusercontent.com/ipruning/ae517e5ca8eda986a090617d5ea717d9/raw/ae44c828cf25bccd7836e339c3c442ac31c73269/richify.py
-  my_logger "Inference completed..."
+  echo "$prompt"
+}
+
+function aid() {
+  local other_context=""
+  if ! [ -t 0 ]; then
+    while IFS= read -r line; do
+      other_context+="${line}"$'\n'
+    done
+    other_context=${other_context%$'\n'}
+  fi
+  echo "$other_context" | llm | uv run https://gist.githubusercontent.com/ipruning/ae517e5ca8eda986a090617d5ea717d9/raw/ae44c828cf25bccd7836e339c3c442ac31c73269/richify.py
+}
+
+function aid-chatgpt() {
+  local other_context=""
+  if ! [ -t 0 ]; then
+    while IFS= read -r line; do
+      other_context+="${line}"$'\n'
+    done
+    other_context=${other_context%$'\n'}
+  fi
+  echo "$other_context" | uv run https://gist.githubusercontent.com/ipruning/93a65b84d69585bbb370c149c47392a2/raw/1e08ab2a8db3b35250741cb3d7d8464ce0c9987e/chatgpt_cli.py
+}
+
+function aid-chatgpt-pro() {
+  local other_context=""
+  if ! [ -t 0 ]; then
+    while IFS= read -r line; do
+      other_context+="${line}"$'\n'
+    done
+    other_context=${other_context%$'\n'}
+  fi
+  echo "$other_context" | uv run https://gist.githubusercontent.com/ipruning/93a65b84d69585bbb370c149c47392a2/raw/1e08ab2a8db3b35250741cb3d7d8464ce0c9987e/chatgpt_cli.py --pro
 }
 
 function repo-fork-sync() {
