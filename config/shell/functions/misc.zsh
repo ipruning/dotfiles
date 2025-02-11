@@ -64,30 +64,6 @@ function buffit() {
   fi
 }
 
-function prompt() {
-  local other_context=""
-  local user_instructions=$(printf "%s " "$@")
-
-  if ! [ -t 0 ]; then
-    while IFS= read -r line; do
-      other_context+="${line}"$'\n'
-    done
-    other_context=${other_context%$'\n'}
-  fi
-
-  if [[ -z "$other_context" ]]; then
-    echo "$user_instructions"
-  else
-    echo "<context>"
-    echo -e "$other_context"
-    echo "</context>"
-    echo
-    echo "<user_instructions>"
-    echo "$user_instructions"
-    echo "</user_instructions>"
-  fi
-}
-
 function catscreen() {
   if [[ -z "$ZELLIJ" ]]; then
     my_logger "Not running inside a Zellij session." "WARN"
@@ -95,21 +71,38 @@ function catscreen() {
   fi
 
   zellij action dump-screen /tmp/screen-dump.txt
-  cat /tmp/screen-dump.txt
+  rg -v -N '^\s*$' /tmp/screen-dump.txt
   rip /tmp/screen-dump.txt
+}
+
+function prompt() {
+  local context=""
+
+  if ! [ -t 0 ]; then
+    while IFS= read -r line; do
+      context+="${line}"$'\n'
+    done
+    context=${context%$'\n'}
+  fi
+
+  if [[ -n "$context" ]]; then
+    echo "<context>"
+    echo -e "$context"
+    echo "</context>"
+    echo
+  fi
+
+  if (( $# > 0 )); then
+    echo "<user_instructions>"
+    printf "%s " "$@"
+    echo
+    echo "</user_instructions>"
+  fi
 }
 
 function wtf() {
   local terminal_context=""
   local other_context=""
-  local user_instructions=$(printf "%s " "$@")
-
-  if [[ -n "$ZELLIJ" ]]; then
-    terminal_context=$(catscreen | sed '/^.*>.*wtf/,$d')
-  else
-    my_logger "Not running inside a Zellij session." "WARN"
-    return 1
-  fi
 
   if ! [ -t 0 ]; then
     while IFS= read -r line; do
@@ -118,29 +111,56 @@ function wtf() {
     other_context=${other_context%$'\n'}
   fi
 
-  local prompt=$(
-    if [[ -n "$terminal_context" ]]; then
-      echo "<terminal_context>"
-      echo "$terminal_context"
-      echo "</terminal_context>"
-      echo
-    fi
+  local prompt
+  if [[ -n "$ZELLIJ" ]]; then
+    terminal_context=$(catscreen | sed '$d')
 
-    if [[ -n "$other_context" ]]; then
-      echo "<other_context>"
-      echo -e "$other_context"
-      echo "</other_context>"
-      echo
-    fi
+    prompt=$(
+      if [[ -n "$terminal_context" ]]; then
+        echo "<terminal_context>"
+        echo "$terminal_context"
+        echo "</terminal_context>"
+        echo
+      fi
 
-    echo "<user_instructions>"
-    echo "$user_instructions"
-    echo "</user_instructions>"
-  )
+      if [[ -n "$other_context" ]]; then
+        echo "<other_context>"
+        echo -e "$other_context"
+        echo "</other_context>"
+        echo
+      fi
 
+      if (( $# > 0 )); then
+        echo "<user_instructions>"
+        printf "%s " "$@"
+        echo
+        echo "</user_instructions>"
+      fi
+    )
+  else
+    my_logger "不在 Zellij 中 Session 上下文构建已跳过..."
+    prompt=$(
+      if [[ -n "$other_context" ]]; then
+        echo "<other_context>"
+        echo -e "$other_context"
+        echo "</other_context>"
+        echo
+      fi
+
+      if (( $# > 0 )); then
+        echo "<user_instructions>"
+        printf "%s " "$@"
+        echo
+        echo "</user_instructions>"
+      fi
+    )
+  fi
+
+  my_logger "提示词已构建..."
   echo "$prompt"
-  echo
-  llm $prompt | uv run https://gist.githubusercontent.com/ipruning/ae517e5ca8eda986a090617d5ea717d9/raw/ae44c828cf25bccd7836e339c3c442ac31c73269/richify.py
+  my_logger "推理中..."
+  llm "$prompt" | uv run https://gist.githubusercontent.com/ipruning/ae517e5ca8eda986a090617d5ea717d9/raw/ae44c828cf25bccd7836e339c3c442ac31c73269/richify.py
+  my_logger "推理结束..."
 }
 
 function repo-fork-sync() {
