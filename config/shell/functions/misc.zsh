@@ -137,9 +137,9 @@ function wtf() {
         echo "</user_instructions>"
       fi
     )
-  else
-    my_logger "不在 Zellij 中 Session 上下文构建已跳过..."
-    prompt=$(
+    else
+      my_logger "Not in Zellij session - skipping context building..."
+      prompt=$(
       if [[ -n "$other_context" ]]; then
         echo "<other_context>"
         echo -e "$other_context"
@@ -156,11 +156,9 @@ function wtf() {
     )
   fi
 
-  my_logger "提示词已构建..."
-  echo "$prompt"
-  my_logger "推理中..."
+  my_logger "Context constructed..."
   llm "$prompt" | uv run https://gist.githubusercontent.com/ipruning/ae517e5ca8eda986a090617d5ea717d9/raw/ae44c828cf25bccd7836e339c3c442ac31c73269/richify.py
-  my_logger "推理结束..."
+  my_logger "Inference completed..."
 }
 
 function repo-fork-sync() {

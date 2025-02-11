@@ -98,6 +98,7 @@
   },
   "terminal": {
     "button": false,
+    "font_weight": 500,
     "toolbar": {
       "breadcrumbs": false
     }
