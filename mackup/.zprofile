@@ -44,4 +44,17 @@ if [[ $OSTYPE = darwin* ]]; then
       fi
     fi
   }
+
+  function jump_to_repo() {
+    local repo_path
+    repo_path=$(tv git-repos)
+    [[ -z "$repo_path" ]] && return
+    if [[ -n "$ZELLIJ" ]]; then
+      cd "${repo_path}"
+    else
+      cd "${repo_path}"
+      local repo_name=$(basename "${repo_path}")
+      zellij attach "${repo_name}" 2>/dev/null || zellij --session "${repo_name}"
+    fi
+  }
 fi
