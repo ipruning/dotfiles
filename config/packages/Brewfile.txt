@@ -46,7 +46,6 @@ httm
 huggingface-cli
 hurl
 hyperfine
-iperf3
 ipinfo-cli
 jc
 jless
