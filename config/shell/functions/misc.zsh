@@ -153,7 +153,7 @@ function aid-chatgpt() {
     done
     other_context=${other_context%$'\n'}
   fi
-  echo "$other_context" | uv run https://gist.githubusercontent.com/ipruning/93a65b84d69585bbb370c149c47392a2/raw/1e08ab2a8db3b35250741cb3d7d8464ce0c9987e/chatgpt_cli.py
+  echo "$other_context" | uv run https://gist.githubusercontent.com/ipruning/93a65b84d69585bbb370c149c47392a2/raw/29fedea1d43e07f90a6b90db7f269b1fbe45d474/chatgpt_cli.py
 }
 
 function aid-chatgpt-pro() {
@@ -164,7 +164,7 @@ function aid-chatgpt-pro() {
     done
     other_context=${other_context%$'\n'}
   fi
-  echo "$other_context" | uv run https://gist.githubusercontent.com/ipruning/93a65b84d69585bbb370c149c47392a2/raw/1e08ab2a8db3b35250741cb3d7d8464ce0c9987e/chatgpt_cli.py --pro
+  echo "$other_context" | uv run https://gist.githubusercontent.com/ipruning/93a65b84d69585bbb370c149c47392a2/raw/29fedea1d43e07f90a6b90db7f269b1fbe45d474/chatgpt_cli.py --pro
 }
 
 function repo-fork-sync() {

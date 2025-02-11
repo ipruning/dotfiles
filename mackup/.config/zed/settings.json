@@ -56,7 +56,8 @@
         "coloring": "indent_aware",
         "enabled": true
       },
-      "language_servers": ["pyright", "ruff"]
+      "language_servers": ["pyright", "ruff"],
+      "tab_size": 4
     },
     "TSX": {
       "language_servers": ["typescript-language-server", "!vtsls"]
