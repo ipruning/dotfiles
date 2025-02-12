@@ -3,7 +3,7 @@
 cursor-style = block
 cursor-style-blink = false
 font-family = MonoLisa
-font-size = 12
+font-size = 13
 font-style = Medium
 macos-titlebar-style = hidden
 shell-integration-features = no-cursor
@@ -11,6 +11,9 @@ theme = catppuccin-mocha
 unfocused-split-opacity = 1
 window-padding-x = 10, 10
 window-padding-y = 10, 10
+
+theme = catppuccin-latte
+font-style = SimiBold
 
 macos-option-as-alt = true
 

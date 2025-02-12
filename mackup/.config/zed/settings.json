@@ -10,7 +10,7 @@
   "buffer_font_fallbacks": ["JetBrainsMono Nerd Font"],
   "buffer_font_family": "MonoLisa",
   "buffer_font_size": 13.0,
-  "buffer_font_weight": 400,
+  "buffer_font_weight": 500,
   "buffer_line_height": "comfortable",
   "collaboration_panel": {
     "dock": "right"
@@ -104,12 +104,12 @@
       "breadcrumbs": false
     }
   },
-  "theme": "Catppuccin Mocha",
+  "theme": "Catppuccin Latte",
   "ui_font_family": "MonoLisa",
   "ui_font_size": 15,
   "ui_font_weight": 500,
   "vim": {
-    "highlight_on_yank_duration": 400,
+    "highlight_on_yank_duration": 250,
     "toggle_relative_line_numbers": true,
     "use_multiline_find": true,
     "use_smartcase_find": true,
