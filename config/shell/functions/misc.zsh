@@ -70,9 +70,12 @@ function catscreen() {
     return 1
   fi
 
-  zellij action dump-screen /tmp/screen-dump.txt
-  rg -v -N '^\s*$' /tmp/screen-dump.txt
-  rip /tmp/screen-dump.txt
+  local temp_file
+  temp_file=$(mktemp) || return 1
+
+  zellij action dump-screen "$temp_file"
+  rg --invert-match --no-line-number '^\s*$' "$temp_file"
+  rip "$temp_file"
 }
 
 function prompt() {
@@ -153,7 +156,7 @@ function aid-chatgpt() {
     done
     other_context=${other_context%$'\n'}
   fi
-  echo "$other_context" | uv run https://gist.githubusercontent.com/ipruning/93a65b84d69585bbb370c149c47392a2/raw/29fedea1d43e07f90a6b90db7f269b1fbe45d474/chatgpt_cli.py
+  echo "$other_context" | uv run "$HOME"/Developer/local/prototypes/utils/scripts/chatgpt_cli.py
 }
 
 function aid-chatgpt-pro() {
@@ -164,7 +167,7 @@ function aid-chatgpt-pro() {
     done
     other_context=${other_context%$'\n'}
   fi
-  echo "$other_context" | uv run https://gist.githubusercontent.com/ipruning/93a65b84d69585bbb370c149c47392a2/raw/29fedea1d43e07f90a6b90db7f269b1fbe45d474/chatgpt_cli.py --pro
+  echo "$other_context" | uv run "$HOME"/Developer/local/prototypes/utils/scripts/chatgpt_cli.py --pro
 }
 
 function repo-fork-sync() {
