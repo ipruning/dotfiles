@@ -22,8 +22,7 @@ alias ports="ss -tulpn"
 
 # macOS Aliases Part 1
 alias brow="/usr/local/homebrew/bin/brew"
-alias cat='bat --paging=never'
+alias cat="bat --paging=never"
 alias ll="eza --all --git --group-directories-first --header --long --time-style long-iso"
 alias n="nvim"
-alias ping="ping"
 alias ports="viddy --interval 1s 'lsof -i @127.0.0.1 | grep LISTEN'"

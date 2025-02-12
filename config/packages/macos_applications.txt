@@ -15,9 +15,6 @@ Balatro
 BetterDisplay
 Bob
 Capture One
-ChatGPT
-Chromium
-Claude
 Contexts
 CrossOver
 Cursor
