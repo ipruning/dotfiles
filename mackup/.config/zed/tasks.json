@@ -49,6 +49,11 @@
     "hide": "always"
   },
   {
+    "label": "lazydocker",
+    "command": "lazydocker",
+    "hide": "always"
+  },
+  {
     "label": "gitu",
     "command": "gitu",
     "hide": "always"

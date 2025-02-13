@@ -92,6 +92,7 @@
     "show": "never"
   },
   "show_inline_completions": true,
+  "soft_wrap": "editor_width",
   "tab_size": 2,
   "tabs": {
     "file_icons": true,

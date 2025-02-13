@@ -1,6 +1,9 @@
 # 👇 zsh Theme
 eval "$(starship init zsh)"
 
+# 👇 Emacs Mode
+bindkey -e
+
 # 👇 plugins
 ZSH_PLUGINS_DIR="$HOME/dotfiles/config/shell/plugins"
 

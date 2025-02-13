@@ -4,7 +4,7 @@ git:
   paging:
     externalDiffCommand: difft --color=always --display=side-by-side-show-both --syntax-highlight=off
 gui:
-  border: hidden
+  # border: hidden
   mouseEvents: false
   sidePanelWidth: 0.3
   # theme:
@@ -27,6 +27,6 @@ gui:
   #     - "#cdd6f4"
   #   searchingActiveBorderColor:
   #     - "#f9e2af"
-  authorColors:
-    "*": "#b4befe"
-  nerdFontsVersion: "3"
+  # authorColors:
+  #   "*": "#b4befe"
+  # nerdFontsVersion: "3"
