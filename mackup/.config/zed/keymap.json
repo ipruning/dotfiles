@@ -12,11 +12,14 @@
     "context": "EmptyPane || SharedScreen",
     "bindings": {
       "space /": ["task::Spawn", { "task_name": "Live Grep", "reveal_target": "center" }],
+      "space e": ["task::Spawn", { "task_name": "yazi", "reveal_target": "center" }],
       "space g": ["task::Spawn", { "task_name": "gitu", "reveal_target": "center" }],
+      "space l z d": ["task::Spawn", { "task_name": "lazydocker", "reveal_target": "center" }],
+      "space l z g": ["task::Spawn", { "task_name": "lazygit", "reveal_target": "center" }],
       "space n t": ["workspace::SendKeystrokes", ": new center terminal enter"],
-      "space r": "projects::OpenRecent",
-      "space shift-e": ["task::Spawn", { "task_name": "yazi", "reveal_target": "center" }],
-      "space shift-r": ["task::Spawn", { "task_name": "Project Finder", "reveal_target": "center" }],
+      "space r": ["task::Spawn", { "task_name": "Project Finder", "reveal_target": "center" }],
+      "space shift-e": "pane::RevealInProjectPanel",
+      "space shift-r": "projects::OpenRecent",
       "space space": ["task::Spawn", { "task_name": "File Finder", "reveal_target": "center" }]
     }
   },
@@ -94,15 +97,17 @@
       "space s b": "branches::OpenRecent",
 
       "space a": "assistant::ToggleFocus",
-      "space e": "pane::RevealInProjectPanel",
       "space x": "diagnostics::Deploy",
 
       "space /": ["task::Spawn", { "task_name": "Live Grep", "reveal_target": "center" }],
+      "space e": ["task::Spawn", { "task_name": "yazi", "reveal_target": "center" }],
       "space g": ["task::Spawn", { "task_name": "gitu", "reveal_target": "center" }],
+      "space l z d": ["task::Spawn", { "task_name": "lazydocker", "reveal_target": "center" }],
+      "space l z g": ["task::Spawn", { "task_name": "lazygit", "reveal_target": "center" }],
       "space n t": ["workspace::SendKeystrokes", ": new center terminal enter"],
-      "space r": "projects::OpenRecent",
-      "space shift-e": ["task::Spawn", { "task_name": "yazi", "reveal_target": "center" }],
-      "space shift-r": ["task::Spawn", { "task_name": "Project Finder", "reveal_target": "center" }],
+      "space r": ["task::Spawn", { "task_name": "Project Finder", "reveal_target": "center" }],
+      "space shift-e": "pane::RevealInProjectPanel",
+      "space shift-r": "projects::OpenRecent",
       "space space": ["task::Spawn", { "task_name": "File Finder", "reveal_target": "center" }]
     }
   },

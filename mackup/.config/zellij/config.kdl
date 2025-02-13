@@ -286,3 +286,7 @@ scrollback_editor "/opt/homebrew/bin/zed --wait"
 session_serialization false
 simplified_ui true
 theme "catppuccin-latte"
+
+env {
+    RUST_BACKTRACE 1
+}

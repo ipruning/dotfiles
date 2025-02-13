@@ -14,6 +14,7 @@ cgif
 cmake
 csvlens
 cyme
+d2
 datasette
 detect-secrets
 difftastic
