@@ -26,7 +26,6 @@ DeskPad
 Drafts
 Eagle
 Eudic
-ExcalidrawZ
 FixTim
 Fork
 Frame0
