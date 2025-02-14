@@ -24,7 +24,7 @@
   },
   "cursor_blink": false,
   "features": {
-    "inline_completion_provider": "zed"
+    "edit_prediction_provider": "zed"
   },
   "format_on_save": "on",
   "icon_theme": "Zed (Default)",
@@ -91,7 +91,7 @@
   "scrollbar": {
     "show": "never"
   },
-  "show_inline_completions": true,
+  "show_edit_predictions": true,
   "soft_wrap": "editor_width",
   "tab_size": 2,
   "tabs": {
@@ -105,7 +105,7 @@
       "breadcrumbs": false
     }
   },
-  "theme": "Catppuccin Latte",
+  "theme": "Catppuccin Latte - No Italics",
   "ui_font_family": "MonoLisa",
   "ui_font_size": 15,
   "ui_font_weight": 500,

@@ -156,7 +156,7 @@ function aid-chatgpt() {
     done
     other_context=${other_context%$'\n'}
   fi
-  echo "$other_context" | uv run "$HOME"/Developer/local/prototypes/utils/scripts/chatgpt_cli.py
+  echo "$other_context" | uv run "$HOME"/Developer/self/prototypes/utils/scripts/chatgpt_cli.py
 }
 
 function aid-chatgpt-pro() {
@@ -167,7 +167,7 @@ function aid-chatgpt-pro() {
     done
     other_context=${other_context%$'\n'}
   fi
-  echo "$other_context" | uv run "$HOME"/Developer/local/prototypes/utils/scripts/chatgpt_cli.py --pro
+  echo "$other_context" | uv run "$HOME"/Developer/self/prototypes/utils/scripts/chatgpt_cli.py --pro
 }
 
 function repo-fork-sync() {

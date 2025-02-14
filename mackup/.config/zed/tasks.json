@@ -1,6 +1,6 @@
 [
   {
-    "label": "Live Grep",
+    "label": "live_grep",
     "command": "selection=$(tv text); [ -n \"$selection\" ] && zed \"$selection\"",
     "hide": "always",
     "allow_concurrent_runs": true,
@@ -13,7 +13,7 @@
     }
   },
   {
-    "label": "File Finder",
+    "label": "file_finder",
     "command": "selection=$([[ $(pwd) == \"$HOME\" ]] && fd . --no-ignore-vcs --hidden --max-depth 3 | tv || tv hidden-files-zed); [ -n \"$selection\" ] && zed \"$selection\"",
     "hide": "always",
     "allow_concurrent_runs": true,
@@ -26,7 +26,7 @@
     }
   },
   {
-    "label": "Project Finder",
+    "label": "project_finder",
     "command": "selection=$(tv git-repos); [ -n \"$selection\" ] && zed \"$selection\"",
     "hide": "always",
     "allow_concurrent_runs": true,
