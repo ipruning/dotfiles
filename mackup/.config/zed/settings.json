@@ -27,7 +27,7 @@
     "edit_prediction_provider": "zed"
   },
   "format_on_save": "on",
-  "icon_theme": "Zed (Default)",
+  "icon_theme": "Catppuccin Latte",
   "indent_guides": {
     "coloring": "indent_aware",
     "enabled": true
