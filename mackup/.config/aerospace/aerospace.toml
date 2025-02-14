@@ -17,11 +17,16 @@ outer.top = 8
 outer.right = 8
 
 [workspace-to-monitor-force-assignment]
+1 = "secondary"
+2 = "secondary"
+3 = "secondary"
+4 = "secondary"
+5 = "secondary"
+
 6 = "main"
 7 = "main"
 8 = "main"
 9 = "main"
-0 = "main"
 
 [mode.main.binding]
 alt-p = 'mode pass'
@@ -35,13 +40,11 @@ alt-6 = 'workspace 6'
 alt-7 = 'workspace 7'
 alt-8 = 'workspace 8'
 alt-9 = 'workspace 9'
-alt-0 = 'workspace 0'
 
 alt-shift-6 = 'move-node-to-workspace 6'
 alt-shift-7 = 'move-node-to-workspace 7'
 alt-shift-8 = 'move-node-to-workspace 8'
 alt-shift-9 = 'move-node-to-workspace 9'
-alt-shift-0 = 'move-node-to-workspace 0'
 
 alt-h = 'focus left --boundaries all-monitors-outer-frame'
 alt-j = 'focus down --boundaries all-monitors-outer-frame'
@@ -159,24 +162,20 @@ run = 'layout floating'
 
 [[on-window-detected]]
 if.app-id = 'com.google.Chrome'
-run = 'move-node-to-workspace 0'
+run = 'move-node-to-workspace 6'
 
 [[on-window-detected]]
 if.app-id = 'com.apple.Safari'
-run = 'move-node-to-workspace 0'
+run = 'move-node-to-workspace 6'
 
 [[on-window-detected]]
 if.app-id = 'com.todesktop.230313mzl4w4u92'
-run = 'move-node-to-workspace 9'
+run = 'move-node-to-workspace 7'
 
 [[on-window-detected]]
 if.app-id = 'com.exafunction.windsurf'
-run = 'move-node-to-workspace 9'
+run = 'move-node-to-workspace 7'
 
-# [[on-window-detected]]
-# if.app-id = 'com.openai.chat'
-# run = 'move-node-to-workspace 1'
-
-# [[on-window-detected]]
-# if.app-id = 'com.pvncher.repoprompt'
-# run = 'move-node-to-workspace 1'
+[[on-window-detected]]
+if.app-id = 'com.pvncher.repoprompt'
+run = 'move-node-to-workspace 1'
