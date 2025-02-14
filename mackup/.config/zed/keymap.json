@@ -11,16 +11,16 @@
   {
     "context": "EmptyPane || SharedScreen",
     "bindings": {
-      "space /": ["task::Spawn", { "task_name": "Live Grep", "reveal_target": "center" }],
+      "space /": ["task::Spawn", { "task_name": "live_grep", "reveal_target": "center" }],
       "space e": ["task::Spawn", { "task_name": "yazi", "reveal_target": "center" }],
       "space g": ["task::Spawn", { "task_name": "gitu", "reveal_target": "center" }],
       "space l z d": ["task::Spawn", { "task_name": "lazydocker", "reveal_target": "center" }],
       "space l z g": ["task::Spawn", { "task_name": "lazygit", "reveal_target": "center" }],
       "space n t": ["workspace::SendKeystrokes", ": new center terminal enter"],
-      "space r": ["task::Spawn", { "task_name": "Project Finder", "reveal_target": "center" }],
+      "space r": "projects::OpenRecent",
       "space shift-e": "pane::RevealInProjectPanel",
-      "space shift-r": "projects::OpenRecent",
-      "space space": ["task::Spawn", { "task_name": "File Finder", "reveal_target": "center" }]
+      "space shift-r": ["task::Spawn", { "task_name": "project_finder", "reveal_target": "center" }],
+      "space space": ["task::Spawn", { "task_name": "file_finder", "reveal_target": "center" }]
     }
   },
   {
@@ -94,21 +94,21 @@
       "space t": "task::Spawn",
       "space shift-t": "task::Rerun",
 
-      "space s b": "branches::OpenRecent",
+      "space s b": "git::Branch",
 
       "space a": "assistant::ToggleFocus",
       "space x": "diagnostics::Deploy",
 
-      "space /": ["task::Spawn", { "task_name": "Live Grep", "reveal_target": "center" }],
+      "space /": ["task::Spawn", { "task_name": "live_grep", "reveal_target": "center" }],
       "space e": ["task::Spawn", { "task_name": "yazi", "reveal_target": "center" }],
       "space g": ["task::Spawn", { "task_name": "gitu", "reveal_target": "center" }],
       "space l z d": ["task::Spawn", { "task_name": "lazydocker", "reveal_target": "center" }],
       "space l z g": ["task::Spawn", { "task_name": "lazygit", "reveal_target": "center" }],
       "space n t": ["workspace::SendKeystrokes", ": new center terminal enter"],
-      "space r": ["task::Spawn", { "task_name": "Project Finder", "reveal_target": "center" }],
+      "space r": "projects::OpenRecent",
       "space shift-e": "pane::RevealInProjectPanel",
-      "space shift-r": "projects::OpenRecent",
-      "space space": ["task::Spawn", { "task_name": "File Finder", "reveal_target": "center" }]
+      "space shift-r": ["task::Spawn", { "task_name": "project_finder", "reveal_target": "center" }],
+      "space space": ["task::Spawn", { "task_name": "file_finder", "reveal_target": "center" }]
     }
   },
   {
@@ -133,11 +133,11 @@
     }
   },
   {
-    "context": "Editor && inline_completion && !showing_completions",
+    "context": "Editor && edit_prediction && !showing_completions",
     "use_key_equivalents": true,
     "bindings": {
       "tab": "editor::Tab",
-      "ctrl-y": "editor::AcceptInlineCompletion"
+      "ctrl-y": "editor::AcceptEditPrediction"
     }
   }
 ]
