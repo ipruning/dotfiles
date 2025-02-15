@@ -15,6 +15,7 @@ Balatro
 BetterDisplay
 Bob
 Capture One
+ChatGPT
 Contexts
 CrossOver
 Cursor

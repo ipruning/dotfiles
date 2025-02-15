@@ -406,7 +406,7 @@
     "editor.lineHighlightBackground": "#1073cf2d",
     "editor.lineHighlightBorder": "#9fced11f"
   },
-  "workbench.colorTheme": "Catppuccin Latte",
+  "workbench.colorTheme": "Catppuccin Mocha",
   "workbench.editor.enablePreviewFromQuickOpen": false,
   "workbench.editor.revealIfOpen": true,
   "workbench.editor.tabActionCloseVisibility": false,
@@ -414,7 +414,7 @@
     "*.ipynb": "jupyter-notebook",
     "*.pdf": "latex-workshop-pdf-hook"
   },
-  "workbench.iconTheme": "catppuccin-latte",
+  "workbench.iconTheme": "catppuccin-mocha",
   "workbench.settings.editor": "json",
   "workbench.tree.indent": 22,
   "workbench.tree.renderIndentGuides": "always",
