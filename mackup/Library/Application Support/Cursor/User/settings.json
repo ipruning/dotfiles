@@ -107,7 +107,7 @@
   "editor.cursorSmoothCaretAnimation": "on",
   "editor.fontFamily": "'MonoLisa', 'JetBrainsMono Nerd Font', 'Source Han Sans SC'",
   "editor.fontSize": 13,
-  "editor.fontWeight": "500",
+  "editor.fontWeight": "400",
   "editor.formatOnSave": true,
   "editor.guides.bracketPairs": true,
   "editor.guides.bracketPairsHorizontal": "active",

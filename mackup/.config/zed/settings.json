@@ -10,7 +10,7 @@
   "buffer_font_fallbacks": ["JetBrainsMono Nerd Font"],
   "buffer_font_family": "MonoLisa",
   "buffer_font_size": 13.0,
-  "buffer_font_weight": 500,
+  "buffer_font_weight": 400,
   "buffer_line_height": "comfortable",
   "collaboration_panel": {
     "dock": "right"
