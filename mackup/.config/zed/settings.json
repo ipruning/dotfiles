@@ -10,7 +10,7 @@
   "buffer_font_fallbacks": ["JetBrainsMono Nerd Font"],
   "buffer_font_family": "MonoLisa",
   "buffer_font_size": 13.0,
-  "buffer_font_weight": 400,
+  "buffer_font_weight": 500,
   "buffer_line_height": "comfortable",
   "collaboration_panel": {
     "dock": "right"
@@ -27,7 +27,7 @@
     "edit_prediction_provider": "zed"
   },
   "format_on_save": "on",
-  "icon_theme": "Catppuccin Mocha",
+  "icon_theme": "Catppuccin Latte",
   "indent_guides": {
     "coloring": "indent_aware",
     "enabled": true
@@ -100,12 +100,12 @@
   },
   "terminal": {
     "button": false,
-    "font_weight": 500,
+    "font_weight": 600,
     "toolbar": {
       "breadcrumbs": false
     }
   },
-  "theme": "Catppuccin Mocha - No Italics",
+  "theme": "Catppuccin Latte - No Italics",
   "ui_font_family": "MonoLisa",
   "ui_font_size": 15,
   "ui_font_weight": 500,

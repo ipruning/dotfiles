@@ -179,3 +179,7 @@ run = 'move-node-to-workspace 7'
 [[on-window-detected]]
 if.app-id = 'com.pvncher.repoprompt'
 run = 'move-node-to-workspace 1'
+
+[[on-window-detected]]
+if.app-id = 'com.TickTick.task.mac'
+run = 'move-node-to-workspace 1'
