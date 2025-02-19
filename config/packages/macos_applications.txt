@@ -107,6 +107,7 @@ Things3
 TickTick
 UninstallPKG
 VideoFusion-macOS
+VirtualBox
 VirtualBuddy
 WeChat
 Whisper Transcription
@@ -123,6 +124,7 @@ calibre
 iMazing
 kindaVim
 logioptionsplus
+pcsuite
 qBittorrent
 rednote
 小宇宙
