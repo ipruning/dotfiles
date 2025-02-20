@@ -27,7 +27,7 @@
     "edit_prediction_provider": "zed"
   },
   "format_on_save": "on",
-  "icon_theme": "Catppuccin Latte",
+  "icon_theme": "Catppuccin Mocha",
   "indent_guides": {
     "coloring": "indent_aware",
     "enabled": true
@@ -100,12 +100,12 @@
   },
   "terminal": {
     "button": false,
-    "font_weight": 600,
+    "font_weight": 500,
     "toolbar": {
       "breadcrumbs": false
     }
   },
-  "theme": "Catppuccin Latte - No Italics",
+  "theme": "Catppuccin Mocha",
   "ui_font_family": "MonoLisa",
   "ui_font_size": 15,
   "ui_font_weight": 500,

@@ -13,9 +13,9 @@ font-size = 13
 font-style = Medium
 theme = catppuccin-mocha
 
-font-size = 13
-font-style = SimiBold
-theme = catppuccin-latte
+# font-size = 13
+# font-style = SimiBold
+# theme = catppuccin-latte
 
 macos-option-as-alt = true
 
