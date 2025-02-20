@@ -26,6 +26,7 @@ extra-cmake-modules
 eza
 fastfetch
 fd
+fio
 flyctl
 fossil
 fpp
