@@ -1,9 +1,11 @@
 [ui]
 show_preview_panel = false
-# theme = "dark"
-theme = "light"
-# ui_scale = 95
+ui_scale = 95
 use_nerd_font_icons = false
+
+theme = "dark"
+
+# theme = "light"
 
 # Keybindings
 # ----------------------------------------------------------------------------

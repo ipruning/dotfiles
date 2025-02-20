@@ -44,10 +44,13 @@
     "bindings": {
       "ctrl-alt-shift-u": "vim::ScrollUp",
       "ctrl-u": ["workspace::SendKeystrokes", "ctrl-alt-shift-u z z"],
+
       "ctrl-alt-shift-d": "vim::ScrollDown",
       "ctrl-d": ["workspace::SendKeystrokes", "ctrl-alt-shift-d z z"],
+
       "ctrl-shift-n": "vim::MoveToNextMatch",
       "n": ["workspace::SendKeystrokes", "ctrl-shift-n z z"],
+
       "ctrl-alt-shift-n": "vim::MoveToPrevMatch",
       "shift-n": ["workspace::SendKeystrokes", "ctrl-alt-shift-n z z"],
 
