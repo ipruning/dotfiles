@@ -92,7 +92,7 @@
     "show": "never"
   },
   "show_edit_predictions": true,
-  "soft_wrap": "editor_width",
+  "soft_wrap": "none",
   "tab_size": 2,
   "tabs": {
     "file_icons": true,
