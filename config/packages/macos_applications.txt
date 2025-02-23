@@ -15,7 +15,6 @@ Balatro
 BetterDisplay
 Bob
 Capture One
-ChatGPT
 Contexts
 CrossOver
 Cursor
@@ -70,6 +69,7 @@ Numbers
 OBS
 OnyX
 OrbStack
+Orion
 PDF Expert
 Pages
 PasteNow
@@ -124,7 +124,6 @@ Zotero
 calibre
 iMazing
 kindaVim
-logioptionsplus
 pcsuite
 qBittorrent
 rednote
