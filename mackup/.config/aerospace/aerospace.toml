@@ -1,4 +1,4 @@
-start-at-login = false
+start-at-login = true
 enable-normalization-flatten-containers = true
 enable-normalization-opposite-orientation-for-nested-containers = true
 accordion-padding = 38
@@ -179,3 +179,7 @@ run = 'move-node-to-workspace 7'
 [[on-window-detected]]
 if.app-id = 'com.exafunction.windsurf'
 run = 'move-node-to-workspace 7'
+
+[[on-window-detected]]
+if.app-id = 'org.zotero.zotero'
+run = 'move-node-to-workspace 8'
