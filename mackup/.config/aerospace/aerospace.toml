@@ -173,6 +173,10 @@ if.app-id = 'com.apple.Safari'
 run = 'move-node-to-workspace 6'
 
 [[on-window-detected]]
+if.app-id = 'dev.zed.Zed'
+run = 'move-node-to-workspace 7'
+
+[[on-window-detected]]
 if.app-id = 'com.todesktop.230313mzl4w4u92'
 run = 'move-node-to-workspace 7'
 
