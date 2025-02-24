@@ -105,7 +105,6 @@ TestFlight
 The Powder Toy
 Things3
 TickTick
-ToDesk_Daas
 UninstallPKG
 VideoFusion-macOS
 VirtualBox
