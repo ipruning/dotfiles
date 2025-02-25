@@ -57,5 +57,10 @@
     "label": "gitu",
     "command": "gitu",
     "hide": "always"
+  },
+  {
+    "label": "claude",
+    "command": "set-claude && claude",
+    "hide": "always"
   }
 ]

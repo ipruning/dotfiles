@@ -6,6 +6,7 @@
 "gem:kamal" = "latest"
 "go:github.com/josephburnett/jd" = "latest"
 "go:github.com/merschformann/gotz" = "latest"
+"npm:@anthropic-ai/claude-code" = "latest"
 "pipx:ttok" = "latest"
 bun = "latest"
 go = "latest"

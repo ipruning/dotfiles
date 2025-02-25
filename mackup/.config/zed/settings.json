@@ -1,7 +1,7 @@
 {
   "assistant": {
     "default_model": {
-      "model": "claude-3-5-sonnet-latest",
+      "model": "claude-3-7-sonnet-latest",
       "provider": "zed.dev"
     },
     "version": "2"
