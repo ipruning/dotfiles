@@ -15,6 +15,7 @@ Balatro
 BetterDisplay
 Bob
 Capture One
+ChatGPT
 Contexts
 CrossOver
 Cursor
@@ -88,6 +89,7 @@ Rotato
 Safari
 Scapple
 Screen Studio
+Scripton
 Scrolla
 Setapp
 Shortcat
@@ -109,6 +111,7 @@ UninstallPKG
 VideoFusion-macOS
 VirtualBox
 VirtualBuddy
+Visual Studio Code
 WeChat
 Whisper Transcription
 Wireshark
