@@ -93,6 +93,9 @@
   "code-runner.preserveFocus": false,
   "code-runner.runInTerminal": true,
   "code-runner.saveFileBeforeRun": true,
+  "cursor.chat.terminalShowHoverHint": false,
+  "cursor.cmdk.useThemedDiffBackground": false,
+  "cursor.composer.collapsePaneInputBoxPills": true,
   "diffEditor.ignoreTrimWhitespace": false,
   "diffEditor.maxComputationTime": 8192,
   "diffEditor.renderSideBySide": true,
@@ -185,7 +188,7 @@
     ".env": "*.env, .env.*, .envrc, env.d.ts",
     ".gitignore": ".gitattributes, .gitmodules, .gitmessage, .mailmap, .git-blame*",
     ".project": ".classpath",
-    "//": "Last update at 2/24/2025, 10:54:10 AM",
+    "//": "Last update at 2/26/2025, 5:00:06 AM",
     "BUILD.bazel": "*.bzl, *.bazel, *.bazelrc, bazel.rc, .bazelignore, .bazelproject, WORKSPACE",
     "CMakeLists.txt": "*.cmake, *.cmake.in, .cmake-format.yaml, CMakePresets.json, CMakeCache.txt",
     "Cargo.toml": ".clippy.toml, .rustfmt.toml, cargo.lock, clippy.toml, cross.toml, rust-toolchain.toml, rustfmt.toml",
@@ -235,9 +238,9 @@
   "files.associations": {
     ".cforge": "json",
     ".env*": "dotenv",
-    "secrets": "dotenv",
+    ".fdignore": "ignore",
     ".rgignore": "ignore",
-    ".fdignore": "ignore"
+    "secrets": "dotenv"
   },
   "files.insertFinalNewline": true,
   "files.simpleDialog.enable": true,
