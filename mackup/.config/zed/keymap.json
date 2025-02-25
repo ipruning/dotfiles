@@ -12,6 +12,7 @@
     "context": "EmptyPane || SharedScreen",
     "bindings": {
       "space /": ["task::Spawn", { "task_name": "live_grep", "reveal_target": "center" }],
+      "space c": ["task::Spawn", { "task_name": "claude", "reveal_target": "center" }],
       "space e": ["task::Spawn", { "task_name": "yazi", "reveal_target": "center" }],
       "space g": ["task::Spawn", { "task_name": "gitu", "reveal_target": "center" }],
       "space l z d": ["task::Spawn", { "task_name": "lazydocker", "reveal_target": "center" }],
@@ -64,9 +65,6 @@
       "space 8": ["pane::ActivateItem", 7],
       "space 9": ["pane::ActivateItem", 8],
       "space 0": "pane::ActivateLastItem"
-
-      // "tab": "editor::Indent",
-      // "shift-tab": "editor::TabPrev"
     }
   },
   {
@@ -103,6 +101,7 @@
       "space x": "diagnostics::Deploy",
 
       "space /": ["task::Spawn", { "task_name": "live_grep", "reveal_target": "center" }],
+      "space c": ["task::Spawn", { "task_name": "claude", "reveal_target": "center" }],
       "space e": ["task::Spawn", { "task_name": "yazi", "reveal_target": "center" }],
       "space g": ["task::Spawn", { "task_name": "gitu", "reveal_target": "center" }],
       "space l z d": ["task::Spawn", { "task_name": "lazydocker", "reveal_target": "center" }],
@@ -126,21 +125,4 @@
       "shift-k": "editor::MoveLineUp"
     }
   }
-  // {
-  //   "context": "Editor && showing_completions",
-  //   "use_key_equivalents": true,
-  //   "bindings": {
-  //     "enter": "editor::ConfirmCompletion",
-  //     "tab": "editor::Tab",
-  //     "ctrl-y": "editor::ComposeCompletion"
-  //   }
-  // },
-  // {
-  //   "context": "Editor && edit_prediction && !showing_completions",
-  //   "use_key_equivalents": true,
-  //   "bindings": {
-  //     "tab": "editor::Tab",
-  //     "ctrl-y": "editor::AcceptEditPrediction"
-  //   }
-  // }
 ]
