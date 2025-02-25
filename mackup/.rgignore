@@ -5,38 +5,10 @@
 .DS_Store
 
 # git
-.git
+.git/
 
-# node
-node_modules
+# typescript
+node_modules/
 
 # python
-*.egg*
-*.py[cod]
-*.so
-.Python
-build/
-dist/
-downloads/
-htmlcov/
-lib/
-lib64/
-parts/
-sdist/
-share/python-wheels/
-var/
-wheels/
-
-# env
-*env/
-.*env
-
-# log
-# *.log*
-
-# llm
-*.cforge
-*.safetensors
-*lance
-cachedir/
-logdir/
+.venv/
