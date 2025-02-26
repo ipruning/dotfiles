@@ -10,7 +10,6 @@
 "pipx:ttok" = "latest"
 bun = "latest"
 go = "latest"
-node = "latest"
 python = "latest"
 ruby = "latest"
 rust = "latest"
@@ -19,6 +18,9 @@ zig = "latest"
 [settings]
 trusted_config_paths = ['~/Developer']
 experimental = true
+
+[settings.npm]
+bun = true
 
 [settings.pipx]
 uvx = true
