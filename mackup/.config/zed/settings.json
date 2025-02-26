@@ -1,4 +1,16 @@
 {
+  "ssh_connections": [
+    {
+      "host": "m4.sgponte",
+      "projects": [
+        {
+          "paths": [
+            "~/dotfiles"
+          ]
+        }
+      ]
+    }
+  ],
   "assistant": {
     "default_model": {
       "model": "claude-3-7-sonnet-latest",
