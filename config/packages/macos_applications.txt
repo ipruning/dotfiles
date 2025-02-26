@@ -130,6 +130,7 @@ pcsuite
 qBittorrent
 rednote
 superwhisper
+闲鱼
 小宇宙
 集换社
 夸克网盘
