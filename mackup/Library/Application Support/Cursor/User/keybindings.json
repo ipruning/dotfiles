@@ -4,24 +4,11 @@
     "key": "ctrl+w"
   },
   {
-    "key": "shift+cmd+b",
-    "command": "-workbench.action.tasks.build",
-    "when": "taskCommandsRegistered"
+    "command": "aichat.newchataction",
+    "key": "shift+cmd+b"
   },
   {
-    "key": "shift+cmd+b",
-    "command": "aichat.newchataction"
+    "command": "aichat.insertselectionintochat",
+    "key": "shift+cmd+."
   },
-  {
-    "key": "cmd+l",
-    "command": "-aichat.newchataction"
-  },
-  {
-    "key": "shift+cmd+.",
-    "command": "aichat.insertselectionintochat"
-  },
-  {
-    "key": "shift+cmd+l",
-    "command": "-aichat.insertselectionintochat"
-  }
 ]

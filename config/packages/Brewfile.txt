@@ -91,6 +91,7 @@ shfmt
 smartmontools
 sqlfluff
 sqlite-utils
+sshx
 starship
 tailspin
 tealdeer
