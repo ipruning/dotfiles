@@ -111,12 +111,12 @@ UninstallPKG
 VideoFusion-macOS
 VirtualBox
 VirtualBuddy
-Visual Studio Code
 WeChat
 Whisper Transcription
 Wireshark
 Wooshy
 XLD
+Xcode-16.2.0
 Xcodes
 YACReader
 YACReaderLibrary
