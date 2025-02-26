@@ -145,7 +145,7 @@ function aid() {
     done
     other_context=${other_context%$'\n'}
   fi
-  echo "$other_context" | llm | uv run https://gist.githubusercontent.com/ipruning/ae517e5ca8eda986a090617d5ea717d9/raw/ae44c828cf25bccd7836e339c3c442ac31c73269/richify.py
+  echo "$other_context" | llm | richify.py
 }
 
 function aid-chatgpt() {
@@ -156,7 +156,7 @@ function aid-chatgpt() {
     done
     other_context=${other_context%$'\n'}
   fi
-  echo "$other_context" | uv run "$HOME"/Developer/self/prototypes/utils/scripts/chatgpt_cli.py
+  echo "$other_context" | chatgpt_cli.py
 }
 
 function aid-chatgpt-pro() {
@@ -167,7 +167,7 @@ function aid-chatgpt-pro() {
     done
     other_context=${other_context%$'\n'}
   fi
-  echo "$other_context" | uv run "$HOME"/Developer/self/prototypes/utils/scripts/chatgpt_cli.py --pro
+  echo "$other_context" | chatgpt_cli.py --pro
 }
 
 function repo-fork-sync() {
