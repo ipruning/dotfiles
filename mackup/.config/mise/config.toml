@@ -10,6 +10,7 @@
 "pipx:ttok" = "latest"
 bun = "latest"
 go = "latest"
+node = "latest"
 python = "latest"
 ruby = "latest"
 rust = "latest"
