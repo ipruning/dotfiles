@@ -1,6 +1,35 @@
 default_install_hook_types: [pre-commit, commit-msg, pre-push]
 default_stages: [pre-commit, pre-push]
 repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-yaml
+        stages: [pre-commit]
+      - id: end-of-file-fixer
+        stages: [pre-commit]
+      - id: trailing-whitespace
+        stages: [pre-commit]
+  - repo: https://github.com/commitizen-tools/commitizen
+    rev: v4.2.2
+    hooks:
+      - id: commitizen
+      - id: commitizen-branch
+        stages: [post-commit]
+  - repo: local
+    hooks:
+      - id: autocorrect-lint
+        name: autocorrect lint
+        description: "Checks the style of CJK files."
+        entry: autocorrect --lint
+        language: system
+        types: [file]
+      - id: autocorrect-fix
+        name: autocorrect fix
+        description: "Fixes the style of CJK files."
+        entry: autocorrect --fix
+        language: system
+        types: [file]
   - repo: https://github.com/Yelp/detect-secrets
     rev: v1.5.0
     hooks:
@@ -9,10 +38,3 @@ repos:
         language: python
         entry: detect-secrets-hook
         args: ["--baseline", ".secrets.baseline"]
-  - repo: https://github.com/commitizen-tools/commitizen
-    rev: v3.29.0
-    hooks:
-      - id: commitizen
-      - id: commitizen-branch
-        stages:
-          - post-commit
