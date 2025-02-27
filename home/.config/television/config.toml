@@ -1,10 +1,11 @@
 [ui]
 show_preview_panel = false
-ui_scale = 100
 use_nerd_font_icons = false
 
+ui_scale = 100
 theme = "dark"
 
+# ui_scale = 95
 # theme = "light"
 
 # Keybindings
@@ -80,35 +81,55 @@ toggle_help = "ctrl-g"
 # Toggle the preview panel
 toggle_preview = "ctrl-o"
 
-[shell_integration.commands]
-"" = "hidden-files-max-depth-3"
-"bat" = "hidden-files"
-"cat" = "hidden-files"
-"cd" = "dirs"
-"cmd-execute" = "my-sh-files"
-"csvlens" = "csv-files"
-"docker run" = "docker-images"
-"export" = "env"
-"eza" = "dirs"
-"git add" = "git-diff"
-"git switch" = "git-branch"
-"head" = "files"
-"j" = "dirs"
-"less" = "files"
-"ls" = "dirs"
-"modal run" = "py-files"
-"n" = "hidden-files"
-"nvim" = "hidden-files"
-"open" = "hidden-files"
-"python" = "py-files"
-"sh" = "sh-files"
-"ssh" = "hosts"
-"tail" = "files"
-"tv" = "channels"
-"unset" = "env"
-"uv run" = "py-files"
-"vim" = "hidden-files"
-"wget" = "gists"
-"zed" = "hidden-files"
-"zellij a" = "zellij-sessions"
-"zellij attach" = "zellij-sessions"
+[shell_integration.channel_triggers]
+"alias" = ["alias", "unalias"]
+"env" = ["export", "unset"]
+"dirs" = ["cd", "ls", "rmdir", "j", "eza"]
+"files" = [
+  "cat",
+  "less",
+  "head",
+  "tail",
+  "vim",
+  "nano",
+  "bat",
+  "cp",
+  "mv",
+  "rm",
+  "touch",
+  "chmod",
+  "chown",
+  "ln",
+  "tar",
+  "zip",
+  "unzip",
+  "gzip",
+  "gunzip",
+  "xz",
+]
+"git-diff" = ["git add", "git restore"]
+"git-branch" = [
+  "git checkout",
+  "git branch",
+  "git merge",
+  "git rebase",
+  "git pull",
+  "git push",
+  "git switch",
+]
+"docker-images" = ["docker run"]
+"git-repos" = ["nvim", "code", "hx", "git clone"]
+
+"channels" = ["tv"]
+"csv-files" = ["csvlens"]
+"gists" = ["wget"]
+"hidden-files-max-depth-3" = [""]
+"hidden-files" = ["bat", "cat", "n", "nvim", "open", "vim", "zed"]
+"hosts" = ["ssh"]
+"my-sh-files" = ["cmd-execute"]
+"py-files" = ["modal run", "python", "uv run"]
+"sh-files" = ["sh"]
+"zellij-sessions" = ["zellij a", "zellij attach"]
+
+[shell_integration.keybindings]
+"smart_autocomplete" = "ctrl-t"
