@@ -1,4 +1,5 @@
 [tools]
+"cargo:https://github.com/yshavit/mdq" = "latest"
 "cargo:koji" = "latest"
 "cargo:netscanner" = "latest"
 "cargo:pik" = "latest"
