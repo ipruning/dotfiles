@@ -96,11 +96,14 @@
   "cursor.chat.terminalShowHoverHint": false,
   "cursor.cmdk.useThemedDiffBackground": false,
   "cursor.composer.collapsePaneInputBoxPills": true,
+  "cursor.cpp.disabledLanguages": [
+    "plaintext"
+  ],
   "diffEditor.ignoreTrimWhitespace": false,
   "diffEditor.maxComputationTime": 8192,
   "diffEditor.renderSideBySide": true,
   "diffEditor.wordWrap": "off",
-  "dotenv.enableAutocloaking": false,
+  "dotenv.enableAutocloaking": true,
   "editor.accessibilitySupport": "off",
   "editor.bracketPairColorization.enabled": true,
   "editor.cursorBlinking": "solid",
@@ -127,7 +130,14 @@
   "editor.suggestSelection": "first",
   "editor.tabSize": 2,
   "editor.tokenColorCustomizations": {
-    "textMateRules": []
+    "textMateRules": [
+      {
+        "scope": "keyword.other.dotenv",
+        "settings": {
+          "foreground": "#FF000000"
+        }
+      }
+    ]
   },
   "editor.unicodeHighlight.ambiguousCharacters": true,
   "editor.unicodeHighlight.invisibleCharacters": true,
@@ -239,6 +249,7 @@
     ".cforge": "json",
     ".env*": "dotenv",
     ".fdignore": "ignore",
+    ".mdc": "markdown",
     ".rgignore": "ignore",
     ".secrets.baseline": "json",
     "secrets": "dotenv"
