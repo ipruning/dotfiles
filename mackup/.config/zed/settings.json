@@ -4,9 +4,7 @@
       "host": "m4.sgponte",
       "projects": [
         {
-          "paths": [
-            "~/dotfiles"
-          ]
+          "paths": ["~/dotfiles"]
         }
       ]
     }
@@ -112,7 +110,7 @@
   },
   "terminal": {
     "button": false,
-    "font_weight": 500,
+    "font_weight": 600,
     "toolbar": {
       "breadcrumbs": false
     }

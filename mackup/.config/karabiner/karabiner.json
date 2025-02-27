@@ -93,7 +93,7 @@
                         ]
                     },
                     {
-                        "description": "yper-s to cmd-bracket (with conditions)",
+                        "description": "yper-s/d to cmd-bracket (with conditions)",
                         "manipulators": [
                             {
                                 "conditions": [
@@ -142,7 +142,7 @@
                         ]
                     },
                     {
-                        "description": "yper-e to cmd-shift-bracket (with conditions)",
+                        "description": "yper-e/r to cmd-shift-bracket (with conditions)",
                         "manipulators": [
                             {
                                 "conditions": [
