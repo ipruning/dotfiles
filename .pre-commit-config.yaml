@@ -38,3 +38,9 @@ repos:
         language: python
         entry: detect-secrets-hook
         args: ["--baseline", ".secrets.baseline"]
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.9.7
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
