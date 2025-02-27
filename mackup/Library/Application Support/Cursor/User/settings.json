@@ -240,6 +240,7 @@
     ".env*": "dotenv",
     ".fdignore": "ignore",
     ".rgignore": "ignore",
+    ".secrets.baseline": "json",
     "secrets": "dotenv"
   },
   "files.insertFinalNewline": true,

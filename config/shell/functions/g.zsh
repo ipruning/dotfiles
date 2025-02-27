@@ -7,6 +7,7 @@ typeset -A g_commands=(
   d  "git diff"
   j  "jump_to_repo"
   l  "git lg"
+  o  "open ."
   s  "git status"
 )
 
