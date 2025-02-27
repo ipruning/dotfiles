@@ -312,7 +312,7 @@
   "terminal.integrated.confirmOnExit": "hasChildProcesses",
   "terminal.integrated.defaultProfile.osx": "zsh",
   "terminal.integrated.fontSize": 13,
-  "terminal.integrated.fontWeight": "500",
+  "terminal.integrated.fontWeight": "600",
   "terminal.integrated.inheritEnv": true,
   "vim.hlsearch": true,
   "vim.incsearch": true,
