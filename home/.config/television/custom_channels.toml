@@ -83,5 +83,5 @@ preview_command = ":files:"
 
 [[cable_channel]]
 name = "my-prompt-files"
-source_command = "fd . '/Users/alex/Developer/self/prototypes/docs' --type file -0 | xargs -0 gprintf '%q\n'"
+source_command = "fd . '/Users/alex/Developer/self/prototypes/utils' --type file -0 | xargs -0 gprintf '%q\n'"
 preview_command = ":files:"

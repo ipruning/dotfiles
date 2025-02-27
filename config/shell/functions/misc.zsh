@@ -156,7 +156,7 @@ function aid-chatgpt() {
     done
     other_context=${other_context%$'\n'}
   fi
-  echo "$other_context" | chatgpt.py
+  echo "$other_context" | chatgpt-cli.py
 }
 
 function aid-chatgpt-pro() {
@@ -167,7 +167,7 @@ function aid-chatgpt-pro() {
     done
     other_context=${other_context%$'\n'}
   fi
-  echo "$other_context" | chatgpt.py --pro
+  echo "$other_context" | chatgpt-cli.py --pro
 }
 
 function repo-fork-sync() {
