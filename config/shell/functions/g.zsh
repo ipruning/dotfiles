@@ -5,7 +5,7 @@ typeset -A g_commands=(
   b  "git browse"
   c  "git commit"
   d  "git diff"
-  j  "jump_to_repo"
+  j  "jump-to-repo"
   l  "git lg"
   o  "open ."
   s  "git status"
