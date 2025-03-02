@@ -15,7 +15,6 @@ Balatro
 BetterDisplay
 Bob
 Capture One
-ChatGPT
 Contexts
 CrossOver
 Cursor
@@ -81,7 +80,7 @@ QQ
 Raycast
 Rectangle
 Red Canary Mac Monitor
-RepoPrompt
+Repo Prompt
 Reqable
 Roam Research
 Rond
