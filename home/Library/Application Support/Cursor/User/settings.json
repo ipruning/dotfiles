@@ -103,7 +103,7 @@
   "diffEditor.maxComputationTime": 8192,
   "diffEditor.renderSideBySide": true,
   "diffEditor.wordWrap": "off",
-  "dotenv.enableAutocloaking": true,
+  "dotenv.enableAutocloaking": false,
   "editor.accessibilitySupport": "off",
   "editor.bracketPairColorization.enabled": true,
   "editor.cursorBlinking": "solid",
@@ -130,14 +130,7 @@
   "editor.suggestSelection": "first",
   "editor.tabSize": 2,
   "editor.tokenColorCustomizations": {
-    "textMateRules": [
-      {
-        "scope": "keyword.other.dotenv",
-        "settings": {
-          "foreground": "#FF000000"
-        }
-      }
-    ]
+    "textMateRules": []
   },
   "editor.unicodeHighlight.ambiguousCharacters": true,
   "editor.unicodeHighlight.invisibleCharacters": true,
@@ -422,5 +415,5 @@
   "workbench.settings.editor": "json",
   "workbench.tree.indent": 22,
   "workbench.tree.renderIndentGuides": "always",
-  "zig.zls.enabled": "on"
+  "zig.zls.enabled": "on",
 }
