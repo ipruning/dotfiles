@@ -10,20 +10,6 @@ function unset-all-proxy() {
   unset all_proxy
 }
 
-function toggle-enhanced-mode() {
-  local x_key=$(cat "$HOME/Library/Application Support/Surge/Profiles/default.conf" | perl -ne 'print $1 if /http-api = (.*?)@/')
-  local current_status=$(xh --body GET https://localhost:6171/v1/features/enhanced_mode X-Key:$x_key | jq -r '.enabled')
-
-  if [[ "$current_status" == "false" ]]; then
-    xh --quiet POST https://localhost:6171/v1/features/enhanced_mode X-Key:$x_key enabled:=true
-  else
-    xh --quiet POST https://localhost:6171/v1/features/enhanced_mode X-Key:$x_key enabled:=false
-  fi
-
-  sleep 0.5
-  echo "Enhanced Mode Status: $(xh --body GET https://localhost:6171/v1/features/enhanced_mode X-Key:$x_key | jq -r '.enabled')"
-}
-
 function set-smart-proxy() {
   local x_key=$(cat "$HOME/Library/Application Support/Surge/Profiles/default.conf" | perl -ne 'print $1 if /http-api = (.*?)@/')
   xh --quiet POST https://localhost:6171/v1/policy_groups/select X-Key:$x_key group_name='Automatic' policy='VPS_SMART'
@@ -68,4 +54,18 @@ function toggle-outbound-mode() {
     xh --quiet POST https://localhost:6171/v1/outbound X-Key:$x_key mode=rule
   fi
   echo "Outbound Mode Status: $(xh --body GET https://localhost:6171/v1/outbound X-Key:$x_key | jq -r '.mode')"
+}
+
+function toggle-enhanced-mode() {
+  local x_key=$(cat "$HOME/Library/Application Support/Surge/Profiles/default.conf" | perl -ne 'print $1 if /http-api = (.*?)@/')
+  local current_status=$(xh --body GET https://localhost:6171/v1/features/enhanced_mode X-Key:$x_key | jq -r '.enabled')
+
+  if [[ "$current_status" == "false" ]]; then
+    xh --quiet POST https://localhost:6171/v1/features/enhanced_mode X-Key:$x_key enabled:=true
+  else
+    xh --quiet POST https://localhost:6171/v1/features/enhanced_mode X-Key:$x_key enabled:=false
+  fi
+
+  sleep 0.5
+  echo "Enhanced Mode Status: $(xh --body GET https://localhost:6171/v1/features/enhanced_mode X-Key:$x_key | jq -r '.enabled')"
 }

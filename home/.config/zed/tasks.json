@@ -60,7 +60,7 @@
   },
   {
     "label": "claude",
-    "command": "set-claude && claude",
+    "command": "set-bedrock-env && claude",
     "hide": "always"
   }
 ]

@@ -1,4 +1,4 @@
-function my_logger() {
+function logger() {
   local RED='\033[0;31m'
   local YELLOW='\033[1;33m'
   local GRAY='\033[0;90m'
@@ -35,18 +35,18 @@ function my_logger() {
 
 function readit() {
   if [ $# -eq 0 ]; then
-    my_logger "No URL provided" "ERROR"
+    logger "No URL provided" "ERROR"
   fi
 
   local url="$1"
 
   if [[ ! "$url" =~ ^[a-zA-Z0-9._/:%-]+$ ]]; then
-    my_logger "Invalid URL format" "ERROR"
+    logger "Invalid URL format" "ERROR"
     exit 1
   fi
 
   if ! curl -fSL "https://r.jina.ai/$url" 2>/dev/null; then
-    my_logger "Failed to fetch https://r.jina.ai/$url" "ERROR"
+    logger "Failed to fetch https://r.jina.ai/$url" "ERROR"
     exit 1
   fi
 }
@@ -56,17 +56,17 @@ function buffit() {
     if [ -n "$my_buff" ]; then
       echo "$my_buff"
     else
-      my_logger "No data piped and 'my_buff' is empty." "WARN"
+      logger "No data piped and 'my_buff' is empty." "WARN"
     fi
   else
     read -r -d '' my_buff
-    my_logger "Buffer updated."
+    logger "Buffer updated."
   fi
 }
 
 function catscreen() {
   if [[ -z "$ZELLIJ" ]]; then
-    my_logger "Not running inside a Zellij session." "WARN"
+    logger "Not running inside a Zellij session." "WARN"
     return 1
   fi
 
@@ -183,28 +183,28 @@ function x86_64-zsh-run() {
 }
 
 function upgrade-all() {
-  my_logger "Updating Homebrew..."
+  logger "Updating Homebrew..."
   brew update
   brew upgrade
 
-  my_logger "Pruning Homebrew..."
+  logger "Pruning Homebrew..."
   brew cleanup
   brew autoremove
 
-  my_logger "Updating mise..."
+  logger "Updating mise..."
   mise upgrade
 
-  my_logger "Pruning mise..."
+  logger "Pruning mise..."
   mise prune
   mise reshim
 
-  my_logger "Upgrading GitHub CLI extensions..."
+  logger "Upgrading GitHub CLI extensions..."
   gh extension upgrade --all
 
-  my_logger "Updating tldr pages..."
+  logger "Updating tldr pages..."
   tldr --update
 
-  my_logger "Backing up all packages..."
+  logger "Backing up all packages..."
   brew bundle dump --file="$HOME"/dotfiles/config/packages/Brewfile --force
   brew leaves >"$HOME"/dotfiles/config/packages/Brewfile.txt
   gh extension list | awk '{print $3}' >"$HOME"/dotfiles/config/packages/gh_extensions.txt
