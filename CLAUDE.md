@@ -1,31 +1,32 @@
 # AI Agent Guidelines for Working with this Codebase
 
-## Environment & Prerequisites
+## Environment & Commands
 
-- This is primarily a dotfiles repository for macOS environment configuration
-- Uses Homebrew for package management with primary dependencies in `config/packages/Brewfile`
-- Main shell: zsh with customizations
+- macOS dotfiles repository with zsh as main shell
+- Package management: `brew update && brew upgrade && brew cleanup`
+- Version management: `mise upgrade && mise prune && mise reshim`
+- Backup commands: `upgrade-all` (backs up packages to `config/packages/`)
+- Linting: For shell scripts use shellcheck: `shellcheck <file.sh>`
+- Formatting: For shell scripts use shfmt: `shfmt -i 2 -w <file.sh>`
+- Python linting/formatting: `ruff check` and `ruff format`
 
 ## Code Style & Conventions
 
-- Shell scripts: 2-space indentation, snake_case for function/variable names
-- Python: 4-space indentation
-- Use shellcheck for shell script linting and shfmt for formatting
-- Python: Use ruff for formatting and linting
+- Shell: 2-space indentation, snake_case for variables/functions
+- Python: 4-space indentation, follow PEP 8 conventions
+- Git shortcuts: Use `g` function for git operations or `lazygit`
+- Error handling: Use conditional checks in shell scripts with early returns
 
-## Testing & Development
+## Documentation & Design
 
-- No formal test infrastructure in this repository
-- Manual validation of shell functions should be performed before committing
-- Run `upgrade-all` function to update dependencies and backup package lists
-
-## Documentation Practices
-
-- Use emoji prefixes like "👇" for section comments in configuration files
-- Comment non-obvious functionality
-- Include function documentation for reusable shell functions
+- Use emoji prefixes (👇) for section comments
+- Document non-obvious functionality
+- Include function descriptions in shell functions
+- Default to built-in tools and commands when possible
+- Follow existing patterns in similar files
+- Keep configuration sections logically grouped
 
 ## Commit Conventions
 
-- Use conventional commit format: feat:, build:, chore:
-- Follow existing coding patterns in similar files
+- Use conventional commit format: `feat:`, `fix:`, `build:`, `chore:`
+- Align with existing code structure and organization
