@@ -60,7 +60,7 @@ brew "fossil"
 brew "fpp"
 brew "fzf"
 brew "genact"
-brew "gfold"
+brew "gfold", link: false
 brew "gh"
 brew "git"
 brew "git-delta"
