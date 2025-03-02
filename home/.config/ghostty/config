@@ -10,7 +10,7 @@ window-padding-x = 10, 10
 window-padding-y = 10, 10
 
 font-size = 13
-font-style = SemiBold
+font-style = Medium
 theme = catppuccin-mocha
 
 # font-size = 13

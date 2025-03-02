@@ -110,14 +110,13 @@
   },
   "terminal": {
     "button": false,
-    "font_weight": 600,
     "toolbar": {
       "breadcrumbs": false
     }
   },
   "theme": "Catppuccin Mocha - No Italics",
   "ui_font_family": "MonoLisa",
-  "ui_font_size": 15,
+  "ui_font_size": 15.0,
   "ui_font_weight": 500,
   "vim": {
     "highlight_on_yank_duration": 250,
