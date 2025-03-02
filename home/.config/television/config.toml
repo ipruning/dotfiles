@@ -118,17 +118,22 @@ toggle_preview = "ctrl-o"
   "git switch",
 ]
 "docker-images" = ["docker run"]
-"git-repos" = ["nvim", "code", "hx", "git clone"]
 
 "channels" = ["tv"]
 "csv-files" = ["csvlens"]
-"gists" = ["wget"]
-"hidden-files-max-depth-3" = [""]
-"hidden-files" = ["bat", "cat", "n", "nvim", "open", "vim", "zed"]
+"hidden-files" = ["bat", "cat", "cursor", "n", "nvim", "open", "vim", "zed"]
 "hosts" = ["ssh"]
 "my-sh-files" = ["cmd-execute"]
-"py-files" = ["modal run", "python", "uv run"]
-"sh-files" = ["sh"]
+"py-files" = [
+  "marimo edit",
+  "marimo run",
+  "modal run",
+  "modal-cli",
+  "python",
+  "uv add",
+  "uv run",
+]
+"sh-files" = ["bash", "sh"]
 "zellij-sessions" = ["zellij a", "zellij attach"]
 
 [shell_integration.keybindings]
