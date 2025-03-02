@@ -21,7 +21,6 @@
   "buffer_font_family": "MonoLisa",
   "buffer_font_size": 13.0,
   "buffer_font_weight": 500,
-  "buffer_line_height": "comfortable",
   "collaboration_panel": {
     "dock": "right"
   },
@@ -110,6 +109,9 @@
   },
   "terminal": {
     "button": false,
+    "font_family": "MonoLisa",
+    "font_size": 13.0,
+    "font_weight": 500,
     "toolbar": {
       "breadcrumbs": false
     }
