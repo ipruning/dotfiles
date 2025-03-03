@@ -27,6 +27,20 @@ if [[ $OSTYPE = darwin* ]]; then
   #   fi
   # fi
 
+  if [[ "$TERM_PROGRAM" == "ghostty" ]]; then
+    if [[ -z "$ZELLIJ" ]]; then
+      if [[ "$ZELLIJ_AUTO_ATTACH" == "true" ]]; then
+        /opt/homebrew/bin/zellij attach -c
+      else
+        /opt/homebrew/bin/zellij
+      fi
+
+      if [[ "$ZELLIJ_AUTO_EXIT" == "true" ]]; then
+        exit
+      fi
+    fi
+  fi
+
   function jump-to-session() {
     if [[ -n "$ZELLIJ" ]]; then
     else
