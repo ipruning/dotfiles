@@ -8,7 +8,6 @@ awscli
 basedpyright
 bat
 bats-core
-bore-cli
 cfitsio
 cgif
 cmake
@@ -17,11 +16,9 @@ cyme
 d2
 datasette
 detect-secrets
-difftastic
 docker
 doggo
 duckdb
-eget
 extra-cmake-modules
 eza
 fastfetch
@@ -31,7 +28,6 @@ flyctl
 fossil
 fpp
 genact
-gfold
 gh
 git
 git-delta
@@ -46,13 +42,11 @@ hdf5
 htop
 httm
 huggingface-cli
-hurl
 hyperfine
 ipinfo-cli
 jc
 jless
 jq
-just
 lazydocker
 lazygit
 libmagic
@@ -83,7 +77,6 @@ python@3.11
 rclone
 rip2
 ripgrep
-ruff
 rustscan
 screenpipe
 shellcheck
