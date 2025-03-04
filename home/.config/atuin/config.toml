@@ -5,6 +5,7 @@ enter_accept = false
 exit_mode = "return-query"
 inline_height = 23
 invert = true
+search_mode = "skim"
 show_help = false
 show_tabs = false
 style = "compact"

@@ -23,7 +23,6 @@ alias ports="ss -tulpn"
 alias brow="/usr/local/homebrew/bin/brew"
 alias c="pbcopy"
 alias cat="bat --paging=never"
-alias gfold="/opt/homebrew/Cellar/gfold/2025.2.1/bin/gfold"
 alias keyboardmaestro='/Applications/Keyboard\ Maestro.app/Contents/MacOS/keyboardmaestro'
 alias ll="eza --all --git --group-directories-first --header --long --time-style long-iso"
 alias n="nvim"
