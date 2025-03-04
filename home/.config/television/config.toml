@@ -86,35 +86,36 @@ toggle_preview = "ctrl-o"
 "env" = ["export", "unset"]
 "dirs" = ["cd", "ls", "rmdir", "j", "eza"]
 "files" = [
-  "cat",
-  "less",
-  "head",
-  "tail",
-  "vim",
-  "nano",
   "bat",
-  "cp",
-  "mv",
-  "rm",
-  "touch",
+  "cat",
   "chmod",
   "chown",
-  "ln",
-  "tar",
-  "zip",
-  "unzip",
-  "gzip",
+  "cp",
   "gunzip",
+  "gzip",
+  "head",
+  "less",
+  "ln",
+  "mv",
+  "nano",
+  "rip",
+  "rm",
+  "tail",
+  "tar",
+  "touch",
+  "unzip",
+  "vim",
   "xz",
+  "zip",
 ]
 "git-diff" = ["git add", "git restore"]
 "git-branch" = [
-  "git checkout",
   "git branch",
+  "git checkout",
   "git merge",
-  "git rebase",
   "git pull",
   "git push",
+  "git rebase",
   "git switch",
 ]
 "docker-images" = ["docker run"]
@@ -135,6 +136,8 @@ toggle_preview = "ctrl-o"
 ]
 "sh-files" = ["bash", "sh"]
 "zellij-sessions" = ["zellij a", "zellij attach"]
+
+"my-scripts" = [""]
 
 [shell_integration.keybindings]
 "smart_autocomplete" = "ctrl-t"
