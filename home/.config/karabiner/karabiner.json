@@ -100,6 +100,7 @@
                                     {
                                         "bundle_identifiers": [
                                             "com.google.Chrome",
+                                            "com.apple.finder",
                                             "com.roam-research.desktop-app"
                                         ],
                                         "type": "frontmost_application_if"
@@ -122,6 +123,7 @@
                                     {
                                         "bundle_identifiers": [
                                             "com.google.Chrome",
+                                            "com.apple.finder",
                                             "com.roam-research.desktop-app"
                                         ],
                                         "type": "frontmost_application_if"
@@ -148,8 +150,7 @@
                                 "conditions": [
                                     {
                                         "bundle_identifiers": [
-                                            "com.google.Chrome",
-                                            "com.roam-research.desktop-app"
+                                            "com.google.Chrome"
                                         ],
                                         "type": "frontmost_application_if"
                                     }
@@ -170,8 +171,7 @@
                                 "conditions": [
                                     {
                                         "bundle_identifiers": [
-                                            "com.google.Chrome",
-                                            "com.roam-research.desktop-app"
+                                            "com.google.Chrome"
                                         ],
                                         "type": "frontmost_application_if"
                                     }
