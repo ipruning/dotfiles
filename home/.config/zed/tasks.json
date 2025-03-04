@@ -60,7 +60,7 @@
   },
   {
     "label": "claude",
-    "command": "set-bedrock-env && claude",
+    "command": "current_dir=$(basename \"$(pwd)\"); tmux attach-session -t \"$current_dir\" 2>/dev/null || tmux new-session -s \"$current_dir\" 'tmux new-window -n claude \"claude\" && tmux select-window -t claude'",
     "hide": "always"
   }
 ]

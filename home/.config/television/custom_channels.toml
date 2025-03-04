@@ -53,6 +53,10 @@ name = "zellij-sessions"
 source_command = "zellij list-sessions --no-formatting --short"
 
 [[cable_channel]]
+name = "tmux-sessions"
+source_command = "tmux list-sessions -F '#{session_name}'"
+
+[[cable_channel]]
 name = "gists"
 source_command = "gh api --paginate /gists | jq -r '.[] .files[] | .raw_url'"
 preview_command = "curl --silent {0}"
