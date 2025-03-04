@@ -135,7 +135,8 @@ toggle_preview = "ctrl-o"
   "uv run",
 ]
 "sh-files" = ["bash", "sh"]
-"zellij-sessions" = ["zellij a", "zellij attach"]
+"tmux-sessions" = ["tmux a -t"]
+"zellij-sessions" = ["zellij a"]
 
 "my-scripts" = [""]
 
