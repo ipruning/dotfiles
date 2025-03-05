@@ -205,9 +205,11 @@ function upgrade-all() {
   tldr --update
 
   logger "Backing up all packages..."
-  brew bundle dump --file="$HOME"/dotfiles/config/packages/Brewfile --force
-  brew leaves >"$HOME"/dotfiles/config/packages/Brewfile.txt
-  gh extension list | awk '{print $3}' >"$HOME"/dotfiles/config/packages/gh_extensions.txt
-  find /Applications -maxdepth 1 -name "*.app" -exec basename {} .app \; | sort >"$HOME"/dotfiles/config/packages/macos_applications.txt
-  find /Applications/Setapp -maxdepth 1 -name "*.app" -exec basename {} .app \; | sort >"$HOME"/dotfiles/config/packages/macos_setapp.txt
+  local host=$(hostname -s)
+  brew bundle dump --file="$HOME/dotfiles/config/packages/brew_dump.${host}.txt" --force
+  brew leaves >"$HOME/dotfiles/config/packages/brew_leaves.${host}.txt"
+  brew list --installed-on-request >"$HOME/dotfiles/config/packages/brew_installed.${host}.txt"
+  gh extension list | awk '{print $3}' >"$HOME/dotfiles/config/packages/gh_extensions.${host}.txt"
+  find /Applications -maxdepth 1 -name "*.app" -exec basename {} .app \; | sort >"$HOME/dotfiles/config/packages/macos_applications.${host}.txt"
+  find /Applications/Setapp -maxdepth 1 -name "*.app" -exec basename {} .app \; | sort >"$HOME/dotfiles/config/packages/macos_setapp.${host}.txt"
 }
