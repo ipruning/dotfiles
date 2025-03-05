@@ -13,6 +13,8 @@
 "go:github.com/merschformann/gotz" = "latest"
 "go:github.com/zyedidia/eget" = "latest"
 "npm:@anthropic-ai/claude-code" = "latest"
+"pipx:pyright" = "latest"
+"pipx:ruff" = "latest"
 bun = "latest"
 go = "latest"
 node = "latest"
