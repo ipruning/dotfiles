@@ -12,32 +12,47 @@ function x86_64-zsh-run() {
 
 function upgrade-all() {
   logger "Updating Homebrew..."
-  brew update
-  brew upgrade
-
-  logger "Pruning Homebrew..."
-  brew cleanup
-  brew autoremove
+  if command -v brew &>/dev/null; then
+    brew update
+    brew upgrade
+    logger "Pruning Homebrew..."
+    brew cleanup
+    brew autoremove
+  fi
 
   logger "Updating mise..."
-  mise upgrade
+  if command -v mise &>/dev/null; then
+    mise upgrade
 
-  logger "Pruning mise..."
-  mise prune
-  mise reshim
+    logger "Pruning mise..."
+    mise prune
+    mise reshim
+  fi
 
   logger "Upgrading GitHub CLI extensions..."
-  gh extension upgrade --all
+  if command -v gh &>/dev/null; then
+    gh extension upgrade --all
+  fi
 
   logger "Updating tldr pages..."
-  tldr --update
+  if command -v tldr &>/dev/null; then
+    tldr --update
+  fi
 
   logger "Backing up all packages..."
   local host=$(hostname -s)
-  brew bundle dump --file="$HOME/dotfiles/config/packages/brew_dump.${host}.txt" --force
-  brew leaves >"$HOME/dotfiles/config/packages/brew_leaves.${host}.txt"
-  brew list --installed-on-request >"$HOME/dotfiles/config/packages/brew_installed.${host}.txt"
-  gh extension list | awk '{print $3}' >"$HOME/dotfiles/config/packages/gh_extensions.${host}.txt"
-  find /Applications -maxdepth 1 -name "*.app" -exec basename {} .app \; | sort >"$HOME/dotfiles/config/packages/macos_applications.${host}.txt"
-  find /Applications/Setapp -maxdepth 1 -name "*.app" -exec basename {} .app \; | sort >"$HOME/dotfiles/config/packages/macos_setapp.${host}.txt"
+  if command -v brew &>/dev/null; then
+    brew bundle dump --file="$HOME/dotfiles/config/packages/brew_dump.${host}.txt" --force
+    brew leaves >"$HOME/dotfiles/config/packages/brew_leaves.${host}.txt"
+    brew list --installed-on-request >"$HOME/dotfiles/config/packages/brew_installed.${host}.txt"
+  fi
+  if command -v gh &>/dev/null; then
+    gh extension list | awk '{print $3}' >"$HOME/dotfiles/config/packages/gh_extensions.${host}.txt"
+  fi
+  if [ -d "/Applications" ]; then
+    find /Applications -maxdepth 1 -name "*.app" -exec basename {} .app \; | sort >"$HOME/dotfiles/config/packages/macos_applications.${host}.txt"
+  fi
+  if [ -d "/Applications/Setapp" ]; then
+    find /Applications/Setapp -maxdepth 1 -name "*.app" -exec basename {} .app \; | sort >"$HOME/dotfiles/config/packages/macos_setapp.${host}.txt"
+  fi
 }
