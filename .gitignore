@@ -4,3 +4,5 @@
 *tmTheme
 config/shell/completions/
 config/shell/plugins/
+
+!*private*.tpl
