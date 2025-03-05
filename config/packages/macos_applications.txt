@@ -13,6 +13,8 @@ Avenue
 BaiduNetdisk_mac
 Balatro
 BetterDisplay
+Blackmagic Disk Speed Test
+Blackmagic Media Express
 Bob
 Capture One
 Contexts
@@ -55,6 +57,7 @@ LM Studio
 Lark
 LinearMouse
 Longbridge Pro
+Loopback
 LyricsX
 MWeb Pro
 Microsoft Excel
