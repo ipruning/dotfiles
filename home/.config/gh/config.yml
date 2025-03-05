@@ -3,9 +3,9 @@ editor:
 prompt: enabled
 pager: delta
 aliases:
-  branch: f -b
-  log: f -l
-  prs: f -p
+    branch: f -b
+    log: f -l
+    prs: f -p
 http_unix_socket:
 browser:
 version: "1"

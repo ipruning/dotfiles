@@ -1,0 +1,44 @@
+.Karabiner-VirtualHIDDevice-Manager
+1Password
+1Password for Safari
+AdGuard for Safari
+AeroSpace
+AltTab
+Bob
+Claude
+Cursor
+GarageBand
+Ghostty
+Google Chrome
+Heptabase
+Ice
+Immersive Translate
+Input Source Pro
+Kagi for Safari
+Karabiner-Elements
+Karabiner-EventViewer
+Keyboard Maestro
+Keynote
+LM Studio
+Lark
+LinearMouse
+Mos
+Numbers
+OrbStack
+Pages
+Parsec
+PasteNow
+Repo Prompt
+Roam Research
+Safari
+Screen Studio
+Shottr
+Spark Desktop
+Surfingkeys
+Surge
+Tailscale
+Tampermonkey
+Xcode-16.2.0
+Xcodes
+Zed
+iMovie
