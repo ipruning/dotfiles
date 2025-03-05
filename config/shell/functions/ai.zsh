@@ -1,38 +1,3 @@
-function logger() {
-  local RED='\033[0;31m'
-  local YELLOW='\033[1;33m'
-  local GRAY='\033[0;90m'
-  local NC='\033[0m'
-
-  local message=$1
-  local loglevel=${2:-"INFO"}
-  local timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-
-  local color=$GRAY
-
-  case "${loglevel:u}" in
-  "ERROR")
-    color=$RED
-    ;;
-  "WARN")
-    color=$YELLOW
-    ;;
-  "INFO")
-    if [ "$DRY_RUN" = true ]; then
-      color=$YELLOW
-    else
-      color=$GRAY
-    fi
-    ;;
-  *)
-    loglevel="INFO"
-    color=$GRAY
-    ;;
-  esac
-
-  printf "${color}[%s] [%s] %s${NC}\n" "$timestamp" "${loglevel:u}" "$message"
-}
-
 function readit() {
   if [ $# -eq 0 ]; then
     logger "No URL provided" "ERROR"
@@ -168,48 +133,4 @@ function aid-chatgpt-pro() {
     other_context=${other_context%$'\n'}
   fi
   echo "$other_context" | chatgpt-cli.py --pro
-}
-
-function repo-fork-sync() {
-  gh repo list --fork --visibility public --json owner,name | jq -r 'map(.owner.login + "/" + .name) | .[]' | xargs -t -L1 gh repo sync
-}
-
-function x86_64-zsh-login() {
-  arch -x86_64 zsh --login
-}
-
-function x86_64-zsh-run() {
-  arch -x86_64 zsh -c "$@"
-}
-
-function upgrade-all() {
-  logger "Updating Homebrew..."
-  brew update
-  brew upgrade
-
-  logger "Pruning Homebrew..."
-  brew cleanup
-  brew autoremove
-
-  logger "Updating mise..."
-  mise upgrade
-
-  logger "Pruning mise..."
-  mise prune
-  mise reshim
-
-  logger "Upgrading GitHub CLI extensions..."
-  gh extension upgrade --all
-
-  logger "Updating tldr pages..."
-  tldr --update
-
-  logger "Backing up all packages..."
-  local host=$(hostname -s)
-  brew bundle dump --file="$HOME/dotfiles/config/packages/brew_dump.${host}.txt" --force
-  brew leaves >"$HOME/dotfiles/config/packages/brew_leaves.${host}.txt"
-  brew list --installed-on-request >"$HOME/dotfiles/config/packages/brew_installed.${host}.txt"
-  gh extension list | awk '{print $3}' >"$HOME/dotfiles/config/packages/gh_extensions.${host}.txt"
-  find /Applications -maxdepth 1 -name "*.app" -exec basename {} .app \; | sort >"$HOME/dotfiles/config/packages/macos_applications.${host}.txt"
-  find /Applications/Setapp -maxdepth 1 -name "*.app" -exec basename {} .app \; | sort >"$HOME/dotfiles/config/packages/macos_setapp.${host}.txt"
 }

@@ -100,13 +100,17 @@ bindkey "^E" end-of-line
 bindkey "^F" forward-char
 
 # 👇 Custom paths
-export PATH="$HOME/dotfiles/bin:$PATH"
-source "$HOME/dotfiles/config/shell/functions/misc.zsh"
-source "$HOME/dotfiles/config/shell/functions/db.zsh"
-source "$HOME/dotfiles/config/shell/functions/g.zsh"
-source "$HOME/dotfiles/config/shell/functions/surge.zsh"
 export PATH="$HOME/Developer/self/prototypes/utils/bin:$PATH"
 export PATH="$HOME/Developer/self/prototypes/utils/scripts:$PATH"
+export PATH="$HOME/dotfiles/bin:$PATH"
+
+source "$HOME/dotfiles/config/shell/functions/utils.zsh"
+
+source "$HOME/dotfiles/config/shell/functions/ai.zsh"
+source "$HOME/dotfiles/config/shell/functions/db.zsh"
+source "$HOME/dotfiles/config/shell/functions/g.zsh"
+source "$HOME/dotfiles/config/shell/functions/macos.zsh"
+source "$HOME/dotfiles/config/shell/functions/surge.zsh"
 
 # 👇 Brew
 export HOMEBREW_NO_ANALYTICS=1
