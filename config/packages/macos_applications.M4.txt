@@ -38,6 +38,7 @@ Surfingkeys
 Surge
 Tailscale
 Tampermonkey
+Telegram
 Xcode-16.2.0
 Xcodes
 Zed
