@@ -52,7 +52,7 @@
       "ctrl-shift-n": "vim::MoveToNextMatch",
       "n": ["workspace::SendKeystrokes", "ctrl-shift-n z z"],
 
-      "ctrl-alt-shift-n": "vim::MoveToPrevMatch",
+      "ctrl-alt-shift-n": "vim::MoveToPreviousMatch",
       "shift-n": ["workspace::SendKeystrokes", "ctrl-alt-shift-n z z"],
 
       "space 1": ["pane::ActivateItem", 0],
@@ -71,16 +71,16 @@
     "context": "Pane",
     "bindings": {
       "ctrl-shift-j": "search::SelectNextMatch",
-      "ctrl-shift-k": "search::SelectPrevMatch"
+      "ctrl-shift-k": "search::SelectPreviousMatch"
     }
   },
   {
     "context": "Editor && vim_mode == normal && !VimWaiting && !menu",
     "bindings": {
       "ctrl-j": "editor::GoToDiagnostic",
-      "ctrl-k": "editor::GoToPrevDiagnostic",
+      "ctrl-k": "editor::GoToPreviousDiagnostic",
 
-      "shift-h": "pane::ActivatePrevItem",
+      "shift-h": "pane::ActivatePreviousItem",
       "shift-l": "pane::ActivateNextItem",
 
       "g d": "editor::GoToDefinition",
@@ -123,6 +123,43 @@
 
       "shift-j": "editor::MoveLineDown",
       "shift-k": "editor::MoveLineUp"
+    }
+  },
+  {
+    "context": "Editor && showing_completions",
+    "use_key_equivalents": true,
+    "bindings": {
+      "enter": "editor::ConfirmCompletion",
+      "ctrl-y": "editor::ComposeCompletion"
+    }
+  },
+  {
+    "context": "Editor && mode == full && edit_prediction",
+    "use_key_equivalents": true,
+    "bindings": {
+      "ctrl-shift-y": "editor::NextEditPrediction",
+      "alt-ctrl-shift-y": "editor::PreviousEditPrediction"
+    }
+  },
+  {
+    "context": "Editor && !edit_prediction",
+    "use_key_equivalents": true,
+    "bindings": {
+      "ctrl-shift-y": "editor::ShowEditPrediction"
+    }
+  },
+  {
+    "context": "Editor && edit_prediction",
+    "bindings": {
+      "ctrl-shift-y": "editor::AcceptEditPrediction",
+      "ctrl-y": "editor::AcceptEditPrediction"
+    }
+  },
+  {
+    "context": "Editor && edit_prediction_conflict",
+    "use_key_equivalents": true,
+    "bindings": {
+      "ctrl-shift-y": "editor::AcceptEditPrediction"
     }
   }
 ]
