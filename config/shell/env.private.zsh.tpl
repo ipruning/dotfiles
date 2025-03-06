@@ -40,8 +40,8 @@ set-tigris-env() {
 
 set-bedrock-env() {
   export ANTHROPIC_MODEL="us.anthropic.claude-3-7-sonnet-20250219-v1:0"
-  export AWS_ACCESS_KEY_ID="op://dev-work/AWS/macos/AWS_ACCESS_KEY_ID"
-  export AWS_SECRET_ACCESS_KEY="op://dev-work/AWS/macos/AWS_SECRET_ACCESS_KEY"
+  export AWS_ACCESS_KEY_ID="op://dev-work/AWS/claude_code/AWS_ACCESS_KEY_ID"
+  export AWS_SECRET_ACCESS_KEY="op://dev-work/AWS/claude_code/AWS_SECRET_ACCESS_KEY"
   export CLAUDE_CODE_USE_BEDROCK=1
   export DISABLE_PROMPT_CACHING=1
 }
