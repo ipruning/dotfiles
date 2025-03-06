@@ -2,7 +2,6 @@
 "cargo:gfold" = "latest"
 "cargo:https://github.com/bodo-run/yek" = "latest"
 "cargo:https://github.com/hanshuaikang/Nping" = "latest"
-"cargo:https://github.com/jflam/clip.git" = "latest"
 "cargo:https://github.com/svenstaro/miniserve" = "latest"
 "cargo:https://github.com/yshavit/mdq" = "latest"
 "cargo:koji" = "latest"
