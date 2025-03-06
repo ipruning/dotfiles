@@ -26,6 +26,7 @@ d2
 datasette
 dav1d
 detect-secrets
+difftastic
 docker
 doggo
 duckdb

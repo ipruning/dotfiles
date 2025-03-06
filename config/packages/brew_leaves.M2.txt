@@ -16,6 +16,7 @@ cyme
 d2
 datasette
 detect-secrets
+difftastic
 docker
 doggo
 duckdb
