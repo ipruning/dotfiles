@@ -15,6 +15,7 @@
 "npm:@anthropic-ai/claude-code" = "latest"
 "pipx:pyright" = "latest"
 "pipx:ruff" = "latest"
+"pipx:vastai" = "latest"
 bun = "latest"
 go = "latest"
 node = "latest"
