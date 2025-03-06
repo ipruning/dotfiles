@@ -1,5 +1,3 @@
-# op inject -i ./config/shell/env.private.zsh.tpl -o ./config/shell/env.private.zsh
-
 export HF_TOKEN="op://dev-self/Hugging Face/macos/HF_TOKEN"
 export LOGFIRE_TOKEN="op://dev-self/426cvuij6hhwgrmghdzue2p5hu/macos/LOGFIRE_TOKEN"
 
@@ -45,5 +43,3 @@ set-bedrock-env() {
   export CLAUDE_CODE_USE_BEDROCK=1
   export DISABLE_PROMPT_CACHING=1
 }
-
-set-bedrock-env
