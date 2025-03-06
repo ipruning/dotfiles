@@ -161,5 +161,11 @@
     "bindings": {
       "ctrl-shift-y": "editor::AcceptEditPrediction"
     }
+  },
+  {
+    "context": "Editor",
+    "bindings": {
+      "shift-enter": ["workspace::SendKeystrokes", "y $ ctrl-` cmd-v enter"]
+    }
   }
 ]

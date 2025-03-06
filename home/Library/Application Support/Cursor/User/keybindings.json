@@ -1,5 +1,9 @@
 [
   {
+    "command": "workbench.action.terminal.runSelectedText",
+    "key": "shift+enter"
+  },
+  {
     "command": "-workbench.action.switchWindow",
     "key": "ctrl+w"
   },
@@ -20,8 +24,6 @@
     "key": "ctrl+y"
   },
   {
-    "command": "runCommands",
-    "key": "cmd+g cmd+g",
     "args": {
       "commands": [
         "workbench.action.files.save",
@@ -30,6 +32,8 @@
         "git.commit",
         "git.push"
       ]
-    }
+    },
+    "command": "runCommands",
+    "key": "cmd+g cmd+g"
   }
 ]
