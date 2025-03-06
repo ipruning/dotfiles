@@ -73,6 +73,20 @@
   "beancount.mainBeanFile": "~/Databases/Ledger/main.bean",
   "beancountFormatter.currencyColumn": 72,
   "beancountFormatter.fixedCJKWidth": true,
+  "catppuccin-icons.associations.extensions": {
+    "mdc": "markdown",
+    "tpl": "env"
+  },
+  "catppuccin-icons.associations.files": {
+    "secrets": "env"
+  },
+  "catppuccin-icons.associations.folders": {
+    ".cursor": "folder_config",
+    ".cursor/rules": "folder_scripts",
+    ".kamal": "folder_config",
+    "prompts": "folder_scripts",
+    "vps-scripts": "folder_scripts"
+  },
   "catppuccin.boldKeywords": true,
   "catppuccin.italicComments": true,
   "catppuccin.italicKeywords": false,
@@ -245,6 +259,7 @@
     ".mdc": "markdown",
     ".rgignore": "ignore",
     ".secrets.baseline": "json",
+    ".tpl": "dotenv",
     "secrets": "dotenv"
   },
   "files.insertFinalNewline": true,
@@ -415,5 +430,5 @@
   "workbench.settings.editor": "json",
   "workbench.tree.indent": 22,
   "workbench.tree.renderIndentGuides": "always",
-  "zig.zls.enabled": "on",
+  "zig.zls.enabled": "on"
 }
