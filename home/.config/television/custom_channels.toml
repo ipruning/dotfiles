@@ -87,10 +87,10 @@ preview_command = ":files:"
 
 [[cable_channel]]
 name = "my-prompt-files"
-source_command = "fd . ~/Developer/self/prototypes/utils --type file -0 | xargs -0 gprintf '%q\n'"
+source_command = "fd . ~/Developer/self/prototypes/utils/prompts --type file -0 | xargs -0 gprintf '%q\n'"
 preview_command = ":files:"
 
 [[cable_channel]]
 name = "my-scripts"
-source_command = "fd . ~/Developer/self/prototypes/utils/scripts --type file | xargs -n1 basename"
+source_command = "fd . ~/Developer/self/prototypes/utils/scripts --type file -0 | xargs -0 gprintf '%q\n'"
 preview_command = ":files:"
