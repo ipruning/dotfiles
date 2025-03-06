@@ -1,5 +1,6 @@
 [tools]
 "cargo:gfold" = "latest"
+"cargo:https://github.com/Nukesor/pueue" = "latest"
 "cargo:https://github.com/bodo-run/yek" = "latest"
 "cargo:https://github.com/hanshuaikang/Nping" = "latest"
 "cargo:https://github.com/svenstaro/miniserve" = "latest"
