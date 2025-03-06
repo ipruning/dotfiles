@@ -95,7 +95,7 @@ brew "monolith"
 brew "mtr"
 brew "neovim"
 brew "nmap"
-brew "ollama", restart_service: :changed
+brew "ollama"
 brew "onefetch"
 brew "openjdk"
 brew "ouch"
