@@ -52,6 +52,7 @@ gnupg
 graphviz
 grex
 hdf5
+helix
 htop
 httm
 huggingface-cli
@@ -83,7 +84,6 @@ openssl@3
 ouch
 pandoc-crossref
 pango
-parallel
 pcre2
 pkgconf
 pkl
