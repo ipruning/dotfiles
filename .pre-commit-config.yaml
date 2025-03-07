@@ -30,6 +30,15 @@ repos:
         entry: autocorrect --fix
         language: system
         types: [file]
+      - id: lychee
+        name: lychee
+        description: "Check links in the repository"
+        entry: lychee
+        language: system
+        args: ["--no-progress"]
+        types: [text]
+        pass_filenames: true
+        require_serial: true
       - id: ripsecrets-system
         name: ripsecrets
         description: 'Prevent committing secret keys into your source code'
