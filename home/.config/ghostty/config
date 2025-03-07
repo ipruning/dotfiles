@@ -9,11 +9,11 @@ unfocused-split-opacity = 1
 window-padding-x = 10, 10
 window-padding-y = 10, 10
 
-font-size = 13
+font-size = 12
 font-style = Medium
 theme = catppuccin-mocha
 
-# font-size = 13
+font-size = 14
 # font-style = SimiBold
 # theme = catppuccin-latte
 
