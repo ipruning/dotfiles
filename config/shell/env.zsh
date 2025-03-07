@@ -139,3 +139,6 @@ eval "$(atuin init zsh --disable-up-arrow)"
 
 # 👇 mise
 eval "$(mise activate zsh)"
+
+# 👇 bartib
+export BARTIB_FILE="$HOME/.config/bartib/activities.bartib"
