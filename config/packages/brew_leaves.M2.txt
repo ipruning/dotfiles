@@ -37,6 +37,7 @@ gnupg
 graphviz
 grex
 hdf5
+helix
 htop
 httm
 huggingface-cli
@@ -61,7 +62,6 @@ onefetch
 openjdk
 ouch
 pandoc-crossref
-parallel
 pkl
 postgresql@17
 pre-commit
