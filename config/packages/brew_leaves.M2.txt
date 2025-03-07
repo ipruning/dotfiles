@@ -3,7 +3,6 @@ assimp
 ast-grep
 atuin
 autoconf
-autocorrect
 awscli
 basedpyright
 bat
@@ -15,7 +14,6 @@ csvlens
 cyme
 d2
 datasette
-detect-secrets
 difftastic
 docker
 doggo
@@ -51,7 +49,6 @@ lazygit
 libmagic
 llama.cpp
 llm
-lychee
 mackup
 macmon
 media-info
@@ -72,7 +69,6 @@ procs
 py3cairo
 python@3.11
 rclone
-ripsecrets
 rustscan
 screenpipe
 shellcheck
