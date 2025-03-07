@@ -17,6 +17,7 @@ Blackmagic Disk Speed Test
 Blackmagic Media Express
 Bob
 Capture One
+ChatGPT
 Contexts
 CrossOver
 Cursor
