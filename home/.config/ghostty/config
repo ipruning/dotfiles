@@ -14,15 +14,16 @@ font-style = Medium
 theme = catppuccin-mocha
 
 font-size = 14
-# font-style = SimiBold
+font-style = SimiBold
 # theme = catppuccin-latte
 
 macos-option-as-alt = true
 
 confirm-close-surface = false
+confirm-close-surface = true
 
-keybind = cmd+j=text: jump-to-session\x0a
-keybind = cmd+shift+j=text: jump-to-repo\x0a
+# keybind = cmd+j=text: jump-to-session\x0a
+# keybind = cmd+shift+j=text: jump-to-repo\x0a
 
 keybind = cmd+u=scroll_page_up
 keybind = cmd+d=scroll_page_down
@@ -44,9 +45,8 @@ keybind = cmd+shift+down=new_split:down
 keybind = cmd+shift+up=new_split:up
 keybind = cmd+shift+right=new_split:right
 
-# keybind = cmd+n=new_split:auto
-
-keybind = cmd+n=new_window
+keybind = cmd+n=new_split:auto
+keybind = cmd+shift+n=new_window
 keybind = cmd+t=ignore
 
 # keybind = cmd+ctrl+alt+h=goto_split:left
