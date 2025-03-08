@@ -1,6 +1,8 @@
 # echo ">>> .zprofile is loaded. Shell: $SHELL, Options: $-"
 
 if [[ $OSTYPE = darwin* ]]; then
+  typeset -U path
+
   # >>> conda initialize >>>
   # !! Contents within this block are managed by 'conda init' !!
   __conda_setup="$('/opt/homebrew/Caskroom/miniforge/base/bin/conda' 'shell.bash' 'hook' 2>/dev/null)"
