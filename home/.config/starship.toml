@@ -1,4 +1,4 @@
-format = """
+format = """\
 $sudo\
 $username\
 $hostname\
@@ -7,7 +7,7 @@ $git_branch\
 $git_status\
 $package\
 $cmd_duration\
-$battery
+$battery\
 $character"""
 add_newline = false
 command_timeout = 1_000
