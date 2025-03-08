@@ -74,6 +74,9 @@ source "$ZSH_PLUGINS_DIR"/fast-syntax-highlighting/fast-syntax-highlighting.plug
 setopt interactivecomments
 zstyle ":completion:*" matcher-list "m:{a-z}={A-Za-z}"
 
+# 👇 Tips
+# edit-command-line: edit the command line in the editor
+# fc: edit the command line in the editor
 autoload -U edit-command-line
 zle -N edit-command-line
 bindkey "^v" edit-command-line
