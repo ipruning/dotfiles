@@ -84,6 +84,7 @@ openssl@3
 ouch
 pandoc-crossref
 pango
+parallel
 pcre2
 pkgconf
 pkl
