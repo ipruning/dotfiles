@@ -1,31 +1,31 @@
 [[cable_channel]]
 name = "hidden-files"
-source_command = "~/.local/share/mise/installs/cargo-fd-find/10.2.0/bin/fd --no-ignore-vcs --type file --hidden --follow -0 | xargs -0 gprintf '%q\n'"
+source_command = "fd --no-ignore-vcs --type file --hidden --follow -0 | xargs -0 gprintf '%q\n'"
 preview_command = ":files:"
 
 [[cable_channel]]
 name = "hidden-files-max-depth-3"
-source_command = "~/.local/share/mise/installs/cargo-fd-find/10.2.0/bin/fd --no-ignore-vcs --type file --hidden --follow --max-depth 3 -0 | xargs -0 gprintf '%q\n'"
+source_command = "fd --no-ignore-vcs --type file --hidden --follow --max-depth 3 -0 | xargs -0 gprintf '%q\n'"
 preview_command = ":files:"
 
 [[cable_channel]]
 name = "hidden-files-zed"
-source_command = "~/.local/share/mise/installs/cargo-fd-find/10.2.0/bin/fd --no-ignore-vcs --type file --hidden --follow"
+source_command = "fd --no-ignore-vcs --type file --hidden --follow"
 preview_command = ":files:"
 
 [[cable_channel]]
 name = "csv-files"
-source_command = "~/.local/share/mise/installs/cargo-fd-find/10.2.0/bin/fd --no-ignore-vcs --type file --extension csv -0 | xargs -0 gprintf '%q\n'"
+source_command = "fd --no-ignore-vcs --type file --extension csv -0 | xargs -0 gprintf '%q\n'"
 preview_command = ":files:"
 
 [[cable_channel]]
 name = "sh-files"
-source_command = "~/.local/share/mise/installs/cargo-fd-find/10.2.0/bin/fd --no-ignore-vcs --type file --hidden --extension sh -0 | xargs -0 gprintf '%q\n'"
+source_command = "fd --no-ignore-vcs --type file --hidden --extension sh -0 | xargs -0 gprintf '%q\n'"
 preview_command = ":files:"
 
 [[cable_channel]]
 name = "py-files"
-source_command = "~/.local/share/mise/installs/cargo-fd-find/10.2.0/bin/fd --no-ignore-vcs --type file --hidden --extension py -0 | xargs -0 gprintf '%q\n'"
+source_command = "fd --no-ignore-vcs --type file --hidden --extension py -0 | xargs -0 gprintf '%q\n'"
 preview_command = ":files:"
 
 [[cable_channel]]
@@ -72,25 +72,25 @@ source_command = "tv list-channels | grep -v 'channels:' | sed '/^[[:space:]]*$/
 
 [[cable_channel]]
 name = "my-md-files"
-source_command = "~/.local/share/mise/installs/cargo-fd-find/10.2.0/bin/fd . ~/Databases/Roam --type file --extension md -0 | xargs -0 gprintf '%q\n'"
+source_command = "fd . ~/Databases/Roam --type file --extension md -0 | xargs -0 gprintf '%q\n'"
 preview_command = ":files:"
 
 [[cable_channel]]
 name = "my-sh-files"
-source_command = "~/.local/share/mise/installs/cargo-fd-find/10.2.0/bin/fd . ~/Developer/self/prototypes/utils --type file --extension sh -0 | xargs -0 gprintf '%q\n'"
+source_command = "fd . ~/Developer/self/prototypes/utils --type file --extension sh -0 | xargs -0 gprintf '%q\n'"
 preview_command = ":files:"
 
 [[cable_channel]]
 name = "my-py-files"
-source_command = "~/.local/share/mise/installs/cargo-fd-find/10.2.0/bin/fd . ~/Developer/self/prototypes/utils --type file --extension py | xargs -0 gprintf '%q\n'"
+source_command = "fd . ~/Developer/self/prototypes/utils --type file --extension py | xargs -0 gprintf '%q\n'"
 preview_command = ":files:"
 
 [[cable_channel]]
 name = "my-prompt-files"
-source_command = "~/.local/share/mise/installs/cargo-fd-find/10.2.0/bin/fd . ~/Developer/self/prototypes/utils/prompts --type file -0 | xargs -0 gprintf '%q\n'"
+source_command = "fd . ~/Developer/self/prototypes/utils/prompts --type file -0 | xargs -0 gprintf '%q\n'"
 preview_command = ":files:"
 
 [[cable_channel]]
 name = "my-scripts"
-source_command = "~/.local/share/mise/installs/cargo-fd-find/10.2.0/bin/fd . ~/Developer/self/prototypes/utils/scripts --type file -0 | xargs -0 gprintf '%q\n'"
+source_command = "fd . ~/Developer/self/prototypes/utils/scripts --type file -0 | xargs -0 gprintf '%q\n'"
 preview_command = ":files:"
