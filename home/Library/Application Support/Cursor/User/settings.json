@@ -272,6 +272,8 @@
   "git.enableSmartCommit": true,
   "git.openRepositoryInParentFolders": "never",
   "json.maxItemsComputed": 8192,
+  "lldb.launch.expressions": "native",
+  "lldb.library": "/Applications/Xcode-16.2.0.app/Contents/SharedFrameworks/LLDB.framework/Versions/A/LLDB",
   "markdown.suggest.paths.enabled": true,
   "markdown.validate.enabled": true,
   "markdownlint.config": {

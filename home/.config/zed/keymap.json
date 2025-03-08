@@ -53,7 +53,7 @@
           "reveal_target": "center"
         }
       ],
-      "space n t": ["workspace::SendKeystrokes", ": new center terminal enter"],
+      "space n": ["workspace::SendKeystrokes", ": new center terminal enter"],
       "space r": "projects::OpenRecent",
       "space shift-e": "pane::RevealInProjectPanel",
       "space shift-r": [
@@ -179,7 +179,7 @@
           "reveal_target": "center"
         }
       ],
-      "space n t": ["workspace::SendKeystrokes", ": new center terminal enter"],
+      "space n": ["workspace::SendKeystrokes", ": new center terminal enter"],
       "space r": "projects::OpenRecent",
       "space shift-e": "pane::RevealInProjectPanel",
       "space shift-r": [
