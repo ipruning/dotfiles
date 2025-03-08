@@ -27,5 +27,6 @@ alias c="pbcopy"
 alias keyboardmaestro='/Applications/Keyboard\ Maestro.app/Contents/MacOS/keyboardmaestro'
 alias ll="eza --all --git --group-directories-first --header --long --time-style long-iso"
 alias lt="eza --all --git --group-directories-first --header --long --time-style long-iso --tree"
+alias o="open ."
 alias p="pbpaste"
 alias ports="viddy --interval 1s 'lsof -i @127.0.0.1 | grep LISTEN'"
