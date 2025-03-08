@@ -2,26 +2,74 @@
   {
     "context": "Terminal",
     "bindings": {
-      "cmd-n": "pane::SplitRight",
-      "cmd-t": "workspace::NewTerminal",
+      "cmd-d": "terminal::ScrollPageDown",
       "cmd-u": "terminal::ScrollPageUp",
-      "cmd-d": "terminal::ScrollPageDown"
+      "cmd-n": "pane::SplitRight",
+      "cmd-t": "workspace::NewTerminal"
     }
   },
   {
     "context": "EmptyPane || SharedScreen",
     "bindings": {
-      "space /": ["task::Spawn", { "task_name": "live_grep", "reveal_target": "center" }],
-      "space c": ["task::Spawn", { "task_name": "claude", "reveal_target": "center" }],
-      "space e": ["task::Spawn", { "task_name": "yazi", "reveal_target": "center" }],
-      "space g": ["task::Spawn", { "task_name": "gitu", "reveal_target": "center" }],
-      "space l z d": ["task::Spawn", { "task_name": "lazydocker", "reveal_target": "center" }],
-      "space l z g": ["task::Spawn", { "task_name": "lazygit", "reveal_target": "center" }],
+      "space /": [
+        "task::Spawn",
+        {
+          "task_name": "live_grep",
+          "reveal_target": "center"
+        }
+      ],
+      "space c": [
+        "task::Spawn",
+        {
+          "task_name": "claude",
+          "reveal_target": "center"
+        }
+      ],
+      "space e": [
+        "task::Spawn",
+        {
+          "task_name": "yazi",
+          "reveal_target": "center"
+        }
+      ],
+      "space g": [
+        "task::Spawn",
+        {
+          "task_name": "gitu",
+          "reveal_target": "center"
+        }
+      ],
+      "space l z d": [
+        "task::Spawn",
+        {
+          "task_name": "lazydocker",
+          "reveal_target": "center"
+        }
+      ],
+      "space l z g": [
+        "task::Spawn",
+        {
+          "task_name": "lazygit",
+          "reveal_target": "center"
+        }
+      ],
       "space n t": ["workspace::SendKeystrokes", ": new center terminal enter"],
       "space r": "projects::OpenRecent",
       "space shift-e": "pane::RevealInProjectPanel",
-      "space shift-r": ["task::Spawn", { "task_name": "project_finder", "reveal_target": "center" }],
-      "space space": ["task::Spawn", { "task_name": "file_finder", "reveal_target": "center" }]
+      "space shift-r": [
+        "task::Spawn",
+        {
+          "task_name": "project_finder",
+          "reveal_target": "center"
+        }
+      ],
+      "space space": [
+        "task::Spawn",
+        {
+          "task_name": "file_finder",
+          "reveal_target": "center"
+        }
+      ]
     }
   },
   {
@@ -45,16 +93,12 @@
     "bindings": {
       "ctrl-alt-shift-u": "vim::ScrollUp",
       "ctrl-u": ["workspace::SendKeystrokes", "ctrl-alt-shift-u z z"],
-
       "ctrl-alt-shift-d": "vim::ScrollDown",
       "ctrl-d": ["workspace::SendKeystrokes", "ctrl-alt-shift-d z z"],
-
       "ctrl-shift-n": "vim::MoveToNextMatch",
       "n": ["workspace::SendKeystrokes", "ctrl-shift-n z z"],
-
       "ctrl-alt-shift-n": "vim::MoveToPreviousMatch",
       "shift-n": ["workspace::SendKeystrokes", "ctrl-alt-shift-n z z"],
-
       "space 1": ["pane::ActivateItem", 0],
       "space 2": ["pane::ActivateItem", 1],
       "space 3": ["pane::ActivateItem", 2],
@@ -79,38 +123,79 @@
     "bindings": {
       "ctrl-j": "editor::GoToDiagnostic",
       "ctrl-k": "editor::GoToPreviousDiagnostic",
-
       "shift-h": "pane::ActivatePreviousItem",
       "shift-l": "pane::ActivateNextItem",
-
       "g d": "editor::GoToDefinition",
       "g D": "editor::GoToDefinitionSplit",
       "g r": "editor::FindAllReferences",
-
       "space b": "editor::ToggleGitBlame",
       "space f": "editor::Format",
       "space q": "pane::CloseActiveItem",
       "space w": "workspace::Save",
-
       "space t": "task::Spawn",
       "space shift-t": "task::Rerun",
-
       "space s b": "git::Branch",
-
       "space a": "assistant::ToggleFocus",
       "space x": "diagnostics::Deploy",
-
-      "space /": ["task::Spawn", { "task_name": "live_grep", "reveal_target": "center" }],
-      "space c": ["task::Spawn", { "task_name": "claude", "reveal_target": "center" }],
-      "space e": ["task::Spawn", { "task_name": "yazi", "reveal_target": "center" }],
-      "space g": ["task::Spawn", { "task_name": "gitu", "reveal_target": "center" }],
-      "space l z d": ["task::Spawn", { "task_name": "lazydocker", "reveal_target": "center" }],
-      "space l z g": ["task::Spawn", { "task_name": "lazygit", "reveal_target": "center" }],
+      "space /": [
+        "task::Spawn",
+        {
+          "task_name": "live_grep",
+          "reveal_target": "center"
+        }
+      ],
+      "space c": [
+        "task::Spawn",
+        {
+          "task_name": "claude",
+          "reveal_target": "center"
+        }
+      ],
+      "space e": [
+        "task::Spawn",
+        {
+          "task_name": "yazi",
+          "reveal_target": "center"
+        }
+      ],
+      "space g": [
+        "task::Spawn",
+        {
+          "task_name": "gitu",
+          "reveal_target": "center"
+        }
+      ],
+      "space l z d": [
+        "task::Spawn",
+        {
+          "task_name": "lazydocker",
+          "reveal_target": "center"
+        }
+      ],
+      "space l z g": [
+        "task::Spawn",
+        {
+          "task_name": "lazygit",
+          "reveal_target": "center"
+        }
+      ],
       "space n t": ["workspace::SendKeystrokes", ": new center terminal enter"],
       "space r": "projects::OpenRecent",
       "space shift-e": "pane::RevealInProjectPanel",
-      "space shift-r": ["task::Spawn", { "task_name": "project_finder", "reveal_target": "center" }],
-      "space space": ["task::Spawn", { "task_name": "file_finder", "reveal_target": "center" }]
+      "space shift-r": [
+        "task::Spawn",
+        {
+          "task_name": "project_finder",
+          "reveal_target": "center"
+        }
+      ],
+      "space space": [
+        "task::Spawn",
+        {
+          "task_name": "file_finder",
+          "reveal_target": "center"
+        }
+      ]
     }
   },
   {
@@ -118,9 +203,7 @@
     "bindings": {
       "space d": "editor::Delete",
       "space p": "editor::Paste",
-
       "g c": "editor::ToggleComments",
-
       "shift-j": "editor::MoveLineDown",
       "shift-k": "editor::MoveLineUp"
     }
