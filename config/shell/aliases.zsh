@@ -11,10 +11,6 @@ alias mkdir="mkdir -p"
 alias mv="mv -i"
 alias rm="rm -i"
 
-if [[ "$OSTYPE" != "darwin"* ]]; then
-  alias gprintf="printf"
-fi
-
 # Linux Aliases Part 2
 alias ...="cd ../.."
 alias ..="cd .."
