@@ -1,84 +1,95 @@
-# Core Configuration
 [core]
 excludesfile = ~/.gitignore
-pager = delta
+ignorecase = false
+pager = delta --color-only --line-numbers
 
 [init]
 defaultBranch = main
 
-# Common Operations
 [alias]
 lg = log --graph --decorate \n-30 --all --date-order --date=format:'%Y-%m-%d %H:%M:%S' \n--pretty=format:'%C(cyan)%h%Creset %C(black bold)%ad%Creset%C(auto)%d %s'
 
 [commit]
 verbose = true
+template = ~/.gitcommit
 
-# Branch Settings
 [branch]
 sort = -committerdate
 
 [push]
+default = current # https://git-scm.com/docs/git-config#Documentation/git-config.txt-pushdefault
 autoSetupRemote = true
-
-[pull]
-rebase = true
 
 [rebase]
 autoStash = true
 
-# Diff and Merge Display
+[fetch]
+recurseSubmodules = true # still requires: git clone --recursive ...
+
+[pull]
+rebase = true
+
 [diff]
 colorMoved = default
+algorithm = histogram
+indentHeuristic = true
+compactionHeuristic = true
 
 [interactive]
-diffFilter = delta --color-only
+diffFilter = delta --color-only --line-numbers
 
 [delta]
 navigate = true
 side-by-side = true
-; features = catppuccin-mocha
+features = catppuccin-mocha
 
-; [delta "catppuccin-mocha"]
-; blame-palette = "#1e1e2e #181825 #11111b #313244 #45475a"
-; commit-decoration-style = box ul
-; dark = true
-; file-decoration-style = "#cdd6f4"
-; file-style = "#cdd6f4"
-; hunk-header-decoration-style = box ul
-; hunk-header-file-style = bold
-; hunk-header-line-number-style = bold "#a6adc8"
-; hunk-header-style = file line-number syntax
-; line-numbers-left-style = "#6c7086"
-; line-numbers-minus-style = bold "#f38ba8"
-; line-numbers-plus-style = bold "#a6e3a1"
-; line-numbers-right-style = "#6c7086"
-; line-numbers-zero-style = "#6c7086"
-; minus-emph-style = bold syntax "#53394c"
-; minus-style = syntax "#34293a"
-; plus-emph-style = bold syntax "#404f4a"
-; plus-style = syntax "#2c3239"
-; map-styles = \
-; 	bold purple = "#494060", \
-; 	bold blue = "#384361", \
-; 	bold cyan = "#384d5d", \
-; 	bold yellow = "#544f4e" >syntax >syntax >syntax >syntax
-; syntax-theme = Catppuccin Mocha
+[delta "catppuccin-mocha"]
+blame-palette = "#1e1e2e #181825 #11111b #313244 #45475a"
+commit-decoration-style = box ul
+dark = true
+file-decoration-style = "#cdd6f4"
+file-style = "#cdd6f4"
+hunk-header-decoration-style = box ul
+hunk-header-file-style = bold
+hunk-header-line-number-style = bold "#a6adc8"
+hunk-header-style = file line-number syntax
+line-numbers-left-style = "#6c7086"
+line-numbers-minus-style = bold "#f38ba8"
+line-numbers-plus-style = bold "#a6e3a1"
+line-numbers-right-style = "#6c7086"
+line-numbers-zero-style = "#6c7086"
+minus-emph-style = bold syntax "#53394c"
+minus-style = syntax "#34293a"
+plus-emph-style = bold syntax "#404f4a"
+plus-style = syntax "#2c3239"
+map-styles = \
+  bold purple = "#494060", \
+  bold blue = "#384361", \
+  bold cyan = "#384d5d", \
+  bold yellow = "#544f4e" >syntax >syntax >syntax >syntax
+syntax-theme = Catppuccin Mocha
 
 [merge]
 conflictstyle = diff3
 
-# Git LFS Settings
 [filter "lfs"]
 required = true
 clean = git-lfs clean -- %f
 smudge = git-lfs smudge -- %f
 process = git-lfs filter-process
 
-# Garbage Collection Settings
 [gc]
 reflogExpire = 200
 reflogExpireUnreachable = 90
 
-# Other Settings
 [include]
 path = ~/Developer/.gitconfig
+
+[protocol]
+version = 2 # https://blog.github.com/changelog/2018-11-08-git-protocol-v2-support/
+
+[gpg]
+program = /opt/homebrew/bin/gpg
+
+[url "git@github.com:"]
+insteadOf = https://github.com/
