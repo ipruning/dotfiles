@@ -21,6 +21,7 @@ duckdb
 extra-cmake-modules
 eza
 fastfetch
+fd
 fio
 flyctl
 fossil
@@ -70,6 +71,7 @@ procs
 py3cairo
 python@3.11
 rclone
+ripgrep-all
 rustscan
 screenpipe
 shellcheck
