@@ -78,6 +78,7 @@
     "tpl": "env"
   },
   "catppuccin-icons.associations.files": {
+    "config": "env",
     "secrets": "env"
   },
   "catppuccin-icons.associations.folders": {
@@ -260,6 +261,7 @@
     ".rgignore": "ignore",
     ".secrets.baseline": "json",
     ".tpl": "dotenv",
+    "config": "dotenv",
     "secrets": "dotenv"
   },
   "files.insertFinalNewline": true,
