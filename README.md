@@ -6,22 +6,6 @@
 
 <!--rehype:style=text-align: center;-->
 
-## Table of Contents
-
-- [Table of Contents](#table-of-contents)
-- [Bootstrap](#bootstrap)
-- [ChangeLog](#changelog)
-
-## Bootstrap
-
-If you are a macOS user, you will need to install xcode first or download it here <https://developer.apple.com/download/more/>.
-
-```shell
-xcode-select --install
-```
-
-In addition, you will need to sign into the AppStore with your Apple ID as the MAS app is available in the Brewfile.
-
 ## ChangeLog
 
 - 2022-05-25 Update README
