@@ -5,4 +5,11 @@
 .DS_Store
 
 # git
-.git
+.git/
+
+# typescript
+node_modules/
+
+# python
+.venv/
+uv.lock
