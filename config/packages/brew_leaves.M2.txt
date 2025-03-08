@@ -62,6 +62,7 @@ onefetch
 openjdk
 ouch
 pandoc-crossref
+parallel
 pkl
 postgresql@17
 pre-commit
