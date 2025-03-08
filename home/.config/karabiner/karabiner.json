@@ -9,28 +9,7 @@
                 },
                 "rules": [
                     {
-                        "description": "shift-backspace to alt-backspace",
-                        "manipulators": [
-                            {
-                                "from": {
-                                    "key_code": "delete_or_backspace",
-                                    "modifiers": {
-                                        "mandatory": ["shift"],
-                                        "optional": ["any"]
-                                    }
-                                },
-                                "to": [
-                                    {
-                                        "key_code": "delete_or_backspace",
-                                        "modifiers": ["left_option"]
-                                    }
-                                ],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "yper-b/f to alt-left/right",
+                        "description": "yper b/f 👉 alt ←/→",
                         "manipulators": [
                             {
                                 "from": {
@@ -93,7 +72,7 @@
                         ]
                     },
                     {
-                        "description": "yper-s/d to cmd-bracket (with conditions)",
+                        "description": "yper s/d 👉 cmd [/] (with conditions)",
                         "manipulators": [
                             {
                                 "conditions": [
@@ -144,7 +123,7 @@
                         ]
                     },
                     {
-                        "description": "yper-e/r to cmd-shift-bracket (with conditions)",
+                        "description": "yper e/r 👉 cmd shift [/] (with conditions)",
                         "manipulators": [
                             {
                                 "conditions": [
@@ -191,18 +170,20 @@
                         ]
                     },
                     {
-                        "description": "caps_lock → hyper",
-                        "enabled": false,
+                        "description": "shift back 👉 alt back",
                         "manipulators": [
                             {
                                 "from": {
-                                    "key_code": "caps_lock",
-                                    "modifiers": { "optional": ["any"] }
+                                    "key_code": "delete_or_backspace",
+                                    "modifiers": {
+                                        "mandatory": ["shift"],
+                                        "optional": ["any"]
+                                    }
                                 },
                                 "to": [
                                     {
-                                        "key_code": "left_shift",
-                                        "modifiers": ["left_command", "left_control", "left_option"]
+                                        "key_code": "delete_or_backspace",
+                                        "modifiers": ["left_option"]
                                     }
                                 ],
                                 "type": "basic"
@@ -210,21 +191,24 @@
                         ]
                     },
                     {
-                        "description": "caps_lock → left_control",
-                        "enabled": false,
+                        "description": "left_cmd / right_cmd (alone) 👉 en / zh-Hans",
                         "manipulators": [
                             {
                                 "from": {
-                                    "key_code": "caps_lock",
+                                    "key_code": "left_command",
                                     "modifiers": { "optional": ["any"] }
                                 },
-                                "to": [
-                                    {
-                                        "key_code": "left_control",
-                                        "lazy": true
-                                    }
-                                ],
-                                "to_if_alone": [{ "key_code": "caps_lock" }],
+                                "to": [{ "key_code": "left_command" }],
+                                "to_if_alone": [{ "select_input_source": { "language": "^en$" } }],
+                                "type": "basic"
+                            },
+                            {
+                                "from": {
+                                    "key_code": "right_command",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to": [{ "key_code": "right_command" }],
+                                "to_if_alone": [{ "select_input_source": { "language": "^zh-Hans$" } }],
                                 "type": "basic"
                             }
                         ]
