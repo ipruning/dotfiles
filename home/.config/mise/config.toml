@@ -14,6 +14,7 @@
 "cargo:https://github.com/yarrow/zet" = "latest"
 "cargo:https://github.com/yshavit/mdq" = "latest"
 "cargo:jaq" = "latest"
+"cargo:just" = "latest"
 "cargo:koji" = "latest"
 "cargo:legdur" = "latest"
 "cargo:lychee" = "latest"
