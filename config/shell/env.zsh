@@ -105,7 +105,6 @@ bindkey "^F" forward-char
 # 👇 Custom paths
 export PATH="$HOME/Developer/prototypes/utils/bin:$PATH"
 export PATH="$HOME/Developer/prototypes/utils/scripts:$PATH"
-export PATH="$HOME/dotfiles/bin:$PATH"
 
 source "$HOME/dotfiles/config/shell/functions/utils.zsh"
 
