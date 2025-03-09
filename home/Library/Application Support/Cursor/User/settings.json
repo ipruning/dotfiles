@@ -94,14 +94,12 @@
   "code-runner.clearPreviousOutput": false,
   "code-runner.enableAppInsights": false,
   "code-runner.executorMap": {
-    "javascript": "bun run $fullFileName",
-    "python": "python -u $fullFileName",
-    "typescript": "deno run --allow-env --allow-net $fullFileName"
+    "javascript": "bun run",
+    "python": "uv run",
+    "typescript": "deno run --allow-env --allow-net"
   },
   "code-runner.executorMapByGlob": {
-    "*.hurl": "hurl $fullFileName",
-    "*.lmql": "lmql run $fullFileName",
-    "*.typ": "typst $fullFileName"
+    "*.typ": "typst"
   },
   "code-runner.fileDirectoryAsCwd": false,
   "code-runner.ignoreSelection": true,
