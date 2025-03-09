@@ -20,7 +20,8 @@ alias ports="ss -tulpn"
 
 # macOS Aliases Part 1
 alias c="pbcopy"
-alias keyboardmaestro='/Applications/Keyboard\ Maestro.app/Contents/MacOS/keyboardmaestro'
+alias g="git"
+alias keyboardmaestro="/Applications/Keyboard\ Maestro.app/Contents/MacOS/keyboardmaestro"
 alias ll="eza --all --git --group-directories-first --header --long --time-style long-iso"
 alias lt="eza --all --git --group-directories-first --header --long --time-style long-iso --tree"
 alias o="open ."

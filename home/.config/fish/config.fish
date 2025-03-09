@@ -50,6 +50,7 @@ if status is-interactive
 
     # macOS Aliases Part 1
     alias c="pbcopy"
+    alias g="git"
     alias keyboardmaestro="/Applications/Keyboard\ Maestro.app/Contents/MacOS/keyboardmaestro"
     alias ll="eza --all --git --group-directories-first --header --long --time-style long-iso"
     alias lt="eza --all --git --group-directories-first --header --long --time-style long-iso --tree"

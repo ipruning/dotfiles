@@ -108,7 +108,6 @@ export PATH="$HOME/Developer/prototypes/utils/scripts:$PATH"
 
 source "$HOME/dotfiles/config/shell/functions/utils.zsh"
 
-source "$HOME/dotfiles/config/shell/functions/g.zsh"
 source "$HOME/dotfiles/config/shell/functions/macos.zsh"
 source "$HOME/dotfiles/config/shell/functions/surge.zsh"
 
