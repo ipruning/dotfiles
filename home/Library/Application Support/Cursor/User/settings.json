@@ -55,9 +55,6 @@
     "editor.defaultFormatter": "charliermarsh.ruff",
     "editor.tabSize": 4
   },
-  "[shellscript]": {
-    "editor.defaultFormatter": "foxundermoon.shell-format"
-  },
   "[typescript]": {
     "editor.defaultFormatter": "oven.bun-vscode"
   },
@@ -302,18 +299,21 @@
   "shellcheck.customArgs": [],
   "shellcheck.enable": true,
   "shellcheck.enableQuickFix": true,
-  "shellcheck.exclude": [
-    "SC1091",
-    "SC2128",
-    "SC2155"
-  ],
-  "shellcheck.executablePath": "/opt/homebrew/bin/shellcheck",
+  "shellcheck.exclude": [],
+  "shellcheck.executablePath": "",
   "shellcheck.ignoreFileSchemes": [
     "git",
     "gitfs",
     "output"
   ],
   "shellcheck.ignorePatterns": {
+    "**/*.csh": true,
+    "**/*.cshrc": true,
+    "**/*.fish": true,
+    "**/*.login": true,
+    "**/*.logout": true,
+    "**/*.tcsh": true,
+    "**/*.tcshrc": true,
     "**/*.xonshrc": true,
     "**/*.xsh": true,
     "**/*.zlogin": true,
