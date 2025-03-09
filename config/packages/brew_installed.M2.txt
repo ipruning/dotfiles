@@ -34,6 +34,7 @@ fastfetch
 fd
 ffmpeg
 fio
+fish
 flyctl
 fossil
 fpp
@@ -119,7 +120,6 @@ typos-cli
 typst
 ugit
 uv
-viddy
 wget
 whisperkit-cli
 xh
