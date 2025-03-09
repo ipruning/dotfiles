@@ -8,21 +8,13 @@
     "key": "ctrl+w"
   },
   {
-    "command": "aichat.newchataction",
-    "key": "shift+cmd+b"
+    "command": "-editor.action.acceptCursorTabSuggestion",
+    "key": "tab"
   },
   {
-    "command": "aichat.insertselectionintochat",
-    "key": "shift+cmd+."
+    "command": "editor.action.acceptCursorTabSuggestion",
+    "key": "ctrl+y"
   },
-  // {
-  //   "command": "-editor.action.acceptCursorTabSuggestion",
-  //   "key": "tab"
-  // },
-  // {
-  //   "command": "editor.action.acceptCursorTabSuggestion",
-  //   "key": "ctrl+y"
-  // },
   {
     "args": {
       "commands": [
@@ -34,6 +26,6 @@
       ]
     },
     "command": "runCommands",
-    "key": "cmd+g cmd+g"
+    "key": "cmd+g a c"
   }
 ]
