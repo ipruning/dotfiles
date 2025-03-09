@@ -10,40 +10,40 @@ function unset-all-proxy() {
   unset all_proxy
 }
 
-function set-smart-proxy() {
-  local x_key=$(cat "$HOME/Library/Application Support/Surge/Profiles/default.conf" | perl -ne 'print $1 if /http-api = (.*?)@/')
-  xh --quiet POST https://localhost:6171/v1/policy_groups/select X-Key:$x_key group_name='Automatic' policy='VPS_SMART'
-  echo "Policy Group Status: $(xh --body GET "https://localhost:6171/v1/policy_groups/select?group_name=VPS_SMART" X-Key:$x_key | jq -r '.policy')"
-  xh --quiet POST https://localhost:6171/v1/features/system_proxy X-Key:$x_key enabled:=false
-  xh --quiet POST https://localhost:6171/v1/features/enhanced_mode X-Key:$x_key enabled:=true
-  sleep 0.5
-  echo "System Proxy Status: $(xh --body GET https://localhost:6171/v1/features/system_proxy X-Key:$x_key | jq -r '.enabled')"
-  echo "Enhanced Mode Status: $(xh --body GET https://localhost:6171/v1/features/enhanced_mode X-Key:$x_key | jq -r '.enabled')"
-}
+# function set-smart-proxy() {
+#   local x_key=$(cat "$HOME/Library/Application Support/Surge/Profiles/default.conf" | perl -ne 'print $1 if /http-api = (.*?)@/')
+#   xh --quiet POST https://localhost:6171/v1/policy_groups/select X-Key:$x_key group_name='Automatic' policy='VPS_SMART'
+#   echo "Policy Group Status: $(xh --body GET "https://localhost:6171/v1/policy_groups/select?group_name=VPS_SMART" X-Key:$x_key | jq -r '.policy')"
+#   xh --quiet POST https://localhost:6171/v1/features/system_proxy X-Key:$x_key enabled:=false
+#   xh --quiet POST https://localhost:6171/v1/features/enhanced_mode X-Key:$x_key enabled:=true
+#   sleep 1
+#   echo "System Proxy Status: $(xh --body GET https://localhost:6171/v1/features/system_proxy X-Key:$x_key | jq -r '.enabled')"
+#   echo "Enhanced Mode Status: $(xh --body GET https://localhost:6171/v1/features/enhanced_mode X-Key:$x_key | jq -r '.enabled')"
+# }
 
-function set-jp-proxy() {
-  local x_key=$(cat "$HOME/Library/Application Support/Surge/Profiles/default.conf" | perl -ne 'print $1 if /http-api = (.*?)@/')
-  xh --quiet POST https://localhost:6171/v1/policy_groups/select X-Key:$x_key group_name='VPS' policy='V1-DEV-JP1-BWH-001'
-  xh --quiet POST https://localhost:6171/v1/policy_groups/select X-Key:$x_key group_name='Automatic' policy='VPS'
-  echo "Policy Group Status: $(xh --body GET "https://localhost:6171/v1/policy_groups/select?group_name=VPS" X-Key:$x_key | jq -r '.policy')"
-  xh --quiet POST https://localhost:6171/v1/features/system_proxy X-Key:$x_key enabled:=false
-  xh --quiet POST https://localhost:6171/v1/features/enhanced_mode X-Key:$x_key enabled:=true
-  sleep 0.5
-  echo "System Proxy Status: $(xh --body GET https://localhost:6171/v1/features/system_proxy X-Key:$x_key | jq -r '.enabled')"
-  echo "Enhanced Mode Status: $(xh --body GET https://localhost:6171/v1/features/enhanced_mode X-Key:$x_key | jq -r '.enabled')"
-}
+# function set-jp-proxy() {
+#   local x_key=$(cat "$HOME/Library/Application Support/Surge/Profiles/default.conf" | perl -ne 'print $1 if /http-api = (.*?)@/')
+#   xh --quiet POST https://localhost:6171/v1/policy_groups/select X-Key:$x_key group_name='VPS' policy='V1-DEV-JP1-BWH-001'
+#   xh --quiet POST https://localhost:6171/v1/policy_groups/select X-Key:$x_key group_name='Automatic' policy='VPS'
+#   echo "Policy Group Status: $(xh --body GET "https://localhost:6171/v1/policy_groups/select?group_name=VPS" X-Key:$x_key | jq -r '.policy')"
+#   xh --quiet POST https://localhost:6171/v1/features/system_proxy X-Key:$x_key enabled:=false
+#   xh --quiet POST https://localhost:6171/v1/features/enhanced_mode X-Key:$x_key enabled:=true
+#   sleep 1
+#   echo "System Proxy Status: $(xh --body GET https://localhost:6171/v1/features/system_proxy X-Key:$x_key | jq -r '.enabled')"
+#   echo "Enhanced Mode Status: $(xh --body GET https://localhost:6171/v1/features/enhanced_mode X-Key:$x_key | jq -r '.enabled')"
+# }
 
-function set-us-proxy() {
-  local x_key=$(cat "$HOME/Library/Application Support/Surge/Profiles/default.conf" | perl -ne 'print $1 if /http-api = (.*?)@/')
-  xh --quiet POST https://localhost:6171/v1/policy_groups/select X-Key:$x_key group_name='VPS' policy='V1-DEV-US1-BWH-001'
-  xh --quiet POST https://localhost:6171/v1/policy_groups/select X-Key:$x_key group_name='Automatic' policy='VPS'
-  echo "Policy Group Status: $(xh --body GET "https://localhost:6171/v1/policy_groups/select?group_name=VPS" X-Key:$x_key | jq -r '.policy')"
-  xh --quiet POST https://localhost:6171/v1/features/system_proxy X-Key:$x_key enabled:=false
-  xh --quiet POST https://localhost:6171/v1/features/enhanced_mode X-Key:$x_key enabled:=true
-  sleep 0.5
-  echo "System Proxy Status: $(xh --body GET https://localhost:6171/v1/features/system_proxy X-Key:$x_key | jq -r '.enabled')"
-  echo "Enhanced Mode Status: $(xh --body GET https://localhost:6171/v1/features/enhanced_mode X-Key:$x_key | jq -r '.enabled')"
-}
+# function set-us-proxy() {
+#   local x_key=$(cat "$HOME/Library/Application Support/Surge/Profiles/default.conf" | perl -ne 'print $1 if /http-api = (.*?)@/')
+#   xh --quiet POST https://localhost:6171/v1/policy_groups/select X-Key:$x_key group_name='VPS' policy='V1-DEV-US1-BWH-001'
+#   xh --quiet POST https://localhost:6171/v1/policy_groups/select X-Key:$x_key group_name='Automatic' policy='VPS'
+#   echo "Policy Group Status: $(xh --body GET "https://localhost:6171/v1/policy_groups/select?group_name=VPS" X-Key:$x_key | jq -r '.policy')"
+#   xh --quiet POST https://localhost:6171/v1/features/system_proxy X-Key:$x_key enabled:=false
+#   xh --quiet POST https://localhost:6171/v1/features/enhanced_mode X-Key:$x_key enabled:=true
+#   sleep 1
+#   echo "System Proxy Status: $(xh --body GET https://localhost:6171/v1/features/system_proxy X-Key:$x_key | jq -r '.enabled')"
+#   echo "Enhanced Mode Status: $(xh --body GET https://localhost:6171/v1/features/enhanced_mode X-Key:$x_key | jq -r '.enabled')"
+# }
 
 function toggle-outbound-mode() {
   local x_key=$(cat "$HOME/Library/Application Support/Surge/Profiles/default.conf" | perl -ne 'print $1 if /http-api = (.*?)@/')
@@ -66,6 +66,6 @@ function toggle-enhanced-mode() {
     xh --quiet POST https://localhost:6171/v1/features/enhanced_mode X-Key:$x_key enabled:=false
   fi
 
-  sleep 0.5
+  sleep 1
   echo "Enhanced Mode Status: $(xh --body GET https://localhost:6171/v1/features/enhanced_mode X-Key:$x_key | jq -r '.enabled')"
 }
