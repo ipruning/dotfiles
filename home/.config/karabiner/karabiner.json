@@ -79,8 +79,8 @@
                                     {
                                         "bundle_identifiers": [
                                             "com.google.Chrome",
-                                            "com.apple.finder",
-                                            "com.roam-research.desktop-app"
+                                            "com.roam-research.desktop-app",
+                                            "com.apple.finder"
                                         ],
                                         "type": "frontmost_application_if"
                                     }
@@ -102,8 +102,8 @@
                                     {
                                         "bundle_identifiers": [
                                             "com.google.Chrome",
-                                            "com.apple.finder",
-                                            "com.roam-research.desktop-app"
+                                            "com.roam-research.desktop-app",
+                                            "com.apple.finder"
                                         ],
                                         "type": "frontmost_application_if"
                                     }
@@ -129,7 +129,10 @@
                                 "conditions": [
                                     {
                                         "bundle_identifiers": [
-                                            "com.google.Chrome"
+                                            "com.google.Chrome",
+                                            "com.roam-research.desktop-app",
+                                            "com.apple.finder",
+                                            "com.todesktop.230313mzl4w4u92"
                                         ],
                                         "type": "frontmost_application_if"
                                     }
@@ -150,7 +153,10 @@
                                 "conditions": [
                                     {
                                         "bundle_identifiers": [
-                                            "com.google.Chrome"
+                                            "com.google.Chrome",
+                                            "com.roam-research.desktop-app",
+                                            "com.apple.finder",
+                                            "com.todesktop.230313mzl4w4u92"
                                         ],
                                         "type": "frontmost_application_if"
                                     }
