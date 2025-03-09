@@ -23,6 +23,7 @@
 "cargo:rust-parallel" = "latest"
 "cargo:sd" = "latest"
 "cargo:spacer" = "latest"
+"cargo:viddy" = "latest"
 "cargo:watchexec-cli" = "latest"
 "gem:kamal" = "latest"
 "go:code.gitea.io/tea" = "latest"
