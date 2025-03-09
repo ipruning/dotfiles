@@ -72,10 +72,10 @@ source_command = "tv list-channels | grep -v 'channels:' | sed '/^[[:space:]]*$/
 
 [[cable_channel]]
 name = "my-prompt-files"
-source_command = "fd . ~/Developer/self/prototypes/utils --type file --extension txt --extension md --extension mdx -0 | xargs -0 gprintf '%q\n'"
+source_command = "fd . ~/Developer/prototypes/utils --type file --extension txt --extension md --extension mdx -0 | xargs -0 gprintf '%q\n'"
 preview_command = ":files:"
 
 [[cable_channel]]
 name = "my-scripts"
-source_command = "fd . ~/Developer/self/prototypes/utils --type file --extension sh --extension bash --extension py --extension swift -0 | xargs -0 gprintf '%q\n'"
+source_command = "fd . ~/Developer/prototypes/utils --type file --extension sh --extension bash --extension py --extension swift -0 | xargs -0 gprintf '%q\n'"
 preview_command = ":files:"
