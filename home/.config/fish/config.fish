@@ -1,6 +1,8 @@
 if test -d /opt/homebrew
     /opt/homebrew/bin/brew shellenv | source
+    mise activate fish | source
 end
+
 
 if status is-interactive
     set -g fish_greeting
@@ -21,6 +23,10 @@ if status is-interactive
         end
         rm -f -- "$tmp"
     end
+
+    fish_add_path $HOME/Developer/prototypes/utils/bin
+    fish_add_path $HOME/Developer/prototypes/utils/scripts
+    register-python-argcomplete --shell fish ttok.py | source
 
     # Linux Aliases Part 1
     alias cp="cp -i"
