@@ -4,6 +4,8 @@
 
 # custom-shader = ~/.config/ghostty/crt-shader-with-chromatic-aberration-glow-scanlines-dot-matrix/crt-shader-with-chromatic-aberration-glow-scanlines-dot-matrix.glsl
 
+command = /opt/homebrew/bin/fish --login --interactive
+
 clipboard-paste-protection = true
 clipboard-trim-trailing-spaces = true
 copy-on-select = clipboard
