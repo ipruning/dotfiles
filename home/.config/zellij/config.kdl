@@ -202,7 +202,7 @@ keybinds clear-defaults=true {
         bind "n" { NewTab; SwitchToMode "locked"; }
         bind "t" { NewTab; SwitchToMode "locked"; }
 
-        bind "e" { EditScrollback; SwitchToMode "locked"; }
+        bind "Ctrl s" { EditScrollback; SwitchToMode "locked"; }
 
         bind "u" { HalfPageScrollUp; }
         bind "d" { HalfPageScrollDown; }
