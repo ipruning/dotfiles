@@ -23,7 +23,7 @@ eza
 fastfetch
 fd
 fio
-fish
+fisher
 flyctl
 fossil
 fpp
