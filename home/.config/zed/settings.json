@@ -111,6 +111,9 @@
     "button": false,
     "font_family": "MonoLisa",
     "font_weight": 600,
+    "line_height": {
+      "custom": 1.5
+    },
     "toolbar": {
       "breadcrumbs": false
     }
