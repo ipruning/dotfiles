@@ -106,10 +106,10 @@ bindkey "^F" forward-char
 export PATH="$HOME/Developer/prototypes/utils/bin:$PATH"
 export PATH="$HOME/Developer/prototypes/utils/scripts:$PATH"
 
-source "$HOME/dotfiles/config/shell/functions/utils.zsh"
-
 source "$HOME/dotfiles/config/shell/functions/macos.zsh"
+source "$HOME/dotfiles/config/shell/functions/mkbir.zsh"
 source "$HOME/dotfiles/config/shell/functions/surge.zsh"
+source "$HOME/dotfiles/config/shell/functions/utils.zsh"
 
 # 👇 Brew
 export HOMEBREW_NO_ANALYTICS=1
