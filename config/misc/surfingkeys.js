@@ -5,7 +5,8 @@ settings.focusFirstCandidate = true;
 settings.tabsThreshold = 0;
 
 api.Hints.style(`
-  font-family: SF Mono, monospace;
+  font-family: MonoLisa;
+  font-size: 12px;
 `);
 settings.theme = `
 .sk_theme #sk_omnibarSearchArea input, #sk_omnibarSearchResult {
@@ -136,5 +137,5 @@ api.unmapAllExcept(
     "p",
     "P",
   ],
-  /boot.dev|excalidraw.com|feishu.cn|localhost|monkeytype.com|motherduck.com|roamresearch.com/,
+  /boot.dev|excalidraw.com|tldraw.com|feishu.cn|localhost|monkeytype.com|motherduck.com|roamresearch.com/,
 );

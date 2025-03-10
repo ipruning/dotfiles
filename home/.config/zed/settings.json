@@ -114,6 +114,12 @@
     "line_height": {
       "custom": 1.5
     },
+    "shell": {
+      "with_arguments": {
+        "program": "/opt/homebrew/bin/fish",
+        "args": ["--login", "--interactive"]
+      }
+    },
     "toolbar": {
       "breadcrumbs": false
     }
