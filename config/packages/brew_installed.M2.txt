@@ -35,6 +35,7 @@ fd
 ffmpeg
 fio
 fish
+fisher
 flyctl
 fossil
 fpp
