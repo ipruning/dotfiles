@@ -92,7 +92,7 @@
   "code-runner.enableAppInsights": false,
   "code-runner.executorMap": {
     "javascript": "bun run",
-    "python": "uv run",
+    "python": "uv run --active",
     "typescript": "deno run --allow-env --allow-net"
   },
   "code-runner.executorMapByGlob": {
