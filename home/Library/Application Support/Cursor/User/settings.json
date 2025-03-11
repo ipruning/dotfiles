@@ -255,7 +255,7 @@
     ".mdc": "markdown",
     ".rgignore": "ignore",
     ".secrets.baseline": "json",
-    ".tpl": "dotenv",
+    ".tpl": "plaintext",
     "config": "dotenv",
     "secrets": "dotenv"
   },
