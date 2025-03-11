@@ -39,17 +39,17 @@
           "reveal_target": "center"
         }
       ],
-      "space l z d": [
+      "space d": [
         "task::Spawn",
         {
           "task_name": "lazydocker",
           "reveal_target": "center"
         }
       ],
-      "space l z g": [
+      "space u": [
         "task::Spawn",
         {
-          "task_name": "lazygit",
+          "task_name": "gitu",
           "reveal_target": "center"
         }
       ],
@@ -161,21 +161,21 @@
       "space g": [
         "task::Spawn",
         {
-          "task_name": "gitu",
+          "task_name": "lazygit",
           "reveal_target": "center"
         }
       ],
-      "space l z d": [
+      "space d": [
         "task::Spawn",
         {
           "task_name": "lazydocker",
           "reveal_target": "center"
         }
       ],
-      "space l z g": [
+      "space u": [
         "task::Spawn",
         {
-          "task_name": "lazygit",
+          "task_name": "gitu",
           "reveal_target": "center"
         }
       ],
