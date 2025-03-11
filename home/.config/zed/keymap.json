@@ -35,7 +35,7 @@
       "space g": [
         "task::Spawn",
         {
-          "task_name": "gitu",
+          "task_name": "lazygit",
           "reveal_target": "center"
         }
       ],
