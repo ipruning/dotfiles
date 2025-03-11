@@ -14,7 +14,7 @@
   },
   {
     "label": "file_finder",
-    "command": "selection=$([[ $(pwd) == \"$HOME\" ]] && \"$HOME\"/.local/share/mise/installs/cargo-fd-find/10.2.0/bin/fd . --no-ignore-vcs --hidden --max-depth 3 | tv || tv hidden-files-zed); [ -n \"$selection\" ] && zed \"$selection\"",
+    "command": "selection=$([[ $(pwd) == \"$HOME\" ]] && fd . --no-ignore-vcs --hidden --max-depth 3 | tv || tv hidden-files-zed); [ -n \"$selection\" ] && zed \"$selection\"",
     "hide": "always",
     "allow_concurrent_runs": true,
     "use_new_terminal": true,
