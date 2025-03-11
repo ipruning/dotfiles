@@ -133,5 +133,5 @@ version = 2 # https://blog.github.com/changelog/2018-11-08-git-protocol-v2-suppo
 [gpg]
 program = /opt/homebrew/bin/gpg
 
-[url "git@github.com:"]
-insteadOf = https://github.com/
+[url "https://github.com/"]
+insteadOf = "git@github.com:"
