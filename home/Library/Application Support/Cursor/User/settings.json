@@ -332,7 +332,7 @@
   "shellcheck.run": "onType",
   "sqlfluff.executablePath": "/opt/homebrew/bin/sqlfluff",
   "terminal.integrated.confirmOnExit": "hasChildProcesses",
-  "terminal.integrated.defaultProfile.osx": "zsh",
+  "terminal.integrated.defaultProfile.osx": "fish",
   "terminal.integrated.fontSize": 12,
   "terminal.integrated.fontWeight": "500",
   "terminal.integrated.inheritEnv": true,
