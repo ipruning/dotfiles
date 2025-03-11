@@ -102,7 +102,6 @@
   },
   "show_edit_predictions": true,
   "soft_wrap": "none",
-  "tab_size": 2,
   "tabs": {
     "file_icons": true,
     "git_status": true
