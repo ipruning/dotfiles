@@ -138,7 +138,6 @@
   },
   "editor.stickyScroll.enabled": true,
   "editor.suggestSelection": "first",
-  "editor.tabSize": 2,
   "editor.tokenColorCustomizations": {
     "textMateRules": []
   },
