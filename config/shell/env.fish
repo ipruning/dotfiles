@@ -14,7 +14,7 @@ if status is-interactive
   zoxide init fish --cmd j | source
 
   tv init fish | source
-  
+
   atuin init fish --disable-up-arrow | source
 
   function y
@@ -59,4 +59,13 @@ if status is-interactive
   alias o="open ."
   alias p="pbpaste"
   alias ports="viddy --interval 1s 'lsof -i @127.0.0.1 | grep LISTEN'"
+
+  function cursor
+      open $argv -a "Cursor"
+  end
+
+  function code
+      open $argv -a "Visual Studio Code"
+  end
+
 end
