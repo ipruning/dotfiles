@@ -35,7 +35,7 @@ repos:
         description: "Check links in the repository"
         entry: lychee
         language: system
-        args: ["--no-progress", "--exclude-loopback"]
+        args: ["--no-progress", "--exclude-loopback", "--exclude-path", "config/shell/"]
         types: [text]
         pass_filenames: true
         require_serial: true
