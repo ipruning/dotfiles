@@ -54,7 +54,8 @@ keybind = cmd+shift+down=new_split:down
 keybind = cmd+shift+up=new_split:up
 keybind = cmd+shift+right=new_split:right
 
-keybind = cmd+n=new_split:auto
+# keybind = cmd+n=new_split:auto
+keybind = cmd+n=new_split:down
 keybind = cmd+shift+n=new_window
 keybind = cmd+t=ignore
 
