@@ -3,7 +3,6 @@ if test -d /opt/homebrew
   mise activate fish | source
 end
 
-
 if status is-interactive
   set -g fish_greeting
 
@@ -15,7 +14,7 @@ if status is-interactive
 
   tv init fish | source
 
-  atuin init fish --disable-up-arrow | source
+  source $HOME/dotfiles/config/shell/atuin.fish
 
   function y
     set tmp (mktemp -t "yazi-cwd.XXXXXX")
