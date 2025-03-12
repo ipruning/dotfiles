@@ -337,6 +337,7 @@
   "terminal.integrated.fontSize": 12,
   "terminal.integrated.fontWeight": "500",
   "terminal.integrated.inheritEnv": true,
+  "update.releaseTrack": "prerelease",
   "vim.hlsearch": true,
   "vim.incsearch": true,
   "vim.leader": "<space>",
