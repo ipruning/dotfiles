@@ -11,12 +11,10 @@ ForkLift
 HazeOver
 Hookmark
 HoudahSpot
-Hustl
 Image2icon
 In Your Face
 Luminar Neo
 MarginNote
-Mockuuups Studio
 One Switch
 Permute
 PhotoBulk
@@ -27,7 +25,6 @@ SnapMotion
 Spark Mail
 TablePlus
 Timing
-Tripsy
 Ulysses
 WiFi Explorer
 Yoink

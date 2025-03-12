@@ -29,7 +29,6 @@ DeskPad
 Drafts
 Eagle
 Eudic
-FixTim
 Fork
 Frame0
 Ghostty
@@ -39,7 +38,6 @@ Google Docs
 Google Drive
 Google Sheets
 Google Slides
-Goose
 Heptabase
 Homerow
 Hush
@@ -47,7 +45,6 @@ IINA
 Ice
 Immersive Translate
 Input Source Pro
-Jan
 Kagi for Safari
 Karabiner-Elements
 Karabiner-EventViewer
@@ -68,14 +65,9 @@ MongoDB Compass
 Mos
 MusicHarbor
 NeteaseMusic
-Notion Calendar
-Numbers
 OBS
 OnyX
 OrbStack
-Orion
-PDF Expert
-Pages
 PasteNow
 Pearcleaner
 PlayCover
@@ -89,7 +81,6 @@ Reqable
 Rond
 Rotato
 Safari
-SamsungMagician
 Scapple
 Screen Studio
 Scripton
@@ -106,7 +97,6 @@ TabTab
 Tampermonkey
 Telegram
 TencentMeeting
-TestFlight
 The Powder Toy
 Things3
 TickTick
@@ -122,7 +112,6 @@ XLD
 Xcode-16.2.0
 Xcodes
 YACReader
-YACReaderLibrary
 Z-Library
 Zed
 Zotero
@@ -133,7 +122,3 @@ pcsuite
 qBittorrent
 rednote
 superwhisper
-闲鱼
-小宇宙
-集换社
-夸克网盘
