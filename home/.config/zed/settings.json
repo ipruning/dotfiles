@@ -4,9 +4,7 @@
       "host": "m4.sgponte",
       "projects": [
         {
-          "paths": [
-            "~/dotfiles"
-          ]
+          "paths": ["~/dotfiles"]
         }
       ]
     }
@@ -19,9 +17,7 @@
     "version": "2"
   },
   "autosave": "on_focus_change",
-  "buffer_font_fallbacks": [
-    "JetBrainsMono Nerd Font"
-  ],
+  "buffer_font_fallbacks": ["JetBrainsMono Nerd Font"],
   "buffer_font_family": "MonoLisa",
   "buffer_font_size": 13.0,
   "buffer_font_weight": 500,
@@ -47,10 +43,7 @@
   },
   "languages": {
     "JavaScript": {
-      "language_servers": [
-        "typescript-language-server",
-        "!vtsls"
-      ]
+      "language_servers": ["typescript-language-server", "!vtsls"]
     },
     "Python": {
       "format_on_save": "on",
@@ -72,23 +65,14 @@
         "coloring": "indent_aware",
         "enabled": true
       },
-      "language_servers": [
-        "pyright",
-        "ruff"
-      ],
+      "language_servers": ["pyright", "ruff"],
       "tab_size": 4
     },
     "TSX": {
-      "language_servers": [
-        "typescript-language-server",
-        "!vtsls"
-      ]
+      "language_servers": ["typescript-language-server", "!vtsls"]
     },
     "TypeScript": {
-      "language_servers": [
-        "typescript-language-server",
-        "!vtsls"
-      ]
+      "language_servers": ["typescript-language-server", "!vtsls"]
     }
   },
   "lsp": {
@@ -129,12 +113,12 @@
     "line_height": {
       "custom": 1.5
     },
-    // "shell": {
-    //   "with_arguments": {
-    //     "program": "/opt/homebrew/bin/fish",
-    //     "args": ["--login", "--interactive"]
-    //   }
-    // },
+    "shell": {
+      "with_arguments": {
+        "program": "/opt/homebrew/bin/fish",
+        "args": ["--login", "--interactive"]
+      }
+    },
     "toolbar": {
       "breadcrumbs": false
     }
