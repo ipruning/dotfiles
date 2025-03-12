@@ -3,8 +3,7 @@
 # cmd+shift+v == paste whatever was selected using the mouse (vs cmd+v which pastes anything selected with the keyboard selection)
 
 # custom-shader = ~/.config/ghostty/crt-shader-with-chromatic-aberration-glow-scanlines-dot-matrix/crt-shader-with-chromatic-aberration-glow-scanlines-dot-matrix.glsl
-
-command = /opt/homebrew/bin/fish --login --interactive
+# command = /opt/homebrew/bin/fish --login --interactive
 
 clipboard-paste-protection = true
 clipboard-trim-trailing-spaces = true
