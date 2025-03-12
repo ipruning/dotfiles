@@ -7,3 +7,5 @@ inline_height = 23
 invert = true
 search_mode = "skim"
 show_help = false
+
+history_filter = ["^secret-cmd", "^innocuous-cmd .*--secret=.+"]
