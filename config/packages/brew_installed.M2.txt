@@ -77,7 +77,6 @@ mackup
 macmon
 media-info
 mise
-mongocli
 monolith
 mtr
 neovim

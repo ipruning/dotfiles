@@ -78,6 +78,7 @@ Rectangle
 Red Canary Mac Monitor
 Repo Prompt
 Reqable
+Roam Research
 Rond
 Rotato
 Safari
