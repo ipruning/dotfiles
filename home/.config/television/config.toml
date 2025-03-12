@@ -124,7 +124,6 @@ toggle_preview = "ctrl-o"
 "csv-files" = ["csvlens"]
 "hidden-files" = ["bat", "cat", "cursor", "n", "nvim", "open", "vim", "zed"]
 "hosts" = ["ssh"]
-"my-sh-files" = ["cmd-execute.bash"]
 "py-files" = [
   "marimo edit",
   "marimo run",
@@ -138,7 +137,7 @@ toggle_preview = "ctrl-o"
 "tmux-sessions" = ["tmux a -t"]
 "zellij-sessions" = ["zellij a"]
 
-"my-scripts" = [""]
+"my-scripts" = ["cmd-execute.bash", ""]
 
 [shell_integration.keybindings]
 "smart_autocomplete" = "ctrl-t"
