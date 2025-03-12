@@ -27,6 +27,7 @@ dav1d
 difftastic
 docker
 doggo
+dos2unix
 duckdb
 extra-cmake-modules
 eza
@@ -76,6 +77,7 @@ mackup
 macmon
 media-info
 mise
+mongocli
 monolith
 mtr
 neovim
