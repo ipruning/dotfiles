@@ -19,36 +19,29 @@ function _atuin_postexec --on-event fish_postexec
 end
 
 function _atuin_search
-    set -l keymap_mode
-    switch $fish_key_bindings
-        case fish_vi_key_bindings
-            switch $fish_bind_mode
-                case default
-                    set keymap_mode vim-normal
-                case insert
-                    set keymap_mode vim-insert
-            end
-        case '*'
-            set keymap_mode emacs
-    end
+    # Save current command
+    set -l current_cmd (commandline)
 
-    # In fish 3.4 and above we can use `"$(some command)"` to keep multiple lines separate;
-    # but to support fish 3.3 we need to use `(some command | string collect)`.
-    # https://fishshell.com/docs/current/relnotes.html#id24 (fish 3.4 "Notable improvements and fixes")
-    set -l ATUIN_H (ATUIN_SHELL_FISH=t ATUIN_LOG=error ATUIN_QUERY=(commandline -b) atuin search --keymap-mode=$keymap_mode $argv -i 3>&1 1>&2 2>&3 | string collect)
+    # Enter alternate screen buffer
+    echo -ne "\033[?1049h"
 
-    echo
+    # Run Atuin
+    set -l ATUIN_H (ATUIN_SHELL_FISH=t ATUIN_LOG=error ATUIN_QUERY=$current_cmd atuin search --keymap-mode=emacs $argv -i 3>&1 1>&2 2>&3 | string collect)
 
+    # Return to main screen buffer
+    echo -ne "\033[?1049l"
+
+    # Process results
     if test -n "$ATUIN_H"
         if string match --quiet '__atuin_accept__:*' "$ATUIN_H"
-          set -l ATUIN_HIST (string replace "__atuin_accept__:" "" -- "$ATUIN_H" | string collect)
-          commandline -r "$ATUIN_HIST"
-          commandline -f repaint
-          commandline -f execute
-          return
+            set -l ATUIN_HIST (string replace "__atuin_accept__:" "" -- "$ATUIN_H" | string collect)
+            commandline -r "$ATUIN_HIST"
+            commandline -f execute
         else
-          commandline -r "$ATUIN_H"
+            commandline -r "$ATUIN_H"
         end
+    else
+        commandline -r "$current_cmd"
     end
 
     commandline -f repaint
