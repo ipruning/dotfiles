@@ -9,7 +9,32 @@
                 },
                 "rules": [
                     {
-                        "description": "yper b/f 👉 alt ←/→",
+                        "description": "caps_lock 👉 escape on tap / left_control on hold (only on built-in keyboard)",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "identifiers": [{ "is_built_in_keyboard": true }],
+                                        "type": "device_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "caps_lock",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "left_control",
+                                        "lazy": true
+                                    }
+                                ],
+                                "to_if_alone": [{ "key_code": "escape" }],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "yper b / f 👉 alt ← / →",
                         "manipulators": [
                             {
                                 "from": {
@@ -72,7 +97,7 @@
                         ]
                     },
                     {
-                        "description": "yper s/d 👉 cmd [/] (with conditions)",
+                        "description": "yper s / d 👉 cmd [ / ] (with conditions)",
                         "manipulators": [
                             {
                                 "conditions": [
@@ -123,7 +148,7 @@
                         ]
                     },
                     {
-                        "description": "yper e/r 👉 cmd shift [/] (with conditions)",
+                        "description": "yper e / r 👉 cmd shift [ / ] (with conditions)",
                         "manipulators": [
                             {
                                 "conditions": [
@@ -197,7 +222,7 @@
                         ]
                     },
                     {
-                        "description": "left_cmd / right_cmd (alone) 👉 en / zh-Hans",
+                        "description": "left_cmd / right_cmd (alone) 👉 en / zh",
                         "manipulators": [
                             {
                                 "from": {
@@ -221,29 +246,6 @@
                     }
                 ]
             },
-            "devices": [
-                {
-                    "identifiers": {
-                        "is_keyboard": true,
-                        "product_id": 24926,
-                        "vendor_id": 7504
-                    },
-                    "treat_as_built_in_keyboard": true
-                },
-                {
-                    "identifiers": { "is_keyboard": true },
-                    "simple_modifications": [
-                        {
-                            "from": { "key_code": "caps_lock" },
-                            "to": [{ "key_code": "left_control" }]
-                        },
-                        {
-                            "from": { "key_code": "left_control" },
-                            "to": [{ "key_code": "caps_lock" }]
-                        }
-                    ]
-                }
-            ],
             "fn_function_keys": [
                 {
                     "from": { "key_code": "f3" },
