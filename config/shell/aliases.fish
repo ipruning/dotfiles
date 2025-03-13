@@ -30,10 +30,10 @@ alias o="open ."
 alias p="pbpaste"
 alias ports="viddy --interval 1s 'lsof -i @127.0.0.1 | grep LISTEN'"
 
-function cursor() {
-  open "$@" -a "Cursor"
-}
+function cursor
+    open $argv -a "Cursor"
+end
 
-function code() {
-  open "$@" -a "Visual Studio Code"
-}
+function code
+    open $argv -a "Visual Studio Code"
+end
