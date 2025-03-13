@@ -12,7 +12,8 @@
     "editor.defaultFormatter": "oven.bun-vscode"
   },
   "[json][jsonc]": {
-    "editor.defaultFormatter": "vscode.json-language-features"
+    "editor.defaultFormatter": "vscode.json-language-features",
+    "editor.tabSize": 2,
   },
   "[kdl]": {
     "editor.tabSize": 4
@@ -41,7 +42,8 @@
     "editor.renderWhitespace": "selection",
     "editor.snippetSuggestions": "top",
     "editor.tabCompletion": "on",
-    "editor.wordWrap": "on"
+    "editor.wordWrap": "on",
+    "editor.tabSize": 2,
   },
   "[plaintext]": {
     "editor.wordWrap": "on"
