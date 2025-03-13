@@ -16,7 +16,6 @@ if status is-interactive
 
   tv init fish | source
 
-  source $HOME/dotfiles/config/shell/atuin.fish
 
   function y
     set tmp (mktemp -t "yazi-cwd.XXXXXX")
@@ -33,5 +32,6 @@ if status is-interactive
   register-python-argcomplete --shell fish ttok.py | source
 
   source $HOME/dotfiles/config/shell/aliases.fish
-
+  source $HOME/dotfiles/config/shell/functions/atuin.fish
+  source $HOME/dotfiles/config/shell/functions/utils.fish
 end
