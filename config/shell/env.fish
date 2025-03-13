@@ -6,7 +6,9 @@ end
 if status is-interactive
   set -g fish_greeting
 
-  source $HOME/dotfiles/config/shell/env.private.fish
+  if test -f $HOME/dotfiles/config/shell/env.private.fish
+    source $HOME/dotfiles/config/shell/env.private.fish
+  end
 
   starship init fish | source
 
@@ -27,6 +29,7 @@ if status is-interactive
 
   fish_add_path $HOME/Developer/prototypes/utils/bin
   fish_add_path $HOME/Developer/prototypes/utils/scripts
+
   register-python-argcomplete --shell fish ttok.py | source
 
   source $HOME/dotfiles/config/shell/aliases.fish
