@@ -9,11 +9,3 @@ function x86_64-zsh-login() {
 function x86_64-zsh-run() {
   arch -x86_64 zsh -c "$@"
 }
-
-function cursor() {
-  open "$@" -a "Cursor"
-}
-
-function code() {
-  open "$@" -a "Visual Studio Code"
-}
