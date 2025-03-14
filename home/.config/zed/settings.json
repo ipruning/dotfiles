@@ -1,14 +1,4 @@
 {
-  "ssh_connections": [
-    {
-      "host": "m4.sgponte",
-      "projects": [
-        {
-          "paths": ["~/dotfiles"]
-        }
-      ]
-    }
-  ],
   "assistant": {
     "default_model": {
       "model": "claude-3-7-sonnet-latest",
@@ -32,6 +22,12 @@
     }
   },
   "cursor_blink": false,
+  "detect_venv": {
+    "on": {
+      "activate_script": "fish",
+      "directories": [".env", "env", ".venv", "venv"]
+    }
+  },
   "features": {
     "edit_prediction_provider": "zed"
   },
@@ -102,6 +98,16 @@
   },
   "show_edit_predictions": true,
   "soft_wrap": "none",
+  "ssh_connections": [
+    {
+      "host": "m4.sgponte",
+      "projects": [
+        {
+          "paths": ["~/dotfiles"]
+        }
+      ]
+    }
+  ],
   "tabs": {
     "file_icons": true,
     "git_status": true
@@ -115,8 +121,8 @@
     },
     "shell": {
       "with_arguments": {
-        "program": "/opt/homebrew/bin/fish",
-        "args": ["--login", "--interactive"]
+        "args": ["--login", "--interactive"],
+        "program": "/opt/homebrew/bin/fish"
       }
     },
     "toolbar": {
