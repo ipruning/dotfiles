@@ -49,8 +49,9 @@ rust = "stable"
 zig = "latest"
 
 [settings]
-trusted_config_paths = ['~/Developer']
 experimental = true
+python.uv_venv_auto = true
+trusted_config_paths = ['~/Developer']
 
 [settings.npm]
 bun = true
