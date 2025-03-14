@@ -29,6 +29,7 @@ alias lzg="lazygit"
 alias o="open ."
 alias p="pbpaste"
 alias ports="viddy --interval 1s 'lsof -i @127.0.0.1 | grep LISTEN'"
+alias surge="/Applications/Surge.app/Contents/Applications/surge-cli"
 
 function cursor() {
   open "$@" -a "Cursor"
