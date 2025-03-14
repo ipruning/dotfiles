@@ -37,6 +37,7 @@
 "npm:autocorrect-node" = "latest"
 "pipx:argcomplete" = "latest"
 "pipx:pyright" = "latest"
+"pipx:python-dotenv" = { version = "latest", cli = "" }
 "pipx:ruff" = "latest"
 "pipx:vastai" = "latest"
 bun = "latest"
