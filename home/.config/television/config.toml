@@ -1,6 +1,6 @@
 [ui]
-show_preview_panel = false
-use_nerd_font_icons = false
+show_preview_panel = true
+use_nerd_font_icons = true
 
 ui_scale = 100
 theme = "dark"
