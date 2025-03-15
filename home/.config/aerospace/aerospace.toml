@@ -186,14 +186,14 @@ run = 'layout floating'
 if.app-id = 'com.taobao.fleamarket'
 run = 'layout floating'
 
-[[on-window-detected]]
-if.app-id = 'com.todesktop.230313mzl4w4u92'
-run = 'move-node-to-workspace 7'
+# [[on-window-detected]]
+# if.app-id = 'com.todesktop.230313mzl4w4u92'
+# run = 'move-node-to-workspace 7'
 
-[[on-window-detected]]
-if.app-id = 'com.exafunction.windsurf'
-run = 'move-node-to-workspace 7'
+# [[on-window-detected]]
+# if.app-id = 'com.exafunction.windsurf'
+# run = 'move-node-to-workspace 7'
 
-[[on-window-detected]]
-if.app-id = 'com.pvncher.repoprompt'
-run = 'move-node-to-workspace 8'
+# [[on-window-detected]]
+# if.app-id = 'com.pvncher.repoprompt'
+# run = 'move-node-to-workspace 8'
