@@ -22,12 +22,6 @@
     }
   },
   "cursor_blink": false,
-  "detect_venv": {
-    "on": {
-      "activate_script": "fish",
-      "directories": [".env", "env", ".venv", "venv"]
-    }
-  },
   "features": {
     "edit_prediction_provider": "zed"
   },
@@ -114,6 +108,12 @@
   },
   "terminal": {
     "button": false,
+    "detect_venv": {
+      "on": {
+        "activate_script": "fish",
+        "directories": [".env", "env", ".venv", "venv"]
+      }
+    },
     "font_family": "MonoLisa",
     "font_weight": 600,
     "line_height": {
