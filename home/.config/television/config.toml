@@ -124,6 +124,7 @@ toggle_preview = "ctrl-o"
 "csv-files" = ["csvlens"]
 "hidden-files" = ["bat", "cat", "cursor", "n", "nvim", "open", "vim", "zed"]
 "hosts" = ["ssh"]
+"marimo-files" = ["modal.bash"]
 "py-files" = [
   "marimo edit",
   "marimo run",
