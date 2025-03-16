@@ -29,6 +29,11 @@ source_command = "fd --no-ignore-vcs --type file --hidden --follow --extension p
 preview_command = ":files:"
 
 [[cable_channel]]
+name = "marimo-files"
+source_command = "rg --files-with-matches 'app = marimo.App()' -g '*.py'"
+preview_command = ":files:"
+
+[[cable_channel]]
 name = "brew-packages"
 source_command = "brew list --installed-on-request"
 preview_command = "brew info {0}"
