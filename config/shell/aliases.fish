@@ -32,9 +32,9 @@ alias ports="viddy --interval 1s 'lsof -i @127.0.0.1 | grep LISTEN'"
 alias surge="/Applications/Surge.app/Contents/Applications/surge-cli"
 
 function cursor
-    open $argv -a "Cursor"
+  open $argv -a "Cursor"
 end
 
 function code
-    open $argv -a "Visual Studio Code"
+  open $argv -a "Visual Studio Code"
 end
