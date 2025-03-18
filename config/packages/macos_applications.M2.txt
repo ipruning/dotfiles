@@ -18,6 +18,7 @@ Blackmagic Media Express
 Bob
 Capture One
 ChatGPT
+ComfyUI
 Contexts
 CrossOver
 Cursor
