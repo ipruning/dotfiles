@@ -16,6 +16,8 @@ if status is-interactive
 
   tv init fish | source
 
+  bind \cs edit_command_buffer
+
   function cancel-commandline
       commandline -C 2147483647
       for i in (seq (commandline -L))
@@ -24,8 +26,15 @@ if status is-interactive
       commandline ""
   end
 
+  if not set -q VISUAL
+    set -g VISUAL "zed --wait"
+  end
+
+  if not set -q EDITOR
+    set -g EDITOR "zed --wait"
+  end
+
   bind \cc cancel-commandline
-  bind \cs edit_command_buffer
 
   function y
     set tmp (mktemp -t "yazi-cwd.XXXXXX")
@@ -39,7 +48,9 @@ if status is-interactive
   fish_add_path $HOME/Developer/prototypes/utils/bin
   fish_add_path $HOME/Developer/prototypes/utils/scripts
 
-  register-python-argcomplete --shell fish ttok.py | source
+  for file in $HOME/dotfiles/home/.config/fish/completions/*.fish
+    source $file
+  end
 
   source $HOME/dotfiles/config/shell/aliases.fish
   source $HOME/dotfiles/config/shell/functions/atuin.fish
