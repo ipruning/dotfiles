@@ -8,6 +8,7 @@
 "cargo:https://github.com/bodo-run/yek" = "latest"
 "cargo:https://github.com/hanshuaikang/Nping" = "latest"
 "cargo:https://github.com/lotabout/rargs.git" = "latest"
+"cargo:https://github.com/mfontanini/presenterm" = "latest"
 "cargo:https://github.com/sirwart/ripsecrets" = "latest"
 "cargo:https://github.com/svenstaro/miniserve" = "latest"
 "cargo:https://github.com/yarrow/zet" = "latest"
