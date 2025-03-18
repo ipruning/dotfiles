@@ -9,22 +9,17 @@ clipboard-trim-trailing-spaces = true
 copy-on-select = clipboard
 cursor-style = block
 cursor-style-blink = false
-font-family = MonoLisa
-font-family = "JetBrainsMono Nerd Font"
-font-family = "Source Han Sans SC"
 macos-titlebar-style = hidden
 shell-integration-features = no-cursor
 unfocused-split-opacity = 1
 window-padding-x = 10, 10
 window-padding-y = 10, 10
 
-font-size = 12
-font-style = Medium
-theme = catppuccin-mocha
-
+font-family = MonoLisa
+font-family = "Maple Mono NF CN"
 font-size = 14
-font-style = SimiBold
-# theme = catppuccin-latte
+font-style = SemiBold
+theme = catppuccin-mocha
 
 macos-option-as-alt = true
 
