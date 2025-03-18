@@ -22,7 +22,7 @@ font-size = 12
 font-style = Medium
 theme = catppuccin-mocha
 
-font-size = 13
+font-size = 14
 font-style = SimiBold
 # theme = catppuccin-latte
 
@@ -31,8 +31,8 @@ macos-option-as-alt = true
 confirm-close-surface = false
 confirm-close-surface = true
 
-keybind = cmd+j=text: jump-to-session\x0a
-keybind = cmd+shift+j=text: jump-to-repo\x0a
+# keybind = cmd+j=text: jump-to-session\x0a
+# keybind = cmd+shift+j=text: jump-to-repo\x0a
 
 keybind = cmd+u=scroll_page_up
 keybind = cmd+d=scroll_page_down
