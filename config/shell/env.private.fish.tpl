@@ -14,32 +14,38 @@ set -x ROAM_RESEARCH_TOKEN "op://dev-self/Roam Research/credentials/ROAM_RESEARC
 set -x ROAM_RESEARCH_ENDPOINT "op://dev-self/Roam Research/credentials/ROAM_RESEARCH_ENDPOINT"
 
 function set-rclone-env
-  set -x RCLONE_CONFIG_R2_TYPE "s3"
-  set -x RCLONE_CONFIG_R2_PROVIDER "Cloudflare"
-  set -x RCLONE_CONFIG_R2_ENDPOINT "op://dev-self/Cloudflare/credentials/ENDPOINT"
-  set -x RCLONE_CONFIG_R2_ACCESS_KEY_ID "op://dev-self/Cloudflare/credentials/ACCESS_KEY_ID"
-  set -x RCLONE_CONFIG_R2_SECRET_ACCESS_KEY "op://dev-self/Cloudflare/credentials/SECRET_ACCESS_KEY"
+  set -gx RCLONE_CONFIG_R2_TYPE "s3"
+  set -gx RCLONE_CONFIG_R2_PROVIDER "Cloudflare"
+  set -gx RCLONE_CONFIG_R2_ENDPOINT "op://dev-self/Cloudflare/credentials/ENDPOINT"
+  set -gx RCLONE_CONFIG_R2_ACCESS_KEY_ID "op://dev-self/Cloudflare/credentials/ACCESS_KEY_ID"
+  set -gx RCLONE_CONFIG_R2_SECRET_ACCESS_KEY "op://dev-self/Cloudflare/credentials/SECRET_ACCESS_KEY"
 
-  set -x RCLONE_CONFIG_TIGRIS_TYPE "s3"
-  set -x RCLONE_CONFIG_TIGRIS_PROVIDER "AWS"
-  set -x RCLONE_CONFIG_TIGRIS_ENDPOINT "op://dev-self/Tigris/credentials/ENDPOINT"
-  set -x RCLONE_CONFIG_TIGRIS_ACCESS_KEY_ID "op://dev-self/Tigris/credentials/ACCESS_KEY_ID"
-  set -x RCLONE_CONFIG_TIGRIS_SECRET_ACCESS_KEY "op://dev-self/Tigris/credentials/SECRET_ACCESS_KEY"
+  set -gx RCLONE_CONFIG_TIGRIS_TYPE "s3"
+  set -gx RCLONE_CONFIG_TIGRIS_PROVIDER "AWS"
+  set -gx RCLONE_CONFIG_TIGRIS_ENDPOINT "op://dev-self/Tigris/credentials/ENDPOINT"
+  set -gx RCLONE_CONFIG_TIGRIS_ACCESS_KEY_ID "op://dev-self/Tigris/credentials/ACCESS_KEY_ID"
+  set -gx RCLONE_CONFIG_TIGRIS_SECRET_ACCESS_KEY "op://dev-self/Tigris/credentials/SECRET_ACCESS_KEY"
+
+  set -gx RCLONE_CONFIG_HETZNER_TYPE "s3"
+  set -gx RCLONE_CONFIG_HETZNER_PROVIDER "AWS"
+  set -gx RCLONE_CONFIG_HETZNER_ENDPOINT "op://dev-self/Hetzner/credentials/ENDPOINT"
+  set -gx RCLONE_CONFIG_HETZNER_ACCESS_KEY_ID "op://dev-self/Hetzner/credentials/ACCESS_KEY_ID"
+  set -gx RCLONE_CONFIG_HETZNER_SECRET_ACCESS_KEY "op://dev-self/Hetzner/credentials/SECRET_ACCESS_KEY"
 end
 
 function set-tigris-env
-  set -x AWS_ENDPOINT_URL "https://fly.storage.tigris.dev"
-  set -x AWS_ENDPOINT_URL_S3 "https://fly.storage.tigris.dev"
-  set -x AWS_ENDPOINT_URL_IAM "https://fly.iam.storage.tigris.dev"
-  set -x AWS_REGION "auto"
-  set -x AWS_ACCESS_KEY_ID "op://dev-self/Tigris/credentials/access_key_id"
-  set -x AWS_SECRET_ACCESS_KEY "op://dev-self/Tigris/credentials/secret_access_key"
+  set -gx AWS_ENDPOINT_URL "https://fly.storage.tigris.dev"
+  set -gx AWS_ENDPOINT_URL_S3 "https://fly.storage.tigris.dev"
+  set -gx AWS_ENDPOINT_URL_IAM "https://fly.iam.storage.tigris.dev"
+  set -gx AWS_REGION "auto"
+  set -gx AWS_ACCESS_KEY_ID "op://dev-self/Tigris/credentials/access_key_id"
+  set -gx AWS_SECRET_ACCESS_KEY "op://dev-self/Tigris/credentials/secret_access_key"
 end
 
 function set-bedrock-env
-  set -x ANTHROPIC_MODEL "us.anthropic.claude-3-7-sonnet-20250219-v1:0"
-  set -x AWS_ACCESS_KEY_ID "op://dev-work/AWS/claude_code/AWS_ACCESS_KEY_ID"
-  set -x AWS_SECRET_ACCESS_KEY "op://dev-work/AWS/claude_code/AWS_SECRET_ACCESS_KEY"
-  set -x CLAUDE_CODE_USE_BEDROCK 1
-  set -x DISABLE_PROMPT_CACHING 1
+  set -gx ANTHROPIC_MODEL "us.anthropic.claude-3-7-sonnet-20250219-v1:0"
+  set -gx AWS_ACCESS_KEY_ID "op://dev-work/AWS/claude_code/AWS_ACCESS_KEY_ID"
+  set -gx AWS_SECRET_ACCESS_KEY "op://dev-work/AWS/claude_code/AWS_SECRET_ACCESS_KEY"
+  set -gx CLAUDE_CODE_USE_BEDROCK 1
+  set -gx DISABLE_PROMPT_CACHING 1
 end
