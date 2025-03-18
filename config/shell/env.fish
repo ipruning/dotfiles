@@ -16,6 +16,16 @@ if status is-interactive
 
   tv init fish | source
 
+  function cancel-commandline
+      commandline -C 2147483647
+      for i in (seq (commandline -L))
+          echo '^C'
+      end
+      commandline ""
+  end
+
+  bind \cc cancel-commandline
+  bind \cs edit_command_buffer
 
   function y
     set tmp (mktemp -t "yazi-cwd.XXXXXX")
