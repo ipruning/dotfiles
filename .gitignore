@@ -7,5 +7,4 @@ config/shell/plugins/
 
 !*private*.tpl
 
-home/.config/fish/completions/docker.fish
-home/.config/fish/completions/kubectl.fish
+home/.config/fish/completions/
