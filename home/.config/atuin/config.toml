@@ -3,7 +3,7 @@ key_path = "~/.local/share/atuin/key"
 
 enter_accept = false
 exit_mode = "return-query"
-inline_height = 23
+# inline_height = 23
 search_mode = "skim"
 show_help = false
 
