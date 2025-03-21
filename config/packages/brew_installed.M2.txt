@@ -7,6 +7,7 @@ atuin
 autoconf
 autocorrect
 awscli
+bartib
 basedpyright
 bash
 bat
@@ -18,8 +19,10 @@ cairo
 certifi
 cfitsio
 cgif
+choose-rust
 cjson
 cmake
+counts
 csvlens
 cyme
 d2
@@ -80,9 +83,12 @@ llama.cpp
 llm
 lua
 luajit
+lychee
 mackup
 macmon
+mdq
 media-info
+miniserve
 mise
 monolith
 mtr
@@ -109,6 +115,7 @@ py3cairo
 python-argcomplete
 python@3.11
 python@3.12
+rargs
 rclone
 rip2
 ripgrep-all
@@ -147,4 +154,5 @@ xh
 xz
 yazi
 zellij
+zet
 zoxide
