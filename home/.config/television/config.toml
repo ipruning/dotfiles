@@ -110,8 +110,7 @@ toggle_preview = "ctrl-o"
 # branches to choose from.
 
 [shell_integration]
-# This specifies the default fallback channel if no other channel is matched.
-fallback_channel = "files"
+fallback_channel = "hidden-files-max-depth-3"
 
 [shell_integration.channel_triggers]
 "alias" = ["alias", "unalias"]
