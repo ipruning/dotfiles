@@ -30,6 +30,7 @@ DeskPad
 Drafts
 Eagle
 Eudic
+Figma
 Fork
 Frame0
 Ghostty
@@ -66,6 +67,8 @@ MongoDB Compass
 Mos
 MusicHarbor
 NeteaseMusic
+Notion
+Notion Calendar
 OBS
 OnyX
 OrbStack
