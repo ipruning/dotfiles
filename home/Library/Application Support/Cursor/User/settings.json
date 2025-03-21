@@ -350,6 +350,24 @@
     {
       "before": [
         "<leader>",
+        "r"
+      ],
+      "commands": [
+        "workbench.action.openRecent"
+      ]
+    },
+    {
+      "before": [
+        "<leader>",
+        "n"
+      ],
+      "commands": [
+        "workbench.action.createTerminalEditor"
+      ]
+    },
+    {
+      "before": [
+        "<leader>",
         "t"
       ],
       "commands": [
@@ -364,15 +382,6 @@
         "workbench.action.showCommands"
       ],
       "silent": true
-    },
-    {
-      "before": [
-        "<leader>",
-        "r"
-      ],
-      "commands": [
-        "workbench.action.openRecent"
-      ]
     },
     {
       "before": [
