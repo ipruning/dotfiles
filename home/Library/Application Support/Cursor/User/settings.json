@@ -1,22 +1,18 @@
 {
   "[beancount]": {
-    "editor.defaultFormatter": "dongfg.vscode-beancount-formatter"
+    "editor.defaultFormatter": "dongfg.vscode-beancount-formatter",
   },
   "[css][scss][less]": {
-    "editor.defaultFormatter": "vscode.css-language-features"
+    "editor.defaultFormatter": "vscode.css-language-features",
   },
   "[dockerfile]": {
-    "editor.defaultFormatter": "ms-azuretools.vscode-docker"
+    "editor.defaultFormatter": "ms-azuretools.vscode-docker",
   },
   "[html]": {
-    "editor.defaultFormatter": "oven.bun-vscode"
+    "editor.defaultFormatter": "oven.bun-vscode",
   },
   "[json][jsonc]": {
     "editor.defaultFormatter": "vscode.json-language-features",
-    "editor.tabSize": 2
-  },
-  "[kdl]": {
-    "editor.tabSize": 4
   },
   "[latex]": {
     "editor.acceptSuggestionOnEnter": "on",
@@ -29,7 +25,8 @@
     "editor.renderWhitespace": "selection",
     "editor.snippetSuggestions": "top",
     "editor.tabCompletion": "on",
-    "editor.wordWrap": "on"
+    "editor.wordWrap": "on",
+    "editor.tabSize": 2,
   },
   "[markdown]": {
     "editor.acceptSuggestionOnEnter": "on",
@@ -42,11 +39,8 @@
     "editor.renderWhitespace": "selection",
     "editor.snippetSuggestions": "top",
     "editor.tabCompletion": "on",
-    "editor.tabSize": 2,
-    "editor.wordWrap": "on"
-  },
-  "[plaintext]": {
-    "editor.wordWrap": "on"
+    "editor.wordWrap": "on",
+    "editor.tabSize": 2
   },
   "[python]": {
     "diffEditor.ignoreTrimWhitespace": false,
@@ -58,13 +52,15 @@
     "editor.tabSize": 4
   },
   "[typescript]": {
-    "editor.defaultFormatter": "oven.bun-vscode"
+    "editor.defaultFormatter": "oven.bun-vscode",
   },
   "[typst-code]": {
-    "editor.wordSeparators": "`~!@#$%^&*()=+[{]}\\|;:'\",.<>/?"
+    "editor.wordSeparators": "`~!@#$%^&*()=+[{]}\\|;:'\",.<>/?",
+    "editor.tabSize": 2
   },
   "[typst]": {
-    "editor.wordSeparators": "`~!@#$%^&*()=+[{]}\\|;:'\",.<>/?"
+    "editor.wordSeparators": "`~!@#$%^&*()=+[{]}\\|;:'\",.<>/?",
+    "editor.tabSize": 2
   },
   "autocorrect.formatOnSave": false,
   "baml.bamlPanelOpen": false,
@@ -121,7 +117,7 @@
   "editor.cursorBlinking": "solid",
   "editor.cursorSmoothCaretAnimation": "on",
   "editor.fontFamily": "'MonoLisa', 'Maple Mono NF CN'",
-  "editor.fontSize": 13,
+  "editor.fontSize": 12,
   "editor.fontWeight": "400",
   "editor.formatOnSave": true,
   "editor.guides.bracketPairs": true,
@@ -338,7 +334,7 @@
   "sqlfluff.executablePath": "/opt/homebrew/bin/sqlfluff",
   "terminal.integrated.confirmOnExit": "hasChildProcesses",
   "terminal.integrated.defaultProfile.osx": "fish",
-  "terminal.integrated.fontSize": 13,
+  "terminal.integrated.fontSize": 12,
   "terminal.integrated.fontWeight": "500",
   "terminal.integrated.inheritEnv": true,
   "update.releaseTrack": "prerelease",
