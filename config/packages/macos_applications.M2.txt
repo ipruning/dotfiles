@@ -108,6 +108,7 @@ UninstallPKG
 VideoFusion-macOS
 VirtualBox
 VirtualBuddy
+VoiceInk
 WeChat
 Whisper Transcription
 Wireshark

@@ -70,6 +70,7 @@ pkl
 postgresql@17
 pre-commit
 procs
+py-spy
 py3cairo
 python@3.11
 rclone
