@@ -1,5 +1,3 @@
-tap "homebrew/bundle"
-tap "homebrew/services"
 tap "libsql/sqld"
 tap "nikitabobko/tap"
 tap "oh-my-home/fonts"
