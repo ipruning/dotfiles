@@ -137,5 +137,5 @@ api.unmapAllExcept(
     "p",
     "P",
   ],
-  /boot.dev|excalidraw.com|tldraw.com|feishu.cn|localhost|monkeytype.com|motherduck.com|roamresearch.com/,
+  /boot.dev|excalidraw.com|feishu.cn|localhost|monkeytype.com|motherduck.com|notion.so|roamresearch.com|tldraw.com/,
 );
