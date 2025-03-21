@@ -223,6 +223,7 @@
                     },
                     {
                         "description": "left_cmd / right_cmd (alone) 👉 en / zh",
+                        "enabled": false,
                         "manipulators": [
                             {
                                 "from": {
