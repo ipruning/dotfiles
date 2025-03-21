@@ -1,18 +1,18 @@
 {
   "[beancount]": {
-    "editor.defaultFormatter": "dongfg.vscode-beancount-formatter",
+    "editor.defaultFormatter": "dongfg.vscode-beancount-formatter"
   },
   "[css][scss][less]": {
-    "editor.defaultFormatter": "vscode.css-language-features",
+    "editor.defaultFormatter": "vscode.css-language-features"
   },
   "[dockerfile]": {
-    "editor.defaultFormatter": "ms-azuretools.vscode-docker",
+    "editor.defaultFormatter": "ms-azuretools.vscode-docker"
   },
   "[html]": {
-    "editor.defaultFormatter": "oven.bun-vscode",
+    "editor.defaultFormatter": "oven.bun-vscode"
   },
   "[json][jsonc]": {
-    "editor.defaultFormatter": "vscode.json-language-features",
+    "editor.defaultFormatter": "vscode.json-language-features"
   },
   "[latex]": {
     "editor.acceptSuggestionOnEnter": "on",
@@ -25,8 +25,8 @@
     "editor.renderWhitespace": "selection",
     "editor.snippetSuggestions": "top",
     "editor.tabCompletion": "on",
-    "editor.wordWrap": "on",
     "editor.tabSize": 2,
+    "editor.wordWrap": "on"
   },
   "[markdown]": {
     "editor.acceptSuggestionOnEnter": "on",
@@ -39,8 +39,8 @@
     "editor.renderWhitespace": "selection",
     "editor.snippetSuggestions": "top",
     "editor.tabCompletion": "on",
-    "editor.wordWrap": "on",
-    "editor.tabSize": 2
+    "editor.tabSize": 2,
+    "editor.wordWrap": "on"
   },
   "[python]": {
     "diffEditor.ignoreTrimWhitespace": false,
@@ -51,16 +51,20 @@
     "editor.defaultFormatter": "charliermarsh.ruff",
     "editor.tabSize": 4
   },
+  "[sql]": {
+    "editor.defaultFormatter": "dorzey.vscode-sqlfluff",
+    "editor.tabSize": 4
+  },
   "[typescript]": {
-    "editor.defaultFormatter": "oven.bun-vscode",
+    "editor.defaultFormatter": "oven.bun-vscode"
   },
   "[typst-code]": {
-    "editor.wordSeparators": "`~!@#$%^&*()=+[{]}\\|;:'\",.<>/?",
-    "editor.tabSize": 2
+    "editor.tabSize": 2,
+    "editor.wordSeparators": "`~!@#$%^&*()=+[{]}\\|;:'\",.<>/?"
   },
   "[typst]": {
-    "editor.wordSeparators": "`~!@#$%^&*()=+[{]}\\|;:'\",.<>/?",
-    "editor.tabSize": 2
+    "editor.tabSize": 2,
+    "editor.wordSeparators": "`~!@#$%^&*()=+[{]}\\|;:'\",.<>/?"
   },
   "autocorrect.formatOnSave": false,
   "baml.bamlPanelOpen": false,
@@ -331,6 +335,7 @@
     "**/zshrc": true
   },
   "shellcheck.run": "onType",
+  "sqlfluff.dialect": "duckdb",
   "sqlfluff.executablePath": "/opt/homebrew/bin/sqlfluff",
   "terminal.integrated.confirmOnExit": "hasChildProcesses",
   "terminal.integrated.defaultProfile.osx": "fish",
