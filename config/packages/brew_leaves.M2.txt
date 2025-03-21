@@ -5,12 +5,15 @@ atuin
 autoconf
 autocorrect
 awscli
+bartib
 basedpyright
 bat
 bats-core
 cfitsio
 cgif
+choose-rust
 cmake
+counts
 csvlens
 cyme
 d2
@@ -60,9 +63,12 @@ lazygit
 libmagic
 llama.cpp
 llm
+lychee
 mackup
 macmon
+mdq
 media-info
+miniserve
 mise
 monolith
 mtr
@@ -83,6 +89,7 @@ py-spy
 py3cairo
 python-argcomplete
 python@3.11
+rargs
 rclone
 rip2
 ripgrep-all
@@ -118,4 +125,5 @@ whisperkit-cli
 xh
 yazi
 zellij
+zet
 zoxide
