@@ -12,13 +12,15 @@ cursor-style-blink = false
 macos-titlebar-style = hidden
 shell-integration-features = no-cursor
 unfocused-split-opacity = 1
+window-height = 40
 window-padding-x = 10, 10
 window-padding-y = 10, 10
+window-width = 140
 
-font-family = MonoLisa
+font-family = "MonoLisa"
 font-family = "Maple Mono NF CN"
-font-size = 14
-font-style = SemiBold
+font-size = 13
+font-style = Medium
 theme = catppuccin-mocha
 
 macos-option-as-alt = true
