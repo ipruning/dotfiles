@@ -9,8 +9,8 @@
   "autosave": "on_focus_change",
   "buffer_font_fallbacks": ["Maple Mono NF CN"],
   "buffer_font_family": "MonoLisa",
-  "buffer_font_size": 12.0,
-  "buffer_font_weight": 500,
+  "buffer_font_size": 13.0,
+  "buffer_font_weight": 400,
   "collaboration_panel": {
     "dock": "right"
   },
@@ -131,8 +131,8 @@
   },
   "theme": "Catppuccin Mocha - No Italics",
   "ui_font_family": "MonoLisa",
-  "ui_font_size": 16.0,
-  "ui_font_weight": 600,
+  "ui_font_size": 15.0,
+  "ui_font_weight": 500,
   "vim": {
     "highlight_on_yank_duration": 250,
     "toggle_relative_line_numbers": true,
