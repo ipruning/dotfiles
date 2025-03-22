@@ -1,4 +1,12 @@
 [tools]
+bun = "latest"
+go = "latest"
+node = "latest"
+python = "latest"
+ruby = "latest"
+rust = "stable"
+zig = "latest"
+
 "cargo:gfold" = "latest"
 "cargo:https://github.com/bodo-run/yek" = "latest"
 "cargo:netscanner" = "latest"
@@ -42,14 +50,6 @@
 # "pipx:pyright" = "latest"
 # "pipx:ruff" = "latest"
 # "pipx:vastai" = "latest"
-
-bun = "latest"
-go = "latest"
-node = "latest"
-python = "latest"
-ruby = "latest"
-rust = "stable"
-zig = "latest"
 
 [settings]
 experimental = true
