@@ -9,8 +9,11 @@
   "autosave": "on_focus_change",
   "buffer_font_fallbacks": ["Maple Mono NF CN"],
   "buffer_font_family": "MonoLisa",
-  "buffer_font_size": 12.0,
+  "buffer_font_size": 13.0,
   "buffer_font_weight": 400,
+  "buffer_line_height": {
+    "custom": 1.5
+  },
   "collaboration_panel": {
     "dock": "right"
   },
@@ -26,7 +29,7 @@
     "edit_prediction_provider": "zed"
   },
   "format_on_save": "on",
-  "icon_theme": "Catppuccin Mocha",
+  "icon_theme": "Zed (Default)",
   "indent_guides": {
     "coloring": "indent_aware",
     "enabled": true
@@ -115,7 +118,7 @@
       }
     },
     "font_family": "MonoLisa",
-    "font_weight": 600,
+    "font_weight": 400,
     "line_height": {
       "custom": 1.5
     },
@@ -131,8 +134,8 @@
   },
   "theme": "Catppuccin Mocha - No Italics",
   "ui_font_family": "MonoLisa",
-  "ui_font_size": 14.0,
-  "ui_font_weight": 500,
+  "ui_font_size": 15.0,
+  "ui_font_weight": 400,
   "vim": {
     "highlight_on_yank_duration": 250,
     "toggle_relative_line_numbers": true,
