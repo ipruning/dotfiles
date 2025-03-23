@@ -47,6 +47,7 @@ j  = "!sh -c 'jump-to-repo'"
 l  = "!sh -c 'git lg'"
 o  = "!sh -c 'open .'"
 s  = "!sh -c 'git status'"
+tidy = "!gh tidy"
 
 [commit]
 verbose = true
