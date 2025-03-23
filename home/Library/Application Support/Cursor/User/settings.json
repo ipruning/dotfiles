@@ -344,7 +344,7 @@
   "terminal.integrated.confirmOnExit": "hasChildProcesses",
   "terminal.integrated.defaultProfile.osx": "fish",
   "terminal.integrated.fontSize": 12,
-  "terminal.integrated.fontWeight": "500",
+  "terminal.integrated.fontWeight": "400",
   "terminal.integrated.inheritEnv": true,
   "update.releaseTrack": "prerelease",
   "vim.hlsearch": true,
@@ -437,6 +437,7 @@
   "vscode-mogami.enableCodeLens": true,
   "vscode-mogami.usePrivateSource": false,
   "window.commandCenter": false,
+  "window.zoomLevel": 0.5,
   "workbench.colorCustomizations": {
     "editor.lineHighlightBackground": "#1073cf2d",
     "editor.lineHighlightBorder": "#9fced11f"
