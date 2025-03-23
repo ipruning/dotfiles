@@ -4,7 +4,7 @@ if [[ $OSTYPE = darwin* ]]; then
   if [ -d "/opt/homebrew/bin" ]; then
     eval "$(/opt/homebrew/bin/brew shellenv)"
   fi
-  
+
   if [ -d "$HOME/dotfiles/config/shell/completions" ]; then
     fpath=("$HOME/dotfiles/config/shell/completions" "${fpath[@]}")
   fi
