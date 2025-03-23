@@ -7,6 +7,7 @@ atuin
 autoconf
 autocorrect
 awscli
+bandwhich
 bartib
 basedpyright
 bash
@@ -58,6 +59,7 @@ git-lfs
 gitu
 glow
 gnupg
+goaccess
 gotz
 graphviz
 grex

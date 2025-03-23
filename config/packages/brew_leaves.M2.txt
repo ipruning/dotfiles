@@ -5,6 +5,7 @@ atuin
 autoconf
 autocorrect
 awscli
+bandwhich
 bartib
 basedpyright
 bat
@@ -42,6 +43,7 @@ git-filter-repo
 gitu
 glow
 gnupg
+goaccess
 gotz
 graphviz
 grex
