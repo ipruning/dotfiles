@@ -96,6 +96,7 @@ monolith
 mtr
 neovim
 nmap
+oha
 ollama
 onefetch
 openjdk

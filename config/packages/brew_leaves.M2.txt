@@ -75,6 +75,7 @@ mise
 monolith
 mtr
 neovim
+oha
 ollama
 onefetch
 openjdk
