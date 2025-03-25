@@ -25,6 +25,12 @@ set-rclone-env() {
   export RCLONE_CONFIG_TIGRIS_ENDPOINT="op://dev-self/Tigris/credentials/ENDPOINT"
   export RCLONE_CONFIG_TIGRIS_ACCESS_KEY_ID="op://dev-self/Tigris/credentials/ACCESS_KEY_ID"
   export RCLONE_CONFIG_TIGRIS_SECRET_ACCESS_KEY="op://dev-self/Tigris/credentials/SECRET_ACCESS_KEY"
+
+  export RCLONE_CONFIG_HETZNER_TYPE=s3
+  export RCLONE_CONFIG_HETZNER_PROVIDER=AWS
+  export RCLONE_CONFIG_HETZNER_ENDPOINT="op://dev-self/Hetzner/credentials/ENDPOINT"
+  export RCLONE_CONFIG_HETZNER_ACCESS_KEY_ID="op://dev-self/Hetzner/credentials/ACCESS_KEY_ID"
+  export RCLONE_CONFIG_HETZNER_SECRET_ACCESS_KEY="op://dev-self/Hetzner/credentials/SECRET_ACCESS_KEY"
 }
 
 set-tigris-env() {
