@@ -1,11 +1,4 @@
 git_protocol: https
-editor:
-prompt: enabled
 pager: delta
-aliases:
-    branch: f -b
-    log: f -l
-    prs: f -p
-http_unix_socket:
-browser:
+prompt: enabled
 version: "1"
