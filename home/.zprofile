@@ -18,59 +18,29 @@ if [[ $OSTYPE = darwin* ]]; then
   unset __conda_setup
   # <<< conda initialize <<<
 
-  # if [[ "$TERM_PROGRAM" == "zed" ]]; then
-  #   if [[ -n "$ZELLIJ" ]]; then
-  #   else
-  #     local repo_path=$(pwd)
-  #     if [[ "$repo_path" != "$HOME" ]] && git rev-parse --is-inside-work-tree >/dev/null 2>&1 && [[ "$(git rev-parse --show-toplevel)" == "$repo_path" ]]; then
-  #       local repo_name=$(basename "${repo_path}")
-  #       zellij attach "${repo_name}" 2>/dev/null || zellij --session "${repo_name}"
-  #     fi
-  #   fi
-  # fi
-
-  # if [[ "$TERM_PROGRAM" == "ghostty" ]]; then
-  #   if [[ -z "$ZELLIJ" ]]; then
-  #     if [[ "$ZELLIJ_AUTO_ATTACH" == "true" ]]; then
-  #       /opt/homebrew/bin/zellij attach -c
-  #     else
-  #       /opt/homebrew/bin/zellij
-  #     fi
-
-  #     if [[ "$ZELLIJ_AUTO_EXIT" == "true" ]]; then
-  #       exit
-  #     fi
-  #   fi
-  # fi
-
-  function jump-to-session() {
+  if [[ "$TERM_PROGRAM" == "zed" ]]; then
     if [[ -n "$ZELLIJ" ]]; then
     else
-      if [[ "$TERM_PROGRAM" == "ghostty" ]]; then
-        zj_sessions=$(/opt/homebrew/bin/zellij list-sessions --no-formatting --short)
-        case $(echo "$zj_sessions" | grep -c '^.') in
-        0)
-          /opt/homebrew/bin/zellij
-          ;;
-        *)
-          selected_session=$(echo "$zj_sessions" | /opt/homebrew/bin/tv --no-preview) &&
-            [[ -n "$selected_session" ]] && /opt/homebrew/bin/zellij attach "$selected_session"
-          ;;
-        esac
+      local repo_path=$(pwd)
+      if [[ "$repo_path" != "$HOME" ]] && git rev-parse --is-inside-work-tree >/dev/null 2>&1 && [[ "$(git rev-parse --show-toplevel)" == "$repo_path" ]]; then
+        local repo_name=$(basename "${repo_path}")
+        zellij attach "${repo_name}" 2>/dev/null || zellij --session "${repo_name}"
       fi
     fi
-  }
+  fi
 
-  function jump-to-repo() {
-    local repo_path
-    repo_path=$(tv git-repos)
-    [[ -z "$repo_path" ]] && return
-    if [[ -n "$ZELLIJ" ]]; then
-      cd "${repo_path}"
-    else
-      cd "${repo_path}"
-      local repo_name=$(basename "${repo_path}")
-      zellij attach "${repo_name}" 2>/dev/null || zellij --session "${repo_name}"
+  if [[ "$TERM_PROGRAM" == "ghostty" ]]; then
+    if [[ -z "$ZELLIJ" ]]; then
+      if [[ "$ZELLIJ_AUTO_ATTACH" == "true" ]]; then
+        /opt/homebrew/bin/zellij attach -c
+      else
+        /opt/homebrew/bin/zellij
+      fi
+
+      if [[ "$ZELLIJ_AUTO_EXIT" == "true" ]]; then
+        exit
+      fi
     fi
-  }
+  fi
+
 fi
