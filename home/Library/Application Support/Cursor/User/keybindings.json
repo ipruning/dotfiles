@@ -1,7 +1,7 @@
 [
   {
     "command": "workbench.action.terminal.runSelectedText",
-    "key": "shift+enter"
+    "key": "ctrl+shift+enter"
   },
   {
     "command": "-workbench.action.switchWindow",

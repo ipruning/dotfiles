@@ -121,6 +121,8 @@
   {
     "context": "Editor && vim_mode == normal && !VimWaiting && !menu",
     "bindings": {
+      "ctrl-shift-enter": ["workspace::SendKeystrokes", "cmd-c ctrl-` cmd-v enter"],
+
       "ctrl-j": "editor::GoToDiagnostic",
       "ctrl-k": "editor::GoToPreviousDiagnostic",
       "shift-h": "pane::ActivatePreviousItem",
@@ -128,7 +130,7 @@
       "g d": "editor::GoToDefinition",
       "g D": "editor::GoToDefinitionSplit",
       "g r": "editor::FindAllReferences",
-      "space b": "editor::ToggleGitBlame",
+      "space b": "git::Blame",
       "space f": "editor::Format",
       "space q": "pane::CloseActiveItem",
       "space w": "workspace::Save",
