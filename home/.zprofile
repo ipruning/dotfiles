@@ -31,14 +31,11 @@ if [[ $OSTYPE = darwin* ]]; then
 
   if [[ "$TERM_PROGRAM" == "ghostty" ]]; then
     if [[ -z "$ZELLIJ" ]]; then
-      if [[ "$ZELLIJ_AUTO_ATTACH" == "true" ]]; then
-        /opt/homebrew/bin/zellij attach -c
+      latest_session=$(/opt/homebrew/bin/zellij list-sessions --no-formatting --reverse --short | head -n 1)
+      if [[ -n "$latest_session" ]]; then
+        /opt/homebrew/bin/zellij attach "$latest_session"
       else
         /opt/homebrew/bin/zellij
-      fi
-
-      if [[ "$ZELLIJ_AUTO_EXIT" == "true" ]]; then
-        exit
       fi
     fi
   fi
