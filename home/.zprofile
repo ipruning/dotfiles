@@ -33,7 +33,7 @@ if [[ $OSTYPE = darwin* ]]; then
     if [[ -z "$ZELLIJ" ]]; then
       latest_session=$(/opt/homebrew/bin/zellij list-sessions --no-formatting --reverse --short | head -n 1)
       if [[ -n "$latest_session" ]]; then
-        /opt/homebrew/bin/zellij attach "$latest_session"
+        /opt/homebrew/bin/zellij attach --create "$latest_session"
       else
         /opt/homebrew/bin/zellij
       fi
