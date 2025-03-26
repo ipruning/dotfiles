@@ -1,6 +1,35 @@
 keybinds clear-defaults=true {
     locked {
         bind "Ctrl g" { SwitchToMode "normal"; }
+
+        bind "Ctrl j" {
+            LaunchOrFocusPlugin "https://github.com/laperlej/zellij-sessionizer/releases/latest/download/zellij-sessionizer.wasm" {
+                floating true
+                move_to_focused_tab true
+                cwd "/"
+                root_dirs "/Users/alex/Developer/local;/Users/alex/Developer/jihuanshe.com"
+                session_layout "default"
+            }
+            SwitchToMode "locked"
+        }
+        bind "Ctrl J" {
+            LaunchOrFocusPlugin "session-manager" {
+                floating true
+                move_to_focused_tab true
+            }
+            SwitchToMode "locked"
+        }
+
+
+        bind "Ctrl 1" { GoToTab 1; SwitchToMode "locked";}
+        bind "Ctrl 2" { GoToTab 2; SwitchToMode "locked";}
+        bind "Ctrl 3" { GoToTab 3; SwitchToMode "locked";}
+        bind "Ctrl 4" { GoToTab 4; SwitchToMode "locked";}
+        bind "Ctrl 5" { GoToTab 5; SwitchToMode "locked";}
+        bind "Ctrl 6" { GoToTab 6; SwitchToMode "locked";}
+        bind "Ctrl 7" { GoToTab 7; SwitchToMode "locked";}
+        bind "Ctrl 8" { GoToTab 8; SwitchToMode "locked";}
+        bind "Ctrl 9" { GoToTab 9; SwitchToMode "locked";}
     }
     pane {
         bind "left" { MoveFocus "left"; }
@@ -158,6 +187,35 @@ keybinds clear-defaults=true {
     shared_except "locked" "renametab" "renamepane" {
         bind "Ctrl g" { SwitchToMode "locked"; }
         bind "Ctrl q" { Quit; }
+
+        bind "Ctrl d" { Detach; }
+
+        bind "1" { GoToTab 1; SwitchToMode "locked"; }
+        bind "2" { GoToTab 2; SwitchToMode "locked"; }
+        bind "3" { GoToTab 3; SwitchToMode "locked"; }
+        bind "4" { GoToTab 4; SwitchToMode "locked"; }
+        bind "5" { GoToTab 5; SwitchToMode "locked"; }
+        bind "6" { GoToTab 6; SwitchToMode "locked"; }
+        bind "7" { GoToTab 7; SwitchToMode "locked"; }
+        bind "8" { GoToTab 8; SwitchToMode "locked"; }
+        bind "9" { GoToTab 9; SwitchToMode "locked"; }
+
+        bind "h" { MoveFocusOrTab "left"; }
+        bind "j" { MoveFocus "down"; }
+        bind "k" { MoveFocus "up"; }
+        bind "l" { MoveFocusOrTab "right"; }
+        bind "left" { NewPane "left"; SwitchToMode "locked"; }
+        bind "down" { NewPane "down"; SwitchToMode "locked"; }
+        bind "up" { NewPane "up"; SwitchToMode "locked"; }
+        bind "right" { NewPane "right"; SwitchToMode "locked"; }
+        bind "n" { NewTab; SwitchToMode "locked"; }
+        bind "t" { NewTab; SwitchToMode "locked"; }
+
+        bind "Ctrl s" { EditScrollback; SwitchToMode "locked"; }
+
+        bind "u" { HalfPageScrollUp; }
+        bind "d" { HalfPageScrollDown; }
+
     }
     shared_except "locked" "entersearch" {
         bind "enter" { SwitchToMode "locked"; }
@@ -246,7 +304,7 @@ load_plugins {
 //   - true
 //   - false (Default)
 // 
-simplified_ui true
+// simplified_ui true
  
 // Choose the theme that is specified in the themes section.
 // Default: default
@@ -322,7 +380,7 @@ default_mode "locked"
 // Valid values: positive integers
 // Default value: 10000
 // 
-scroll_buffer_size 100000
+scroll_buffer_size 50000
  
 // Provide a command to execute when copying text. The text will be piped to
 // the stdin of the program to perform the copy. This can be used with
