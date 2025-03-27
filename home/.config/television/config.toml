@@ -160,6 +160,7 @@ fallback_channel = "hidden-files-max-depth-3"
   "marimo edit",
   "marimo run",
   "modal run",
+  "modal serve",
   "modal-cli",
   "python",
   "uv add",
