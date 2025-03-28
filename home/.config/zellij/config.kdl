@@ -3,16 +3,6 @@ keybinds clear-defaults=true {
         bind "Ctrl g" { SwitchToMode "normal"; }
 
         bind "Ctrl j" {
-            LaunchOrFocusPlugin "https://github.com/laperlej/zellij-sessionizer/releases/latest/download/zellij-sessionizer.wasm" {
-                floating true
-                move_to_focused_tab true
-                cwd "/"
-                root_dirs "/Users/alex/Developer;/Users/alex/Developer/jihuanshe.com"
-                session_layout "compact"
-            }
-            SwitchToMode "locked"
-        }
-        bind "Ctrl J" {
             LaunchOrFocusPlugin "session-manager" {
                 floating true
                 move_to_focused_tab true
@@ -20,6 +10,16 @@ keybinds clear-defaults=true {
             SwitchToMode "locked"
         }
 
+        bind "Ctrl J" {
+            LaunchOrFocusPlugin "https://github.com/laperlej/zellij-sessionizer/releases/latest/download/zellij-sessionizer.wasm" {
+                floating true
+                move_to_focused_tab true
+                cwd "/"
+                root_dirs "/Users/alex/Developer;/Users/alex/Developer/jihuanshe.com"
+                session_layout "default"
+            }
+            SwitchToMode "locked"
+        }
 
         bind "Ctrl 1" { GoToTab 1; SwitchToMode "locked";}
         bind "Ctrl 2" { GoToTab 2; SwitchToMode "locked";}
@@ -328,7 +328,7 @@ default_mode "locked"
 // The name of the default layout to load on startup
 // Default: "default"
 // 
-default_layout "compact"
+default_layout "default"
  
 // The folder in which Zellij will look for layouts
 // (Requires restart)
