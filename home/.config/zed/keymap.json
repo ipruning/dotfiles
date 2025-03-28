@@ -214,7 +214,7 @@
     "context": "Editor",
     "bindings": {
       "tab": "editor::Tab",
-      "shift-enter": ["workspace::SendKeystrokes", "y $ ctrl-` cmd-v enter"]
+      "ctrl-shift-enter": ["workspace::SendKeystrokes", "y $ ctrl-` cmd-v enter"]
     }
   },
   {
