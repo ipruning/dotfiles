@@ -7,8 +7,8 @@ keybinds clear-defaults=true {
                 floating true
                 move_to_focused_tab true
                 cwd "/"
-                root_dirs "/Users/alex/Developer/local;/Users/alex/Developer/jihuanshe.com"
-                session_layout "default"
+                root_dirs "/Users/alex/Developer;/Users/alex/Developer/jihuanshe.com"
+                session_layout "compact"
             }
             SwitchToMode "locked"
         }
@@ -328,7 +328,7 @@ default_mode "locked"
 // The name of the default layout to load on startup
 // Default: "default"
 // 
-// default_layout "compact"
+default_layout "compact"
  
 // The folder in which Zellij will look for layouts
 // (Requires restart)
