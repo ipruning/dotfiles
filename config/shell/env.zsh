@@ -43,6 +43,12 @@ zstyle ':fzf-tab:*' use-fzf-default-opts yes
 unset __TREE_IGNORE
 unset __FD_COMMAND
 
+# 👇 zsh-autosuggestions
+source "$ZSH_PLUGINS_DIR"/zsh-autosuggestions/zsh-autosuggestions.zsh
+
+# 👇 fast-syntax-highlighting
+source "$ZSH_PLUGINS_DIR"/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
+
 # 👇 tv
 _tv_search() {
   emulate -L zsh
@@ -66,9 +72,6 @@ _tv_search() {
 zle -N tv-search _tv_search
 
 bindkey '^T' tv-search
-
-# 👇 fast-syntax-highlighting
-source "$ZSH_PLUGINS_DIR"/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
 
 # 👇 zsh options
 setopt interactivecomments
