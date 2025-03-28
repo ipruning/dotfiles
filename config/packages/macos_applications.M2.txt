@@ -31,6 +31,7 @@ Drafts
 Eagle
 Eudic
 Figma
+Firefox
 Fork
 Frame0
 Ghostty
