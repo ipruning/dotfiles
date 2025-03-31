@@ -1,17 +1,11 @@
 export HF_TOKEN="op://dev-self/Hugging Face/macos/HF_TOKEN"
-export LOGFIRE_TOKEN="op://dev-self/426cvuij6hhwgrmghdzue2p5hu/macos/LOGFIRE_TOKEN"
+export LOGFIRE_TOKEN="op://dev-self/Logfire/prototypes/LOGFIRE_TOKEN"
 
+export ANTHROPIC_API_KEY="op://prod-coach/Anthropic/macos/ANTHROPIC_API_KEY"
 export GEMINI_API_KEY="op://dev-self/Vertex Al/macos/GEMINI_API_KEY"
 export OPENAI_API_KEY="op://dev-self/OpenAI Platform/macos/OPENAI_API_KEY"
-export OPENAI_BASE_URL=https://api.openai.com/v1
 
-export AI_PY_API_KEY=$OPENAI_API_KEY
 export LLM_GEMINI_KEY=$GEMINI_API_KEY
-export DEEPSEEK_API_KEY="op://dev-self/DeepSeek/credentials/DEEPSEEK_API_KEY"
-export DEEPSEEK_BASE_URL="op://dev-self/DeepSeek/credentials/DEEPSEEK_BASE_URL"
-
-export ROAM_RESEARCH_TOKEN="op://dev-self/Roam Research/credentials/ROAM_RESEARCH_TOKEN"
-export ROAM_RESEARCH_ENDPOINT="op://dev-self/Roam Research/credentials/ROAM_RESEARCH_ENDPOINT"
 
 set-rclone-env() {
   export RCLONE_CONFIG_R2_TYPE=s3

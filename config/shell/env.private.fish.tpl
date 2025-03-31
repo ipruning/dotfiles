@@ -1,17 +1,11 @@
 set -x HF_TOKEN "op://dev-self/Hugging Face/macos/HF_TOKEN"
-set -x LOGFIRE_TOKEN "op://dev-self/426cvuij6hhwgrmghdzue2p5hu/macos/LOGFIRE_TOKEN"
+set -x LOGFIRE_TOKEN "op://dev-self/Logfire/prototypes/LOGFIRE_TOKEN"
 
+set -x ANTHROPIC_API_KEY "op://prod-coach/Anthropic/macos/ANTHROPIC_API_KEY"
 set -x GEMINI_API_KEY "op://dev-self/Vertex Al/macos/GEMINI_API_KEY"
 set -x OPENAI_API_KEY "op://dev-self/OpenAI Platform/macos/OPENAI_API_KEY"
-set -x OPENAI_BASE_URL "https://api.openai.com/v1"
 
-set -x AI_PY_API_KEY $OPENAI_API_KEY
 set -x LLM_GEMINI_KEY $GEMINI_API_KEY
-set -x DEEPSEEK_API_KEY "op://dev-self/DeepSeek/credentials/DEEPSEEK_API_KEY"
-set -x DEEPSEEK_BASE_URL "op://dev-self/DeepSeek/credentials/DEEPSEEK_BASE_URL"
-
-set -x ROAM_RESEARCH_TOKEN "op://dev-self/Roam Research/credentials/ROAM_RESEARCH_TOKEN"
-set -x ROAM_RESEARCH_ENDPOINT "op://dev-self/Roam Research/credentials/ROAM_RESEARCH_ENDPOINT"
 
 function set-rclone-env
   set -gx RCLONE_CONFIG_R2_TYPE "s3"
