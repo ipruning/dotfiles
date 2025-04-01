@@ -1,12 +1,12 @@
 [[plugin.deps]]
 use = "dedukun/relative-motions"
-rev = "a1466a9"
-hash = "26d7fd10e163e0624d733c067eba4b61"
+rev = "8103065"
+hash = "9f13f0740fa3a0c18e47ec6fb62ddfaa"
 
 [[plugin.deps]]
 use = "yazi-rs/plugins:git"
-rev = "5186af7"
-hash = "771f18427fb75fb19990ce602bb322f4"
+rev = "2730199"
+hash = "e0d2c8d7e7afe5b82270367098d1a821"
 
 [[plugin.deps]]
 use = "KKV9/compress"
@@ -15,8 +15,8 @@ hash = "ee025be766240cc98e671754ac836da3"
 
 [[plugin.deps]]
 use = "yazi-rs/plugins:smart-enter"
-rev = "5186af7"
-hash = "aef2b1a805b80cce573bb766f1459d88"
+rev = "2730199"
+hash = "7918aab6a71caf31b58411f789195677"
 
 [flavor]
 deps = []
