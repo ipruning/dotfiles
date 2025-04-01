@@ -24,14 +24,14 @@ if [[ $OSTYPE = darwin* ]]; then
       local repo_path=$(pwd)
       if [[ "$repo_path" != "$HOME" ]] && git rev-parse --is-inside-work-tree >/dev/null 2>&1 && [[ "$(git rev-parse --show-toplevel)" == "$repo_path" ]]; then
         local repo_name=$(basename "${repo_path}")
-        zellij attach "${repo_name}" 2>/dev/null || zellij --session "${repo_name}"
+        zellij attach "repo-${repo_name}" 2>/dev/null || zellij --session "repo-${repo_name}"
       fi
     fi
   fi
 
   if [[ "$TERM_PROGRAM" == "ghostty" ]]; then
     if [[ -z "$ZELLIJ" ]]; then
-      latest_session=$(/opt/homebrew/bin/zellij list-sessions --no-formatting --reverse --short | head -n 1)
+      latest_session=$(/opt/homebrew/bin/zellij list-sessions --no-formatting --reverse --short | grep -v "^repo-" | head -n 1)
       if [[ -n "$latest_session" ]]; then
         /opt/homebrew/bin/zellij attach --create "$latest_session"
       else
