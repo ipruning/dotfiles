@@ -54,7 +54,7 @@ zig = "latest"
 [settings]
 experimental = true
 python.uv_venv_auto = true
-trusted_config_paths = ['~/Developer']
+trusted_config_paths = ['~/dev']
 
 [settings.npm]
 bun = true

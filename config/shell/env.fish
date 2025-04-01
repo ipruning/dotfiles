@@ -45,8 +45,8 @@ if status is-interactive
     rm -f -- "$tmp"
   end
 
-  fish_add_path $HOME/Developer/prototypes/utils/bin
-  fish_add_path $HOME/Developer/prototypes/utils/scripts
+  fish_add_path $HOME/dev/prototypes/utils/bin
+  fish_add_path $HOME/dev/prototypes/utils/scripts
 
   for file in $HOME/dotfiles/home/.config/fish/completions/*.fish
     source $file

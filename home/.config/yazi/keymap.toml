@@ -561,11 +561,6 @@ run = "cd ~/Downloads"
 desc = "Goto Downloads"
 
 [[manager.prepend_keymap]]
-on = ["g", "l"]
-run = "cd ~/Developer/local"
-desc = "Goto local"
-
-[[manager.prepend_keymap]]
 on = ["c", "C"]
 run = '''shell 'yek "$@" | pbcopy' '''
 desc = "Clip selected files and directories"

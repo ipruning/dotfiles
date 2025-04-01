@@ -30,10 +30,10 @@ outer.right = 8
 # 3 = 1
 # 4 = 1
 # 5 = 1
-6 = 2
-7 = 2
-8 = 2
-9 = 2
+# 6 = 2
+# 7 = 2
+# 8 = 2
+# 9 = 2
 
 [mode.main.binding]
 alt-p = 'mode pass'
