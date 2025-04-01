@@ -130,7 +130,8 @@ function y() {
 
 # 👇 atuin
 # eval "$(atuin init zsh --disable-up-arrow)"
-eval "$(atuin init zsh)"
+# eval "$(atuin init zsh)"
+source "$HOME/dotfiles/config/shell/functions/atuin.zsh"
 
 # 👇 mise
 eval "$(mise activate zsh)"
