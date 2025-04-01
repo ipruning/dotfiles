@@ -11,18 +11,18 @@ accordion-padding = 0
 preset = 'qwerty'
 
 [gaps]
-# inner.horizontal = 8
-# inner.vertical = 8
-# outer.left = 8
-# outer.bottom = 8
-# outer.top = 8
-# outer.right = 8
-inner.horizontal = 0
-inner.vertical = 0
-outer.left = 0
-outer.bottom = 0
-outer.top = 0
-outer.right = 0
+inner.horizontal = 8
+inner.vertical = 8
+outer.left = 8
+outer.bottom = 8
+outer.top = 8
+outer.right = 8
+# inner.horizontal = 0
+# inner.vertical = 0
+# outer.left = 0
+# outer.bottom = 0
+# outer.top = 0
+# outer.right = 0
 
 [workspace-to-monitor-force-assignment]
 # 1 = 1
@@ -120,7 +120,15 @@ f = ['layout floating tiling', 'mode main']
 shift-f = ['fullscreen', 'mode main']
 
 [[on-window-detected]]
-if.app-id = 'com.xingin.discover'
+if.window-title-regex-substring = 'MDPro3'
+run = 'layout floating'
+
+[[on-window-detected]]
+if.window-title-regex-substring = 'steam'
+run = 'layout floating'
+
+[[on-window-detected]]
+if.app-id = 'uk.co.powdertoy.tpt'
 run = 'layout floating'
 
 [[on-window-detected]]
@@ -132,23 +140,11 @@ if.app-id = 'com.xfge.LifeEasy'
 run = 'layout floating'
 
 [[on-window-detected]]
-if.app-id = 'app.podcast.cosmos'
+if.app-id = 'com.apple.audio.AudioMIDISetup'
 run = 'layout floating'
 
 [[on-window-detected]]
-if.app-id = 'com.miHoYo.hkrpg'
-run = 'layout floating'
-
-[[on-window-detected]]
-if.app-id = 'com.miHoYo.Nap'
-run = 'layout floating'
-
-[[on-window-detected]]
-if.window-title-regex-substring = 'MDPro3'
-run = 'layout floating'
-
-[[on-window-detected]]
-if.window-title-regex-substring = 'steam'
+if.app-id = 'com.apple.ScreenSharing'
 run = 'layout floating'
 
 [[on-window-detected]]
@@ -160,37 +156,9 @@ if.app-id = 'org.pqrs.Karabiner-EventViewer'
 run = 'layout floating'
 
 [[on-window-detected]]
-if.app-id = 'com.apple.audio.AudioMIDISetup'
-run = 'layout floating'
-
-[[on-window-detected]]
-if.app-id = 'uk.co.powdertoy.tpt'
-run = 'layout floating'
-
-[[on-window-detected]]
-if.app-id = 'com.apple.ScreenSharing'
-run = 'layout floating'
-
-[[on-window-detected]]
 if.app-id = 'codes.rambo.VirtualBuddy'
 run = 'layout floating'
 
 [[on-window-detected]]
-if.app-id = 'com.zuler.daas.client'
+if.app-id = 'com.tencent.xinWeChat'
 run = 'layout floating'
-
-[[on-window-detected]]
-if.app-id = 'com.taobao.fleamarket'
-run = 'layout floating'
-
-# [[on-window-detected]]
-# if.app-id = 'com.todesktop.230313mzl4w4u92'
-# run = 'move-node-to-workspace 7'
-
-# [[on-window-detected]]
-# if.app-id = 'com.exafunction.windsurf'
-# run = 'move-node-to-workspace 7'
-
-# [[on-window-detected]]
-# if.app-id = 'com.pvncher.repoprompt'
-# run = 'move-node-to-workspace 8'
