@@ -117,6 +117,10 @@
     //     "directories": [".env", "env", ".venv", "venv"]
     //   }
     // },
+    "env": {
+      "EDITOR": "zed --wait",
+      "VISUAL": "zed --wait"
+    },
     "font_family": "MonoLisa",
     "font_weight": 400,
     "line_height": {
