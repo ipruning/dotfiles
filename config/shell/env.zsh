@@ -85,16 +85,8 @@ zle -N edit-command-line
 bindkey "^v" edit-command-line
 
 # 👇 My preferred editor for local and remote sessions
-if [[ "$TERM_PROGRAM" == "ghostty" ]]; then
-  export EDITOR="nvim"
-  export VISUAL="nvim"
-elif [[ "$TERM_PROGRAM" == "zed" ]]; then
-  export EDITOR="zed --wait"
-  export VISUAL="zed --wait"
-else
-  export EDITOR="nvim"
-  export VISUAL="nvim"
-fi
+export EDITOR="nvim"
+export VISUAL="nvim"
 
 # 👇 My keybindings
 bindkey "^[f" forward-word
@@ -145,3 +137,7 @@ eval "$(mise activate zsh)"
 
 # 👇 bartib
 export BARTIB_FILE="$HOME/.config/bartib/activities.bartib"
+
+# 👇 prefect
+export PREFECT_API_PORT=4200
+export PREFECT_API_URL=http://127.0.0.1:$PREFECT_API_PORT/api
