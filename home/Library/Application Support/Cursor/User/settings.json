@@ -25,7 +25,7 @@
     "editor.renderWhitespace": "selection",
     "editor.snippetSuggestions": "top",
     "editor.tabCompletion": "on",
-    "editor.tabSize": 2,
+    "editor.tabSize": 2
   },
   "[markdown]": {
     "editor.acceptSuggestionOnEnter": "on",
@@ -38,7 +38,7 @@
     "editor.renderWhitespace": "selection",
     "editor.snippetSuggestions": "top",
     "editor.tabCompletion": "on",
-    "editor.tabSize": 2,
+    "editor.tabSize": 2
   },
   "[python]": {
     "diffEditor.ignoreTrimWhitespace": false,
@@ -300,6 +300,7 @@
   "python.analysis.inlayHints.variableTypes": false,
   "python.analysis.typeCheckingMode": "basic",
   "python.languageServer": "Pylance",
+  "redhat.telemetry.enabled": false,
   "ruff.configurationPreference": "filesystemFirst",
   "shellcheck.customArgs": [],
   "shellcheck.enable": true,
