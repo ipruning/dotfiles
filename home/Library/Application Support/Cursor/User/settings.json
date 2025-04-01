@@ -148,6 +148,7 @@
     "error",
     "warning"
   ],
+  "errorLens.messageBackgroundMode": "none",
   "explorer.confirmDelete": false,
   "explorer.confirmDragAndDrop": false,
   "explorer.fileNesting.enabled": true,
