@@ -98,6 +98,7 @@ rip2
 ripgrep-all
 ripsecrets
 rnr
+ruff
 rust-parallel
 rustscan
 screenpipe
