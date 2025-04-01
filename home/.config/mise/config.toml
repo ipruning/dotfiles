@@ -53,7 +53,7 @@ zig = "latest"
 
 [settings]
 experimental = true
-python.uv_venv_auto = true
+status = { missing_tools = "never" }
 trusted_config_paths = ['~/dev']
 
 [settings.npm]
