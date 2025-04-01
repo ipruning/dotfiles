@@ -8,7 +8,11 @@
     "shell": {
       "with_arguments": {
         "program": "sh",
-        "args": ["--noediting", "--norc", "--noprofile"]
+        "args": [
+          "--noediting",
+          "--norc",
+          "--noprofile"
+        ]
       }
     }
   },
@@ -21,7 +25,11 @@
     "shell": {
       "with_arguments": {
         "program": "sh",
-        "args": ["--noediting", "--norc", "--noprofile"]
+        "args": [
+          "--noediting",
+          "--norc",
+          "--noprofile"
+        ]
       }
     }
   },
@@ -34,7 +42,11 @@
     "shell": {
       "with_arguments": {
         "program": "sh",
-        "args": ["--noediting", "--norc", "--noprofile"]
+        "args": [
+          "--noediting",
+          "--norc",
+          "--noprofile"
+        ]
       }
     }
   },
@@ -47,7 +59,11 @@
     "shell": {
       "with_arguments": {
         "program": "sh",
-        "args": ["--noediting", "--norc", "--noprofile"]
+        "args": [
+          "--noediting",
+          "--norc",
+          "--noprofile"
+        ]
       }
     }
   },
@@ -60,7 +76,11 @@
     "shell": {
       "with_arguments": {
         "program": "sh",
-        "args": ["--noediting", "--norc", "--noprofile"]
+        "args": [
+          "--noediting",
+          "--norc",
+          "--noprofile"
+        ]
       }
     }
   },
@@ -73,7 +93,11 @@
     "shell": {
       "with_arguments": {
         "program": "sh",
-        "args": ["--noediting", "--norc", "--noprofile"]
+        "args": [
+          "--noediting",
+          "--norc",
+          "--noprofile"
+        ]
       }
     }
   },
@@ -86,13 +110,17 @@
     "shell": {
       "with_arguments": {
         "program": "sh",
-        "args": ["--noediting", "--norc", "--noprofile"]
+        "args": [
+          "--noediting",
+          "--norc",
+          "--noprofile"
+        ]
       }
     }
   },
   {
     "label": "claude",
-    "command": "current_dir=$(basename \"$(pwd)\"); tmux attach-session -t \"$current_dir\" 2>/dev/null || tmux new-session -s \"$current_dir\" 'tmux new-window -n claude \"zsh -i -c \\\"set-bedrock-env && claude\\\"\" && tmux select-window -t claude'",
+    "command": "current_dir=$(basename \"$(pwd)\"); tmux attach-session -t \"$current_dir\" 2>/dev/null || tmux new-session -s \"$current_dir\" 'tmux new-window -n claude \"zsh -i -c \\\"set-bedrock-dev-work-env && claude\\\"\" && tmux select-window -t claude'",
     "hide": "always"
   }
 ]
