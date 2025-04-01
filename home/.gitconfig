@@ -126,7 +126,7 @@ reflogExpire = 200
 reflogExpireUnreachable = 90
 
 [include]
-path = ~/Developer/.gitconfig
+path = ~/dev/.gitconfig
 
 [protocol]
 version = 2 # https://blog.github.com/changelog/2018-11-08-git-protocol-v2-support/
