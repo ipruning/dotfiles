@@ -1,10 +1,9 @@
 .DS_Store
 *backups
-*private*
 *tmTheme
 config/shell/completions/
 config/shell/plugins/
-
-!*private*.tpl
-
 home/.config/fish/completions/
+
+*private*
+!*tpl*
