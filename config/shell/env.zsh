@@ -44,7 +44,7 @@ unset __TREE_IGNORE
 unset __FD_COMMAND
 
 # 👇 zsh-autosuggestions
-source "$ZSH_PLUGINS_DIR"/zsh-autosuggestions/zsh-autosuggestions.zsh
+# source "$ZSH_PLUGINS_DIR"/zsh-autosuggestions/zsh-autosuggestions.zsh
 
 # 👇 fast-syntax-highlighting
 source "$ZSH_PLUGINS_DIR"/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
@@ -137,7 +137,8 @@ function y() {
 }
 
 # 👇 atuin
-eval "$(atuin init zsh --disable-up-arrow)"
+# eval "$(atuin init zsh --disable-up-arrow)"
+eval "$(atuin init zsh)"
 
 # 👇 mise
 eval "$(mise activate zsh)"
