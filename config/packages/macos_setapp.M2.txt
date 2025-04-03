@@ -13,6 +13,7 @@ Hookmark
 HoudahSpot
 Image2icon
 In Your Face
+iStat Menus
 Luminar Neo
 MarginNote
 One Switch
@@ -28,4 +29,3 @@ Timing
 Ulysses
 WiFi Explorer
 Yoink
-iStat Menus
