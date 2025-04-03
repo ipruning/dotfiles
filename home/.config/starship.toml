@@ -30,9 +30,10 @@ style = "bold yellow"
 [directory]
 read_only = ' [RO]'
 read_only_style = "bold red"
+truncation_symbol = ".../"
 
-fish_style_pwd_dir_length = 1
-truncation_length = 1
+# fish_style_pwd_dir_length = 1
+# truncation_length = 4
 
 [git_branch]
 format = "[$branch]($style) "
