@@ -53,8 +53,8 @@ zig = "latest"
 
 [settings]
 experimental = true
-status = { missing_tools = "never" }
-trusted_config_paths = ['~/dev']
+status = { missing_tools = "never", show_env = false, show_tools = false }
+trusted_config_paths = ['~/dev', '~/dev-work']
 
 [settings.npm]
 bun = true
