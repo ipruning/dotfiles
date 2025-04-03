@@ -1,4 +1,4 @@
-# start-at-login = true
+start-at-login = true
 enable-normalization-flatten-containers = true
 enable-normalization-opposite-orientation-for-nested-containers = true
 default-root-container-layout = 'accordion'
@@ -17,6 +17,7 @@ outer.left = 12
 outer.bottom = 12
 outer.top = 12
 outer.right = 12
+
 # inner.horizontal = 0
 # inner.vertical = 0
 # outer.left = 0
@@ -38,7 +39,7 @@ outer.right = 12
 [mode.main.binding]
 alt-p = 'mode pass'
 
-alt-backslash = 'workspace-back-and-forth'
+# alt-backslash = 'workspace-back-and-forth'
 alt-comma = 'layout tiles vertical horizontal'
 # alt-period = 'layout accordion vertical horizontal'
 alt-period = 'layout accordion vertical'
@@ -49,6 +50,7 @@ alt-slash = 'mode service'
 # alt-3 = 'workspace 3'
 # alt-4 = 'workspace 4'
 # alt-5 = 'workspace 5'
+
 alt-6 = 'workspace 6'
 alt-7 = 'workspace 7'
 alt-8 = 'workspace 8'
@@ -59,6 +61,7 @@ alt-9 = 'workspace 9'
 # alt-shift-3 = 'move-node-to-workspace 3'
 # alt-shift-4 = 'move-node-to-workspace 4'
 # alt-shift-5 = 'move-node-to-workspace 5'
+
 alt-shift-6 = 'move-node-to-workspace 6'
 alt-shift-7 = 'move-node-to-workspace 7'
 alt-shift-8 = 'move-node-to-workspace 8'
@@ -72,6 +75,11 @@ alt-shift-h = ['move left', 'mode main']
 alt-shift-j = ['move down', 'mode main']
 alt-shift-k = ['move up', 'mode main']
 alt-shift-l = ['move right', 'mode main']
+
+alt-y = 'exec-and-forget open -a /Applications/Zed.app'
+alt-u = 'exec-and-forget open -a /Applications/Ghostty.app'
+alt-i = 'exec-and-forget open -a /Applications/Google\ Chrome.app'
+alt-o = 'exec-and-forget open -a /Applications/Roam\ Research.app'
 
 cmd-m = []
 cmd-h = []
