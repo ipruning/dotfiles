@@ -73,6 +73,7 @@ Notion
 Notion Calendar
 OBS
 OnyX
+OpenCat
 OrbStack
 Parsec
 PasteNow
@@ -88,6 +89,7 @@ Reqable
 Roam Research
 Rond
 Rotato
+RustDesk
 Safari
 Scapple
 Screen Studio
@@ -109,6 +111,7 @@ TencentMeeting
 The Powder Toy
 Things3
 TickTick
+ToDesk
 UninstallPKG
 VideoFusion-macOS
 VirtualBox
