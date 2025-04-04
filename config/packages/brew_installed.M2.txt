@@ -6,6 +6,7 @@ ast-grep
 atuin
 autoconf
 autocorrect
+automake
 awscli
 bandwhich
 bartib
@@ -13,6 +14,7 @@ basedpyright
 bash
 bat
 bats-core
+bison
 brotli
 c-ares
 ca-certificates
@@ -43,6 +45,7 @@ ffmpeg
 fio
 fish
 fisher
+flex
 flyctl
 fossil
 fpp
@@ -88,6 +91,7 @@ luajit
 lychee
 mackup
 macmon
+make
 mdq
 media-info
 miniserve
@@ -96,6 +100,7 @@ monolith
 mtr
 neovim
 nmap
+nushell
 oha
 ollama
 onefetch
