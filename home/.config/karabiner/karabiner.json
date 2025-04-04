@@ -9,7 +9,23 @@
                 },
                 "rules": [
                     {
-                        "description": "caps_lock 👉 escape on tap / left_control on hold (only on built-in keyboard)",
+                        "description": "home 👉 hyper if on hold",
+                        "manipulators": [
+                            {
+                                "from": { "key_code": "home" },
+                                "to": [
+                                    {
+                                        "key_code": "left_shift",
+                                        "modifiers": ["left_command", "left_control", "left_option"]
+                                    }
+                                ],
+                                "to_if_alone": [{ "key_code": "home" }],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "caps_lock 👉 escape if alone / left_control if on hold (only on built-in keyboard)",
                         "manipulators": [
                             {
                                 "conditions": [
@@ -35,6 +51,7 @@
                     },
                     {
                         "description": "yper b / f 👉 alt ← / →",
+                        "enabled": false,
                         "manipulators": [
                             {
                                 "from": {
@@ -98,6 +115,7 @@
                     },
                     {
                         "description": "yper s / d 👉 cmd [ / ] (with conditions)",
+                        "enabled": false,
                         "manipulators": [
                             {
                                 "conditions": [
@@ -149,6 +167,7 @@
                     },
                     {
                         "description": "yper e / r 👉 cmd shift [ / ] (with conditions)",
+                        "enabled": false,
                         "manipulators": [
                             {
                                 "conditions": [
@@ -202,6 +221,7 @@
                     },
                     {
                         "description": "shift back 👉 alt back",
+                        "enabled": false,
                         "manipulators": [
                             {
                                 "from": {
@@ -247,6 +267,28 @@
                     }
                 ]
             },
+            "devices": [
+                {
+                    "disable_built_in_keyboard_if_exists": true,
+                    "identifiers": {
+                        "is_keyboard": true,
+                        "is_pointing_device": true,
+                        "product_id": 866,
+                        "vendor_id": 10730
+                    },
+                    "ignore": false
+                },
+                {
+                    "disable_built_in_keyboard_if_exists": true,
+                    "identifiers": {
+                        "is_keyboard": true,
+                        "is_pointing_device": true,
+                        "product_id": 24926,
+                        "vendor_id": 7504
+                    },
+                    "ignore": false
+                }
+            ],
             "fn_function_keys": [
                 {
                     "from": { "key_code": "f3" },
