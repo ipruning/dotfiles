@@ -2,14 +2,15 @@ aider
 assimp
 ast-grep
 atuin
-autoconf
 autocorrect
+automake
 awscli
 bandwhich
 bartib
 basedpyright
 bat
 bats-core
+bison
 cfitsio
 cgif
 choose-rust
@@ -31,6 +32,7 @@ fastfetch
 fd
 fio
 fisher
+flex
 flyctl
 fossil
 fpp
@@ -68,6 +70,7 @@ llm
 lychee
 mackup
 macmon
+make
 mdq
 media-info
 miniserve
@@ -75,6 +78,7 @@ mise
 monolith
 mtr
 neovim
+nushell
 oha
 ollama
 onefetch
