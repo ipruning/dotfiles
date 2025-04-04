@@ -3,29 +3,39 @@
     "command": "workbench.action.terminal.runSelectedText",
     "key": "ctrl+shift+enter"
   },
-  {
-    "command": "-workbench.action.switchWindow",
-    "key": "ctrl+w"
-  },
-  {
-    "command": "-editor.action.acceptCursorTabSuggestion",
-    "key": "tab"
-  },
-  {
-    "command": "editor.action.acceptCursorTabSuggestion",
-    "key": "ctrl+y"
-  },
-  {
-    "args": {
-      "commands": [
-        "workbench.action.files.save",
-        "git.stageAll",
-        "cursor.generateGitCommitMessage",
-        "git.commit",
-        "git.push"
-      ]
-    },
-    "command": "runCommands",
-    "key": "cmd+g a c"
-  },
+  // {
+  //   "command": "-workbench.action.switchWindow",
+  //   "key": "ctrl+w"
+  // },
+  // {
+  //   "command": "-editor.action.acceptCursorTabSuggestion",
+  //   "key": "tab"
+  // },
+  // {
+  //   "command": "editor.action.acceptCursorTabSuggestion",
+  //   "key": "ctrl+y"
+  // },
+  // {
+  //   "args": {
+  //     "commands": [
+  //       "workbench.action.files.save",
+  //       "git.stageAll",
+  //       "cursor.generateGitCommitMessage",
+  //       "git.commit",
+  //       "git.push"
+  //     ]
+  //   },
+  //   "command": "runCommands",
+  //   "key": "cmd+g a c"
+  // },
+  // {
+  //   "key": "ctrl+a",
+  //   "command": "cursorHome",
+  //   "when": "textInputFocus"
+  // },
+  // {
+  //   "key": "ctrl+e",
+  //   "command": "cursorEnd",
+  //   "when": "textInputFocus"
+  // }
 ]

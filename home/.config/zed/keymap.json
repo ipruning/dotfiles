@@ -213,38 +213,38 @@
   {
     "context": "Editor",
     "bindings": {
-      "tab": "editor::Tab",
+      // "tab": "editor::Tab",
       "ctrl-shift-enter": ["workspace::SendKeystrokes", "y $ ctrl-` cmd-v enter"]
     }
-  },
-  {
-    "context": "(VimControl && !menu) || vim_mode == replace || vim_mode == waiting",
-    "bindings": {
-      "tab": "vim::Tab"
-    }
-  },
-  {
-    "context": "vim_mode == literal",
-    "bindings": {
-      "tab": ["vim::Literal", ["tab", "\u0009"]]
-    }
-  },
-  {
-    "context": "Editor && showing_completions",
-    "bindings": {
-      "enter": "editor::ConfirmCompletion"
-    }
-  },
-  {
-    "context": "Editor && edit_prediction",
-    "bindings": {
-      "ctrl-y": "editor::AcceptEditPrediction"
-    }
-  },
-  {
-    "context": "Editor && edit_prediction_conflict",
-    "bindings": {
-      "ctrl-y": "editor::AcceptEditPrediction"
-    }
   }
+  // {
+  //   "context": "(VimControl && !menu) || vim_mode == replace || vim_mode == waiting",
+  //   "bindings": {
+  //     "tab": "vim::Tab"
+  //   }
+  // },
+  // {
+  //   "context": "vim_mode == literal",
+  //   "bindings": {
+  //     "tab": ["vim::Literal", ["tab", "\u0009"]]
+  //   }
+  // },
+  // {
+  //   "context": "Editor && showing_completions",
+  //   "bindings": {
+  //     "enter": "editor::ConfirmCompletion"
+  //   }
+  // },
+  // {
+  //   "context": "Editor && edit_prediction",
+  //   "bindings": {
+  //     "ctrl-y": "editor::AcceptEditPrediction"
+  //   }
+  // },
+  // {
+  //   "context": "Editor && edit_prediction_conflict",
+  //   "bindings": {
+  //     "ctrl-y": "editor::AcceptEditPrediction"
+  //   }
+  // }
 ]
