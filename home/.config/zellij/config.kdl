@@ -2,7 +2,7 @@ keybinds clear-defaults=true {
     locked {
         bind "Ctrl g" { SwitchToMode "normal"; }
 
-        bind "Ctrl J" {
+        bind "Ctrl j" {
             LaunchOrFocusPlugin "session-manager" {
                 floating true
                 move_to_focused_tab true
@@ -10,7 +10,7 @@ keybinds clear-defaults=true {
             SwitchToMode "locked"
         }
 
-        bind "Ctrl j" {
+        bind "Ctrl J" {
             LaunchOrFocusPlugin "https://github.com/laperlej/zellij-sessionizer/releases/latest/download/zellij-sessionizer.wasm" {
                 floating true
                 move_to_focused_tab true
