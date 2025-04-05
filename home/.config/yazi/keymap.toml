@@ -1,49 +1,49 @@
 "$schema" = "https://yazi-rs.github.io/schemas/keymap.json"
 
-[[manager.prepend_keymap]]
-on = ["1"]
-run = "plugin relative-motions 1"
-desc = "Move in relative steps"
+# [[manager.prepend_keymap]]
+# on = ["1"]
+# run = "plugin relative-motions 1"
+# desc = "Move in relative steps"
 
-[[manager.prepend_keymap]]
-on = ["2"]
-run = "plugin relative-motions 2"
-desc = "Move in relative steps"
+# [[manager.prepend_keymap]]
+# on = ["2"]
+# run = "plugin relative-motions 2"
+# desc = "Move in relative steps"
 
-[[manager.prepend_keymap]]
-on = ["3"]
-run = "plugin relative-motions 3"
-desc = "Move in relative steps"
+# [[manager.prepend_keymap]]
+# on = ["3"]
+# run = "plugin relative-motions 3"
+# desc = "Move in relative steps"
 
-[[manager.prepend_keymap]]
-on = ["4"]
-run = "plugin relative-motions 4"
-desc = "Move in relative steps"
+# [[manager.prepend_keymap]]
+# on = ["4"]
+# run = "plugin relative-motions 4"
+# desc = "Move in relative steps"
 
-[[manager.prepend_keymap]]
-on = ["5"]
-run = "plugin relative-motions 5"
-desc = "Move in relative steps"
+# [[manager.prepend_keymap]]
+# on = ["5"]
+# run = "plugin relative-motions 5"
+# desc = "Move in relative steps"
 
-[[manager.prepend_keymap]]
-on = ["6"]
-run = "plugin relative-motions 6"
-desc = "Move in relative steps"
+# [[manager.prepend_keymap]]
+# on = ["6"]
+# run = "plugin relative-motions 6"
+# desc = "Move in relative steps"
 
-[[manager.prepend_keymap]]
-on = ["7"]
-run = "plugin relative-motions 7"
-desc = "Move in relative steps"
+# [[manager.prepend_keymap]]
+# on = ["7"]
+# run = "plugin relative-motions 7"
+# desc = "Move in relative steps"
 
-[[manager.prepend_keymap]]
-on = ["8"]
-run = "plugin relative-motions 8"
-desc = "Move in relative steps"
+# [[manager.prepend_keymap]]
+# on = ["8"]
+# run = "plugin relative-motions 8"
+# desc = "Move in relative steps"
 
-[[manager.prepend_keymap]]
-on = ["9"]
-run = "plugin relative-motions 9"
-desc = "Move in relative steps"
+# [[manager.prepend_keymap]]
+# on = ["9"]
+# run = "plugin relative-motions 9"
+# desc = "Move in relative steps"
 
 [[manager.prepend_keymap]]
 on = "l"
@@ -61,9 +61,49 @@ run = "cd ~/Downloads"
 desc = "Goto Downloads"
 
 [[manager.prepend_keymap]]
+on = ["g", "j"]
+run = "plugin zoxide"
+desc = "Jump to a directory via zoxide"
+
+[[manager.prepend_keymap]]
+on = ["g", "J"]
+run = "plugin fzf"
+desc = "Jump to a file/directory via fzf"
+
+[[manager.prepend_keymap]]
 on = ["c", "y"]
 run = '''shell 'yek "$@" | pbcopy' '''
 desc = "Yek selected files and directories"
+
+[[manager.prepend_keymap]]
+on = ["g", "s", "n"]
+run = 'shell "$SHELL" --confirm --block'
+desc = "Run shell"
+
+[[manager.prepend_keymap]]
+on = ["g", "s", "g"]
+run = "shell --confirm --block lazygit"
+desc = "Run lazygit"
+
+[[manager.prepend_keymap]]
+on = ["g", "s", "e"]
+run = """shell --confirm --block 'nvim "$PWD"'"""
+desc = "Run nvim"
+
+[[manager.prepend_keymap]]
+on = ["c", "a"]
+run = "plugin ouch"
+desc = "Compress with ouch"
+
+[[manager.prepend_keymap]]
+on = ["c", "D"]
+run = "plugin diff"
+desc = "Copy the diff of the selected with the hovered file"
+
+[[manager.prepend_keymap]]
+on = [ "c", "r" ]
+run = "plugin path-from-root"
+desc = "Copies path from git root"
 
 [[manager.prepend_keymap]]
 on = "T"
@@ -73,23 +113,3 @@ desc = "Maximize or restore the preview pane"
 [[manager.prepend_keymap]]
 on = "M"
 run = "plugin mount"
-
-[[manager.prepend_keymap]]
-on = ["p", "d"]
-run = "plugin diff"
-desc = "Diff the selected with the hovered file"
-
-[[manager.prepend_keymap]]
-on = ["p", "g"]
-run = "shell --confirm --block lazygit"
-desc = "lazygit"
-
-[[manager.prepend_keymap]]
-on = ["p", "s"]
-run = 'shell "$SHELL" --confirm --block'
-desc = "shell"
-
-[[manager.prepend_keymap]]
-on = ["c", "a"]
-run = "plugin ouch"
-desc = "Compress with ouch"
