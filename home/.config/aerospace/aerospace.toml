@@ -4,7 +4,7 @@ enable-normalization-opposite-orientation-for-nested-containers = true
 default-root-container-layout = 'accordion'
 default-root-container-orientation = 'vertical'
 
-accordion-padding = 0
+# accordion-padding = 0
 
 [key-mapping]
 preset = 'qwerty'
