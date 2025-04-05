@@ -1,5 +1,28 @@
 "$schema" = "https://yazi-rs.github.io/schemas/yazi.json"
 
 [manager]
-ratio = [2, 5, 5]
+ratio = [3, 4, 5]
 show_symlink = false
+
+[plugin]
+prepend_previewers = [
+  { mime = "application/*zip", run = "ouch" },
+  { mime = "application/x-7z-compressed", run = "ouch" },
+  { mime = "application/x-bzip2", run = "ouch" },
+  { mime = "application/x-rar", run = "ouch" },
+  { mime = "application/x-tar", run = "ouch" },
+  { mime = "application/x-xz", run = "ouch" },
+  { name = "*.csv", run = "duckdb" },
+  { name = "*.json", run = "duckdb" },
+  { name = "*.parquet", run = "duckdb" },
+  { name = "*.tsv", run = "duckdb" },
+]
+
+prepend_preloaders = [
+  { name = "*.csv", run = "duckdb", multi = false },
+  { name = "*.db", run = "duckdb" },
+  { name = "*.duckdb", run = "duckdb" },
+  { name = "*.json", run = "duckdb", multi = false },
+  { name = "*.parquet", run = "duckdb", multi = false },
+  { name = "*.tsv", run = "duckdb", multi = false },
+]
