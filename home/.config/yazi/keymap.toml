@@ -46,11 +46,6 @@ run = "plugin relative-motions 9"
 desc = "Move in relative steps"
 
 [[manager.prepend_keymap]]
-on = ["c", "a"]
-run = "plugin compress"
-desc = "Archive selected files"
-
-[[manager.prepend_keymap]]
 on = "l"
 run = "plugin smart-enter"
 desc = "Enter the child directory, or open the file"
@@ -61,16 +56,6 @@ run = "plugin smart-enter"
 desc = "Enter the child directory, or open the file"
 
 [[manager.prepend_keymap]]
-on = "<C-g>"
-run = "shell --confirm --block lazygit"
-desc = "lazygit"
-
-[[manager.prepend_keymap]]
-on = "<C-`>"
-run = 'shell "$SHELL" --confirm --block'
-desc = "shell"
-
-[[manager.prepend_keymap]]
 on = ["g", "d"]
 run = "cd ~/Downloads"
 desc = "Goto Downloads"
@@ -79,3 +64,37 @@ desc = "Goto Downloads"
 on = ["c", "y"]
 run = '''shell 'yek "$@" | pbcopy' '''
 desc = "Yek selected files and directories"
+
+[[manager.prepend_keymap]]
+on = "T"
+run = "plugin toggle-pane max-preview"
+desc = "Maximize or restore the preview pane"
+
+[[manager.prepend_keymap]]
+on = "M"
+run = "plugin mount"
+
+[[manager.prepend_keymap]]
+on = ["p", "d"]
+run = "plugin diff"
+desc = "Diff the selected with the hovered file"
+
+[[manager.prepend_keymap]]
+on = ["p", "g"]
+run = "shell --confirm --block lazygit"
+desc = "lazygit"
+
+[[manager.prepend_keymap]]
+on = ["p", "s"]
+run = 'shell "$SHELL" --confirm --block'
+desc = "shell"
+
+[[manager.prepend_keymap]]
+on = ["c", "a"]
+run = "plugin ouch"
+desc = "Compress with ouch"
+
+# [[manager.prepend_keymap]]
+# on = ["c", "a"]
+# run = "plugin compress"
+# desc = "Archive selected files"

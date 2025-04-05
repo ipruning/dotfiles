@@ -1,3 +1,6 @@
+# [flavor]
+# dark = "catppuccin-mocha"
+
 [manager]
 cwd = { fg = "#94e2d5" }
 
