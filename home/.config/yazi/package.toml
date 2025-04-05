@@ -9,11 +9,6 @@ rev = "9a09505"
 hash = "e0ada736ea676c2bbb3ec705a49526ef"
 
 [[plugin.deps]]
-use = "KKV9/compress"
-rev = "60b24af"
-hash = "ee025be766240cc98e671754ac836da3"
-
-[[plugin.deps]]
 use = "yazi-rs/plugins:smart-enter"
 rev = "9a09505"
 hash = "7918aab6a71caf31b58411f789195677"
@@ -53,7 +48,5 @@ use = "yazi-rs/plugins:diff"
 rev = "9a09505"
 hash = "7a08e303167d5b655c06da6d570f0333"
 
-[[flavor.deps]]
-use = "yazi-rs/flavors:catppuccin-mocha"
-rev = "68326b4"
-hash = "2ac87e1b3a61f5887472899e86535d29"
+[flavor]
+deps = []

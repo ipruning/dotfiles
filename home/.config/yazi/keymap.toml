@@ -93,8 +93,3 @@ desc = "shell"
 on = ["c", "a"]
 run = "plugin ouch"
 desc = "Compress with ouch"
-
-# [[manager.prepend_keymap]]
-# on = ["c", "a"]
-# run = "plugin compress"
-# desc = "Archive selected files"
