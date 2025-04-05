@@ -1,42 +1,12 @@
 [[plugin.deps]]
-use = "dedukun/relative-motions"
-rev = "8103065"
-hash = "9f13f0740fa3a0c18e47ec6fb62ddfaa"
-
-[[plugin.deps]]
-use = "yazi-rs/plugins:git"
-rev = "9a09505"
-hash = "e0ada736ea676c2bbb3ec705a49526ef"
-
-[[plugin.deps]]
 use = "yazi-rs/plugins:smart-enter"
 rev = "9a09505"
 hash = "7918aab6a71caf31b58411f789195677"
 
 [[plugin.deps]]
-use = "wylie102/duckdb"
-rev = "6959a9b"
-hash = "9221c0bac69ac22a1878ffc20c13ef77"
-
-[[plugin.deps]]
 use = "yazi-rs/plugins:toggle-pane"
 rev = "9a09505"
 hash = "5c9dda1a587b8f5b6f63e3d5375bda88"
-
-[[plugin.deps]]
-use = "Rolv-Apneseth/starship"
-rev = "6c639b4"
-hash = "5614c46d5de76623c283d415bfac8025"
-
-[[plugin.deps]]
-use = "yazi-rs/plugins:full-border"
-rev = "9a09505"
-hash = "1f3dad061209081a6b04dd6ff2cb06c7"
-
-[[plugin.deps]]
-use = "ndtoan96/ouch"
-rev = "558188d"
-hash = "2d0afef7b50747c543c4304004a72cec"
 
 [[plugin.deps]]
 use = "yazi-rs/plugins:mount"
@@ -47,6 +17,31 @@ hash = "dd97eede8e20e59cd2604e8006e470e2"
 use = "yazi-rs/plugins:diff"
 rev = "9a09505"
 hash = "7a08e303167d5b655c06da6d570f0333"
+
+[[plugin.deps]]
+use = "dedukun/relative-motions"
+rev = "8103065"
+hash = "9f13f0740fa3a0c18e47ec6fb62ddfaa"
+
+[[plugin.deps]]
+use = "wylie102/duckdb"
+rev = "6959a9b"
+hash = "9221c0bac69ac22a1878ffc20c13ef77"
+
+[[plugin.deps]]
+use = "Rolv-Apneseth/starship"
+rev = "6c639b4"
+hash = "5614c46d5de76623c283d415bfac8025"
+
+[[plugin.deps]]
+use = "ndtoan96/ouch"
+rev = "558188d"
+hash = "2d0afef7b50747c543c4304004a72cec"
+
+[[plugin.deps]]
+use = "aresler/path-from-root"
+rev = "7d05b87"
+hash = "46977a29d4349d11465af1817f17d414"
 
 [flavor]
 deps = []
