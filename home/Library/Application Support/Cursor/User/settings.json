@@ -341,7 +341,7 @@
   "sqlfluff.dialect": "duckdb",
   "sqlfluff.executablePath": "/opt/homebrew/bin/sqlfluff",
   "terminal.integrated.confirmOnExit": "hasChildProcesses",
-  // "terminal.integrated.defaultProfile.osx": "fish",
+  "terminal.integrated.defaultProfile.osx": "zsh",
   "terminal.integrated.fontSize": 12,
   "terminal.integrated.fontWeight": "400",
   "terminal.integrated.inheritEnv": true,
