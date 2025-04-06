@@ -5,23 +5,18 @@
 A Better Finder Attributes 7
 AdGuard for Safari
 AeroSpace
-AlexSideBar
 Alfred 5
 AltTab
 Anki
-API Parrot
 Avenue
 BaiduNetdisk_mac
 Balatro
 BetterDisplay
-Blackmagic Disk Speed Test
-Blackmagic Media Express
 Bob
 calibre
 Capture One
 ChatGPT
 Chromium
-ComfyUI
 Contexts
 CrossOver
 Cursor
@@ -33,19 +28,16 @@ DEVONthink 3
 Drafts
 Eagle
 Eudic
-Figma
 Firefox
 Fork
 Frame0
 Ghostty
-GitButler
 Google Chrome
 Google Docs
 Google Drive
 Google Sheets
 Google Slides
 Heptabase
-Homerow
 Hush
 Ice
 IINA
@@ -77,9 +69,7 @@ Notion
 Notion Calendar
 OBS
 OnyX
-OpenCat
 OrbStack
-Parsec
 PasteNow
 pcsuite
 Pearcleaner
@@ -93,14 +83,13 @@ Red Canary Mac Monitor
 rednote
 Repo Prompt
 Reqable
+Retcon
 Roam Research
 Rond
 Rotato
-RustDesk
 Safari
 Scapple
 Screen Studio
-Scripton
 Scrolla
 Setapp
 Shortcat
@@ -124,7 +113,6 @@ UninstallPKG
 VideoFusion-macOS
 VirtualBox
 VirtualBuddy
-VoiceInk
 WeChat
 Whisper Transcription
 Wireshark
