@@ -1,9 +1,7 @@
-Aeon Timeline
 BetterZip
 CleanMyMac
 CleanShot X
 Clop
-Craft
 DevUtils
 Downie
 Focus 2

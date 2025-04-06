@@ -42,9 +42,9 @@ git
 git-delta
 git-extras
 git-filter-repo
+git-who
 gitu
 glow
-gnupg
 goaccess
 gotz
 graphviz
@@ -88,6 +88,7 @@ pandoc-crossref
 parallel
 parallel-disk-usage
 pkl
+poppler
 postgresql@17
 pre-commit
 procs

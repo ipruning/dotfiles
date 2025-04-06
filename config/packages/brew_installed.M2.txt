@@ -59,6 +59,7 @@ git-delta
 git-extras
 git-filter-repo
 git-lfs
+git-who
 gitu
 glow
 gnupg
@@ -114,6 +115,7 @@ parallel-disk-usage
 pcre2
 pkgconf
 pkl
+poppler
 postgresql@17
 pre-commit
 procs
