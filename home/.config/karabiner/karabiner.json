@@ -9,7 +9,7 @@
                 },
                 "rules": [
                     {
-                        "description": "home 👉 hyper if on hold",
+                        "description": "home 👉 hyper (if on hold)",
                         "manipulators": [
                             {
                                 "from": { "key_code": "home" },
@@ -25,7 +25,7 @@
                         ]
                     },
                     {
-                        "description": "caps_lock 👉 escape if alone / left_control if on hold (only on built-in keyboard)",
+                        "description": "caps_lock 👉 escape (only on built-in keyboard)",
                         "manipulators": [
                             {
                                 "conditions": [
@@ -45,6 +45,30 @@
                                     }
                                 ],
                                 "to_if_alone": [{ "key_code": "escape" }],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "left_control 👉 hyper (if on hold) (only on built-in keyboard)",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "identifiers": [{ "is_built_in_keyboard": true }],
+                                        "type": "device_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "left_control",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "left_shift",
+                                        "modifiers": ["left_command", "left_control", "left_option"]
+                                    }
+                                ],
                                 "type": "basic"
                             }
                         ]
@@ -269,7 +293,6 @@
             },
             "devices": [
                 {
-                    "disable_built_in_keyboard_if_exists": true,
                     "identifiers": {
                         "is_keyboard": true,
                         "is_pointing_device": true,
@@ -279,7 +302,6 @@
                     "ignore": false
                 },
                 {
-                    "disable_built_in_keyboard_if_exists": true,
                     "identifiers": {
                         "is_keyboard": true,
                         "is_pointing_device": true,
