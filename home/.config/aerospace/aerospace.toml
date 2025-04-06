@@ -1,21 +1,21 @@
 # start-at-login = true
+# accordion-padding = 0
+
 enable-normalization-flatten-containers = true
 enable-normalization-opposite-orientation-for-nested-containers = true
 default-root-container-layout = 'accordion'
 default-root-container-orientation = 'vertical'
 
-# accordion-padding = 0
-
 [key-mapping]
 preset = 'qwerty'
 
 [gaps]
-inner.horizontal = 10
-inner.vertical = 10
-outer.left = 10
-outer.bottom = 10
-outer.top = 10
-outer.right = 10
+inner.horizontal = 0
+inner.vertical = 0
+outer.left = 0
+outer.bottom = 0
+outer.top = 0
+outer.right = 0
 
 [workspace-to-monitor-force-assignment]
 # 1 = 1
