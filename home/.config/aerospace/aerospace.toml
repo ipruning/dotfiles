@@ -68,10 +68,10 @@ alt-shift-j = ['move down', 'mode main']
 alt-shift-k = ['move up', 'mode main']
 alt-shift-l = ['move right', 'mode main']
 
-alt-y = 'exec-and-forget open -a /Applications/Zed.app'
-alt-u = 'exec-and-forget open -a /Applications/Ghostty.app'
-alt-i = 'exec-and-forget open -a /Applications/Google\ Chrome.app'
-alt-o = 'exec-and-forget open -a /Applications/Roam\ Research.app'
+# alt-y = 'exec-and-forget open -a /Applications/Zed.app'
+# alt-u = 'exec-and-forget open -a /Applications/Ghostty.app'
+# alt-i = 'exec-and-forget open -a /Applications/Google\ Chrome.app'
+# alt-o = 'exec-and-forget open -a /Applications/Roam\ Research.app'
 
 cmd-m = []
 cmd-h = []
