@@ -16,7 +16,6 @@ Bob
 calibre
 Capture One
 ChatGPT
-Chromium
 Contexts
 CrossOver
 Cursor
@@ -28,7 +27,6 @@ DEVONthink 3
 Drafts
 Eagle
 Eudic
-Firefox
 Fork
 Frame0
 Ghostty
@@ -99,7 +97,6 @@ Stratoshark
 superwhisper
 Surfingkeys
 Surge
-Syntax Highlight
 TabTab
 Tailscale
 Tampermonkey
@@ -109,7 +106,6 @@ The Powder Toy
 Things3
 TickTick
 ToDesk
-UninstallPKG
 VideoFusion-macOS
 VirtualBox
 VirtualBuddy
@@ -117,7 +113,7 @@ WeChat
 Whisper Transcription
 Wireshark
 Wooshy
-Xcode-16.2.0
+Xcode-16.3.0
 Xcodes
 XLD
 YACReader

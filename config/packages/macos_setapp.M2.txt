@@ -1,3 +1,4 @@
+Archiver
 BetterZip
 CleanMyMac
 CleanShot X
