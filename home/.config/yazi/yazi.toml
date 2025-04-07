@@ -2,6 +2,7 @@
 
 [manager]
 ratio = [3, 4, 5]
+show_hidden = true
 show_symlink = false
 
 [plugin]

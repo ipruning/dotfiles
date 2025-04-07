@@ -49,6 +49,10 @@
         "program": "sh",
         "args": ["--noediting", "--norc", "--noprofile"]
       }
+    },
+    "env": {
+      "EDITOR": "zed --wait",
+      "VISUAL": "zed --wait"
     }
   },
   {
