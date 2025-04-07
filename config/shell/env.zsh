@@ -1,3 +1,6 @@
+# 👇 mise
+eval "$(mise activate zsh)"
+
 # 👇 zsh Theme
 eval "$(starship init zsh)"
 
@@ -132,13 +135,3 @@ function y() {
 # eval "$(atuin init zsh --disable-up-arrow)"
 # eval "$(atuin init zsh)"
 source "$HOME/dotfiles/config/shell/functions/atuin.zsh"
-
-# 👇 mise
-eval "$(mise activate zsh)"
-
-# 👇 bartib
-export BARTIB_FILE="$HOME/.config/bartib/activities.bartib"
-
-# 👇 prefect
-export PREFECT_API_PORT=4200
-export PREFECT_API_URL=http://127.0.0.1:$PREFECT_API_PORT/api
