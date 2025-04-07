@@ -97,6 +97,7 @@ Stratoshark
 superwhisper
 Surfingkeys
 Surge
+Suspicious Package
 TabTab
 Tailscale
 Tampermonkey
