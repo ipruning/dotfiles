@@ -40,7 +40,7 @@
   },
   {
     "label": "yazi",
-    "command": "yazi",
+    "command": "yazi $ZED_FILE",
     "hide": "always",
     "allow_concurrent_runs": true,
     "use_new_terminal": true,
