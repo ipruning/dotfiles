@@ -111,12 +111,12 @@
   },
   "terminal": {
     "button": false,
-    // "detect_venv": {
-    //   "on": {
-    //     "activate_script": "fish",
-    //     "directories": [".env", "env", ".venv", "venv"]
-    //   }
-    // },
+    "detect_venv": {
+      "on": {
+        "activate_script": "fish",
+        "directories": [".env", "env", ".venv", "venv"]
+      }
+    },
     "env": {
       "EDITOR": "zed --wait",
       "VISUAL": "zed --wait"
@@ -126,12 +126,12 @@
     "line_height": {
       "custom": 1.5
     },
-    // "shell": {
-    //   "with_arguments": {
-    //     "args": ["--login", "--interactive"],
-    //     "program": "/opt/homebrew/bin/fish"
-    //   }
-    // },
+    "shell": {
+      "with_arguments": {
+        "args": ["--login", "--interactive"],
+        "program": "/opt/homebrew/bin/fish"
+      }
+    },
     "toolbar": {
       "breadcrumbs": false
     }
