@@ -11,5 +11,4 @@ function set-aws-bedrock-dev-work
   set -gx AWS_ACCESS_KEY_ID "op://dev-work/AWS/claude_code/AWS_ACCESS_KEY_ID"
   set -gx AWS_SECRET_ACCESS_KEY "op://dev-work/AWS/claude_code/AWS_SECRET_ACCESS_KEY"
   set -gx CLAUDE_CODE_USE_BEDROCK 1
-  set -gx DISABLE_PROMPT_CACHING 1
 end
