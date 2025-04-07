@@ -406,6 +406,15 @@
     },
     {
       "before": [
+        "c",
+        "d"
+      ],
+      "commands": [
+        "editor.action.rename"
+      ]
+    },
+    {
+      "before": [
         "<leader>",
         "e"
       ],
