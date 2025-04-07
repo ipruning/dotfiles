@@ -136,5 +136,8 @@ function y() {
 # eval "$(atuin init zsh)"
 source "$HOME/dotfiles/config/shell/functions/atuin.zsh"
 
-# 👇 Tailspin
+# 👇 tailspin
 export TAILSPIN_PAGER="ov -f [FILE]"
+
+# 👇 httm
+source ~/.httm-key-bindings.zsh
