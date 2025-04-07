@@ -48,7 +48,7 @@ show_help_bar = false
 # This option can be toggled with the (default) `ctrl-o` keybinding
 show_preview_panel = true
 # Where to place the input bar in the UI (top or bottom)
-input_bar_position = "top"
+input_bar_position = "bottom"
 # DEPRECATED: title is now always displayed at the top as part of the border
 # Where to place the preview title in the UI (top or bottom)
 # preview_title_position = "top"
