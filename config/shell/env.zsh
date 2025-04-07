@@ -135,3 +135,6 @@ function y() {
 # eval "$(atuin init zsh --disable-up-arrow)"
 # eval "$(atuin init zsh)"
 source "$HOME/dotfiles/config/shell/functions/atuin.zsh"
+
+# 👇 Tailspin
+export TAILSPIN_PAGER="ov -f [FILE]"
