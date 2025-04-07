@@ -54,5 +54,6 @@ if status is-interactive
 
   source $HOME/dotfiles/config/shell/aliases.fish
   source $HOME/dotfiles/config/shell/functions/atuin.fish
+  source $HOME/dotfiles/config/shell/functions/macos.fish
   source $HOME/dotfiles/config/shell/functions/utils.fish
 end
