@@ -1,7 +1,7 @@
 [core]
 excludesfile = ~/.gitignore
 ignorecase = false
-pager = delta --color-only --line-numbers
+pager = delta
 
 [init]
 defaultBranch = main
@@ -79,7 +79,7 @@ indentHeuristic = true
 compactionHeuristic = true
 
 [interactive]
-diffFilter = delta --color-only --line-numbers
+diffFilter = delta
 
 [delta]
 navigate = true
