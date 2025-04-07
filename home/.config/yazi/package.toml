@@ -20,13 +20,13 @@ hash = "7a08e303167d5b655c06da6d570f0333"
 
 [[plugin.deps]]
 use = "dedukun/relative-motions"
-rev = "8103065"
-hash = "9f13f0740fa3a0c18e47ec6fb62ddfaa"
+rev = "61ae795"
+hash = "65d576a76597aac2a428dc7ec0eda2ce"
 
 [[plugin.deps]]
 use = "wylie102/duckdb"
-rev = "6959a9b"
-hash = "9221c0bac69ac22a1878ffc20c13ef77"
+rev = "495c21f"
+hash = "3d2320d000964c1244271b48001fd6ff"
 
 [[plugin.deps]]
 use = "Rolv-Apneseth/starship"
