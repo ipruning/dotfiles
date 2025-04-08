@@ -5,11 +5,8 @@ repos:
     rev: v5.0.0
     hooks:
       - id: check-yaml
-        stages: [pre-commit]
       - id: end-of-file-fixer
-        stages: [pre-commit]
       - id: trailing-whitespace
-        stages: [pre-commit]
   - repo: https://github.com/commitizen-tools/commitizen
     rev: v4.2.2
     hooks:
@@ -35,16 +32,22 @@ repos:
         description: "Check links in the repository"
         entry: lychee
         language: system
-        args: ["--no-progress", "--exclude-loopback", "--exclude-path", "config/shell/"]
+        args:
+          [
+            "--no-progress",
+            "--exclude-loopback",
+            "--exclude-path",
+            "config/shell/",
+          ]
         types: [text]
         pass_filenames: true
         require_serial: true
       - id: ripsecrets-system
         name: ripsecrets
-        description: 'Prevent committing secret keys into your source code'
+        description: "Prevent committing secret keys into your source code"
         entry: ripsecrets
         language: system
         types: [text]
         args: [--strict-ignore]
         require_serial: true
-        minimum_pre_commit_version: '0'
+        minimum_pre_commit_version: "0"
