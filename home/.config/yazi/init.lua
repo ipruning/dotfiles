@@ -5,6 +5,8 @@ require("full-border"):setup {
 
 require("starship"):setup()
 
+require("git"):setup()
+
 require("duckdb"):setup({
     mode = "standard",
     row_id = true,

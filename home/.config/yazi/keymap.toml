@@ -56,6 +56,11 @@ run = "plugin smart-enter"
 desc = "Enter the child directory, or open the file"
 
 [[manager.prepend_keymap]]
+on = ["g", "c"]
+run = "plugin vcs-files"
+desc = "Show Git file changes"
+
+[[manager.prepend_keymap]]
 on = ["g", "d"]
 run = "cd ~/Downloads"
 desc = "Goto Downloads"
@@ -101,7 +106,7 @@ run = "plugin diff"
 desc = "Copy the diff of the selected with the hovered file"
 
 [[manager.prepend_keymap]]
-on = [ "c", "r" ]
+on = ["c", "r"]
 run = "plugin path-from-root"
 desc = "Copies path from git root"
 

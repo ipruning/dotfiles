@@ -27,3 +27,13 @@ prepend_preloaders = [
   { name = "*.parquet", run = "duckdb", multi = false },
   { name = "*.tsv", run = "duckdb", multi = false },
 ]
+
+[[plugin.prepend_fetchers]]
+id = "git"
+name = "*"
+run = "git"
+
+[[plugin.prepend_fetchers]]
+id = "git"
+name = "*/"
+run = "git"
