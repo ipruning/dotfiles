@@ -17,19 +17,19 @@ repos:
     hooks:
       - id: autocorrect-lint
         name: autocorrect lint
-        description: "Checks the style of CJK files."
+        description: "Checks the style and formatting of Chinese, Japanese, and Korean text."
         entry: autocorrect --lint
         language: system
         types: [file]
       - id: autocorrect-fix
         name: autocorrect fix
-        description: "Fixes the style of CJK files."
+        description: "Automatically fixes style issues in Chinese, Japanese, and Korean text."
         entry: autocorrect --fix
         language: system
         types: [file]
       - id: lychee
         name: lychee
-        description: "Check links in the repository"
+        description: "Checks for broken links in documentation and text files."
         entry: lychee
         language: system
         args:
@@ -44,7 +44,7 @@ repos:
         require_serial: true
       - id: ripsecrets-system
         name: ripsecrets
-        description: "Prevent committing secret keys into your source code"
+        description: "Scans files for potential API keys, tokens, and credentials to prevent security leaks."
         entry: ripsecrets
         language: system
         types: [text]

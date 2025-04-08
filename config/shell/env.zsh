@@ -87,10 +87,6 @@ autoload -U edit-command-line
 zle -N edit-command-line
 bindkey "^v" edit-command-line
 
-# 👇 My preferred editor for local and remote sessions
-export EDITOR="nvim"
-export VISUAL="nvim"
-
 # 👇 My keybindings
 bindkey "^[f" forward-word
 bindkey "^[b" backward-word
