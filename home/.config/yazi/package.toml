@@ -43,5 +43,10 @@ use = "aresler/path-from-root"
 rev = "7d05b87"
 hash = "46977a29d4349d11465af1817f17d414"
 
+[[plugin.deps]]
+use = "yazi-rs/plugins:vcs-files"
+rev = "9a09505"
+hash = "5e85dd0baca18119f4d712d81b09eb7c"
+
 [flavor]
 deps = []
