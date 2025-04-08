@@ -14,7 +14,9 @@ fzf
 gh
 git-delta
 git-extras
+httm
 jaq
+jd
 jq
 lazydocker
 lazygit
@@ -39,7 +41,7 @@ uv
 viddy
 watchexec
 wget
-yazi
+yq
 zellij
 zet
 zoxide
