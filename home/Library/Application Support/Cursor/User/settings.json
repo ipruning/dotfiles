@@ -73,6 +73,7 @@
   "catppuccin-icons.associations.extensions": {
     "bean": "markdown",
     "mdc": "markdown",
+    "repo_ignore": "gitignore",
     "tpl": "env"
   },
   "catppuccin-icons.associations.files": {
@@ -259,6 +260,7 @@
     ".env*": "dotenv",
     ".fdignore": "ignore",
     ".mdc": "markdown",
+    ".repo_ignore": "ignore",
     ".rgignore": "ignore",
     ".secrets.baseline": "json",
     ".tpl": "plaintext",
