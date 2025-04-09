@@ -25,7 +25,9 @@ mise
 neovim
 ouch
 ov
+parallel-disk-usage
 procs
+pueue
 rclone
 rip2
 ripgrep-all
