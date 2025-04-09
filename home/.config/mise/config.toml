@@ -14,6 +14,7 @@ zig = "latest"
 "pipx:pre-commit" = "latest"
 "pipx:pyright" = "latest"
 "pipx:ruff" = "latest"
+"pipx:sqlfluff" = "latest"
 
 "cargo:gfold" = "latest"
 "cargo:https://github.com/bodo-run/yek" = "latest"
