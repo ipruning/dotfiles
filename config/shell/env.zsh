@@ -4,11 +4,11 @@ eval "$(mise activate zsh)"
 # 👇 zsh Theme
 eval "$(starship init zsh)"
 
-# 👇 Emacs Mode
-bindkey -e
-
 # 👇 plugins
 ZSH_PLUGINS_DIR="$HOME/dotfiles/config/shell/plugins"
+
+# 👇 ugit
+source "$ZSH_PLUGINS_DIR"/ugit/ugit.plugin.zsh
 
 # 👇 fzf
 __TREE_IGNORE="-I '.git' -I '*.py[co]' -I '__pycache__' $__TREE_IGNORE"
@@ -17,26 +17,15 @@ __FD_COMMAND="-L -H --no-ignore-vcs ${__TREE_IGNORE//-I/-E} $__FD_COMMAND"
 export FZF_DEFAULT_COMMAND="fd $__FD_COMMAND"
 
 export FZF_DEFAULT_OPTS=" \
---style minimal \
---reverse \
 --multi \
+--reverse \
+--style minimal \
 --bind 'ctrl-y:accept' \
 --color=bg+:#313244,bg:#1e1e2e,spinner:#f5e0dc,hl:#f38ba8 \
 --color=fg:#cdd6f4,header:#f38ba8,info:#cba6f7,pointer:#f5e0dc \
 --color=marker:#b4befe,fg+:#cdd6f4,prompt:#cba6f7,hl+:#f38ba8 \
 --color=selected-bg:#45475a"
 
-# export FZF_DEFAULT_OPTS=" \
-# --style minimal \
-# --reverse \
-# --multi \
-# --bind 'ctrl-y:accept' \
-# --color=bg+:#ccd0da,bg:#eff1f5,spinner:#dc8a78,hl:#d20f39 \
-# --color=fg:#4c4f69,header:#d20f39,info:#8839ef,pointer:#dc8a78 \
-# --color=marker:#7287fd,fg+:#4c4f69,prompt:#8839ef,hl+:#d20f39 \
-# --color=selected-bg:#bcc0cc"
-
-# 👇 fzf-tab
 source "$ZSH_PLUGINS_DIR"/fzf-tab/fzf-tab.plugin.zsh
 
 zstyle ':completion:*:descriptions' format '[%d]'
@@ -47,7 +36,7 @@ unset __TREE_IGNORE
 unset __FD_COMMAND
 
 # 👇 zsh-autosuggestions
-# source "$ZSH_PLUGINS_DIR"/zsh-autosuggestions/zsh-autosuggestions.zsh
+source "$ZSH_PLUGINS_DIR"/zsh-autosuggestions/zsh-autosuggestions.zsh
 
 # 👇 fast-syntax-highlighting
 source "$ZSH_PLUGINS_DIR"/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
@@ -86,6 +75,9 @@ zstyle ":completion:*" matcher-list "m:{a-z}={A-Za-z}"
 autoload -U edit-command-line
 zle -N edit-command-line
 bindkey "^v" edit-command-line
+
+# 👇 Emacs Mode
+bindkey -e
 
 # 👇 My keybindings
 bindkey "^[f" forward-word
@@ -136,4 +128,3 @@ source "$HOME/dotfiles/config/shell/functions/atuin.zsh"
 export TAILSPIN_PAGER="ov -f [FILE]"
 
 # 👇 httm
-source ~/.httm-key-bindings.zsh
