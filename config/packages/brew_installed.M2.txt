@@ -1,4 +1,5 @@
 atuin
+bash
 bat
 coreutils
 difftastic
@@ -23,6 +24,7 @@ lazygit
 macmon
 mise
 neovim
+nushell
 ouch
 ov
 parallel-disk-usage
@@ -47,3 +49,4 @@ yq
 zellij
 zet
 zoxide
+zsh
