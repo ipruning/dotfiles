@@ -1,4 +1,9 @@
 [[cable_channel]]
+name = "hidden-dirs"
+source_command = "fd --no-ignore-vcs --type directory --hidden --follow -0 | xargs -0 gprintf '%q\n'"
+preview_command = "eza --all --long --time-style long-iso --color always {0}"
+
+[[cable_channel]]
 name = "hidden-files"
 source_command = "fd --no-ignore-vcs --type file --hidden --follow -0 | xargs -0 gprintf '%q\n'"
 preview_command = ":files:"

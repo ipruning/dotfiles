@@ -113,22 +113,30 @@ toggle_preview = "ctrl-o"
 fallback_channel = "hidden-files-max-depth-3"
 
 [shell_integration.channel_triggers]
-"alias" = ["alias", "unalias"]
-"env" = ["export", "unset"]
-"dirs" = ["cd", "ls", "rmdir", "j", "eza"]
-"files" = [
+"hidden-dirs" = [
+  "cd",
+  "ls",
+  "rmdir",
+  "j",
+  "eza"
+]
+"hidden-files" = [
   "bat",
   "cat",
   "chmod",
   "chown",
   "cp",
+  "cursor",
   "gunzip",
   "gzip",
   "head",
   "less",
   "ln",
   "mv",
+  "n",
   "nano",
+  "nvim",
+  "open",
   "rip",
   "rm",
   "tail",
@@ -137,9 +145,22 @@ fallback_channel = "hidden-files-max-depth-3"
   "unzip",
   "vim",
   "xz",
+  "zed",
   "zip",
 ]
-"git-diff" = ["git add", "git restore"]
+"py-files" = [
+  "marimo edit",
+  "marimo run",
+  "modal deploy",
+  "modal launch",
+  "modal run",
+  "modal serve",
+  "modal shell",
+  "modal-cli",
+  "python",
+  "uv add",
+  "uv run",
+]
 "git-branch" = [
   "git branch",
   "git checkout",
@@ -149,28 +170,19 @@ fallback_channel = "hidden-files-max-depth-3"
   "git rebase",
   "git switch",
 ]
-"docker-images" = ["docker run"]
 
+"alias" = ["alias", "unalias"]
 "channels" = ["tv"]
 "csv-files" = ["csvlens"]
-"hidden-files" = ["bat", "cat", "cursor", "n", "nvim", "open", "vim", "zed"]
+"docker-images" = ["docker run"]
+"env" = ["export", "unset"]
+"git-diff" = ["git add", "git restore"]
 "hosts" = ["ssh"]
 "marimo-files" = ["modal.bash"]
-"py-files" = [
-  "marimo edit",
-  "marimo run",
-  "modal run",
-  "modal serve",
-  "modal-cli",
-  "python",
-  "uv add",
-  "uv run",
-]
+"my-scripts" = ["cmd-execute.bash"]
 "sh-files" = ["bash", "sh"]
 "tmux-sessions" = ["tmux a -t"]
 "zellij-sessions" = ["zellij a"]
-
-"my-scripts" = ["cmd-execute.bash"]
 
 [shell_integration.keybindings]
 "smart_autocomplete" = "ctrl-t"
