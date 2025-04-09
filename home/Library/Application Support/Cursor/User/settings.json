@@ -339,6 +339,10 @@
   },
   "shellcheck.run": "onType",
   "sqlfluff.dialect": "duckdb",
+  "sqlfluff.excludeRules": [
+    "RF05",
+    "RF01",
+  ],
   "sqlfluff.executablePath": "/Users/alex/.local/share/mise/installs/pipx-sqlfluff/3.3.1/bin/sqlfluff",
   "terminal.integrated.confirmOnExit": "hasChildProcesses",
   "terminal.integrated.defaultProfile.osx": "zsh",

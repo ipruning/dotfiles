@@ -3,9 +3,8 @@
     "context": "Terminal",
     "bindings": {
       "cmd-d": "terminal::ScrollPageDown",
-      "cmd-u": "terminal::ScrollPageUp",
-      "cmd-n": "pane::SplitRight",
-      "cmd-t": "workspace::NewTerminal"
+      "cmd-t": "workspace::NewFile",
+      "cmd-u": "terminal::ScrollPageUp"
     }
   },
   {
