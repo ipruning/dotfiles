@@ -122,6 +122,7 @@
       "VISUAL": "zed --wait"
     },
     "font_family": "MonoLisa",
+    "font_size": 13,
     "font_weight": 400,
     "line_height": {
       "custom": 1.5
