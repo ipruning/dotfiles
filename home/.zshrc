@@ -34,3 +34,7 @@ if [[ $OSTYPE = darwin* ]]; then
     fi
   fi
 fi
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:/Users/alex/.cache/lm-studio/bin"
+# End of LM Studio CLI section
