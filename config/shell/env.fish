@@ -54,12 +54,14 @@ if status is-interactive
   #################### Tailspin ####################
   set -gx TAILSPIN_PAGER "ov -f [FILE]"
 
+  #################### Path ####################
   fish_add_path $HOME/dev/prototypes/utils/bin
   fish_add_path $HOME/dev/prototypes/utils/scripts
 
-  for file in $HOME/dotfiles/home/.config/fish/completions/*.fish
-    source $file
-  end
+  #################### Completions ####################
+  # for file in $HOME/dotfiles/home/.config/fish/completions/*.fish
+  #   source $file
+  # end
 
   #################### Aliases ####################
   source $HOME/dotfiles/config/shell/aliases.fish
