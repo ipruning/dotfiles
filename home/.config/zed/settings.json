@@ -1,5 +1,7 @@
 {
   "assistant": {
+    "always_allow_tool_actions": false,
+    "default_profile": "ask",
     "default_model": {
       "model": "claude-3-7-sonnet-latest",
       "provider": "zed.dev"
@@ -16,13 +18,6 @@
   },
   "collaboration_panel": {
     "dock": "right"
-  },
-  "context_servers": {
-    "postgres-context-server": {
-      "settings": {
-        "database_url": "postgresql://myuser:mypassword@localhost:5432/mydatabase"
-      }
-    }
   },
   "cursor_blink": false,
   "features": {
