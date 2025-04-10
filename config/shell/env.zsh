@@ -18,7 +18,6 @@ export FZF_DEFAULT_COMMAND="fd $__FD_COMMAND"
 
 export FZF_DEFAULT_OPTS=" \
 --multi \
---reverse \
 --style minimal \
 --bind 'ctrl-y:accept' \
 --color=bg+:#313244,bg:#1e1e2e,spinner:#f5e0dc,hl:#f38ba8 \
