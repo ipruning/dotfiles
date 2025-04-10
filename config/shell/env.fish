@@ -37,15 +37,6 @@ if status is-interactive
 
   bind \cc cancel-commandline
 
-  #################### Editor ####################
-  if not set -q VISUAL
-    set -g VISUAL "zed --wait"
-  end
-
-  if not set -q EDITOR
-    set -g EDITOR "zed --wait"
-  end
-
   #################### Yazi ####################
   function y
     set tmp (mktemp -t "yazi-cwd.XXXXXX")
@@ -56,8 +47,12 @@ if status is-interactive
     rm -f -- "$tmp"
   end
 
+  #################### Editor ####################
+  set -gx VISUAL "zed --wait"
+  set -gx EDITOR "zed --wait"
+
   #################### Tailspin ####################
-  set -g TAILSPIN_PAGER "ov -f [FILE]"
+  set -gx TAILSPIN_PAGER "ov -f [FILE]"
 
   fish_add_path $HOME/dev/prototypes/utils/bin
   fish_add_path $HOME/dev/prototypes/utils/scripts
