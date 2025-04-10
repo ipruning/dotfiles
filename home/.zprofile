@@ -26,14 +26,14 @@ if [[ $OSTYPE = darwin* ]]; then
   if [[ "$TERM_PROGRAM" == "zed" ]]; then
     export EDITOR="zed --wait"
     export VISUAL="zed --wait"
-    if [[ -n "$ZELLIJ" ]]; then
-    else
-      local repo_path=$(pwd)
-      if [[ "$repo_path" != "$HOME" ]] && git rev-parse --is-inside-work-tree >/dev/null 2>&1 && [[ "$(git rev-parse --show-toplevel)" == "$repo_path" ]]; then
-        local repo_name=$(basename "${repo_path}")
-        zellij attach "repo-${repo_name}" 2>/dev/null || zellij --session "repo-${repo_name}"
-      fi
-    fi
+    # if [[ -n "$ZELLIJ" ]]; then
+    # else
+    #   local repo_path=$(pwd)
+    #   if [[ "$repo_path" != "$HOME" ]] && git rev-parse --is-inside-work-tree >/dev/null 2>&1 && [[ "$(git rev-parse --show-toplevel)" == "$repo_path" ]]; then
+    #     local repo_name=$(basename "${repo_path}")
+    #     zellij attach "repo-${repo_name}" 2>/dev/null || zellij --session "repo-${repo_name}"
+    #   fi
+    # fi
   fi
 
   if [[ "$TERM_PROGRAM" == "ghostty" ]]; then
