@@ -4,8 +4,8 @@
     "key": "ctrl+shift+enter"
   },
   {
-    "key": "cmd+t",
     "command": "workbench.action.terminal.new",
+    "key": "cmd+t",
     "when": "terminalFocus && !terminalTextSelected"
   },
   {
@@ -22,13 +22,13 @@
     "key": "cmd+g a c"
   },
   {
-    "key": "ctrl+a",
     "command": "cursorHome",
+    "key": "ctrl+a",
     "when": "textInputFocus"
   },
   {
-    "key": "ctrl+e",
     "command": "cursorEnd",
+    "key": "ctrl+e",
     "when": "textInputFocus"
   }
 ]
