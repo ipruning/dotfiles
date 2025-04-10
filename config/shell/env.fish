@@ -7,6 +7,7 @@ if test -d /opt/homebrew
 end
 
 if status is-interactive
+  #################### Greeting ####################
   set -g fish_greeting
 
   #################### Private Env ####################
