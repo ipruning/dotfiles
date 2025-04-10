@@ -16,6 +16,7 @@ gh
 git-delta
 git-extras
 httm
+hyperfine
 jaq
 jd
 jq
