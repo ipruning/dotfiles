@@ -40,6 +40,23 @@
   },
   {
     "label": "yazi",
+    "command": "yazi",
+    "hide": "always",
+    "allow_concurrent_runs": true,
+    "use_new_terminal": true,
+    "shell": {
+      "with_arguments": {
+        "program": "sh",
+        "args": ["--noediting", "--norc", "--noprofile"]
+      }
+    },
+    "env": {
+      "EDITOR": "zed --wait",
+      "VISUAL": "zed --wait"
+    }
+  },
+  {
+    "label": "yazi_with_file",
     "command": "yazi $ZED_FILE",
     "hide": "always",
     "allow_concurrent_runs": true,
