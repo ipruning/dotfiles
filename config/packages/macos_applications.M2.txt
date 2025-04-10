@@ -75,6 +75,7 @@ PlayCover
 ProNotes
 qBittorrent
 QQ
+Quark
 Raycast
 Rectangle
 Red Canary Mac Monitor
@@ -110,6 +111,7 @@ ToDesk
 VideoFusion-macOS
 VirtualBox
 VirtualBuddy
+waifu2x
 WeChat
 Whisper Transcription
 Wireshark
