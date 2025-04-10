@@ -3,8 +3,7 @@
     "context": "Terminal",
     "bindings": {
       "cmd-d": "terminal::ScrollPageDown",
-      "cmd-n": "workspace::NewFile",
-      "cmd-t": "workspace::NewTerminal",
+      "cmd-n": "workspace::NewTerminal",
       "cmd-u": "terminal::ScrollPageUp"
     }
   },
@@ -53,7 +52,14 @@
           "reveal_target": "center"
         }
       ],
-      "space n": ["workspace::SendKeystrokes", ": new center terminal enter"],
+      "space n": [
+        "task::Spawn",
+        {
+          "task_name": "zellij",
+          "reveal_target": "center"
+        }
+      ],
+      // "space n": ["workspace::SendKeystrokes", ": new center terminal enter"],
       "space r": "projects::OpenRecent",
       "space shift-e": "pane::RevealInProjectPanel",
       "space shift-r": [
@@ -195,7 +201,13 @@
           "reveal_target": "center"
         }
       ],
-      "space n": ["workspace::SendKeystrokes", ": new center terminal enter"],
+      "space n": [
+        "task::Spawn",
+        {
+          "task_name": "zellij",
+          "reveal_target": "center"
+        }
+      ],
       "space r": "projects::OpenRecent",
       "space shift-e": "pane::RevealInProjectPanel",
       "space shift-r": [

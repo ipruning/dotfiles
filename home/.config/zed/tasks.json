@@ -114,6 +114,21 @@
   {
     "label": "claude",
     "command": "current_dir=$(basename \"$(pwd)\"); tmux attach-session -t \"$current_dir\" 2>/dev/null || tmux new-session -s \"$current_dir\" 'tmux new-window -n claude \"zsh -i -c \\\"set-aws-bedrock-dev-work && claude\\\"\" && tmux select-window -t claude'",
-    "hide": "always"
+    "hide": "always",
+    "allow_concurrent_runs": true,
+    "use_new_terminal": true
+  },
+  {
+    "label": "zellij",
+    "command": "repo_path=$(pwd); if [[ \"$repo_path\" != \"$HOME\" ]] && git rev-parse --is-inside-work-tree >/dev/null 2>&1 && [[ \"$(git rev-parse --show-toplevel)\" == \"$repo_path\" ]]; then repo_name=$(basename \"${repo_path}\"); zellij attach \"repo-${repo_name}\" 2>/dev/null || zellij --session \"repo-${repo_name}\"; fi",
+    "hide": "always",
+    "allow_concurrent_runs": true,
+    "use_new_terminal": true,
+    "shell": {
+      "with_arguments": {
+        "program": "sh",
+        "args": ["--noediting", "--norc", "--noprofile"]
+      }
+    }
   }
 ]
