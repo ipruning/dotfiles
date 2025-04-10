@@ -89,6 +89,20 @@
     }
   },
   {
+    "context": "vim_mode == normal || vim_mode == visual",
+    "bindings": {
+      "s": "vim::PushSneak",
+      "shift-s": "vim::PushSneakBackward"
+    }
+  },
+  {
+    "context": "vim_mode == normal || vim_mode == visual",
+    "bindings": {
+      "s": "vim::PushSneak",
+      "shift-s": "vim::PushSneakBackward"
+    }
+  },
+  {
     "context": "Editor && (vim_mode == normal || vim_mode == visual) && !VimWaiting && !menu",
     "bindings": {
       "ctrl-alt-shift-u": "vim::ScrollUp",
@@ -156,7 +170,7 @@
       "space e": [
         "task::Spawn",
         {
-          "task_name": "yazi",
+          "task_name": "yazi_with_file",
           "reveal_target": "center"
         }
       ],
