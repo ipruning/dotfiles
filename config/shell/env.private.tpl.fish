@@ -12,3 +12,7 @@ function set-aws-bedrock-dev-work
   set -gx AWS_SECRET_ACCESS_KEY "op://dev-work/AWS/claude_code/AWS_SECRET_ACCESS_KEY"
   set -gx CLAUDE_CODE_USE_BEDROCK 1
 end
+
+set -gx ZED_ACCESS_KEY_ID "op://dev-work/AWS/claude_code/AWS_ACCESS_KEY_ID"
+set -gx ZED_SECRET_ACCESS_KEY "op://dev-work/AWS/claude_code/AWS_SECRET_ACCESS_KEY"
+set -gx ZED_AWS_REGION "us-west-2"
