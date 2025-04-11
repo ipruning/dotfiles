@@ -31,8 +31,8 @@
     "key": "ctrl+e",
     "when": "textInputFocus"
   },
-  {
-    "command": "-workbench.action.openRecent",
-    "key": "ctrl+r"
-  },
+  // {
+  //   "command": "-workbench.action.openRecent",
+  //   "key": "ctrl+r"
+  // },
 ]
