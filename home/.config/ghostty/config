@@ -1,6 +1,6 @@
 # cmd+<triple-mouse-click> == copy command output
 
-command = /opt/homebrew/bin/fish --login --interactive
+# command = /opt/homebrew/bin/fish --login --interactive
 
 clipboard-paste-protection = true
 clipboard-trim-trailing-spaces = true
