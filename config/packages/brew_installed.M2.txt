@@ -1,6 +1,8 @@
 atuin
 bash
 bat
+beancount
+beancount-language-server
 coreutils
 difftastic
 docker
@@ -15,6 +17,7 @@ fzf
 gh
 git-delta
 git-extras
+htop
 httm
 hyperfine
 jaq
