@@ -8,7 +8,9 @@ eval "$(starship init zsh)"
 ZSH_PLUGINS_DIR="$HOME/dotfiles/config/shell/plugins"
 
 # 👇 ugit
-source "$ZSH_PLUGINS_DIR"/ugit/ugit.plugin.zsh
+if [[ -f "$ZSH_PLUGINS_DIR"/ugit/ugit.plugin.zsh ]]; then
+  source "$ZSH_PLUGINS_DIR"/ugit/ugit.plugin.zsh
+fi
 
 # 👇 fzf
 __TREE_IGNORE="-I '.git' -I '*.py[co]' -I '__pycache__' $__TREE_IGNORE"
@@ -25,20 +27,25 @@ export FZF_DEFAULT_OPTS=" \
 --color=marker:#b4befe,fg+:#cdd6f4,prompt:#cba6f7,hl+:#f38ba8 \
 --color=selected-bg:#45475a"
 
-source "$ZSH_PLUGINS_DIR"/fzf-tab/fzf-tab.plugin.zsh
-
-zstyle ':completion:*:descriptions' format '[%d]'
-zstyle ':completion:*' menu no
-zstyle ':fzf-tab:*' use-fzf-default-opts yes
+if [[ -f "$ZSH_PLUGINS_DIR"/fzf-tab/fzf-tab.plugin.zsh ]]; then
+  source "$ZSH_PLUGINS_DIR"/fzf-tab/fzf-tab.plugin.zsh
+  zstyle ':completion:*:descriptions' format '[%d]'
+  zstyle ':completion:*' menu no
+  zstyle ':fzf-tab:*' use-fzf-default-opts yes
+fi
 
 unset __TREE_IGNORE
 unset __FD_COMMAND
 
 # 👇 zsh-autosuggestions
-source "$ZSH_PLUGINS_DIR"/zsh-autosuggestions/zsh-autosuggestions.zsh
+if [[ -f "$ZSH_PLUGINS_DIR"/zsh-autosuggestions/zsh-autosuggestions.zsh ]]; then
+  source "$ZSH_PLUGINS_DIR"/zsh-autosuggestions/zsh-autosuggestions.zsh
+fi
 
 # 👇 fast-syntax-highlighting
-source "$ZSH_PLUGINS_DIR"/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
+if [[ -f "$ZSH_PLUGINS_DIR"/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh ]]; then
+  source "$ZSH_PLUGINS_DIR"/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
+fi
 
 # 👇 tv
 _tv_search() {
