@@ -11,7 +11,7 @@
   "autosave": "on_focus_change",
   "buffer_font_fallbacks": ["Maple Mono NF CN"],
   "buffer_font_family": "MonoLisa",
-  "buffer_font_size": 14.0,
+  "buffer_font_size": 13.0,
   "buffer_font_weight": 400,
   "buffer_line_height": {
     "custom": 1.5
@@ -52,7 +52,7 @@
         "coloring": "indent_aware",
         "enabled": true
       },
-      "language_servers": ["pyright", "ruff"],
+      "language_servers": ["basedpyright", "!pyright", "ruff"],
       "tab_size": 4
     },
     "TSX": {
@@ -113,7 +113,7 @@
       "VISUAL": "zed --wait"
     },
     "font_family": "MonoLisa",
-    "font_size": 14.0,
+    "font_size": 13.0,
     "font_weight": 500,
     "line_height": {
       "custom": 1.5
@@ -130,7 +130,7 @@
   },
   "theme": "Catppuccin Mocha - No Italics",
   "ui_font_family": "MonoLisa",
-  "ui_font_size": 16.0,
+  "ui_font_size": 15.0,
   "ui_font_weight": 500,
   "vim": {
     "enable_vim_sneak": true,
