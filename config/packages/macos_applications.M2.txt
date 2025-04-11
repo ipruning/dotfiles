@@ -103,6 +103,7 @@ Tailscale
 Tampermonkey
 Telegram
 TencentMeeting
+Termius
 The Powder Toy
 Things3
 TickTick
