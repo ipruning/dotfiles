@@ -4,6 +4,92 @@ eval "$(mise activate zsh)"
 # 👇 zsh Theme
 eval "$(starship init zsh)"
 
+# 👇 zsh options
+setopt interactivecomments
+zstyle ":completion:*" matcher-list "m:{a-z}={A-Za-z}"
+
+# 👇 Tips
+# edit-command-line: edit the command line in the editor
+# fc: edit the command line in the editor
+autoload -U edit-command-line
+zle -N edit-command-line
+bindkey "^v" edit-command-line
+
+# 👇 Emacs Mode
+bindkey -e
+
+# 👇 My keybindings
+bindkey "^[f" forward-word
+bindkey "^[b" backward-word
+bindkey "^A" beginning-of-line
+bindkey "^B" backward-char
+bindkey "^D" delete-word
+bindkey "^E" end-of-line
+bindkey "^F" forward-char
+
+# 👇 Custom paths
+export PATH="$HOME/dev/prototypes/utils/bin:$PATH"
+export PATH="$HOME/dev/prototypes/utils/scripts:$PATH"
+
+source "$HOME/dotfiles/config/shell/functions/macos.zsh"
+source "$HOME/dotfiles/config/shell/functions/mkbir.zsh"
+source "$HOME/dotfiles/config/shell/functions/surge.zsh"
+source "$HOME/dotfiles/config/shell/functions/utils.zsh"
+
+# 👇 Brew
+export HOMEBREW_NO_ANALYTICS=1
+
+# 👇 Mojo
+export PATH="$HOME/.modular/bin:$PATH"
+
+# 👇 tailspin
+export TAILSPIN_PAGER="ov -f [FILE]"
+
+# 👇 OrbStack
+source "$HOME/.orbstack/shell/init.zsh" 2>/dev/null || :
+
+# 👇 zoxide
+eval "$(zoxide init zsh --cmd j)"
+
+# 👇 yazi
+function y() {
+  local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+  yazi "$@" --cwd-file="$tmp"
+  if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+    builtin cd -- "$cwd"
+  fi
+  rm -f -- "$tmp"
+}
+
+# 👇 atuin
+# eval "$(atuin init zsh --disable-up-arrow)"
+# eval "$(atuin init zsh)"
+source "$HOME/dotfiles/config/shell/functions/atuin.zsh"
+
+# 👇 tv
+_tv_search() {
+  emulate -L zsh
+  zle -I
+
+  local current_prompt
+  current_prompt=$LBUFFER
+
+  local output
+
+  output=$(tv --autocomplete-prompt "$current_prompt" $*)
+
+  zle reset-prompt
+
+  if [[ -n $output ]]; then
+    RBUFFER=""
+    LBUFFER=$current_prompt$output
+  fi
+}
+
+zle -N tv-search _tv_search
+
+bindkey '^T' tv-search
+
 # 👇 plugins
 ZSH_PLUGINS_DIR="$HOME/dotfiles/config/shell/plugins"
 
@@ -46,91 +132,3 @@ fi
 if [[ -f "$ZSH_PLUGINS_DIR"/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh ]]; then
   source "$ZSH_PLUGINS_DIR"/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
 fi
-
-# 👇 tv
-_tv_search() {
-  emulate -L zsh
-  zle -I
-
-  local current_prompt
-  current_prompt=$LBUFFER
-
-  local output
-
-  output=$(tv --autocomplete-prompt "$current_prompt" $*)
-
-  zle reset-prompt
-
-  if [[ -n $output ]]; then
-    RBUFFER=""
-    LBUFFER=$current_prompt$output
-  fi
-}
-
-zle -N tv-search _tv_search
-
-bindkey '^T' tv-search
-
-# 👇 zsh options
-setopt interactivecomments
-zstyle ":completion:*" matcher-list "m:{a-z}={A-Za-z}"
-
-# 👇 Tips
-# edit-command-line: edit the command line in the editor
-# fc: edit the command line in the editor
-autoload -U edit-command-line
-zle -N edit-command-line
-bindkey "^v" edit-command-line
-
-# 👇 Emacs Mode
-bindkey -e
-
-# 👇 My keybindings
-bindkey "^[f" forward-word
-bindkey "^[b" backward-word
-bindkey "^A" beginning-of-line
-bindkey "^B" backward-char
-bindkey "^D" delete-word
-bindkey "^E" end-of-line
-bindkey "^F" forward-char
-
-# 👇 Custom paths
-export PATH="$HOME/dev/prototypes/utils/bin:$PATH"
-export PATH="$HOME/dev/prototypes/utils/scripts:$PATH"
-
-source "$HOME/dotfiles/config/shell/functions/macos.zsh"
-source "$HOME/dotfiles/config/shell/functions/mkbir.zsh"
-source "$HOME/dotfiles/config/shell/functions/surge.zsh"
-source "$HOME/dotfiles/config/shell/functions/utils.zsh"
-
-# 👇 Brew
-export HOMEBREW_NO_ANALYTICS=1
-
-# 👇 Mojo
-export PATH="$HOME/.modular/bin:$PATH"
-
-# 👇 OrbStack
-source "$HOME/.orbstack/shell/init.zsh" 2>/dev/null || :
-
-# 👇 zoxide
-eval "$(zoxide init zsh --cmd j)"
-
-# 👇 yazi
-function y() {
-  local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
-  yazi "$@" --cwd-file="$tmp"
-  if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
-    builtin cd -- "$cwd"
-  fi
-  rm -f -- "$tmp"
-}
-
-# 👇 atuin
-# eval "$(atuin init zsh --disable-up-arrow)"
-# eval "$(atuin init zsh)"
-source "$HOME/dotfiles/config/shell/functions/atuin.zsh"
-
-# 👇 tailspin
-export TAILSPIN_PAGER="ov -f [FILE]"
-
-# 👇 httm
