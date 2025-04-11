@@ -75,7 +75,6 @@ PlayCover
 ProNotes
 qBittorrent
 QQ
-Quark
 Raycast
 Rectangle
 Red Canary Mac Monitor
