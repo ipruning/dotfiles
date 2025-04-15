@@ -109,9 +109,8 @@
   "cursor.cmdk.autoSelect": false,
   "cursor.cmdk.useThemedDiffBackground": false,
   "cursor.composer.collapsePaneInputBoxPills": true,
-  "cursor.cpp.disabledLanguages": [
-    "plaintext"
-  ],
+  "cursor.composer.shouldAllowCustomModes": true,
+  "cursor.composer.shouldChimeAfterChatFinishes": true,
   "diffEditor.ignoreTrimWhitespace": false,
   "diffEditor.maxComputationTime": 8192,
   "diffEditor.renderSideBySide": true,
