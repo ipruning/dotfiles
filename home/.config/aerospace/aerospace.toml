@@ -1,4 +1,4 @@
-start-at-login = true
+start-at-login = false
 accordion-padding = 0
 
 enable-normalization-flatten-containers = true
@@ -159,10 +159,18 @@ run = 'layout floating'
 if.app-id = 'codes.rambo.VirtualBuddy'
 run = 'layout floating'
 
-[[on-window-detected]]
-if.app-id = 'com.tencent.xinWeChat'
-run = 'layout floating'
+# [[on-window-detected]]
+# if.app-id = 'com.tencent.xinWeChat'
+# run = 'layout floating'
 
-[[on-window-detected]]
-if.app-id = 'com.xingin.discover'
-run = 'layout floating'
+# [[on-window-detected]]
+# if.app-id = 'com.electron.lark'
+# run = 'layout floating'
+
+# [[on-window-detected]]
+# if.app-id = 'com.xingin.discover'
+# run = 'layout floating'
+
+# [[on-window-detected]]
+# if.app-id = 'com.1password.1password'
+# run = 'layout floating'
