@@ -48,7 +48,6 @@ trzsz-ssh
 uv
 viddy
 watchexec
-wget
 yq
 zellij
 zet
