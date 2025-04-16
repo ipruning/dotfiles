@@ -14,6 +14,7 @@ Image2icon
 In Your Face
 iStat Menus
 Luminar Neo
+Lungo
 MarginNote
 One Switch
 Permute
