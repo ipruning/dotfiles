@@ -35,9 +35,11 @@ parallel-disk-usage
 procs
 pueue
 rclone
+riff
 rip2
 ripgrep-all
 ruby
+rustscan
 shellcheck
 starship
 tailspin
@@ -48,6 +50,7 @@ trzsz-ssh
 uv
 viddy
 watchexec
+yazi
 yq
 zellij
 zet
