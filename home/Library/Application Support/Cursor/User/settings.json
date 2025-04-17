@@ -293,6 +293,46 @@
     "MD041": false,
     "MD045": false
   },
+  "multiCommand.commands": [
+    {
+      "command": "multiCommand.pageUp",
+      "sequence": [
+        {
+          "args": {
+            "by": "wrappedLine",
+            "to": "up",
+            "value": 32
+          },
+          "command": "editorScroll"
+        },
+        {
+          "args": {
+            "to": "viewPortCenter"
+          },
+          "command": "cursorMove"
+        }
+      ]
+    },
+    {
+      "command": "multiCommand.pageDown",
+      "sequence": [
+        {
+          "args": {
+            "by": "wrappedLine",
+            "to": "down",
+            "value": 32
+          },
+          "command": "editorScroll"
+        },
+        {
+          "args": {
+            "to": "viewPortCenter"
+          },
+          "command": "cursorMove"
+        }
+      ]
+    }
+  ],
   "notebook.cellToolbarLocation": {
     "default": "right",
     "jupyter-notebook": "left"
