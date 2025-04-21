@@ -2,7 +2,7 @@ notARepository: "quit"
 promptToReturnFromSubprocess: false
 git:
   paging:
-    externalDiffCommand: difft --color=always --display=side-by-side-show-both --syntax-highlight=off
+    externalDiffCommand: difft
 gui:
   mouseEvents: false
   sidePanelWidth: 0.3
