@@ -1,4 +1,5 @@
 {
+  "icon_theme": "Catppuccin Mocha",
   "assistant": {
     "always_allow_tool_actions": true,
     "default_profile": "write",
