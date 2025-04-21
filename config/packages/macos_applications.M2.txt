@@ -1,9 +1,11 @@
+美图秀秀
 集换社
 .Karabiner-VirtualHIDDevice-Manager
 1Password
 1Password for Safari
 A Better Finder Attributes 7
 AdGuard for Safari
+Advantage 360 SmartSet App (macOS v1.0.4)
 AeroSpace
 Alfred 5
 AltTab
@@ -65,6 +67,7 @@ MWeb Pro
 NeteaseMusic
 Notion
 Notion Calendar
+Notion Mail
 OBS
 OnyX
 OrbStack
