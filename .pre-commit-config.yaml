@@ -27,6 +27,15 @@ repos:
         entry: autocorrect --fix
         language: system
         types: [file]
+      - id: ripsecrets-system
+        name: ripsecrets
+        description: "Scans files for potential API keys, tokens, and credentials to prevent security leaks."
+        entry: ripsecrets
+        language: system
+        types: [text]
+        args: [--strict-ignore]
+        require_serial: true
+        minimum_pre_commit_version: "0"
       - id: lychee
         name: lychee
         description: "Checks for broken links in documentation and text files."
@@ -42,12 +51,3 @@ repos:
         types: [text]
         pass_filenames: true
         require_serial: true
-      - id: ripsecrets-system
-        name: ripsecrets
-        description: "Scans files for potential API keys, tokens, and credentials to prevent security leaks."
-        entry: ripsecrets
-        language: system
-        types: [text]
-        args: [--strict-ignore]
-        require_serial: true
-        minimum_pre_commit_version: "0"
