@@ -75,6 +75,7 @@ zig = "latest"
 
 [settings]
 experimental = true
+idiomatic_version_file_enable_tools = ["python"]
 status = { missing_tools = "never", show_env = false, show_tools = false }
 trusted_config_paths = ['~/dev', '~/dev-work']
 
