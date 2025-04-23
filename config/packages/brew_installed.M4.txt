@@ -1,14 +1,16 @@
 atuin
+bat
+coreutils
+difftastic
 eza
 fd
 fio
+fish
 fzf
 gh
 git-delta
-gnupg
 lazydocker
 lazygit
-llm
 mackup
 macmon
 mise
@@ -22,6 +24,8 @@ television
 ugit
 uv
 viddy
+wget
+xcodes
 yazi
 zellij
 zoxide
