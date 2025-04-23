@@ -25,7 +25,7 @@
           "reveal_target": "center"
         }
       ],
-      "space e": [
+      "space y": [
         "task::Spawn",
         {
           "task_name": "yazi",
@@ -173,7 +173,7 @@
           "reveal_target": "center"
         }
       ],
-      "space e": [
+      "space y": [
         "task::Spawn",
         {
           "task_name": "yazi_with_file",
@@ -209,7 +209,7 @@
         }
       ],
       "space r": "projects::OpenRecent",
-      "space shift-e": "pane::RevealInProjectPanel",
+      "space e": "pane::RevealInProjectPanel",
       "space shift-r": [
         "task::Spawn",
         {
