@@ -5,12 +5,8 @@ AdGuard for Safari
 AeroSpace
 AltTab
 Bob
-Claude
-Cursor
-GarageBand
 Ghostty
 Google Chrome
-Heptabase
 Ice
 Immersive Translate
 Input Source Pro
@@ -19,14 +15,11 @@ Karabiner-Elements
 Karabiner-EventViewer
 Keyboard Maestro
 Keynote
-LM Studio
 Lark
 LinearMouse
+LM Studio
 Mos
-Numbers
 OrbStack
-Pages
-Parsec
 PasteNow
 Repo Prompt
 Roam Research
@@ -39,7 +32,6 @@ Surge
 Tailscale
 Tampermonkey
 Telegram
-Xcode-16.2.0
+Xcode-16.3.0
 Xcodes
 Zed
-iMovie
