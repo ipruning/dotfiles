@@ -79,6 +79,7 @@ desc = "Jump to a file/directory via fzf"
 on = ["c", "y"]
 run = '''shell 'yek "$@" | pbcopy' '''
 desc = "Yek selected files and directories"
+
 [[manager.prepend_keymap]]
 on = ["g", "s", "g"]
 run = "shell --confirm --block lazygit"
@@ -117,3 +118,23 @@ desc = "Maximize or restore the preview pane"
 [[manager.prepend_keymap]]
 on = "M"
 run = "plugin mount"
+
+[[manager.prepend_keymap]]
+on = "H"
+run = "plugin duckdb -1"
+desc = "Scroll one column to the left"
+
+[[manager.prepend_keymap]]
+on = "L"
+run = "plugin duckdb +1"
+desc = "Scroll one column to the right"
+
+[[manager.prepend_keymap]]
+on = ["g", "o"]
+run = "plugin duckdb -open"
+desc = "open with duckdb"
+
+[[manager.prepend_keymap]]
+on = ["g", "u"]
+run = "plugin duckdb -ui"
+desc = "open with duckdb ui"
