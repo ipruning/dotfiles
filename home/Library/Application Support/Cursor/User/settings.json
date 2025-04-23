@@ -1,5 +1,4 @@
 {
-  "editor.wordWrap": "on",
   "[beancount]": {
     "editor.defaultFormatter": "dongfg.vscode-beancount-formatter"
   },
