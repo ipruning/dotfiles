@@ -1,21 +1,21 @@
 [[plugin.deps]]
 use = "yazi-rs/plugins:smart-enter"
-rev = "b12a9ab"
+rev = "4b027c7"
 hash = "7918aab6a71caf31b58411f789195677"
 
 [[plugin.deps]]
 use = "yazi-rs/plugins:toggle-pane"
-rev = "b12a9ab"
-hash = "5c9dda1a587b8f5b6f63e3d5375bda88"
+rev = "4b027c7"
+hash = "f3853bbdd1da2fad09d059ab5464abfd"
 
 [[plugin.deps]]
 use = "yazi-rs/plugins:mount"
-rev = "b12a9ab"
+rev = "4b027c7"
 hash = "dd97eede8e20e59cd2604e8006e470e2"
 
 [[plugin.deps]]
 use = "yazi-rs/plugins:diff"
-rev = "b12a9ab"
+rev = "4b027c7"
 hash = "7a08e303167d5b655c06da6d570f0333"
 
 [[plugin.deps]]
@@ -25,13 +25,13 @@ hash = "23915860e59348bf4166778bb0e606f7"
 
 [[plugin.deps]]
 use = "wylie102/duckdb"
-rev = "ee8cae3"
-hash = "196642f25645e406d3f6d153e88f8fb1"
+rev = "6259e2d"
+hash = "833314e2c2bd0de8d43ef2341cb0853b"
 
 [[plugin.deps]]
 use = "Rolv-Apneseth/starship"
-rev = "c070754"
-hash = "ebe49da58741aa3bf06c49ee394e0a5a"
+rev = "6fde3b2"
+hash = "7ddb7a790746fd91ecdd0350cc5a5d8c"
 
 [[plugin.deps]]
 use = "ndtoan96/ouch"
@@ -45,7 +45,7 @@ hash = "46977a29d4349d11465af1817f17d414"
 
 [[plugin.deps]]
 use = "yazi-rs/plugins:vcs-files"
-rev = "b12a9ab"
+rev = "4b027c7"
 hash = "36405f8781fcaf33ceab24dffd5cea19"
 
 [flavor]
