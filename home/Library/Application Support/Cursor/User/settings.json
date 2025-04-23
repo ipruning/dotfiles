@@ -12,7 +12,8 @@
     "editor.defaultFormatter": "oven.bun-vscode"
   },
   "[json][jsonc]": {
-    "editor.defaultFormatter": "vscode.json-language-features"
+    "editor.defaultFormatter": "vscode.json-language-features",
+    "editor.tabSize": 2
   },
   "[latex]": {
     "editor.acceptSuggestionOnEnter": "on",
@@ -50,8 +51,7 @@
     "editor.tabSize": 4
   },
   "[sql]": {
-    "editor.defaultFormatter": "dorzey.vscode-sqlfluff",
-    "editor.tabSize": 4
+    "editor.defaultFormatter": "dorzey.vscode-sqlfluff"
   },
   "[typescript]": {
     "editor.defaultFormatter": "oven.bun-vscode"
@@ -63,6 +63,9 @@
   "[typst]": {
     "editor.tabSize": 2,
     "editor.wordSeparators": "`~!@#$%^&*()=+[{]}\\|;:'\",.<>/?"
+  },
+  "[yaml]": {
+    "editor.tabSize": 2
   },
   "autocorrect.formatOnSave": false,
   "baml.bamlPanelOpen": false,
@@ -202,7 +205,7 @@
     ".env": "*.env, .env.*, .envrc, env.d.ts",
     ".gitignore": ".gitattributes, .gitmodules, .gitmessage, .lfsconfig, .mailmap, .git-blame*",
     ".project": ".classpath",
-    "//": "Last update at 4/9/2025, 2:16:18 PM",
+    "//": "Last update at 4/24/2025, 2:28:51 AM",
     "BUILD.bazel": "*.bzl, *.bazel, *.bazelrc, bazel.rc, .bazelignore, .bazelproject, .bazelversion, MODULE.bazel.lock, WORKSPACE",
     "CMakeLists.txt": "*.cmake, *.cmake.in, .cmake-format.yaml, CMakePresets.json, CMakeCache.txt",
     "Cargo.toml": ".clippy.toml, .rustfmt.toml, Cargo.Bazel.lock, Cargo.lock, clippy.toml, cross.toml, insta.yaml, rust-toolchain.toml, rustfmt.toml",
