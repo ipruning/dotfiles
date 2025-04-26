@@ -135,7 +135,7 @@
     "toggle_relative_line_numbers": true,
     "use_multiline_find": true,
     "use_smartcase_find": true,
-    "use_system_clipboard": "on_yank"
+    "use_system_clipboard": "never"
   },
   "vim_mode": true
 }
