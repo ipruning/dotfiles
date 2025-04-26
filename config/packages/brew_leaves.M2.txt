@@ -26,11 +26,13 @@ jq
 lazydocker
 lazygit
 macmon
+mdq
 mise
 neovim
 nushell
 ouch
 ov
+pandoc
 parallel-disk-usage
 procs
 pueue
