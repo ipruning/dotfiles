@@ -86,7 +86,7 @@
     "show": "never"
   },
   "show_edit_predictions": true,
-  "soft_wrap": "none",
+  "soft_wrap": null,
   "ssh_connections": [
     {
       "host": "m4",
