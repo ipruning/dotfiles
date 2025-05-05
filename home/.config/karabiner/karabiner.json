@@ -50,7 +50,7 @@
                         ]
                     },
                     {
-                        "description": "left_control 👉 hyper (if on hold) (only on built-in keyboard)",
+                        "description": "left_control 👉 hyper (only on built-in keyboard)",
                         "manipulators": [
                             {
                                 "conditions": [
