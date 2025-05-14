@@ -393,7 +393,7 @@
   "terminal.integrated.fontSize": 12,
   "terminal.integrated.fontWeight": "400",
   "terminal.integrated.inheritEnv": true,
-  "terminal.integrated.scrollback": 50000,
+  "terminal.integrated.scrollback": 10000,
   "update.releaseTrack": "prerelease",
   "vim.hlsearch": true,
   "vim.incsearch": true,
