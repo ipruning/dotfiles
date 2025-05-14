@@ -54,6 +54,7 @@ kindaVim
 Lark
 LinearMouse
 LM Studio
+Longbridge
 Longbridge Pro
 Loopback
 LyricsX
@@ -107,6 +108,7 @@ Tampermonkey
 Telegram
 TencentMeeting
 Termius
+TestFlight
 The Powder Toy
 Things3
 TickTick
