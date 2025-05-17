@@ -72,7 +72,7 @@ alt-shift-l = ['move right', 'mode main']
 # alt-i = 'exec-and-forget open -a /Applications/Google\ Chrome.app'
 # alt-o = 'exec-and-forget open -a /Applications/Roam\ Research.app'
 
-cmd-m = []
+# cmd-m = []
 cmd-h = []
 
 [mode.pass.binding]
