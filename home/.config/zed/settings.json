@@ -1,12 +1,11 @@
 {
-  "icon_theme": "Catppuccin Mocha",
-  "assistant": {
+  "agent": {
     "always_allow_tool_actions": true,
-    "default_profile": "write",
     "default_model": {
-      "model": "claude-3-7-sonnet-thinking-latest",
-      "provider": "anthropic"
+      "model": "anthropic.claude-3-7-sonnet-20250219-v1:0",
+      "provider": "amazon-bedrock"
     },
+    "default_profile": "write",
     "version": "2"
   },
   "autosave": "on_focus_change",
@@ -17,11 +16,22 @@
   "buffer_line_height": {
     "custom": 1.5
   },
+  "collaboration_panel": {
+    "dock": "right"
+  },
   "cursor_blink": false,
   "features": {
     "edit_prediction_provider": "zed"
   },
+  "file_types": {
+    "Dockerfile": ["Dockerfile", "Dockerfile.*"],
+    "JSON": ["json"]
+  },
   "format_on_save": "on",
+  "git_panel": {
+    "dock": "right"
+  },
+  "icon_theme": "Catppuccin Mocha",
   "indent_guides": {
     "coloring": "indent_aware",
     "enabled": true
@@ -78,7 +88,13 @@
       }
     }
   },
+  "outline_panel": {
+    "dock": "right"
+  },
   "preferred_line_length": 120,
+  "project_panel": {
+    "dock": "right"
+  },
   "relative_line_numbers": true,
   "restore_on_startup": "last_session",
   "scroll_beyond_last_line": "off",
@@ -107,7 +123,12 @@
   ],
   "tabs": {
     "file_icons": true,
-    "git_status": true
+    "git_status": true,
+    "show_diagnostics": "errors"
+  },
+  "telemetry": {
+    "diagnostics": false,
+    "metrics": false
   },
   "terminal": {
     "button": false,
@@ -135,7 +156,7 @@
     "toggle_relative_line_numbers": true,
     "use_multiline_find": true,
     "use_smartcase_find": true,
-    "use_system_clipboard": "never"
+    "use_system_clipboard": "on_yank"
   },
   "vim_mode": true
 }

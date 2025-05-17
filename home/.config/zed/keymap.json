@@ -1,5 +1,39 @@
 [
   {
+    "context": "MessageEditor > Editor",
+    "bindings": {
+      "enter": "editor::Newline",
+      "cmd-enter": "agent::Chat",
+      "cmd-w": "workspace::ToggleRightDock"
+    }
+  },
+  {
+    "context": "MessageEditor > Editor && !showing_completions && !showing_code_actions",
+    "use_key_equivalents": true,
+    "bindings": {
+      "enter": "editor::Newline",
+      "cmd-enter": "agent::Chat"
+    }
+  },
+  {
+    "context": "EditMessageEditor > Editor && !showing_completions && !showing_code_actions",
+    "use_key_equivalents": true,
+    "bindings": {
+      "escape": "menu::Cancel",
+      "enter": "editor::Newline",
+      "cmd-enter": "menu::Confirm"
+    }
+  },
+  {
+    "context": "AgentFeedbackMessageEditor > Editor && !showing_completions && !showing_code_actions",
+    "use_key_equivalents": true,
+    "bindings": {
+      "escape": "menu::Cancel",
+      "enter": "editor::Newline",
+      "cmd-enter": "menu::Confirm"
+    }
+  },
+  {
     "context": "Terminal",
     "bindings": {
       "cmd-d": "terminal::ScrollPageDown",
