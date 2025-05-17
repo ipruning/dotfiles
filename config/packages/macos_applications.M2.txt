@@ -1,18 +1,14 @@
-美图秀秀
-集换社
 .Karabiner-VirtualHIDDevice-Manager
 1Password
 1Password for Safari
 A Better Finder Attributes 7
-AdGuard for Safari
-Advantage 360 SmartSet App (macOS v1.0.4)
+Advantage 360 SmartSet
 AeroSpace
 Alfred 5
 AltTab
 Anki
 Avenue
 BaiduNetdisk_mac
-Balatro
 BetterDisplay
 Bob
 calibre
@@ -54,10 +50,10 @@ kindaVim
 Lark
 LinearMouse
 LM Studio
-Longbridge
 Longbridge Pro
 Loopback
 LyricsX
+MDPro3
 Microsoft Excel
 Microsoft PowerPoint
 Microsoft Word
@@ -112,16 +108,13 @@ TestFlight
 The Powder Toy
 Things3
 TickTick
-ToDesk
 VideoFusion-macOS
-VirtualBox
 VirtualBuddy
 waifu2x
 WeChat
 Whisper Transcription
 Wireshark
 Wooshy
-Xcode-16.3.0
 Xcodes
 XLD
 YACReader
