@@ -93,7 +93,7 @@
   },
   "preferred_line_length": 120,
   "project_panel": {
-    "dock": "right"
+    "dock": "left"
   },
   "relative_line_numbers": true,
   "restore_on_startup": "last_session",
@@ -138,7 +138,7 @@
     },
     "font_family": "MonoLisa",
     "font_size": 13.0,
-    "font_weight": 400,
+    "font_weight": 500,
     "line_height": {
       "custom": 1.5
     },
