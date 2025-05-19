@@ -1,4 +1,5 @@
 BetterZip
+Chimeful
 CleanMyMac
 CleanShot X
 Clop
