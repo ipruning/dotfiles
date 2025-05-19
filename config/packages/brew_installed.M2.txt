@@ -17,6 +17,7 @@ fzf
 gh
 git-delta
 git-extras
+git-lfs
 htop
 httm
 hyperfine
