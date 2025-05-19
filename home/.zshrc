@@ -12,13 +12,13 @@ if [[ $OSTYPE = darwin* ]]; then
   autoload -Uz compinit
   compinit -d ~/.zcompdump
 
-  autoload -U +X bashcompinit && bashcompinit
+  # autoload -U +X bashcompinit && bashcompinit
 
-  if [ -d "$HOME/dotfiles/config/shell/completions" ]; then
-    for completion in "$HOME/dotfiles/config/shell/completions"/*.bash; do
-      [[ -f "$completion" ]] && source "$completion"
-    done
-  fi
+  # if [ -d "$HOME/dotfiles/config/shell/completions" ]; then
+  #   for completion in "$HOME/dotfiles/config/shell/completions"/*.bash; do
+  #     [[ -f "$completion" ]] && source "$completion"
+  #   done
+  # fi
 
   if [ -d "$HOME/dotfiles" ]; then
     if [ -n "$ZSH_VERSION" ]; then
