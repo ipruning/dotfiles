@@ -147,6 +147,8 @@
   },
   "editor.unicodeHighlight.ambiguousCharacters": true,
   "editor.unicodeHighlight.invisibleCharacters": true,
+  "editor.wordWrap": "on",
+  "editor.wrappingStrategy": "advanced",
   "errorLens.enabledDiagnosticLevels": [
     "error",
     "warning"
