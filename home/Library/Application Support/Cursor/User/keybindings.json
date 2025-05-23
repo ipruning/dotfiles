@@ -50,5 +50,13 @@
     "key": "ctrl+d",
     "command": "multiCommand.pageDown",
     "when": "editorTextFocus"
+  },
+  {
+    "key": "shift+enter",
+    "command": "workbench.action.terminal.sendSequence",
+    "args": {
+      "text": "\\\r\n"
+    },
+    "when": "terminalFocus"
   }
 ]
