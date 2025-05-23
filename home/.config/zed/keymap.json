@@ -191,7 +191,7 @@
       "space t": "task::Spawn",
       "space shift-t": "task::Rerun",
       "space s b": "git::Branch",
-      "space a": "assistant::ToggleFocus",
+      "space a": "agent::ToggleFocus",
       "space x": "diagnostics::Deploy",
       "space /": [
         "task::Spawn",
