@@ -113,7 +113,7 @@
   },
   {
     "label": "claude",
-    "command": "current_dir=$(basename \"$(pwd)\"); tmux attach-session -t \"$current_dir\" 2>/dev/null || tmux new-session -s \"$current_dir\" 'tmux new-window -n claude \"zsh -i -c \\\"set-aws-bedrock-dev-work && claude\\\"\" && tmux select-window -t claude'",
+    "command": "current_dir=$(basename \"$(pwd)\"); tmux attach-session -t \"$current_dir\" 2>/dev/null || tmux new-session -s \"$current_dir\" 'tmux new-window -n claude \"zsh -i -c \\\"claude\\\"\" && tmux select-window -t claude'",
     "hide": "always",
     "allow_concurrent_runs": true,
     "use_new_terminal": true
