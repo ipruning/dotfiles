@@ -40,6 +40,7 @@ IINA
 iMazing
 Immersive Translate
 Input Source Pro
+Jan
 Kagi for Safari
 Karabiner-Elements
 Karabiner-EventViewer
@@ -115,6 +116,7 @@ WeChat
 Whisper Transcription
 Wireshark
 Wooshy
+Xcode-16.3.0
 Xcodes
 XLD
 YACReader
