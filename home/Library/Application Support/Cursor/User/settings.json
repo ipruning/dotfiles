@@ -11,8 +11,11 @@
   "[html]": {
     "editor.defaultFormatter": "oven.bun-vscode"
   },
+  "[javascript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
   "[json][jsonc]": {
-    "editor.defaultFormatter": "vscode.json-language-features",
+    "editor.defaultFormatter": "biomejs.biome",
     "editor.tabSize": 2
   },
   "[latex]": {
@@ -54,7 +57,10 @@
     "editor.defaultFormatter": "dorzey.vscode-sqlfluff"
   },
   "[typescript]": {
-    "editor.defaultFormatter": "oven.bun-vscode"
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "biomejs.biome"
   },
   "[typst-code]": {
     "editor.tabSize": 2,
