@@ -114,6 +114,9 @@ syntax-theme = Catppuccin Mocha
 [merge]
 conflictstyle = diff3
 
+[rerere]
+enabled = true
+
 [filter "lfs"]
 required = true
 clean = git-lfs clean -- %f
