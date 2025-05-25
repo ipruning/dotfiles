@@ -9,6 +9,22 @@
                 },
                 "rules": [
                     {
+                        "description": "page_up 👉 hyper (if on hold)",
+                        "manipulators": [
+                            {
+                                "from": { "key_code": "page_up" },
+                                "to": [
+                                    {
+                                        "key_code": "left_shift",
+                                        "modifiers": ["left_command", "left_control", "left_option"]
+                                    }
+                                ],
+                                "to_if_alone": [{ "key_code": "page_up" }],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
                         "description": "home 👉 hyper (if on hold)",
                         "manipulators": [
                             {
@@ -20,6 +36,30 @@
                                     }
                                 ],
                                 "to_if_alone": [{ "key_code": "home" }],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "left_control 👉 hyper (only on built-in keyboard)",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "identifiers": [{ "is_built_in_keyboard": true }],
+                                        "type": "device_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "left_control",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "left_shift",
+                                        "modifiers": ["left_command", "left_control", "left_option"]
+                                    }
+                                ],
                                 "type": "basic"
                             }
                         ]
@@ -45,30 +85,6 @@
                                     }
                                 ],
                                 "to_if_alone": [{ "key_code": "escape" }],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "left_control 👉 hyper (only on built-in keyboard)",
-                        "manipulators": [
-                            {
-                                "conditions": [
-                                    {
-                                        "identifiers": [{ "is_built_in_keyboard": true }],
-                                        "type": "device_if"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "left_control",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to": [
-                                    {
-                                        "key_code": "left_shift",
-                                        "modifiers": ["left_command", "left_control", "left_option"]
-                                    }
-                                ],
                                 "type": "basic"
                             }
                         ]
