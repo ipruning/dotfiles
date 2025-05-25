@@ -27,5 +27,6 @@ Spark Mail
 TablePlus
 Timing
 Ulysses
+Vivid
 WiFi Explorer
 Yoink
