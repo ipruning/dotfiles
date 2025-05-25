@@ -6,7 +6,6 @@ node = "latest"
 python = "latest"
 ruby = "latest"
 rust = "stable"
-zig = "latest"
 
 "pipx:pre-commit" = "latest"
 
