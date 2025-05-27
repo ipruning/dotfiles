@@ -10,6 +10,7 @@ duckdb
 eza
 fd
 ffmpeg
+fio
 fish
 flyctl
 fpp
