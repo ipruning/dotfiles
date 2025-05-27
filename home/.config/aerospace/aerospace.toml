@@ -1,4 +1,4 @@
-start-at-login = false
+start-at-login = true
 accordion-padding = 0
 enable-normalization-flatten-containers = true
 enable-normalization-opposite-orientation-for-nested-containers = true
@@ -160,4 +160,8 @@ run = 'layout floating'
 
 [[on-window-detected]]
 if.app-id = 'codes.rambo.VirtualBuddy'
+run = 'layout floating'
+
+[[on-window-detected]]
+if.app-id = 'com.hypergryph.arknights'
 run = 'layout floating'
