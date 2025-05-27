@@ -26,7 +26,7 @@ theme = catppuccin-mocha
 
 macos-option-as-alt = true
 
-# confirm-close-surface = false
+confirm-close-surface = false
 
 keybind = cmd+j=text: jump-to-session\x0a
 keybind = cmd+shift+j=text: jump-to-repo\x0a
