@@ -37,16 +37,16 @@ if [[ $OSTYPE = darwin* ]]; then
   fi
 
   if [[ "$TERM_PROGRAM" == "ghostty" ]]; then
-    export EDITOR="nvim"
-    export VISUAL="nvim"
-    # if [[ -z "$ZELLIJ" ]]; then
-    #   latest_session=$(/opt/homebrew/bin/zellij list-sessions --no-formatting --reverse --short | grep -v "^repo-" | head -n 1)
-    #   if [[ -n "$latest_session" ]]; then
-    #     /opt/homebrew/bin/zellij attach --create "$latest_session"
-    #   else
-    #     /opt/homebrew/bin/zellij
-    #   fi
-    # fi
+    export EDITOR="zed --wait"
+    export VISUAL="zed --wait"
+    if [[ -z "$ZELLIJ" ]]; then
+      latest_session=$(/opt/homebrew/bin/zellij list-sessions --no-formatting --reverse --short | grep -v "^repo-" | head -n 1)
+      if [[ -n "$latest_session" ]]; then
+        /opt/homebrew/bin/zellij attach --create "$latest_session"
+      else
+        /opt/homebrew/bin/zellij
+      fi
+    fi
   fi
 
 fi
