@@ -29,11 +29,13 @@ lazygit
 macmon
 mdq
 mise
+mongodb/brew/mongodb-community
 neovim
 nushell
 ouch
 ov
 pandoc
+parallel
 parallel-disk-usage
 procs
 pueue
@@ -42,6 +44,7 @@ riff
 rip2
 ripgrep-all
 ruby
+rust-parallel
 rustscan
 shellcheck
 starship
