@@ -54,6 +54,7 @@ LM Studio
 Longbridge Pro
 Loopback
 LyricsX
+MAA
 MDPro3
 Microsoft Excel
 Microsoft PowerPoint
