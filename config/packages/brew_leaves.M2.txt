@@ -26,8 +26,10 @@ hyperfine
 jaq
 jd
 jq
+just
 lazydocker
 lazygit
+lazyjj
 macmon
 mdq
 mise

@@ -8,6 +8,7 @@ ruby = "latest"
 rust = "stable"
 
 "pipx:pre-commit" = "latest"
+just = "latest"
 
 "cargo:https://github.com/sirwart/ripsecrets" = "latest"
 "cargo:lychee" = "latest"
