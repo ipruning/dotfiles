@@ -11,7 +11,10 @@ function x86_64-zsh-run() {
 }
 
 function jump-to-session() {
+  local zellij_path="/opt/homebrew/bin/zellij"
+
   if [[ -n "$ZELLIJ" ]]; then
+    :
   else
     zj_sessions=$($zellij_path list-sessions --no-formatting --short)
     case $(echo "$zj_sessions" | grep -c '^.') in
@@ -34,16 +37,17 @@ function jump-to-session() {
 function jump-to-repo() {
   local repo_path
   repo_path=$(tv git-repos)
+  local zellij_path="/opt/homebrew/bin/zellij"
+
   [[ -z "$repo_path" ]] && return
   if [[ -n "$ZELLIJ" ]]; then
     cd "${repo_path}"
   else
     cd "${repo_path}"
     local repo_name=$(basename "${repo_path}")
-    zellij attach "${repo_name}" 2>/dev/null || zellij --session "${repo_name}"
+    $zellij_path attach "${repo_name}" 2>/dev/null || $zellij_path --session "${repo_name}"
   fi
 }
-
 
 function pf() {
   set -f
@@ -73,4 +77,16 @@ ctrl-f:reload^$PUEUE_TASKS^\
     --preview="echo {} | cut -d'|' -f1 | xargs pueue log | bat -l log --style=rule,numbers --color=always -r ':200'" \
     --bind="$bind"
   set +f
+}
+
+function mkdircd() {
+  mkdir -p "$@" && cd "$1"
+}
+
+function serve() {
+  local port=${1:-8000}
+  local ip=$(ipconfig getifaddr en0)
+
+  echo "Serving on ${ip}:${port} ..."
+  uv run python -m http.server ${port}
 }
