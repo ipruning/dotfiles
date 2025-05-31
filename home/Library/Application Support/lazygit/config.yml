@@ -4,7 +4,6 @@ git:
   paging:
     colorArg: always
     pager: delta --paging=never
-    # externalDiffCommand: difft
 gui:
   mouseEvents: false
   sidePanelWidth: 0.3
