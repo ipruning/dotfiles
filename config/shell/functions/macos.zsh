@@ -13,18 +13,21 @@ function x86_64-zsh-run() {
 function jump-to-session() {
   if [[ -n "$ZELLIJ" ]]; then
   else
-    if [[ "$TERM_PROGRAM" == "ghostty" ]]; then
-      zj_sessions=$(/opt/homebrew/bin/zellij list-sessions --no-formatting --short)
-      case $(echo "$zj_sessions" | grep -c '^.') in
-      0)
-        /opt/homebrew/bin/zellij
-        ;;
-      *)
-        selected_session=$(echo "$zj_sessions" | /opt/homebrew/bin/tv --no-preview) &&
-          [[ -n "$selected_session" ]] && /opt/homebrew/bin/zellij attach "$selected_session"
-        ;;
-      esac
-    fi
+    zj_sessions=$($zellij_path list-sessions --no-formatting --short)
+    case $(echo "$zj_sessions" | grep -c '^.') in
+    0)
+      $zellij_path
+      ;;
+    *)
+      if local selected_session; selected_session=$(echo "$zj_sessions" | tv --no-preview); then
+        if [[ -n "$selected_session" ]]; then
+          $zellij_path attach "$selected_session"
+        fi
+      else
+        :
+      fi
+      ;;
+    esac
   fi
 }
 
