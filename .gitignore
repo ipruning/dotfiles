@@ -4,6 +4,7 @@
 config/shell/completions/
 config/shell/plugins/
 home/.config/fish/completions/
+home/.config/zellij/plugins
 
-*private*
 !*tpl*
+*private*
