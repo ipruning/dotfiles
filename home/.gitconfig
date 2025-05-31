@@ -37,17 +37,6 @@ wip = "!sh -c 'git for-each-ref --sort='authordate:iso8601' --format=' %(color:g
 clean-untracked = "!sh -c 'git clean -fd'"
 unstage = "!sh -c 'git reset HEAD --'"
 
-aa = "!sh -c 'git add --all --verbose'"
-ac = "!sh -c 'codegpt commit --no_confirm'"
-b  = "!sh -c 'git browse'"
-c  = "!sh -c 'koji'"
-d  = "!sh -c 'git diff'"
-j  = "!sh -c 'jump-to-repo'"
-l  = "!sh -c 'git log'"
-o  = "!sh -c 'open .'"
-s  = "!sh -c 'git status'"
-tidy = "!gh tidy"
-
 [commit]
 verbose = true
 template = ~/.gitcommit

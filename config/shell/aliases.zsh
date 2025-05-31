@@ -30,6 +30,19 @@ alias p="pbpaste"
 alias ports="viddy --interval 1s 'lsof -i @127.0.0.1 | grep LISTEN'"
 alias surge="/Applications/Surge.app/Contents/Applications/surge-cli"
 
+alias gaa="git add --all --verbose"
+alias gac="codegpt commit --no_confirm"
+alias gb="git browse"
+alias gc="koji"
+alias gco="git checkout" 
+alias gd="git diff"
+alias gdc="git diff --cached"
+alias gj="jump-to-repo"
+alias gl="git log"
+alias go="open ."
+alias gs="git status"
+alias gtidy="gh tidy"
+
 function code() {
   open "$@" -a "Visual Studio Code"
 }
