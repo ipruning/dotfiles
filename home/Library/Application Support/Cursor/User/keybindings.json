@@ -1,62 +1,52 @@
 [
-  {
-    "command": "workbench.action.terminal.runSelectedText",
-    "key": "ctrl+shift+enter"
-  },
-  {
-    "command": "workbench.action.terminal.new",
-    "key": "cmd+t",
-    "when": "terminalFocus && !terminalTextSelected"
-  },
-  {
-    "args": {
-      "commands": [
-        "workbench.action.files.save",
-        "git.stageAll",
-        "cursor.generateGitCommitMessage",
-        "git.commit",
-        "git.push"
-      ]
-    },
-    "command": "runCommands",
-    "key": "cmd+g a c"
-  },
-  {
-    "command": "cursorHome",
-    "key": "ctrl+a",
-    "when": "textInputFocus"
-  },
-  {
-    "command": "cursorEnd",
-    "key": "ctrl+e",
-    "when": "textInputFocus"
-  },
-  {
-    "key": "ctrl+u",
-    "command": "-vscode-neovim.ctrl-u",
-    "when": "editorTextFocus && neovim.ctrlKeysNormal.u && neovim.init && neovim.mode != 'insert' && editorLangId not in 'neovim.editorLangIdExclusions'"
-  },
-  {
-    "key": "ctrl+d",
-    "command": "-vscode-neovim.ctrl-d",
-    "when": "editorTextFocus && neovim.ctrlKeysNormal.d && neovim.init && neovim.mode != 'insert' && editorLangId not in 'neovim.editorLangIdExclusions'"
-  },
-  {
-    "key": "ctrl+u",
-    "command": "multiCommand.pageUp",
-    "when": "editorTextFocus"
-  },
-  {
-    "key": "ctrl+d",
-    "command": "multiCommand.pageDown",
-    "when": "editorTextFocus"
-  },
-  {
-    "key": "shift+enter",
-    "command": "workbench.action.terminal.sendSequence",
-    "args": {
-      "text": "\\\r\n"
-    },
-    "when": "terminalFocus"
-  }
+	{
+		"args": {
+			"commands": [
+				"workbench.action.files.save",
+				"git.stageAll",
+				"cursor.generateGitCommitMessage",
+				"git.commit",
+				"git.push"
+			]
+		},
+		"command": "runCommands",
+		"key": "cmd+g a c"
+	},
+	{
+		"command": "cursorHome",
+		"key": "ctrl+a",
+		"when": "textInputFocus"
+	},
+	{
+		"command": "cursorEnd",
+		"key": "ctrl+e",
+		"when": "textInputFocus"
+	},
+	{
+		"command": "workbench.action.terminal.runSelectedText",
+		"key": "ctrl+shift+enter"
+	},
+	{
+		"command": "workbench.action.terminal.new",
+		"key": "cmd+t",
+		"when": "terminalFocus && !terminalTextSelected"
+	},
+	{
+		"command": "workbench.action.terminal.scrollUpPage",
+		"key": "cmd+u",
+		"when": "terminalFocus"
+	},
+	{
+		"command": "workbench.action.terminal.scrollDownPage",
+		"key": "cmd+d",
+		"when": "terminalFocus"
+	},
+	{
+		"key": "shift+enter",
+		"command": "workbench.action.terminal.sendSequence",
+		"args": {
+			"text": "\\\r\n"
+		},
+		"when": "terminalFocus"
+	}
 ]
