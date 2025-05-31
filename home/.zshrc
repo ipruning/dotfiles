@@ -10,7 +10,10 @@ if [[ $OSTYPE = darwin* ]]; then
   fi
 
   autoload -Uz compinit
-  compinit -d ~/.zcompdump
+  for dump in ~/.zcompdump(N.mh+24); do
+    compinit
+  done
+  compinit -C
 
   # autoload -U +X bashcompinit && bashcompinit
 
