@@ -25,7 +25,6 @@ just = "latest"
 
 "cargo:gfold" = "latest"
 "cargo:https://github.com/bodo-run/yek" = "latest"
-"cargo:koji" = "latest"
 "cargo:rust-parallel" = "latest"
 "cargo:tokei" = "latest"
 "gem:kamal" = "latest"
