@@ -18,6 +18,17 @@ if [[ $OSTYPE = darwin* ]]; then
   # unset __conda_setup
   # <<< conda initialize <<<
 
+  # if type nvim &> /dev/null; then
+  #   alias vim="nvim"
+  #   export EDITOR="nvim"
+  #   export PSQL_EDITOR="nvim -c 'set filetype=sql'"
+  #   export GIT_EDITOR="nvim"
+  # else
+  #   export EDITOR="vim"
+  #   export PSQL_EDITOR="vim -c 'set filetype=sql'"
+  #   export GIT_EDITOR="vim"
+  # fi
+
   if [[ "$TERM_PROGRAM" == "vscode" ]]; then
     export EDITOR="zed --wait"
     export VISUAL="zed --wait"
