@@ -3,20 +3,22 @@
     "editor.defaultFormatter": "dongfg.vscode-beancount-formatter"
   },
   "[css][scss][less]": {
-    "editor.defaultFormatter": "vscode.css-language-features"
+    "editor.tabSize": 2
   },
   "[dockerfile]": {
-    "editor.defaultFormatter": "ms-azuretools.vscode-docker"
+    "editor.tabSize": 2
   },
   "[html]": {
-    "editor.defaultFormatter": "oven.bun-vscode"
+    "editor.tabSize": 2
   },
   "[javascript]": {
-    "editor.defaultFormatter": "biomejs.biome"
+    "editor.tabSize": 2
   },
   "[json][jsonc]": {
-    "editor.defaultFormatter": "biomejs.biome",
     "editor.tabSize": 2
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
   },
   "[latex]": {
     "editor.acceptSuggestionOnEnter": "on",
@@ -57,10 +59,10 @@
     "editor.defaultFormatter": "dorzey.vscode-sqlfluff"
   },
   "[typescript]": {
-    "editor.defaultFormatter": "biomejs.biome"
+    "editor.tabSize": 2
   },
   "[typescriptreact]": {
-    "editor.defaultFormatter": "biomejs.biome"
+    "editor.tabSize": 2
   },
   "[typst-code]": {
     "editor.tabSize": 2,
@@ -214,7 +216,7 @@
     ".env": "*.env, .env.*, .envrc, env.d.ts",
     ".gitignore": ".gitattributes, .gitmodules, .gitmessage, .lfsconfig, .mailmap, .git-blame*",
     ".project": ".classpath",
-    "//": "Last update at 5/25/2025, 12:06:27 AM",
+    "//": "Last update at 6/1/2025, 8:44:49 AM",
     "BUILD.bazel": "*.bzl, *.bazel, *.bazelrc, bazel.rc, .bazelignore, .bazelproject, .bazelversion, MODULE.bazel.lock, WORKSPACE",
     "CMakeLists.txt": "*.cmake, *.cmake.in, .cmake-format.yaml, CMakePresets.json, CMakeCache.txt",
     "Cargo.toml": ".clippy.toml, .rustfmt.toml, Cargo.Bazel.lock, Cargo.lock, clippy.toml, cross.toml, insta.yaml, rust-toolchain.toml, rustfmt.toml",
@@ -394,7 +396,7 @@
   "sqlfluff.dialect": "duckdb",
   "sqlfluff.excludeRules": [
     "RF05",
-    "RF01",
+    "RF01"
   ],
   "sqlfluff.executablePath": "/Users/alex/.local/share/mise/installs/pipx-sqlfluff/3.4.0/bin/sqlfluff",
   "terminal.integrated.confirmOnExit": "hasChildProcesses",
