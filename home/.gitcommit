@@ -6,7 +6,7 @@
 #
 # STRUCTURE:
 #
-#		<type>(optional_scope): <description: imperative mood>
+# <type>(optional_scope): <description: imperative mood>
 #
 # TYPES:
 #    all:      Changes to multiple files/modules/packages.
