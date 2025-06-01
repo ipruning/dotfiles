@@ -1,7 +1,7 @@
-require("full-border"):setup {
-    ---@diagnostic disable-next-line: undefined-global
-    type = ui.Border.ROUNDED,
-}
+-- require("full-border"):setup {
+--     ---@diagnostic disable-next-line: undefined-global
+--     type = ui.Border.ROUNDED,
+-- }
 
 require("starship"):setup()
 
