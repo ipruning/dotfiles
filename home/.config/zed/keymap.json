@@ -193,7 +193,7 @@
       "space t": [
         "task::Spawn",
         {
-          "task_name": "run_python",
+          "task_name": "run",
           "reveal_target": "center"
         }
       ],
