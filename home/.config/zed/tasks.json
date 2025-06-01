@@ -130,5 +130,18 @@
         "args": ["--noediting", "--norc", "--noprofile"]
       }
     }
+  },
+  {
+    "label": "run_python",
+    "command": "uv",
+    "args": ["run", "$ZED_FILE"],
+    "allow_concurrent_runs": true,
+    "use_new_terminal": true,
+    "shell": {
+      "with_arguments": {
+        "program": "sh",
+        "args": ["--noediting", "--norc", "--noprofile"]
+      }
+    }
   }
 ]
