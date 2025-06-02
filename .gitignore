@@ -1,3 +1,5 @@
+.claude-trace/
+.claude/
 .DS_Store
 *backups
 *tmTheme
