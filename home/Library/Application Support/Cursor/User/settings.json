@@ -75,6 +75,9 @@
   "[yaml]": {
     "editor.tabSize": 2
   },
+  "amp.commands.allowlist": [
+    "ruff"
+  ],
   "autocorrect.formatOnSave": false,
   "baml.bamlPanelOpen": false,
   "beancount.fixedCJKWidth": true,
