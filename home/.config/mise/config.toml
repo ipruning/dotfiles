@@ -8,6 +8,7 @@ ruby = "latest"
 rust = "stable"
 
 "pipx:pre-commit" = "latest"
+cargo-binstall = "latest"
 just = "latest"
 
 "cargo:https://github.com/sirwart/ripsecrets" = "latest"
@@ -89,8 +90,14 @@ missing_tools = "never"
 show_env = false
 show_tools = false
 
+[settings.cargo]
+binstall = true
+
 [settings.npm]
 bun = true
 
 [settings.pipx]
 uvx = true
+
+[settings.python]
+compile = false
