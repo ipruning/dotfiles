@@ -27,7 +27,7 @@
     "Dockerfile": ["Dockerfile", "Dockerfile.*"],
     "JSON": ["json"]
   },
-  "format_on_save": "on",
+  "format_on_save": "off",
   "git_panel": {
     "dock": "right"
   },
@@ -44,7 +44,7 @@
       "language_servers": ["typescript-language-server", "!vtsls"]
     },
     "Python": {
-      "format_on_save": "on",
+      "format_on_save": "off",
       "formatter": [
         {
           "code_actions": {

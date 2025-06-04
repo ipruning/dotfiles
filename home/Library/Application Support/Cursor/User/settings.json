@@ -57,9 +57,7 @@
     "editor.tabSize": 2,
     "editor.wordSeparators": "`~!@#$%^&*()=+[{]}\\|;:'\",.<>/?"
   },
-  "amp.commands.allowlist": [
-    "ruff"
-  ],
+  "amp.commands.allowlist": ["ruff"],
   "autocorrect.formatOnSave": false,
   "baml.bamlPanelOpen": false,
   "beancount.fixedCJKWidth": true,
@@ -119,7 +117,7 @@
   "editor.fontFamily": "'MonoLisa', 'Maple Mono NF CN'",
   "editor.fontSize": 12,
   "editor.fontWeight": "400",
-  "editor.formatOnSave": true,
+  "editor.formatOnSave": false,
   "editor.guides.bracketPairs": true,
   "editor.guides.bracketPairsHorizontal": "active",
   "editor.guides.highlightActiveIndentation": true,
@@ -143,10 +141,7 @@
   "editor.unicodeHighlight.invisibleCharacters": true,
   "editor.wordWrap": "on",
   "editor.wrappingStrategy": "advanced",
-  "errorLens.enabledDiagnosticLevels": [
-    "error",
-    "warning"
-  ],
+  "errorLens.enabledDiagnosticLevels": ["error", "warning"],
   "explorer.confirmDelete": false,
   "explorer.confirmDragAndDrop": false,
   "explorer.fileNesting.enabled": true,
@@ -349,11 +344,7 @@
   "shellcheck.enableQuickFix": true,
   "shellcheck.exclude": [],
   "shellcheck.executablePath": "",
-  "shellcheck.ignoreFileSchemes": [
-    "git",
-    "gitfs",
-    "output"
-  ],
+  "shellcheck.ignoreFileSchemes": ["git", "gitfs", "output"],
   "shellcheck.ignorePatterns": {
     "**/*.csh": true,
     "**/*.cshrc": true,
@@ -379,10 +370,7 @@
   },
   "shellcheck.run": "onType",
   "sqlfluff.dialect": "duckdb",
-  "sqlfluff.excludeRules": [
-    "RF05",
-    "RF01"
-  ],
+  "sqlfluff.excludeRules": ["RF05", "RF01"],
   "sqlfluff.executablePath": "/Users/alex/.local/share/mise/installs/pipx-sqlfluff/3.4.0/bin/sqlfluff",
   "svelte.enable-ts-plugin": true,
   "terminal.integrated.confirmOnExit": "hasChildProcesses",
@@ -397,92 +385,49 @@
   "vim.leader": "<space>",
   "vim.normalModeKeyBindings": [
     {
-      "before": [
-        "<leader>",
-        "r"
-      ],
-      "commands": [
-        "workbench.action.openRecent"
-      ]
+      "before": ["<leader>", "r"],
+      "commands": ["workbench.action.openRecent"]
     },
     {
-      "before": [
-        "<leader>",
-        "n"
-      ],
-      "commands": [
-        "workbench.action.createTerminalEditor"
-      ]
+      "before": ["<leader>", "n"],
+      "commands": ["workbench.action.createTerminalEditor"]
     },
     {
-      "before": [
-        "<leader>",
-        "t"
-      ],
-      "commands": [
-        "code-runner.run"
-      ]
+      "before": ["<leader>", "t"],
+      "commands": ["code-runner.run"]
     },
     {
-      "before": [
-        ":"
-      ],
-      "commands": [
-        "workbench.action.showCommands"
-      ],
+      "before": [":"],
+      "commands": ["workbench.action.showCommands"],
       "silent": true
     },
     {
-      "before": [
-        "<leader>",
-        "<leader>"
-      ],
-      "commands": [
-        "workbench.action.quickOpen"
-      ]
+      "before": ["<leader>", "<leader>"],
+      "commands": ["workbench.action.quickOpen"]
     },
     {
-      "before": [
-        "<leader>",
-        "a"
-      ],
-      "commands": [
-        "workbench.action.toggleAuxiliaryBar"
-      ]
+      "before": ["<leader>", "a"],
+      "commands": ["workbench.action.toggleAuxiliaryBar"]
     },
     {
-      "before": [
-        "c",
-        "d"
-      ],
-      "commands": [
-        "editor.action.rename"
-      ]
+      "before": ["c", "d"],
+      "commands": ["editor.action.rename"]
     },
     {
-      "before": [
-        "<leader>",
-        "e"
-      ],
-      "commands": [
-        "workbench.action.toggleSidebarVisibility"
-      ]
+      "before": ["<leader>", "f"],
+      "commands": ["editor.action.formatDocument"]
     },
     {
-      "before": [
-        "<C-j>"
-      ],
-      "commands": [
-        "editor.action.marker.nextInFiles"
-      ]
+      "before": ["<leader>", "e"],
+      "commands": ["workbench.action.toggleSidebarVisibility"]
     },
     {
-      "before": [
-        "<C-k>"
-      ],
-      "commands": [
-        "editor.action.marker.prevInFiles"
-      ]
+      "before": ["<C-j>"],
+      "commands": ["editor.action.marker.nextInFiles"]
+    },
+    {
+      "before": ["<C-k>"],
+      "commands": ["editor.action.marker.prevInFiles"]
     }
   ],
   "vim.useSystemClipboard": true,
