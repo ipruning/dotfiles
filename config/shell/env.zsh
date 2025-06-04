@@ -1,5 +1,10 @@
-# 👇 mise
+# 👇 mise hook-env
 eval "$(mise activate zsh)"
+eval "$(mise hook-env -s zsh)"
+
+# 👇 mise shims
+# eval "$(mise activate zsh --shims)"
+# eval "$(mise activate zsh)"
 
 # 👇 zsh Theme
 eval "$(starship init zsh)"
