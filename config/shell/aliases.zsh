@@ -33,7 +33,7 @@ alias rsyncssh="rsync -Pr --rsh=ssh"
 alias c="pbcopy"
 alias cdr='cd $(git rev-parse --show-toplevel)'
 alias gb="git browse"
-alias gtidy="gh tidy"
+alias gtidy="gh tidy && git fetch --prune"
 alias history="atuin history list --format '{time} - [{duration}] - {command}'"
 alias jr="jump-to-repo"
 alias js="jump-to-session"
