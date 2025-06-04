@@ -2,20 +2,8 @@
   "[beancount]": {
     "editor.defaultFormatter": "dongfg.vscode-beancount-formatter"
   },
-  "[css][scss][less]": {
-    "editor.tabSize": 2
-  },
-  "[dockerfile]": {
-    "editor.tabSize": 2
-  },
-  "[html]": {
-    "editor.tabSize": 2
-  },
   "[javascript]": {
-    "editor.tabSize": 2
-  },
-  "[json][jsonc]": {
-    "editor.tabSize": 2
+    "editor.defaultFormatter": "vscode.typescript-language-features"
   },
   "[jsonc]": {
     "editor.defaultFormatter": "vscode.json-language-features"
@@ -58,11 +46,8 @@
   "[sql]": {
     "editor.defaultFormatter": "dorzey.vscode-sqlfluff"
   },
-  "[typescript]": {
-    "editor.tabSize": 2
-  },
-  "[typescriptreact]": {
-    "editor.tabSize": 2
+  "[svelte]": {
+    "editor.defaultFormatter": "svelte.svelte-vscode"
   },
   "[typst-code]": {
     "editor.tabSize": 2,
@@ -71,9 +56,6 @@
   "[typst]": {
     "editor.tabSize": 2,
     "editor.wordSeparators": "`~!@#$%^&*()=+[{]}\\|;:'\",.<>/?"
-  },
-  "[yaml]": {
-    "editor.tabSize": 2
   },
   "amp.commands.allowlist": [
     "ruff"
@@ -84,6 +66,7 @@
   "beancount.mainBeanFile": "~/Databases/Ledger/main.bean",
   "beancountFormatter.currencyColumn": 72,
   "beancountFormatter.fixedCJKWidth": true,
+  "biome.requireConfiguration": true,
   "catppuccin-icons.associations.extensions": {
     "bean": "markdown",
     "mdc": "markdown",
@@ -121,7 +104,6 @@
   "code-runner.saveFileBeforeRun": true,
   "cursor.chat.terminalShowHoverHint": false,
   "cursor.cmdk.autoSelect": false,
-  "cursor.cmdk.useThemedDiffBackground": false,
   "cursor.cmdk.useThemedDiffBackground2": false,
   "cursor.composer.collapsePaneInputBoxPills": true,
   "cursor.composer.shouldAllowCustomModes": true,
@@ -219,7 +201,7 @@
     ".env": "*.env, .env.*, .envrc, env.d.ts",
     ".gitignore": ".gitattributes, .gitmodules, .gitmessage, .lfsconfig, .mailmap, .git-blame*",
     ".project": ".classpath",
-    "//": "Last update at 6/1/2025, 8:44:49 AM",
+    "//": "Last update at 6/4/2025, 3:23:24 PM",
     "BUILD.bazel": "*.bzl, *.bazel, *.bazelrc, bazel.rc, .bazelignore, .bazelproject, .bazelversion, MODULE.bazel.lock, WORKSPACE",
     "CMakeLists.txt": "*.cmake, *.cmake.in, .cmake-format.yaml, CMakePresets.json, CMakeCache.txt",
     "Cargo.toml": ".clippy.toml, .rustfmt.toml, Cargo.Bazel.lock, Cargo.lock, clippy.toml, cross.toml, insta.yaml, rust-toolchain.toml, rustfmt.toml",
@@ -402,6 +384,7 @@
     "RF01"
   ],
   "sqlfluff.executablePath": "/Users/alex/.local/share/mise/installs/pipx-sqlfluff/3.4.0/bin/sqlfluff",
+  "svelte.enable-ts-plugin": true,
   "terminal.integrated.confirmOnExit": "hasChildProcesses",
   "terminal.integrated.defaultProfile.osx": "zsh",
   "terminal.integrated.fontSize": 12,
