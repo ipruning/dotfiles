@@ -131,3 +131,6 @@ program = /opt/homebrew/bin/gpg
 
 [url "https://github.com/"]
 insteadOf = "git@github.com:"
+
+[log]
+date = iso
