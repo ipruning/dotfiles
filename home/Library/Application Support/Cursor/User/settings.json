@@ -57,7 +57,9 @@
     "editor.tabSize": 2,
     "editor.wordSeparators": "`~!@#$%^&*()=+[{]}\\|;:'\",.<>/?"
   },
-  "amp.commands.allowlist": ["ruff"],
+  "amp.commands.allowlist": [
+    "ruff"
+  ],
   "autocorrect.formatOnSave": false,
   "baml.bamlPanelOpen": false,
   "beancount.fixedCJKWidth": true,
@@ -65,6 +67,7 @@
   "beancountFormatter.currencyColumn": 72,
   "beancountFormatter.fixedCJKWidth": true,
   "biome.requireConfiguration": true,
+  "bun.runtime": "/Users/alex/.local/share/mise/shims/bun",
   "catppuccin-icons.associations.extensions": {
     "bean": "markdown",
     "mdc": "markdown",
@@ -106,6 +109,9 @@
   "cursor.composer.collapsePaneInputBoxPills": true,
   "cursor.composer.shouldAllowCustomModes": true,
   "cursor.composer.shouldChimeAfterChatFinishes": true,
+  "debug.javascript.defaultRuntimeExecutable": {
+    "pwa-node": "/Users/alex/.local/share/mise/shims/node"
+  },
   "diffEditor.ignoreTrimWhitespace": false,
   "diffEditor.maxComputationTime": 8192,
   "diffEditor.renderSideBySide": true,
@@ -141,7 +147,10 @@
   "editor.unicodeHighlight.invisibleCharacters": true,
   "editor.wordWrap": "on",
   "editor.wrappingStrategy": "advanced",
-  "errorLens.enabledDiagnosticLevels": ["error", "warning"],
+  "errorLens.enabledDiagnosticLevels": [
+    "error",
+    "warning"
+  ],
   "explorer.confirmDelete": false,
   "explorer.confirmDragAndDrop": false,
   "explorer.fileNesting.enabled": true,
@@ -267,6 +276,11 @@
   "git.confirmSync": false,
   "git.enableSmartCommit": true,
   "git.openRepositoryInParentFolders": "never",
+  "go.alternateTools": {
+    "go": "/Users/alex/.local/share/mise/shims/go",
+    "gopls": "/Users/alex/.local/share/mise/shims/gopls"
+  },
+  "go.goroot": "/Users/alex/.local/share/mise/installs/go/1.24.4",
   "json.maxItemsComputed": 8192,
   "lldb.launch.expressions": "native",
   "lldb.library": "/Library/Developer/CommandLineTools/Library/PrivateFrameworks/LLDB.framework/Versions/A/LLDB",
@@ -336,6 +350,7 @@
   "python.analysis.autoFormatStrings": true,
   "python.analysis.inlayHints.variableTypes": false,
   "python.analysis.typeCheckingMode": "basic",
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv",
   "python.languageServer": "Pylance",
   "redhat.telemetry.enabled": false,
   "ruff.configurationPreference": "filesystemFirst",
@@ -344,7 +359,11 @@
   "shellcheck.enableQuickFix": true,
   "shellcheck.exclude": [],
   "shellcheck.executablePath": "",
-  "shellcheck.ignoreFileSchemes": ["git", "gitfs", "output"],
+  "shellcheck.ignoreFileSchemes": [
+    "git",
+    "gitfs",
+    "output"
+  ],
   "shellcheck.ignorePatterns": {
     "**/*.csh": true,
     "**/*.cshrc": true,
@@ -370,7 +389,10 @@
   },
   "shellcheck.run": "onType",
   "sqlfluff.dialect": "duckdb",
-  "sqlfluff.excludeRules": ["RF05", "RF01"],
+  "sqlfluff.excludeRules": [
+    "RF05",
+    "RF01"
+  ],
   "sqlfluff.executablePath": "/Users/alex/.local/share/mise/installs/pipx-sqlfluff/3.4.0/bin/sqlfluff",
   "svelte.enable-ts-plugin": true,
   "terminal.integrated.confirmOnExit": "hasChildProcesses",
@@ -385,49 +407,101 @@
   "vim.leader": "<space>",
   "vim.normalModeKeyBindings": [
     {
-      "before": ["<leader>", "r"],
-      "commands": ["workbench.action.openRecent"]
+      "before": [
+        "<leader>",
+        "r"
+      ],
+      "commands": [
+        "workbench.action.openRecent"
+      ]
     },
     {
-      "before": ["<leader>", "n"],
-      "commands": ["workbench.action.createTerminalEditor"]
+      "before": [
+        "<leader>",
+        "n"
+      ],
+      "commands": [
+        "workbench.action.createTerminalEditor"
+      ]
     },
     {
-      "before": ["<leader>", "t"],
-      "commands": ["code-runner.run"]
+      "before": [
+        "<leader>",
+        "t"
+      ],
+      "commands": [
+        "code-runner.run"
+      ]
     },
     {
-      "before": [":"],
-      "commands": ["workbench.action.showCommands"],
+      "before": [
+        ":"
+      ],
+      "commands": [
+        "workbench.action.showCommands"
+      ],
       "silent": true
     },
     {
-      "before": ["<leader>", "<leader>"],
-      "commands": ["workbench.action.quickOpen"]
+      "before": [
+        "<leader>",
+        "<leader>"
+      ],
+      "commands": [
+        "workbench.action.quickOpen"
+      ]
     },
     {
-      "before": ["<leader>", "a"],
-      "commands": ["workbench.action.toggleAuxiliaryBar"]
+      "before": [
+        "<leader>",
+        "a"
+      ],
+      "commands": [
+        "workbench.action.toggleAuxiliaryBar"
+      ]
     },
     {
-      "before": ["c", "d"],
-      "commands": ["editor.action.rename"]
+      "before": [
+        "c",
+        "d"
+      ],
+      "commands": [
+        "editor.action.rename"
+      ]
     },
     {
-      "before": ["<leader>", "f"],
-      "commands": ["editor.action.formatDocument"]
+      "before": [
+        "<leader>",
+        "f"
+      ],
+      "commands": [
+        "editor.action.formatDocument"
+      ]
     },
     {
-      "before": ["<leader>", "e"],
-      "commands": ["workbench.action.toggleSidebarVisibility"]
+      "before": [
+        "<leader>",
+        "e"
+      ],
+      "commands": [
+        "workbench.action.toggleSidebarVisibility"
+      ]
     },
     {
-      "before": ["<C-j>"],
-      "commands": ["editor.action.marker.nextInFiles"]
+      "before": [
+        "<C-j>"
+      ],
+      "commands": [
+        "editor.action.marker.nextInFiles"
+      ]
     },
     {
-      "before": ["<C-k>"],
-      "commands": ["editor.action.marker.prevInFiles"]
+      "before": [
+        "<C-k>"
+      ],
+      "commands": [
+        "editor.action.marker.prevInFiles"
+      ]
     }
   ],
   "vim.useSystemClipboard": true,
