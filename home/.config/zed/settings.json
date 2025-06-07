@@ -2,8 +2,8 @@
   "agent": {
     "always_allow_tool_actions": true,
     "default_model": {
-      "model": "anthropic.claude-3-7-sonnet-20250219-v1:0",
-      "provider": "amazon-bedrock"
+      "model": "gemini-2.5-pro",
+      "provider": "copilot_chat"
     },
     "default_profile": "write",
     "version": "2"
