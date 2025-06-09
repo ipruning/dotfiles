@@ -51,6 +51,7 @@ ruby
 rust-parallel
 rustscan
 shellcheck
+sqlfluff
 starship
 tailspin
 tealdeer

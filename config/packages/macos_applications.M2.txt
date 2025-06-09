@@ -68,6 +68,7 @@ Notion
 Notion Calendar
 Notion Mail
 OBS
+Obsidian
 OnyX
 OrbStack
 PasteNow
@@ -123,5 +124,6 @@ XLD
 YACReader
 Z-Library
 Zed
+Zed Preview
 zoom.us
 Zotero
