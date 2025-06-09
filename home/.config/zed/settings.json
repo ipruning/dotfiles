@@ -2,10 +2,11 @@
   "agent": {
     "always_allow_tool_actions": true,
     "default_model": {
-      "model": "gemini-2.5-pro",
+      "model": "claude-sonnet-4",
       "provider": "copilot_chat"
     },
     "default_profile": "write",
+    "play_sound_when_agent_done": true,
     "version": "2"
   },
   "autosave": "on_focus_change",
