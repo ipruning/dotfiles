@@ -67,7 +67,6 @@
   "beancountFormatter.currencyColumn": 72,
   "beancountFormatter.fixedCJKWidth": true,
   "biome.requireConfiguration": true,
-  "bun.runtime": "/Users/alex/.local/share/mise/shims/bun",
   "catppuccin-icons.associations.extensions": {
     "bean": "markdown",
     "mdc": "markdown",
@@ -109,9 +108,6 @@
   "cursor.composer.collapsePaneInputBoxPills": true,
   "cursor.composer.shouldAllowCustomModes": true,
   "cursor.composer.shouldChimeAfterChatFinishes": true,
-  "debug.javascript.defaultRuntimeExecutable": {
-    "pwa-node": "/Users/alex/.local/share/mise/shims/node"
-  },
   "diffEditor.ignoreTrimWhitespace": false,
   "diffEditor.maxComputationTime": 8192,
   "diffEditor.renderSideBySide": true,
@@ -276,11 +272,6 @@
   "git.confirmSync": false,
   "git.enableSmartCommit": true,
   "git.openRepositoryInParentFolders": "never",
-  "go.alternateTools": {
-    "go": "/Users/alex/.local/share/mise/shims/go",
-    "gopls": "/Users/alex/.local/share/mise/shims/gopls"
-  },
-  "go.goroot": "/Users/alex/.local/share/mise/installs/go/1.24.4",
   "json.maxItemsComputed": 8192,
   "lldb.launch.expressions": "native",
   "lldb.library": "/Library/Developer/CommandLineTools/Library/PrivateFrameworks/LLDB.framework/Versions/A/LLDB",
@@ -393,7 +384,7 @@
     "RF05",
     "RF01"
   ],
-  "sqlfluff.executablePath": "/Users/alex/.local/share/mise/installs/pipx-sqlfluff/3.4.0/bin/sqlfluff",
+  "sqlfluff.executablePath": "/opt/homebrew/bin/sqlfluff",
   "svelte.enable-ts-plugin": true,
   "terminal.integrated.confirmOnExit": "hasChildProcesses",
   "terminal.integrated.defaultProfile.osx": "zsh",
