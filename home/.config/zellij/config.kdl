@@ -186,6 +186,10 @@ keybinds clear-defaults=true {
     }
     shared_except "locked" "renametab" "renamepane" {
         bind "Ctrl g" { SwitchToMode "locked"; }
+
+        bind "esc" { SwitchToMode "locked"; }
+        bind "Ctrl c" { SwitchToMode "locked"; }
+
         bind "Ctrl q" { Quit; }
 
         bind "Ctrl d" { Detach; }
