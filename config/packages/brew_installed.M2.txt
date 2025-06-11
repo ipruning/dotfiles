@@ -20,6 +20,7 @@ gh
 git-delta
 git-extras
 git-lfs
+gnupg
 htop
 httm
 hyperfine

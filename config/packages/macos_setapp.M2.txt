@@ -16,6 +16,7 @@ iStat Menus
 Luminar Neo
 Lungo
 MarginNote
+Muse
 One Switch
 Permute
 PhotoBulk
