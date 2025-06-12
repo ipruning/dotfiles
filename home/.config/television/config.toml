@@ -142,19 +142,7 @@ fallback_channel = "hidden-files-max-depth-3"
   "zed",
   "zip",
 ]
-"py-files" = [
-  "marimo edit",
-  "marimo run",
-  "modal deploy",
-  "modal launch",
-  "modal run",
-  "modal serve",
-  "modal shell",
-  "modal-cli",
-  "python",
-  "uv add",
-  "uv run",
-]
+"py-files" = ["marimo edit", "marimo run", "python", "uv add", "uv run"]
 "git-branch" = [
   "git branch",
   "git checkout",
@@ -172,7 +160,14 @@ fallback_channel = "hidden-files-max-depth-3"
 "env" = ["export", "unset"]
 "git-diff" = ["git add", "git restore"]
 "hosts" = ["ssh"]
-"marimo-files" = ["modal.bash"]
+"modal-files" = [
+  "modal deploy",
+  "modal launch",
+  "modal run",
+  "modal serve",
+  "modal shell",
+]
+"notebook-files" = ["modal.bash"]
 "my-scripts" = ["cmd-execute.bash"]
 "sh-files" = ["bash", "sh"]
 "tmux-sessions" = ["tmux a -t"]

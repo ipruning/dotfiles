@@ -34,8 +34,13 @@ source_command = "fd --no-ignore-vcs --type file --hidden --follow --extension p
 preview_command = ":files:"
 
 [[cable_channel]]
-name = "marimo-files"
-source_command = "rg --files-with-matches 'app = marimo.App()' -g '*.py'"
+name = "notebook-files"
+source_command = "rg --files-with-matches 'app = marimo.App()|jupyter' -g '*.py' -g '*.ipynb'"
+preview_command = ":files:"
+
+[[cable_channel]]
+name = "modal-files"
+source_command = "rg --files-with-matches 'modal' -g '*.py'"
 preview_command = ":files:"
 
 [[cable_channel]]
