@@ -1,3 +1,4 @@
+appleboy/tap/codegpt
 atuin
 awscli
 bash
