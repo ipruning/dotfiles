@@ -160,14 +160,15 @@ fallback_channel = "hidden-files-max-depth-3"
 "env" = ["export", "unset"]
 "git-diff" = ["git add", "git restore"]
 "hosts" = ["ssh"]
-"modal-files" = [
+"modal-apps" = [
   "modal deploy",
   "modal launch",
   "modal run",
   "modal serve",
   "modal shell",
 ]
-"notebook-files" = ["modal.bash"]
+"notebooks" = ["modal.bash"]
+"notebooks-marimo" = ["marimo edit", "marimo run"]
 "my-scripts" = ["cmd-execute.bash"]
 "sh-files" = ["bash", "sh"]
 "tmux-sessions" = ["tmux a -t"]
