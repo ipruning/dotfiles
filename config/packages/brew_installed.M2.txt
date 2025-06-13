@@ -4,6 +4,7 @@ bash
 bat
 beancount
 beancount-language-server
+codegpt
 coreutils
 difftastic
 docker
