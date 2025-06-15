@@ -21,6 +21,7 @@ LM Studio
 Mos
 OrbStack
 PasteNow
+qBittorrent
 Repo Prompt
 Roam Research
 Safari

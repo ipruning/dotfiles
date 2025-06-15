@@ -10,6 +10,7 @@ gh
 git-delta
 lazydocker
 lazygit
+libyaml
 mackup
 macmon
 mise
