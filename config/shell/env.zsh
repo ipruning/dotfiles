@@ -1,11 +1,3 @@
-# 👇 mise hook-env
-eval "$(mise activate zsh)"
-eval "$(mise hook-env -s zsh)"
-
-# 👇 mise shims
-# eval "$(mise activate zsh --shims)"
-# eval "$(mise activate zsh)"
-
 # 👇 zsh Theme
 eval "$(starship init zsh)"
 
@@ -137,3 +129,15 @@ fi
 if [[ -f "$ZSH_PLUGINS_DIR"/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh ]]; then
   source "$ZSH_PLUGINS_DIR"/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
 fi
+
+# 👇 select-word-style
+autoload -Uz select-word-style
+select-word-style bash
+
+# 👇 mise hook-env
+eval "$(mise activate zsh)"
+eval "$(mise hook-env -s zsh)"
+
+# 👇 mise shims
+# eval "$(mise activate zsh --shims)"
+# eval "$(mise activate zsh)"
