@@ -28,7 +28,7 @@
     "Dockerfile": ["Dockerfile", "Dockerfile.*"],
     "JSON": ["json"]
   },
-  "format_on_save": "off",
+  "format_on_save": "on",
   "git_panel": {
     "dock": "right"
   },
