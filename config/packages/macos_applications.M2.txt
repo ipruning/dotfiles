@@ -110,6 +110,7 @@ TestFlight
 The Powder Toy
 Things3
 TickTick
+VibeMeter
 VideoFusion-macOS
 VirtualBuddy
 waifu2x
