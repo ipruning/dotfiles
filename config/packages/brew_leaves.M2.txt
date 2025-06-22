@@ -32,7 +32,6 @@ jq
 just
 lazydocker
 lazygit
-lazyjj
 macmon
 mdq
 mise

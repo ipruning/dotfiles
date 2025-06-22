@@ -28,12 +28,10 @@ httm
 hyperfine
 jaq
 jd
-jj
 jq
 just
 lazydocker
 lazygit
-lazyjj
 macmon
 mdq
 mise

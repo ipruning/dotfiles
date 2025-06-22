@@ -13,6 +13,7 @@ BetterDisplay
 Bob
 calibre
 Capture One
+ChatGPT
 Contexts
 CrossOver
 Cursor
