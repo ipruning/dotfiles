@@ -5,7 +5,6 @@ CleanShot X
 Clop
 DevUtils
 Downie
-Due
 Focus 2
 ForkLift
 HazeOver
