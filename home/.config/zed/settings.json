@@ -2,8 +2,8 @@
   "agent": {
     "always_allow_tool_actions": true,
     "default_model": {
-      "model": "claude-sonnet-4",
-      "provider": "copilot_chat"
+      "model": "o3",
+      "provider": "openai"
     },
     "default_profile": "write",
     "play_sound_when_agent_done": true,
