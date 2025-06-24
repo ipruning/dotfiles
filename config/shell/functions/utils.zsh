@@ -48,7 +48,7 @@ function upgrade-all() {
     mise upgrade
 
     logger "Pruning mise..."
-    mise prune
+    mise prune --yes
     mise reshim
   fi
 
