@@ -44,18 +44,19 @@
   {
     "context": "EmptyPane || SharedScreen",
     "bindings": {
+      "space a": "agent::ToggleFocus",
+      "space shift-a": [
+        "task::Spawn",
+        {
+          "task_name": "amp",
+          "reveal_target": "center"
+        }
+      ],
       "space x": "diagnostics::Deploy",
       "space /": [
         "task::Spawn",
         {
           "task_name": "live_grep",
-          "reveal_target": "center"
-        }
-      ],
-      "space c": [
-        "task::Spawn",
-        {
-          "task_name": "claude",
           "reveal_target": "center"
         }
       ],
@@ -200,18 +201,18 @@
       "space shift-t": "task::Spawn",
       "space s b": "git::Branch",
       "space a": "agent::ToggleFocus",
+      "space shift-a": [
+        "task::Spawn",
+        {
+          "task_name": "amp",
+          "reveal_target": "center"
+        }
+      ],
       "space x": "diagnostics::Deploy",
       "space /": [
         "task::Spawn",
         {
           "task_name": "live_grep",
-          "reveal_target": "center"
-        }
-      ],
-      "space c": [
-        "task::Spawn",
-        {
-          "task_name": "claude",
           "reveal_target": "center"
         }
       ],
