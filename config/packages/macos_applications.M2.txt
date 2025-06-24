@@ -124,5 +124,6 @@ XLD
 YACReader
 Z-Library
 Zed
+Zed Preview
 zoom.us
 Zotero
