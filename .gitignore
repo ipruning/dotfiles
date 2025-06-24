@@ -1,12 +1,13 @@
 .claude-trace/
 .claude/
+
 .DS_Store
-*backups
-*tmTheme
-config/shell/completions/
-config/shell/plugins/
-home/.config/fish/completions/
-home/.config/zellij/plugins
+
+**/*backups
+**/*completions
+**/*plugins
+**/*tmTheme
+
+*private*
 
 !*tpl*
-*private*
