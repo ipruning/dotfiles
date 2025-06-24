@@ -100,6 +100,9 @@ api.mapkey("P", "Enter PassThrough mode", () => {
   api.Normal.passThrough(TIMEOUT_LONG_MS);
 });
 
+api.map("<Ctrl-u>", "e");
+api.map("<Ctrl-d>", "d");
+
 api.unmap("?", /\b(kagi\.com)\b/i);
 api.unmap("h", /\b(kagi\.com)\b/i); // Navigation
 api.unmap("j", /\b(kagi\.com)\b/i); // Navigation
