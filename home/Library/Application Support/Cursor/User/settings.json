@@ -49,6 +49,9 @@
   "[svelte]": {
     "editor.defaultFormatter": "svelte.svelte-vscode"
   },
+  "[toml]": {
+    "editor.tabSize": 4
+  },
   "[typst-code]": {
     "editor.tabSize": 2,
     "editor.wordSeparators": "`~!@#$%^&*()=+[{]}\\|;:'\",.<>/?"
@@ -202,7 +205,7 @@
     ".env": "*.env, .env.*, .envrc, env.d.ts",
     ".gitignore": ".gitattributes, .gitmodules, .gitmessage, .lfsconfig, .mailmap, .git-blame*",
     ".project": ".classpath",
-    "//": "Last update at 6/18/2025, 12:56:18 PM",
+    "//": "Last update at 6/24/2025, 3:26:31 PM",
     "BUILD.bazel": "*.bzl, *.bazel, *.bazelrc, bazel.rc, .bazelignore, .bazelproject, .bazelversion, MODULE.bazel.lock, WORKSPACE",
     "CMakeLists.txt": "*.cmake, *.cmake.in, .cmake-format.yaml, CMakePresets.json, CMakeCache.txt",
     "Cargo.toml": ".clippy.toml, .rustfmt.toml, Cargo.Bazel.lock, Cargo.lock, clippy.toml, cross.toml, insta.yaml, rust-toolchain.toml, rustfmt.toml",
