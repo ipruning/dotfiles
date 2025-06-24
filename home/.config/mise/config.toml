@@ -9,7 +9,9 @@ rust = "stable"
 
 "pipx:pre-commit" = "latest"
 cargo-binstall = "latest"
+cosign = "latest"
 just = "latest"
+slsa-verifier = "latest"
 
 "cargo:https://github.com/sirwart/ripsecrets" = "latest"
 "cargo:lychee" = "latest"
@@ -23,6 +25,7 @@ just = "latest"
 "pipx:ruff" = "latest"
 "pipx:sqlfluff" = "latest"
 "pipx:ty" = "latest"
+shellcheck = "latest"
 
 "cargo:gfold" = "latest"
 "cargo:https://github.com/bodo-run/yek" = "latest"
@@ -99,4 +102,4 @@ bun = true
 uvx = true
 
 [settings.python]
-compile = false
+uv_venv_auto = true
