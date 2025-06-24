@@ -13,7 +13,7 @@ function upgrade-all
         mise upgrade
 
         set_color green; echo "Pruning mise..."; set_color normal
-        mise prune
+        mise prune --yes
         mise reshim
     end
 
