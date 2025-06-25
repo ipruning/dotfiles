@@ -136,7 +136,7 @@ select-word-style bash
 
 # 👇 mise hook-env
 eval "$(mise activate zsh)"
-eval "$(mise hook-env -s zsh)"
+# eval "$(mise hook-env -s zsh)"
 
 # 👇 mise shims
 # eval "$(mise activate zsh --shims)"
