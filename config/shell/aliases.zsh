@@ -23,22 +23,23 @@ fi
 # Linux Aliases Part 2
 alias ...="cd ../.."
 alias ..="cd .."
+alias cdr='cd $(git rev-parse --show-toplevel)'
 alias d="lazydocker"
+alias dateutc="date -u +%Y-%m-%dT%H:%M:%SZ"
 alias g="lazygit"
 alias hg="history | grep"
+alias mr="mise run"
 alias ports="ss -tulpn"
 alias rsyncssh="rsync -Pr --rsh=ssh"
 
 # macOS Aliases
 alias c="pbcopy"
-alias cdr='cd $(git rev-parse --show-toplevel)'
 alias gb="git browse"
 alias gtidy="gh tidy && git fetch --prune"
 alias history="atuin history list --format '{time} - [{duration}] - {command}'"
 alias jr="jump-to-repo"
 alias js="jump-to-session"
 alias keyboardmaestro="/Applications/Keyboard\ Maestro.app/Contents/MacOS/keyboardmaestro"
-alias mr="mise run"
 alias o="open ."
 alias p="pbpaste"
 alias ports="viddy --interval 1s 'lsof -i @127.0.0.1 | grep LISTEN'"
