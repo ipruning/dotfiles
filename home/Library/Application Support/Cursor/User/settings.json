@@ -2,6 +2,9 @@
   "[beancount]": {
     "editor.defaultFormatter": "dongfg.vscode-beancount-formatter"
   },
+  "[dockerfile]": {
+    "editor.tabSize": 4
+  },
   "[javascript]": {
     "editor.defaultFormatter": "vscode.typescript-language-features"
   },
@@ -40,7 +43,10 @@
       "source.fixAll": "explicit",
       "source.organizeImports": "explicit"
     },
-    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.defaultFormatter": "charliermarsh.ruff"
+  },
+  "[shellscript]": {
+    "editor.tabSize": 4
   },
   "[sql]": {
     "editor.defaultFormatter": "dorzey.vscode-sqlfluff"
