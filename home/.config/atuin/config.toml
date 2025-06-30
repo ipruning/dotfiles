@@ -7,4 +7,4 @@ inline_height = 0
 search_mode = "fulltext"
 show_help = false
 
-history_filter = ["^secret-cmd", "^innocuous-cmd .*--secret=.+"]
+history_filter = ["^secret-cmd", "^innocuous-cmd .*--secret=.+", "^#.*"]
