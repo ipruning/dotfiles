@@ -278,14 +278,15 @@
       "shift-j": "editor::MoveLineDown",
       "shift-k": "editor::MoveLineUp"
     }
+  },
+  {
+    "context": "Editor",
+    "bindings": {
+      "ctrl-shift-v": "workspace::ToggleVimMode"
+      // "tab": "editor::Tab",
+      // "ctrl-shift-enter": ["workspace::SendKeystrokes", "y $ ctrl-` cmd-v enter"]
+    }
   }
-  // {
-  //   "context": "Editor",
-  //   "bindings": {
-  //     "tab": "editor::Tab",
-  //     "ctrl-shift-enter": ["workspace::SendKeystrokes", "y $ ctrl-` cmd-v enter"]
-  //   }
-  // },
   // {
   //   "context": "(VimControl && !menu) || vim_mode == replace || vim_mode == waiting",
   //   "bindings": {
