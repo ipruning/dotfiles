@@ -127,6 +127,21 @@ api.unmap("u", /\b(x\.com)\b/i); // Mute account
 
 api.unmapAllExcept(
   [
+    "E",
+    "R",
+    "B",
+    "F",
+    "S",
+    "D",
+    "T",
+    "p",
+    "P",
+  ],
+  /excalidraw.com/,
+);
+
+api.unmapAllExcept(
+  [
     "e",
     "d",
     "E",
