@@ -93,7 +93,6 @@ Scapple
 Screen Studio
 Scrolla
 Setapp
-Shortcat
 Skim
 Steam
 Stratoshark
