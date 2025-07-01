@@ -143,12 +143,6 @@
     "command": "runner.bash",
     "args": ["$ZED_FILE"],
     "allow_concurrent_runs": true,
-    "use_new_terminal": true,
-    "shell": {
-      "with_arguments": {
-        "program": "sh",
-        "args": ["--noediting", "--norc", "--noprofile"]
-      }
-    }
+    "use_new_terminal": true
   }
 ]
