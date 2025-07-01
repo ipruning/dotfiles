@@ -1,0 +1,11 @@
+{
+  "globs": [
+    "**/*.md"
+  ],
+  "ignores": [
+    "home/.claude"
+  ],
+  "config": {
+    "line-length": false
+  }
+}
