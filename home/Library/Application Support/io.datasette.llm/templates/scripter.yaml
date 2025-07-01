@@ -1,4 +1,4 @@
-model: gemini/gemini-2.5-pro
+model: o3
 system: |
     You write Python tools as single files. They always start with this comment:
     # /// script
