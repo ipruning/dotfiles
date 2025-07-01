@@ -46,9 +46,9 @@ keybind = cmd+shift+l=new_split:right
 # keybind = cmd+shift+k=resize_split:up,100
 # keybind = cmd+shift+l=resize_split:right,100
 
-keybind = cmd+n=new_split:down
-keybind = cmd+shift+n=ignore
-keybind = cmd+t=ignore
+# keybind = cmd+n=new_split:down
+# keybind = cmd+shift+n=ignore
+# keybind = cmd+t=ignore
 
 # keybind = cmd+j=text: jump-to-session\x0a
 # keybind = cmd+shift+j=text: jump-to-repo\x0a
@@ -65,3 +65,6 @@ keybind = cmd+t=ignore
 
 # keybind = cmd+n=new_window
 # keybind = cmd+shift+n=new_window
+
+keybind = cmd+n=new_split:down
+keybind = cmd+t=new_window
