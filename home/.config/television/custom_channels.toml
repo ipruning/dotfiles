@@ -40,7 +40,7 @@ preview_command = ":files:"
 
 [[cable_channel]]
 name = "notebooks-marimo"
-source_command = "rg --files-with-matches 'marimo.App()' -g '*.py' -g '*.ipynb'"
+source_command = "rg --files-with-matches 'marimo.App()' -g '*.py'"
 preview_command = ":files:"
 
 [[cable_channel]]
