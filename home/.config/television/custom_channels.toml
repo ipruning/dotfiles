@@ -92,15 +92,15 @@ source_command = "tv list-channels | grep -v 'channels:' | sed '/^[[:space:]]*$/
 
 [[cable_channel]]
 name = "prompts"
-source_command = "fd . ~/dev/prototypes/utils --type file --extension txt --extension md --extension mdx -0 | xargs -0 gprintf '%q\n'"
+source_command = "fd . ~/dev/prototypes/utils ~/.claude/commands --type file --extension txt --extension md --extension mdx -0 | xargs -0 gprintf '%q\n'"
 preview_command = ":files:"
 
 [[cable_channel]]
-name = "my-prompt-files"
-source_command = "fd . ~/dev/prototypes/utils --type file --extension txt --extension md --extension mdx -0 | xargs -0 gprintf '%q\n'"
+name = "scripts"
+source_command = "fd . ~/dev/prototypes/utils/scripts --type file --extension sh --extension bash --extension py --extension swift -0 | xargs -0 gprintf '%q\n'"
 preview_command = ":files:"
 
 [[cable_channel]]
-name = "my-scripts"
-source_command = "fd . ~/dev/prototypes/utils --type file --extension sh --extension bash --extension py --extension swift -0 | xargs -0 gprintf '%q\n'"
+name = "vps-scripts"
+source_command = "fd . ~/dev/prototypes/utils/vps-scripts --type file --extension sh --extension bash --extension py --extension swift -0 | xargs -0 gprintf '%q\n'"
 preview_command = ":files:"

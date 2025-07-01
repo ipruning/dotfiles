@@ -169,7 +169,7 @@ fallback_channel = "hidden-files-max-depth-3"
 ]
 "notebooks" = ["modal.bash"]
 "notebooks-marimo" = ["marimo edit", "marimo run"]
-"my-scripts" = ["cmd-execute.bash"]
+"vps-scripts" = ["cmd-execute.bash"]
 "sh-files" = ["bash", "sh"]
 "tmux-sessions" = ["tmux a -t"]
 "zellij-sessions" = ["zellij a"]
