@@ -33,6 +33,7 @@ jq
 just
 lazydocker
 lazygit
+mackup
 macmon
 mdq
 mise
