@@ -30,10 +30,8 @@ hyperfine
 jaq
 jd
 jq
-just
 lazydocker
 lazygit
-mackup
 macmon
 mdq
 mise
@@ -50,7 +48,7 @@ pueue
 rclone
 riff
 rip2
-ripgrep-all
+ripgrep
 ruby
 rust-parallel
 rustscan
@@ -61,11 +59,14 @@ tailspin
 tealdeer
 television
 tmux
+tokei
 trzsz-ssh
 uv
 viddy
 watchexec
+xh
 yazi
+yek
 yq
 zellij
 zet
