@@ -16,7 +16,7 @@ function jump-to-session
     if test "$TERM_PROGRAM" = "ghostty"
       set zj_sessions (/opt/homebrew/bin/zellij list-sessions --no-formatting --short)
       set session_count (echo "$zj_sessions" | grep -c '^.')
-      
+
       if test $session_count -eq 0
         /opt/homebrew/bin/zellij
       else
@@ -34,7 +34,7 @@ function jump-to-repo
   if test -z "$repo_path"
     return
   end
-  
+
   if test -n "$ZELLIJ"
     cd "$repo_path"
   else

@@ -95,20 +95,20 @@ _atuin_up_search() {
     if [[ ! $BUFFER == *$'\n'* ]]; then
         # Save current command
         local current_cmd=$BUFFER
-        
+
         # Enter alternate screen buffer
         echo -ne "\033[?1049h"
-        
+
         local output
         output=$(ATUIN_SHELL_ZSH=t ATUIN_LOG=error ATUIN_QUERY=$BUFFER atuin search --shell-up-key-binding "$@" -i 3>&1 1>&2 2>&3)
-        
+
         # Return to main screen buffer
         echo -ne "\033[?1049l"
-        
+
         if [[ -n $output ]]; then
             RBUFFER=""
             LBUFFER=$output
-            
+
             if [[ $LBUFFER == __atuin_accept__:* ]]; then
                 LBUFFER=${LBUFFER#__atuin_accept__:}
                 zle accept-line
