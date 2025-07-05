@@ -1,36 +1,36 @@
 [[cable_channel]]
 name = "hidden-dirs"
-source_command = "fd --no-ignore-vcs --type directory --hidden --follow -0 | xargs -0 gprintf '%q\n'"
+source_command = "fd -IHL -t directory -x bash -c 'printf \"%q\n\" \"$1\"' _ {}"
 preview_command = "eza --all --long --time-style long-iso --color always {0}"
 
 [[cable_channel]]
 name = "hidden-files"
-source_command = "fd --no-ignore-vcs --type file --hidden --follow -0 | xargs -0 gprintf '%q\n'"
+source_command = "fd -IHL --ignore-file .DS_Store -t file -x bash -c 'printf \"%q\n\" \"$1\"' _ {}"
 preview_command = ":files:"
 
 [[cable_channel]]
 name = "hidden-files-max-depth-3"
-source_command = "fd --no-ignore-vcs --type file --hidden --follow --max-depth 3 -0 | xargs -0 gprintf '%q\n'"
+source_command = "fd -IHL --ignore-file .DS_Store -t file -d 3 -x bash -c 'printf \"%q\n\" \"$1\"' _ {}"
 preview_command = ":files:"
 
 [[cable_channel]]
 name = "hidden-files-zed"
-source_command = "fd --no-ignore-vcs --type file --hidden --follow"
+source_command = "fd -IHL --ignore-file .DS_Store -t file"
 preview_command = ":files:"
 
 [[cable_channel]]
 name = "csv-files"
-source_command = "fd --no-ignore-vcs --type file --hidden --follow --extension csv -0 | xargs -0 gprintf '%q\n'"
+source_command = "fd -IHL -t file -e csv -x bash -c 'printf \"%q\n\" \"$1\"' _ {}"
 preview_command = ":files:"
 
 [[cable_channel]]
 name = "sh-files"
-source_command = "fd --no-ignore-vcs --type file --hidden --follow --extension sh --extension bash --extension zsh -0 | xargs -0 gprintf '%q\n'"
+source_command = "fd -IHL -t file -e sh -e bash -e zsh -x bash -c 'printf \"%q\n\" \"$1\"' _ {}"
 preview_command = ":files:"
 
 [[cable_channel]]
 name = "py-files"
-source_command = "fd --no-ignore-vcs --type file --hidden --follow --extension py -0 | xargs -0 gprintf '%q\n'"
+source_command = "fd -IHL -t file -e py -x bash -c 'printf \"%q\n\" \"$1\"' _ {}"
 preview_command = ":files:"
 
 [[cable_channel]]
@@ -92,15 +92,15 @@ source_command = "tv list-channels | grep -v 'channels:' | sed '/^[[:space:]]*$/
 
 [[cable_channel]]
 name = "prompts"
-source_command = "fd . ~/dev/prototypes/utils ~/.claude/commands --type file --extension txt --extension md --extension mdx -0 | xargs -0 gprintf '%q\n'"
+source_command = "fd . ~/dev/prototypes/utils ~/.claude/commands ~/Library/Application\\ Support/io.datasette.llm/templates --type file -e txt -e md -e mdx -e yaml -x bash -c 'printf \"%q\n\" \"$1\"' _ {}"
 preview_command = ":files:"
 
 [[cable_channel]]
 name = "scripts"
-source_command = "fd . ~/dev/prototypes/utils/scripts --type file --extension sh --extension bash --extension py --extension swift -0 | xargs -0 gprintf '%q\n'"
+source_command = "fd . ~/dev/prototypes/utils/scripts --type file -e sh -e bash -e py -e swift -x bash -c 'printf \"%q\n\" \"$1\"' _ {}"
 preview_command = ":files:"
 
 [[cable_channel]]
 name = "vps-scripts"
-source_command = "fd . ~/dev/prototypes/utils/vps-scripts --type file --extension sh --extension bash --extension py --extension swift -0 | xargs -0 gprintf '%q\n'"
+source_command = "fd . ~/dev/prototypes/utils/vps-scripts --type file -e sh -e bash -e py -e swift -x bash -c 'printf \"%q\n\" \"$1\"' _ {}"
 preview_command = ":files:"
