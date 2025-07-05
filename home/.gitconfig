@@ -120,9 +120,6 @@ process = git-lfs filter-process
 reflogExpire = 200
 reflogExpireUnreachable = 90
 
-[include]
-path = ~/dev/.gitconfig
-
 [protocol]
 version = 2 # https://blog.github.com/changelog/2018-11-08-git-protocol-v2-support/
 
@@ -134,3 +131,24 @@ insteadOf = "git@github.com:"
 
 [log]
 date = iso
+
+[includeIf "gitdir:~/dev/"]
+path = ~/dev/.gitconfig
+
+[includeIf "gitdir:~/dev-work/"]
+path = ~/dev-work/.gitconfig
+
+[includeIf "gitdir:~/.ssh/"]
+path = ~/dev/.gitconfig
+
+[includeIf "gitdir:~/dotfiles/"]
+path = ~/dev/.gitconfig
+
+[includeIf "gitdir:~/Databases/"]
+path = ~/dev/.gitconfig
+
+[includeIf "gitdir:~/Library/Application Support/Surge/"]
+path = ~/dev/.gitconfig
+
+[includeIf "gitdir:~/Library/Rime/"]
+path = ~/dev/.gitconfig
