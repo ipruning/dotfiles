@@ -4,7 +4,7 @@ ignorecase = false
 pager = delta
 
 [interactive]
-diffFilter = delta --features=interactive-catppuccin-mocha
+diffFilter = delta --color-only --features=interactive-catppuccin-mocha
 
 [init]
 defaultBranch = main
@@ -71,7 +71,6 @@ compactionHeuristic = true
 
 [delta]
 navigate = true
-side-by-side = true
 features = catppuccin-mocha
 
 [delta "catppuccin-mocha"]
