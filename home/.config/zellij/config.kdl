@@ -15,7 +15,7 @@ keybinds clear-defaults=true {
                 floating true
                 move_to_focused_tab true
                 cwd "/"
-                root_dirs "/Users/alex/dev;/Users/alex/dev-work"
+                root_dirs "/Users/alex/Developer;/Users/alex/Databases"
                 session_layout "default"
             }
             SwitchToMode "locked"
