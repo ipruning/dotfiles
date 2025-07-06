@@ -23,6 +23,7 @@ git-delta
 git-extras
 git-filter-repo
 git-lfs
+gitu
 gnupg
 htop
 httm
@@ -30,8 +31,6 @@ hyperfine
 jaq
 jd
 jq
-lazydocker
-lazygit
 macmon
 mdq
 mise
