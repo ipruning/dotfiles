@@ -114,7 +114,7 @@ pre-commit = "latest"
 experimental = true
 idiomatic_version_file_enable_tools = ["python"]
 
-trusted_config_paths = ['~/dev', '~/dev-work']
+trusted_config_paths = ['~/Developer']
 
 [settings.status]
 missing_tools = "never"
