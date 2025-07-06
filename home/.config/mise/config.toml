@@ -11,6 +11,7 @@ zig = "latest"
 
 # Package Management Tools
 cargo-binstall = "latest"
+uv = "latest"
 
 # CI / CD Tools
 "cargo:https://github.com/sirwart/ripsecrets" = "latest"
@@ -29,13 +30,16 @@ pre-commit = "latest"
 "npm:@google/gemini-cli" = "latest"
 
 # Development Tools (Test
-"npm:@anthropic-ai/claude-code" = "latest"
-"npm:@mariozechner/claude-trace" = "latest"
-"npm:@openai/codex" = "latest"
 "cargo:gfold" = "latest"
 "gem:kamal" = "latest"
 "go:code.gitea.io/tea" = "latest"
 "go:github.com/bootdotdev/bootdev" = "latest"
+"go:github.com/jesseduffield/lazydocker" = "latest"
+"go:github.com/jesseduffield/lazygit" = "latest"
+"go:github.com/jorgerojas26/lazysql" = "latest"
+"npm:@anthropic-ai/claude-code" = "latest"
+"npm:@mariozechner/claude-trace" = "latest"
+"npm:@openai/codex" = "latest"
 "npm:@sourcegraph/amp" = "latest"
 "pipx:modal" = "latest"
 # "cargo:bartib" = "latest"
