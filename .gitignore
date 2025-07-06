@@ -3,12 +3,12 @@
 
 .DS_Store
 
-**/*backups
-**/*completions
-**/*plugins
-**/*tmTheme
+home/.config/karabiner/automatic_backups/
+
+config/shell/completions/
+home/.config/fish/completions/
+
+config/shell/plugins/
+home/.config/zellij/plugins/
 
 *private*
-
-!*tpl*
-!home/.claude
