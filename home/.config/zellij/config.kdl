@@ -562,7 +562,7 @@ scrollback_editor "/opt/homebrew/bin/zed --wait"
 //   - true (default)
 //   - false
 //
-session_serialization false
+// session_serialization false
 
 // Whether pane viewports are serialized along with the session, default is false
 // Options:
