@@ -8,11 +8,15 @@ cursor-style-blink = false
 macos-titlebar-style = hidden
 shell-integration-features = no-cursor
 unfocused-split-opacity = 1
-window-height = 40
-window-width = 140
 
-window-padding-x = 4, 4
-window-padding-y = 4, 4
+# window-height = 40
+# window-width = 140
+
+window-step-resize = true
+window-padding-balance = true
+
+# window-padding-x = 0
+# window-padding-y = 0
 
 # font-family = "Berkeley Mono"
 font-family = "MonoLisa"
@@ -63,8 +67,8 @@ keybind = cmd+shift+l=new_split:right
 # keybind = cmd+shift+up=new_split:up
 # keybind = cmd+shift+right=new_split:right
 
-# keybind = cmd+n=new_window
-# keybind = cmd+shift+n=new_window
+keybind = cmd+n=new_window
+keybind = cmd+shift+n=new_window
 
-keybind = cmd+n=new_split:down
-keybind = cmd+t=new_window
+# keybind = cmd+n=new_split:down
+# keybind = cmd+t=new_window
