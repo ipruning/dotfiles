@@ -17,14 +17,14 @@ window-padding-y = 8, 8
 # font-family = "Berkeley Mono"
 font-family = "MonoLisa"
 font-family = "Maple Mono NF CN"
-font-size = 14
+font-size = 13
 font-style = Medium
 
 theme = catppuccin-mocha
 
 macos-option-as-alt = true
 
-confirm-close-surface = true
+confirm-close-surface = false
 
 keybind = cmd+u=scroll_page_up
 keybind = cmd+d=scroll_page_down
