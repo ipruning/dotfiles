@@ -122,12 +122,6 @@ reflogExpireUnreachable = 90
 [protocol]
 version = 2 # https://blog.github.com/changelog/2018-11-08-git-protocol-v2-support/
 
-[gpg]
-program = /opt/homebrew/bin/gpg
-
-[url "https://github.com/"]
-insteadOf = "git@github.com:"
-
 [log]
 date = iso
 
