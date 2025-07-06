@@ -2,7 +2,7 @@
 
 [mgr]
 ratio = [1, 1, 2]
-show_hidden = true
+show_hidden = false
 show_symlink = false
 
 [plugin]
