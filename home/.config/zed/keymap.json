@@ -48,7 +48,7 @@
       "space shift-a": [
         "task::Spawn",
         {
-          "task_name": "amp",
+          "task_name": "agents",
           "reveal_target": "center"
         }
       ],
@@ -204,7 +204,7 @@
       "space shift-a": [
         "task::Spawn",
         {
-          "task_name": "amp",
+          "task_name": "agents",
           "reveal_target": "center"
         }
       ],
