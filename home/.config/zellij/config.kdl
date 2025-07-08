@@ -16,7 +16,7 @@ keybinds clear-defaults=true {
                 move_to_focused_tab true
                 cwd "/"
                 root_dirs "/Users/alex/Developer;/Users/alex/Databases"
-                session_layout "default"
+                session_layout "dev"
             }
             SwitchToMode "locked"
         }
@@ -562,7 +562,7 @@ scrollback_editor "/opt/homebrew/bin/zed --wait"
 //   - true (default)
 //   - false
 //
-// session_serialization false
+session_serialization false
 
 // Whether pane viewports are serialized along with the session, default is false
 // Options:

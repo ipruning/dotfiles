@@ -45,7 +45,7 @@ function jump-to-repo() {
   else
     cd "${repo_path}"
     local repo_name=$(basename "${repo_path}")
-    $zellij_path attach "${repo_name}" 2>/dev/null || $zellij_path --session "${repo_name}"
+    $zellij_path attach "${repo_name}" 2>/dev/null || $zellij_path --session "${repo_name}" --new-session-with-layout dev
   fi
 }
 
