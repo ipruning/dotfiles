@@ -31,13 +31,12 @@ style = "bold yellow"
 read_only = ' [RO]'
 read_only_style = "bold red"
 truncation_symbol = ".../"
-
 # fish_style_pwd_dir_length = 1
 # truncation_length = 4
 
 [git_branch]
 format = "[$branch]($style) "
-ignore_branches = ["main", "master", "develop", "dev"]
+# ignore_branches = ["main", "master", "develop", "dev"]
 
 [package]
 format = '[$version]($style) '
