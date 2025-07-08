@@ -112,6 +112,13 @@
     }
   },
   {
+    "label": "agents",
+    "command": "agents.bash",
+    "hide": "always",
+    "allow_concurrent_runs": true,
+    "use_new_terminal": true
+  },
+  {
     "label": "amp",
     "command": "current_dir=$(basename \"$(pwd)\"); tmux attach-session -t \"$current_dir\" 2>/dev/null || tmux new-session -s \"$current_dir\" 'tmux new-window -n amp \"zsh -i -c \\\"amp\\\"\" && tmux select-window -t amp'",
     "hide": "always",
@@ -121,6 +128,20 @@
   {
     "label": "claude",
     "command": "current_dir=$(basename \"$(pwd)\"); tmux attach-session -t \"$current_dir\" 2>/dev/null || tmux new-session -s \"$current_dir\" 'tmux new-window -n claude \"zsh -i -c \\\"claude\\\"\" && tmux select-window -t claude'",
+    "hide": "always",
+    "allow_concurrent_runs": true,
+    "use_new_terminal": true
+  },
+  {
+    "label": "codex",
+    "command": "current_dir=$(basename \"$(pwd)\"); tmux attach-session -t \"$current_dir\" 2>/dev/null || tmux new-session -s \"$current_dir\" 'tmux new-window -n codex \"zsh -i -c \\\"codex\\\"\" && tmux select-window -t codex'",
+    "hide": "always",
+    "allow_concurrent_runs": true,
+    "use_new_terminal": true
+  },
+  {
+    "label": "gemini",
+    "command": "current_dir=$(basename \"$(pwd)\"); tmux attach-session -t \"$current_dir\" 2>/dev/null || tmux new-session -s \"$current_dir\" 'tmux new-window -n gemini \"zsh -i -c \\\"gemini\\\"\" && tmux select-window -t gemini'",
     "hide": "always",
     "allow_concurrent_runs": true,
     "use_new_terminal": true
