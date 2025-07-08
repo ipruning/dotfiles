@@ -10,6 +10,7 @@ coreutils
 difftastic
 docker
 duckdb
+evil-helix
 eza
 fd
 ffmpeg
