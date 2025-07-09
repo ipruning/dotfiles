@@ -5,6 +5,7 @@ requirements = ["bat", "fd"]
 
 [source]
 command = "fd . ~/Developer/prototypes/utils ~/.claude/commands ~/Library/Application\\ Support/io.datasette.llm/templates --type file -e txt -e md -e mdx -e yaml -x bash -c 'printf \"%q\n\" \"$1\"' _ {}"
+display = "{split:/:-1}"
 
 [preview]
 command = "bat -n --color=always '{}'"
