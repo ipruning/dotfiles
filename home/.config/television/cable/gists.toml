@@ -1,0 +1,19 @@
+[metadata]
+name = "gists"
+description = "List GitHub gists"
+requirements = ["bat", "curl", "gh", "jq"]
+
+[source]
+command = "gh api --paginate /gists | jq -r '.[] .files[] | .raw_url'"
+display = "{split:/:-1}"
+
+[preview]
+command = """
+filename=$(basename '{}')
+url=$(echo '{}')
+cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/television/gists"
+mkdir -p "$cache_dir"
+cache_file="$cache_dir/$filename"
+curl --silent "$url" -o "$cache_file"
+bat --color=always "$cache_file"
+"""
