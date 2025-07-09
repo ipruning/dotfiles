@@ -263,6 +263,7 @@ fallback_channel = "files"
   "modal shell",
 ]
 "notebooks" = ["modal.bash"]
+"py-files" = ["python", "uv add --script", "uv run"]
 
 [shell_integration.keybindings]
 # controls which key binding should trigger tv
