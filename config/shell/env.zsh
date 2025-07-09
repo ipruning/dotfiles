@@ -139,5 +139,6 @@ eval "$(mise activate zsh)"
 # eval "$(mise hook-env -s zsh)"
 
 # 👇 mise shims
+export PATH="$HOME/.loacl/share/mise/shims:$PATH"
 # eval "$(mise activate zsh --shims)"
 # eval "$(mise activate zsh)"
