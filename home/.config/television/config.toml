@@ -153,8 +153,10 @@ confirm_selection = "enter"
 # Preview panel control
 # --------------------
 # Scrolling the preview pane
-scroll_preview_half_page_down = ["pagedown", "mousescrolldown"]
-scroll_preview_half_page_up = ["pageup", "mousescrollup"]
+# scroll_preview_half_page_down = ["pagedown", "mousescrolldown"]
+# scroll_preview_half_page_up = ["pageup", "mousescrollup"]
+scroll_preview_half_page_down = ["pagedown", "mousescrolldown", "ctrl-d"]
+scroll_preview_half_page_up = ["pageup", "mousescrollup", "ctrl-u"]
 
 # Data operations
 # --------------
