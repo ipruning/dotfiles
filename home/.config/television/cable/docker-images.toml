@@ -8,6 +8,5 @@ requirements = ["docker", "jq"]
 command = "docker images --format '{{.Repository}}:{{.Tag}} {{.ID}}'"
 output = "{split: :-1}"
 
-
 [preview]
 command = "docker image inspect {split: :-1} | jq -C"

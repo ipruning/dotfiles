@@ -6,6 +6,5 @@ requirements = ["fd", "bat"]
 [source]
 command = "fd -t f . $HOME/.config"
 
-
 [preview]
 command = "bat -n --color=always '{}'"
