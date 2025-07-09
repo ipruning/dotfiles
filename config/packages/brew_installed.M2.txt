@@ -7,7 +7,6 @@ beancount
 beancount-language-server
 blueutil
 codegpt
-coreutils
 difftastic
 docker
 duckdb
@@ -62,6 +61,7 @@ television
 tmux
 tokei
 trzsz-ssh
+uutils-coreutils
 uv
 viddy
 watchexec
