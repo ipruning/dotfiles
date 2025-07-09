@@ -254,6 +254,7 @@ fallback_channel = "files"
 ]
 "hosts" = ["ssh"]
 "known-hosts" = ["ssh-keygen -R"]
+"marimo-notebooks" = ["marimo edit", "marimo run"]
 "modal-apps" = [
   "modal deploy",
   "modal launch",
@@ -261,6 +262,7 @@ fallback_channel = "files"
   "modal serve",
   "modal shell",
 ]
+"notebooks" = ["modal.bash"]
 
 [shell_integration.keybindings]
 # controls which key binding should trigger tv
