@@ -96,15 +96,15 @@
           "reveal_target": "center"
         }
       ],
-      "space r": "projects::OpenRecent",
-      "space shift-e": "pane::RevealInProjectPanel",
-      "space shift-r": [
+      "space r": [
         "task::Spawn",
         {
           "task_name": "project_finder",
           "reveal_target": "center"
         }
       ],
+      "space shift-r": "projects::OpenRecent",
+      "space shift-e": "pane::RevealInProjectPanel",
       "space space": [
         "task::Spawn",
         {
@@ -253,15 +253,15 @@
           "reveal_target": "center"
         }
       ],
-      "space r": "projects::OpenRecent",
-      "space e": "pane::RevealInProjectPanel",
-      "space shift-r": [
+      "space r": [
         "task::Spawn",
         {
           "task_name": "project_finder",
           "reveal_target": "center"
         }
       ],
+      "space shift-r": "projects::OpenRecent",
+      "space e": "pane::RevealInProjectPanel",
       "space space": [
         "task::Spawn",
         {
