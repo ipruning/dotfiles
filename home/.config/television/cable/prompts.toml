@@ -1,0 +1,10 @@
+[metadata]
+name = "prompts"
+description = "Find prompt template files"
+requirements = ["bat", "fd"]
+
+[source]
+command = "fd . ~/Developer/prototypes/utils ~/.claude/commands ~/Library/Application\\ Support/io.datasette.llm/templates --type file -e txt -e md -e mdx -e yaml -x bash -c 'printf \"%q\n\" \"$1\"' _ {}"
+
+[preview]
+command = "bat -n --color=always '{}'"
