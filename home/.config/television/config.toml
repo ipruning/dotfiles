@@ -254,6 +254,13 @@ fallback_channel = "files"
 ]
 "hosts" = ["ssh"]
 "known-hosts" = ["ssh-keygen -R"]
+"modal-apps" = [
+  "modal deploy",
+  "modal launch",
+  "modal run",
+  "modal serve",
+  "modal shell",
+]
 
 [shell_integration.keybindings]
 # controls which key binding should trigger tv

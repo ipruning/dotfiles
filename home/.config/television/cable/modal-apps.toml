@@ -1,0 +1,10 @@
+[metadata]
+name = "modal-apps"
+description = "Find Modal application files"
+requirements = ["bat", "rg"]
+
+[source]
+command = "rg --files-with-matches 'modal' -g '*.py'"
+
+[preview]
+command = "bat -n --color=always '{}'"
