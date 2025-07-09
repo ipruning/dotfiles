@@ -4,7 +4,7 @@ description = "Find hidden files for Zed editor"
 requirements = ["bat", "fd"]
 
 [source]
-command = "fd -IHL --ignore-file .DS_Store -E .git -E .venv -t file"
+command = "fd -IHL -E .git -E .venv -E .DS_Store -t file"
 
 [preview]
 command = "bat -n --color=always '{}'"
