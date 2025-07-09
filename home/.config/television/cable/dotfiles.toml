@@ -1,7 +1,7 @@
 [metadata]
 name = "dotfiles"
 description = "A channel to select from your user's dotfiles"
-requirements = ["fd", "bat"]
+requirements = ["bat", "fd"]
 
 [source]
 command = "fd -t f . $HOME/.config"
