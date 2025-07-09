@@ -1,0 +1,10 @@
+[metadata]
+name = "hosts"
+description = "List SSH hosts from config"
+requirements = []
+
+[source]
+command = "grep '^Host ' ~/.ssh/config | grep -v '[*]' | awk '{print $2}'"
+
+[preview]
+command = "grep -A 5 'Host {}' ~/.ssh/config"
