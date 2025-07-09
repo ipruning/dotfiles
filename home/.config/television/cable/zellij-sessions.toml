@@ -1,0 +1,7 @@
+[metadata]
+name = "zellij-sessions"
+description = "List Zellij sessions"
+requirements = ["zellij"]
+
+[source]
+command = "zellij list-sessions --no-formatting --short"
