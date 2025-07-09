@@ -6,8 +6,7 @@
       "provider": "openai"
     },
     "default_profile": "write",
-    "play_sound_when_agent_done": true,
-    "version": "2"
+    "play_sound_when_agent_done": true
   },
   "autosave": "on_focus_change",
   "buffer_font_fallbacks": ["Maple Mono NF CN"],
@@ -151,10 +150,8 @@
   "ui_font_size": 15.0,
   "ui_font_weight": 500,
   "vim": {
-    "enable_vim_sneak": true,
     "highlight_on_yank_duration": 250,
     "toggle_relative_line_numbers": true,
-    "use_multiline_find": true,
     "use_smartcase_find": true,
     "use_system_clipboard": "on_yank"
   },
