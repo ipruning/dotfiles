@@ -239,6 +239,19 @@ fallback_channel = "files"
 "git-repos" = ["nvim", "code", "hx", "git clone"]
 
 "channels" = ["tv"]
+"hidden-dirs" = [
+  "cd",
+  "eza",
+  "j",
+]
+"hidden-files" = [
+  "bat",
+  "cat",
+  "cursor",
+  "rip",
+  "rm",
+  "zed",
+]
 "hosts" = ["ssh"]
 "known-hosts" = ["ssh-keygen -R"]
 
