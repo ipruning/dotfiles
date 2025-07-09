@@ -1,0 +1,7 @@
+[metadata]
+name = "tmux-sessions"
+description = "List tmux sessions"
+requirements = ["tmux"]
+
+[source]
+command = "tmux list-sessions -F '#{session_name}'"

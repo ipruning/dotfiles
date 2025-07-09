@@ -264,6 +264,9 @@ fallback_channel = "files"
 ]
 "notebooks" = ["modal.bash"]
 "py-files" = ["python", "uv add --script", "uv run"]
+"tmux-sessions" = ["tmux a -t"]
+"vps-scripts" = ["cmd-execute.bash"]
+"zellij-sessions" = ["zellij a"]
 
 [shell_integration.keybindings]
 # controls which key binding should trigger tv
