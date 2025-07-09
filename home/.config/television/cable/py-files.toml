@@ -1,0 +1,10 @@
+[metadata]
+name = "py-files"
+description = "Find Python files"
+requirements = ["bat", "fd"]
+
+[source]
+command = "fd -IHL -t file -e py -x bash -c 'printf \"%q\n\" \"$1\"' _ {}"
+
+[preview]
+command = "bat -n --color=always '{}'"
