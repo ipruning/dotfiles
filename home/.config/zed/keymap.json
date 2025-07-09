@@ -45,7 +45,7 @@
     "context": "EmptyPane || SharedScreen",
     "bindings": {
       "space a": "agent::ToggleFocus",
-      "space shift-a": [
+      "space s": [
         "task::Spawn",
         {
           "task_name": "agents",
@@ -67,7 +67,8 @@
           "reveal_target": "center"
         }
       ],
-      "space g": [
+      "space g": "git_panel::ToggleFocus",
+      "space shift-g": [
         "task::Spawn",
         {
           "task_name": "lazygit",
@@ -199,9 +200,9 @@
         }
       ],
       "space shift-t": "task::Spawn",
-      "space s b": "git::Branch",
+      // "space s b": "git::Branch",
       "space a": "agent::ToggleFocus",
-      "space shift-a": [
+      "space s": [
         "task::Spawn",
         {
           "task_name": "agents",
@@ -223,7 +224,8 @@
           "reveal_target": "center"
         }
       ],
-      "space g": [
+      "space g": "git_panel::ToggleFocus",
+      "space shift-g": [
         "task::Spawn",
         {
           "task_name": "lazygit",
@@ -285,6 +287,13 @@
       "ctrl-shift-v": "workspace::ToggleVimMode"
       // "tab": "editor::Tab",
       // "ctrl-shift-enter": ["workspace::SendKeystrokes", "y $ ctrl-` cmd-v enter"]
+    }
+  },
+  {
+    "context": "GitPanel && ChangesList",
+    "bindings": {
+      "esc": "workspace::ToggleRightDock",
+      "cmd-w": "workspace::ToggleRightDock"
     }
   }
   // {
