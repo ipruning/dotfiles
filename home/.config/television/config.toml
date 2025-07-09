@@ -239,6 +239,7 @@ fallback_channel = "files"
 "git-repos" = ["nvim", "code", "hx", "git clone"]
 
 "channels" = ["tv"]
+"hosts" = ["ssh"]
 
 [shell_integration.keybindings]
 # controls which key binding should trigger tv
