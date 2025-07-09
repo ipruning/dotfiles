@@ -1,7 +1,7 @@
 [metadata]
 name = "hidden-files-zed"
 description = "Find hidden files for Zed editor"
-requirements = ["fd"]
+requirements = ["bat", "fd"]
 
 [source]
 command = "fd -IHL --ignore-file .DS_Store -E .git -E .venv -t file"

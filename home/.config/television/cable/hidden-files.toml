@@ -1,7 +1,7 @@
 [metadata]
 name = "hidden-files"
 description = "Find hidden files including dotfiles"
-requirements = ["fd"]
+requirements = ["bat", "fd"]
 
 [source]
 command = "fd -IHL --ignore-file .DS_Store -t file -x bash -c 'printf \"%q\n\" \"$1\"' _ {}"
