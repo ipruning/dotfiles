@@ -1,0 +1,10 @@
+[metadata]
+name = "known-hosts"
+description = "List known SSH hosts"
+requirements = ["awk", "dig"]
+
+[source]
+command = "cat ~/.ssh/known_hosts | awk '{print $1}' | sort -u"
+
+[preview]
+command = "dig '{}'"
