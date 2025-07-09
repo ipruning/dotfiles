@@ -1,0 +1,10 @@
+[metadata]
+name = "notebooks"
+description = "Find Jupyter and Marimo notebook files"
+requirements = ["bat", "rg"]
+
+[source]
+command = "rg --files-with-matches 'app = marimo.App()|jupyter' -g '*.py' -g '*.ipynb'"
+
+[preview]
+command = "bat -n --color=always '{}'"

@@ -4,7 +4,7 @@ description = "Find Modal application files"
 requirements = ["bat", "rg"]
 
 [source]
-command = "rg --files-with-matches 'modal' -g '*.py'"
+command = "rg --files-with-matches 'import modal' -g '*.py'"
 
 [preview]
 command = "bat -n --color=always '{}'"

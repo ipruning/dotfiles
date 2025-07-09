@@ -1,0 +1,10 @@
+[metadata]
+name = "marimo-notebooks"
+description = "Find Marimo notebook files"
+requirements = ["bat", "rg"]
+
+[source]
+command = "rg --files-with-matches 'marimo.App()' -g '*.py'"
+
+[preview]
+command = "bat -n --color=always '{}'"
