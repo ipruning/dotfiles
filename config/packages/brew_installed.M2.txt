@@ -5,6 +5,7 @@ bash
 bat
 beancount
 beancount-language-server
+blueutil
 codegpt
 coreutils
 difftastic
