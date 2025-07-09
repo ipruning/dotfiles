@@ -290,7 +290,7 @@
     }
   },
   {
-    "context": "GitPanel && ChangesList",
+    "context": "GitPanel",
     "bindings": {
       "esc": "workspace::ToggleRightDock",
       "cmd-w": "workspace::ToggleRightDock"
