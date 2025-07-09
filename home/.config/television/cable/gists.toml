@@ -1,7 +1,7 @@
 [metadata]
 name = "gists"
 description = "List GitHub gists"
-requirements = ["bat", "curl", "gh", "jq"]
+requirements = ["bat", "gh", "jq"]
 
 [source]
 command = "gh api --paginate /gists | jq -r '.[] .files[] | .raw_url'"
