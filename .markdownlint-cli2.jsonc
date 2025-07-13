@@ -7,6 +7,6 @@
     "home/.claude"
   ],
   "config": {
-    "line-length": false
-  }
+    "line-length": false,
+  },
 }
