@@ -69,13 +69,13 @@ alt-shift-j = ['move down', 'mode main']
 alt-shift-k = ['move up', 'mode main']
 alt-shift-l = ['move right', 'mode main']
 
-alt-y = 'exec-and-forget open -a /Applications/Ghostty.app'
-alt-u = 'exec-and-forget open -a /Applications/Zed.app'
-alt-i = 'exec-and-forget open -a /Applications/Repo\ Prompt.app'
-alt-o = 'exec-and-forget open -a /Applications/Google\ Chrome.app'
-alt-p = 'exec-and-forget open -a /Applications/Roam\ Research.app'
+# alt-y = 'exec-and-forget open -a /Applications/Roam\ Research.app'
+# alt-u = 'exec-and-forget open -a /Applications/Google\ Chrome.app'
+# alt-i = 'exec-and-forget open -a /Applications/Repo\ Prompt.app'
+# alt-o = 'exec-and-forget open -a /Applications/Zed.app'
+# alt-p = 'exec-and-forget open -a /Applications/Ghostty.app'
 
-# cmd-m = []
+cmd-m = []
 cmd-h = []
 
 [mode.pass.binding]
@@ -170,15 +170,11 @@ if.app-id = 'com.hypergryph.arknights'
 run = 'layout floating'
 
 [[on-window-detected]]
-if.app-id = 'com.mitchellh.ghostty'
+if.app-id = 'com.roam-research.desktop-app'
 run = 'move-node-to-workspace 6'
 
 [[on-window-detected]]
-if.app-id = 'com.todesktop.230313mzl4w4u92'
-run = 'move-node-to-workspace 7'
-
-[[on-window-detected]]
-if.app-id = 'dev.zed.Zed'
+if.app-id = 'com.google.Chrome'
 run = 'move-node-to-workspace 7'
 
 [[on-window-detected]]
@@ -186,9 +182,13 @@ if.app-id = 'com.pvncher.repoprompt'
 run = 'move-node-to-workspace 8'
 
 [[on-window-detected]]
-if.app-id = 'com.google.Chrome'
+if.app-id = 'dev.zed.Zed'
 run = 'move-node-to-workspace 9'
 
 [[on-window-detected]]
-if.app-id = 'com.roam-research.desktop-app'
+if.app-id = 'com.todesktop.230313mzl4w4u92'
+run = 'move-node-to-workspace 9'
+
+[[on-window-detected]]
+if.app-id = 'com.mitchellh.ghostty'
 run = 'move-node-to-workspace 0'
