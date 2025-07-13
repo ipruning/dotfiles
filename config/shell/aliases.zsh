@@ -34,6 +34,7 @@ alias rsyncssh="rsync -Pr --rsh=ssh"
 
 # macOS Aliases
 alias c="pbcopy"
+alias cat="bat"
 alias gb="git browse"
 alias gtidy="gh tidy && git fetch --prune"
 alias history="atuin history list --format '{time} - [{duration}] - {command}'"
