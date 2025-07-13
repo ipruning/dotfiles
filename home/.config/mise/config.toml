@@ -32,6 +32,7 @@ pre-commit = "latest"
 # Development Tools (Test)
 "cargo:gfold" = "latest"
 "gem:kamal" = "latest"
+"gem:rails" = "latest"
 "go:code.gitea.io/tea" = "latest"
 "go:github.com/bootdotdev/bootdev" = "latest"
 "go:github.com/jesseduffield/lazydocker" = "latest"
