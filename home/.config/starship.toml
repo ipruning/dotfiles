@@ -60,3 +60,17 @@ threshold = 20
 
 [[battery.display]]
 threshold = 40
+
+[custom.git_user]
+command = "git config --get user.name"
+when    = "git rev-parse --git-dir 2>/dev/null"
+symbol  = ""
+style   = "cyan bold"
+format  = '[$symbol$output]($style)'
+
+[custom.git_email]
+command = "git config --get user.email"
+when    = "git rev-parse --git-dir 2>/dev/null"
+symbol  = ""
+style   = "yellow bold"
+format  = '[$symbol$output]($style)'
