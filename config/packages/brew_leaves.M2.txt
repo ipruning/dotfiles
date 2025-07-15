@@ -62,6 +62,7 @@ television
 tmux
 tokei
 trzsz-ssh
+tursodatabase/tap/turso
 uutils-coreutils
 uv
 viddy
