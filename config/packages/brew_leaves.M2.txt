@@ -8,6 +8,7 @@ beancount
 beancount-language-server
 blueutil
 coreutils
+csvlens
 difftastic
 docker
 duckdb
@@ -44,6 +45,7 @@ ov
 pandoc
 parallel
 parallel-disk-usage
+postgresql@17
 procs
 pueue
 rclone

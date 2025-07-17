@@ -44,6 +44,7 @@ pre-commit = "latest"
 "npm:@mariozechner/claude-trace" = "latest"
 "npm:@openai/codex" = "latest"
 "npm:@sourcegraph/amp" = "latest"
+"pipx:huggingface_hub" = { version = "latest", cli = "" }
 "pipx:llm" = "latest"
 "pipx:modal" = "latest"
 # "cargo:bartib" = "latest"
