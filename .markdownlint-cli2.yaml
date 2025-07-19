@@ -1,7 +1,9 @@
 globs:
   - "**/*.md"
+
 ignores:
   - "config/shell/plugins"
   - "home/.claude"
+
 config:
   line-length: false
