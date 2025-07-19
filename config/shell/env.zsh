@@ -134,11 +134,11 @@ fi
 autoload -Uz select-word-style
 select-word-style bash
 
-# 👇 mise hook-env
-eval "$(mise activate zsh)"
-# eval "$(mise hook-env -s zsh)"
-
 # 👇 mise shims
 export PATH="$HOME/.loacl/share/mise/shims:$PATH"
 # eval "$(mise activate zsh --shims)"
 # eval "$(mise activate zsh)"
+
+# 👇 mise hook-env
+eval "$(mise activate zsh)"
+# eval "$(mise hook-env -s zsh)"
