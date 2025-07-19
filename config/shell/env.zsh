@@ -135,7 +135,7 @@ autoload -Uz select-word-style
 select-word-style bash
 
 # 👇 mise shims
-export PATH="$HOME/.loacl/share/mise/shims:$PATH"
+export PATH="$HOME/.local/share/mise/shims:$PATH"
 # eval "$(mise activate zsh --shims)"
 # eval "$(mise activate zsh)"
 
