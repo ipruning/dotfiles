@@ -97,7 +97,7 @@ map-styles = \
   bold blue = "#384361", \
   bold cyan = "#384d5d", \
   bold yellow = "#544f4e" >syntax >syntax >syntax >syntax
-syntax-theme = Catppuccin Mocha
+syntax-theme = catppuccin-mocha
 
 [delta "interactive-catppuccin-mocha"]
 features = catppuccin-mocha
