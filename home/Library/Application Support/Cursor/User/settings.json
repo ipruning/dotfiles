@@ -2,24 +2,14 @@
   "[beancount]": {
     "editor.defaultFormatter": "dongfg.vscode-beancount-formatter"
   },
-  "[css]": {
-    "editor.defaultFormatter": "biomejs.biome"
-  },
+  "[css]": {},
   "[dockerfile]": {
     "editor.tabSize": 4
   },
-  "[html]": {
-    "editor.defaultFormatter": "biomejs.biome"
-  },
-  "[javascript]": {
-    "editor.defaultFormatter": "biomejs.biome"
-  },
-  "[json]": {
-    "editor.defaultFormatter": "vscode.json-language-features"
-  },
-  "[jsonc]": {
-    "editor.defaultFormatter": "vscode.json-language-features"
-  },
+  "[html]": {},
+  "[javascript]": {},
+  "[json]": {},
+  "[jsonc]": {},
   "[latex]": {
     "editor.acceptSuggestionOnEnter": "on",
     "editor.defaultFormatter": "James-Yu.latex-workshop",
@@ -59,18 +49,12 @@
   "[sql]": {
     "editor.defaultFormatter": "dorzey.vscode-sqlfluff"
   },
-  "[svelte]": {
-    "editor.defaultFormatter": "biomejs.biome"
-  },
+  "[svelte]": {},
   "[toml]": {
     "editor.tabSize": 4
   },
-  "[typescript]": {
-    "editor.defaultFormatter": "biomejs.biome"
-  },
-  "[typescriptreact]": {
-    "editor.defaultFormatter": "biomejs.biome"
-  },
+  "[typescript]": {},
+  "[typescriptreact]": {},
   "[typst-code]": {
     "editor.tabSize": 2,
     "editor.wordSeparators": "`~!@#$%^&*()=+[{]}\\|;:'\",.<>/?"
