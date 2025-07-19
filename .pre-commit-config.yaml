@@ -18,10 +18,7 @@ repos:
   - repo: https://github.com/sirwart/ripsecrets
     rev: v0.1.11
     hooks:
-      - id: ripsecrets-system
-        args: ["--strict-ignore"]
-        require_serial: true
-        minimum_pre_commit_version: "0"
+      - id: ripsecrets
 
   - repo: https://github.com/lycheeverse/lychee
     rev: lychee-v0.19.1
