@@ -47,7 +47,6 @@
     "editor.tabSize": 2
   },
   "[python]": {
-    "diffEditor.ignoreTrimWhitespace": false,
     "editor.codeActionsOnSave": {
       "source.fixAll": "explicit",
       "source.organizeImports": "explicit"
