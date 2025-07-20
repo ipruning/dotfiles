@@ -1,5 +1,5 @@
 start-at-login = true
-accordion-padding = 20
+accordion-padding = 0
 enable-normalization-flatten-containers = true
 enable-normalization-opposite-orientation-for-nested-containers = true
 default-root-container-layout = 'accordion'
