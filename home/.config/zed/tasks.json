@@ -26,6 +26,19 @@
     }
   },
   {
+    "label": "file_finder_modified",
+    "command": "selection=$([[ $(pwd) == \"$HOME\" ]] && fd . -IHL --max-depth 3 | tv || tv modified-files); [ -n \"$selection\" ] && zed \"$selection\"",
+    "hide": "always",
+    "allow_concurrent_runs": true,
+    "use_new_terminal": true,
+    "shell": {
+      "with_arguments": {
+        "program": "sh",
+        "args": ["--noediting", "--norc", "--noprofile"]
+      }
+    }
+  },
+  {
     "label": "project_finder",
     "command": "selection=$(tv git-repos); [ -n \"$selection\" ] && zed \"$selection\"",
     "hide": "always",

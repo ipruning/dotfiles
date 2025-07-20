@@ -111,6 +111,13 @@
           "task_name": "file_finder",
           "reveal_target": "center"
         }
+      ],
+      "space shift-space": [
+        "task::Spawn",
+        {
+          "task_name": "file_finder_modified",
+          "reveal_target": "center"
+        }
       ]
     }
   },
@@ -266,6 +273,13 @@
         "task::Spawn",
         {
           "task_name": "file_finder",
+          "reveal_target": "center"
+        }
+      ],
+      "space shift-space": [
+        "task::Spawn",
+        {
+          "task_name": "file_finder_modified",
           "reveal_target": "center"
         }
       ]
