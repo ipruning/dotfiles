@@ -75,14 +75,17 @@
   "lsp": {
     "basedpyright": {
       "settings": {
-        "python": { "pythonPath": ".venv/bin/python" },
+        "python": {
+          "pythonPath": ".venv/bin/python"
+        },
         "basedpyright.analysis": {
           "diagnosticMode": "workspace",
           "typeCheckingMode": "strict",
           "inlayHints": {
             "callArgumentNames": true,
-            "variableTypes": true,
-            "functionReturnTypes": true
+            "functionReturnTypes": true,
+            "genericTypes": false,
+            "variableTypes": true
           },
           "exclude": ["**/__pycache__", "**/.venv"]
         }
