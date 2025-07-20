@@ -4,7 +4,7 @@ description = "Find hidden files including dotfiles"
 requirements = ["bat", "fd"]
 
 [source]
-command = "fd -IHL -E .git -E .venv -E .DS_Store -t file -x bash -c 'printf \"%q\n\" \"$1\"' _ {}"
+command = "fd -IHL -E .git -E .DS_Store -E .venv -E __pycache__ -E .ruff_cache -E node_modules -t file -x bash -c 'printf \"%q\n\" \"$1\"' _ {}"
 
 [preview]
 command = "bat -n --color=always '{}'"
