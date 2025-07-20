@@ -62,7 +62,7 @@
         "coloring": "indent_aware",
         "enabled": true
       },
-      "language_servers": ["basedpyright", "!pyright", "ruff"],
+      "language_servers": ["ruff", "basedpyright", "!pyright"],
       "tab_size": 4
     },
     "TSX": {
@@ -75,14 +75,16 @@
   "lsp": {
     "basedpyright": {
       "settings": {
+        "python": { "pythonPath": ".venv/bin/python" },
         "basedpyright.analysis": {
           "diagnosticMode": "workspace",
+          "typeCheckingMode": "strict",
           "inlayHints": {
-            "callArgumentNames": false
-          }
-        },
-        "python": {
-          "pythonPath": ".venv/bin/python"
+            "callArgumentNames": true,
+            "variableTypes": true,
+            "functionReturnTypes": true
+          },
+          "exclude": ["**/__pycache__", "**/.venv"]
         }
       }
     }
