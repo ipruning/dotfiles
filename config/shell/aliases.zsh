@@ -2,8 +2,6 @@
 alias cp="cp -i"
 alias df="df -h"
 alias du="du -h"
-alias egrep="egrep --color=auto"
-alias fgrep="fgrep --color=auto"
 alias free="free -h"
 alias grep="grep --color=auto"
 alias history="history 1"
@@ -27,8 +25,6 @@ alias cdr='cd $(git rev-parse --show-toplevel)'
 alias d="lazydocker"
 alias dateutc="date -u +%Y-%m-%dT%H:%M:%SZ"
 alias g="lazygit"
-alias hg="history | grep"
-alias mr="mise run"
 alias ports="ss -tulpn"
 alias rsyncssh="rsync -Pr --rsh=ssh"
 
