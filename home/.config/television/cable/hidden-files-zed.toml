@@ -4,7 +4,7 @@ description = "Find hidden files for Zed editor"
 requirements = ["bat", "fd"]
 
 [source]
-command = "fd -IHL -E .git -E .DS_Store -E .venv -E __pycache__ -E .ruff_cache -E node_modules -t file"
+command = "fd -H -L --no-ignore-vcs -t file"
 
 [preview]
 command = "bat -n --color=always '{}'"
