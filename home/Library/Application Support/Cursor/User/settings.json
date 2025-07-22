@@ -63,6 +63,9 @@
     "editor.tabSize": 2,
     "editor.wordSeparators": "`~!@#$%^&*()=+[{]}\\|;:'\",.<>/?"
   },
+  "[yaml]": {
+    "editor.wordWrap": "on"
+  },
   "amp.commands.allowlist": [
     "ruff"
   ],
