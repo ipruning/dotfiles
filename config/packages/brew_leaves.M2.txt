@@ -58,6 +58,7 @@ rustscan
 shellcheck
 sqlfluff
 starship
+steipete/tap/peekaboo
 tailspin
 tealdeer
 television

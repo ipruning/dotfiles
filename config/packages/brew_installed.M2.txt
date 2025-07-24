@@ -45,6 +45,7 @@ ov
 pandoc
 parallel
 parallel-disk-usage
+peekaboo
 postgresql@17
 procs
 pueue
