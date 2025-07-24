@@ -28,7 +28,7 @@
   },
   {
     "command": "workbench.action.terminal.new",
-    "key": "cmd+t",
+    "key": "cmd+n",
     "when": "terminalFocus && !terminalTextSelected"
   },
   {
