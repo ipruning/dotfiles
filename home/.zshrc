@@ -38,6 +38,32 @@ if [[ $OSTYPE = darwin* ]]; then
   fi
 fi
 
+if [[ $OSTYPE = linux* ]]; then
+  if [ -d "$HOME/dotfiles/config/shell/completions" ]; then
+    fpath=("$HOME/dotfiles/config/shell/completions" "${fpath[@]}")
+  fi
+
+  autoload -Uz compinit
+  for dump in ~/.zcompdump(N.mh+24); do
+    compinit
+  done
+  compinit -C
+
+  if [ -d "$HOME/dotfiles" ]; then
+    if [ -n "$ZSH_VERSION" ]; then
+      local config_files=(
+        "$HOME/dotfiles/config/shell/aliases.zsh"
+        "$HOME/dotfiles/config/shell/env.zsh"
+        "$HOME/dotfiles/config/shell/env.private.zsh"
+      )
+
+      for file in "${config_files[@]}"; do
+        [[ -e "$file" ]] && source "$file"
+      done
+    fi
+  fi
+fi
+
 # Added by LM Studio CLI (lms)
 export PATH="$PATH:/Users/alex/.cache/lm-studio/bin"
 # End of LM Studio CLI section

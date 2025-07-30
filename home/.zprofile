@@ -59,5 +59,31 @@ if [[ $OSTYPE = darwin* ]]; then
       fi
     fi
   fi
+fi
 
+if [[ $OSTYPE = linux* ]]; then
+  typeset -U path
+
+  if [[ "$TERM_PROGRAM" == "vscode" ]]; then
+    export EDITOR="zed --wait"
+    export VISUAL="zed --wait"
+  fi
+
+  if [[ "$TERM_PROGRAM" == "zed" ]]; then
+    export EDITOR="zed --wait"
+    export VISUAL="zed --wait"
+  fi
+
+  if [[ "$TERM_PROGRAM" == "ghostty" ]]; then
+    export EDITOR="zed --wait"
+    export VISUAL="zed --wait"
+    if [[ -z "$ZELLIJ" ]]; then
+      latest_session=$(/opt/homebrew/bin/zellij list-sessions --no-formatting --reverse --short | grep -v "^repo-" | head -n 1)
+      if [[ -n "$latest_session" ]]; then
+        /opt/homebrew/bin/zellij attach --create "$latest_session"
+      else
+        /opt/homebrew/bin/zellij
+      fi
+    fi
+  fi
 fi
