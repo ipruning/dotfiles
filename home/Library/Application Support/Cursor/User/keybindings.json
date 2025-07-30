@@ -48,5 +48,9 @@
     "command": "workbench.action.terminal.sendSequence",
     "key": "shift+enter",
     "when": "terminalFocus"
+  },
+  {
+    "key": "cmd+e",
+    "command": "composerMode.background"
   }
 ]
