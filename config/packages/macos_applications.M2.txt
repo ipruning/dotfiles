@@ -10,6 +10,7 @@ Anki
 Atuin
 Avenue
 BaiduNetdisk_mac
+balenaEtcher
 BetterDisplay
 Bob
 calibre
