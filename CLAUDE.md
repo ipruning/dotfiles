@@ -58,7 +58,7 @@ gh extension upgrade --all
 # Run pre-commit hooks manually
 pre-commit run --all-files
 
-# Hooks include: YAML validation, trailing whitespace removal, markdown linting, 
+# Hooks include: YAML validation, trailing whitespace removal, markdown linting,
 # secret scanning (ripsecrets), link checking (lychee), CJK text formatting (autocorrect)
 ```
 
