@@ -31,12 +31,9 @@ style = "bold yellow"
 read_only = ' [RO]'
 read_only_style = "bold red"
 truncation_symbol = ".../"
-# fish_style_pwd_dir_length = 1
-# truncation_length = 4
 
 [git_branch]
 format = "[$branch]($style) "
-# ignore_branches = ["main", "master", "develop", "dev"]
 
 [package]
 format = '[$version]($style) '
@@ -59,18 +56,18 @@ vimcmd_visual_symbol = '[<](bold yellow)'
 threshold = 20
 
 [[battery.display]]
-threshold = 40
+threshold = 30
 
 [custom.git_user]
 command = "git config --get user.name"
-when    = "git rev-parse --git-dir 2>/dev/null"
-symbol  = ""
-style   = "cyan bold"
-format  = '[$symbol$output]($style)'
+when = "git rev-parse --git-dir 2>/dev/null"
+symbol = ""
+style = "cyan bold"
+format = '[$symbol$output]($style)'
 
 [custom.git_email]
 command = "git config --get user.email"
-when    = "git rev-parse --git-dir 2>/dev/null"
-symbol  = ""
-style   = "yellow bold"
-format  = '[$symbol$output]($style)'
+when = "git rev-parse --git-dir 2>/dev/null"
+symbol = ""
+style = "yellow bold"
+format = '[$symbol$output]($style)'
