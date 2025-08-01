@@ -9,7 +9,6 @@
   },
   {
     "context": "MessageEditor > Editor && !showing_completions && !showing_code_actions",
-    "use_key_equivalents": true,
     "bindings": {
       "enter": "editor::Newline",
       "cmd-enter": "agent::Chat"
@@ -17,7 +16,6 @@
   },
   {
     "context": "EditMessageEditor > Editor && !showing_completions && !showing_code_actions",
-    "use_key_equivalents": true,
     "bindings": {
       "escape": "menu::Cancel",
       "enter": "editor::Newline",
@@ -26,7 +24,6 @@
   },
   {
     "context": "AgentFeedbackMessageEditor > Editor && !showing_completions && !showing_code_actions",
-    "use_key_equivalents": true,
     "bindings": {
       "escape": "menu::Cancel",
       "enter": "editor::Newline",
