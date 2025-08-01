@@ -11,7 +11,7 @@ keybinds clear-defaults=true {
         }
 
         bind "Ctrl J" {
-            LaunchOrFocusPlugin "file:/Users/alex/dotfiles/home/.config/zellij/plugins/zellij-sessionizer.wasm" {
+            LaunchOrFocusPlugin "file:~/dotfiles/home/.config/zellij/plugins/zellij-sessionizer.wasm" {
                 floating true
                 move_to_focused_tab true
                 cwd "/"
