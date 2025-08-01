@@ -62,8 +62,6 @@ if [[ $OSTYPE = linux* ]]; then
       done
     fi
   fi
-fi
 
-# Added by LM Studio CLI (lms)
-export PATH="$PATH:/Users/alex/.cache/lm-studio/bin"
-# End of LM Studio CLI section
+  source /opt/clash/script/common.sh && source /opt/clash/script/clashctl.sh && watch_proxy
+fi
