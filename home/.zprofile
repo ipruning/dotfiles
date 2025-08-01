@@ -29,35 +29,37 @@ if [[ $OSTYPE = darwin* ]]; then
   #   export GIT_EDITOR="vim"
   # fi
 
+  # if [[ -z "$ZELLIJ" ]]; then
+  #   latest_session=$(/opt/homebrew/bin/zellij list-sessions --no-formatting --reverse --short | grep -v "^repo-" | head -n 1)
+  #   if [[ -n "$latest_session" ]]; then
+  #     /opt/homebrew/bin/zellij attach --create "$latest_session"
+  #   else
+  #     /opt/homebrew/bin/zellij
+  #   fi
+  # fi
+
+  # if [[ -n "$ZELLIJ" ]]; then
+  # else
+  #   local repo_path=$(pwd)
+  #   if [[ "$repo_path" != "$HOME" ]] && git rev-parse --is-inside-work-tree >/dev/null 2>&1 && [[ "$(git rev-parse --show-toplevel)" == "$repo_path" ]]; then
+  #     local repo_name=$(basename "${repo_path}")
+  #     zellij attach "repo-${repo_name}" 2>/dev/null || zellij --session "repo-${repo_name}"
+  #   fi
+  # fi
+
   if [[ "$TERM_PROGRAM" == "vscode" ]]; then
-    export EDITOR="zed --wait"
-    export VISUAL="zed --wait"
+    export EDITOR="/opt/homebrew/bin/zed --wait"
+    export VISUAL="/opt/homebrew/bin/zed --wait"
   fi
 
   if [[ "$TERM_PROGRAM" == "zed" ]]; then
-    export EDITOR="zed --wait"
-    export VISUAL="zed --wait"
-    # if [[ -n "$ZELLIJ" ]]; then
-    # else
-    #   local repo_path=$(pwd)
-    #   if [[ "$repo_path" != "$HOME" ]] && git rev-parse --is-inside-work-tree >/dev/null 2>&1 && [[ "$(git rev-parse --show-toplevel)" == "$repo_path" ]]; then
-    #     local repo_name=$(basename "${repo_path}")
-    #     zellij attach "repo-${repo_name}" 2>/dev/null || zellij --session "repo-${repo_name}"
-    #   fi
-    # fi
+    export EDITOR="/opt/homebrew/bin/zed --wait"
+    export VISUAL="/opt/homebrew/bin/zed --wait"
   fi
 
   if [[ "$TERM_PROGRAM" == "ghostty" ]]; then
-    export EDITOR="zed --wait"
-    export VISUAL="zed --wait"
-    if [[ -z "$ZELLIJ" ]]; then
-      latest_session=$(/opt/homebrew/bin/zellij list-sessions --no-formatting --reverse --short | grep -v "^repo-" | head -n 1)
-      if [[ -n "$latest_session" ]]; then
-        /opt/homebrew/bin/zellij attach --create "$latest_session"
-      else
-        /opt/homebrew/bin/zellij
-      fi
-    fi
+    export EDITOR="/opt/homebrew/bin/zed --wait"
+    export VISUAL="/opt/homebrew/bin/zed --wait"
   fi
 fi
 
@@ -65,25 +67,17 @@ if [[ $OSTYPE = linux* ]]; then
   typeset -U path
 
   if [[ "$TERM_PROGRAM" == "vscode" ]]; then
-    export EDITOR="zed --wait"
-    export VISUAL="zed --wait"
+    export EDITOR="/usr/local/bin/zed --wait"
+    export VISUAL="/usr/local/bin/zed --wait"
   fi
 
   if [[ "$TERM_PROGRAM" == "zed" ]]; then
-    export EDITOR="zed --wait"
-    export VISUAL="zed --wait"
+    export EDITOR="/usr/local/bin/zed --wait"
+    export VISUAL="/usr/local/bin/zed --wait"
   fi
 
   if [[ "$TERM_PROGRAM" == "ghostty" ]]; then
-    export EDITOR="zed --wait"
-    export VISUAL="zed --wait"
-    if [[ -z "$ZELLIJ" ]]; then
-      latest_session=$(/opt/homebrew/bin/zellij list-sessions --no-formatting --reverse --short | grep -v "^repo-" | head -n 1)
-      if [[ -n "$latest_session" ]]; then
-        /opt/homebrew/bin/zellij attach --create "$latest_session"
-      else
-        /opt/homebrew/bin/zellij
-      fi
-    fi
+    export EDITOR="/usr/local/bin/zed --wait"
+    export VISUAL="/usr/local/bin/zed --wait"
   fi
 fi
