@@ -8,7 +8,7 @@ This channel uses `fd` to find directories that contain a `.git` subdirectory, a
 """
 
 [source]
-command = "fd -HI -t d -t f -d 4 -E Library -E .cache -E .Trash '^\\.git$' /Users/alex -x dirname {}"
+command = "fd -HI -t d -t f -d 4 -E Library -E .cache -E .Trash '^\\.git$' -x dirname {}"
 
 [preview]
 command = "cd {}; git log --graph --all --color --date=short --pretty=format:'%C(auto)%h %ad %an %s'"
