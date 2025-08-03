@@ -135,20 +135,6 @@
     }
   },
   {
-    "context": "vim_mode == normal || vim_mode == visual",
-    "bindings": {
-      "s": "vim::PushSneak",
-      "shift-s": "vim::PushSneakBackward"
-    }
-  },
-  {
-    "context": "vim_mode == normal || vim_mode == visual",
-    "bindings": {
-      "s": "vim::PushSneak",
-      "shift-s": "vim::PushSneakBackward"
-    }
-  },
-  {
     "context": "Editor && (vim_mode == normal || vim_mode == visual) && !VimWaiting && !menu",
     "bindings": {
       "ctrl-alt-shift-u": "vim::ScrollUp",
@@ -194,8 +180,6 @@
       "space f": "editor::Format",
       "space q": "pane::CloseActiveItem",
       "space w": "workspace::Save",
-      // "space t": "task::Spawn",
-      // "space shift-t": "task::Rerun",
       "space t": [
         "task::Spawn",
         {
@@ -204,7 +188,6 @@
         }
       ],
       "space shift-t": "task::Spawn",
-      // "space s b": "git::Branch",
       "space a": "agent::ToggleFocus",
       "space s": [
         "task::Spawn",
