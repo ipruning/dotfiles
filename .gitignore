@@ -11,3 +11,5 @@ config/shell/plugins/
 home/.config/zellij/plugins/
 
 *private*
+
+!*tpl*
