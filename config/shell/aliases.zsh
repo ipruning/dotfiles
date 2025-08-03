@@ -26,13 +26,10 @@ alias d="lazydocker"
 alias dateutc="date -u +%Y-%m-%dT%H:%M:%SZ"
 alias g="lazygit"
 alias ports="ss -tulpn"
-alias rsyncssh="rsync -Pr --rsh=ssh"
 
 # macOS Aliases
 alias c="pbcopy"
 alias cat="bat"
-alias gb="git browse"
-alias gtidy="gh tidy && git fetch --prune"
 alias history="atuin history list --format '{time} - [{duration}] - {command}'"
 alias jr="jump-to-repo"
 alias js="jump-to-session"
@@ -50,17 +47,6 @@ function cursor() {
   open "$@" -a "Cursor"
 }
 
-function repo() {
+function repoprompt() {
   open "repoprompt://open/$(pwd)"
 }
-
-# Git Aliases
-alias gaa="git add --all --verbose"
-alias gac="codegpt commit --no_confirm"
-alias gc="git commit"
-alias gd="git diff"
-alias gdc="git diff --cached"
-alias gf="git fetch --prune"
-alias gs="git switch"
-alias gst="git status"
-alias pr="gh pr view -w"
