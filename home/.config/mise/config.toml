@@ -47,6 +47,10 @@ pre-commit = "latest"
 "pipx:huggingface_hub" = { version = "latest", cli = "" }
 "pipx:llm" = "latest"
 "pipx:modal" = "latest"
+
+# Mise Tools
+"cargo:presenterm" = "latest"
+
 # "cargo:bartib" = "latest"
 # "cargo:bmm" = "latest"
 # "cargo:choose" = "latest"
