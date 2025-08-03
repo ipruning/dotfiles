@@ -22,54 +22,54 @@ window-padding-balance = true
 # font-family = "Berkeley Mono"
 font-family = "MonoLisa"
 font-family = "Maple Mono NF CN"
-font-size = 13
+font-size = 12
 font-style = Medium
 
 theme = catppuccin-mocha
 
 macos-option-as-alt = true
 
-confirm-close-surface = false
+# confirm-close-surface = false
 
-keybind = cmd+u=scroll_page_up
-keybind = cmd+d=scroll_page_down
-keybind = cmd+s=write_screen_file:open
-keybind = cmd+shift+s=write_screen_file:paste
+keybind = alt+u=scroll_page_up
+keybind = alt+d=scroll_page_down
+keybind = alt+s=write_screen_file:open
+keybind = alt+shift+s=write_screen_file:paste
 
-keybind = cmd+h=goto_split:left
-keybind = cmd+j=goto_split:bottom
-keybind = cmd+k=goto_split:top
-keybind = cmd+l=goto_split:right
+# keybind = alt+h=goto_split:left
+# keybind = alt+j=goto_split:bottom
+# keybind = alt+k=goto_split:top
+# keybind = alt+l=goto_split:right
 
-keybind = cmd+shift+h=new_split:left
-keybind = cmd+shift+j=new_split:down
-keybind = cmd+shift+k=new_split:up
-keybind = cmd+shift+l=new_split:right
+# keybind = alt+shift+h=new_split:left
+# keybind = alt+shift+j=new_split:down
+# keybind = alt+shift+k=new_split:up
+# keybind = alt+shift+l=new_split:right
 
-# keybind = cmd+shift+h=resize_split:left,100
-# keybind = cmd+shift+j=resize_split:down,100
-# keybind = cmd+shift+k=resize_split:up,100
-# keybind = cmd+shift+l=resize_split:right,100
+# keybind = alt+shift+h=resize_split:left,100
+# keybind = alt+shift+j=resize_split:down,100
+# keybind = alt+shift+k=resize_split:up,100
+# keybind = alt+shift+l=resize_split:right,100
 
-# keybind = cmd+n=new_split:down
-# keybind = cmd+shift+n=ignore
-# keybind = cmd+t=ignore
+# keybind = alt+n=new_split:down
+# keybind = alt+shift+n=ignore
+# keybind = alt+t=ignore
 
-# keybind = cmd+j=text: jump-to-session\x0a
-# keybind = cmd+shift+j=text: jump-to-repo\x0a
+# keybind = alt+j=text: jump-to-session\x0a
+# keybind = alt+shift+j=text: jump-to-repo\x0a
 
-# keybind = cmd+left=goto_split:left
-# keybind = cmd+down=goto_split:bottom
-# keybind = cmd+up=goto_split:top
-# keybind = cmd+right=goto_split:right
+# keybind = alt+left=goto_split:left
+# keybind = alt+down=goto_split:bottom
+# keybind = alt+up=goto_split:top
+# keybind = alt+right=goto_split:right
 
-# keybind = cmd+shift+left=new_split:left
-# keybind = cmd+shift+down=new_split:down
-# keybind = cmd+shift+up=new_split:up
-# keybind = cmd+shift+right=new_split:right
+# keybind = alt+shift+left=new_split:left
+# keybind = alt+shift+down=new_split:down
+# keybind = alt+shift+up=new_split:up
+# keybind = alt+shift+right=new_split:right
 
-keybind = cmd+n=new_window
-keybind = cmd+shift+n=new_window
+keybind = alt+n=new_window
+keybind = alt+shift+n=new_window
 
-# keybind = cmd+n=new_split:down
-# keybind = cmd+t=new_window
+# keybind = alt+n=new_split:down
+# keybind = alt+t=new_window
