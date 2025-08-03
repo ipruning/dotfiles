@@ -62,11 +62,11 @@ layout {
     }
   }
 
-  tab name="gemini" focus=true {
-    pane {
-      command "gemini"
-    }
-  }
+  // tab name="gemini" focus=true {
+  //   pane {
+  //     command "gemini"
+  //   }
+  // }
 
   tab name="claude" {
     pane {
@@ -80,9 +80,9 @@ layout {
     }
   }
 
-  tab name="amp" {
-    pane {
-      command "amp"
-    }
-  }
+  // tab name="amp" {
+  //   pane {
+  //     command "amp"
+  //   }
+  // }
 }
