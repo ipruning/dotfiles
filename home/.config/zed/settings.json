@@ -62,7 +62,7 @@
         "coloring": "indent_aware",
         "enabled": true
       },
-      "language_servers": ["ruff", "basedpyright", "!pyright"],
+      "language_servers": ["ruff", "pyright"], // ["ruff", "basedpyright", "!pyright"],
       "tab_size": 4
     },
     "TSX": {
