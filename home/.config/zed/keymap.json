@@ -109,7 +109,7 @@
           "reveal_target": "center"
         }
       ],
-      "space shift-space": [
+      "space enter": [
         "task::Spawn",
         {
           "task_name": "file_finder_modified",
@@ -127,13 +127,13 @@
       "cmd-v": "project_panel::Paste"
     }
   },
-  {
-    "context": "Editor && mode == full",
-    "bindings": {
-      "cmd->": "assistant::QuoteSelection",
-      "cmd-<": "assistant::InsertIntoEditor"
-    }
-  },
+  // {
+  //   "context": "Editor && mode == full",
+  //   "bindings": {
+  //     "cmd->": "assistant::QuoteSelection",
+  //     "cmd-<": "assistant::InsertIntoEditor"
+  //   }
+  // },
   {
     "context": "Editor && (vim_mode == normal || vim_mode == visual) && !VimWaiting && !menu",
     "bindings": {
@@ -256,7 +256,7 @@
           "reveal_target": "center"
         }
       ],
-      "space shift-space": [
+      "space enter": [
         "task::Spawn",
         {
           "task_name": "file_finder_modified",
