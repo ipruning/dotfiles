@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-This is a personal dotfiles repository for macOS development environment with dual shell support (zsh/fish) and modern tooling. The repository follows a structured approach with configuration files organized by category and home directory files following XDG standards.
+This is a personal dotfiles repository for macOS development environment with dual shell support (zsh/fish) and modern tooling. The repository follows a structured approach with configuration files organized by category and home directory files following XDG standards. All automation is handled through mise tasks and shell functions - there are no traditional build files (Makefile, package.json).
 
 ## Key Architecture
 
@@ -17,22 +17,29 @@ This is a personal dotfiles repository for macOS development environment with du
   - `mackup/` - Mackup configuration for app settings backup
 - `home/` - Direct home directory files and XDG configurations
   - `.config/` - Application configurations following XDG standards
+- `.mise/tasks/` - Mise task definitions for automation (replaces traditional Makefiles)
 
-### Tool Management
+### Tool Management Hierarchy
 
-- **mise**: Primary tool for unified version and tool management (replaces asdf/rtx)
-- **Homebrew**: Package management with machine-specific lists
-- **pre-commit**: Automated linting, security scanning, and CJK text formatting
+1. **mise**: Primary tool for unified version and tool management (replaces asdf/rtx)
+   - Manages languages (Node.js, Python, Go, Rust, Ruby, Deno, Bun, Zig)
+   - Manages CLI tools (claude-code, amp, llm, modal, codex, gemini-cli)
+   - Task runner for automation (mise tasks in `.mise/tasks/`)
+2. **Homebrew**: Package management with machine-specific lists
+3. **pre-commit**: Automated linting, security scanning, and CJK text formatting
 
 ## Common Commands
 
 ### Environment Setup
 
 ```bash
+# Complete initial setup (installs tools, pre-commit hooks, plugins, creates symlinks)
+mise init
+
 # Install all tools and dependencies
 mise install
 
-# Set up pre-commit hooks
+# Set up pre-commit hooks only
 pre-commit install
 
 # Source shell configurations
@@ -40,11 +47,24 @@ source ~/.zshrc  # for zsh
 source ~/.config/fish/config.fish  # for fish
 ```
 
+### Development Tasks
+
+```bash
+# Run linting/pre-commit checks
+mise lint
+
+# Sync shell completions for all CLI tools
+mise sync-completion
+
+# List all available mise tasks
+mise tasks
+```
+
 ### Package Management
 
 ```bash
-# Update all tools and packages
-upgrade-all  # Custom function that updates Homebrew, mise, gh extensions, and backs up package lists
+# Update all tools and packages (master command)
+upgrade-all  # Updates Homebrew, mise, gh extensions, and backs up package lists to config/packages/
 
 # Update individual components
 brew update && brew upgrade
@@ -58,8 +78,12 @@ gh extension upgrade --all
 # Run pre-commit hooks manually
 pre-commit run --all-files
 
-# Hooks include: YAML validation, trailing whitespace removal, markdown linting,
-# secret scanning (ripsecrets), link checking (lychee), CJK text formatting (autocorrect)
+# Hook pipeline (in order):
+# 1. YAML validation + trailing whitespace removal
+# 2. Markdown linting with auto-fix
+# 3. Secret scanning (ripsecrets)
+# 4. Link validation (lychee) with smart excludes
+# 5. CJK text formatting (autocorrect)
 ```
 
 ## Shell Configuration
@@ -74,10 +98,11 @@ The repository supports both zsh and fish shells with consistent functionality:
 
 ### Key Aliases and Functions
 
-- Modern CLI replacements: `ls` → `eza`, `cat` → `bat`, `find` → `fd`
+- Modern CLI replacements: `ls` → `eza`, `cat` → `bat`, `find` → `fd`, `grep` → `rg`
 - Git shortcuts: `g` → `lazygit`, `gst` → `git status`, `gaa` → `git add --all --verbose`
-- Development: `d` → `lazydocker`, `jr` → `jump-to-repo`
-- System utilities: `upgrade-all` function updates all package managers
+- Development: `d` → `lazydocker`, `jr` → `jump-to-repo`, `js` → `jump-to-session`
+- Navigation: `j` → `zoxide` (smart directory jumping), `y` → `yazi` (with directory change on exit)
+- System utilities: `upgrade-all` function updates all package managers and backs up package states
 
 ### Private Configuration
 
@@ -108,14 +133,13 @@ Use `.tpl` template files for private configurations:
 
 ### Machine-Specific Package Lists
 
-Package lists are maintained per machine type:
+Package lists are maintained per machine type (hostname-based):
 
-- `config/packages/brew_dump.M2.txt` - Complete M2 Mac package list
-- `config/packages/brew_dump.M4.txt` - Complete M4 Mac package list
-- `config/packages/brew_leaves.M*.txt` - Explicitly installed packages
-- `config/packages/brew_installed.M*.txt` - All installed packages
+- `config/packages/brew_dump.{hostname}.txt` - Complete Homebrew bundle format
+- `config/packages/brew_leaves.{hostname}.txt` - Only explicitly installed packages
+- `config/packages/brew_installed.{hostname}.txt` - All installed packages
 
-The `upgrade-all` function automatically backs up current package states to these files.
+The `upgrade-all` function automatically backs up current package states to these files, enabling machine-specific package management and restoration.
 
 ## Quality and Security
 
@@ -141,17 +165,38 @@ The repository uses a comprehensive pre-commit pipeline with:
 1. Add to `home/.config/mise/config.toml` for programming tools
 2. Add to appropriate Homebrew package list for system applications
 3. Update aliases in both `config/shell/aliases.zsh` and `config/shell/aliases.fish`
+4. Run `upgrade-all` to backup new package state
 
 ### Configuration Changes
 
-- Shell configurations should be made in both zsh and fish variants
+- Shell configurations must be made in both zsh and fish variants to maintain parity
 - Use the `logger` function from `config/shell/functions/utils.zsh` for consistent logging
 - Private configurations should use the `.tpl` template system
+- Shell plugins are managed as git submodules in `config/shell/plugins/`
 
 ### Testing Changes
 
 Run pre-commit hooks before committing:
 
 ```bash
+mise lint  # or
 pre-commit run --all-files
 ```
+
+### Session and Navigation Patterns
+
+- Repository navigation: `jr` (jump-to-repo) uses `television` for fuzzy finding
+- Session management: `js` (jump-to-session) for Zellij sessions
+- Automatic Zellij session creation with pattern `repo-t-{basename}`
+- Zed editor tasks integrate with terminal tools via `home/.config/zed/tasks.json`
+
+### Plugin Management
+
+ZSH plugins (git submodules):
+
+- `fast-syntax-highlighting` - Real-time syntax highlighting
+- `zsh-autosuggestions` - History-based suggestions
+- `fzf-tab` - Fuzzy completion interface
+- `ugit` - Interactive git undo
+
+Update plugins via `mise init` task which handles both shell and Zellij plugins.
