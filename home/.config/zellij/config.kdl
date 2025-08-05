@@ -564,7 +564,7 @@ scroll_buffer_size 50000
 //   - true (default)
 //   - false
 //
-// session_serialization false
+session_serialization false
 
 // Whether pane viewports are serialized along with the session, default is false
 // Options:
