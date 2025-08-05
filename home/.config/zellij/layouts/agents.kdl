@@ -74,11 +74,17 @@ layout {
     }
   }
 
-  tab name="codex" {
+  tab name="top" {
     pane {
-      command "codex"
+      command "htop"
     }
   }
+
+  // tab name="codex" {
+  //   pane {
+  //     command "codex"
+  //   }
+  // }
 
   // tab name="amp" {
   //   pane {
