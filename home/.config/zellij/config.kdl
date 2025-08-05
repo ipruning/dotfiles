@@ -185,10 +185,10 @@ keybinds clear-defaults=true {
         bind "Alt o" { MoveTab "right"; }
     }
     shared_except "locked" "renametab" "renamepane" {
-        bind "Ctrl g" { SwitchToMode "locked"; }
-
-        bind "esc" { SwitchToMode "locked"; }
         bind "Ctrl c" { SwitchToMode "locked"; }
+        bind "Ctrl g" { SwitchToMode "locked"; }
+        bind "enter" { SwitchToMode "locked"; }
+        bind "esc" { SwitchToMode "locked"; }
 
         bind "Ctrl q" { Quit; }
 
@@ -208,10 +208,12 @@ keybinds clear-defaults=true {
         bind "j" { MoveFocus "down"; }
         bind "k" { MoveFocus "up"; }
         bind "l" { MoveFocusOrTab "right"; }
+
         bind "left" { NewPane "left"; SwitchToMode "locked"; }
         bind "down" { NewPane "down"; SwitchToMode "locked"; }
         bind "up" { NewPane "up"; SwitchToMode "locked"; }
         bind "right" { NewPane "right"; SwitchToMode "locked"; }
+
         bind "n" { NewTab; SwitchToMode "locked"; }
         bind "t" { NewTab; SwitchToMode "locked"; }
 
@@ -535,7 +537,7 @@ scroll_buffer_size 50000
 
 // Path to the default editor to use to edit pane scrollbuffer
 // Default: $EDITOR or $VISUAL
-scrollback_editor "/opt/homebrew/bin/zed --wait"
+// scrollback_editor "/opt/homebrew/bin/zed --wait"
 
 // A fixed name to always give the Zellij session.
 // Consider also setting `attach_to_session true,`
@@ -562,7 +564,7 @@ scrollback_editor "/opt/homebrew/bin/zed --wait"
 //   - true (default)
 //   - false
 //
-session_serialization false
+// session_serialization false
 
 // Whether pane viewports are serialized along with the session, default is false
 // Options:
