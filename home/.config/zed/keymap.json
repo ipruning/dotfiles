@@ -34,7 +34,7 @@
     "context": "Terminal",
     "bindings": {
       "cmd-d": "terminal::ScrollPageDown",
-      "cmd-n": "workspace::NewTerminal",
+      "cmd-n": null,
       "cmd-u": "terminal::ScrollPageUp"
     }
   },
