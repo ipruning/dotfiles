@@ -15,6 +15,7 @@ docker
 duckdb
 evil-helix
 eza
+fastfetch
 fd
 ffmpeg
 fio
