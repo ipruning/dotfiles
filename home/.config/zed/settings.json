@@ -2,7 +2,7 @@
   "agent": {
     "always_allow_tool_actions": true,
     "default_model": {
-      "model": "o3",
+      "model": "gpt-5",
       "provider": "openai"
     },
     "default_profile": "write",
