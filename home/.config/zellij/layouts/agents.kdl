@@ -62,15 +62,21 @@ layout {
     }
   }
 
-  // tab name="gemini" focus=true {
-  //   pane {
-  //     command "gemini"
-  //   }
-  // }
-
   tab name="claude" {
     pane {
       command "claude"
+    }
+  }
+
+  tab name="codex" {
+    pane {
+      command "codex"
+    }
+  }
+
+  tab name="amp" {
+    pane {
+      command "amp"
     }
   }
 
@@ -79,16 +85,4 @@ layout {
       command "htop"
     }
   }
-
-  // tab name="codex" {
-  //   pane {
-  //     command "codex"
-  //   }
-  // }
-
-  // tab name="amp" {
-  //   pane {
-  //     command "amp"
-  //   }
-  // }
 }
