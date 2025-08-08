@@ -28,6 +28,8 @@ bindkey "^F" forward-char
 export PATH="$HOME/Developer/prototypes/utils/bin:$PATH"
 export PATH="$HOME/Developer/prototypes/utils/scripts:$PATH"
 
+export PATH="$HOME/.local/bin:$PATH"
+
 source "$HOME/dotfiles/config/shell/functions/macos.zsh"
 source "$HOME/dotfiles/config/shell/functions/mkbir.zsh"
 source "$HOME/dotfiles/config/shell/functions/surge.zsh"
