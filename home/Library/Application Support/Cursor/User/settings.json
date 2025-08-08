@@ -8,7 +8,9 @@
   },
   "[html]": {},
   "[javascript]": {},
-  "[json]": {},
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
   "[jsonc]": {},
   "[latex]": {
     "editor.acceptSuggestionOnEnter": "on",
@@ -114,10 +116,13 @@
   "code-runner.saveFileBeforeRun": true,
   "cursor.chat.terminalShowHoverHint": false,
   "cursor.cmdk.autoSelect": false,
-  "cursor.cmdk.useThemedDiffBackground2": false,
   "cursor.composer.collapsePaneInputBoxPills": true,
+  "cursor.composer.queueMessageDefaultBehavior": "queue",
   "cursor.composer.shouldAllowCustomModes": true,
   "cursor.composer.shouldChimeAfterChatFinishes": true,
+  "cursor.composer.textSizeScale": 0.85,
+  "cursor.composer.usageSummaryDisplay": "always",
+  "cursor.diffs.useCharacterLevelDiffs": true,
   "cursor.windowSwitcher.sidebarHoverCollapsed": true,
   "diffEditor.ignoreTrimWhitespace": false,
   "diffEditor.maxComputationTime": 8192,
@@ -405,6 +410,7 @@
   "terminal.integrated.fontWeight": "500",
   "terminal.integrated.inheritEnv": true,
   "terminal.integrated.scrollback": 10000,
+  "update.releaseTrack": "prerelease",
   "vim.hlsearch": true,
   "vim.incsearch": true,
   "vim.leader": "<space>",
@@ -513,7 +519,7 @@
   "vscode-mogami.enableCodeLens": true,
   "vscode-mogami.usePrivateSource": false,
   "window.commandCenter": false,
-  "window.zoomLevel": 0,
+  "window.zoomLevel": -1,
   "workbench.colorCustomizations": {
     "editor.lineHighlightBackground": "#1073cf2d",
     "editor.lineHighlightBorder": "#9fced11f"
