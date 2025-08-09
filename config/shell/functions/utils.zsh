@@ -62,6 +62,11 @@ function upgrade-all() {
     tldr --update
   fi
 
+  logger "Updating ya packages..."
+  if command -v ya &>/dev/null; then
+    ya pkg upgrade
+  fi
+
   logger "Backing up all packages..."
   local host=$(hostname -s)
   if command -v brew &>/dev/null; then
