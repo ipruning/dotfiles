@@ -49,4 +49,7 @@ fi
 printf '\n\033[1;34m▶ Syncing Completion\033[0m\n'
 mise sync-completion
 
+printf '\n\033[1;34m▶ Injecting Private Environment\033[0m\n'
+op inject --in-file config/shell/env.private.tpl.zsh --out-file config/shell/env.private.zsh
+
 printf '\n\033[1;34m▶ Done\033[0m\n'
