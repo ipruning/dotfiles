@@ -7,6 +7,14 @@ cd "$(git rev-parse --show-toplevel)" || exit 1
 
 [ -d config/shell/completions ] || mkdir -p config/shell/completions
 
-_LLM_COMPLETE=zsh_source uvx llm > config/shell/completions/_llm
-bootdev completion zsh > config/shell/completions/_bootdev
-ov --completion zsh > config/shell/completions/_ov
+if which uvx >/dev/null 2>&1; then
+  _LLM_COMPLETE=zsh_source uvx llm > config/shell/completions/_llm
+fi
+
+if which bootdev >/dev/null 2>&1; then
+  bootdev completion zsh > config/shell/completions/_bootdev
+fi
+
+if which ov >/dev/null 2>&1; then
+  ov --completion zsh > config/shell/completions/_ov
+fi
