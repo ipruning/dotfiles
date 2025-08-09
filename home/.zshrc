@@ -1,13 +1,17 @@
 # echo ">>> .zshrc is loaded. Shell: $SHELL, Options: $-"
 
-if [[ $OSTYPE = darwin* ]]; then
+if [[ $OSTYPE == darwin* ]]; then
   if [ -d "/opt/homebrew/bin" ]; then
     eval "$(/opt/homebrew/bin/brew shellenv)"
   fi
 
-  if [ -d "$HOME/dotfiles/config/shell/completions" ]; then
-    fpath=("$HOME/dotfiles/config/shell/completions" "${fpath[@]}")
-  fi
+  local completion_paths=()
+  
+  [ -d "$HOME/dotfiles/config/shell/completions" ] && completion_paths+=("$HOME/dotfiles/config/shell/completions")
+  
+  completion_paths+=("${fpath[@]}")
+  
+  fpath=("${completion_paths[@]}")
 
   autoload -Uz compinit
   for dump in ~/.zcompdump(N.mh+24); do
@@ -38,10 +42,16 @@ if [[ $OSTYPE = darwin* ]]; then
   fi
 fi
 
-if [[ $OSTYPE = linux* ]]; then
-  if [ -d "$HOME/dotfiles/config/shell/completions" ]; then
-    fpath=("$HOME/dotfiles/config/shell/completions" "${fpath[@]}")
-  fi
+if [[ $OSTYPE == linux* ]]; then
+  local completion_paths=()
+  
+  [ -d "$HOME/dotfiles/config/shell/completions" ] && completion_paths+=("$HOME/dotfiles/config/shell/completions")
+  
+  completion_paths+=("${fpath[@]}")
+  
+  [ -d "/usr/share/zsh/site-functions" ] && completion_paths+=("/usr/share/zsh/site-functions")
+  
+  fpath=("${completion_paths[@]}")
 
   autoload -Uz compinit
   for dump in ~/.zcompdump(N.mh+24); do
