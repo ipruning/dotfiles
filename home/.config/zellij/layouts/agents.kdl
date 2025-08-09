@@ -64,13 +64,13 @@ layout {
 
   tab name="claude" {
     pane {
-      command "claude"
+      command "claude-sonnet"
     }
   }
 
   tab name="codex" {
     pane {
-      command "codex"
+      command "codex -m gpt-5 -c model_reasoning_effort=high"
     }
   }
 
