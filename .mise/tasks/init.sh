@@ -8,11 +8,14 @@ cd "$(git rev-parse --show-toplevel)" || exit 1
 
 type mise || exit 1
 type uv || exit 1
-type uvx || exit 1
 
 mise upgrade
 
-mise x -- pre-commit install
+if which pre-commit >/dev/null 2>&1; then
+  mise x -- pre-commit install
+else
+  printf '\033[1;31m[WARN]\033[0m pre-commit not found, skipping pre-commit install\n' >&2
+fi
 
 mise cfg
 
@@ -33,17 +36,21 @@ printf '\n\033[1;34m▶ Updating ZSH Plugins\033[0m\n'
 [ -d config/shell/plugins/zsh-autosuggestions ]      || git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions              config/shell/plugins/zsh-autosuggestions
 [ -d config/shell/plugins/fast-syntax-highlighting ] || git clone --depth=1 https://github.com/zdharma-continuum/fast-syntax-highlighting config/shell/plugins/fast-syntax-highlighting
 
-gfold -d json "$@" 2>/dev/null |
+if which gfold >/dev/null 2>&1; then
+  gfold -d json "$@" 2>/dev/null |
   jq -r '.[] | (.parent | rtrimstr("/")) + "/" + .name' |
   while read -r repo; do
-      printf '\n\033[1;34m▶ Updating %s\033[0m\n' "$repo"
-      git -C "$repo" pull --ff-only
+    printf '\n\033[1;34m▶ Updating %s\033[0m\n' "$repo"
+    git -C "$repo" pull --ff-only
   done
+else
+  printf '\033[1;31m[WARN]\033[0m gfold not found, skipping gfold update\n' >&2
+fi
 
 printf '\n\033[1;34m▶ Restoring Mackup\033[0m\n'
 if [ ! -L "$HOME/.mackup" ] || [ ! -L "$HOME/.mackup.cfg" ]; then
-  [ ! -L "$HOME/.mackup" ] && ln -sf config/mackup/.mackup "$HOME"/.mackup
-  [ ! -L "$HOME/.mackup.cfg" ] && ln -sf config/mackup/.mackup.cfg "$HOME"/.mackup.cfg
+  [ ! -L "$HOME/.mackup" ] && ln -sf "$HOME/config/mackup/.mackup" "$HOME"/.mackup
+  [ ! -L "$HOME/.mackup.cfg" ] && ln -sf "$HOME/config/mackup/.mackup.cfg" "$HOME"/.mackup.cfg
   uvx mackup restore
 else
   printf '\n\033[1;34m▶ Mackup is already configured\033[0m\n'
