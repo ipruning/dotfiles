@@ -6,11 +6,11 @@ if [[ $OSTYPE == darwin* ]]; then
   fi
 
   local completion_paths=()
-  
+
   [ -d "$HOME/dotfiles/config/shell/completions" ] && completion_paths+=("$HOME/dotfiles/config/shell/completions")
-  
+
   completion_paths+=("${fpath[@]}")
-  
+
   fpath=("${completion_paths[@]}")
 
   autoload -Uz compinit
@@ -44,13 +44,13 @@ fi
 
 if [[ $OSTYPE == linux* ]]; then
   local completion_paths=()
-  
+
   [ -d "$HOME/dotfiles/config/shell/completions" ] && completion_paths+=("$HOME/dotfiles/config/shell/completions")
-  
+
   completion_paths+=("${fpath[@]}")
-  
+
   [ -d "/usr/share/zsh/site-functions" ] && completion_paths+=("/usr/share/zsh/site-functions")
-  
+
   fpath=("${completion_paths[@]}")
 
   autoload -Uz compinit
