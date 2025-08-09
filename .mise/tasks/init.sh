@@ -15,8 +15,8 @@ find "$(git rev-parse --show-toplevel)"/.mise/tasks/ -type f -exec chmod +x {} \
 
 printf '\n\033[1;34m▶ Updating Zellij Plugins\033[0m\n'
 mkdir -p home/.config/zellij/plugins/
-curl -L -o home/.config/zellij/plugins/zjstatus.wasm https://github.com/dj95/zjstatus/releases/latest/download/zjstatus.wasm
-curl -L -o home/.config/zellij/plugins/zellij-sessionizer.wasm https://github.com/laperlej/zellij-sessionizer/releases/latest/download/zellij-sessionizer.wasm
+curl -sSL -o home/.config/zellij/plugins/zjstatus.wasm https://github.com/dj95/zjstatus/releases/latest/download/zjstatus.wasm
+curl -sSL -o home/.config/zellij/plugins/zellij-sessionizer.wasm https://github.com/laperlej/zellij-sessionizer/releases/latest/download/zellij-sessionizer.wasm
 
 printf '\n\033[1;34m▶ Updating ZSH Plugins\033[0m\n'
 
