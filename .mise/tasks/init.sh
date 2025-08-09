@@ -1,26 +1,16 @@
 #!/usr/bin/env bash
 #MISE description="Initialize Monorepo CI/CD tools"
-#MISE env={MISE_DEBUG=1,MISE_LOG_HTTP=1,MISE_RAW=1,MISE_JOBS=1}
 
 set -euo pipefail
 
 cd "$(git rev-parse --show-toplevel)" || exit 1
 
-type mise || exit 1
-type uv || exit 1
+type mise >/dev/null 2>&1 || exit 1
+type uv >/dev/null 2>&1 || exit 1
 
+
+printf '\n\033[1;34m▶ Updating mise packages and tasks\033[0m\n'
 mise upgrade
-
-if which pre-commit >/dev/null 2>&1; then
-  mise x -- pre-commit install
-else
-  printf '\033[1;31m[WARN]\033[0m pre-commit not found, skipping pre-commit install\n' >&2
-fi
-
-mise cfg
-
-mise tasks
-
 find "$(git rev-parse --show-toplevel)"/.mise/tasks/ -type f -exec chmod +x {} \;
 
 printf '\n\033[1;34m▶ Updating Zellij Plugins\033[0m\n'
@@ -55,9 +45,6 @@ if [ ! -L "$HOME/.mackup" ] || [ ! -L "$HOME/.mackup.cfg" ]; then
 else
   printf '\n\033[1;34m▶ Mackup is already configured\033[0m\n'
 fi
-
-printf '\n\033[1;34m▶ Linting\033[0m\n'
-mise lint
 
 printf '\n\033[1;34m▶ Syncing Completion\033[0m\n'
 mise sync-completion
