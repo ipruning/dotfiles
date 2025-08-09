@@ -62,27 +62,15 @@ layout {
     }
   }
 
-  tab name="claude" {
-    pane {
-      command "claude-sonnet"
-    }
-  }
-
   tab name="codex" {
     pane {
-      command "codex -m gpt-5 -c model_reasoning_effort=high"
-    }
-  }
-
-  tab name="amp" {
-    pane {
-      command "amp"
+      command "codex" close_on_exit=true
     }
   }
 
   tab name="top" {
     pane {
-      command "htop"
+      command "htop" close_on_exit=true
     }
   }
 }
