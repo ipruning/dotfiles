@@ -1,6 +1,6 @@
 # echo ">>> .zprofile is loaded. Shell: $SHELL, Options: $-"
 
-if [[ $OSTYPE = darwin* ]]; then
+if [[ $OSTYPE == darwin* ]]; then
   typeset -U path
 
   # >>> conda initialize >>>
@@ -71,7 +71,7 @@ if [[ $OSTYPE = darwin* ]]; then
   fi
 fi
 
-if [[ $OSTYPE = linux* ]]; then
+if [[ $OSTYPE == linux* ]]; then
   typeset -U path
 
   if [[ "$TERM_PROGRAM" == "vscode" ]]; then
