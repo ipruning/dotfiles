@@ -49,8 +49,9 @@ pre-commit = "latest"
 "pipx:modal" = "latest"
 
 # Mise Tools
-"cargo:presenterm" = "latest"
 "cargo:https://github.com/j178/prefligit" = "latest"
+"cargo:presenterm" = "latest"
+"cargo:somo" = "latest"
 
 # "cargo:bartib" = "latest"
 # "cargo:bmm" = "latest"
