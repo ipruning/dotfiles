@@ -75,17 +75,25 @@ if [[ $OSTYPE == linux* ]]; then
   typeset -U path
 
   if [[ "$TERM_PROGRAM" == "vscode" ]]; then
-    export EDITOR="/usr/local/bin/zed --wait"
-    export VISUAL="/usr/local/bin/zed --wait"
+    export EDITOR="/usr/bin/zed --wait"
+    export VISUAL="/usr/bin/zed --wait"
   fi
 
   if [[ "$TERM_PROGRAM" == "zed" ]]; then
-    export EDITOR="/usr/local/bin/zed --wait"
-    export VISUAL="/usr/local/bin/zed --wait"
+    export EDITOR="/usr/bin/zed --wait"
+    export VISUAL="/usr/bin/zed --wait"
   fi
 
   if [[ "$TERM_PROGRAM" == "ghostty" ]]; then
-    export EDITOR="/usr/local/bin/zed --wait"
-    export VISUAL="/usr/local/bin/zed --wait"
+    export EDITOR="/usr/bin/zed --wait"
+    export VISUAL="/usr/bin/zed --wait"
+    if [[ -z "$ZELLIJ" ]]; then
+      latest_session=$(/usr/bin/zellij list-sessions --no-formatting --short | grep -v "^repo-" | head -n 1)
+      if [[ -n "$latest_session" ]]; then
+        /usr/bin/zellij attach --create "$latest_session"
+      else
+        /usr/bin/zellij
+      fi
+    fi
   fi
 fi
