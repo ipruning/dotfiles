@@ -291,7 +291,6 @@
   "git.confirmSync": false,
   "git.enableSmartCommit": true,
   "git.openRepositoryInParentFolders": "never",
-  "git.replaceTagsWhenPull": true,
   "json.maxItemsComputed": 8192,
   "lldb.launch.expressions": "native",
   "lldb.library": "/Library/Developer/CommandLineTools/Library/PrivateFrameworks/LLDB.framework/Versions/A/LLDB",
