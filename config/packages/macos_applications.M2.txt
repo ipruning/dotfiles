@@ -42,7 +42,6 @@ IINA
 iMazing
 Immersive Translate
 Input Source Pro
-Jan
 Kagi for Safari
 Karabiner-Elements
 Karabiner-EventViewer
@@ -57,7 +56,6 @@ Longbridge Pro
 Loopback
 LyricsX
 MAA
-MDPro3
 Microsoft Excel
 Microsoft PowerPoint
 Microsoft Word
