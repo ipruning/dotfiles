@@ -23,7 +23,7 @@ window-padding-balance = true
 font-family = "MonoLisa"
 font-family = "Maple Mono NF CN"
 font-size = 12
-font-style = Medium
+font-style = SemiBold
 
 theme = catppuccin-mocha
 
