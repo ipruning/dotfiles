@@ -69,7 +69,7 @@ layout {
   }
 
   tab name="claude code" {
-    pane 
+    pane
   }
 
   tab name="top" {
