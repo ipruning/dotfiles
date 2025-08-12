@@ -62,15 +62,19 @@ layout {
     }
   }
 
-  tab name="codex" {
+  tab name="codex cli" {
     pane {
       command "codex" close_on_exit=true
     }
   }
 
+  tab name="claude code" {
+    pane 
+  }
+
   tab name="top" {
     pane {
-      command "htop" close_on_exit=true
+      command "btop" close_on_exit=true
     }
   }
 }
