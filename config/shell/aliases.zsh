@@ -26,7 +26,9 @@ else
   alias ls="ls --color=auto"
 fi
 
-alias cat="bat"
+if type bat &> /dev/null; then
+  alias cat="bat"
+fi
 alias cdr='cd $(git rev-parse --show-toplevel)'
 alias d="lazydocker"
 alias dateutc="date -u +%Y-%m-%dT%H:%M:%SZ"

@@ -1,5 +1,7 @@
 # 👇 zsh Theme
-eval "$(starship init zsh)"
+if command -v starship >/dev/null 2>&1; then
+  eval "$(starship init zsh)"
+fi
 
 # 👇 zsh options
 setopt interactivecomments
@@ -16,8 +18,8 @@ bindkey "^v" edit-command-line
 bindkey -e
 
 # 👇 My keybindings
-bindkey "^[f" forward-word
-bindkey "^[b" backward-word
+bindkey '\e[1;5C' forward-word
+bindkey '\e[1;5D' backward-word
 bindkey "^A" beginning-of-line
 bindkey "^B" backward-char
 bindkey "^D" delete-word
@@ -30,10 +32,12 @@ export PATH="$HOME/Developer/prototypes/utils/scripts:$PATH"
 
 export PATH="$HOME/.local/bin:$PATH"
 
-source "$HOME/dotfiles/config/shell/functions/macos.zsh"
-source "$HOME/dotfiles/config/shell/functions/mkbir.zsh"
-source "$HOME/dotfiles/config/shell/functions/surge.zsh"
-source "$HOME/dotfiles/config/shell/functions/utils.zsh"
+if [[ $OSTYPE == darwin* ]]; then
+  source "$HOME/dotfiles/config/shell/functions/macos.zsh"
+  source "$HOME/dotfiles/config/shell/functions/mkbir.zsh"
+  source "$HOME/dotfiles/config/shell/functions/surge.zsh"
+  source "$HOME/dotfiles/config/shell/functions/utils.zsh"
+fi
 
 # 👇 Brew
 export HOMEBREW_NO_ANALYTICS=1
@@ -48,7 +52,9 @@ export TAILSPIN_PAGER="ov -f [FILE]"
 source "$HOME/.orbstack/shell/init.zsh" 2>/dev/null || :
 
 # 👇 zoxide
-eval "$(zoxide init zsh --cmd j)"
+if command -v zoxide >/dev/null 2>&1; then
+  eval "$(zoxide init zsh --cmd j)"
+fi
 
 # 👇 yazi
 function y() {
@@ -63,7 +69,9 @@ function y() {
 # 👇 atuin
 # eval "$(atuin init zsh --disable-up-arrow)"
 # eval "$(atuin init zsh)"
-source "$HOME/dotfiles/config/shell/functions/atuin.zsh"
+if command -v atuin >/dev/null 2>&1; then
+  source "$HOME/dotfiles/config/shell/functions/atuin.zsh"
+fi
 
 # 👇 tv
 _tv_search() {
@@ -142,5 +150,7 @@ export PATH="$HOME/.local/share/mise/shims:$PATH"
 # eval "$(mise activate zsh)"
 
 # 👇 mise hook-env
-eval "$(mise activate zsh)"
+if command -v mise >/dev/null 2>&1; then
+  eval "$(mise activate zsh)"
+fi
 # eval "$(mise hook-env -s zsh)"

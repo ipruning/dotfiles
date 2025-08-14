@@ -1,8 +1,10 @@
 if test -d /opt/homebrew
   #################### Homebrew ####################
   /opt/homebrew/bin/brew shellenv | source
+end
 
-  #################### Mise ####################
+#################### Mise ####################
+if type -q mise
   mise activate fish | source
 end
 
@@ -19,13 +21,19 @@ if status is-interactive
   bind \cs edit_command_buffer
 
   #################### Starship ####################
-  starship init fish | source
+  if type -q starship
+    starship init fish | source
+  end
 
   #################### Zoxide ####################
-  zoxide init fish --cmd j | source
+  if type -q zoxide
+    zoxide init fish --cmd j | source
+  end
 
   #################### Television ####################
-  tv init fish | source
+  if type -q tv
+    tv init fish | source
+  end
 
   #################### Cancel Commandline ####################
   function cancel-commandline

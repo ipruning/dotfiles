@@ -18,7 +18,7 @@ function logger() {
     color=$YELLOW
     ;;
   "INFO")
-    if [ "$DRY_RUN" = true ]; then
+    if [ "${DRY_RUN:-}" = true ]; then
       color=$YELLOW
     else
       color=$GRAY
