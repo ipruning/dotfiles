@@ -59,7 +59,6 @@ _atuin_search() {
     echo -ne "\033[?1049h"
 
     # swap stderr and stdout, so that the tui stuff works
-    # TODO: not this
     local output
     # shellcheck disable=SC2048
     output=$(ATUIN_SHELL_ZSH=t ATUIN_LOG=error ATUIN_QUERY=$BUFFER atuin search $* -i 3>&1 1>&2 2>&3)
