@@ -52,6 +52,8 @@ pre-commit = "latest"
 "cargo:presenterm" = "latest"
 "cargo:somo" = "latest"
 "cargo:television" = "latest"
+"pipx:mcp-proxy" = "latest"
+"pipx:ty" = "latest"
 
 # "cargo:bartib" = "latest"
 # "cargo:bmm" = "latest"
