@@ -71,6 +71,15 @@
   "amp.commands.allowlist": [
     "ruff"
   ],
+  "amp.permissions": [
+    {
+      "action": "allow",
+      "matches": {
+        "cmd": "ruff"
+      },
+      "tool": "Bash"
+    }
+  ],
   "autocorrect.formatOnSave": false,
   "baml.bamlPanelOpen": false,
   "beancount.fixedCJKWidth": true,
@@ -520,6 +529,7 @@
   "vscode-mogami.usePrivateSource": false,
   "window.commandCenter": false,
   "window.zoomLevel": -1,
+  "workbench.activityBar.orientation": "vertical",
   "workbench.colorCustomizations": {
     "editor.lineHighlightBackground": "#1073cf2d",
     "editor.lineHighlightBorder": "#9fced11f"
