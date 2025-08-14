@@ -25,8 +25,8 @@ api.mapkey("ym", "Copy current page URL as Markdown link", () =>
 );
 
 // URL validation pattern
-// Matches: domain.com, sub.domain.com, http(s)://domain.com, with optional path
-const URL_PATTERN = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
+// Matches: domain.com, sub.domain.com, http(s)://domain.com, with optional path; allow longer TLDs
+const URL_PATTERN = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,63})([\/\w .-]*)*\/?$/i;
 
 // Error handling for clipboard operations
 function handleClipboardError(error) {
