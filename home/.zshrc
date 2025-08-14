@@ -5,7 +5,7 @@ if [[ $OSTYPE == darwin* ]]; then
     eval "$(/opt/homebrew/bin/brew shellenv)"
   fi
 
-  local completion_paths=()
+  completion_paths=()
   [ -d "$HOME/dotfiles/config/shell/completions" ] && completion_paths+=("$HOME/dotfiles/config/shell/completions")
   completion_paths+=("${fpath[@]}")
   fpath=("${completion_paths[@]}")
@@ -25,7 +25,7 @@ if [[ $OSTYPE == darwin* ]]; then
 
   if [ -d "$HOME/dotfiles" ]; then
     if [ -n "$ZSH_VERSION" ]; then
-      local config_files=(
+      config_files=(
         "$HOME/dotfiles/config/shell/aliases.zsh"
         "$HOME/dotfiles/config/shell/env.zsh"
         "$HOME/dotfiles/config/shell/env.private.zsh"
@@ -39,7 +39,7 @@ if [[ $OSTYPE == darwin* ]]; then
 fi
 
 if [[ $OSTYPE == linux* ]]; then
-  local completion_paths=()
+  completion_paths=()
   [ -d "$HOME/dotfiles/config/shell/completions" ] && completion_paths+=("$HOME/dotfiles/config/shell/completions")
   completion_paths+=("${fpath[@]}")
   [ -d "/usr/share/zsh/site-functions" ] && completion_paths+=("/usr/share/zsh/site-functions")
@@ -52,7 +52,7 @@ if [[ $OSTYPE == linux* ]]; then
 
   if [ -d "$HOME/dotfiles" ]; then
     if [ -n "$ZSH_VERSION" ]; then
-      local config_files=(
+      config_files=(
         "$HOME/dotfiles/config/shell/aliases.zsh"
         "$HOME/dotfiles/config/shell/env.zsh"
         "$HOME/dotfiles/config/shell/env.private.zsh"
@@ -64,5 +64,9 @@ if [[ $OSTYPE == linux* ]]; then
     fi
   fi
 
-  source /opt/clash/script/common.sh && source /opt/clash/script/clashctl.sh && watch_proxy
+  if [[ -r /opt/clash/script/common.sh && -r /opt/clash/script/clashctl.sh ]]; then
+    source /opt/clash/script/common.sh
+    source /opt/clash/script/clashctl.sh
+    watch_proxy
+  fi
 fi
