@@ -51,6 +51,7 @@ peekaboo
 postgresql@17
 procs
 pueue
+rainfrog
 rclone
 riff
 rip2
@@ -64,6 +65,7 @@ starship
 tailspin
 tealdeer
 television
+temporal
 tmux
 tokei
 trzsz-ssh

@@ -8,6 +8,7 @@ Alfred 5
 AltTab
 Anki
 Atuin
+Audio Hijack
 Avenue
 BaiduNetdisk_mac
 balenaEtcher
@@ -42,6 +43,7 @@ IINA
 iMazing
 Immersive Translate
 Input Source Pro
+Jan
 Kagi for Safari
 Karabiner-Elements
 Karabiner-EventViewer

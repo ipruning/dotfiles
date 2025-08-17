@@ -23,6 +23,7 @@ uv = "latest"
 "npm:autocorrect-node" = "latest"
 "pipx:basedpyright" = "latest"
 "pipx:ruff" = "latest"
+"pipx:ty" = "latest"
 pre-commit = "latest"
 
 # Development Tools
@@ -53,7 +54,6 @@ pre-commit = "latest"
 "cargo:somo" = "latest"
 "cargo:television" = "latest"
 "pipx:mcp-proxy" = "latest"
-"pipx:ty" = "latest"
 
 # "cargo:bartib" = "latest"
 # "cargo:bmm" = "latest"
