@@ -416,7 +416,7 @@
   "terminal.integrated.confirmOnExit": "hasChildProcesses",
   "terminal.integrated.defaultProfile.osx": "zsh",
   "terminal.integrated.fontSize": 12,
-  "terminal.integrated.fontWeight": "500",
+  "terminal.integrated.fontWeight": "400",
   "terminal.integrated.inheritEnv": true,
   "terminal.integrated.scrollback": 10000,
   "update.releaseTrack": "prerelease",
