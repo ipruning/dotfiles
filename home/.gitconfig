@@ -26,6 +26,10 @@ diff = "!sh -c 'git diff -w'"
 diff-conflicts = "!sh -c 'git diff --name-only --diff-filter=U'"
 diff-unmerged = "!sh -c 'git diff --name-only --diff-filter=U | uniq | xargs \"$EDITOR\"'"
 
+dlog = -c diff.external=difft log --ext-diff
+dshow = -c diff.external=difft show --ext-diff
+ddiff = -c diff.external=difft diff
+
 log-graph = "!sh -c 'git log --graph --decorate --all --date-order --date=format:\"%Y-%m-%d %H:%M:%S\" --pretty=format:\"%C(cyan)%h%Creset %C(black bold)%ad%Creset%C(auto)%d %s\" -n 42'"
 log-graphstat = "!sh -c 'git log --pretty=format:\"%C(auto)%h%d%n%s%n%C(auto)%C(blue)%an <%ae>%C(reset), %C(auto)%C(dim)%ad%n\" --graph --stat'"
 
