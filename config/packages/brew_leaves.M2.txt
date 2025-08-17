@@ -50,6 +50,7 @@ parallel-disk-usage
 postgresql@17
 procs
 pueue
+rainfrog
 rclone
 riff
 rip2
@@ -64,6 +65,7 @@ steipete/tap/peekaboo
 tailspin
 tealdeer
 television
+temporal
 tmux
 tokei
 trzsz-ssh
