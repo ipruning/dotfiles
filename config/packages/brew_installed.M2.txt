@@ -69,7 +69,6 @@ temporal
 tmux
 tokei
 trzsz-ssh
-turso
 uutils-coreutils
 uv
 viddy

@@ -36,6 +36,7 @@ hyperfine
 jaq
 jd
 jq
+libsql/sqld/sqld
 macmon
 mdq
 mise
@@ -69,7 +70,6 @@ temporal
 tmux
 tokei
 trzsz-ssh
-tursodatabase/tap/turso
 uutils-coreutils
 uv
 viddy

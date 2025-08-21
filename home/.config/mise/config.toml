@@ -50,6 +50,7 @@ pre-commit = "latest"
 
 # Mise Tools
 "cargo:https://github.com/j178/prefligit" = "latest"
+"cargo:isambard-sc/clifton" = "latest"
 "cargo:presenterm" = "latest"
 "cargo:somo" = "latest"
 "cargo:television" = "latest"
