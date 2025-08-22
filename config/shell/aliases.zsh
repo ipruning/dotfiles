@@ -33,8 +33,6 @@ alias cdr='cd $(git rev-parse --show-toplevel)'
 alias d="lazydocker"
 alias dateutc="date -u +%Y-%m-%dT%H:%M:%SZ"
 alias g="lazygit"
-alias jr="jump-to-repo"
-alias js="jump-to-session"
 
 if [[ $OSTYPE == linux* ]]; then
   alias ports="ss -tulpn"
@@ -48,6 +46,8 @@ fi
 
 if [[ $OSTYPE == darwin* ]]; then
   alias c="pbcopy"
+  alias jr="jump-to-repo"
+  alias js="jump-to-session"
   alias keyboardmaestro="/Applications/Keyboard\ Maestro.app/Contents/MacOS/keyboardmaestro"
   alias o="open ."
   alias p="pbpaste"
