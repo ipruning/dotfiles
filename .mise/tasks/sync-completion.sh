@@ -18,3 +18,7 @@ fi
 if which ov >/dev/null 2>&1; then
   ov --completion zsh > config/shell/completions/_ov
 fi
+
+if which just >/dev/null 2>&1; then
+  just --completions zsh > config/shell/completions/_just
+fi
