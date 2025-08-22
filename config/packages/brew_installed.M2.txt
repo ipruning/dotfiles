@@ -30,12 +30,12 @@ git-filter-repo
 git-lfs
 gitu
 gnupg
-htop
 httm
 hyperfine
 jaq
 jd
 jq
+just
 macmon
 mdq
 mise
