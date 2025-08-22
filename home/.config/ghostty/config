@@ -1,4 +1,4 @@
-command = fish --login --interactive
+# command = fish --login --interactive
 command = zsh --login --interactive
 
 clipboard-paste-protection = true
@@ -29,7 +29,7 @@ theme = catppuccin-mocha
 
 macos-option-as-alt = true
 
-confirm-close-surface = false
+confirm-close-surface = true
 
 keybind = alt+u=scroll_page_up
 keybind = alt+d=scroll_page_down
