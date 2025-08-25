@@ -75,8 +75,8 @@ alt-shift-l = ['move right', 'mode main']
 # alt-o = 'exec-and-forget open -a /Applications/Zed.app'
 # alt-p = 'exec-and-forget open -a /Applications/Ghostty.app'
 
-# cmd-m = []
-# cmd-h = []
+cmd-m = []
+cmd-h = []
 
 [mode.pass.binding]
 alt-p = 'mode main'
