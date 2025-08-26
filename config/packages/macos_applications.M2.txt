@@ -1,4 +1,5 @@
 小红书
+集換社 - トレカ総合アプリ
 .Karabiner-VirtualHIDDevice-Manager
 1Password
 1Password for Safari
