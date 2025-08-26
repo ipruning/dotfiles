@@ -11,7 +11,9 @@
   "[json]": {
     "editor.defaultFormatter": "vscode.json-language-features"
   },
-  "[jsonc]": {},
+  "[jsonc]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
   "[latex]": {
     "editor.acceptSuggestionOnEnter": "on",
     "editor.defaultFormatter": "James-Yu.latex-workshop",
@@ -223,7 +225,7 @@
     "*.w": "$(capture).*.w, I$(capture).w",
     "*.wat": "$(capture).wasm",
     "*.xaml": "$(capture).xaml.cs",
-    "//": "Last update at 8/21/2025, 5:32:53 PM",
+    "//": "Last update at 8/26/2025, 1:25:25 PM",
     "+layout.svelte": "+layout.ts,+layout.ts,+layout.js,+layout.server.ts,+layout.server.js,+layout.gql",
     "+page.svelte": "+page.server.ts,+page.server.js,+page.ts,+page.js,+page.gql",
     "AGENTS.md": ".clinerules, .cursorrules, .replit.md, .windsurfrules, AGENT.md, CLAUDE.md, GEMINI.md",
@@ -368,6 +370,7 @@
   "python.analysis.inlayHints.variableTypes": false,
   "python.analysis.typeCheckingMode": "basic",
   "python.languageServer": "None",
+  "python.terminal.activateEnvironment": false,
   "redhat.telemetry.enabled": false,
   "ruff.configurationPreference": "filesystemFirst",
   "shellcheck.customArgs": [],
