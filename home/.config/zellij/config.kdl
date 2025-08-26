@@ -455,7 +455,7 @@ default_mode "locked"
 // The name of the default layout to load on startup
 // Default: "default"
 //
-default_layout "default"
+default_layout "compact"
 
 // The folder in which Zellij will look for layouts
 // (Requires restart)
@@ -481,7 +481,7 @@ default_layout "default"
 //   - true (default, enabled)
 //   - false
 //
-// pane_frames false
+pane_frames false
 
 // When attaching to an existing session with other users,
 // should the session be mirrored (true)
