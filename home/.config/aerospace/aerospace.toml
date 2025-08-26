@@ -173,6 +173,10 @@ run = 'layout floating'
 if.app-id = 'com.rogueamoeba.audiohijack'
 run = 'layout floating'
 
+[[on-window-detected]]
+if.app-id = 'ai.tcgcard.app'
+run = 'layout floating'
+
 # [[on-window-detected]]
 # if.app-id = 'com.pvncher.repoprompt'
 # run = 'move-node-to-workspace 6'
