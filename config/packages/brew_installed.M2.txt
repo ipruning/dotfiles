@@ -7,7 +7,6 @@ beancount
 beancount-language-server
 blueutil
 btop
-codegpt
 coreutils
 csvlens
 difftastic
