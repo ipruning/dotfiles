@@ -54,6 +54,7 @@ pre-commit = "latest"
 "cargo:presenterm" = "latest"
 "cargo:somo" = "latest"
 "cargo:television" = "latest"
+"npm:@antfu/ni" = "latest"
 "npm:mcp-remote" = "latest"
 "pipx:mcp-proxy" = "latest"
 

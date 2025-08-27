@@ -1,4 +1,3 @@
-appleboy/tap/codegpt
 ast-grep
 atuin
 awscli
