@@ -420,6 +420,8 @@
   "terminal.integrated.fontWeight": "400",
   "terminal.integrated.inheritEnv": true,
   "terminal.integrated.scrollback": 30000,
+  "typos.diagnosticSeverity": "Information",
+  "typos.logLevel": "info",
   "update.releaseTrack": "prerelease",
   "vim.hlsearch": true,
   "vim.incsearch": true,

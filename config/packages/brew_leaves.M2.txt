@@ -71,6 +71,7 @@ tokei
 trzsz-ssh
 uutils-coreutils
 uv
+valkey
 viddy
 watchexec
 wget
