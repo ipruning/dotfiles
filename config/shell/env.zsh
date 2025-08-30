@@ -146,11 +146,8 @@ select-word-style bash
 
 # 👇 mise shims
 export PATH="$HOME/.local/share/mise/shims:$PATH"
-# eval "$(mise activate zsh --shims)"
-# eval "$(mise activate zsh)"
 
 # 👇 mise hook-env
 if command -v mise >/dev/null 2>&1; then
   eval "$(mise activate zsh)"
 fi
-# eval "$(mise hook-env -s zsh)"
