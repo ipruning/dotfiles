@@ -6,6 +6,10 @@ layout {
         children
     }
 
+    tab name="main" {
+        pane
+    }
+
     tab name="editor" focus=true {
         pane {
             command "zsh"
@@ -18,13 +22,5 @@ layout {
             command "zsh"
             args "-i" "-c" "claude"
         }
-    }
-
-    tab name="monitor" {
-        pane
-    }
-
-    tab name="cli" {
-        pane
     }
 }
