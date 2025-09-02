@@ -106,10 +106,7 @@ if [[ -f "$ZSH_PLUGINS_DIR"/ugit/ugit.plugin.zsh ]]; then
 fi
 
 # 👇 fzf
-__TREE_IGNORE="-I '.git' -I '*.py[co]' -I '__pycache__' $__TREE_IGNORE"
-__FD_COMMAND="-L -H --no-ignore-vcs ${__TREE_IGNORE//-I/-E} $__FD_COMMAND"
-
-export FZF_DEFAULT_COMMAND="fd $__FD_COMMAND"
+export FZF_DEFAULT_COMMAND="fd"
 
 export FZF_DEFAULT_OPTS=" \
 --multi \
@@ -127,9 +124,6 @@ if [[ -f "$ZSH_PLUGINS_DIR"/fzf-tab/fzf-tab.plugin.zsh ]]; then
   zstyle ':fzf-tab:*' use-fzf-default-opts yes
 fi
 
-unset __TREE_IGNORE
-unset __FD_COMMAND
-
 # 👇 zsh-autosuggestions
 if [[ -f "$ZSH_PLUGINS_DIR"/zsh-autosuggestions/zsh-autosuggestions.zsh ]]; then
   source "$ZSH_PLUGINS_DIR"/zsh-autosuggestions/zsh-autosuggestions.zsh
@@ -146,11 +140,8 @@ select-word-style bash
 
 # 👇 mise shims
 export PATH="$HOME/.local/share/mise/shims:$PATH"
-# eval "$(mise activate zsh --shims)"
-# eval "$(mise activate zsh)"
 
 # 👇 mise hook-env
 if command -v mise >/dev/null 2>&1; then
   eval "$(mise activate zsh)"
 fi
-# eval "$(mise hook-env -s zsh)"

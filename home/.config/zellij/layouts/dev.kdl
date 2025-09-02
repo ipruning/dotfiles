@@ -1,30 +1,26 @@
 layout {
     default_tab_template {
+        children
         pane size=1 borderless=true {
             plugin location="compact-bar"
         }
-        children
     }
 
-    tab name="editor" focus=true {
+    tab name="cli" focus=true {
+        pane
+    }
+
+    tab name="editor" {
         pane {
             command "zsh"
             args "-i" "-c" "hx ."
         }
     }
 
-    tab name="code-agent" {
+    tab name="codex" {
         pane {
             command "zsh"
-            args "-i" "-c" "claude"
+            args "-i" "-c" "codex"
         }
-    }
-
-    tab name="monitor" {
-        pane
-    }
-
-    tab name="cli" {
-        pane
     }
 }

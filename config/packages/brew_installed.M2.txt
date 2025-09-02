@@ -7,6 +7,7 @@ beancount
 beancount-language-server
 blueutil
 btop
+carapace
 coreutils
 csvlens
 difftastic
@@ -33,6 +34,7 @@ httm
 hyperfine
 jaq
 jd
+jj
 jq
 just
 macmon
@@ -65,10 +67,10 @@ tailspin
 tealdeer
 television
 temporal
+terminal-notifier
 tmux
 tokei
 trzsz-ssh
-uutils-coreutils
 uv
 valkey
 viddy

@@ -1,6 +1,8 @@
-.claude/
-
 .DS_Store
+.git
+.jj
+
+.claude/
 
 home/.config/karabiner/automatic_backups/
 

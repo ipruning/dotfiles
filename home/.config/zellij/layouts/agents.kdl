@@ -1,24 +1,14 @@
 layout {
     default_tab_template {
+        children
         pane size=1 borderless=true {
             plugin location="compact-bar"
         }
-        children
     }
 
-    tab name="codex cli" {
+    tab name="codex" {
         pane {
             command "codex" close_on_exit=true
-        }
-    }
-
-    tab name="claude code" {
-        pane
-    }
-
-    tab name="top" {
-        pane {
-            command "btop" close_on_exit=true
         }
     }
 }
