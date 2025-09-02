@@ -3,11 +3,6 @@ alias du="du -h"
 alias free="free -h"
 alias grep="grep --color=auto"
 
-# alias cp="cp -i"
-# alias mkdir="mkdir -p"
-# alias mv="mv -i"
-# alias rm="rm -i"
-
 alias ...="cd ../.."
 alias ..="cd .."
 
@@ -29,6 +24,11 @@ fi
 if type bat &> /dev/null; then
   alias cat="bat"
 fi
+
+# if type rip &> /dev/null; then
+#   alias rm="echo Use 'rip' instead of rm."
+# fi
+
 alias cdr='cd $(git rev-parse --show-toplevel)'
 alias d="lazydocker"
 alias dateutc="date -u +%Y-%m-%dT%H:%M:%SZ"
