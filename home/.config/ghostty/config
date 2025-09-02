@@ -19,10 +19,9 @@ window-padding-balance = true
 # window-padding-x = 0
 # window-padding-y = 0
 
-# font-family = "Berkeley Mono"
-font-family = "MonoLisa"
+font-family = "Berkeley Mono Variable"
 font-family = "Maple Mono NF CN"
-font-size = 12
+font-size = 14
 font-style = Medium
 
 theme = catppuccin-mocha
@@ -74,3 +73,26 @@ keybind = alt+shift+n=new_window
 
 # keybind = alt+n=new_split:down
 # keybind = alt+t=new_window
+
+keybind = cmd+a=unbind
+
+keybind = cmd+j=unbind
+keybind = cmd+shift+j=unbind
+
+keybind = cmd+1=unbind
+keybind = cmd+2=unbind
+keybind = cmd+3=unbind
+keybind = cmd+4=unbind
+keybind = cmd+5=unbind
+keybind = cmd+6=unbind
+keybind = cmd+7=unbind
+keybind = cmd+8=unbind
+keybind = cmd+9=unbind
+
+keybind = cmd+n=unbind
+keybind = cmd+t=unbind
+
+keybind = cmd+s=unbind
+
+keybind = cmd+u=unbind
+keybind = cmd+d=unbind

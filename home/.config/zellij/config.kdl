@@ -1,16 +1,10 @@
 keybinds clear-defaults=true {
     locked {
-        bind "Ctrl g" { SwitchToMode "normal"; }
+        // bind "Ctrl g" { SwitchToMode "normal"; }
 
-        bind "Ctrl j" {
-            LaunchOrFocusPlugin "session-manager" {
-                floating true
-                move_to_focused_tab true
-            }
-            SwitchToMode "locked"
-        }
+        bind "Super a" { SwitchToMode "normal"; }
 
-        bind "Ctrl J" {
+        bind "Super j" {
             LaunchOrFocusPlugin "file:~/dotfiles/home/.config/zellij/plugins/zellij-sessionizer.wasm" {
                 floating true
                 move_to_focused_tab true
@@ -20,16 +14,30 @@ keybinds clear-defaults=true {
             }
             SwitchToMode "locked"
         }
+        bind "Super J" {
+            LaunchOrFocusPlugin "session-manager" {
+                floating true
+                move_to_focused_tab true
+            }
+        }
 
-        // bind "Ctrl 1" { GoToTab 1; SwitchToMode "locked";}
-        // bind "Ctrl 2" { GoToTab 2; SwitchToMode "locked";}
-        // bind "Ctrl 3" { GoToTab 3; SwitchToMode "locked";}
-        // bind "Ctrl 4" { GoToTab 4; SwitchToMode "locked";}
-        // bind "Ctrl 5" { GoToTab 5; SwitchToMode "locked";}
-        // bind "Ctrl 6" { GoToTab 6; SwitchToMode "locked";}
-        // bind "Ctrl 7" { GoToTab 7; SwitchToMode "locked";}
-        // bind "Ctrl 8" { GoToTab 8; SwitchToMode "locked";}
-        // bind "Ctrl 9" { GoToTab 9; SwitchToMode "locked";}
+        bind "Super 1" { GoToTab 1; }
+        bind "Super 2" { GoToTab 2; }
+        bind "Super 3" { GoToTab 3; }
+        bind "Super 4" { GoToTab 4; }
+        bind "Super 5" { GoToTab 5; }
+        bind "Super 6" { GoToTab 6; }
+        bind "Super 7" { GoToTab 7; }
+        bind "Super 8" { GoToTab 8; }
+        bind "Super 9" { GoToTab 9; }
+
+        bind "Super n" { NewTab; SwitchToMode "locked"; }
+        bind "Super t" { NewTab; SwitchToMode "locked"; }
+
+        bind "Super s" { EditScrollback; SwitchToMode "locked"; }
+
+        bind "Super u" { HalfPageScrollUp; }
+        bind "Super d" { HalfPageScrollDown; }
     }
     pane {
         bind "left" { MoveFocus "left"; }
@@ -186,7 +194,7 @@ keybinds clear-defaults=true {
     }
     shared_except "locked" "renametab" "renamepane" {
         bind "Ctrl c" { SwitchToMode "locked"; }
-        bind "Ctrl g" { SwitchToMode "locked"; }
+        // bind "Ctrl g" { SwitchToMode "locked"; }
         bind "enter" { SwitchToMode "locked"; }
         bind "esc" { SwitchToMode "locked"; }
 
@@ -209,10 +217,10 @@ keybinds clear-defaults=true {
         bind "k" { MoveFocus "up"; }
         bind "l" { MoveFocusOrTab "right"; }
 
-        bind "left" { NewPane "left"; SwitchToMode "locked"; }
-        bind "down" { NewPane "down"; SwitchToMode "locked"; }
-        bind "up" { NewPane "up"; SwitchToMode "locked"; }
-        bind "right" { NewPane "right"; SwitchToMode "locked"; }
+        // bind "left" { NewPane "left"; SwitchToMode "locked"; }
+        // bind "down" { NewPane "down"; SwitchToMode "locked"; }
+        // bind "up" { NewPane "up"; SwitchToMode "locked"; }
+        // bind "right" { NewPane "right"; SwitchToMode "locked"; }
 
         bind "n" { NewTab; SwitchToMode "locked"; }
         bind "t" { NewTab; SwitchToMode "locked"; }
@@ -221,7 +229,6 @@ keybinds clear-defaults=true {
 
         bind "u" { HalfPageScrollUp; }
         bind "d" { HalfPageScrollDown; }
-
     }
     shared_except "locked" "entersearch" {
         bind "enter" { SwitchToMode "locked"; }
@@ -533,11 +540,11 @@ scroll_buffer_size 50000
 // Enable automatic copying (and clearing) of selection when releasing mouse
 // Default: true
 //
-// copy_on_select true
+// copy_on_select false
 
 // Path to the default editor to use to edit pane scrollbuffer
 // Default: $EDITOR or $VISUAL
-// scrollback_editor "/opt/homebrew/bin/zed --wait"
+scrollback_editor "/opt/homebrew/bin/zed --wait"
 
 // A fixed name to always give the Zellij session.
 // Consider also setting `attach_to_session true,`

@@ -1,19 +1,18 @@
 [tools]
-# Language Tools
 bun = "latest"
 deno = "latest"
 go = "latest"
 node = "latest"
 python = "latest"
 ruby = "latest"
-rust = "stable"
+rust = "latest"
 zig = "latest"
 
-# Package Management Tools
 cargo-binstall = "latest"
 uv = "latest"
 
-# CI / CD Tools
+pre-commit = "latest"
+
 "cargo:https://github.com/sirwart/ripsecrets" = "latest"
 "cargo:https://github.com/tekumara/typos-lsp" = "latest"
 "cargo:lychee" = "latest"
@@ -21,18 +20,11 @@ uv = "latest"
 "npm:@biomejs/biome" = "latest"
 "npm:@ls-lint/ls-lint" = "latest"
 "npm:autocorrect-node" = "latest"
+"npm:markdownlint-cli2" = "latest"
 "pipx:basedpyright" = "latest"
 "pipx:ruff" = "latest"
 "pipx:ty" = "latest"
-pre-commit = "latest"
 
-# Development Tools
-"npm:@anthropic-ai/claude-code" = "latest"
-"npm:@google/gemini-cli" = "latest"
-"npm:@openai/codex" = "latest"
-"npm:@sourcegraph/amp" = "latest"
-
-# Development Tools (Test)
 "cargo:genact" = "latest"
 "cargo:gfold" = "latest"
 "gem:kamal" = "latest"
@@ -48,15 +40,23 @@ pre-commit = "latest"
 "pipx:llm" = "latest"
 "pipx:modal" = "latest"
 
-# Mise Tools
 "cargo:https://github.com/j178/prefligit" = "latest"
 "cargo:isambard-sc/clifton" = "latest"
 "cargo:presenterm" = "latest"
 "cargo:somo" = "latest"
 "cargo:television" = "latest"
 "npm:@antfu/ni" = "latest"
+"npm:@anthropic-ai/claude-code" = "latest"
+"npm:@openai/codex" = "latest"
 "npm:mcp-remote" = "latest"
 "pipx:mcp-proxy" = "latest"
+duckdb = "latest"
+fd = "latest"
+fzf = "latest"
+jq = "latest"
+rclone = "latest"
+ripgrep = "latest"
+yq = "latest"
 
 # "cargo:bartib" = "latest"
 # "cargo:bmm" = "latest"

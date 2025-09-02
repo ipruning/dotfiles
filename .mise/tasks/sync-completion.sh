@@ -22,3 +22,11 @@ fi
 if which just >/dev/null 2>&1; then
   just --completions zsh > config/shell/completions/_just
 fi
+
+if which codex >/dev/null 2>&1; then
+  codex completion zsh > config/shell/completions/_codex
+fi
+
+if which jj >/dev/null 2>&1; then
+  jj util completion zsh > config/shell/completions/_jj
+fi

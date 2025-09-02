@@ -1,10 +1,4 @@
-export AMP_API_KEY="op://dev/Amp/AMP_API_KEY"
-export ANTHROPIC_API_KEY="op://dev/Anthropic/macos/ANTHROPIC_API_KEY"
-export EXA_API_KEY="op://Private/Exa/macos/EXA_API_KEY"
-export GEMINI_API_KEY="op://dev/Vertex Al/macos/GEMINI_API_KEY"
 export HF_TOKEN="op://dev/Hugging Face/macos/HF_TOKEN"
-export LLM_GEMINI_KEY="op://dev/Vertex Al/macos/GEMINI_API_KEY"
-export OPENAI_API_KEY="op://dev-work/OpenAI Platform/macos/OPENAI_API_KEY"
 
 claude() {
   env AWS_ACCESS_KEY_ID="op://dev-work/AWS/claude_code/AWS_ACCESS_KEY_ID" \
