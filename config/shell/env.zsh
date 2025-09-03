@@ -26,6 +26,22 @@ bindkey "^D" delete-word
 bindkey "^E" end-of-line
 bindkey "^F" forward-char
 
+# 👇 Editor
+if [[ "$TERM_PROGRAM" == "vscode" ]]; then
+  export EDITOR="cursor --wait"
+  export VISUAL="$EDITOR"
+fi
+
+if [[ "$TERM_PROGRAM" == "zed" ]]; then
+  export EDITOR="zed --wait"
+  export VISUAL="$EDITOR"
+fi
+
+if [[ "$TERM_PROGRAM" == "ghostty" ]]; then
+  export EDITOR="nvim"
+  export VISUAL="$EDITOR"
+fi
+
 # 👇 Custom paths
 export PATH="$HOME/Developer/prototypes/utils/bin:$PATH"
 export PATH="$HOME/Developer/prototypes/utils/scripts:$PATH"
