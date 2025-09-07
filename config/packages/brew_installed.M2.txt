@@ -71,6 +71,7 @@ terminal-notifier
 tmux
 tokei
 trzsz-ssh
+uncloud
 uv
 valkey
 viddy

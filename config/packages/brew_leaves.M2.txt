@@ -51,6 +51,7 @@ parallel
 parallel-disk-usage
 postgresql@17
 procs
+psviderski/tap/uncloud
 pueue
 rainfrog
 rclone
