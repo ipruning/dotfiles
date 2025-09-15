@@ -17,7 +17,11 @@ bindkey "^v" edit-command-line
 # 👇 Emacs Mode
 bindkey -e
 
-# 👇 My keybindings
+# 👇 Wordchars
+WORDCHARS=${WORDCHARS//\/}
+WORDCHARS=${WORDCHARS//=}
+
+# 👇 Keybindings
 bindkey '\e[1;5C' forward-word
 bindkey '\e[1;5D' backward-word
 bindkey "^A" beginning-of-line
@@ -42,12 +46,7 @@ if [[ "$TERM_PROGRAM" == "ghostty" ]]; then
   export VISUAL="$EDITOR"
 fi
 
-# 👇 Custom paths
-export PATH="$HOME/Developer/prototypes/utils/bin:$PATH"
-export PATH="$HOME/Developer/prototypes/utils/scripts:$PATH"
-
-export PATH="$HOME/.local/bin:$PATH"
-
+# 👇 Functions
 if [[ $OSTYPE == darwin* ]]; then
   source "$HOME/dotfiles/config/shell/functions/macos.zsh"
   source "$HOME/dotfiles/config/shell/functions/mkbir.zsh"
@@ -150,9 +149,8 @@ if [[ -f "$ZSH_PLUGINS_DIR"/fast-syntax-highlighting/fast-syntax-highlighting.pl
   source "$ZSH_PLUGINS_DIR"/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
 fi
 
-# 👇 select-word-style
-autoload -Uz select-word-style
-select-word-style bash
+# 👇 mysql
+export PKG_CONFIG_PATH="$(brew --prefix mysql-client)/lib/pkgconfig:$PKG_CONFIG_PATH"
 
 # 👇 mise shims
 export PATH="$HOME/.local/share/mise/shims:$PATH"
@@ -161,3 +159,10 @@ export PATH="$HOME/.local/share/mise/shims:$PATH"
 if command -v mise >/dev/null 2>&1; then
   eval "$(mise activate zsh)"
 fi
+
+# 👇 Custom paths
+export PATH="$HOME/Developer/prototypes/utils/bin:$PATH"
+
+export PATH="$HOME/Developer/prototypes/utils/scripts:$PATH"
+
+export PATH="$HOME/.local/bin:$PATH"
