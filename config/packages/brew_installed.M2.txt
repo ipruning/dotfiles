@@ -41,6 +41,7 @@ macmon
 mdq
 mise
 mongodb-community
+mysql-client
 neovim
 nushell
 ouch
@@ -49,6 +50,7 @@ pandoc
 parallel
 parallel-disk-usage
 peekaboo
+pkgconf
 postgresql@17
 procs
 pueue
@@ -62,6 +64,7 @@ rust-parallel
 rustscan
 shellcheck
 sqlfluff
+sshx
 starship
 tailspin
 tealdeer
@@ -71,6 +74,7 @@ terminal-notifier
 tmux
 tokei
 trzsz-ssh
+typst
 uncloud
 uv
 valkey

@@ -42,6 +42,7 @@ macmon
 mdq
 mise
 mongodb/brew/mongodb-community
+mysql-client
 neovim
 nushell
 ouch
@@ -49,6 +50,7 @@ ov
 pandoc
 parallel
 parallel-disk-usage
+pkgconf
 postgresql@17
 procs
 psviderski/tap/uncloud
@@ -63,6 +65,7 @@ rust-parallel
 rustscan
 shellcheck
 sqlfluff
+sshx
 starship
 steipete/tap/peekaboo
 tailspin
@@ -73,6 +76,7 @@ terminal-notifier
 tmux
 tokei
 trzsz-ssh
+typst
 uv
 valkey
 viddy

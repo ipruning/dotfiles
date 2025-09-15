@@ -59,6 +59,7 @@ jq = "latest"
 prek = "latest"
 rclone = "latest"
 ripgrep = "latest"
+xh = "latest"
 yq = "latest"
 
 # "cargo:bartib" = "latest"
