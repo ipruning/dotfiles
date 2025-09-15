@@ -20,15 +20,20 @@ keybinds clear-defaults=true {
             }
         }
 
-        bind "Super 1" { GoToTab 1; }
-        bind "Super 2" { GoToTab 2; }
-        bind "Super 3" { GoToTab 3; }
-        bind "Super 4" { GoToTab 4; }
-        bind "Super 5" { GoToTab 5; }
-        bind "Super 6" { GoToTab 6; }
-        bind "Super 7" { GoToTab 7; }
-        bind "Super 8" { GoToTab 8; }
-        bind "Super 9" { GoToTab 9; }
+        bind "Super h" { GoToPreviousTab; }
+        bind "Super j" { GoToNextTab; }
+        // bind "Super k" { MoveFocus "up"; }
+        // bind "Super l" { MoveFocus "right"; }
+
+        // bind "Super 1" { GoToTab 1; }
+        // bind "Super 2" { GoToTab 2; }
+        // bind "Super 3" { GoToTab 3; }
+        // bind "Super 4" { GoToTab 4; }
+        // bind "Super 5" { GoToTab 5; }
+        // bind "Super 6" { GoToTab 6; }
+        // bind "Super 7" { GoToTab 7; }
+        // bind "Super 8" { GoToTab 8; }
+        // bind "Super 9" { GoToTab 9; }
 
         bind "Super n" { NewTab; SwitchToMode "locked"; }
         bind "Super t" { NewTab; SwitchToMode "locked"; }
@@ -478,8 +483,8 @@ scroll_buffer_size 50000
 
 // Path to the default editor to use to edit pane scrollbuffer
 // Default: $EDITOR or $VISUAL
-// scrollback_editor "/opt/homebrew/bin/zed --wait"
-scrollback_editor "nvim"
+scrollback_editor "/opt/homebrew/bin/zed --wait"
+// scrollback_editor "nvim"
 
 // A fixed name to always give the Zellij session.
 // Consider also setting `attach_to_session true,`

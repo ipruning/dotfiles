@@ -1,5 +1,5 @@
 # command = fish --login --interactive
-command = zsh --login --interactive
+# command = zsh --login --interactive
 
 clipboard-paste-protection = true
 clipboard-trim-trailing-spaces = true
@@ -10,16 +10,10 @@ macos-titlebar-style = hidden
 shell-integration-features = no-cursor
 unfocused-split-opacity = 1
 
-# window-height = 40
-# window-width = 140
-
 window-step-resize = true
 window-padding-balance = true
 
-# window-padding-x = 0
-# window-padding-y = 0
-
-font-family = "Berkeley Mono Variable"
+font-family = "MonoLisa"
 font-family = "Maple Mono NF CN"
 font-size = 12
 font-style = Medium
@@ -29,12 +23,48 @@ theme = catppuccin-mocha
 macos-option-as-alt = true
 
 confirm-close-surface = true
-confirm-close-surface = false
 
-keybind = alt+u=scroll_page_up
-keybind = alt+d=scroll_page_down
-keybind = alt+s=write_screen_file:open
-keybind = alt+shift+s=write_screen_file:paste
+# 👇 Ghostty Only
+
+keybind = super+u=scroll_page_up
+keybind = super+d=scroll_page_down
+
+# 👇 Ghostty with Zellij
+
+# keybind = alt+n=new_window
+# keybind = alt+shift+n=new_window
+
+# keybind = super+a=unbind
+
+# keybind = super+h=unbind
+# keybind = super+j=unbind
+# keybind = super+l=unbind
+# keybind = super+shift+j=unbind
+
+# keybind = super+1=unbind
+# keybind = super+2=unbind
+# keybind = super+3=unbind
+# keybind = super+4=unbind
+# keybind = super+5=unbind
+# keybind = super+6=unbind
+# keybind = super+7=unbind
+# keybind = super+8=unbind
+# keybind = super+9=unbind
+
+# keybind = super+n=unbind
+# keybind = super+t=unbind
+
+# keybind = super+s=unbind
+
+# keybind = super+u=unbind
+# keybind = super+d=unbind
+
+# 👇 Misc
+
+# keybind = alt+u=scroll_page_up
+# keybind = alt+d=scroll_page_down
+# keybind = alt+s=write_screen_file:open
+# keybind = alt+shift+s=write_screen_file:paste
 
 # keybind = alt+h=goto_split:left
 # keybind = alt+j=goto_split:bottom
@@ -67,32 +97,3 @@ keybind = alt+shift+s=write_screen_file:paste
 # keybind = alt+shift+down=new_split:down
 # keybind = alt+shift+up=new_split:up
 # keybind = alt+shift+right=new_split:right
-
-keybind = alt+n=new_window
-keybind = alt+shift+n=new_window
-
-# keybind = alt+n=new_split:down
-# keybind = alt+t=new_window
-
-keybind = cmd+a=unbind
-
-keybind = cmd+j=unbind
-keybind = cmd+shift+j=unbind
-
-keybind = cmd+1=unbind
-keybind = cmd+2=unbind
-keybind = cmd+3=unbind
-keybind = cmd+4=unbind
-keybind = cmd+5=unbind
-keybind = cmd+6=unbind
-keybind = cmd+7=unbind
-keybind = cmd+8=unbind
-keybind = cmd+9=unbind
-
-keybind = cmd+n=unbind
-keybind = cmd+t=unbind
-
-keybind = cmd+s=unbind
-
-keybind = cmd+u=unbind
-keybind = cmd+d=unbind
