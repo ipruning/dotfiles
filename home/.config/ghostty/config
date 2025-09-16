@@ -3,7 +3,7 @@
 
 clipboard-paste-protection = true
 clipboard-trim-trailing-spaces = true
-# copy-on-select = clipboard
+copy-on-select = clipboard
 cursor-style = block
 cursor-style-blink = false
 macos-titlebar-style = hidden
@@ -25,9 +25,8 @@ macos-option-as-alt = true
 confirm-close-surface = true
 
 # 👇 Ghostty Only
-
-keybind = super+u=scroll_page_up
-keybind = super+d=scroll_page_down
+# keybind = ctrl+shift+u=scroll_page_up
+# keybind = ctrl+shift+d=scroll_page_down
 
 # 👇 Ghostty with Zellij
 
