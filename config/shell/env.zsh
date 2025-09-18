@@ -82,11 +82,10 @@ function y() {
 }
 
 # 👇 atuin
-# eval "$(atuin init zsh --disable-up-arrow)"
-# eval "$(atuin init zsh)"
-if command -v atuin >/dev/null 2>&1; then
-  source "$HOME/dotfiles/config/shell/functions/atuin.zsh"
-fi
+eval "$(atuin init zsh --disable-up-arrow)"
+# if command -v atuin >/dev/null 2>&1; then
+#   source "$HOME/dotfiles/config/shell/functions/atuin.zsh"
+# fi
 
 # 👇 tv
 _tv_search() {
@@ -105,6 +104,10 @@ _tv_search() {
   if [[ -n $output ]]; then
     RBUFFER=""
     LBUFFER=$current_prompt$output
+
+    # uncomment this to automatically accept the line
+    # (i.e. run the command without having to press enter twice)
+    # zle accept-line
   fi
 }
 
