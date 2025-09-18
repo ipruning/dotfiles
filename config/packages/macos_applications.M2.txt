@@ -16,6 +16,7 @@ BetterDisplay
 Bob
 Capture One
 ChatGPT
+Comet
 Contexts
 CrossOver
 Cursor

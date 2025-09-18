@@ -73,6 +73,7 @@ temporal
 terminal-notifier
 tmux
 tokei
+trufflehog
 trzsz-ssh
 typst
 uncloud
