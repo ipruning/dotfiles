@@ -32,17 +32,17 @@ bindkey "^F" forward-char
 
 # 👇 Editor
 if [[ "$TERM_PROGRAM" == "vscode" ]]; then
-  export EDITOR="cursor --wait"
+  export EDITOR="/usr/local/bin/cursor --wait"
   export VISUAL="$EDITOR"
 fi
 
 if [[ "$TERM_PROGRAM" == "zed" ]]; then
-  export EDITOR="zed --wait"
+  export EDITOR="/opt/homebrew/bin/zed --wait"
   export VISUAL="$EDITOR"
 fi
 
 if [[ "$TERM_PROGRAM" == "ghostty" ]]; then
-  export EDITOR="nvim"
+  export EDITOR="/opt/homebrew/bin/nvim"
   export VISUAL="$EDITOR"
 fi
 

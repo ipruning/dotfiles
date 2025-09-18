@@ -50,14 +50,6 @@ if [[ $OSTYPE == darwin* ]]; then
   alias ports="viddy --interval 1s 'lsof -i @127.0.0.1 | grep LISTEN'"
   alias surge="/Applications/Surge.app/Contents/Applications/surge-cli"
 
-  function code() {
-    open "$@" -a "Visual Studio Code"
-  }
-
-  function cursor() {
-    open "$@" -a "Cursor"
-  }
-
   function repoprompt() {
     open "repoprompt://open/$(pwd)"
   }
