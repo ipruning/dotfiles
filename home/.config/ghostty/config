@@ -1,3 +1,5 @@
+# command = /opt/homebrew/bin/nu
+
 theme = catppuccin-mocha
 
 font-family = "Berkeley Mono Variable"
