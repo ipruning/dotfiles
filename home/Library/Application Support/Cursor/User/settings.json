@@ -419,6 +419,7 @@
   "terminal.integrated.scrollback": 50000,
   "typos.diagnosticSeverity": "Information",
   "typos.logLevel": "info",
+  "update.releaseTrack": "prerelease",
   "vim.hlsearch": true,
   "vim.incsearch": true,
   "vim.leader": "<space>",
@@ -545,6 +546,5 @@
   "workbench.settings.editor": "json",
   "workbench.tree.indent": 22,
   "workbench.tree.renderIndentGuides": "always",
-  "zig.zls.enabled": "on",
-  "update.releaseTrack": "prerelease"
+  "zig.zls.enabled": "on"
 }
