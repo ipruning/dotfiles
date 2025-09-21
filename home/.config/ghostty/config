@@ -2,9 +2,9 @@
 
 theme = catppuccin-mocha
 
-font-family = "Berkeley Mono Variable"
+# font-family = "Berkeley Mono Variable"
 font-family = "MonoLisa"
-# font-family = "Maple Mono NF CN"
+font-family = "Maple Mono NF CN"
 font-size = 14
 font-style = Medium
 
