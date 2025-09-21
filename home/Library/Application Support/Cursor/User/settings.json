@@ -73,6 +73,7 @@
   "amp.commands.allowlist": [
     "ruff"
   ],
+  "amp.gpt5": true,
   "amp.permissions": [
     {
       "action": "allow",
@@ -82,6 +83,7 @@
       "tool": "Bash"
     }
   ],
+  "amp.url": "https://ampcode.com/",
   "autocorrect.formatOnSave": false,
   "baml.bamlPanelOpen": false,
   "beancount.fixedCJKWidth": true,
