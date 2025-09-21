@@ -1,5 +1,3 @@
-小红书
-集換社 - トレカ総合アプリ
 .Karabiner-VirtualHIDDevice-Manager
 1Password
 1Password for Safari
@@ -13,20 +11,20 @@ Atuin
 Audio Hijack
 Avenue
 BaiduNetdisk_mac
-balenaEtcher
+Base
 BetterDisplay
 Bob
-calibre
 Capture One
 ChatGPT
+Comet
 Contexts
 CrossOver
 Cursor
+DEVONthink 3
 DaisyDisk
 Dark Reader for Safari
 Day One
 DeskPad
-DEVONthink 3
 Drafts
 Eagle
 Eudic
@@ -40,33 +38,32 @@ Google Sheets
 Google Slides
 Heptabase
 Hush
-Ice
 IINA
-iMazing
+Ice
 Immersive Translate
 Input Source Pro
 Jan
 Kagi for Safari
 Karabiner-Elements
 Karabiner-EventViewer
-Keyboard Maestro
 KeyCastr
+Keyboard Maestro
 Keynote
-kindaVim
-Lark
-LinearMouse
 LM Studio
+Lark
+Linear
+LinearMouse
 Longbridge Pro
 Loopback
 LyricsX
 MAA
+MWeb Pro
 Microsoft Excel
 Microsoft PowerPoint
 Microsoft Word
 MongoDB Compass
 Mos
 MusicHarbor
-MWeb Pro
 MyCard
 NeteaseMusic
 Notion
@@ -77,11 +74,9 @@ Obsidian
 OnyX
 OrbStack
 PasteNow
-pcsuite
 Pearcleaner
 PlayCover
 ProNotes
-qBittorrent
 QQ
 Raycast
 Rectangle
@@ -100,7 +95,6 @@ Setapp
 Skim
 Steam
 Stratoshark
-superwhisper
 Surfingkeys
 Surge
 Suspicious Package
@@ -117,7 +111,6 @@ TickTick
 VibeMeter
 VideoFusion-macOS
 VirtualBuddy
-waifu2x
 WeChat
 Whisper Transcription
 Wireshark
@@ -127,5 +120,17 @@ YACReader
 Z-Library
 Zed
 Zen
-zoom.us
 Zotero
+aDrive
+balenaEtcher
+calibre
+iMazing
+kindaVim
+pcsuite
+qBittorrent
+superwhisper
+uBlock Origin Lite
+waifu2x
+zoom.us
+小红书
+集換社 - トレカ総合アプリ

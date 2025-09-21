@@ -1,3 +1,6 @@
+# 👇 XDG Config Home
+export XDG_CONFIG_HOME="$HOME/.config"
+
 # 👇 zsh Theme
 if command -v starship >/dev/null 2>&1; then
   eval "$(starship init zsh)"
@@ -17,7 +20,11 @@ bindkey "^v" edit-command-line
 # 👇 Emacs Mode
 bindkey -e
 
-# 👇 My keybindings
+# 👇 Wordchars
+WORDCHARS=${WORDCHARS//\/}
+WORDCHARS=${WORDCHARS//=}
+
+# 👇 Keybindings
 bindkey '\e[1;5C' forward-word
 bindkey '\e[1;5D' backward-word
 bindkey "^A" beginning-of-line
@@ -26,12 +33,23 @@ bindkey "^D" delete-word
 bindkey "^E" end-of-line
 bindkey "^F" forward-char
 
-# 👇 Custom paths
-export PATH="$HOME/Developer/prototypes/utils/bin:$PATH"
-export PATH="$HOME/Developer/prototypes/utils/scripts:$PATH"
+# 👇 Editor
+if [[ "$TERM_PROGRAM" == "vscode" ]]; then
+  export EDITOR="/usr/local/bin/cursor --wait"
+  export VISUAL="$EDITOR"
+fi
 
-export PATH="$HOME/.local/bin:$PATH"
+if [[ "$TERM_PROGRAM" == "zed" ]]; then
+  export EDITOR="/opt/homebrew/bin/zed --wait"
+  export VISUAL="$EDITOR"
+fi
 
+if [[ "$TERM_PROGRAM" == "ghostty" ]]; then
+  export EDITOR="/opt/homebrew/bin/nvim"
+  export VISUAL="$EDITOR"
+fi
+
+# 👇 Functions
 if [[ $OSTYPE == darwin* ]]; then
   source "$HOME/dotfiles/config/shell/functions/macos.zsh"
   source "$HOME/dotfiles/config/shell/functions/mkbir.zsh"
@@ -67,11 +85,10 @@ function y() {
 }
 
 # 👇 atuin
-# eval "$(atuin init zsh --disable-up-arrow)"
-# eval "$(atuin init zsh)"
-if command -v atuin >/dev/null 2>&1; then
-  source "$HOME/dotfiles/config/shell/functions/atuin.zsh"
-fi
+eval "$(atuin init zsh --disable-up-arrow)"
+# if command -v atuin >/dev/null 2>&1; then
+#   source "$HOME/dotfiles/config/shell/functions/atuin.zsh"
+# fi
 
 # 👇 tv
 _tv_search() {
@@ -90,6 +107,10 @@ _tv_search() {
   if [[ -n $output ]]; then
     RBUFFER=""
     LBUFFER=$current_prompt$output
+
+    # uncomment this to automatically accept the line
+    # (i.e. run the command without having to press enter twice)
+    # zle accept-line
   fi
 }
 
@@ -117,6 +138,14 @@ export FZF_DEFAULT_OPTS=" \
 --color=marker:#b4befe,fg+:#cdd6f4,prompt:#cba6f7,hl+:#f38ba8 \
 --color=selected-bg:#45475a"
 
+# 👇 carapace
+# export CARAPACE_BRIDGES='zsh,fish,bash,inshellisense' # optional
+# zstyle ':completion:*' format $'\e[2;37mCompleting %d\e[m'
+# source <(carapace _carapace)
+
+# zstyle ':completion:*:git:*' group-order 'main commands' 'alias commands' 'external commands'
+
+# 👇 fzf-tab
 if [[ -f "$ZSH_PLUGINS_DIR"/fzf-tab/fzf-tab.plugin.zsh ]]; then
   source "$ZSH_PLUGINS_DIR"/fzf-tab/fzf-tab.plugin.zsh
   zstyle ':completion:*:descriptions' format '[%d]'
@@ -134,9 +163,8 @@ if [[ -f "$ZSH_PLUGINS_DIR"/fast-syntax-highlighting/fast-syntax-highlighting.pl
   source "$ZSH_PLUGINS_DIR"/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
 fi
 
-# 👇 select-word-style
-autoload -Uz select-word-style
-select-word-style bash
+# 👇 mysql
+export PKG_CONFIG_PATH="$(brew --prefix mysql-client)/lib/pkgconfig:$PKG_CONFIG_PATH"
 
 # 👇 mise shims
 export PATH="$HOME/.local/share/mise/shims:$PATH"
@@ -145,3 +173,10 @@ export PATH="$HOME/.local/share/mise/shims:$PATH"
 if command -v mise >/dev/null 2>&1; then
   eval "$(mise activate zsh)"
 fi
+
+# 👇 Custom paths
+export PATH="$HOME/Developer/prototypes/utils/bin:$PATH"
+
+export PATH="$HOME/Developer/prototypes/utils/scripts:$PATH"
+
+export PATH="$HOME/.local/bin:$PATH"

@@ -62,7 +62,7 @@
         "coloring": "indent_aware",
         "enabled": true
       },
-      "language_servers": ["ruff", "basedpyright", "!pyright"],
+      "language_servers": ["ty", "!basedpyright"],
       "tab_size": 4
     },
     "TSX": {
@@ -75,19 +75,9 @@
   "lsp": {
     "basedpyright": {
       "settings": {
-        "python": {
-          "pythonPath": ".venv/bin/python"
-        },
         "basedpyright.analysis": {
           "diagnosticMode": "workspace",
-          "typeCheckingMode": "strict",
-          "inlayHints": {
-            "callArgumentNames": true,
-            "functionReturnTypes": true,
-            "genericTypes": false,
-            "variableTypes": true
-          },
-          "exclude": ["**/__pycache__", "**/.venv"]
+          "inlayHints.callArgumentNames": false
         }
       }
     }
@@ -150,7 +140,7 @@
       "breadcrumbs": false
     }
   },
-  "theme": "Catppuccin Mocha - No Italics",
+  "theme": "Catppuccin Mocha",
   "ui_font_family": "MonoLisa",
   "ui_font_size": 13.0,
   "ui_font_weight": 500,

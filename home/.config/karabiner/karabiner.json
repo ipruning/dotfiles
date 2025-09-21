@@ -327,7 +327,6 @@
                     "ignore": false
                 },
                 {
-                    "disable_built_in_keyboard_if_exists": true,
                     "identifiers": {
                         "is_keyboard": true,
                         "product_id": 864,
@@ -344,11 +343,11 @@
                         },
                         {
                             "from": { "key_code": "right_command" },
-                            "to": [{ "key_code": "right_control" }]
+                            "to": [{ "key_code": "right_option" }]
                         },
                         {
                             "from": { "key_code": "right_control" },
-                            "to": [{ "key_code": "right_option" }]
+                            "to": [{ "key_code": "right_command" }]
                         }
                     ]
                 }

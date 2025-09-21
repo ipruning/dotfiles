@@ -1,3 +1,4 @@
+asciinema
 ast-grep
 atuin
 awscli
@@ -38,10 +39,14 @@ jj
 jq
 just
 libsql/sqld/sqld
+litecli
 macmon
 mdq
 mise
+mkcert
 mongodb/brew/mongodb-community
+mycli
+mysql-client
 neovim
 nushell
 ouch
@@ -49,8 +54,11 @@ ov
 pandoc
 parallel
 parallel-disk-usage
+pgcli
+pkgconf
 postgresql@17
 procs
+psviderski/tap/uncloud
 pueue
 rainfrog
 rclone
@@ -62,6 +70,7 @@ rust-parallel
 rustscan
 shellcheck
 sqlfluff
+sshx
 starship
 steipete/tap/peekaboo
 tailspin
@@ -71,7 +80,9 @@ temporal
 terminal-notifier
 tmux
 tokei
+trufflehog
 trzsz-ssh
+typst
 uv
 valkey
 viddy

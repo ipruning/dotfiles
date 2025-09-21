@@ -25,14 +25,11 @@ if type bat &> /dev/null; then
   alias cat="bat"
 fi
 
-# if type rip &> /dev/null; then
-#   alias rm="echo Use 'rip' instead of rm."
-# fi
-
 alias cdr='cd $(git rev-parse --show-toplevel)'
 alias d="lazydocker"
 alias dateutc="date -u +%Y-%m-%dT%H:%M:%SZ"
 alias g="lazygit"
+alias rsyncssh="rsync -Pr --rsh=ssh"
 
 if [[ $OSTYPE == linux* ]]; then
   alias ports="ss -tulpn"
@@ -53,14 +50,6 @@ if [[ $OSTYPE == darwin* ]]; then
   alias p="pbpaste"
   alias ports="viddy --interval 1s 'lsof -i @127.0.0.1 | grep LISTEN'"
   alias surge="/Applications/Surge.app/Contents/Applications/surge-cli"
-
-  function code() {
-    open "$@" -a "Visual Studio Code"
-  }
-
-  function cursor() {
-    open "$@" -a "Cursor"
-  }
 
   function repoprompt() {
     open "repoprompt://open/$(pwd)"
