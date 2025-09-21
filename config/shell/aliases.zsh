@@ -29,6 +29,7 @@ alias cdr='cd $(git rev-parse --show-toplevel)'
 alias d="lazydocker"
 alias dateutc="date -u +%Y-%m-%dT%H:%M:%SZ"
 alias g="lazygit"
+alias rsyncssh="rsync -Pr --rsh=ssh"
 
 if [[ $OSTYPE == linux* ]]; then
   alias ports="ss -tulpn"
