@@ -1,5 +1,8 @@
 # echo ">>> .zshrc is loaded. Shell: $SHELL, Options: $-"
 
+typeset -U path
+typeset -U fpath
+
 if [[ $OSTYPE == darwin* ]]; then
   if [ -d "/opt/homebrew/bin" ]; then
     eval "$(/opt/homebrew/bin/brew shellenv)"
