@@ -3,8 +3,9 @@
 theme = catppuccin-mocha
 
 font-family = "Berkeley Mono Variable"
-font-family = "Maple Mono NF CN"
-font-size = 12
+font-family = "MonoLisa"
+# font-family = "Maple Mono NF CN"
+font-size = 14
 font-style = Medium
 
 macos-option-as-alt = true
