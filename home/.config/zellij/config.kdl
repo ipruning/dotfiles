@@ -564,3 +564,11 @@ show_startup_tips false
 // Default: true
 //
 // show_release_notes false
+
+// Web server cert and key
+web_server false // always start the web server on Zellij startup (default: false)
+web_server_ip "0.0.0.0" // the IP to listen on, 0.0.0.0 is all (default: 127.0.0.1)
+web_server_port 443 // the port to listen on (default: 8082)
+web_server_cert "/Users/alex/.certs/localhost+3.pem" // SSL certificate
+web_server_key "/Users/alex/.certs/localhost+3-key.pem" // SSL private key
+enforce_https_on_localhost true // whether to enforce an https certificate being present also when listening on localhost (default: false)
