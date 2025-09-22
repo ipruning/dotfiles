@@ -1,6 +1,12 @@
 # 👇 XDG Config Home
 export XDG_CONFIG_HOME="$HOME/.config"
 
+# 👇 Emacs Mode
+bindkey -e
+
+# 👇 Vim Mode
+# bindkey -v
+
 # 👇 zsh Theme
 if command -v starship >/dev/null 2>&1; then
   eval "$(starship init zsh)"
@@ -16,9 +22,6 @@ zstyle ":completion:*" matcher-list "m:{a-z}={A-Za-z}"
 autoload -U edit-command-line
 zle -N edit-command-line
 bindkey "^v" edit-command-line
-
-# 👇 Emacs Mode
-bindkey -e
 
 # 👇 Wordchars
 WORDCHARS=${WORDCHARS//\/}
@@ -138,12 +141,6 @@ export FZF_DEFAULT_OPTS=" \
 --color=marker:#b4befe,fg+:#cdd6f4,prompt:#cba6f7,hl+:#f38ba8 \
 --color=selected-bg:#45475a"
 
-# 👇 carapace
-# export CARAPACE_BRIDGES='zsh,fish,bash,inshellisense' # optional
-# zstyle ':completion:*' format $'\e[2;37mCompleting %d\e[m'
-# source <(carapace _carapace)
-
-# zstyle ':completion:*:git:*' group-order 'main commands' 'alias commands' 'external commands'
 
 # 👇 fzf-tab
 if [[ -f "$ZSH_PLUGINS_DIR"/fzf-tab/fzf-tab.plugin.zsh ]]; then
