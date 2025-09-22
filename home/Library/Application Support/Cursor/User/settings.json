@@ -530,7 +530,7 @@
   "vscode-mogami.enableCodeLens": true,
   "vscode-mogami.usePrivateSource": false,
   "window.commandCenter": false,
-  "window.zoomLevel": -1,
+  "window.zoomLevel": 0,
   "workbench.activityBar.orientation": "vertical",
   "workbench.colorCustomizations": {
     "editor.lineHighlightBackground": "#1073cf2d",
