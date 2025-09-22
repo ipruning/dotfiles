@@ -46,7 +46,6 @@ min_time_to_notify = 100_000
 show_milliseconds = false
 
 [character]
-disabled = true
 success_symbol = '[\$](bold green)'
 error_symbol = '[\$](bold red)'
 vimcmd_symbol = '[<](bold green)'
