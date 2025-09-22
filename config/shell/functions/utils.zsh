@@ -71,16 +71,16 @@ function upgrade-all() {
   local host=$(hostname -s)
   if command -v brew &>/dev/null; then
     brew bundle dump --file="$HOME/dotfiles/config/packages/brew_dump.${host}.txt" --force
-    brew leaves | sort -s >"$HOME/dotfiles/config/packages/brew_leaves.${host}.txt"
-    brew list --installed-on-request | sort -s >"$HOME/dotfiles/config/packages/brew_installed.${host}.txt"
+    brew leaves | gsort >"$HOME/dotfiles/config/packages/brew_leaves.${host}.txt"
+    brew list --installed-on-request | gsort >"$HOME/dotfiles/config/packages/brew_installed.${host}.txt"
   fi
   if command -v gh &>/dev/null; then
-    gh extension list | awk '{print $3}' | sort -s >"$HOME/dotfiles/config/packages/gh_extensions.${host}.txt"
+    gh extension list | awk '{print $3}' | gsort >"$HOME/dotfiles/config/packages/gh_extensions.${host}.txt"
   fi
   if [ -d "/Applications" ]; then
-    find /Applications -maxdepth 1 -name "*.app" -exec basename {} .app \; | sort -s >"$HOME/dotfiles/config/packages/macos_applications.${host}.txt"
+    find /Applications -maxdepth 1 -name "*.app" -exec basename {} .app \; | gsort >"$HOME/dotfiles/config/packages/macos_applications.${host}.txt"
   fi
   if [ -d "/Applications/Setapp" ]; then
-    find /Applications/Setapp -maxdepth 1 -name "*.app" -exec basename {} .app \; | sort -s >"$HOME/dotfiles/config/packages/macos_setapp.${host}.txt"
+    find /Applications/Setapp -maxdepth 1 -name "*.app" -exec basename {} .app \; | gsort >"$HOME/dotfiles/config/packages/macos_setapp.${host}.txt"
   fi
 }
