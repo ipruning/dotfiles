@@ -8,7 +8,8 @@ $git_status\
 $package\
 $cmd_duration\
 $battery
-$character"""
+$character
+"""
 add_newline = false
 command_timeout = 1_000
 
