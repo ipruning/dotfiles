@@ -4,11 +4,11 @@ theme = catppuccin-mocha
 
 font-family = "MonoLisa"
 font-family = "Maple Mono NF CN"
+
+cursor-style = block
+cursor-style-blink = false
 font-size = 12
 font-style = Medium
-
-cursor-style-blink = false
-
 macos-option-as-alt = true
-
 shell-integration-features = cursor, title, ssh-env, ssh-terminfo
+shell-integration-features = no-cursor
