@@ -8,7 +8,8 @@ $git_status\
 $package\
 $cmd_duration\
 $battery
-$character"""
+$character
+"""
 add_newline = false
 command_timeout = 1_000
 
@@ -45,6 +46,7 @@ min_time_to_notify = 100_000
 show_milliseconds = false
 
 [character]
+disabled = true
 success_symbol = '[\$](bold green)'
 error_symbol = '[\$](bold red)'
 vimcmd_symbol = '[<](bold green)'

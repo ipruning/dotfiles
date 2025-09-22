@@ -1,12 +1,13 @@
-# command = /opt/homebrew/bin/nu
+command = /opt/homebrew/bin/nu
 
 theme = catppuccin-mocha
 
-# font-family = "Berkeley Mono Variable"
 font-family = "MonoLisa"
 font-family = "Maple Mono NF CN"
-font-size = 14
+font-size = 12
 font-style = Medium
+
+cursor-style-blink = false
 
 macos-option-as-alt = true
 
