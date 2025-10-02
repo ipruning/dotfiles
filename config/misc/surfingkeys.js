@@ -155,5 +155,5 @@ api.unmapAllExcept(
     "p",
     "P",
   ],
-  /boot.dev|feishu.cn|localhost|monkeytype.com|motherduck.com|notion.so|roamresearch.com|sshx.io|tldraw.com|ticktick.com|linear.app/,
+  /boot.dev|feishu.cn|localhost|monkeytype.com|motherduck.com|notion.so|roamresearch.com|sshx.io|tldraw.com|ticktick.com|linear.app|photos.google.com/,
 );
