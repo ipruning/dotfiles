@@ -60,6 +60,7 @@ typos = "latest"
 duckdb = "latest"
 fd = "latest"
 fzf = "latest"
+gum = "latest"
 jq = "latest"
 lychee = "latest"
 prek = "latest"
@@ -156,6 +157,3 @@ bun = true
 
 [settings.pipx]
 uvx = true
-
-[settings.python]
-uv_venv_auto = true

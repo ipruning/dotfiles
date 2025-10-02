@@ -4,37 +4,29 @@
 1Password
 1Password for Safari
 A Better Finder Attributes 7
-aDrive
 Advantage 360 SmartSet
 AeroSpace
 Alfred 5
 AltTab
 Anki
-Atuin
 Audio Hijack
 Avenue
 BaiduNetdisk_mac
 balenaEtcher
-Base
 BetterDisplay
 Bob
 calibre
 Capture One
-ChatGPT
-Comet
 Contexts
 CrossOver
 Cursor
 DaisyDisk
 Dark Reader for Safari
 Day One
-DeskPad
 DEVONthink 3
 Drafts
 Eagle
 Eudic
-Fork
-Frame0
 Ghostty
 Google Chrome
 Google Docs
@@ -48,7 +40,6 @@ IINA
 iMazing
 Immersive Translate
 Input Source Pro
-Jan
 Kagi for Safari
 Karabiner-Elements
 Karabiner-EventViewer
@@ -63,24 +54,18 @@ LM Studio
 Longbridge Pro
 Loopback
 LyricsX
-MAA
 Microsoft Excel
 Microsoft PowerPoint
 Microsoft Word
 MongoDB Compass
 Mos
 MusicHarbor
-MWeb Pro
 MyCard
 NeteaseMusic
-Notion
-Notion Calendar
-Notion Mail
 OBS
 Obsidian
 OnyX
 OrbStack
-PasteNow
 pcsuite
 Pearcleaner
 PlayCover
@@ -89,10 +74,8 @@ qBittorrent
 QQ
 Raycast
 Rectangle
-Red Canary Mac Monitor
 Repo Prompt
 Reqable
-Retcon
 Roam Research
 Rond
 Rotato
@@ -117,12 +100,9 @@ Termius
 TestFlight
 The Powder Toy
 Things3
-TickTick
 uBlock Origin Lite
-VibeMeter
 VideoFusion-macOS
 VirtualBuddy
-waifu2x
 WeChat
 Whisper Transcription
 Wireshark
@@ -131,6 +111,5 @@ Xcodes
 YACReader
 Z-Library
 Zed
-Zen
 zoom.us
 Zotero

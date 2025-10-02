@@ -30,7 +30,9 @@ git-extras
 git-filter-repo
 git-lfs
 gitu
+glow
 gnupg
+gum
 httm
 hyperfine
 jaq
@@ -56,7 +58,7 @@ parallel-disk-usage
 peekaboo
 pgcli
 pkgconf
-postgresql@17
+postgresql@18
 procs
 pueue
 rainfrog
@@ -78,6 +80,7 @@ temporal
 terminal-notifier
 tmux
 tokei
+tree
 trufflehog
 trzsz-ssh
 typst
