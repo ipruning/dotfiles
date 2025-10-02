@@ -30,7 +30,9 @@ git-extras
 git-filter-repo
 git-lfs
 gitu
+glow
 gnupg
+gum
 httm
 hyperfine
 jaq
@@ -38,7 +40,6 @@ jd
 jj
 jq
 just
-libsql/sqld/sqld
 litecli
 macmon
 mdq
@@ -56,7 +57,7 @@ parallel
 parallel-disk-usage
 pgcli
 pkgconf
-postgresql@17
+postgresql@18
 procs
 psviderski/tap/uncloud
 pueue
@@ -80,6 +81,7 @@ temporal
 terminal-notifier
 tmux
 tokei
+tree
 trufflehog
 trzsz-ssh
 typst
