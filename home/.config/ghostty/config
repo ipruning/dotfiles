@@ -1,14 +1,14 @@
-# command = /opt/homebrew/bin/nu
+# command = shell:/opt/homebrew/bin/zsh -ic nu
 
-theme = catppuccin-mocha
+theme = Catppuccin Mocha
 
-font-family = "MonoLisa"
-font-family = "Maple Mono NF CN"
+font-family = MonoLisa
+font-family = Maple Mono NF CN
 
 cursor-style = block
 cursor-style-blink = false
 font-size = 12
 font-style = Medium
 macos-option-as-alt = true
-shell-integration-features = cursor, title, ssh-env, ssh-terminfo
-shell-integration-features = no-cursor
+maximize = true
+shell-integration-features = title, ssh-env, ssh-terminfo, no-cursor

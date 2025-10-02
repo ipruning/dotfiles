@@ -1,22 +1,17 @@
 BetterZip
-Chimeful
 CleanMyMac
 CleanShot X
 Clop
-DevUtils
 Downie
 Focus 2
 ForkLift
-HazeOver
 Hookmark
-HoudahSpot
 Image2icon
 In Your Face
 iStat Menus
 Luminar Neo
 Lungo
 MarginNote
-Muse
 Nitro PDF Pro
 One Switch
 Permute
@@ -29,6 +24,5 @@ Spark Mail
 TablePlus
 Timing
 Ulysses
-Vivid
 WiFi Explorer
 Yoink
