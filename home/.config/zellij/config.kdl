@@ -1,9 +1,25 @@
 keybinds clear-defaults=true {
     locked {
         bind "Ctrl g" { SwitchToMode "normal"; }
-        bind "Super a" { SwitchToMode "normal"; }
 
-        bind "Super j" {
+        bind "Ctrl 1" { GoToTab 1; }
+        bind "Ctrl 2" { GoToTab 2; }
+        bind "Ctrl 3" { GoToTab 3; }
+        bind "Ctrl 4" { GoToTab 4; }
+        bind "Ctrl 5" { GoToTab 5; }
+        bind "Ctrl 6" { GoToTab 6; }
+        bind "Ctrl 7" { GoToTab 7; }
+        bind "Ctrl 8" { GoToTab 8; }
+        bind "Ctrl 9" { GoToTab 9; }
+
+        bind "Ctrl n" { NewTab; SwitchToMode "locked"; }
+
+        bind "Ctrl s" { EditScrollback; SwitchToMode "locked"; }
+
+        bind "Ctrl U" { HalfPageScrollUp; }
+        bind "Ctrl D" { HalfPageScrollDown; }
+
+        bind "Ctrl j" {
             LaunchOrFocusPlugin "file:~/dotfiles/home/.config/zellij/plugins/zellij-sessionizer.wasm" {
                 floating true
                 move_to_focused_tab true
@@ -13,35 +29,12 @@ keybinds clear-defaults=true {
             }
             SwitchToMode "locked"
         }
-        bind "Super J" {
+        bind "Ctrl J" {
             LaunchOrFocusPlugin "session-manager" {
                 floating true
                 move_to_focused_tab true
             }
         }
-
-        bind "Super h" { GoToPreviousTab; }
-        bind "Super j" { GoToNextTab; }
-        // bind "Super k" { MoveFocus "up"; }
-        // bind "Super l" { MoveFocus "right"; }
-
-        // bind "Super 1" { GoToTab 1; }
-        // bind "Super 2" { GoToTab 2; }
-        // bind "Super 3" { GoToTab 3; }
-        // bind "Super 4" { GoToTab 4; }
-        // bind "Super 5" { GoToTab 5; }
-        // bind "Super 6" { GoToTab 6; }
-        // bind "Super 7" { GoToTab 7; }
-        // bind "Super 8" { GoToTab 8; }
-        // bind "Super 9" { GoToTab 9; }
-
-        bind "Super n" { NewTab; SwitchToMode "locked"; }
-        bind "Super t" { NewTab; SwitchToMode "locked"; }
-
-        bind "Super s" { EditScrollback; SwitchToMode "locked"; }
-
-        bind "Super u" { HalfPageScrollUp; }
-        bind "Super d" { HalfPageScrollDown; }
     }
     pane {
         bind "left" { MoveFocus "left"; }
@@ -198,39 +191,38 @@ keybinds clear-defaults=true {
     }
     shared_except "locked" "renametab" "renamepane" {
         bind "Ctrl g" { SwitchToMode "locked"; }
-        bind "Super a" { SwitchToMode "locked"; }
 
-        // bind "Ctrl q" { Quit; }
+        bind "Ctrl q" { Quit; }
 
-        // bind "Ctrl d" { Detach; }
+        bind "Ctrl d" { Detach; }
 
-        // bind "1" { GoToTab 1; }
-        // bind "2" { GoToTab 2; }
-        // bind "3" { GoToTab 3; }
-        // bind "4" { GoToTab 4; }
-        // bind "5" { GoToTab 5; }
-        // bind "6" { GoToTab 6; }
-        // bind "7" { GoToTab 7; }
-        // bind "8" { GoToTab 8; }
-        // bind "9" { GoToTab 9; }
+        bind "1" { GoToTab 1; }
+        bind "2" { GoToTab 2; }
+        bind "3" { GoToTab 3; }
+        bind "4" { GoToTab 4; }
+        bind "5" { GoToTab 5; }
+        bind "6" { GoToTab 6; }
+        bind "7" { GoToTab 7; }
+        bind "8" { GoToTab 8; }
+        bind "9" { GoToTab 9; }
 
-        // bind "h" { MoveFocusOrTab "left"; }
-        // bind "j" { MoveFocus "down"; }
-        // bind "k" { MoveFocus "up"; }
-        // bind "l" { MoveFocusOrTab "right"; }
+        bind "h" { MoveFocusOrTab "left"; }
+        bind "j" { MoveFocus "down"; }
+        bind "k" { MoveFocus "up"; }
+        bind "l" { MoveFocusOrTab "right"; }
 
-        // bind "left" { NewPane "left"; SwitchToMode "locked"; }
-        // bind "down" { NewPane "down"; SwitchToMode "locked"; }
-        // bind "up" { NewPane "up"; SwitchToMode "locked"; }
-        // bind "right" { NewPane "right"; SwitchToMode "locked"; }
+        bind "left" { NewPane "left"; SwitchToMode "locked"; }
+        bind "down" { NewPane "down"; SwitchToMode "locked"; }
+        bind "up" { NewPane "up"; SwitchToMode "locked"; }
+        bind "right" { NewPane "right"; SwitchToMode "locked"; }
 
-        // bind "n" { NewTab; SwitchToMode "locked"; }
-        // bind "t" { NewTab; SwitchToMode "locked"; }
+        bind "n" { NewTab; SwitchToMode "locked"; }
+        bind "t" { NewTab; SwitchToMode "locked"; }
 
-        // bind "Ctrl s" { EditScrollback; SwitchToMode "locked"; }
+        bind "Ctrl s" { EditScrollback; SwitchToMode "locked"; }
 
-        // bind "u" { HalfPageScrollUp; }
-        // bind "d" { HalfPageScrollDown; }
+        bind "u" { HalfPageScrollUp; }
+        bind "d" { HalfPageScrollDown; }
     }
     shared_except "locked" "entersearch" {
         bind "enter" { SwitchToMode "locked"; }

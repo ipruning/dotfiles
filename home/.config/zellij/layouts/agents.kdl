@@ -6,9 +6,9 @@ layout {
         }
     }
 
-    tab name="codex" {
+    tab name="amp" {
         pane {
-            command "codex" close_on_exit=true
+            command "amp" close_on_exit=true
         }
     }
 }
