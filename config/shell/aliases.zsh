@@ -55,3 +55,8 @@ if [[ $OSTYPE == darwin* ]]; then
     open "repoprompt://open/$(pwd)"
   }
 fi
+
+codex() {
+  env -u OPENAI_API_KEY -u OPENAI_BASE_URL \
+    command codex --dangerously-bypass-approvals-and-sandbox --search "$@"
+}
