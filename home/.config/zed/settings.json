@@ -6,7 +6,8 @@
       "provider": "openai"
     },
     "default_profile": "write",
-    "play_sound_when_agent_done": true
+    "play_sound_when_agent_done": true,
+    "use_modifier_to_send": true
   },
   "autosave": "on_focus_change",
   "buffer_font_fallbacks": ["Maple Mono NF CN"],
@@ -40,36 +41,8 @@
     "enabled": true
   },
   "languages": {
-    "JavaScript": {
-      "language_servers": ["typescript-language-server", "!vtsls"]
-    },
     "Python": {
-      "formatter": [
-        {
-          "code_actions": {
-            "source.fixAll.ruff": true,
-            "source.organizeImports.ruff": true
-          }
-        },
-        {
-          "language_server": {
-            "name": "ruff"
-          }
-        }
-      ],
-      "indent_guides": {
-        "background_coloring": "disabled",
-        "coloring": "indent_aware",
-        "enabled": true
-      },
-      "language_servers": ["ty", "ruff", "!basedpyright"],
-      "tab_size": 4
-    },
-    "TSX": {
-      "language_servers": ["typescript-language-server", "!vtsls"]
-    },
-    "TypeScript": {
-      "language_servers": ["typescript-language-server", "!vtsls"]
+      "language_servers": ["ty", "!basedpyright"]
     }
   },
   "lsp": {
@@ -97,24 +70,6 @@
   },
   "show_edit_predictions": true,
   "soft_wrap": null,
-  "ssh_connections": [
-    {
-      "host": "m4",
-      "projects": [
-        {
-          "paths": ["~/dotfiles"]
-        }
-      ]
-    },
-    {
-      "host": "hog-oregon",
-      "projects": [
-        {
-          "paths": ["~/tcglens"]
-        }
-      ]
-    }
-  ],
   "tabs": {
     "file_icons": true,
     "git_status": true,
