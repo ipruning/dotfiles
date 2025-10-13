@@ -4,6 +4,9 @@ typeset -U path
 
 if [[ $OSTYPE == darwin* ]]; then
   if [[ "$TERM_PROGRAM" == "ghostty" ]]; then
+    if [[ -n "$GHOSTTY_RESOURCES_DIR" ]]; then
+      builtin source "${GHOSTTY_RESOURCES_DIR}/shell-integration/zsh/ghostty-integration"
+    fi
     # if [[ -z "$ZELLIJ" ]]; then
     #   latest_session=$(/opt/homebrew/bin/zellij list-sessions --no-formatting --short | grep -v "^repo-" | head -n 1)
     #   if [[ -n "$latest_session" ]]; then
