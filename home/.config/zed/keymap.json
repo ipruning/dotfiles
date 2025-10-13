@@ -42,10 +42,10 @@
     "context": "EmptyPane || SharedScreen",
     "bindings": {
       "space a": "agent::ToggleFocus",
-      "space s": [
+      "space shift-a": [
         "task::Spawn",
         {
-          "task_name": "agents",
+          "task_name": "amp",
           "reveal_target": "center"
         }
       ],
@@ -127,13 +127,6 @@
       "cmd-v": "project_panel::Paste"
     }
   },
-  // {
-  //   "context": "Editor && mode == full",
-  //   "bindings": {
-  //     "cmd->": "assistant::QuoteSelection",
-  //     "cmd-<": "assistant::InsertIntoEditor"
-  //   }
-  // },
   {
     "context": "Editor && (vim_mode == normal || vim_mode == visual) && !VimWaiting && !menu",
     "bindings": {
@@ -189,10 +182,10 @@
       ],
       "space shift-t": "task::Spawn",
       "space a": "agent::ToggleFocus",
-      "space s": [
+      "space shift-a": [
         "task::Spawn",
         {
-          "task_name": "agents",
+          "task_name": "amp",
           "reveal_target": "center"
         }
       ],
@@ -276,48 +269,10 @@
     }
   },
   {
-    "context": "Editor",
-    "bindings": {
-      "ctrl-shift-v": "workspace::ToggleVimMode"
-      // "tab": "editor::Tab",
-      // "ctrl-shift-enter": ["workspace::SendKeystrokes", "y $ ctrl-` cmd-v enter"]
-    }
-  },
-  {
     "context": "GitPanel",
     "bindings": {
       "esc": "workspace::ToggleRightDock",
       "cmd-w": "workspace::ToggleRightDock"
     }
   }
-  // {
-  //   "context": "(VimControl && !menu) || vim_mode == replace || vim_mode == waiting",
-  //   "bindings": {
-  //     "tab": "vim::Tab"
-  //   }
-  // },
-  // {
-  //   "context": "vim_mode == literal",
-  //   "bindings": {
-  //     "tab": ["vim::Literal", ["tab", "\u0009"]]
-  //   }
-  // },
-  // {
-  //   "context": "Editor && showing_completions",
-  //   "bindings": {
-  //     "enter": "editor::ConfirmCompletion"
-  //   }
-  // },
-  // {
-  //   "context": "Editor && edit_prediction",
-  //   "bindings": {
-  //     "ctrl-y": "editor::AcceptEditPrediction"
-  //   }
-  // },
-  // {
-  //   "context": "Editor && edit_prediction_conflict",
-  //   "bindings": {
-  //     "ctrl-y": "editor::AcceptEditPrediction"
-  //   }
-  // }
 ]

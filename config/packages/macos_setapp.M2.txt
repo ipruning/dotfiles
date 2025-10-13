@@ -8,7 +8,6 @@ ForkLift
 Hookmark
 Image2icon
 In Your Face
-iStat Menus
 Luminar Neo
 Lungo
 MarginNote
@@ -26,3 +25,4 @@ Timing
 Ulysses
 WiFi Explorer
 Yoink
+iStat Menus

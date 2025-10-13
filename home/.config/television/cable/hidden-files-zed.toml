@@ -4,7 +4,7 @@ description = "Find hidden files for Zed editor"
 requirements = ["bat", "fd"]
 
 [source]
-command = "fd -IHL -E .git -E .jj -E .DS_Store -t file"
+command = "fd -IHL -E .git -E .jj -E .DS_Store -E .venv -E .uv_cache -E .ruff_cache -E __pycache__ -E node_modules -t file"
 
 [preview]
 command = "bat -n --color=always '{}'"

@@ -22,7 +22,7 @@ if [[ $OSTYPE == darwin* ]]; then
 
   # if [ -d "$HOME/dotfiles/config/shell/completions" ]; then
   #   for completion in "$HOME/dotfiles/config/shell/completions"/*.bash; do
-  #     [[ -f "$completion" ]] && source "$completion"
+  #     [[ -f "$completion" ]] && builtin source "$completion"
   #   done
   # fi
 
@@ -35,7 +35,7 @@ if [[ $OSTYPE == darwin* ]]; then
       )
 
       for file in "${config_files[@]}"; do
-        [[ -e "$file" ]] && source "$file"
+        [[ -e "$file" ]] && builtin source "$file"
       done
     fi
   fi
@@ -62,14 +62,14 @@ if [[ $OSTYPE == linux* ]]; then
       )
 
       for file in "${config_files[@]}"; do
-        [[ -e "$file" ]] && source "$file"
+        [[ -e "$file" ]] && builtin source "$file"
       done
     fi
   fi
 
   if [[ -r /opt/clash/script/common.sh && -r /opt/clash/script/clashctl.sh ]]; then
-    source /opt/clash/script/common.sh
-    source /opt/clash/script/clashctl.sh
+    builtin source /opt/clash/script/common.sh
+    builtin source /opt/clash/script/clashctl.sh
     watch_proxy
   fi
 fi

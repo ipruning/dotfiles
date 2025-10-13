@@ -14,7 +14,7 @@
   },
   {
     "label": "file_finder",
-    "command": "selection=$([[ $(pwd) == \"$HOME\" ]] && fd . -IHL --max-depth 3 | tv || tv hidden-files-zed); [ -n \"$selection\" ] && zed \"$selection\"",
+    "command": "cwd=$(pwd -P); [ \"$cwd\" = \"/\" ] && exit 0; selection=$(tv hidden-files-zed); [ -n \"$selection\" ] && zed \"$selection\"",
     "hide": "always",
     "allow_concurrent_runs": true,
     "use_new_terminal": true,
@@ -27,7 +27,7 @@
   },
   {
     "label": "file_finder_modified",
-    "command": "selection=$([[ $(pwd) == \"$HOME\" ]] && fd . -IHL --max-depth 3 | tv || tv modified-files); [ -n \"$selection\" ] && zed \"$selection\"",
+    "command": "cwd=$(pwd -P); [ \"$cwd\" = \"/\" ] && exit 0; selection=$(tv modified-files); [ -n \"$selection\" ] && zed \"$selection\"",
     "hide": "always",
     "allow_concurrent_runs": true,
     "use_new_terminal": true,
@@ -40,7 +40,7 @@
   },
   {
     "label": "project_finder",
-    "command": "selection=$(tv git-repos); [ -n \"$selection\" ] && zed \"$selection\"",
+    "command": "selection=$(tv git-repos); [ -n \"$selection\" ] && zed --add \"$selection\"",
     "hide": "always",
     "allow_concurrent_runs": true,
     "use_new_terminal": true,
@@ -134,27 +134,6 @@
   {
     "label": "amp",
     "command": "current_dir=$(basename \"$(pwd)\"); tmux attach-session -t \"$current_dir\" 2>/dev/null || tmux new-session -s \"$current_dir\" 'tmux new-window -n amp \"zsh -i -c \\\"amp\\\"\" && tmux select-window -t amp'",
-    "hide": "always",
-    "allow_concurrent_runs": true,
-    "use_new_terminal": true
-  },
-  {
-    "label": "claude",
-    "command": "current_dir=$(basename \"$(pwd)\"); tmux attach-session -t \"$current_dir\" 2>/dev/null || tmux new-session -s \"$current_dir\" 'tmux new-window -n claude \"zsh -i -c \\\"claude\\\"\" && tmux select-window -t claude'",
-    "hide": "always",
-    "allow_concurrent_runs": true,
-    "use_new_terminal": true
-  },
-  {
-    "label": "codex",
-    "command": "current_dir=$(basename \"$(pwd)\"); tmux attach-session -t \"$current_dir\" 2>/dev/null || tmux new-session -s \"$current_dir\" 'tmux new-window -n codex \"zsh -i -c \\\"codex\\\"\" && tmux select-window -t codex'",
-    "hide": "always",
-    "allow_concurrent_runs": true,
-    "use_new_terminal": true
-  },
-  {
-    "label": "gemini",
-    "command": "current_dir=$(basename \"$(pwd)\"); tmux attach-session -t \"$current_dir\" 2>/dev/null || tmux new-session -s \"$current_dir\" 'tmux new-window -n gemini \"zsh -i -c \\\"gemini\\\"\" && tmux select-window -t gemini'",
     "hide": "always",
     "allow_concurrent_runs": true,
     "use_new_terminal": true
