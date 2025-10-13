@@ -24,6 +24,7 @@ zle -N edit-command-line
 bindkey "^v" edit-command-line
 
 # 👇 Wordchars
+WORDCHARS=${WORDCHARS//.}
 WORDCHARS=${WORDCHARS//\/}
 WORDCHARS=${WORDCHARS//=}
 
