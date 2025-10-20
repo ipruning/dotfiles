@@ -8,9 +8,11 @@ ForkLift
 Hookmark
 Image2icon
 In Your Face
+iStat Menus
 Luminar Neo
 Lungo
 MarginNote
+MindNode Next
 Nitro PDF Pro
 One Switch
 Permute
@@ -25,4 +27,3 @@ Timing
 Ulysses
 WiFi Explorer
 Yoink
-iStat Menus
