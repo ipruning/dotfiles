@@ -1,8 +1,8 @@
-# command = shell:/opt/homebrew/bin/zsh -ic nu
+command = shell:zsh -ic nu
 
 theme = Catppuccin Mocha
 
-font-family = Berkeley Mono Variable
+font-family = MonoLisa
 font-family = Maple Mono NF CN
 
 cursor-style = block
