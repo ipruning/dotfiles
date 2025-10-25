@@ -1,5 +1,5 @@
-command = shell:zsh
-# command = shell:zsh -ic nu
+# command = shell:zsh
+command = shell:zsh -ic nu
 # command = shell:zsh -ic fish
 
 theme = Catppuccin Mocha
