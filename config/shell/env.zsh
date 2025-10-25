@@ -164,9 +164,6 @@ fi
 # 👇 mysql
 export PKG_CONFIG_PATH="$(brew --prefix mysql-client)/lib/pkgconfig:$PKG_CONFIG_PATH"
 
-# 👇 mise shims
-export PATH="$HOME/.local/share/mise/shims:$PATH"
-
 # 👇 mise hook-env
 if command -v mise >/dev/null 2>&1; then
   eval "$(mise activate zsh)"
@@ -174,7 +171,5 @@ fi
 
 # 👇 Custom paths
 export PATH="$HOME/Developer/prototypes/utils/bin:$PATH"
-
 export PATH="$HOME/Developer/prototypes/utils/scripts:$PATH"
-
 export PATH="$HOME/.local/bin:$PATH"
