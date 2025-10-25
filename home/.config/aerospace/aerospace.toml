@@ -66,7 +66,7 @@ alt-shift-j = ['move down', 'mode main']
 alt-shift-k = ['move up', 'mode main']
 alt-shift-l = ['move right', 'mode main']
 
-alt-b = 'exec-and-forget ~/Developer/prototypes/utils/scripts/newwin.sh Google\ Chrome'
+alt-b = 'exec-and-forget ~/Developer/prototypes/utils/scripts/newwin.sh Atlas'
 alt-g = 'exec-and-forget open -a /Applications/Ghostty.app'
 alt-p = 'exec-and-forget open -a /Applications/Repo\ Prompt.app'
 alt-r = 'exec-and-forget open -a /Applications/Roam\ Research.app'
