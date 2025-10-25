@@ -1,5 +1,6 @@
 atuin
 bat
+btop
 coreutils
 difftastic
 eza
@@ -8,13 +9,18 @@ fio
 fish
 gh
 git-delta
+gnupg
 lazydocker
 lazygit
 libyaml
 mackup
 macmon
 mise
+mysql-client
 neovim
+ouch
+pkgconf
+pueue
 rip2
 ripgrep
 rustscan
