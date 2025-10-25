@@ -17,6 +17,8 @@ BetterDisplay
 Bob
 calibre
 Capture One
+ChatGPT Atlas
+Comet
 Contexts
 CrossOver
 Cursor
@@ -40,6 +42,7 @@ IINA
 iMazing
 Immersive Translate
 Input Source Pro
+Jan
 Kagi for Safari
 Karabiner-Elements
 Karabiner-EventViewer
