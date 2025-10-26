@@ -1,22 +1,4 @@
 {
-  "[css]": {
-    "editor.defaultFormatter": "biomejs.biome"
-  },
-  "[html]": {
-    "editor.defaultFormatter": "biomejs.biome"
-  },
-  "[javascript]": {
-    "editor.defaultFormatter": "biomejs.biome"
-  },
-  "[json]": {
-    "editor.defaultFormatter": "vscode.json-language-features"
-  },
-  "[json][jsonc]": {
-    "editor.defaultFormatter": "biomejs.biome"
-  },
-  "[jsonc]": {
-    "editor.defaultFormatter": "vscode.json-language-features"
-  },
   "[latex]": {
     "editor.acceptSuggestionOnEnter": "on",
     "editor.defaultFormatter": "James-Yu.latex-workshop",
@@ -53,15 +35,6 @@
   },
   "[sql]": {
     "editor.defaultFormatter": "dorzey.vscode-sqlfluff"
-  },
-  "[svelte]": {
-    "editor.defaultFormatter": "biomejs.biome"
-  },
-  "[typescript]": {
-    "editor.defaultFormatter": "biomejs.biome"
-  },
-  "[typescriptreact]": {
-    "editor.defaultFormatter": "biomejs.biome"
   },
   "[typst-code]": {
     "editor.wordSeparators": "`~!@#$%^&*()=+[{]}\\|;:'\",.<>/?"
@@ -262,7 +235,7 @@
     "*.w": "$(capture).*.w, I$(capture).w",
     "*.wat": "$(capture).wasm",
     "*.xaml": "$(capture).xaml.cs",
-    "//": "Last update at 10/14/2025, 4:15:41 AM",
+    "//": "Last update at 10/26/2025, 6:57:33 PM",
     "+layout.svelte": "+layout.ts,+layout.ts,+layout.js,+layout.server.ts,+layout.server.js,+layout.gql",
     "+page.svelte": "+page.server.ts,+page.server.js,+page.ts,+page.js,+page.gql",
     "AGENTS.md": ".clinerules, .cursorrules, .replit.md, .windsurfrules, AGENT.md, CLAUDE.md, GEMINI.md",
