@@ -29,6 +29,7 @@ alias cdr='cd $(git rev-parse --show-toplevel)'
 alias d="lazydocker"
 alias dateutc="date -u +%Y-%m-%dT%H:%M:%SZ"
 alias g="lazygit"
+alias q="exit"
 alias rsyncssh="rsync -Pr --rsh=ssh"
 
 if [[ $OSTYPE == linux* ]]; then
@@ -59,4 +60,20 @@ fi
 codex() {
   env -u OPENAI_API_KEY -u OPENAI_BASE_URL \
     command codex --dangerously-bypass-approvals-and-sandbox --search "$@"
+}
+
+jt () {
+  local d
+  d="$(mktemp -d -t tempe.XXXXXXXX)" || return
+  umask 077
+  builtin cd "$d" || return
+  if [[ $# -eq 1 ]]; then
+    mkdir -m 700 -p -- "$1" && builtin cd -- "$1"
+  fi
+  pwd
+}
+
+mcd () {
+  [[ -z "${1:-}" ]] && return 2
+  mkdir -p -- "$1" && cd -- "$1"
 }
