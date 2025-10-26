@@ -103,6 +103,7 @@ Termius
 TestFlight
 The Powder Toy
 Things3
+TickTick
 uBlock Origin Lite
 VideoFusion-macOS
 VirtualBuddy
