@@ -24,3 +24,11 @@ if $mise_bin != null {
 $env.CARAPACE_BRIDGES = 'zsh'
 mkdir ~/.cache/carapace
 /opt/homebrew/bin/carapace _carapace nushell | save --force ~/.cache/carapace/init.nu
+
+# 👇 Path
+$env.PATH = ($env.PATH
+  | prepend $"($env.HOME)/Developer/prototypes/utils/bin"
+  | prepend $"($env.HOME)/Developer/prototypes/utils/scripts"
+  | prepend $"($env.HOME)/dotfiles/config/shell/bin"
+  | prepend $"($env.HOME)/.local/bin"
+)
