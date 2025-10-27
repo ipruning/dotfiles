@@ -74,3 +74,6 @@ $env.config.show_banner = false
 
 # 👇 History Max Size
 $env.config.history.max_size = 100000
+
+# 👇 Atuin
+source ~/.local/share/atuin/init.nu
