@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -e
+set -u
+set -o pipefail
+
+if [[ $OSTYPE == darwin* ]]; then
+  open .
+elif [[ $OSTYPE == linux* ]]; then
+  xdg-open .
+else
+  exit 1
+fi

@@ -56,9 +56,7 @@ fi
 # 👇 Functions
 if [[ $OSTYPE == darwin* ]]; then
   source "$HOME/dotfiles/config/shell/functions/macos.zsh"
-  source "$HOME/dotfiles/config/shell/functions/mkbir.zsh"
   source "$HOME/dotfiles/config/shell/functions/surge.zsh"
-  source "$HOME/dotfiles/config/shell/functions/utils.zsh"
 fi
 
 # 👇 Brew
@@ -142,7 +140,6 @@ export FZF_DEFAULT_OPTS=" \
 --color=marker:#b4befe,fg+:#cdd6f4,prompt:#cba6f7,hl+:#f38ba8 \
 --color=selected-bg:#45475a"
 
-
 # 👇 fzf-tab
 if [[ -f "$ZSH_PLUGINS_DIR"/fzf-tab/fzf-tab.plugin.zsh ]]; then
   source "$ZSH_PLUGINS_DIR"/fzf-tab/fzf-tab.plugin.zsh
@@ -172,4 +169,5 @@ fi
 # 👇 Custom paths
 export PATH="$HOME/Developer/prototypes/utils/bin:$PATH"
 export PATH="$HOME/Developer/prototypes/utils/scripts:$PATH"
+export PATH="$HOME/dotfiles/config/shell/bin:$PATH"
 export PATH="$HOME/.local/bin:$PATH"

@@ -34,21 +34,12 @@ alias rsyncssh="rsync -Pr --rsh=ssh"
 
 if [[ $OSTYPE == linux* ]]; then
   alias ports="ss -tulpn"
-
-  if type wl-copy &> /dev/null; then
-    alias c="wl-copy"
-    alias o="xdg-open ."
-    alias p="wl-paste"
-  fi
 fi
 
 if [[ $OSTYPE == darwin* ]]; then
-  alias c="pbcopy"
   alias jr="jump-to-repo"
   alias js="jump-to-session"
   alias keyboardmaestro="/Applications/Keyboard\ Maestro.app/Contents/MacOS/keyboardmaestro"
-  alias o="open ."
-  alias p="pbpaste"
   alias ports="viddy --interval 1s 'lsof -i @127.0.0.1 | grep LISTEN'"
   alias surge="/Applications/Surge.app/Contents/Applications/surge-cli"
 
@@ -56,11 +47,6 @@ if [[ $OSTYPE == darwin* ]]; then
     open "repoprompt://open/$(pwd)"
   }
 fi
-
-codex() {
-  env -u OPENAI_API_KEY -u OPENAI_BASE_URL \
-    command codex --dangerously-bypass-approvals-and-sandbox --search "$@"
-}
 
 jt () {
   local d

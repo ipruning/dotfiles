@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -e
+set -u
+set -o pipefail
+
+if hash codex 2>/dev/null; then
+  env -u OPENAI_API_KEY -u OPENAI_BASE_URL \
+    command codex --dangerously-bypass-approvals-and-sandbox --search "$@"
+else
+  exit 1
+fi

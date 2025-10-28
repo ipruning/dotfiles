@@ -1,3 +1,8 @@
+#!/usr/bin/env bash
+set -e
+set -u
+set -o pipefail
+
 # See: https://bsky.app/profile/gordon.bsky.social/post/3ljinnrymus2n
 
 # Array of bird names
@@ -21,23 +26,26 @@ fi
 
 # Function to create a folder with a bird name
 mkbir() {
-  local count=$(cat "$BIRD_COUNT_FILE")
+  local count
+  count=$(<"$BIRD_COUNT_FILE")
 
-  # In ZSH, arrays are 1-indexed by default, so we need to handle this properly
-  # We use a modulo operation, but we need to make sure we get a value between 1 and array length
+  if [[ ! $count =~ ^[0-9]+$ ]]; then
+    count=0
+  fi
+
   local num_birds=${#BIRD_NAMES[@]}
-  local bird_index=$(( (count % num_birds) + 1 ))
-
+  local bird_index=$(( count % num_birds ))
   local bird_name="${BIRD_NAMES[$bird_index]}"
 
-  # Create folder with bird name (adding current directory if no path specified)
-  if [[ -z "$1" ]]; then
-    mkdir -p "./$bird_name"
-    echo "Created folder: $bird_name"
+  local target_dir
+  if [[ $# -eq 0 ]]; then
+    target_dir="./$bird_name"
   else
-    mkdir -p "$1/$bird_name"
-    echo "Created folder: $1/$bird_name"
+    target_dir="$1/$bird_name"
   fi
+
+  mkdir -p "$target_dir"
+  echo "Created folder: $target_dir"
 
   # Increment and save count
   count=$((count + 1))
@@ -54,6 +62,8 @@ mkbir() {
   fi
 }
 
+mkbir "$@"
+
 # If you want to provide a custom name while still using a bird prefix
 # mkbir_custom() {
 #   if [[ -z "$1" ]]; then
@@ -61,9 +71,13 @@ mkbir() {
 #     return 1
 #   fi
 
-#   local count=$(cat "$BIRD_COUNT_FILE")
+#   local count
+#   count=$(<"$BIRD_COUNT_FILE")
+#   if [[ ! $count =~ ^[0-9]+$ ]]; then
+#     count=0
+#   fi
 #   local num_birds=${#BIRD_NAMES[@]}
-#   local bird_index=$(( (count % num_birds) + 1 ))
+#   local bird_index=$(( count % num_birds ))
 #   local bird_name="${BIRD_NAMES[$bird_index]}"
 #   local custom_name="$1"
 
