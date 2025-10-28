@@ -8,7 +8,6 @@ cd "$(git rev-parse --show-toplevel)" || exit 1
 command -v mise >/dev/null 2>&1 || exit 1
 command -v uv >/dev/null 2>&1 || exit 1
 
-
 printf '\n\033[1;34m▶ Updating mise packages and tasks\033[0m\n'
 mise upgrade
 find "$(git rev-parse --show-toplevel)"/.mise/tasks/ -type f -exec chmod +x {} \;
