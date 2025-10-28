@@ -12,10 +12,10 @@ if ("~/.local/share/mise/shims" | path exists) {
 }
 
 # 👇 Starship
-# $env.STARSHIP_CONFIG = ($nu.home-path | path join ".config/starship.toml")
-# $env.STARSHIP_SHELL = "nu"
-# mkdir ($nu.data-dir | path join "vendor/autoload")
-# starship init nu | save -f ($nu.data-dir | path join "vendor/autoload/starship.nu")
+$env.STARSHIP_CONFIG = ($nu.home-path | path join ".config/starship.toml")
+$env.STARSHIP_SHELL = "nu"
+mkdir ($nu.data-dir | path join "vendor/autoload")
+starship init nu | save -f ($nu.data-dir | path join "vendor/autoload/starship.nu")
 
 # 👇 Zoxide
 source ~/.zoxide.nu
