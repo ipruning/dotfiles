@@ -165,9 +165,3 @@ export PKG_CONFIG_PATH="$(brew --prefix mysql-client)/lib/pkgconfig:$PKG_CONFIG_
 if command -v mise >/dev/null 2>&1; then
   eval "$(mise activate zsh)"
 fi
-
-# 👇 Custom paths
-export PATH="$HOME/Developer/prototypes/utils/bin:$PATH"
-export PATH="$HOME/Developer/prototypes/utils/scripts:$PATH"
-export PATH="$HOME/dotfiles/config/shell/bin:$PATH"
-export PATH="$HOME/.local/bin:$PATH"
