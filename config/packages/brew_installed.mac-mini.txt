@@ -1,6 +1,7 @@
 atuin
 bat
 btop
+carapace
 coreutils
 difftastic
 eza
@@ -19,6 +20,7 @@ macmon
 mise
 mysql-client
 neovim
+nushell
 ouch
 pkgconf
 pueue

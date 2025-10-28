@@ -5,6 +5,7 @@ AdGuard for Safari
 AeroSpace
 AltTab
 Bob
+ChatGPT Atlas
 Cursor
 Ghostty
 Google Chrome
