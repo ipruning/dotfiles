@@ -1,41 +1,34 @@
 if test -d /opt/homebrew
-  #################### Homebrew ####################
   /opt/homebrew/bin/brew shellenv | source
 end
 
-#################### Mise ####################
 if type -q mise
   mise activate fish | source
 end
 
 if status is-interactive
-  #################### Greeting ####################
+  # 👇 Greeting
   set -g fish_greeting
 
-  #################### Private Env ####################
-  if test -f $HOME/dotfiles/config/shell/env.private.fish
-    source $HOME/dotfiles/config/shell/env.private.fish
-  end
-
-  #################### Keybindings ####################
+  # 👇 Keybindings
   bind \cs edit_command_buffer
 
-  #################### Starship ####################
+  # 👇 Starship
   if type -q starship
     starship init fish | source
   end
 
-  #################### Zoxide ####################
+  # 👇 Zoxide
   if type -q zoxide
     zoxide init fish --cmd j | source
   end
 
-  #################### Television ####################
+  # 👇 Television
   if type -q tv
     tv init fish | source
   end
 
-  #################### Cancel Commandline ####################
+  # 👇 Cancel Commandline
   function cancel-commandline
       commandline -C 2147483647
       for i in (seq (commandline -L))
@@ -46,7 +39,7 @@ if status is-interactive
 
   bind \cc cancel-commandline
 
-  #################### Yazi ####################
+  # 👇 Yazi
   function y
     set tmp (mktemp -t "yazi-cwd.XXXXXX")
     yazi $argv --cwd-file="$tmp"
@@ -55,28 +48,4 @@ if status is-interactive
     end
     rm -f -- "$tmp"
   end
-
-  #################### Editor ####################
-  set -gx VISUAL "zed --wait"
-  set -gx EDITOR "zed --wait"
-
-  #################### Tailspin ####################
-  set -gx TAILSPIN_PAGER "ov -f [FILE]"
-
-  #################### Path ####################
-  fish_add_path $HOME/Developer/prototypes/utils/bin
-  fish_add_path $HOME/Developer/prototypes/utils/scripts
-
-  #################### Completions ####################
-  # for file in $HOME/dotfiles/home/.config/fish/completions/*.fish
-  #   source $file
-  # end
-
-  #################### Aliases ####################
-  source $HOME/dotfiles/config/shell/aliases.fish
-
-  #################### Functions ####################
-  source $HOME/dotfiles/config/shell/functions/atuin.fish
-  source $HOME/dotfiles/config/shell/functions/macos.fish
-  source $HOME/dotfiles/config/shell/functions/utils.fish
 end
