@@ -3,10 +3,11 @@ set -e
 set -u
 set -o pipefail
 
+target="${1:-.}"
 if [[ $OSTYPE == darwin* ]]; then
-  open .
+  exec open "$target"
 elif [[ $OSTYPE == linux* ]]; then
-  xdg-open .
+  exec xdg-open "$target"
 else
   exit 1
 fi
