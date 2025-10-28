@@ -65,7 +65,6 @@ rainfrog
 rclone
 riff
 rip2
-ripgrep
 ruby
 rust-parallel
 rustscan
