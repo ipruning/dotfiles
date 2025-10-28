@@ -1,4 +1,3 @@
-小红书
 集換社 - トレカ総合アプリ
 .Karabiner-VirtualHIDDevice-Manager
 1Password
@@ -77,6 +76,7 @@ qBittorrent
 QQ
 Raycast
 Rectangle
+rednote
 Repo Prompt
 Reqable
 Roam Research
