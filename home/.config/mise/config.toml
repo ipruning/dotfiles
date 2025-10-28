@@ -137,7 +137,6 @@ yq = "latest"
 [settings]
 experimental = true
 idiomatic_version_file_enable_tools = ["python"]
-
 trusted_config_paths = ['~/Developer']
 
 [settings.status]
@@ -153,3 +152,11 @@ bun = true
 
 [settings.pipx]
 uvx = true
+
+[env]
+_.path = [
+  "~/.local/bin",
+  "~/dotfiles/config/shell/bin",
+  "~/Developer/prototypes/utils/scripts",
+  "~/Developer/prototypes/utils/bin",
+]
