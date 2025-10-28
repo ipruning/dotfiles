@@ -6,13 +6,13 @@ alias grep="grep --color=auto"
 alias ...="cd ../.."
 alias ..="cd .."
 
-if type atuin &> /dev/null; then
+if command -v atuin &> /dev/null; then
   alias history="atuin history list --format '{time} - [{duration}] - {command}'"
 else
   alias history="history 1"
 fi
 
-if type eza &> /dev/null; then
+if command -v eza &> /dev/null; then
   alias ll="eza --all --git --group-directories-first --header --long --time-style long-iso"
   alias ls="eza"
   alias lt="eza --all --git --group-directories-first --header --long --time-style long-iso --tree"
@@ -21,7 +21,7 @@ else
   alias ls="ls --color=auto"
 fi
 
-if type bat &> /dev/null; then
+if command -v bat &> /dev/null; then
   alias cat="bat"
 fi
 

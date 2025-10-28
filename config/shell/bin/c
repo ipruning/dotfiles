@@ -3,11 +3,11 @@ set -e
 set -u
 set -o pipefail
 
-if hash pbcopy 2>/dev/null; then
+if command -v pbcopy >/dev/null 2>&1; then
   exec pbcopy
-elif hash xclip 2>/dev/null; then
+elif command -v xclip >/dev/null 2>&1; then
   exec xclip -selection clipboard
-elif hash putclip 2>/dev/null; then
+elif command -v putclip >/dev/null 2>&1; then
   exec putclip
 else
   rm -f /tmp/clipboard 2> /dev/null
