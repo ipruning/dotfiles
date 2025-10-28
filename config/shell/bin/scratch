@@ -5,4 +5,33 @@ set -o pipefail
 
 file="$(mktemp)"
 echo "Editing $file"
-exec "$EDITOR" "$file"
+
+candidates=()
+[[ -n "${VISUAL:-}" ]] && candidates+=("$VISUAL")
+[[ -n "${EDITOR:-}" && "${EDITOR:-}" != "${VISUAL:-}" ]] && candidates+=("$EDITOR")
+candidates+=(
+  "cursor --wait"
+  "code -w"
+  "nvim"
+  "vim"
+  "vi"
+)
+
+for candidate in "${candidates[@]}"; do
+  read -r -a cmd <<< "$candidate"
+  exe="${cmd[0]}"
+
+  if [[ "$exe" == /* && ! -x "$exe" ]]; then
+    if resolved="$(command -v "$(basename "$exe")" 2>/dev/null)"; then
+      cmd[0]="$resolved"
+    else
+      continue
+    fi
+  elif ! command -v "$exe" >/dev/null 2>&1; then
+    continue
+  fi
+
+  exec "${cmd[@]}" "$file"
+done
+
+exec vi "$file"
