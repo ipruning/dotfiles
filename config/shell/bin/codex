@@ -3,9 +3,27 @@ set -e
 set -u
 set -o pipefail
 
-if hash codex 2>/dev/null; then
-  env -u OPENAI_API_KEY -u OPENAI_BASE_URL \
-    command codex --dangerously-bypass-approvals-and-sandbox --search "$@"
-else
-  exit 1
+SELF="${0}"
+if command -v "$0" >/dev/null 2>&1; then
+  SELF="$(command -v "$0")"
 fi
+
+REAL_CODEX=""
+
+if [[ -z "$REAL_CODEX" ]]; then
+  while IFS= read -r path; do
+    [[ -e "$path" ]] || continue
+    if [[ ! "$path" -ef "$SELF" ]]; then
+      REAL_CODEX="$path"
+      break
+    fi
+  done < <(type -ap codex 2>/dev/null || true)
+fi
+
+if [[ -z "$REAL_CODEX" ]]; then
+  echo "codex binary not found (or wrapper shadows it)" >&2
+  exit 127
+fi
+
+exec env -u OPENAI_API_KEY -u OPENAI_BASE_URL \
+  "$REAL_CODEX" --dangerously-bypass-approvals-and-sandbox --search "$@"
