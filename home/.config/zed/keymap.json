@@ -41,8 +41,8 @@
   {
     "context": "EmptyPane || SharedScreen",
     "bindings": {
-      "space a": "agent::ToggleFocus",
-      "space shift-a": [
+      "space shift-a": "agent::ToggleFocus",
+      "space a": [
         "task::Spawn",
         {
           "task_name": "amp",
@@ -181,8 +181,8 @@
         }
       ],
       "space shift-t": "task::Spawn",
-      "space a": "agent::ToggleFocus",
-      "space shift-a": [
+      "space shift-a": "agent::ToggleFocus",
+      "space a": [
         "task::Spawn",
         {
           "task_name": "amp",
