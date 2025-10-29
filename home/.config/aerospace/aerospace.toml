@@ -1,9 +1,11 @@
 start-at-login = true
-accordion-padding = 0                                                  # 40
 enable-normalization-flatten-containers = true
 enable-normalization-opposite-orientation-for-nested-containers = true
-default-root-container-layout = 'accordion'
+default-root-container-layout = 'tiles'
 default-root-container-orientation = 'vertical'
+
+# accordion-padding = 40
+# default-root-container-layout = 'accordion'
 
 [key-mapping]
 preset = 'qwerty'
@@ -66,7 +68,7 @@ alt-shift-j = ['move down', 'mode main']
 alt-shift-k = ['move up', 'mode main']
 alt-shift-l = ['move right', 'mode main']
 
-alt-b = 'exec-and-forget ~/Developer/prototypes/utils/scripts/newwin.sh Atlas'
+alt-b = 'exec-and-forget ~/Developer/prototypes/utils/scripts/newwin.sh Chrome'
 alt-g = 'exec-and-forget open -a /Applications/Ghostty.app'
 alt-p = 'exec-and-forget open -a /Applications/Repo\ Prompt.app'
 alt-r = 'exec-and-forget open -a /Applications/Roam\ Research.app'
