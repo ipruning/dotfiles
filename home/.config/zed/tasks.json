@@ -40,7 +40,7 @@
   },
   {
     "label": "project_finder",
-    "command": "selection=$(tv git-repos); [ -n \"$selection\" ] && zed --add \"$selection\"",
+    "command": "selection=$(tv git-repos); [ -n \"$selection\" ] && zed \"$selection\"",
     "hide": "always",
     "allow_concurrent_runs": true,
     "use_new_terminal": true,
@@ -140,7 +140,7 @@
   },
   {
     "label": "zellij",
-    "command": "repo_path=$(pwd); if [[ \"$repo_path\" != \"$HOME\" ]] && git rev-parse --is-inside-work-tree >/dev/null 2>&1 && [[ \"$(git rev-parse --show-toplevel)\" == \"$repo_path\" ]]; then repo_name=repo-t-$(basename \"${repo_path}\"); zellij attach \"${repo_name}\" 2>/dev/null || zellij --session \"${repo_name}\"; fi",
+    "command": "repo_path=$(pwd); if [[ \"$repo_path\" != \"$HOME\" ]] && git rev-parse --is-inside-work-tree >/dev/null 2>&1 && [[ \"$(git rev-parse --show-toplevel)\" == \"$repo_path\" ]]; then repo_name=zed-$(basename \"${repo_path}\"); zellij attach \"${repo_name}\" 2>/dev/null || zellij --session \"${repo_name}\"; fi",
     "hide": "always",
     "allow_concurrent_runs": true,
     "use_new_terminal": true,
