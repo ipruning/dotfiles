@@ -42,56 +42,6 @@
   "[typst]": {
     "editor.wordSeparators": "`~!@#$%^&*()=+[{]}\\|;:'\",.<>/?"
   },
-  "amp.permissions": [
-    {
-      "action": "ask",
-      "matches": {
-        "cmd": [
-          "*rm*-rf*",
-          "*rm*-r*--force*",
-          "*rm*--force*-r*"
-        ]
-      },
-      "tool": "Bash"
-    },
-    {
-      "action": "ask",
-      "matches": {
-        "cmd": [
-          "*find*-exec*",
-          "*find*-delete*"
-        ]
-      },
-      "tool": "Bash"
-    },
-    {
-      "action": "ask",
-      "matches": {
-        "cmd": [
-          "*git*push*--force*",
-          "*git*push*-f*"
-        ]
-      },
-      "tool": "Bash"
-    },
-    {
-      "action": "ask",
-      "matches": {
-        "cmd": [
-          "sudo*",
-          "su*",
-          "*chmod*777*",
-          "*chown*root*"
-        ]
-      },
-      "tool": "Bash"
-    },
-    {
-      "action": "allow",
-      "matches": {},
-      "tool": "*"
-    }
-  ],
   "autocorrect.formatOnSave": false,
   "beancount.fixedCJKWidth": true,
   "beancount.mainBeanFile": "~/Databases/Ledger/main.bean",
@@ -134,7 +84,6 @@
   "code-runner.preserveFocus": false,
   "code-runner.runInTerminal": true,
   "code-runner.saveFileBeforeRun": true,
-  "cursor.agent_layout_browser_beta_setting": true,
   "cursor.cmdk.useThemedDiffBackground2": false,
   "cursor.composer.collapsePaneInputBoxPills": true,
   "cursor.composer.queueMessageDefaultBehavior": "queue",
@@ -308,8 +257,6 @@
   "git.enableSmartCommit": true,
   "git.openRepositoryInParentFolders": "never",
   "json.maxItemsComputed": 8192,
-  "lldb.launch.expressions": "native",
-  "lldb.library": "/Library/Developer/CommandLineTools/Library/PrivateFrameworks/LLDB.framework/Versions/A/LLDB",
   "markdown.suggest.paths.enabled": true,
   "markdown.validate.enabled": true,
   "markdownlint.config": {
@@ -327,55 +274,12 @@
     "MD041": false,
     "MD045": false
   },
-  "multiCommand.commands": [
-    {
-      "command": "multiCommand.pageUp",
-      "sequence": [
-        {
-          "args": {
-            "by": "wrappedLine",
-            "to": "up",
-            "value": 32
-          },
-          "command": "editorScroll"
-        },
-        {
-          "args": {
-            "to": "viewPortCenter"
-          },
-          "command": "cursorMove"
-        }
-      ]
-    },
-    {
-      "command": "multiCommand.pageDown",
-      "sequence": [
-        {
-          "args": {
-            "by": "wrappedLine",
-            "to": "down",
-            "value": 32
-          },
-          "command": "editorScroll"
-        },
-        {
-          "args": {
-            "to": "viewPortCenter"
-          },
-          "command": "cursorMove"
-        }
-      ]
-    }
-  ],
   "notebook.cellToolbarLocation": {
     "default": "right",
     "jupyter-notebook": "left"
   },
   "notebook.formatOnSave.enabled": true,
   "path-autocomplete.triggerOutsideStrings": true,
-  "python.analysis.autoFormatStrings": true,
-  "python.analysis.inlayHints.variableTypes": false,
-  "python.analysis.typeCheckingMode": "basic",
   "python.languageServer": "None",
   "python.terminal.activateEnvironment": false,
   "redhat.telemetry.enabled": false,
@@ -538,7 +442,6 @@
   "vscode-mogami.usePrivateSource": false,
   "window.commandCenter": false,
   "window.zoomLevel": -1,
-  "workbench.activityBar.orientation": "vertical",
   "workbench.colorCustomizations": {
     "editor.lineHighlightBackground": "#1073cf2d",
     "editor.lineHighlightBorder": "#9fced11f"
