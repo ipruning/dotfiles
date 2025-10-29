@@ -9,7 +9,6 @@ beancount-language-server
 blueutil
 btop
 carapace
-coreutils
 csvlens
 difftastic
 docker
