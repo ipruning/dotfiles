@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -e
+set -u
+set -o pipefail
+
+if command -v lazydocker >/dev/null 2>&1; then
+  exec lazydocker
+else
+  exit 1
+fi

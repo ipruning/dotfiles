@@ -7,8 +7,6 @@ if command -v pbpaste >/dev/null 2>&1; then
   exec pbpaste
 elif command -v xclip >/dev/null 2>&1; then
   exec xclip -selection clipboard -o
-elif [[ -e /tmp/clipboard ]]; then
-  exec cat /tmp/clipboard
 else
-  echo ''
+  exit 1
 fi
