@@ -6,11 +6,6 @@ if ("/opt/homebrew/bin" | path exists) {
   path add "/opt/homebrew/bin"
 }
 
-# 👇 Mise Shims Path
-if ("~/.local/share/mise/shims" | path exists) {
-  path add "~/.local/share/mise/shims"
-}
-
 # 👇 Starship
 $env.STARSHIP_CONFIG = ($nu.home-path | path join ".config/starship.toml")
 $env.STARSHIP_SHELL = "nu"
@@ -58,7 +53,7 @@ $env.config = (
 )
 
 # 👇 Table Mode
-$env.config.table.mode = 'psql'
+# $env.config.table.mode = 'psql'
 
 # 👇 Carapace
 source ~/.cache/carapace/init.nu
@@ -82,3 +77,6 @@ $env.config.history = {
 
 # 👇 Atuin
 source ~/.local/share/atuin/init.nu
+
+# 👇 Mise
+source ($nu.default-config-dir | path join mise.nu)
