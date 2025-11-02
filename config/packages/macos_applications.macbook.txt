@@ -29,6 +29,7 @@ Drafts
 Eagle
 Eudic
 Ghostty
+GitButler
 Google Chrome
 Google Docs
 Google Drive
