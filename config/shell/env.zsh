@@ -38,19 +38,21 @@ bindkey "^E" end-of-line
 bindkey "^F" forward-char
 
 # 👇 Editor
-if [[ "$TERM_PROGRAM" == "vscode" ]]; then
-  export EDITOR="/usr/local/bin/cursor --wait"
-  export VISUAL="$EDITOR"
-fi
+if [[ $OSTYPE == darwin* ]]; then
+  if [[ "$TERM_PROGRAM" == "vscode" ]]; then
+    export EDITOR="/usr/local/bin/cursor --wait"
+    export VISUAL="$EDITOR"
+  fi
 
-if [[ "$TERM_PROGRAM" == "zed" ]]; then
-  export EDITOR="/opt/homebrew/bin/zed --wait"
-  export VISUAL="$EDITOR"
-fi
+  if [[ "$TERM_PROGRAM" == "zed" ]]; then
+    export EDITOR="/opt/homebrew/bin/zed --wait"
+    export VISUAL="$EDITOR"
+  fi
 
-if [[ "$TERM_PROGRAM" == "ghostty" ]]; then
-  export EDITOR="/opt/homebrew/bin/nvim"
-  export VISUAL="$EDITOR"
+  if [[ "$TERM_PROGRAM" == "ghostty" ]]; then
+    export EDITOR="/opt/homebrew/bin/nvim"
+    export VISUAL="$EDITOR"
+  fi
 fi
 
 # 👇 Functions
@@ -87,10 +89,9 @@ function y() {
 }
 
 # 👇 atuin
-eval "$(atuin init zsh --disable-up-arrow)"
-# if command -v atuin >/dev/null 2>&1; then
-#   source "$HOME/dotfiles/config/shell/functions/atuin.zsh"
-# fi
+if command -v atuin >/dev/null 2>&1; then
+  eval "$(atuin init zsh --disable-up-arrow)"
+fi
 
 # 👇 tv
 _tv_search() {
@@ -159,7 +160,9 @@ if [[ -f "$ZSH_PLUGINS_DIR"/fast-syntax-highlighting/fast-syntax-highlighting.pl
 fi
 
 # 👇 mysql
-export PKG_CONFIG_PATH="$(brew --prefix mysql-client)/lib/pkgconfig:$PKG_CONFIG_PATH"
+if command -v brew >/dev/null 2>&1; then
+  export PKG_CONFIG_PATH="$(brew --prefix mysql-client)/lib/pkgconfig:$PKG_CONFIG_PATH"
+fi
 
 # 👇 mise
 if command -v mise >/dev/null 2>&1; then
