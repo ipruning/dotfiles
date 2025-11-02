@@ -1,4 +1,4 @@
-# 我的 dotfiles
+# README
 
 <!--rehype:style=font-size: 38px; border-bottom: 0; display: flex; min-height: 260px; align-items: center; justify-content: center;-->
 
@@ -6,7 +6,7 @@
 
 <!--rehype:style=text-align: center;-->
 
-## 更新日志
+## ChangeLog
 
 - 2025-06-24 更新 README，包含最新工具、结构和详细文档
 - 2025-06-23 完全重写 README，添加详细文档
