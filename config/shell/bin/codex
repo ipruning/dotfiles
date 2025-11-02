@@ -26,4 +26,4 @@ if [[ -z "$REAL_CODEX" ]]; then
 fi
 
 exec env -u OPENAI_API_KEY -u OPENAI_BASE_URL \
-  "$REAL_CODEX" --dangerously-bypass-approvals-and-sandbox --search "$@"
+  "$REAL_CODEX" --dangerously-bypass-approvals-and-sandbox --enable web_search_request "$@"
