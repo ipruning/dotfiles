@@ -15,6 +15,11 @@ starship init nu | save -f ($nu.data-dir | path join "vendor/autoload/starship.n
 # 👇 Zoxide
 source ~/.zoxide.nu
 
+# 👇 Completions
+$env.config = ($env.config | upsert completions {
+  case_sensitive: false
+})
+
 # 👇 Television
 def tv_smart_autocomplete [] {
     let line = (commandline)
