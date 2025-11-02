@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -e
+set -u
+set -o pipefail
+
+if command -v yazi >/dev/null 2>&1; then
+  exec yazi
+else
+  exit 1
+fi

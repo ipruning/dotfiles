@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -e
+set -u
+set -o pipefail
+
+if [[ $OSTYPE == linux* ]]; then
+  exec ss -tulpn
+elif [[ $OSTYPE == darwin* ]]; then
+  if command -v viddy >/dev/null 2>&1; then
+    exec viddy --interval 1s 'lsof -i @127.0.0.1 | grep LISTEN'
+  else
+    exec lsof -i @127.0.0.1 | grep LISTEN
+  fi
+else
+  exit 1
+fi

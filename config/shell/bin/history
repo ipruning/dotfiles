@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -e
+set -u
+set -o pipefail
+
+if command -v atuin &> /dev/null; then
+  exec atuin history list --format '{time} - [{duration}] - {command}'
+else
+  exec history 1
+fi

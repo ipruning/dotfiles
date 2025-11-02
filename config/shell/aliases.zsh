@@ -1,51 +1,33 @@
-alias df="df -h"
-alias du="du -h"
-alias free="free -h"
-alias grep="grep --color=auto"
-
+# 👇 Linux
 alias ...="cd ../.."
+
 alias ..="cd .."
 
-if command -v atuin &> /dev/null; then
-  alias history="atuin history list --format '{time} - [{duration}] - {command}'"
-else
-  alias history="history 1"
-fi
+alias df="df -h"
 
-if command -v eza &> /dev/null; then
-  alias ll="eza --all --git --group-directories-first --header --long --time-style long-iso"
-  alias ls="eza"
-  alias lt="eza --all --git --group-directories-first --header --long --time-style long-iso --tree"
-else
-  alias ll="ls -lAh"
-  alias ls="ls --color=auto"
-fi
+alias du="du -h"
 
-if command -v bat &> /dev/null; then
-  alias cat="bat"
-fi
+alias free="free -h"
 
-alias cdr='cd $(git rev-parse --show-toplevel)'
-alias d="lazydocker"
-alias dateutc="date -u +%Y-%m-%dT%H:%M:%SZ"
-alias g="lazygit"
+alias grep="grep --color=auto"
+
+alias ls="ls --color=auto"
+
 alias q="exit"
+
 alias rsyncssh="rsync -Pr --rsh=ssh"
 
-if [[ $OSTYPE == linux* ]]; then
-  alias ports="ss -tulpn"
-fi
+alias cdr='cd $(git rev-parse --show-toplevel)'
 
+# 👇 macOS
 if [[ $OSTYPE == darwin* ]]; then
   alias jr="jump-to-repo"
-  alias js="jump-to-session"
-  alias keyboardmaestro="/Applications/Keyboard\ Maestro.app/Contents/MacOS/keyboardmaestro"
-  alias ports="viddy --interval 1s 'lsof -i @127.0.0.1 | grep LISTEN'"
-  alias surge="/Applications/Surge.app/Contents/Applications/surge-cli"
 
-  function repoprompt() {
-    open "repoprompt://open/$(pwd)"
-  }
+  alias js="jump-to-session"
+
+  alias keyboardmaestro="/Applications/Keyboard\ Maestro.app/Contents/MacOS/keyboardmaestro"
+
+  alias surge="/Applications/Surge.app/Contents/Applications/surge-cli"
 fi
 
 jt () {
