@@ -161,7 +161,7 @@ fi
 # 👇 mysql
 export PKG_CONFIG_PATH="$(brew --prefix mysql-client)/lib/pkgconfig:$PKG_CONFIG_PATH"
 
-# 👇 mise hook-env
+# 👇 mise
 if command -v mise >/dev/null 2>&1; then
   eval "$(mise activate zsh)"
 fi
