@@ -20,6 +20,7 @@ fd
 ffmpeg
 fio
 fish
+flock
 flyctl
 fpp
 fzf
@@ -49,6 +50,7 @@ mycli
 mysql-client
 neovim
 nushell
+opam
 ouch
 ov
 pandoc
@@ -79,7 +81,6 @@ temporal
 terminal-notifier
 tmux
 tokei
-tree
 trufflehog
 trzsz-ssh
 typst
