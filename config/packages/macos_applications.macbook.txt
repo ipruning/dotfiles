@@ -111,6 +111,7 @@ VirtualBuddy
 WeChat
 Whisper Transcription
 Wireshark
+Wispr Flow
 Wooshy
 Xcodes
 YACReader
