@@ -91,7 +91,6 @@ Setapp
 Skim
 Steam
 Stratoshark
-superwhisper
 Surfingkeys
 Surge
 Suspicious Package
@@ -109,7 +108,6 @@ uBlock Origin Lite
 VideoFusion-macOS
 VirtualBuddy
 WeChat
-Whisper Transcription
 Wireshark
 Wispr Flow
 Wooshy
