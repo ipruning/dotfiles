@@ -7,7 +7,20 @@ $env.CARAPACE_BRIDGES = 'zsh,fish,bash,inshellisense'
 mkdir ~/.cache/carapace
 /opt/homebrew/bin/carapace _carapace nushell | save --force ~/.cache/carapace/init.nu
 
+# 👇 Functions
+def open-repo [cwd: string = "nvim"] {
+  let r = (tv git-repos | default "")
+  if $r != "" { ^$cwd $r }
+}
+
+def jump-repo [cwd: string = "cd"] {
+  let r = (tv git-repos | default "")
+  if $r != "" { ^$cwd $r }
+}
+
 # 👇 Alias
+alias jr = jump-repo
+alias or = open-repo
 alias q = exit
 
 # 👇 Mise
