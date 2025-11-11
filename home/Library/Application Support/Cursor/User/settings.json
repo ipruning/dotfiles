@@ -1,4 +1,7 @@
 {
+  "[jsonc]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
   "[latex]": {
     "editor.acceptSuggestionOnEnter": "on",
     "editor.defaultFormatter": "James-Yu.latex-workshop",
@@ -88,6 +91,7 @@
   "cursor.composer.collapsePaneInputBoxPills": true,
   "cursor.composer.queueMessageDefaultBehavior": "queue",
   "cursor.composer.shouldChimeAfterChatFinishes": true,
+  "cursor.composer.textSizeScale": 1.15,
   "cursor.windowSwitcher.sidebarHoverCollapsed": true,
   "cursorpyright.analysis.typeCheckingMode": "basic",
   "diffEditor.ignoreTrimWhitespace": false,
@@ -183,7 +187,7 @@
     "*.w": "$(capture).*.w, I$(capture).w",
     "*.wat": "$(capture).wasm",
     "*.xaml": "$(capture).xaml.cs",
-    "//": "Last update at 10/30/2025, 2:44:25 AM",
+    "//": "Last update at 11/9/2025, 1:41:54 AM",
     "+layout.svelte": "+layout.ts,+layout.ts,+layout.js,+layout.server.ts,+layout.server.js,+layout.gql",
     "+page.svelte": "+page.server.ts,+page.server.js,+page.ts,+page.js,+page.gql",
     "AGENTS.md": ".clinerules, .cursorrules, .replit.md, .windsurfrules, AGENT.md, CLAUDE.md, GEMINI.md",
@@ -436,7 +440,7 @@
   ],
   "vim.useSystemClipboard": true,
   "vim.vimrc.enable": true,
-  "vscode-mogami.concurrency": 20,
+  "vscode-mogami.concurrency": 8,
   "vscode-mogami.enableCodeLens": true,
   "vscode-mogami.usePrivateSource": false,
   "window.commandCenter": false,
