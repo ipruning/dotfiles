@@ -6,9 +6,11 @@ $directory\
 $git_branch\
 $git_status\
 $package\
+$custom\
+$shell\
 $cmd_duration\
 $battery
-$character
+$character\
 """
 add_newline = false
 command_timeout = 1_000
@@ -59,16 +61,23 @@ threshold = 20
 [[battery.display]]
 threshold = 30
 
+[shell]
+disabled = false
+style = "bold dimmed white"
+nu_indicator = ""
+
 [custom.git_user]
 command = "git config --get user.name"
-when = "git rev-parse --git-dir 2>/dev/null"
+format = '[\[$symbol$output\]]($style) '
+require_repo = true
+style = "bold dimmed yellow"
 symbol = ""
-style = "cyan bold"
-format = '[$symbol$output]($style)'
+when = true
 
-[custom.git_email]
-command = "git config --get user.email"
-when = "git rev-parse --git-dir 2>/dev/null"
-symbol = ""
-style = "yellow bold"
-format = '[$symbol$output]($style)'
+# [custom.git_email]
+# command = "git config --get user.email"
+# format = '[$symbol$output]($style) '
+# require_repo = true
+# style = "bold dimmed yellow"
+# symbol = ""
+# when = true
