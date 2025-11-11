@@ -58,7 +58,7 @@ $env.config = (
 )
 
 # 👇 Table Mode
-# $env.config.table.mode = 'psql'
+$env.config.table.mode = 'psql'
 
 # 👇 Carapace
 source ~/.cache/carapace/init.nu
@@ -81,7 +81,7 @@ $env.config.history = {
 }
 
 # 👇 Atuin
-source ~/.local/share/atuin/init.nu
+# source ~/.local/share/atuin/init.nu
 
 # 👇 Mise
 source ($nu.default-config-dir | path join mise.nu)
