@@ -62,7 +62,7 @@
   "project_panel": {
     "dock": "left"
   },
-  "relative_line_numbers": true,
+  "relative_line_numbers": "enabled",
   "restore_on_startup": "last_session",
   "scroll_beyond_last_line": "off",
   "scrollbar": {
@@ -92,7 +92,7 @@
       "custom": 1.5
     },
     "shell": {
-      "program": "nu"
+      "program": "/opt/homebrew/bin/nu"
     },
     "toolbar": {
       "breadcrumbs": false
