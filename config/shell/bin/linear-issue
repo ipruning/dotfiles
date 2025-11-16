@@ -1,0 +1,127 @@
+#!/usr/bin/env nu
+
+# TODO: 与 Linear 以及 Amp 联动
+def main [branch: string]: nothing -> string {
+  let root = (pwd)
+
+  let git_dir = (
+    [$root, ".git"]
+    | path join
+  )
+
+  if (not ($git_dir | path exists)) {
+    print "linear-issue must be run inside a git repository (run it from the repo root)."
+    exit 1
+  }
+
+  let current_branch = (git branch --show-current | str trim)
+  let display_branch = (
+    if (($current_branch | str length) == 0) {
+      "detached HEAD"
+    } else {
+      $current_branch
+    }
+  )
+
+  let env_bases_raw = $env.LINEAR_ISSUE_BASE_BRANCHES?
+  let env_bases = (
+    if ($env_bases_raw == null) {
+      []
+    } else {
+      $env_bases_raw
+      | split row ","
+      | each {|it| $it | str trim }
+      | where {|it| $it != "" }
+    }
+  )
+
+  let base_branches = (
+    if (($env_bases | length) == 0) {
+      ["main", "master"]
+    } else {
+      $env_bases
+    }
+  )
+
+  let base_branches_str = ($base_branches | str join ", ")
+
+  if (not ($current_branch in $base_branches)) {
+    let err_msg = $'linear-issue must run from one of: ($base_branches_str).
+Current worktree: ($display_branch)
+Tip: cd ($root) && git checkout ($base_branches.0)'
+
+    print $err_msg
+    exit 1
+  }
+
+  let root_override = $env.LINEAR_ISSUE_ROOT?
+  let developer_dir = (
+    if ($root_override == null) {
+      [$env.HOME, "Developer"]
+      | path join
+      | path expand
+    } else {
+      $root_override
+      | path expand
+    }
+  )
+
+  if (not ($developer_dir | path exists)) {
+    mkdir $developer_dir
+  }
+
+  let worktree_dirs = (
+    git worktree list --porcelain
+    | lines
+    | where {|line| $line | str starts-with "worktree "}
+    | each {|line| $line | str replace -r "^worktree " "" }
+  )
+
+  mut dir = (
+    [$developer_dir, $branch]
+    | path join
+    | path expand
+  )
+
+  if (not ($dir in $worktree_dirs)) {
+    if ($dir | path exists) {
+      mut suffix = 1
+      loop {
+        let candidate = (
+          [$developer_dir, $"($branch)-($suffix)"]
+          | path join
+          | path expand
+        )
+
+        if (
+          (not ($candidate | path exists))
+          and (not ($candidate in $worktree_dirs))
+        ) {
+          $dir = $candidate
+          break
+        }
+
+        $suffix = $suffix + 1
+      }
+    }
+  }
+
+  let worktree_exists = ($dir in $worktree_dirs)
+
+  if (not $worktree_exists) {
+    let branch_exists = (try {
+      git show-ref --verify --quiet $"refs/heads/($branch)"
+      true
+    } catch {
+      false
+    })
+
+    if $branch_exists {
+      git worktree add $dir $branch
+    } else {
+      git worktree add $dir -b $branch
+    }
+  }
+
+  $dir
+}
