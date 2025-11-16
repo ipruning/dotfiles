@@ -135,5 +135,10 @@ version = 2 # https://blog.github.com/changelog/2018-11-08-git-protocol-v2-suppo
 [log]
 date = iso
 
+[gitbutler]
+aiOpenAIKeyOption = bringYourOwn
+aiOpenAIModelName = gpt-5-mini
+aiModelProvider = openai
+
 [include]
 path = ~/Developer/.gitconfig
