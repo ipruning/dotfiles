@@ -5,7 +5,6 @@ $hostname\
 $directory\
 $git_branch\
 $git_status\
-$package\
 $custom\
 $cmd_duration\
 $battery\
@@ -38,22 +37,33 @@ truncation_symbol = ".../"
 [git_branch]
 format = "[$branch]($style) "
 
-[package]
-format = '[$version]($style) '
+[custom.git_user]
+command = "git config --get user.name"
+format = '[\[$symbol$output\]]($style) '
+require_repo = true
+style = "bold dimmed yellow"
+when = true
+
+# [custom.git_email]
+# command = "git config --get user.email"
+# format = '[$symbol$output]($style) '
+# require_repo = true
+# style = "bold dimmed yellow"
+# symbol = ""
+# when = true
+
+# [custom.modal_profile]
+# command = "modal profile current"
+# format = '[\[$symbol$output\]]($style) '
+# require_repo = true
+# style = "bold dimmed yellow"
+# when = "command -v modal"
 
 [cmd_duration]
 format = '[$duration]($style) '
 min_time = 10_000
 min_time_to_notify = 100_000
 show_milliseconds = false
-
-[character]
-success_symbol = '[\$](bold green)'
-error_symbol = '[\$](bold red)'
-vimcmd_symbol = '[<](bold green)'
-vimcmd_replace_one_symbol = '[<](bold purple)'
-vimcmd_replace_symbol = '[<](bold bold purple)'
-vimcmd_visual_symbol = '[<](bold yellow)'
 
 [[battery.display]]
 threshold = 20
@@ -66,18 +76,10 @@ disabled = false
 style = "bold dimmed white"
 nu_indicator = ""
 
-[custom.git_user]
-command = "git config --get user.name"
-format = '[\[$symbol$output\]]($style) '
-require_repo = true
-style = "bold dimmed yellow"
-symbol = ""
-when = true
-
-# [custom.git_email]
-# command = "git config --get user.email"
-# format = '[$symbol$output]($style) '
-# require_repo = true
-# style = "bold dimmed yellow"
-# symbol = ""
-# when = true
+[character]
+success_symbol = '[\$](bold green)'
+error_symbol = '[\$](bold red)'
+vimcmd_symbol = '[<](bold green)'
+vimcmd_replace_one_symbol = '[<](bold purple)'
+vimcmd_replace_symbol = '[<](bold bold purple)'
+vimcmd_visual_symbol = '[<](bold yellow)'
