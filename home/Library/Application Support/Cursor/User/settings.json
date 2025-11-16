@@ -75,9 +75,9 @@
   "code-runner.clearPreviousOutput": false,
   "code-runner.enableAppInsights": false,
   "code-runner.executorMap": {
-    "javascript": "bun run",
-    "python": "uv run",
-    "typescript": "deno run --allow-env --allow-net"
+    "javascript": "mise exec -- bun run",
+    "python": "mise exec -- uv run",
+    "typescript": "mise exec -- deno run --allow-env --allow-net"
   },
   "code-runner.executorMapByGlob": {
     "*.typ": "typst"
@@ -103,7 +103,7 @@
   "editor.cursorBlinking": "solid",
   "editor.cursorSmoothCaretAnimation": "on",
   "editor.fontFamily": "'MonoLisa', 'Maple Mono NF CN'",
-  "editor.fontSize": 13,
+  "editor.fontSize": 12,
   "editor.fontWeight": "400",
   "editor.formatOnSave": true,
   "editor.guides.bracketPairs": true,
@@ -287,6 +287,7 @@
   "python.terminal.activateEnvironment": false,
   "redhat.telemetry.enabled": false,
   "ruff.configurationPreference": "filesystemFirst",
+  "security.promptForLocalFileProtocolHandling": false,
   "shellcheck.customArgs": [],
   "shellcheck.enable": true,
   "shellcheck.enableQuickFix": true,
@@ -329,7 +330,7 @@
   "sqlfluff.executablePath": "/opt/homebrew/bin/sqlfluff",
   "svelte.enable-ts-plugin": true,
   "terminal.integrated.confirmOnExit": "hasChildProcesses",
-  "terminal.integrated.fontSize": 13,
+  "terminal.integrated.fontSize": 12,
   "terminal.integrated.fontWeight": "400",
   "terminal.integrated.inheritEnv": true,
   "terminal.integrated.scrollback": 50000,
