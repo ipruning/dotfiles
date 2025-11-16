@@ -7,9 +7,9 @@ $git_branch\
 $git_status\
 $package\
 $custom\
-$shell\
 $cmd_duration\
-$battery
+$battery\
+$shell
 $character\
 """
 add_newline = false
