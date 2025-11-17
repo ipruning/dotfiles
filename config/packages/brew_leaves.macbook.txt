@@ -24,6 +24,7 @@ flock
 flyctl
 fpp
 fzf
+geesefs
 gh
 git-delta
 git-extras
@@ -66,7 +67,6 @@ rainfrog
 rclone
 riff
 rip2
-ruby
 rust-parallel
 rustscan
 shellcheck
