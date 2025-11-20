@@ -1,4 +1,4 @@
-集換社 - トレカ総合アプリ
+カドラバ - トレカ総合アプリ
 .Karabiner-VirtualHIDDevice-Manager
 1Password
 1Password for Safari
@@ -8,6 +8,7 @@ AeroSpace
 Alfred 5
 AltTab
 Anki
+Antigravity
 Audio Hijack
 Avenue
 BaiduNetdisk_mac
@@ -23,6 +24,7 @@ CrossOver
 Cursor
 DaisyDisk
 Dark Reader for Safari
+DataGrip
 Day One
 DEVONthink 3
 Drafts

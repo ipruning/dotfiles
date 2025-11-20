@@ -25,6 +25,7 @@ flyctl
 fpp
 fzf
 geesefs
+gemini-cli
 gh
 git-delta
 git-extras
