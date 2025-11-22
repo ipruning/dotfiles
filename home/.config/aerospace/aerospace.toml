@@ -1,12 +1,12 @@
 start-at-login = true
 
-default-root-container-layout = 'accordion'
+# default-root-container-layout = 'accordion'
 default-root-container-orientation = 'vertical'
 enable-normalization-flatten-containers = true
 enable-normalization-opposite-orientation-for-nested-containers = true
 
-# accordion-padding = 0
-# default-root-container-layout = 'tiles'
+accordion-padding = 0
+default-root-container-layout = 'tiles'
 
 [key-mapping]
 preset = 'qwerty'
