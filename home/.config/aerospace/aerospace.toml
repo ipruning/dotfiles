@@ -1,12 +1,12 @@
 start-at-login = true
+
+default-root-container-layout = 'accordion'
+default-root-container-orientation = 'vertical'
 enable-normalization-flatten-containers = true
 enable-normalization-opposite-orientation-for-nested-containers = true
-# default-root-container-layout = 'tiles'
-default-root-container-orientation = 'vertical'
-# accordion-padding = 0
 
-accordion-padding = 40
-default-root-container-layout = 'accordion'
+# accordion-padding = 0
+# default-root-container-layout = 'tiles'
 
 [key-mapping]
 preset = 'qwerty'
@@ -19,16 +19,16 @@ outer.bottom = 0
 outer.top = 0
 outer.right = 0
 
-# [workspace-to-monitor-force-assignment]
-# 1 = 1
-# 2 = 1
-# 3 = 1
-# 4 = 1
-# 5 = 1
-# 6 = 2
-# 7 = 2
-# 8 = 2
-# 9 = 2
+[workspace-to-monitor-force-assignment]
+1 = 2
+2 = 2
+3 = 2
+4 = 2
+5 = 2
+6 = 1
+7 = 1
+8 = 1
+9 = 1
 
 [mode.main.binding]
 alt-shift-p = 'mode pass'
