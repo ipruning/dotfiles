@@ -62,7 +62,8 @@ when = true
 [cmd_duration]
 format = '[$duration]($style) '
 min_time = 10_000
-min_time_to_notify = 100_000
+min_time_to_notify = 3600_000
+show_notifications = false
 show_milliseconds = false
 
 [[battery.display]]
