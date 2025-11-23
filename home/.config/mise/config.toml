@@ -10,7 +10,10 @@ ruby = "latest"
 rust = "latest"
 zig = "latest"
 
+"github:schpet/linear-cli" = "latest"
 "npm:autocorrect-node" = "latest"
+"npm:branchlet" = "latest"
+"npm:linearis" = "latest"
 biome = "latest"
 
 # "cargo:bartib" = "latest"
@@ -125,6 +128,9 @@ biome = "latest"
 [settings]
 idiomatic_version_file_enable_tools = ["python"]
 trusted_config_paths = ['~/Developer']
+
+[settings.npm]
+bun = true
 
 [env]
 _.path = [

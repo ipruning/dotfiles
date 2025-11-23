@@ -106,9 +106,11 @@ TestFlight
 The Powder Toy
 Things3
 TickTick
+Trimmy
 uBlock Origin Lite
 VideoFusion-macOS
 VirtualBuddy
+Warp
 WeChat
 Wireshark
 Wispr Flow
