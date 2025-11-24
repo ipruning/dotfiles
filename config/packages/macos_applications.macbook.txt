@@ -90,6 +90,7 @@ Scapple
 Screen Studio
 Scrolla
 Setapp
+Shottr
 Skim
 Steam
 Stratoshark
