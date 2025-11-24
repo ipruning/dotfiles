@@ -63,6 +63,7 @@ pgcli
 pkgconf
 postgresql@18
 procs
+pscale
 pueue
 rainfrog
 rclone
@@ -72,6 +73,7 @@ ripgrep
 rust-parallel
 rustscan
 shellcheck
+sk
 sqlfluff
 sshx
 starship
