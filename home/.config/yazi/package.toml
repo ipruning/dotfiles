@@ -35,8 +35,8 @@ hash = "c2021386289a0cbb3e152a052f67c177"
 
 [[plugin.deps]]
 use = "ndtoan96/ouch"
-rev = "0742fff"
-hash = "2bd799b42b8e42b8ef100310be71f8d1"
+rev = "41d68cd"
+hash = "c7790dd555aee4adf4d125e200ea8611"
 
 [[plugin.deps]]
 use = "aresler/path-from-root"
