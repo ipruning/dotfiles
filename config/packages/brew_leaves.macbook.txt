@@ -2,7 +2,6 @@ asciinema
 ast-grep
 atuin
 awscli
-bash
 bat
 beancount
 beancount-language-server
@@ -99,4 +98,3 @@ yq
 zellij
 zet
 zoxide
-zsh

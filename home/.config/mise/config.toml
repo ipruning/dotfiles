@@ -128,9 +128,4 @@ trusted_config_paths = ['~/Developer']
 bun = true
 
 [env]
-_.path = [
-  "~/.local/bin",
-  "~/dotfiles/config/shell/bin",
-  "~/Developer/prototypes/utils/scripts",
-  "~/Developer/prototypes/utils/bin",
-]
+_.path = ["~/.local/bin", "~/dotfiles/config/shell/bin"]
