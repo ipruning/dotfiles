@@ -13,6 +13,8 @@ home/.config/fish/completions/
 config/shell/plugins/
 home/.config/zellij/plugins/
 
+config/shell/bin/zbg
+
 *private*
 
 !*tpl*

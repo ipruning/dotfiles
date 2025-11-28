@@ -27,6 +27,7 @@ Dark Reader for Safari
 DataGrip
 Day One
 DEVONthink 3
+Discord
 Drafts
 Eagle
 Eudic
