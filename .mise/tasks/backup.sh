@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#MISE description="Back up your application files"
+#MISE description="Backup your dotfiles"
 
 set -euo pipefail
 

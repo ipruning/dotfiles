@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#MISE description="Initialize Monorepo CI/CD tools"
+#MISE description="Initialize dotfiles"
 
 set -euo pipefail
 

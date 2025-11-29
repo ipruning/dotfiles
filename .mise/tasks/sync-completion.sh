@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#MISE description="Sync CLI Tools Completions"
+#MISE description="Sync shell completion files"
 
 set -euo pipefail
 
