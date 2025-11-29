@@ -1,21 +1,21 @@
 [[plugin.deps]]
 use = "yazi-rs/plugins:smart-enter"
-rev = "2301ff8"
+rev = "eaf6920"
 hash = "56fdabc96fc1f4d53c96eb884b02a5be"
 
 [[plugin.deps]]
 use = "yazi-rs/plugins:toggle-pane"
-rev = "2301ff8"
+rev = "eaf6920"
 hash = "8a7c58225816a163a6e8730c0adafbc8"
 
 [[plugin.deps]]
 use = "yazi-rs/plugins:mount"
-rev = "2301ff8"
+rev = "eaf6920"
 hash = "4fccaaf10c36dc2466e2438a386ff017"
 
 [[plugin.deps]]
 use = "yazi-rs/plugins:diff"
-rev = "2301ff8"
+rev = "eaf6920"
 hash = "82376c3381ae915fd799d40f4dd4c6cd"
 
 [[plugin.deps]]
@@ -35,8 +35,8 @@ hash = "c2021386289a0cbb3e152a052f67c177"
 
 [[plugin.deps]]
 use = "ndtoan96/ouch"
-rev = "41d68cd"
-hash = "c7790dd555aee4adf4d125e200ea8611"
+rev = "cfb9140"
+hash = "b5067143415bd2d46c0dfa57319ddcef"
 
 [[plugin.deps]]
 use = "aresler/path-from-root"
@@ -45,17 +45,17 @@ hash = "5022fdb08fcb05c10eb59b63663edb10"
 
 [[plugin.deps]]
 use = "yazi-rs/plugins:vcs-files"
-rev = "2301ff8"
+rev = "eaf6920"
 hash = "4ee57085277d616acfa0ef1fef37dc00"
 
 [[plugin.deps]]
 use = "yazi-rs/plugins:full-border"
-rev = "2301ff8"
+rev = "eaf6920"
 hash = "3996fc74044bc44144b323686f887e1"
 
 [[plugin.deps]]
 use = "yazi-rs/plugins:git"
-rev = "2301ff8"
+rev = "eaf6920"
 hash = "27ca02f49fd236b5cc7bf03c243859fe"
 
 [flavor]
