@@ -5,6 +5,7 @@ set -euo pipefail
 
 cd "$(git rev-parse --show-toplevel)" || exit 1
 
+command -v git >/dev/null 2>&1 || exit 1
 command -v mise >/dev/null 2>&1 || exit 1
 command -v uv >/dev/null 2>&1 || exit 1
 
