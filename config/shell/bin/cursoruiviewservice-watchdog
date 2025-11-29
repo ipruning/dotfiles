@@ -1,0 +1,50 @@
+#!/bin/bash
+
+set -e
+set -u
+set -o pipefail
+
+APP="${1:-CursorUIViewService}"
+
+is_hung=$(/usr/bin/osascript - "$APP" <<'AS'
+on run argv
+  set pname to item 1 of argv
+  tell application "System Events"
+    if not (exists process pname) then return false
+  end tell
+  try
+    with timeout of 1 seconds
+      tell application "System Events"
+        set _ to value of attribute "AXFocusedUIElement" of process pname
+      end tell
+    end timeout
+    return false
+  on error errMsg number errNum
+    if errNum is -1712 then
+      return true
+    else
+      return false
+    end if
+  end try
+end run
+AS
+)
+
+time_now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+if [[ "$is_hung" = "true" ]]; then
+  echo "$time_now - $APP is hung"
+
+  mapfile -t pids < <(/usr/bin/pgrep -x "$APP" || true)
+
+  if (( ${#pids[@]} )); then
+    /bin/kill -TERM "${pids[@]}" 2>/dev/null || true
+    /bin/sleep 2
+    mapfile -t pids < <(/usr/bin/pgrep -x "$APP" || true)
+    if (( ${#pids[@]} )); then
+      /bin/kill -KILL "${pids[@]}" 2>/dev/null || true
+    fi
+    echo "$time_now - $APP is killed"
+  fi
+else
+  echo "$time_now - $APP is not hung"
+fi
