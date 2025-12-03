@@ -65,6 +65,7 @@ procs
 pscale
 psviderski/tap/uncloud
 pueue
+qpdf
 rainfrog
 rclone
 riff
@@ -73,6 +74,7 @@ rust-parallel
 rustscan
 shellcheck
 sk
+somo
 sqlfluff
 sshx
 starship
