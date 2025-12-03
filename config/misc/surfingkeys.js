@@ -127,17 +127,8 @@ api.unmap("u", /\b(x\.com)\b/i); // Mute account
 
 api.unmapAllExcept(
   [
-    "E",
-    "R",
-    "B",
-    "F",
-    "S",
-    "D",
-    "T",
-    "p",
-    "P",
   ],
-  /excalidraw.com/,
+  /excalidraw.com|linear.app|monkeytype.com|tldraw.com|/,
 );
 
 api.unmapAllExcept(
@@ -155,5 +146,5 @@ api.unmapAllExcept(
     "p",
     "P",
   ],
-  /boot.dev|feishu.cn|localhost|monkeytype.com|motherduck.com|notion.so|roamresearch.com|sshx.io|tldraw.com|ticktick.com|linear.app|photos.google.com|192.168.31.145|100.116.21.100/,
+  /boot.dev|feishu.cn|motherduck.com|notion.so|photos.google.com|roamresearch.com|sshx.io|/,
 );
