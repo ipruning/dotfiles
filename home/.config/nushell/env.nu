@@ -30,3 +30,7 @@ let mise_path = $nu.default-config-dir | path join mise.nu
   | where not ($it | str starts-with "hide,") and not ($it | str starts-with "set,")
   | str join (char newline)
   | save $mise_path --force
+
+# 👇 Private Environment Variables
+const private_env = "~/.config/nushell/env.private.nu"
+source $private_env
