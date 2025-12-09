@@ -91,9 +91,6 @@
     "line_height": {
       "custom": 1.5
     },
-    "shell": {
-      "program": "/opt/homebrew/bin/nu"
-    },
     "toolbar": {
       "breadcrumbs": false
     }
