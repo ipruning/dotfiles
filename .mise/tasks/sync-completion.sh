@@ -30,3 +30,9 @@ fi
 if which jj >/dev/null 2>&1; then
   jj util completion zsh > config/shell/completions/_jj
 fi
+
+if which linear >/dev/null 2>&1; then
+  linear completions zsh > config/shell/completions/_linear
+fi
+
+rm -f ~/.zcompdump*
