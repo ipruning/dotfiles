@@ -125,26 +125,75 @@ api.unmap("r", /\b(x\.com)\b/i); // Reply
 api.unmap("s", /\b(x\.com)\b/i); // Share post
 api.unmap("u", /\b(x\.com)\b/i); // Mute account
 
-api.unmapAllExcept(
-  [
-  ],
-  /excalidraw.com|linear.app|monkeytype.com|tldraw.com|/,
+// const BLOCK_DOMAINS = [
+//   "boot.dev",
+//   "excalidraw.com",
+//   "feishu.cn",
+//   "figma.com",
+//   "linear.app",
+//   "motherduck.com",
+//   "notion.so",
+//   "photos.google.com",
+//   "roamresearch.com",
+//   "sshx.io",
+// ];
+
+// const blocklistRe = new RegExp(
+//   BLOCK_DOMAINS.map(d => d.replace(/\./g, "\\.")).join("|"),
+//   "i",
+// );
+
+// settings.blocklistPattern = blocklistRe;
+
+// api.unmapAllExcept(
+//   [
+//     "e",
+//     "d",
+//     "E",
+//     "R",
+//     "B",
+//     "F",
+//     "S",
+//     "D",
+//     "t",
+//     "T",
+//     "p",
+//     "P",
+//   ],
+//   /boot.dev|feishu.cn|motherduck.com|notion.so|photos.google.com|roamresearch.com|sshx.io|/,
+// );
+
+const LIMITED_DOMAINS = [
+  "boot.dev",
+  "excalidraw.com",
+  "feishu.cn",
+  "figma.com",
+  "linear.app",
+  "motherduck.com",
+  "notion.so",
+  "photos.google.com",
+  "roamresearch.com",
+  "sshx.io",
+];
+
+const limitedRe = new RegExp(
+  LIMITED_DOMAINS.map(d => d.replace(/\./g, "\\.")).join("|"),
+  "i",
 );
 
-api.unmapAllExcept(
-  [
-    "e",
-    "d",
-    "E",
-    "R",
-    "B",
-    "F",
-    "S",
-    "D",
-    "t",
-    "T",
-    "p",
-    "P",
-  ],
-  /boot.dev|feishu.cn|motherduck.com|notion.so|photos.google.com|roamresearch.com|sshx.io|/,
-);
+const KEEP_KEYS = [
+  "e",
+  "d",
+  "E",
+  "R",
+  "B",
+  "F",
+  "S",
+  "D",
+  "t",
+  "T",
+  "p",
+  "P",
+];
+
+api.unmapAllExcept(KEEP_KEYS, limitedRe);
