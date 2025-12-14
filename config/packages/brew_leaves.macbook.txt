@@ -39,7 +39,7 @@ httm
 hyperfine
 jaq
 jd
-jj
+jjui
 jq
 just
 litecli
