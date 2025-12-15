@@ -1,12 +1,11 @@
 # command = shell:zsh
-command = shell:zsh -ic nu
 # command = shell:zsh -ic fish
-
-theme = Catppuccin Mocha
+command = shell:zsh -ic nu
 
 font-family = MonoLisa
 font-family = Maple Mono NF CN
 
+confirm-close-surface = false
 cursor-style = block
 cursor-style-blink = false
 font-size = 12
@@ -14,13 +13,7 @@ font-style = Medium
 macos-option-as-alt = true
 maximize = true
 shell-integration-features = title, ssh-env, ssh-terminfo, no-cursor
+theme = Catppuccin Mocha
 undo-timeout = 1m
 
-keybind = cmd+n=new_window
 keybind = cmd+t=new_window
-
-confirm-close-surface = false
-# keybind = cmd+n=unbind
-# keybind = cmd+shift+n=new_window
-# keybind = cmd+t=unbind
-# macos-titlebar-style = hidden
