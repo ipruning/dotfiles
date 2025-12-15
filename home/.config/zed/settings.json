@@ -1,4 +1,9 @@
 {
+  "agent_servers": {
+    "codex": {
+      "default_mode": "full-access"
+    }
+  },
   "agent": {
     "always_allow_tool_actions": true,
     "default_model": {
