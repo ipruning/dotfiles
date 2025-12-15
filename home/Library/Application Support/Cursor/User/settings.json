@@ -26,7 +26,7 @@
     "editor.renderWhitespace": "selection",
     "editor.snippetSuggestions": "top",
     "editor.tabCompletion": "on",
-    "editor.wordWrap": "on"
+    "editor.wordWrap": "off"
   },
   "[python]": {
     "diffEditor.ignoreTrimWhitespace": false,
