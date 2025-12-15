@@ -14,9 +14,9 @@ import sys
 import tempfile
 import time
 
-from loguru import logger  # type: ignore
-from rich.console import Console  # type: ignore
-from rich.text import Text  # type: ignore
+from loguru import logger
+from rich.console import Console
+from rich.text import Text
 
 logger.remove()
 logger.add(

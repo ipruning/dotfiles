@@ -1,6 +1,6 @@
 #!/usr/bin/env -S uv run --script
 # /// script
-# requires-python = ">=3.12"
+# requires-python = ">=3.13"
 # dependencies = [
 #     "argcomplete==3.6.3",
 #     "loguru==0.7.3",
@@ -16,9 +16,9 @@ import sys
 from pathlib import Path
 from typing import TextIO
 
-import argcomplete  # type: ignore
-import tiktoken  # type: ignore
-from loguru import logger  # type: ignore
+import argcomplete
+import tiktoken
+from loguru import logger
 
 
 def setup_logger() -> None:

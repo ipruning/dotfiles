@@ -9,7 +9,7 @@
 import subprocess
 import sys
 
-import fire  # type: ignore
+import fire
 
 
 def wrap_with_tags(content: str, tag: str) -> str:

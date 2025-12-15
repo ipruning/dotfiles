@@ -1,6 +1,6 @@
 #!/usr/bin/env -S uv run --script
 # /// script
-# requires-python = ">=3.10"
+# requires-python = ">=3.13"
 # dependencies = ["youtube-transcript-api==1.2.3"]
 # ///
 """
@@ -14,7 +14,7 @@ import argparse
 import re
 import sys
 
-from youtube_transcript_api import YouTubeTranscriptApi  # type: ignore
+from youtube_transcript_api import YouTubeTranscriptApi
 
 
 def extract_video_id(url_or_id: str) -> str:
