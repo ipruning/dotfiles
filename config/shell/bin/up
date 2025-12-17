@@ -84,6 +84,11 @@ if command -v amp &>/dev/null; then
   amp update
 fi
 
+logger "Updating Claude..."
+if command -v claude &>/dev/null; then
+  claude update
+fi
+
 logger "Backing up all packages..."
 host="$(hostname -s)"
 if command -v brew &>/dev/null; then
