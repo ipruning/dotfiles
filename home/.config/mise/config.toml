@@ -8,6 +8,7 @@ ruby = "latest"
 rust = "latest"
 zig = "latest"
 
+"cargo:nu_plugin_skim" = "latest"
 "github:schpet/linear-cli" = "latest"
 "go:github.com/bootdotdev/bootdev" = "latest"
 "go:github.com/jorgerojas26/lazysql" = "latest"
@@ -15,9 +16,19 @@ zig = "latest"
 "npm:branchlet" = "latest"
 "npm:linearis" = "latest"
 biome = "latest"
+duckdb = "latest"
+fd = "latest"
+fzf = "latest"
+jq = "latest"
+k6 = "latest"
 lazydocker = "latest"
 lazygit = "latest"
-"cargo:nu_plugin_skim" = "latest"
+prek = "latest"
+rclone = "latest"
+ripgrep = "latest"
+uv = "latest"
+xh = "latest"
+yq = "latest"
 
 # "cargo:bartib" = "latest"
 # "cargo:bmm" = "latest"
@@ -128,4 +139,8 @@ trusted_config_paths = ['~/Developer']
 bun = true
 
 [env]
-_.path = ["~/.local/bin", "~/dotfiles/config/shell/bin", "~/Developer/ipruning/prototypes/utils/scripts"]
+_.path = [
+    "~/dotfiles/config/shell/bin",
+    "~/Developer/ipruning/prototypes/utils/scripts",
+    "~/.local/bin",
+]
