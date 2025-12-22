@@ -94,6 +94,7 @@ valkey
 viddy
 watchexec
 wget
+withgraphite/tap/graphite
 xh
 yazi
 yek
