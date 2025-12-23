@@ -58,8 +58,7 @@
     "tpl": "env"
   },
   "catppuccin-icons.associations.files": {
-    "config": "env",
-    "secrets": "env"
+    "config": "env"
   },
   "catppuccin-icons.associations.folders": {
     ".cursor": "folder_config",
@@ -250,7 +249,8 @@
     ".secrets.baseline": "json",
     ".tpl": "plaintext",
     "config": "dotenv",
-    "secrets": "dotenv"
+    "secrets": "dotenv",
+    "secrets-common": "dotenv"
   },
   "files.insertFinalNewline": true,
   "files.simpleDialog.enable": true,
@@ -336,7 +336,6 @@
   "terminal.integrated.scrollback": 50000,
   "typos.diagnosticSeverity": "Information",
   "typos.logLevel": "info",
-  "update.releaseTrack": "prerelease",
   "vim.hlsearch": true,
   "vim.incsearch": true,
   "vim.leader": "<space>",
