@@ -1,18 +1,18 @@
 {
   "agent_servers": {
     "codex": {
-      "default_mode": "full-access"
-    }
+      "default_mode": "full-access",
+    },
   },
   "agent": {
     "always_allow_tool_actions": true,
     "default_model": {
       "model": "gpt-5",
-      "provider": "openai"
+      "provider": "openai",
     },
     "default_profile": "write",
     "play_sound_when_agent_done": true,
-    "use_modifier_to_send": true
+    "use_modifier_to_send": true,
   },
   "autosave": "on_focus_change",
   "buffer_font_fallbacks": ["Maple Mono NF CN"],
@@ -20,85 +20,77 @@
   "buffer_font_size": 11.0,
   "buffer_font_weight": 400,
   "buffer_line_height": {
-    "custom": 1.5
+    "custom": 1.5,
   },
   "collaboration_panel": {
-    "dock": "right"
+    "dock": "right",
   },
   "cursor_blink": false,
   "features": {
-    "edit_prediction_provider": "zed"
+    "edit_prediction_provider": "zed",
   },
   "file_types": {
     "Dockerfile": ["Dockerfile", "Dockerfile.*"],
-    "JSON": ["json"]
+    "JSON": ["json"],
+    "JSONC": ["**/.zed/**/*.json", "**/zed/**/*.json", "**/.vscode/**/*.json"],
   },
   "format_on_save": "on",
   "git_panel": {
-    "dock": "right"
+    "dock": "right",
   },
   "icon_theme": "Catppuccin Mocha",
   "indent_guides": {
     "coloring": "indent_aware",
-    "enabled": true
+    "enabled": true,
   },
   "inlay_hints": {
-    "enabled": true
+    "enabled": true,
   },
   "languages": {
     "Python": {
-      "language_servers": ["ty", "!basedpyright"]
-    }
-  },
-  "lsp": {
-    "basedpyright": {
-      "settings": {
-        "basedpyright.analysis": {
-          "diagnosticMode": "workspace",
-          "inlayHints.callArgumentNames": false
-        }
-      }
-    }
+      "language_servers": ["ty", "ruff", "!basedpyright", "..."],
+      "format_on_save": "on",
+      "formatter": [{ "language_server": { "name": "ruff" } }],
+    },
   },
   "outline_panel": {
-    "dock": "right"
+    "dock": "right",
   },
   "preferred_line_length": 120,
   "project_panel": {
-    "dock": "left"
+    "dock": "left",
   },
   "relative_line_numbers": "enabled",
   "restore_on_startup": "last_session",
   "scroll_beyond_last_line": "off",
   "scrollbar": {
-    "show": "never"
+    "show": "never",
   },
   "show_edit_predictions": true,
-  "soft_wrap": null,
   "tabs": {
     "file_icons": true,
     "git_status": true,
-    "show_diagnostics": "errors"
+    "show_diagnostics": "errors",
   },
   "telemetry": {
     "diagnostics": false,
-    "metrics": false
+    "metrics": false,
   },
   "terminal": {
     "button": false,
     "env": {
       "EDITOR": "zed --wait",
-      "VISUAL": "zed --wait"
+      "VISUAL": "zed --wait",
     },
     "font_family": "MonoLisa",
     "font_size": 11.0,
     "font_weight": 400,
     "line_height": {
-      "custom": 1.5
+      "custom": 1.5,
     },
     "toolbar": {
-      "breadcrumbs": false
-    }
+      "breadcrumbs": false,
+    },
   },
   "theme": "Catppuccin Mocha",
   "ui_font_family": "MonoLisa",
@@ -108,7 +100,7 @@
     "highlight_on_yank_duration": 250,
     "toggle_relative_line_numbers": true,
     "use_smartcase_find": true,
-    "use_system_clipboard": "on_yank"
+    "use_system_clipboard": "on_yank",
   },
-  "vim_mode": true
+  "vim_mode": true,
 }
