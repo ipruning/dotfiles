@@ -82,7 +82,7 @@ $env.config.history = {
 }
 
 # 👇 Atuin
-# source ~/.local/share/atuin/init.nu
+source ~/dotfiles/config/shell/functions/atuin.nu
 
 # 👇 Mise
 use ($nu.default-config-dir | path join mise.nu)
