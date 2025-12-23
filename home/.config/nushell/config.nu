@@ -58,13 +58,14 @@ $env.config = (
 )
 
 # 👇 Table Mode
-$env.config.table.mode = 'psql'
+# $env.config.table.mode = 'psql'
 
 # 👇 Carapace
 source ~/.cache/carapace/init.nu
 
 # 👇 Editor
-$env.config.buffer_editor = "hx"
+$env.config.buffer_editor = "nvim"
+# $env.config.buffer_editor = "hx"
 
 # 👇 Edit Mode
 # $env.config.edit_mode = 'vi'
