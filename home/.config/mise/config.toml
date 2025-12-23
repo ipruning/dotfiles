@@ -9,6 +9,7 @@ rust = "latest"
 zig = "latest"
 
 "cargo:nu_plugin_skim" = "latest"
+"gem:kamal" = "latest"
 "github:schpet/linear-cli" = "latest"
 "go:github.com/bootdotdev/bootdev" = "latest"
 "go:github.com/jorgerojas26/lazysql" = "latest"
