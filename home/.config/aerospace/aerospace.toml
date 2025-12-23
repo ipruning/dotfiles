@@ -67,12 +67,12 @@ alt-shift-j = ['move down', 'mode main']
 alt-shift-k = ['move up', 'mode main']
 alt-shift-l = ['move right', 'mode main']
 
-alt-b = 'exec-and-forget ~/Developer/prototypes/utils/scripts/newwin.sh chrome'
-alt-c = 'exec-and-forget ~/Developer/prototypes/utils/scripts/newwin.sh cursor'
-alt-g = 'exec-and-forget ~/Developer/prototypes/utils/scripts/newwin.sh ghostty'
+alt-b = 'exec-and-forget ~/Developer/ipruning/prototypes/utils/scripts/newwin.sh chrome'
+alt-c = 'exec-and-forget ~/Developer/ipruning/prototypes/utils/scripts/newwin.sh cursor'
+alt-g = 'exec-and-forget ~/Developer/ipruning/prototypes/utils/scripts/newwin.sh ghostty'
 alt-p = 'exec-and-forget open -a /Applications/Repo\ Prompt.app'
 alt-r = 'exec-and-forget open -a /Applications/Roam\ Research.app'
-alt-z = 'exec-and-forget ~/Developer/prototypes/utils/scripts/newwin.sh zed'
+alt-z = 'exec-and-forget ~/Developer/ipruning/prototypes/utils/scripts/newwin.sh zed'
 
 cmd-m = []
 cmd-h = []
