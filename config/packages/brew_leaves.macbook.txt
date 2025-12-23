@@ -2,7 +2,7 @@ asciinema
 ast-grep
 atuin
 awscli
-bash
+bash-completion@2
 bat
 beancount
 beancount-language-server
@@ -43,8 +43,9 @@ jjui
 jq
 just
 litecli
-macmon
+mactop
 mdq
+minorole/tap/gpane
 mise
 mkcert
 mongodb/brew/mongodb-community
@@ -89,6 +90,7 @@ tokei
 trufflehog
 trzsz-ssh
 typst
+unison
 uv
 valkey
 viddy

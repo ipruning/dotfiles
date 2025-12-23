@@ -3,6 +3,7 @@ ast-grep
 atuin
 awscli
 bash
+bash-completion@2
 bat
 beancount
 beancount-language-server
@@ -34,6 +35,7 @@ git-lfs
 gitu
 glow
 gnupg
+gpane
 graphite
 gum
 httm
@@ -45,7 +47,7 @@ jjui
 jq
 just
 litecli
-macmon
+mactop
 mdq
 mise
 mkcert
@@ -92,6 +94,7 @@ trufflehog
 trzsz-ssh
 typst
 uncloud
+unison
 uv
 valkey
 viddy
