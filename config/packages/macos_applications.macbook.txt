@@ -68,10 +68,12 @@ Mos
 MusicHarbor
 MyCard
 NeteaseMusic
+Numbers
 OBS
 Obsidian
 OnyX
 OrbStack
+Pages
 pcsuite
 Pearcleaner
 PlayCover
