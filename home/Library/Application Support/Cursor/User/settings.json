@@ -45,6 +45,7 @@
   "[typst]": {
     "editor.wordSeparators": "`~!@#$%^&*()=+[{]}\\|;:'\",.<>/?"
   },
+  "amp.url": "https://ampcode.com/",
   "autocorrect.formatOnSave": false,
   "beancount.fixedCJKWidth": true,
   "beancount.mainBeanFile": "~/Databases/Ledger/main.bean",
