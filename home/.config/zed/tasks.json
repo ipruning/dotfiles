@@ -8,22 +8,22 @@
     "shell": {
       "with_arguments": {
         "program": "sh",
-        "args": ["--noediting", "--norc", "--noprofile"]
-      }
-    }
+        "args": ["--noediting", "--norc", "--noprofile"],
+      },
+    },
   },
   {
     "label": "file_finder",
-    "command": "cwd=$(pwd -P); [ \"$cwd\" = \"/\" ] && exit 0; selection=$(tv hidden-files-zed); [ -n \"$selection\" ] && zed \"$selection\"",
+    "command": "cwd=$(pwd -P); [ \"$cwd\" = \"/\" ] && exit 0; selection=$(tv hidden-files); [ -n \"$selection\" ] && zed \"$selection\"",
     "hide": "always",
     "allow_concurrent_runs": true,
     "use_new_terminal": true,
     "shell": {
       "with_arguments": {
         "program": "sh",
-        "args": ["--noediting", "--norc", "--noprofile"]
-      }
-    }
+        "args": ["--noediting", "--norc", "--noprofile"],
+      },
+    },
   },
   {
     "label": "file_finder_modified",
@@ -34,9 +34,9 @@
     "shell": {
       "with_arguments": {
         "program": "sh",
-        "args": ["--noediting", "--norc", "--noprofile"]
-      }
-    }
+        "args": ["--noediting", "--norc", "--noprofile"],
+      },
+    },
   },
   {
     "label": "project_finder",
@@ -47,9 +47,9 @@
     "shell": {
       "with_arguments": {
         "program": "sh",
-        "args": ["--noediting", "--norc", "--noprofile"]
-      }
-    }
+        "args": ["--noediting", "--norc", "--noprofile"],
+      },
+    },
   },
   {
     "label": "yazi",
@@ -60,13 +60,13 @@
     "shell": {
       "with_arguments": {
         "program": "sh",
-        "args": ["--noediting", "--norc", "--noprofile"]
-      }
+        "args": ["--noediting", "--norc", "--noprofile"],
+      },
     },
     "env": {
       "EDITOR": "zed --wait",
-      "VISUAL": "zed --wait"
-    }
+      "VISUAL": "zed --wait",
+    },
   },
   {
     "label": "yazi_with_file",
@@ -77,13 +77,13 @@
     "shell": {
       "with_arguments": {
         "program": "sh",
-        "args": ["--noediting", "--norc", "--noprofile"]
-      }
+        "args": ["--noediting", "--norc", "--noprofile"],
+      },
     },
     "env": {
       "EDITOR": "zed --wait",
-      "VISUAL": "zed --wait"
-    }
+      "VISUAL": "zed --wait",
+    },
   },
   {
     "label": "lazygit",
@@ -94,9 +94,9 @@
     "shell": {
       "with_arguments": {
         "program": "sh",
-        "args": ["--noediting", "--norc", "--noprofile"]
-      }
-    }
+        "args": ["--noediting", "--norc", "--noprofile"],
+      },
+    },
   },
   {
     "label": "lazydocker",
@@ -107,9 +107,9 @@
     "shell": {
       "with_arguments": {
         "program": "sh",
-        "args": ["--noediting", "--norc", "--noprofile"]
-      }
-    }
+        "args": ["--noediting", "--norc", "--noprofile"],
+      },
+    },
   },
   {
     "label": "gitu",
@@ -120,23 +120,23 @@
     "shell": {
       "with_arguments": {
         "program": "sh",
-        "args": ["--noediting", "--norc", "--noprofile"]
-      }
-    }
+        "args": ["--noediting", "--norc", "--noprofile"],
+      },
+    },
   },
   {
     "label": "agents",
     "command": "agents.bash",
     "hide": "always",
     "allow_concurrent_runs": true,
-    "use_new_terminal": true
+    "use_new_terminal": true,
   },
   {
     "label": "amp",
     "command": "current_dir=$(basename \"$(pwd)\"); tmux attach-session -t \"$current_dir\" 2>/dev/null || tmux new-session -s \"$current_dir\" 'tmux new-window -n amp \"zsh -i -c \\\"amp\\\"\" && tmux select-window -t amp'",
     "hide": "always",
     "allow_concurrent_runs": true,
-    "use_new_terminal": true
+    "use_new_terminal": true,
   },
   {
     "label": "zellij",
@@ -147,15 +147,15 @@
     "shell": {
       "with_arguments": {
         "program": "sh",
-        "args": ["--noediting", "--norc", "--noprofile"]
-      }
-    }
+        "args": ["--noediting", "--norc", "--noprofile"],
+      },
+    },
   },
   {
     "label": "run",
     "command": "runner.bash",
     "args": ["$ZED_FILE"],
     "allow_concurrent_runs": true,
-    "use_new_terminal": true
-  }
+    "use_new_terminal": true,
+  },
 ]

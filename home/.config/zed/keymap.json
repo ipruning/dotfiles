@@ -4,39 +4,39 @@
     "bindings": {
       "enter": "editor::Newline",
       "cmd-enter": "agent::Chat",
-      "cmd-w": "workspace::ToggleRightDock"
-    }
+      "cmd-w": "workspace::ToggleRightDock",
+    },
   },
   {
     "context": "MessageEditor > Editor && !showing_completions && !showing_code_actions",
     "bindings": {
       "enter": "editor::Newline",
-      "cmd-enter": "agent::Chat"
-    }
+      "cmd-enter": "agent::Chat",
+    },
   },
   {
     "context": "EditMessageEditor > Editor && !showing_completions && !showing_code_actions",
     "bindings": {
       "escape": "menu::Cancel",
       "enter": "editor::Newline",
-      "cmd-enter": "menu::Confirm"
-    }
+      "cmd-enter": "menu::Confirm",
+    },
   },
   {
     "context": "AgentFeedbackMessageEditor > Editor && !showing_completions && !showing_code_actions",
     "bindings": {
       "escape": "menu::Cancel",
       "enter": "editor::Newline",
-      "cmd-enter": "menu::Confirm"
-    }
+      "cmd-enter": "menu::Confirm",
+    },
   },
   {
     "context": "Terminal",
     "bindings": {
       "cmd-d": "terminal::ScrollPageDown",
       "cmd-n": null,
-      "cmd-u": "terminal::ScrollPageUp"
-    }
+      "cmd-u": "terminal::ScrollPageUp",
+    },
   },
   {
     "context": "EmptyPane || SharedScreen",
@@ -46,77 +46,77 @@
         "task::Spawn",
         {
           "task_name": "amp",
-          "reveal_target": "center"
-        }
+          "reveal_target": "center",
+        },
       ],
       "space x": "diagnostics::Deploy",
       "space /": [
         "task::Spawn",
         {
           "task_name": "live_grep",
-          "reveal_target": "center"
-        }
+          "reveal_target": "center",
+        },
       ],
       "space y": [
         "task::Spawn",
         {
           "task_name": "yazi",
-          "reveal_target": "center"
-        }
+          "reveal_target": "center",
+        },
       ],
       "space shift-g": "git_panel::ToggleFocus",
       "space g": [
         "task::Spawn",
         {
           "task_name": "lazygit",
-          "reveal_target": "center"
-        }
+          "reveal_target": "center",
+        },
       ],
       "space d": [
         "task::Spawn",
         {
           "task_name": "lazydocker",
-          "reveal_target": "center"
-        }
+          "reveal_target": "center",
+        },
       ],
       "space u": [
         "task::Spawn",
         {
           "task_name": "gitu",
-          "reveal_target": "center"
-        }
+          "reveal_target": "center",
+        },
       ],
       "space n": [
         "task::Spawn",
         {
           "task_name": "zellij",
-          "reveal_target": "center"
-        }
+          "reveal_target": "center",
+        },
       ],
-      "space shift-r": [
+      "space r": [
         "task::Spawn",
         {
           "task_name": "project_finder",
-          "reveal_target": "center"
-        }
+          "reveal_target": "center",
+        },
       ],
-      "space r": "projects::OpenRecent",
+      "space shift-r": "projects::OpenRecent",
       "space shift-e": "pane::RevealInProjectPanel",
       "space space": [
         "task::Spawn",
         {
           "task_name": "file_finder",
-          "reveal_target": "center"
-        }
+          "reveal_target": "center",
+        },
       ],
       "space enter": [
         "task::Spawn",
         {
           "task_name": "file_finder_modified",
-          "reveal_target": "center"
-        }
-      ]
-    }
+          "reveal_target": "center",
+        },
+      ],
+    },
   },
   {
     "context": "ProjectPanel && not_editing",
@@ -124,8 +124,8 @@
       "q": "workspace::ToggleLeftDock",
       "cmd-x": "project_panel::Cut",
       "cmd-c": "project_panel::Copy",
-      "cmd-v": "project_panel::Paste"
-    }
+      "cmd-v": "project_panel::Paste",
+    },
   },
   {
     "context": "Editor && (vim_mode == normal || vim_mode == visual) && !VimWaiting && !menu",
@@ -147,15 +147,15 @@
       "space 7": ["pane::ActivateItem", 6],
       "space 8": ["pane::ActivateItem", 7],
       "space 9": ["pane::ActivateItem", 8],
-      "space 0": "pane::ActivateLastItem"
-    }
+      "space 0": "pane::ActivateLastItem",
+    },
   },
   {
     "context": "Pane",
     "bindings": {
       "ctrl-shift-j": "search::SelectNextMatch",
-      "ctrl-shift-k": "search::SelectPreviousMatch"
-    }
+      "ctrl-shift-k": "search::SelectPreviousMatch",
+    },
   },
   {
     "context": "Editor && vim_mode == normal && !VimWaiting && !menu",
@@ -177,8 +177,8 @@
         "task::Spawn",
         {
           "task_name": "run",
-          "reveal_target": "center"
-        }
+          "reveal_target": "center",
+        },
       ],
       "space shift-t": "task::Spawn",
       "space shift-a": "agent::ToggleFocus",
@@ -186,77 +186,77 @@
         "task::Spawn",
         {
           "task_name": "amp",
-          "reveal_target": "center"
-        }
+          "reveal_target": "center",
+        },
       ],
       "space x": "diagnostics::Deploy",
       "space /": [
         "task::Spawn",
         {
           "task_name": "live_grep",
-          "reveal_target": "center"
-        }
+          "reveal_target": "center",
+        },
       ],
       "space y": [
         "task::Spawn",
         {
           "task_name": "yazi_with_file",
-          "reveal_target": "center"
-        }
+          "reveal_target": "center",
+        },
       ],
       "space shift-g": "git_panel::ToggleFocus",
       "space g": [
         "task::Spawn",
         {
           "task_name": "lazygit",
-          "reveal_target": "center"
-        }
+          "reveal_target": "center",
+        },
       ],
       "space d": [
         "task::Spawn",
         {
           "task_name": "lazydocker",
-          "reveal_target": "center"
-        }
+          "reveal_target": "center",
+        },
       ],
       "space u": [
         "task::Spawn",
         {
           "task_name": "gitu",
-          "reveal_target": "center"
-        }
+          "reveal_target": "center",
+        },
       ],
       "space n": [
         "task::Spawn",
         {
           "task_name": "zellij",
-          "reveal_target": "center"
-        }
+          "reveal_target": "center",
+        },
       ],
-      "space shift-r": [
+      "space r": [
         "task::Spawn",
         {
           "task_name": "project_finder",
-          "reveal_target": "center"
-        }
+          "reveal_target": "center",
+        },
       ],
-      "space r": "projects::OpenRecent",
+      "space shift-r": "projects::OpenRecent",
       "space e": "pane::RevealInProjectPanel",
       "space space": [
         "task::Spawn",
         {
           "task_name": "file_finder",
-          "reveal_target": "center"
-        }
+          "reveal_target": "center",
+        },
       ],
       "space enter": [
         "task::Spawn",
         {
           "task_name": "file_finder_modified",
-          "reveal_target": "center"
-        }
-      ]
-    }
+          "reveal_target": "center",
+        },
+      ],
+    },
   },
   {
     "context": "Editor && vim_mode == visual && !VimWaiting && !menu",
@@ -265,14 +265,14 @@
       "space p": "editor::Paste",
       "g c": "editor::ToggleComments",
       "shift-j": "editor::MoveLineDown",
-      "shift-k": "editor::MoveLineUp"
-    }
+      "shift-k": "editor::MoveLineUp",
+    },
   },
   {
     "context": "GitPanel",
     "bindings": {
       "esc": "workspace::ToggleRightDock",
-      "cmd-w": "workspace::ToggleRightDock"
-    }
-  }
+      "cmd-w": "workspace::ToggleRightDock",
+    },
+  },
 ]
