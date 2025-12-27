@@ -1,6 +1,6 @@
-# command = shell:zsh
+command = shell:zsh
 # command = shell:zsh -ic fish
-command = shell:zsh -ic nu
+# command = shell:zsh -ic nu
 
 font-family = MonoLisa
 font-family = Maple Mono NF CN
