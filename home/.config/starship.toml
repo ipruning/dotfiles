@@ -37,12 +37,12 @@ truncation_symbol = ".../"
 [git_branch]
 format = "[$branch]($style) "
 
-[custom.git_user]
-command = "git config --get user.name"
-format = '[\[$symbol$output\]]($style) '
-require_repo = true
-style = "bold dimmed yellow"
-when = true
+# [custom.git_user]
+# command = "git config --get user.name"
+# format = '[\[$symbol$output\]]($style) '
+# require_repo = true
+# style = "bold dimmed yellow"
+# when = true
 
 # [custom.git_email]
 # command = "git config --get user.email"
@@ -72,10 +72,10 @@ threshold = 20
 [[battery.display]]
 threshold = 30
 
-[shell]
-disabled = false
-style = "bold dimmed white"
-nu_indicator = ""
+# [shell]
+# disabled = false
+# style = "bold dimmed white"
+# nu_indicator = ""
 
 [character]
 success_symbol = '[\$](bold green)'
@@ -84,3 +84,4 @@ vimcmd_symbol = '[<](bold green)'
 vimcmd_replace_one_symbol = '[<](bold purple)'
 vimcmd_replace_symbol = '[<](bold bold purple)'
 vimcmd_visual_symbol = '[<](bold yellow)'
+
