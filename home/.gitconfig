@@ -9,47 +9,6 @@ diffFilter = delta --color-only --features=interactive-catppuccin-mocha
 [init]
 defaultBranch = main
 
-[alias]
-log-graph = "!sh -c 'git log --graph --decorate --all --date-order --date=format:\"%Y-%m-%d %H:%M:%S\" --pretty=format:\"%C(cyan)%h%Creset %C(black bold)%ad%Creset%C(auto)%d %s\" -n 42'"
-log-graphstat = "!sh -c 'git log --pretty=format:\"%C(auto)%h%d%n%s%n%C(auto)%C(blue)%an <%ae>%C(reset), %C(auto)%C(dim)%ad%n\" --graph --stat'"
-
-# pr = "!sh -c 'set -e; if [ $# -lt 2 ]; then \
-#   echo \"Usage: git pr <number> <branch>\"; exit 2; fi; \
-#   git fetch origin --prune; \
-#   git fetch origin pull/$1/head:$2; \
-#   git switch $2; \
-#   git rebase --autostash origin/main' -"
-
-# blame = "!sh -c 'git blame -w -C -C -C'"
-# branch-recent = "!sh -c 'git branch --sort=-committerdate'"
-# branch-verbose = "!sh -c '\
-# git for-each-ref --format=\"%(HEAD) \
-# %(align:16,left)%(refname:short)%(end) \
-# %(color:green)%(objectname:short)%(color:reset) \
-# %(color:blue)[%(upstream)]%(color:reset) \
-# %(color:red)%(contents:subject)%(color:reset)\" \
-# refs/heads --sort=-committerdate' -"
-
-# diff = "!sh -c 'git diff -w'"
-# diff-conflicts = "!sh -c 'git diff --name-only --diff-filter=U'"
-# diff-unmerged = "!sh -c 'git diff --name-only -z --diff-filter=U | xargs -0 -n1 ${EDITOR:-vi}' -"
-
-# dlog = -c diff.external=difft log --ext-diff
-# dshow = -c diff.external=difft show --ext-diff
-# ddiff = -c diff.external=difft diff
-
-# view-it = "!sh -c 'git log -p --follow -- \"$1\"' -"
-# push-it = "!sh -c 'git push --force-with-lease origin HEAD' -"
-
-# cc = "!sh -c 'git log --format=format: --name-only | grep -v \"^$\" | sort | uniq -c | sort -rg | head -42'"
-# stm = "!sh -c 'git status --porcelain | grep \"^ M\" | cut -c 4-'"
-# untracked = "!sh -c 'git ls-files --others --exclude-standard'"
-# wip = "!sh -c 'git for-each-ref --sort='authordate:iso8601' --format=' %(color:green)%(authordate:relative)%09%(color:white)%(refname:short)' refs/heads'"
-
-# clean-untracked = "!sh -c 'git clean -fd'"
-# unstage = "!sh -c 'git reset HEAD --'"
-# unstage = reset HEAD --
-
 [commit]
 verbose = true
 template = ~/.gitcommit
@@ -142,3 +101,45 @@ aiModelProvider = openai
 
 [include]
 path = ~/Developer/.gitconfig
+
+[alias]
+# log-graph = "!sh -c 'git log --graph --decorate --all --date-order --date=format:\"%Y-%m-%d %H:%M:%S\" --pretty=format:\"%C(cyan)%h%Creset %C(black bold)%ad%Creset%C(auto)%d %s\" -n 42'"
+# log-graphstat = "!sh -c 'git log --pretty=format:\"%C(auto)%h%d%n%s%n%C(auto)%C(blue)%an <%ae>%C(reset), %C(auto)%C(dim)%ad%n\" --graph --stat'"
+
+# branch-recent = "!sh -c 'git branch --sort=-committerdate'"
+# branch-verbose = "!sh -c '\
+# git for-each-ref --format=\"%(HEAD) \
+# %(align:16,left)%(refname:short)%(end) \
+# %(color:green)%(objectname:short)%(color:reset) \
+# %(color:blue)[%(upstream)]%(color:reset) \
+# %(color:red)%(contents:subject)%(color:reset)\" \
+# refs/heads --sort=-committerdate' -"
+
+diff = "!sh -c 'git diff -w'"
+diff-conflicts = "!sh -c 'git diff --name-only --diff-filter=U'"
+diff-unmerged = "!sh -c 'git diff --name-only -z --diff-filter=U | xargs -0 -n1 ${EDITOR:-vi}' -"
+
+ddiff = -c diff.external=difft diff
+dlog = -c diff.external=difft log --ext-diff
+dshow = -c diff.external=difft show --ext-diff
+
+blame = "!sh -c 'git blame -w -C -C -C'"
+
+view-it = "!sh -c 'git log -p --follow -- \"$1\"' -"
+
+untracked = "!sh -c 'git ls-files --others --exclude-standard'"
+clean-untracked = "!sh -c 'git clean -fd'"
+stage = "!sh -c 'git add -A'"
+unstage = "!sh -c 'git reset HEAD --'"
+
+pr = "!sh -c 'set -e; if [ $# -lt 2 ]; then \
+  echo \"Usage: git pr <number> <branch>\"; exit 2; fi; \
+  git fetch origin --prune; \
+  git fetch origin pull/$1/head:$2; \
+  git switch $2; \
+  git rebase --autostash origin/main' -"
+
+push-it = "!sh -c 'git push --force-with-lease origin HEAD' -"
+
+cc = "!sh -c 'git log --format=format: --name-only | grep -v \"^$\" | sort | uniq -c | sort -rg | head -42'"
+stm = "!sh -c 'git status --porcelain | grep \"^ M\" | cut -c 4-'"
