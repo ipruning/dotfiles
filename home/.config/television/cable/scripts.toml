@@ -4,7 +4,7 @@ description = "Find utility scripts"
 requirements = ["bat", "fd"]
 
 [source]
-command = "fd . ~/Developer/prototypes/utils/scripts --type file -e sh -e bash -e py -e swift -x bash -c 'printf \"%q\n\" \"$1\"' _ {}"
+command = "fd . ~/Developer/ipruning/prototypes/utils/scripts --type file -e sh -e bash -e py -e swift"
 display = "{split:/:-1}"
 
 [preview]

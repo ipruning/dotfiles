@@ -4,7 +4,7 @@ description = "Find hidden directories including dotfiles"
 requirements = ["fd", "eza"]
 
 [source]
-command = "fd -IHL -t directory -x bash -c 'printf \"%q\n\" \"$1\"' _ {}"
+command = "fd -IHL -t directory"
 
 [preview]
 command = "eza --all --long --time-style long-iso --color always '{}'"

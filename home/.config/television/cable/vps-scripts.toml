@@ -4,7 +4,7 @@ description = "Find VPS management scripts"
 requirements = ["bat", "fd"]
 
 [source]
-command = "fd . ~/Developer/prototypes/utils/vps-scripts --type file -e sh -e bash -e py -e swift -x bash -c 'printf \"%q\n\" \"$1\"' _ {}"
+command = "fd . ~/Developer/ipruning/prototypes/utils/vps-scripts --type file -e sh -e bash -e py -e swift"
 
 [preview]
 command = "bat -n --color=always '{}'"
