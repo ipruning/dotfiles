@@ -101,6 +101,7 @@ yq = "latest"
 # "pipx:pyright" = "latest"
 # "pipx:ruff" = "latest"
 # "pipx:sqlfluff" = "latest"
+# "pipx:sqlit-tui" = "latest"
 # "pipx:sqlite-utils" = "latest"
 # "pipx:ty" = "latest"
 # "pipx:vastai" = "latest"
@@ -133,11 +134,7 @@ yq = "latest"
 # yq = "latest"
 
 [settings]
-idiomatic_version_file_enable_tools = ["python"]
 trusted_config_paths = ['~/Developer']
-
-[settings.npm]
-bun = true
 
 [env]
 _.path = [
