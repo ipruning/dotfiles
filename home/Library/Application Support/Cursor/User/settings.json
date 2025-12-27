@@ -462,5 +462,6 @@
   "workbench.settings.editor": "json",
   "workbench.tree.indent": 22,
   "workbench.tree.renderIndentGuides": "always",
-  "zig.zls.enabled": "on"
+  "zig.zls.enabled": "on",
+  "claudeCode.preferredLocation": "panel"
 }
