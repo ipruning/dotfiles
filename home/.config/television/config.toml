@@ -248,7 +248,14 @@ fallback_channel = "files"
 ]
 "git-log" = ["git log", "git show"]
 "docker-images" = ["docker run"]
-"git-repos" = ["nvim", "code", "hx", "git clone"]
+"git-repos" = [
+  "code",
+  "cursor",
+  "git clone",
+  "hx",
+  "nvim",
+  "zed",
+]
 
 "channels" = ["tv"]
 "hidden-dirs" = [
