@@ -65,7 +65,7 @@ $env.config = (
 source ~/.cache/carapace/init.nu
 
 # 👇 Editor
-$env.config.buffer_editor = "nvim"
+$env.config.buffer_editor = ["/opt/homebrew/bin/zed", "--wait"]
 # $env.config.buffer_editor = "hx"
 
 # 👇 Edit Mode
