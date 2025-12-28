@@ -6,24 +6,34 @@ if ("/opt/homebrew/bin" | path exists) {
   path add "/opt/homebrew/bin"
 }
 
+# 👇 Mise
+let autoload_dir = ($nu.default-config-dir | path join "vendor/autoload")
+let mise_autoload = ($autoload_dir | path join "mise.nu")
+
+if not (which mise | is-empty) {
+  mkdir $autoload_dir
+  ^mise activate nu | save -f $mise_autoload
+}
+
+# 👇 Zoxide
+source ~/.zoxide.nu
+
 # 👇 Starship
 # $env.STARSHIP_CONFIG = ($nu.home-path | path join ".config/starship.toml")
 # $env.STARSHIP_SHELL = "nu"
 # mkdir ($nu.data-dir | path join "vendor/autoload")
 # starship init nu | save -f ($nu.data-dir | path join "vendor/autoload/starship.nu")
 
-# 👇 Zoxide
-source ~/.zoxide.nu
+# 👇 Completions
+# let carapace_completer = {|spans: list<string>|
+#   carapace $spans.0 nushell ...$spans | from json
+# }
 
-# 👇 Custom Completions
-# $env.config = ($env.config | upsert completions {
-#   case_sensitive: false
-# })
-
-# 👇 Carapace Completions
-# mkdir ~/.cache/carapace
-# /opt/homebrew/bin/carapace _carapace nushell | save --force ~/.cache/carapace/init.nu
-# source ~/.cache/carapace/init.nu
+# $env.config.completions.external = {
+#   enable: true
+#   max_results: 100
+#   completer: $carapace_completer
+# }
 
 # 👇 Television
 # def tv_smart_autocomplete [] {
@@ -74,15 +84,15 @@ source ~/.zoxide.nu
 # $env.config.edit_mode = 'vi'
 
 # 👇 Banner
-$env.config.show_banner = false
+# $env.config.show_banner = false
 
 # 👇 History
-$env.config.history = {
-  file_format: sqlite
-  max_size: 1_000_000
-  sync_on_enter: true
-  isolation: true
-}
+# $env.config.history = {
+#   file_format: sqlite
+#   max_size: 1_000_000
+#   sync_on_enter: true
+#   isolation: true
+# }
 
 # 👇 Atuin
 # source ~/dotfiles/config/shell/functions/atuin.nu
@@ -102,6 +112,3 @@ $env.config.history = {
 # alias jr = jump-repo
 # alias or = open-repo
 # alias q = exit
-
-# 👇 Mise
-use ($nu.default-config-dir | path join mise.nu)
