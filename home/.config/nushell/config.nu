@@ -7,10 +7,10 @@ if ("/opt/homebrew/bin" | path exists) {
 }
 
 # 👇 Starship
-$env.STARSHIP_CONFIG = ($nu.home-path | path join ".config/starship.toml")
-$env.STARSHIP_SHELL = "nu"
-mkdir ($nu.data-dir | path join "vendor/autoload")
-starship init nu | save -f ($nu.data-dir | path join "vendor/autoload/starship.nu")
+# $env.STARSHIP_CONFIG = ($nu.home-path | path join ".config/starship.toml")
+# $env.STARSHIP_SHELL = "nu"
+# mkdir ($nu.data-dir | path join "vendor/autoload")
+# starship init nu | save -f ($nu.data-dir | path join "vendor/autoload/starship.nu")
 
 # 👇 Zoxide
 source ~/.zoxide.nu
@@ -21,55 +21,53 @@ source ~/.zoxide.nu
 # })
 
 # 👇 Carapace Completions
-mkdir ~/.cache/carapace
-/opt/homebrew/bin/carapace _carapace nushell | save --force ~/.cache/carapace/init.nu
+# mkdir ~/.cache/carapace
+# /opt/homebrew/bin/carapace _carapace nushell | save --force ~/.cache/carapace/init.nu
+# source ~/.cache/carapace/init.nu
 
 # 👇 Television
-def tv_smart_autocomplete [] {
-    let line = (commandline)
-    let cursor = (commandline get-cursor)
-    let lhs = ($line | str substring 0..$cursor)
-    let rhs = ($line | str substring $cursor..)
-    let output = (tv --inline --autocomplete-prompt $lhs | str trim)
+# def tv_smart_autocomplete [] {
+#     let line = (commandline)
+#     let cursor = (commandline get-cursor)
+#     let lhs = ($line | str substring 0..$cursor)
+#     let rhs = ($line | str substring $cursor..)
+#     let output = (tv --inline --autocomplete-prompt $lhs | str trim)
 
-    if ($output | str length) > 0 {
-        let needs_space = not ($lhs | str ends-with " ")
-        let lhs_with_space = if $needs_space { $"($lhs) " } else { $lhs }
-        let new_line = $lhs_with_space + $output + $rhs
-        let new_cursor = ($lhs_with_space + $output | str length)
-        commandline edit --replace $new_line
-        commandline set-cursor $new_cursor
-    }
-}
+#     if ($output | str length) > 0 {
+#         let needs_space = not ($lhs | str ends-with " ")
+#         let lhs_with_space = if $needs_space { $"($lhs) " } else { $lhs }
+#         let new_line = $lhs_with_space + $output + $rhs
+#         let new_cursor = ($lhs_with_space + $output | str length)
+#         commandline edit --replace $new_line
+#         commandline set-cursor $new_cursor
+#     }
+# }
 
-$env.config = (
-  $env.config
-  | upsert keybindings (
-      $env.config.keybindings
-      | append [
-          {
-              name: tv_completion,
-              modifier: Control,
-              keycode: char_t,
-              mode: [vi_normal, vi_insert, emacs],
-              event: {
-                  send: executehostcommand,
-                  cmd: "tv_smart_autocomplete"
-              }
-          }
-      ]
-  )
-)
+# $env.config = (
+#   $env.config
+#   | upsert keybindings (
+#       $env.config.keybindings
+#       | append [
+#           {
+#               name: tv_completion,
+#               modifier: Control,
+#               keycode: char_t,
+#               mode: [vi_normal, vi_insert, emacs],
+#               event: {
+#                   send: executehostcommand,
+#                   cmd: "tv_smart_autocomplete"
+#               }
+#           }
+#       ]
+#   )
+# )
 
 # 👇 Table Mode
 # $env.config.table.mode = 'markdown'
 # $env.config.table.mode = 'psql'
 
-# 👇 Carapace
-source ~/.cache/carapace/init.nu
-
 # 👇 Editor
-$env.config.buffer_editor = ["/opt/homebrew/bin/zed", "--wait"]
+# $env.config.buffer_editor = ["/opt/homebrew/bin/zed", "--wait"]
 # $env.config.buffer_editor = "hx"
 
 # 👇 Edit Mode
@@ -87,23 +85,23 @@ $env.config.history = {
 }
 
 # 👇 Atuin
-source ~/dotfiles/config/shell/functions/atuin.nu
+# source ~/dotfiles/config/shell/functions/atuin.nu
 
 # 👇 Functions
-def open-repo [cwd: string = "nvim"] {
-  let r = (tv git-repos | default "")
-  if $r != "" { ^$cwd $r }
-}
+# def open-repo [cwd: string = "nvim"] {
+#   let r = (tv git-repos | default "")
+#   if $r != "" { ^$cwd $r }
+# }
 
-def jump-repo [cwd: string = "cd"] {
-  let r = (tv git-repos | default "")
-  if $r != "" { ^$cwd $r }
-}
+# def jump-repo [cwd: string = "cd"] {
+#   let r = (tv git-repos | default "")
+#   if $r != "" { ^$cwd $r }
+# }
 
 # 👇 Alias
-alias jr = jump-repo
-alias or = open-repo
-alias q = exit
+# alias jr = jump-repo
+# alias or = open-repo
+# alias q = exit
 
 # 👇 Mise
 use ($nu.default-config-dir | path join mise.nu)
