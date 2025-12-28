@@ -3,7 +3,6 @@ let autoload_dir = $nu.default-config-dir | path join "autoload"
 mkdir $autoload_dir
 
 # 👇 Carapace
-$env.CARAPACE_BRIDGES = 'zsh,fish,bash,inshellisense'
 mkdir ~/.cache/carapace
 /opt/homebrew/bin/carapace _carapace nushell | save --force ~/.cache/carapace/init.nu
 

@@ -58,6 +58,7 @@ $env.config = (
 )
 
 # 👇 Table Mode
+# $env.config.table.mode = 'markdown'
 # $env.config.table.mode = 'psql'
 
 # 👇 Carapace
