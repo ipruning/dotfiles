@@ -15,10 +15,14 @@ starship init nu | save -f ($nu.data-dir | path join "vendor/autoload/starship.n
 # 👇 Zoxide
 source ~/.zoxide.nu
 
-# 👇 Completions
-$env.config = ($env.config | upsert completions {
-  case_sensitive: false
-})
+# 👇 Custom Completions
+# $env.config = ($env.config | upsert completions {
+#   case_sensitive: false
+# })
+
+# 👇 Carapace Completions
+mkdir ~/.cache/carapace
+/opt/homebrew/bin/carapace _carapace nushell | save --force ~/.cache/carapace/init.nu
 
 # 👇 Television
 def tv_smart_autocomplete [] {
@@ -84,6 +88,22 @@ $env.config.history = {
 
 # 👇 Atuin
 source ~/dotfiles/config/shell/functions/atuin.nu
+
+# 👇 Functions
+def open-repo [cwd: string = "nvim"] {
+  let r = (tv git-repos | default "")
+  if $r != "" { ^$cwd $r }
+}
+
+def jump-repo [cwd: string = "cd"] {
+  let r = (tv git-repos | default "")
+  if $r != "" { ^$cwd $r }
+}
+
+# 👇 Alias
+alias jr = jump-repo
+alias or = open-repo
+alias q = exit
 
 # 👇 Mise
 use ($nu.default-config-dir | path join mise.nu)
