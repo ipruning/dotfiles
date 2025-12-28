@@ -37,6 +37,7 @@ URL_REGEX = re.compile(
 URL_COLOR = "\033[36m"
 PATH_COLOR = "\033[32m"
 UUID_COLOR = "\033[35m"
+CMD_COLOR = "\033[33m"
 RESET = "\033[0m"
 
 
@@ -60,6 +61,18 @@ UUID_PATTERNS: list[re.Pattern[str]] = [
     re.compile(
         r"\burn:uuid:([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})\b",
         re.IGNORECASE,
+    ),
+]
+
+# Command patterns for resume/continue commands (e.g. codex resume <uuid>, amp threads continue <id>)
+CMD_PATTERNS: list[re.Pattern[str]] = [
+    # codex resume <uuid>
+    re.compile(
+        r"(codex\s+resume\s+[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})"
+    ),
+    # amp threads continue <thread-id>
+    re.compile(
+        r"(amp\s+threads\s+continue\s+[A-Za-z]-[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})"
     ),
 ]
 
@@ -241,6 +254,14 @@ def extract_items(text: str) -> dict[str, str]:
                 if uuid_str not in items_dict:
                     items_dict[uuid_str] = "UUID"
 
+    # Identify resume/continue commands
+    for line in text.splitlines():
+        for pat in CMD_PATTERNS:
+            for m in pat.finditer(line):
+                cmd_str = m.group(1)
+                if cmd_str not in items_dict:
+                    items_dict[cmd_str] = "CMD"
+
     return items_dict
 
 
@@ -250,6 +271,9 @@ def open_item(item: str, kind: str) -> None:
         subprocess.run(["open", item], check=True)
     elif kind == "UUID":
         logger.info(f"Copying UUID to clipboard: {item}")
+        subprocess.run(["pbcopy"], input=item, text=True, check=True)
+    elif kind == "CMD":
+        logger.info(f"Copying command to clipboard: {item}")
         subprocess.run(["pbcopy"], input=item, text=True, check=True)
     else:
         logger.info(f"Opening file/path: {item}")
@@ -266,19 +290,24 @@ def fuzzy_select_items(items_dict: dict[str, str]) -> None:
         text_obj = Text()
         if kind == "URL":
             text_obj.append(item, style="cyan")
+        elif kind == "CMD":
+            text_obj.append(item, style="yellow")
+        elif kind == "UUID":
+            text_obj.append(item, style="magenta")
         else:
             text_obj.append(item, style="green")
         console.print(text_obj)
 
     lines_for_fzf = []
     for item in items_dict:
-        color = (
-            URL_COLOR
-            if items_dict[item] == "URL"
-            else UUID_COLOR
-            if items_dict[item] == "UUID"
-            else PATH_COLOR
-        )
+        if items_dict[item] == "URL":
+            color = URL_COLOR
+        elif items_dict[item] == "UUID":
+            color = UUID_COLOR
+        elif items_dict[item] == "CMD":
+            color = CMD_COLOR
+        else:
+            color = PATH_COLOR
         lines_for_fzf.append(f"{color}{item}{RESET}")
 
     process = subprocess.run(
