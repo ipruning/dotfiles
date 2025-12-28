@@ -74,6 +74,8 @@ alt-p = 'exec-and-forget open -a /Applications/Repo\ Prompt.app'
 alt-r = 'exec-and-forget open -a /Applications/Roam\ Research.app'
 alt-z = 'exec-and-forget ~/Developer/ipruning/prototypes/utils/scripts/newwin.sh zed'
 
+# cmd-enter = 'exec-and-forget ~/Developer/ipruning/prototypes/utils/scripts/newwin.sh ghostty'
+
 cmd-m = []
 cmd-h = []
 
