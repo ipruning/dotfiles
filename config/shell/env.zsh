@@ -165,6 +165,9 @@ if command -v brew >/dev/null 2>&1; then
   export PKG_CONFIG_PATH="$(brew --prefix mysql-client)/lib/pkgconfig:$PKG_CONFIG_PATH"
 fi
 
+# 👇 Opencode
+export PATH="$HOME/.opencode/bin:$PATH"
+
 # 👇 mise
 if command -v mise >/dev/null 2>&1; then
   eval "$(mise activate zsh)"
