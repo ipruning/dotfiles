@@ -88,6 +88,9 @@
     "line_height": {
       "custom": 1.5,
     },
+    "shell": {
+      "program": "nu",
+    },
     "toolbar": {
       "breadcrumbs": false,
     },
