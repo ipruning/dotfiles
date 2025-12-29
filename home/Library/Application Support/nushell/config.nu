@@ -18,6 +18,9 @@ if not (which mise | is-empty) {
 # 👇 Zoxide
 source ~/.zoxide.nu
 
+# 👇 Banner
+$env.config.show_banner = false
+
 # 👇 Starship
 # $env.STARSHIP_CONFIG = ($nu.home-path | path join ".config/starship.toml")
 # $env.STARSHIP_SHELL = "nu"
@@ -25,15 +28,15 @@ source ~/.zoxide.nu
 # starship init nu | save -f ($nu.data-dir | path join "vendor/autoload/starship.nu")
 
 # 👇 Completions
-# let carapace_completer = {|spans: list<string>|
-#   carapace $spans.0 nushell ...$spans | from json
-# }
+let carapace_completer = {|spans: list<string>|
+  carapace $spans.0 nushell ...$spans | from json
+}
 
-# $env.config.completions.external = {
-#   enable: true
-#   max_results: 100
-#   completer: $carapace_completer
-# }
+$env.config.completions.external = {
+  enable: true
+  max_results: 100
+  completer: $carapace_completer
+}
 
 # 👇 Television
 # def tv_smart_autocomplete [] {
@@ -82,9 +85,6 @@ source ~/.zoxide.nu
 
 # 👇 Edit Mode
 # $env.config.edit_mode = 'vi'
-
-# 👇 Banner
-# $env.config.show_banner = false
 
 # 👇 History
 # $env.config.history = {
