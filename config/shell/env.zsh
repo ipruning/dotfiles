@@ -1,5 +1,5 @@
 # 👇 XDG Config Home
-# export XDG_CONFIG_HOME="$HOME/.config"
+export XDG_CONFIG_HOME="$HOME/.config"
 
 # 👇 Emacs Mode
 bindkey -e
