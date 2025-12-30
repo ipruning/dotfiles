@@ -17,11 +17,18 @@ setopt interactivecomments
 zstyle ":completion:*" matcher-list "m:{a-z}={A-Za-z}"
 
 # 👇 Tips
-# edit-command-line: edit the command line in the editor
-# fc: edit the command line in the editor
 autoload -U edit-command-line
 zle -N edit-command-line
-bindkey "^v" edit-command-line
+bindkey "^x^e" edit-command-line
+
+function copy-command {
+  print -rn -- "$BUFFER" | c
+  zle -M "Copied to clipboard"
+}
+zle -N copy-command
+bindkey "^x^y" copy-command
+
+bindkey ' ' magic-space
 
 # 👇 Wordchars
 WORDCHARS=${WORDCHARS//.}
