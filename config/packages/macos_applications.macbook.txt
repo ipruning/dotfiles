@@ -1,4 +1,3 @@
-カドラバ - トレカ総合アプリ
 .Karabiner-VirtualHIDDevice-Manager
 1Password
 1Password for Safari
@@ -18,6 +17,7 @@ Bob
 calibre
 Capture One
 ChatGPT Atlas
+CodexBar
 Comet
 Contexts
 CrossOver
@@ -31,6 +31,7 @@ Discord
 Drafts
 Eagle
 Eudic
+Figma
 Ghostty
 GitButler
 Google Chrome
