@@ -45,3 +45,15 @@ mcd () {
   [[ -z "${1:-}" ]] && return 2
   mkdir -p -- "$1" && cd -- "$1"
 }
+
+alias -s md="bat"
+alias -s txt="bat"
+
+alias -g DN='> /dev/null'
+alias -g NE='2>/dev/null'
+alias -g NUL='>/dev/null 2>&1'
+
+alias -g JQ='| jq'
+
+alias -g C='| c'
+alias -g P='p |'
