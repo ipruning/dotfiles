@@ -5,6 +5,8 @@ set -euo pipefail
 
 cd "$(git rev-parse --show-toplevel)" || exit 1
 
+printf "\033[34m==> Syncing Shell Completion...\033[0m\n"
+
 [ -d config/shell/completions ] || mkdir -p config/shell/completions
 
 if command -v uvx >/dev/null 2>&1; then
@@ -35,12 +37,18 @@ if command -v linear >/dev/null 2>&1; then
   linear completions zsh > config/shell/completions/_linear
 fi
 
+printf "\033[34m==> Syncing Shell Functions...\033[0m\n"
+
 if command -v starship >/dev/null 2>&1; then
   starship init zsh > config/shell/functions/_starship.zsh
 fi
 
 if command -v atuin >/dev/null 2>&1; then
   atuin init zsh --disable-up-arrow > config/shell/functions/_atuin.zsh
+fi
+
+if command -v mise >/dev/null 2>&1; then
+  mise activate zsh > config/shell/functions/_mise.zsh
 fi
 
 rm -f ~/.zcompdump*
