@@ -4,12 +4,9 @@ export XDG_CONFIG_HOME="$HOME/.config"
 # 👇 Emacs Mode
 bindkey -e
 
-# 👇 Vim Mode
-# bindkey -v
-
 # 👇 zsh Theme
 if command -v starship >/dev/null 2>&1; then
-  eval "$(starship init zsh)"
+  source "$HOME/dotfiles/config/shell/functions/_starship.zsh"
 fi
 
 # 👇 zsh options
@@ -45,29 +42,25 @@ bindkey "^E" end-of-line
 bindkey "^F" forward-char
 
 # 👇 Editor
-if [[ $OSTYPE == darwin* ]]; then
-  if [[ "$TERM_PROGRAM" == "vscode" ]]; then
-    export EDITOR="/usr/local/bin/cursor --wait"
-    export VISUAL="$EDITOR"
-  fi
+if [[ "$TERM_PROGRAM" == "vscode" ]]; then
+  export EDITOR="/usr/local/bin/cursor --wait"
+  export VISUAL="$EDITOR"
+fi
 
-  if [[ "$TERM_PROGRAM" == "zed" ]]; then
-    export EDITOR="/opt/homebrew/bin/zed --wait"
-    export VISUAL="$EDITOR"
-  fi
+if [[ "$TERM_PROGRAM" == "zed" ]]; then
+  export EDITOR="/opt/homebrew/bin/zed --wait"
+  export VISUAL="$EDITOR"
+fi
 
-  if [[ "$TERM_PROGRAM" == "ghostty" ]]; then
-    export EDITOR="/opt/homebrew/bin/nvim"
-    export EDITOR="/opt/homebrew/bin/zed --wait"
-    export VISUAL="$EDITOR"
-  fi
+if [[ "$TERM_PROGRAM" == "ghostty" ]]; then
+  export EDITOR="/opt/homebrew/bin/nvim"
+  export EDITOR="/opt/homebrew/bin/zed --wait"
+  export VISUAL="$EDITOR"
 fi
 
 # 👇 Functions
-if [[ $OSTYPE == darwin* ]]; then
-  source "$HOME/dotfiles/config/shell/functions/macos.zsh"
-  source "$HOME/dotfiles/config/shell/functions/surge.zsh"
-fi
+source "$HOME/dotfiles/config/shell/functions/macos.zsh"
+source "$HOME/dotfiles/config/shell/functions/surge.zsh"
 
 # 👇 Brew
 export HOMEBREW_NO_ANALYTICS=1
@@ -75,8 +68,15 @@ export HOMEBREW_NO_ANALYTICS=1
 # 👇 Mojo
 export PATH="$HOME/.modular/bin:$PATH"
 
+# 👇 Opencode
+export PATH="$HOME/.opencode/bin:$PATH"
+
 # 👇 tailspin
-export TAILSPIN_PAGER="ov -f [FILE]"
+if command -v tailspin >/dev/null 2>&1; then
+  if command -v ov >/dev/null 2>&1; then
+    export TAILSPIN_PAGER="ov -f [FILE]"
+  fi
+fi
 
 # 👇 OrbStack
 source "$HOME/.orbstack/shell/init.zsh" 2>/dev/null || :
@@ -86,19 +86,9 @@ if command -v zoxide >/dev/null 2>&1; then
   eval "$(zoxide init zsh --cmd j)"
 fi
 
-# 👇 yazi
-function y() {
-  local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
-  yazi "$@" --cwd-file="$tmp"
-  if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
-    builtin cd -- "$cwd"
-  fi
-  rm -f -- "$tmp"
-}
-
 # 👇 atuin
 if command -v atuin >/dev/null 2>&1; then
-  eval "$(atuin init zsh --disable-up-arrow)"
+  source "$HOME/dotfiles/config/shell/functions/_atuin.zsh"
 fi
 
 # 👇 tv
@@ -169,13 +159,16 @@ fi
 
 # 👇 mysql
 if command -v brew >/dev/null 2>&1; then
-  export PKG_CONFIG_PATH="$(brew --prefix mysql-client)/lib/pkgconfig:$PKG_CONFIG_PATH"
+  export PKG_CONFIG_PATH="/opt/homebrew/opt/mysql-client/lib/pkgconfig:$PKG_CONFIG_PATH"
 fi
 
-# 👇 Opencode
-export PATH="$HOME/.opencode/bin:$PATH"
-
-# 👇 mise
+# 👇 mise (need 40ms)
 if command -v mise >/dev/null 2>&1; then
   eval "$(mise activate zsh)"
 fi
+
+# 👇 Path
+# export PATH="$HOME/.local/bin:$PATH"
+# export PATH="$HOME/.local/share/mise/shims:$PATH"
+# export PATH="$HOME/Developer/ipruning/prototypes/utils/scripts:$PATH"
+# export PATH="$HOME/dotfiles/config/shell/bin:$PATH"
