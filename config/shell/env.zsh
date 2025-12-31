@@ -164,7 +164,7 @@ fi
 
 # 👇 mise (need 40ms)
 if command -v mise >/dev/null 2>&1; then
-  eval "$(mise activate zsh)"
+  source "$HOME/dotfiles/config/shell/functions/_mise.zsh"
 fi
 
 # 👇 Path

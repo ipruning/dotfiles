@@ -8,6 +8,7 @@ config/shell/bin/claude
 config/shell/bin/zbg
 config/shell/completions/
 config/shell/functions/_atuin.zsh
+config/shell/functions/_mise.zsh
 config/shell/functions/_starship.zsh
 config/shell/plugins/
 home/.config/karabiner/automatic_backups/
