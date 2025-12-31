@@ -1,5 +1,3 @@
-# echo ">>> .zprofile is loaded. Shell: $SHELL, Options: $-"
-
 typeset -U path
 
 # if [[ $OSTYPE == darwin* ]]; then

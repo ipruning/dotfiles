@@ -1,4 +1,10 @@
-# echo ">>> .zshrc is loaded. Shell: $SHELL, Options: $-"
+# Startup profiling (triggered by ZSH_TRACE_STARTUP=1)
+if [[ -n $ZSH_TRACE_STARTUP ]]; then
+  zmodload zsh/datetime
+  exec 2>"${ZSH_TRACE_FILE:-/tmp/zsh_profile_$$.log}"
+  setopt xtrace prompt_subst
+  PS4='+$EPOCHREALTIME> '
+fi
 
 typeset -U path
 typeset -U fpath
