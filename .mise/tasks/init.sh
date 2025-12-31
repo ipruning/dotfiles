@@ -26,7 +26,7 @@ printf '\n\033[1;34m▶ Updating ZSH Plugins\033[0m\n'
 [ -d config/shell/plugins/zsh-autosuggestions ]      || git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions              config/shell/plugins/zsh-autosuggestions
 [ -d config/shell/plugins/fast-syntax-highlighting ] || git clone --depth=1 https://github.com/zdharma-continuum/fast-syntax-highlighting config/shell/plugins/fast-syntax-highlighting
 
-if which gfold >/dev/null 2>&1; then
+if command -v gfold >/dev/null 2>&1; then
   gfold -d json "$@" 2>/dev/null |
   jq -r '.[] | (.parent | rtrimstr("/")) + "/" + .name' |
   while read -r repo; do
