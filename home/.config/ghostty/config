@@ -1,5 +1,4 @@
 # command = shell:/opt/homebrew/bin/fish
-# command = shell:zsh -ic fish
 # command = shell:/opt/homebrew/bin/nu
 
 font-family = MonoLisa
@@ -11,8 +10,7 @@ cursor-style-blink = false
 font-size = 12
 font-style = Medium
 macos-option-as-alt = true
-maximize = true
-shell-integration-features = title, ssh-env, ssh-terminfo, no-cursor
+shell-integration-features = no-cursor, title, ssh-terminfo, ssh-env, sudo
 theme = Catppuccin Mocha
 undo-timeout = 1m
 
