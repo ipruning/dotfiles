@@ -5,14 +5,16 @@
 .git/
 .jj/
 .repoprompt/
-home/.config/karabiner/automatic_backups/
-home/.config/zellij/plugins/
+.ruff_cache/
+.venv/
 
-vendor/bin/claude
-vendor/bin/zbg
 
+generated/bin/
 generated/completions/
 generated/functions/
+home/.config/karabiner/automatic_backups/
+home/.config/zellij/plugins/
+vendor/bin/
 vendor/plugins/
 
 !*tpl*

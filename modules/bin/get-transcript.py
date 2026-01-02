@@ -7,7 +7,7 @@
 Extract transcript from a YouTube video.
 
 Usage:
-    uv run scripts/get_transcript.py <video_id_or_url> [--timestamps]
+    uv run get_transcript.py <video_id_or_url> [--timestamps]
 """
 
 import argparse
