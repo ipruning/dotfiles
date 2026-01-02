@@ -20,11 +20,11 @@ curl -sSL -o home/.config/zellij/plugins/zellij-sessionizer.wasm https://github.
 
 printf "\033[34m==> Updating ZSH Plugins...\033[0m\n"
 
-[ -d config/shell/plugins/fzf-tab ]                  || git clone --depth=1 https://github.com/Aloxaf/fzf-tab                             config/shell/plugins/fzf-tab
-[ -d config/shell/plugins/ugit ]                     || git clone --depth=1 https://github.com/Bhupesh-V/ugit.git                         config/shell/plugins/ugit
-[ -d config/shell/plugins/zsh-autocomplete ]         || git clone --depth=1 https://github.com/marlonrichert/zsh-autocomplete             config/shell/plugins/zsh-autocomplete
-[ -d config/shell/plugins/zsh-autosuggestions ]      || git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions              config/shell/plugins/zsh-autosuggestions
-[ -d config/shell/plugins/fast-syntax-highlighting ] || git clone --depth=1 https://github.com/zdharma-continuum/fast-syntax-highlighting config/shell/plugins/fast-syntax-highlighting
+[ -d vendor/plugins/fzf-tab ]                  || git clone --depth=1 https://github.com/Aloxaf/fzf-tab                             vendor/plugins/fzf-tab
+[ -d vendor/plugins/ugit ]                     || git clone --depth=1 https://github.com/Bhupesh-V/ugit.git                         vendor/plugins/ugit
+[ -d vendor/plugins/zsh-autocomplete ]         || git clone --depth=1 https://github.com/marlonrichert/zsh-autocomplete             vendor/plugins/zsh-autocomplete
+[ -d vendor/plugins/zsh-autosuggestions ]      || git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions              vendor/plugins/zsh-autosuggestions
+[ -d vendor/plugins/fast-syntax-highlighting ] || git clone --depth=1 https://github.com/zdharma-continuum/fast-syntax-highlighting vendor/plugins/fast-syntax-highlighting
 
 if command -v gfold >/dev/null 2>&1; then
   gfold -d json "$@" 2>/dev/null |
@@ -50,6 +50,6 @@ printf "\033[34m==> Syncing Completion...\033[0m\n"
 mise sync-completion
 
 printf "\033[34m==> Injecting Private Environment...\033[0m\n"
-op inject --in-file config/shell/env.private.tpl.zsh --out-file config/shell/env.private.zsh
+op inject --in-file modules/zsh/env.private.tpl.zsh --out-file modules/zsh/env.private.zsh
 
 printf "\033[34m==> Done...\033[0m\n"

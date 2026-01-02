@@ -27,8 +27,10 @@ if [[ $OSTYPE == linux* ]]; then
   fi
 fi
 
+GENERATED_COMPLETIONS_DIR="$HOME/dotfiles/generated/completions"
+
 completion_paths=()
-[[ -d "$HOME/dotfiles/config/shell/completions" ]] && completion_paths+=("$HOME/dotfiles/config/shell/completions")
+[[ -d "$GENERATED_COMPLETIONS_DIR" ]] && completion_paths+=("$GENERATED_COMPLETIONS_DIR")
 completion_paths+=("${fpath[@]}")
 fpath=("${completion_paths[@]}")
 autoload -Uz compinit
@@ -37,11 +39,13 @@ for dump in ~/.zcompdump(N.mh+24); do
 done
 compinit -C
 
-[[ -d "$HOME/dotfiles" ]] && {
+ZSH_MODULES_DIR="$HOME/dotfiles/modules/zsh"
+
+[[ -d "$ZSH_MODULES_DIR" ]] && {
   config_files=(
-    "$HOME/dotfiles/config/shell/aliases.zsh"
-    "$HOME/dotfiles/config/shell/env.zsh"
-    "$HOME/dotfiles/config/shell/env.private.zsh"
+    "$ZSH_MODULES_DIR/aliases.zsh"
+    "$ZSH_MODULES_DIR/env.zsh"
+    "$ZSH_MODULES_DIR/env.private.zsh"
   )
   for file in "${config_files[@]}"; do
     [[ -e "$file" ]] && builtin source "$file"
