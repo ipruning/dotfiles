@@ -1,3 +1,7 @@
+GENERATED_COMPLETIONS_DIR="$HOME/dotfiles/generated/completions"
+GENERATED_FUNCTIONS_DIR="$HOME/dotfiles/generated/functions"
+PLUGINS_DIR="$HOME/dotfiles/vendor/plugins"
+
 # 👇 XDG Config Home
 export XDG_CONFIG_HOME="$HOME/.config"
 
@@ -6,7 +10,7 @@ bindkey -e
 
 # 👇 zsh Theme
 if command -v starship >/dev/null 2>&1; then
-  source "$HOME/dotfiles/config/shell/functions/_starship.zsh"
+  source "$GENERATED_FUNCTIONS_DIR/_starship.zsh"
 fi
 
 # 👇 zsh options
@@ -59,8 +63,8 @@ if [[ "$TERM_PROGRAM" == "ghostty" ]]; then
 fi
 
 # 👇 Functions
-source "$HOME/dotfiles/config/shell/functions/macos.zsh"
-source "$HOME/dotfiles/config/shell/functions/surge.zsh"
+source "$HOME/dotfiles/modules/zsh/macos.zsh"
+source "$HOME/dotfiles/modules/zsh/surge.zsh"
 
 # 👇 Brew
 export HOMEBREW_NO_ANALYTICS=1
@@ -88,7 +92,7 @@ fi
 
 # 👇 atuin
 if command -v atuin >/dev/null 2>&1; then
-  source "$HOME/dotfiles/config/shell/functions/_atuin.zsh"
+  source "$GENERATED_FUNCTIONS_DIR/_atuin.zsh"
 fi
 
 # 👇 tv
@@ -119,12 +123,9 @@ zle -N tv-search _tv_search
 
 bindkey '^T' tv-search
 
-# 👇 plugins
-ZSH_PLUGINS_DIR="$HOME/dotfiles/config/shell/plugins"
-
 # 👇 ugit
-if [[ -f "$ZSH_PLUGINS_DIR"/ugit/ugit.plugin.zsh ]]; then
-  source "$ZSH_PLUGINS_DIR"/ugit/ugit.plugin.zsh
+if [[ -f "$PLUGINS_DIR"/ugit/ugit.plugin.zsh ]]; then
+  source "$PLUGINS_DIR"/ugit/ugit.plugin.zsh
 fi
 
 # 👇 fzf
@@ -140,21 +141,21 @@ export FZF_DEFAULT_OPTS=" \
 --color=selected-bg:#45475a"
 
 # 👇 fzf-tab
-if [[ -f "$ZSH_PLUGINS_DIR"/fzf-tab/fzf-tab.plugin.zsh ]]; then
-  source "$ZSH_PLUGINS_DIR"/fzf-tab/fzf-tab.plugin.zsh
+if [[ -f "$PLUGINS_DIR"/fzf-tab/fzf-tab.plugin.zsh ]]; then
+  source "$PLUGINS_DIR"/fzf-tab/fzf-tab.plugin.zsh
   zstyle ':completion:*:descriptions' format '[%d]'
   zstyle ':completion:*' menu no
   zstyle ':fzf-tab:*' use-fzf-default-opts yes
 fi
 
 # 👇 zsh-autosuggestions
-if [[ -f "$ZSH_PLUGINS_DIR"/zsh-autosuggestions/zsh-autosuggestions.zsh ]]; then
-  source "$ZSH_PLUGINS_DIR"/zsh-autosuggestions/zsh-autosuggestions.zsh
+if [[ -f "$PLUGINS_DIR"/zsh-autosuggestions/zsh-autosuggestions.zsh ]]; then
+  source "$PLUGINS_DIR"/zsh-autosuggestions/zsh-autosuggestions.zsh
 fi
 
 # 👇 fast-syntax-highlighting
-if [[ -f "$ZSH_PLUGINS_DIR"/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh ]]; then
-  source "$ZSH_PLUGINS_DIR"/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
+if [[ -f "$PLUGINS_DIR"/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh ]]; then
+  source "$PLUGINS_DIR"/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
 fi
 
 # 👇 mysql
@@ -164,7 +165,7 @@ fi
 
 # 👇 mise (need 40ms)
 if command -v mise >/dev/null 2>&1; then
-  source "$HOME/dotfiles/config/shell/functions/_mise.zsh"
+  source "$GENERATED_FUNCTIONS_DIR/_mise.zsh"
 fi
 
 # 👇 Path
