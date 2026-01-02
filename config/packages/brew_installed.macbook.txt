@@ -7,6 +7,7 @@ bash-completion@2
 bat
 beancount
 beancount-language-server
+bird
 blueutil
 btop
 carapace

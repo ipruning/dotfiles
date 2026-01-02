@@ -79,6 +79,7 @@ somo
 sqlfluff
 sshx
 starship
+steipete/tap/bird
 steipete/tap/peekaboo
 tailspin
 tealdeer
