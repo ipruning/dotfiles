@@ -135,8 +135,9 @@ trusted_config_paths = ['~/Developer']
 
 [env]
 _.path = [
-    "~/dotfiles/scripts",
-    "~/dotfiles/vendor/bin",
     "~/Developer/ipruning/prototypes/utils/scripts",
+    "~/dotfiles/modules/bin",
+    "~/dotfiles/generated/bin",
+    "~/dotfiles/vendor/bin",
     "~/.local/bin",
 ]
