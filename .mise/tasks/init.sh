@@ -39,8 +39,8 @@ fi
 
 printf "\033[34m==> Restoring Mackup...\033[0m\n"
 if [ ! -L "$HOME/.mackup" ] || [ ! -L "$HOME/.mackup.cfg" ]; then
-  [ ! -L "$HOME/.mackup" ] && ln -sf "$HOME/dotfiles/config/mackup/.mackup" "$HOME"/.mackup
-  [ ! -L "$HOME/.mackup.cfg" ] && ln -sf "$HOME/dotfiles/config/mackup/.mackup.cfg" "$HOME"/.mackup.cfg
+  [ ! -L "$HOME/.mackup" ] && ln -sf "$HOME/dotfiles/modules/mackup/.mackup" "$HOME"/.mackup
+  [ ! -L "$HOME/.mackup.cfg" ] && ln -sf "$HOME/dotfiles/modules/mackup/.mackup.cfg" "$HOME"/.mackup.cfg
   uvx mackup restore
 else
   printf "\033[34m==> Mackup is already configured...\033[0m\n"
