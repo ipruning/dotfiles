@@ -90,18 +90,21 @@ if command -v claude &>/dev/null; then
 fi
 
 logger "Backing up all packages..."
-host="$(hostname -s)"
+host="$(hostname -s || true)"
+host="${host:-unknown-host}"
+host="${host//[^A-Za-z0-9._-]/-}"
+mkdir -p "$HOME/dotfiles/inventory/hosts/$host"
 if command -v brew &>/dev/null; then
-  brew bundle dump --file="$HOME/dotfiles/config/packages/brew_dump.${host}.txt" --force
-  brew leaves | LC_ALL=en_US.UTF-8 sort >"$HOME/dotfiles/config/packages/brew_leaves.${host}.txt"
-  brew list --installed-on-request | LC_ALL=en_US.UTF-8 sort >"$HOME/dotfiles/config/packages/brew_installed.${host}.txt"
+  brew bundle dump --file="$HOME/dotfiles/inventory/hosts/$host/brew_dump.txt" --force
+  brew leaves | LC_ALL=en_US.UTF-8 sort >"$HOME/dotfiles/inventory/hosts/$host/brew_leaves.txt"
+  brew list --installed-on-request | LC_ALL=en_US.UTF-8 sort >"$HOME/dotfiles/inventory/hosts/$host/brew_installed.txt"
 fi
 if command -v gh &>/dev/null; then
-  gh extension list | awk '{print $3}' | LC_ALL=en_US.UTF-8 sort >"$HOME/dotfiles/config/packages/gh_extensions.${host}.txt"
+  gh extension list | awk '{print $3}' | LC_ALL=en_US.UTF-8 sort >"$HOME/dotfiles/inventory/hosts/$host/gh_extensions.txt"
 fi
 if [ -d "/Applications" ]; then
-  find /Applications -maxdepth 1 -name "*.app" -exec basename {} .app \; | LC_ALL=en_US.UTF-8 sort >"$HOME/dotfiles/config/packages/macos_applications.${host}.txt"
+  find /Applications -maxdepth 1 -name "*.app" -exec basename {} .app \; | LC_ALL=en_US.UTF-8 sort >"$HOME/dotfiles/inventory/hosts/$host/applications.txt"
 fi
 if [ -d "/Applications/Setapp" ]; then
-  find /Applications/Setapp -maxdepth 1 -name "*.app" -exec basename {} .app \; | LC_ALL=en_US.UTF-8 sort >"$HOME/dotfiles/config/packages/macos_setapp.${host}.txt"
+  find /Applications/Setapp -maxdepth 1 -name "*.app" -exec basename {} .app \; | LC_ALL=en_US.UTF-8 sort >"$HOME/dotfiles/inventory/hosts/$host/setapp.txt"
 fi
