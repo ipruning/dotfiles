@@ -17,6 +17,7 @@ Bob
 calibre
 Capture One
 ChatGPT Atlas
+Claude
 CodexBar
 Comet
 Contexts
