@@ -248,14 +248,6 @@ fallback_channel = "files"
 ]
 "git-log" = ["git log", "git show"]
 "docker-images" = ["docker run"]
-"git-repos" = [
-  "code",
-  "cursor",
-  "git clone",
-  "hx",
-  "nvim",
-  "zed",
-]
 
 "channels" = ["tv"]
 "hidden-dirs" = [
@@ -266,9 +258,13 @@ fallback_channel = "files"
 "hidden-files" = [
   "bat",
   "cat",
+  "code",
   "cursor",
+  "hx",
   "rip",
   "rm",
+  "vi",
+  "vim",
   "zed",
 ]
 "hosts" = ["ssh"]
