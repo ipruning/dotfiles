@@ -56,7 +56,7 @@ nushell
 opam
 ouch
 ov
-pandoc
+pandoc-crossref
 parallel
 parallel-disk-usage
 pgcli
