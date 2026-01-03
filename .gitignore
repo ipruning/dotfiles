@@ -8,10 +8,7 @@
 .ruff_cache/
 .venv/
 
-
-generated/bin/
-generated/completions/
-generated/functions/
+generated/
 home/.config/karabiner/automatic_backups/
 home/.config/zellij/plugins/
 vendor/bin/
