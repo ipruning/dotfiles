@@ -69,7 +69,7 @@ alt-shift-l = ['move right', 'mode main']
 
 alt-b = 'exec-and-forget ~/Developer/ipruning/prototypes/utils/scripts/newwin.sh chrome'
 alt-c = 'exec-and-forget ~/Developer/ipruning/prototypes/utils/scripts/newwin.sh cursor'
-alt-g = 'exec-and-forget ~/Developer/ipruning/prototypes/utils/scripts/newwin.sh ghostty'
+alt-g = 'exec-and-forget open -a /Applications/Ghostty.app'
 alt-p = 'exec-and-forget open -a /Applications/Repo\ Prompt.app'
 alt-r = 'exec-and-forget open -a /Applications/Roam\ Research.app'
 alt-z = 'exec-and-forget ~/Developer/ipruning/prototypes/utils/scripts/newwin.sh zed'
@@ -183,9 +183,5 @@ if.app-id = 'com.sleeplessmind.Wooshy'
 run = 'layout floating'
 
 [[on-window-detected]]
-if.app-id = 'com.pvncher.repoprompt'
-run = 'move-node-to-workspace 6'
-
-[[on-window-detected]]
-if.app-id = "com.mitchellh.ghostty"
-run = ["layout tiling"]
+if.app-id = 'com.mitchellh.ghostty'
+run = ['move-node-to-workspace 9']
