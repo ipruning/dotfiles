@@ -96,6 +96,7 @@ These are the invariants that keep the repo understandable over time:
 4. **`vendor/` is where third-party payload lives (local cache)**
 
    * `vendor/` is ignored by git; plugins/binaries are cloned/downloaded locally.
+   * `vendor/bin/` is specifically for third-party binaries cached on disk.
    * `init` currently clones latest HEAD rather than pinned versions.
    * `vendor/` should not contain personal secrets.
 
@@ -196,6 +197,7 @@ Examples:
 * `gh_extensions.txt`
 
 These are intentionally host-specific and are expected to change over time.
+They are snapshot artifacts (brew/apps/gh extensions, etc.), not canonical config.
 
 ## Agents / Skills / Prompts
 
