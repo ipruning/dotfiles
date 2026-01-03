@@ -14,4 +14,5 @@ shell-integration-features = no-cursor, title, ssh-terminfo, ssh-env, sudo
 theme = Catppuccin Mocha
 undo-timeout = 1m
 
-keybind = cmd+t=new_window
+keybind = cmd+n=new_tab
+keybind = cmd+t=new_tab
