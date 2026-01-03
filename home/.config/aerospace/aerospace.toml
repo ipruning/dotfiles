@@ -18,15 +18,17 @@ outer.top = 0
 outer.right = 0
 
 [workspace-to-monitor-force-assignment]
-1 = 2
-2 = 2
-3 = 2
-4 = 2
-5 = 2
-6 = 1
-7 = 1
-8 = 1
-9 = 1
+1 = '^built-in retina display$'
+2 = '^built-in retina display$'
+3 = '^built-in retina display$'
+4 = '^built-in retina display$'
+5 = '^built-in retina display$'
+
+6 = '^LG ULTRAGEAR.*$'
+7 = '^LG ULTRAGEAR.*$'
+8 = '^LG ULTRAGEAR.*$'
+9 = '^LG ULTRAGEAR.*$'
+0 = '^LG ULTRAGEAR.*$'
 
 [mode.main.binding]
 alt-shift-p = 'mode pass'
@@ -46,6 +48,7 @@ alt-6 = 'workspace 6'
 alt-7 = 'workspace 7'
 alt-8 = 'workspace 8'
 alt-9 = 'workspace 9'
+alt-0 = 'workspace 0'
 
 alt-shift-1 = 'move-node-to-workspace 1'
 alt-shift-2 = 'move-node-to-workspace 2'
@@ -57,6 +60,7 @@ alt-shift-6 = 'move-node-to-workspace 6'
 alt-shift-7 = 'move-node-to-workspace 7'
 alt-shift-8 = 'move-node-to-workspace 8'
 alt-shift-9 = 'move-node-to-workspace 9'
+alt-shift-0 = 'move-node-to-workspace 0'
 
 alt-h = 'focus left --boundaries all-monitors-outer-frame'
 alt-j = 'focus down --boundaries all-monitors-outer-frame'
