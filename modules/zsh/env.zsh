@@ -91,9 +91,14 @@ if command -v zoxide >/dev/null 2>&1; then
 fi
 
 # 👇 atuin
-if command -v atuin >/dev/null 2>&1; then
-  source "$GENERATED_FUNCTIONS_DIR/_atuin.zsh"
-fi
+# if command -v atuin >/dev/null 2>&1; then
+#   source "$GENERATED_FUNCTIONS_DIR/_atuin.zsh"
+# fi
+
+# 👇 atuin
+export PATH="$HOME/Developer/ipruning/atuin/target/debug:$PATH"
+eval "$($HOME/Developer/ipruning/atuin/target/debug/atuin init zsh --disable-up-arrow)"
+
 
 # 👇 tv
 _tv_search() {
