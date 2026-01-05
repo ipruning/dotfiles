@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 #MISE description="Profile zsh startup time"
-#MISE alias="zp"
 
 set -euo pipefail
+
+command -v zsh >/dev/null 2>&1 || { echo "Error: zsh not found" >&2; exit 1; }
+command -v hyperfine >/dev/null 2>&1 || { echo "Error: hyperfine not found" >&2; exit 1; }
+command -v python3 >/dev/null 2>&1 || { echo "Error: python3 not found" >&2; exit 1; }
 
 RUNS="${1:-50}"
 WARMUP="${2:-10}"

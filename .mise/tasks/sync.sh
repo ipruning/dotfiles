@@ -3,11 +3,49 @@
 
 set -euo pipefail
 
-cd "$(git rev-parse --show-toplevel)" || exit 1
+command -v git >/dev/null 2>&1 || { echo "Error: git not found" >&2; exit 1; }
+REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)" || { echo "Error: not inside a git repo" >&2; exit 1; }
+cd "$REPO_ROOT" || exit 1
+
+printf "\033[34m==> Syncing Vendor Plugins (git pull)...\033[0m\n"
+
+PLUGINS_DIR="$(pwd)/vendor/plugins"
+
+if [ -d "$PLUGINS_DIR" ]; then
+  shopt -s nullglob
+  for plugin_dir in "$PLUGINS_DIR"/*; do
+    [ -d "$plugin_dir" ] || continue
+
+    if ! git -C "$plugin_dir" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+      continue
+    fi
+
+    plugin_name="$(basename "$plugin_dir")"
+
+    if ! git -C "$plugin_dir" remote get-url origin >/dev/null 2>&1; then
+      printf " - %s (no origin remote; skipping)\n" "$plugin_name"
+      continue
+    fi
+
+    branch="$(git -C "$plugin_dir" symbolic-ref -q --short HEAD 2>/dev/null || true)"
+    if [ -z "$branch" ]; then
+      printf " - %s (detached HEAD; skipping)\n" "$plugin_name"
+      continue
+    fi
+
+    printf " - %s (%s)\n" "$plugin_name" "$branch"
+    if ! git -C "$plugin_dir" pull --ff-only; then
+      printf "   -> pull failed; continuing\n"
+    fi
+  done
+  shopt -u nullglob
+else
+  printf " - vendor/plugins not found; skipping\n"
+fi
 
 printf "\033[34m==> Syncing Shell Completion...\033[0m\n"
 
-GENERATED_COMPLETIONS_DIR="$HOME/dotfiles/generated/completions"
+GENERATED_COMPLETIONS_DIR="$REPO_ROOT/generated/completions"
 
 [ -d "$GENERATED_COMPLETIONS_DIR" ] || mkdir -p "$GENERATED_COMPLETIONS_DIR"
 
@@ -41,7 +79,7 @@ fi
 
 printf "\033[34m==> Syncing Shell Functions...\033[0m\n"
 
-GENERATED_FUNCTIONS_DIR="$HOME/dotfiles/generated/functions"
+GENERATED_FUNCTIONS_DIR="$REPO_ROOT/generated/functions"
 
 [ -d "$GENERATED_FUNCTIONS_DIR" ] || mkdir -p "$GENERATED_FUNCTIONS_DIR"
 
