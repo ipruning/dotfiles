@@ -72,6 +72,7 @@
   "catppuccin.boldKeywords": true,
   "catppuccin.italicComments": true,
   "catppuccin.italicKeywords": false,
+  "claudeCode.preferredLocation": "panel",
   "code-runner.clearPreviousOutput": false,
   "code-runner.enableAppInsights": false,
   "code-runner.executorMap": {
@@ -91,7 +92,6 @@
   "cursor.composer.collapsePaneInputBoxPills": true,
   "cursor.composer.queueMessageDefaultBehavior": "queue",
   "cursor.composer.shouldChimeAfterChatFinishes": true,
-  "cursor.composer.textSizeScale": 1.15,
   "cursor.windowSwitcher.sidebarHoverCollapsed": true,
   "cursorpyright.analysis.typeCheckingMode": "basic",
   "diffEditor.ignoreTrimWhitespace": false,
@@ -337,6 +337,7 @@
   "terminal.integrated.scrollback": 50000,
   "typos.diagnosticSeverity": "Information",
   "typos.logLevel": "info",
+  "update.releaseTrack": "prerelease",
   "vim.hlsearch": true,
   "vim.incsearch": true,
   "vim.leader": "<space>",
@@ -462,6 +463,5 @@
   "workbench.settings.editor": "json",
   "workbench.tree.indent": 22,
   "workbench.tree.renderIndentGuides": "always",
-  "zig.zls.enabled": "on",
-  "claudeCode.preferredLocation": "panel"
+  "zig.zls.enabled": "on"
 }
