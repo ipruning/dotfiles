@@ -3,13 +3,17 @@
 
 set -euo pipefail
 
-command -v git >/dev/null 2>&1 || { echo "Error: git not found" >&2; exit 1; }
-REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)" || { echo "Error: not inside a git repo" >&2; exit 1; }
-cd "$REPO_ROOT" || exit 1
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=/dev/null
+source "$SCRIPT_DIR/_lib.sh"
+
+require_cmd git
+REPO_ROOT="$(repo_root)"
+cd "$REPO_ROOT"
 
 printf "\033[34m==> Syncing Vendor Plugins (git pull)...\033[0m\n"
 
-PLUGINS_DIR="$(pwd)/vendor/plugins"
+PLUGINS_DIR="$REPO_ROOT/vendor/plugins"
 
 if [ -d "$PLUGINS_DIR" ]; then
   shopt -s nullglob
