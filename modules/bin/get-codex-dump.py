@@ -69,12 +69,12 @@ def format_response_item(payload: dict) -> str | None:
                 call_id=payload.get("call_id", ""),
             )
 
-        case "function_call_output":
-            return format_tag(
-                "function_call_output",
-                payload.get("output", ""),
-                call_id=payload.get("call_id", ""),
-            )
+        # case "function_call_output":
+        #     return format_tag(
+        #         "function_call_output",
+        #         payload.get("output", ""),
+        #         call_id=payload.get("call_id", ""),
+        #     )
 
         case _:
             return None
