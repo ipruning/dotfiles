@@ -3,12 +3,16 @@
 
 set -euo pipefail
 
-command -v git >/dev/null 2>&1 || { echo "Error: git not found" >&2; exit 1; }
-command -v gum >/dev/null 2>&1 || exit 1
-command -v mise >/dev/null 2>&1 || exit 1
-command -v uv >/dev/null 2>&1 || exit 1
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=/dev/null
+source "$SCRIPT_DIR/_lib.sh"
 
-REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)" || { echo "Error: not inside a git repo" >&2; exit 1; }
-cd "$REPO_ROOT" || exit 1
+require_cmd git
+require_cmd gum
+require_cmd mise
+require_cmd uvx
+
+REPO_ROOT="$(repo_root)"
+cd "$REPO_ROOT"
 
 gum confirm "Are you sure you want to run mackup restore(force)?" && uvx mackup restore --force

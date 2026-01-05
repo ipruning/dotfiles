@@ -3,13 +3,20 @@
 
 set -euo pipefail
 
-command -v zsh >/dev/null 2>&1 || { echo "Error: zsh not found" >&2; exit 1; }
-command -v hyperfine >/dev/null 2>&1 || { echo "Error: hyperfine not found" >&2; exit 1; }
-command -v python3 >/dev/null 2>&1 || { echo "Error: python3 not found" >&2; exit 1; }
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=/dev/null
+source "$SCRIPT_DIR/_lib.sh"
+
+require_cmd zsh
+require_cmd hyperfine
+require_cmd python3
 
 RUNS="${1:-50}"
 WARMUP="${2:-10}"
 TRACE_FILE=""
+
+[[ "$RUNS" =~ ^[0-9]+$ ]] || die "RUNS must be an integer (got: $RUNS)"
+[[ "$WARMUP" =~ ^[0-9]+$ ]] || die "WARMUP must be an integer (got: $WARMUP)"
 
 cleanup() { [[ -n "$TRACE_FILE" && -f "$TRACE_FILE" ]] && rm -f "$TRACE_FILE"; true; }
 trap cleanup EXIT
