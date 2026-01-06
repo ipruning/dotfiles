@@ -1,6 +1,5 @@
 asciinema
 ast-grep
-atuin
 awscli
 bash-completion@2
 bat
