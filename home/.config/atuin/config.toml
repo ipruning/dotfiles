@@ -7,4 +7,4 @@ exit_mode = "return-query"
 # search_mode = "fulltext"
 show_help = false
 
-history_filter = ["^secret-cmd", "^innocuous-cmd .*--secret=.+", "^#.*"]
+history_filter = ["^secret-cmd", "^innocuous-cmd .*--secret=.+", "^#.*", "^\\s"]
