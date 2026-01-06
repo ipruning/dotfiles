@@ -93,22 +93,7 @@ def main(args: list[str]) -> None:
     if not args and not other_context and not terminal_context:
         return
 
-    if other_context:
-        if args:
-            print("<user_instructions>")
-            print(" ".join(args))
-            print("</user_instructions>")
-            print()
-        else:
-            print("<user_instructions>")
-            print(other_context)
-            print("</user_instructions>")
-            print()
-    else:
-        print("<user_instructions>")
-        print(" ".join(args))
-        print("</user_instructions>")
-        print()
+    user_instructions = (" ".join(args)).strip() if args else other_context.strip()
 
     if terminal_context:
         print("<terminal_context>")
@@ -116,39 +101,24 @@ def main(args: list[str]) -> None:
         print("</terminal_context>")
         print()
 
-    if other_context:
-        if args:
-            print("<other_context>")
-            print(other_context)
-            print("</other_context>")
-            print()
-            if IS_CUSTOM_INSTRUCTIONS_ENABLED and _get_custom_instructions():
-                print("<custom_instructions>")
-                print(_get_custom_instructions())
-                print("</custom_instructions>")
-                print()
-            print("<user_instructions>")
-            print(" ".join(args))
-            print("</user_instructions>")
-        else:
-            if IS_CUSTOM_INSTRUCTIONS_ENABLED and _get_custom_instructions():
-                print("<custom_instructions>")
-                print(_get_custom_instructions())
-                print("</custom_instructions>")
-                print()
-            print("<user_instructions>")
-            print(other_context)
-            print("</user_instructions>")
-            print()
-    else:
-        if IS_CUSTOM_INSTRUCTIONS_ENABLED and _get_custom_instructions():
+    if args and other_context.strip():
+        print("<other_context>")
+        print(other_context)
+        print("</other_context>")
+        print()
+
+    if IS_CUSTOM_INSTRUCTIONS_ENABLED:
+        ci = _get_custom_instructions()
+        if ci:
             print("<custom_instructions>")
-            print(_get_custom_instructions())
+            print(ci)
             print("</custom_instructions>")
-            print()
+
+    if user_instructions:
         print("<user_instructions>")
-        print(" ".join(args))
+        print(user_instructions)
         print("</user_instructions>")
+        print()
 
 
 if __name__ == "__main__":
