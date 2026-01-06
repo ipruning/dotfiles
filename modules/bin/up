@@ -46,47 +46,49 @@ function logger() {
   printf "${color}[%s] [%s] %s${NC}\n" "$timestamp" "$loglevel_upper" "$message"
 }
 
-logger "Updating Homebrew..."
 if command -v brew &>/dev/null; then
+  logger "Updating Homebrew..."
   brew update
   brew upgrade
-  logger "Pruning Homebrew..."
   brew cleanup
   brew autoremove
 fi
 
-logger "Updating mise..."
 if command -v mise &>/dev/null; then
+  logger "Updating mise..."
   mise upgrade
-
-  logger "Pruning mise..."
   mise prune --yes
   mise reshim
 fi
 
-logger "Upgrading GitHub CLI extensions..."
 if command -v gh &>/dev/null; then
+  logger "Updating GitHub CLI extensions..."
   gh extension upgrade --all
 fi
 
-logger "Updating tldr pages..."
 if command -v tldr &>/dev/null; then
+  logger "Updating tldr pages..."
   tldr --update
 fi
 
-logger "Updating ya packages..."
 if command -v ya &>/dev/null; then
+  logger "Updating ya packages..."
   ya pkg upgrade
 fi
 
-logger "Updating amp..."
 if command -v amp &>/dev/null; then
+  logger "Updating amp..."
   amp update
 fi
 
-logger "Updating Claude..."
 if command -v claude &>/dev/null; then
+  logger "Updating Claude..."
   claude update
+fi
+
+if command -v opencode &>/dev/null; then
+  logger "Updating OpenCode..."
+  opencode upgrade
 fi
 
 logger "Backing up all packages..."
