@@ -4,7 +4,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=/dev/null
+# shellcheck disable=SC1091
 source "$SCRIPT_DIR/_lib.sh"
 
 require_cmd git
@@ -97,6 +97,12 @@ fi
 
 if command -v mise >/dev/null 2>&1; then
   mise activate zsh > "$GENERATED_FUNCTIONS_DIR/_mise.zsh"
+fi
+
+MODULES_DIR="$REPO_ROOT/modules"
+
+if command -v op >/dev/null 2>&1; then
+  op inject --in-file "$MODULES_DIR/zsh/env.private.tpl.zsh" --out-file "$MODULES_DIR/zsh/env.private.zsh"
 fi
 
 rm -f ~/.zcompdump*
