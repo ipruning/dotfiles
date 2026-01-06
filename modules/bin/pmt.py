@@ -18,6 +18,61 @@ def _setup_logger():
     return logging.getLogger(__name__)
 
 
+def _read_text_file(path: str) -> str:
+    expanded = os.path.expandvars(os.path.expanduser(path))
+    with open(expanded, encoding="utf-8", errors="replace") as f:
+        return f.read()
+
+
+def _maybe_read_user_instructions_from_args(args: list[str]) -> str | None:
+    """
+    Allow passing large multi-line prompts without losing newlines via shell substitution.
+
+    Supported forms:
+    - pmt.py @/path/to/prompt.md
+    - pmt.py /path/to/prompt.md   (only when it's the single arg and the file exists)
+    - pmt.py --file /path/to/prompt.md
+    - pmt.py -f /path/to/prompt.md
+    """
+    log = logging.getLogger(__name__)
+    if not args:
+        return None
+
+    if args[0] in {"-f", "--file"}:
+        if len(args) < 2:
+            log.error("Missing path after %s", args[0])
+            return None
+        path = args[1]
+        try:
+            return _read_text_file(path).rstrip()
+        except OSError as e:
+            log.error("Failed to read file %r: %s", path, e)
+            return None
+
+    if len(args) == 1 and args[0].startswith("@"):
+        path = args[0][1:]
+        if not path:
+            log.error("Missing path after '@'")
+            return None
+        try:
+            return _read_text_file(path).rstrip()
+        except OSError as e:
+            log.error("Failed to read file %r: %s", path, e)
+            return None
+
+    if len(args) == 1:
+        path = args[0]
+        expanded = os.path.expandvars(os.path.expanduser(path))
+        if os.path.isfile(expanded):
+            try:
+                return _read_text_file(path).rstrip()
+            except OSError as e:
+                log.error("Failed to read file %r: %s", path, e)
+                return None
+
+    return None
+
+
 def _get_custom_instructions() -> str | None:
     CUSTOM_INSTRUCTIONS: str | None = """\
     在 Assistant 回答问题前，一定要揣测下：为什么 User 要问 Assistant 这个问题？User 问题背后有没有隐藏的假设？很多时候 User 交给 Assistant 的任务是在更大的 Scope 与 Context 下。
@@ -93,7 +148,12 @@ def main(args: list[str]) -> None:
     if not args and not other_context and not terminal_context:
         return
 
-    user_instructions = (" ".join(args)).strip() if args else other_context.strip()
+    user_instructions_from_args = _maybe_read_user_instructions_from_args(args)
+    user_instructions = (
+        user_instructions_from_args.strip()
+        if user_instructions_from_args is not None
+        else ((" ".join(args)).strip() if args else other_context.strip())
+    )
 
     if terminal_context:
         print("<terminal_context>")
