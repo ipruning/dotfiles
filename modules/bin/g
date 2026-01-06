@@ -4,8 +4,8 @@ set -e
 set -u
 set -o pipefail
 
-if command -v lazygit >/dev/null 2>&1; then
-  exec lazygit
+if command -v gitu >/dev/null 2>&1; then
+  exec gitu
 else
   exit 1
 fi
