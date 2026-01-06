@@ -69,12 +69,6 @@ source "$HOME/dotfiles/modules/zsh/surge.zsh"
 # 👇 Brew
 export HOMEBREW_NO_ANALYTICS=1
 
-# 👇 Mojo
-export PATH="$HOME/.modular/bin:$PATH"
-
-# 👇 Opencode
-export PATH="$HOME/.opencode/bin:$PATH"
-
 # 👇 tailspin
 if command -v tailspin >/dev/null 2>&1; then
   if command -v ov >/dev/null 2>&1; then
@@ -88,11 +82,6 @@ source "$HOME/.orbstack/shell/init.zsh" 2>/dev/null || :
 # 👇 zoxide
 if command -v zoxide >/dev/null 2>&1; then
   eval "$(zoxide init zsh --cmd j)"
-fi
-
-# 👇 atuin
-if command -v atuin >/dev/null 2>&1; then
-  source "$GENERATED_FUNCTIONS_DIR/_atuin.zsh"
 fi
 
 # 👇 tv
@@ -163,13 +152,24 @@ if command -v brew >/dev/null 2>&1; then
   export PKG_CONFIG_PATH="/opt/homebrew/opt/mysql-client/lib/pkgconfig:$PKG_CONFIG_PATH"
 fi
 
-# 👇 mise (need 40ms)
-if command -v mise >/dev/null 2>&1; then
-  source "$GENERATED_FUNCTIONS_DIR/_mise.zsh"
-fi
+# 👇 Mojo
+export PATH="$HOME/.modular/bin:$PATH"
+
+# 👇 Opencode
+export PATH="$HOME/.opencode/bin:$PATH"
 
 # 👇 Path
 # export PATH="$HOME/.local/bin:$PATH"
 # export PATH="$HOME/.local/share/mise/shims:$PATH"
 # export PATH="$HOME/Developer/ipruning/prototypes/utils/scripts:$PATH"
 # export PATH="$HOME/dotfiles/config/shell/bin:$PATH"
+
+# 👇 mise (will cost 40ms)
+if command -v mise >/dev/null 2>&1; then
+  source "$GENERATED_FUNCTIONS_DIR/_mise.zsh"
+fi
+
+# 👇 atuin (need below mise)
+if command -v atuin >/dev/null 2>&1; then
+  source "$GENERATED_FUNCTIONS_DIR/_atuin.zsh"
+fi
