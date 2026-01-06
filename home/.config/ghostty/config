@@ -1,6 +1,3 @@
-# command = shell:/opt/homebrew/bin/fish
-# command = shell:/opt/homebrew/bin/nu
-
 font-family = MonoLisa
 font-family = Maple Mono NF CN
 
