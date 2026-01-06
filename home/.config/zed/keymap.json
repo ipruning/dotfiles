@@ -68,7 +68,7 @@
       "space g": [
         "task::Spawn",
         {
-          "task_name": "lazygit",
+          "task_name": "gitu",
           "reveal_target": "center",
         },
       ],
@@ -93,14 +93,14 @@
           "reveal_target": "center",
         },
       ],
-      "space r": [
+      "space shift-r": [
         "task::Spawn",
         {
           "task_name": "project_finder",
           "reveal_target": "center",
         },
       ],
-      "space shift-r": "projects::OpenRecent",
+      "space r": "projects::OpenRecent",
       "space shift-e": "pane::RevealInProjectPanel",
       "space space": [
         "task::Spawn",
@@ -208,7 +208,7 @@
       "space g": [
         "task::Spawn",
         {
-          "task_name": "lazygit",
+          "task_name": "gitu",
           "reveal_target": "center",
         },
       ],
@@ -233,14 +233,14 @@
           "reveal_target": "center",
         },
       ],
-      "space r": [
+      "space shift-r": [
         "task::Spawn",
         {
           "task_name": "project_finder",
           "reveal_target": "center",
         },
       ],
-      "space shift-r": "projects::OpenRecent",
+      "space r": "projects::OpenRecent",
       "space e": "pane::RevealInProjectPanel",
       "space space": [
         "task::Spawn",
