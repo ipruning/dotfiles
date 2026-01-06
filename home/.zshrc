@@ -1,4 +1,3 @@
-# Startup profiling (triggered by ZSH_TRACE_STARTUP=1)
 if [[ -n $ZSH_TRACE_STARTUP ]]; then
   zmodload zsh/datetime
   exec 2>"${ZSH_TRACE_FILE:-/tmp/zsh_profile_$$.log}"
