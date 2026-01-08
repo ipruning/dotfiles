@@ -1,0 +1,2 @@
+export LINEAR_API_KEY="op://jihuanshe/Linear/LINEAR_API_KEY"
+export LINEAR_API_TOKEN=$LINEAR_API_KEY
