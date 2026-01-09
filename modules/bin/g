@@ -5,7 +5,7 @@ set -u
 set -o pipefail
 
 if command -v gitu >/dev/null 2>&1; then
-  exec gitu
+  exec lazygit
 else
   exit 1
 fi
