@@ -1,0 +1,37 @@
+#!/usr/bin/env sh
+
+set -e
+set -u
+
+pwd_abs="$(pwd -P)"
+
+sanitize() {
+  printf '%s' "$1" | tr -cs '[:alnum:]' '_' | sed 's/^_//; s/_$//'
+}
+
+short_hash() {
+  if command -v shasum >/dev/null 2>&1; then
+    printf '%s' "$1" | shasum -a 256 | awk '{print substr($1,1,8)}'
+  elif command -v sha256sum >/dev/null 2>&1; then
+    printf '%s' "$1" | sha256sum | awk '{print substr($1,1,8)}'
+  elif command -v md5 >/dev/null 2>&1; then
+    printf '%s' "$1" | md5 -q | cut -c1-8
+  elif command -v md5sum >/dev/null 2>&1; then
+    printf '%s' "$1" | md5sum | awk '{print substr($1,1,8)}'
+  else
+    date +%s
+  fi
+}
+
+base="$(sanitize "$(basename "$pwd_abs")")"
+hash="$(short_hash "$pwd_abs")"
+session="${base}-${hash}"
+layout="agents"
+
+# zellij list-sessions 的输出可能包含时间/EXITED 信息；取第一列做判断更稳
+if ! zellij list-sessions 2>/dev/null | awk '{print $1}' | grep -qx "$session"; then
+  # 这里会直接进入 zellij；用户 detach 后命令返回
+  zellij --session "$session" --new-session-with-layout "$layout" && exit 0
+fi
+
+exec zellij attach "$session"
