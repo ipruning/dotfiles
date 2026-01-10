@@ -34,7 +34,7 @@ mkdir -p vendor/plugins
 [ -d vendor/plugins/zsh-autosuggestions ]      || git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions              vendor/plugins/zsh-autosuggestions
 [ -d vendor/plugins/fast-syntax-highlighting ] || git clone --depth=1 https://github.com/zdharma-continuum/fast-syntax-highlighting vendor/plugins/fast-syntax-highlighting
 
-if command -v gfold >/dev/null 2>&1; then
+if command -v gfold >/dev/null 2>&1 && gfold --version 2>&1 | grep -q "gfold"; then
   require_cmd jq
   gfold -d json "$@" 2>/dev/null |
   jq -r '.[] | (.parent | rtrimstr("/")) + "/" + .name' |
@@ -56,7 +56,7 @@ else
 fi
 
 log_info "Syncing Completion..."
-mise sync-completion
+mise run sync
 
 log_info "Injecting Private Environment..."
 op inject --in-file modules/zsh/env.private.tpl.zsh --out-file modules/zsh/env.private.zsh
