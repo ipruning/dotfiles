@@ -11,6 +11,7 @@ fish
 gh
 git-delta
 gnupg
+gum
 lazydocker
 lazygit
 libyaml
@@ -22,9 +23,9 @@ neovim
 nushell
 ouch
 pkgconf
+psviderski/tap/uncloud
 pueue
 rip2
-ripgrep
 rustscan
 starship
 tealdeer
