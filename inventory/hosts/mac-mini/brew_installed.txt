@@ -12,6 +12,7 @@ fzf
 gh
 git-delta
 gnupg
+gum
 lazydocker
 lazygit
 libyaml
@@ -31,6 +32,7 @@ starship
 tealdeer
 television
 ugit
+uncloud
 uv
 viddy
 wget
