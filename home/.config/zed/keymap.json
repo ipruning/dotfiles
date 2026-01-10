@@ -45,7 +45,7 @@
       "space a": [
         "task::Spawn",
         {
-          "task_name": "amp",
+          "task_name": "amp-tmux",
           "reveal_target": "center",
         },
       ],
@@ -68,7 +68,7 @@
       "space g": [
         "task::Spawn",
         {
-          "task_name": "gitu",
+          "task_name": "lazygit",
           "reveal_target": "center",
         },
       ],
@@ -82,7 +82,7 @@
       "space u": [
         "task::Spawn",
         {
-          "task_name": "gitu",
+          "task_name": "lazygit",
           "reveal_target": "center",
         },
       ],
@@ -185,7 +185,7 @@
       "space a": [
         "task::Spawn",
         {
-          "task_name": "amp",
+          "task_name": "amp-tmux",
           "reveal_target": "center",
         },
       ],
@@ -208,7 +208,7 @@
       "space g": [
         "task::Spawn",
         {
-          "task_name": "gitu",
+          "task_name": "lazygit",
           "reveal_target": "center",
         },
       ],
@@ -222,7 +222,7 @@
       "space u": [
         "task::Spawn",
         {
-          "task_name": "gitu",
+          "task_name": "lazygit",
           "reveal_target": "center",
         },
       ],
