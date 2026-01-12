@@ -63,7 +63,6 @@ pkgconf
 postgresql@18
 procs
 pscale
-psviderski/tap/uncloud
 pueue
 qpdf
 rainfrog
