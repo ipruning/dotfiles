@@ -1,5 +1,5 @@
 {
-  "$schema" : "https:\/\/schema.linearmouse.app\/0.10.1-beta.3",
+  "$schema" : "https:\/\/schema.linearmouse.app\/0.10.3-beta.2",
   "schemes" : [
     {
       "if" : {
@@ -143,6 +143,21 @@
         "acceleration" : 1,
         "distance" : "auto",
         "speed" : 0
+      }
+    },
+    {
+      "if" : {
+        "device" : {
+          "category" : "mouse",
+          "productID" : "0xb020",
+          "productName" : "MX Vertical",
+          "serialNumber" : "1FB3DDA65A569AF8",
+          "vendorID" : "0x46d"
+        }
+      },
+      "pointer" : {
+        "acceleration" : 2.5,
+        "disableAcceleration" : true
       }
     }
   ]
