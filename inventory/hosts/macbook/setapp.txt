@@ -22,7 +22,6 @@ Presentify
 Proxyman
 Renamer
 SnapMotion
-Spark Mail
 TablePlus
 Timing
 Ulysses
