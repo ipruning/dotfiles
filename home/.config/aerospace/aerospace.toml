@@ -192,4 +192,4 @@ run = ['move-node-to-workspace 9', 'layout tiling']
 
 [[on-window-detected]]
 if.app-id = 'com.pvncher.repoprompt'
-run = ['move-node-to-workspace 9', 'layout tiling']
+run = ['move-node-to-workspace 9', 'layout floating']
