@@ -1,6 +1,7 @@
 start-at-login = true
 
 accordion-padding = 0
+after-startup-command = ['workspace 6']
 default-root-container-layout = 'accordion'
 default-root-container-orientation = 'vertical'
 enable-normalization-flatten-containers = true
@@ -193,3 +194,6 @@ run = ['move-node-to-workspace 9', 'layout tiling']
 [[on-window-detected]]
 if.app-id = 'com.pvncher.repoprompt'
 run = ['move-node-to-workspace 9', 'layout floating']
+
+[[on-window-detected]]
+run = 'move-node-to-workspace 6'
