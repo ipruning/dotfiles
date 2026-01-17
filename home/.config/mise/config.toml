@@ -8,6 +8,7 @@ ruby = "latest"
 rust = "latest"
 zig = "latest"
 
+"cargo:mq-run" = "latest"
 "gem:kamal" = "latest"
 "github:schpet/linear-cli" = "latest"
 "go:github.com/bootdotdev/bootdev" = "latest"
