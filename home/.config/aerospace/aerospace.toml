@@ -188,12 +188,12 @@ if.app-id = 'com.sleeplessmind.Wooshy'
 run = 'layout floating'
 
 [[on-window-detected]]
-if.app-id = 'com.mitchellh.ghostty'
-run = ['move-node-to-workspace 9', 'layout tiling']
-
-[[on-window-detected]]
 if.app-id = 'com.pvncher.repoprompt'
 run = ['move-node-to-workspace 9', 'layout floating']
+
+[[on-window-detected]]
+if.app-id = 'com.mitchellh.ghostty'
+run = ['move-node-to-workspace 0', 'layout tiling']
 
 [[on-window-detected]]
 run = 'move-node-to-workspace 6'
