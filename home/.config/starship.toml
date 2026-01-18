@@ -5,9 +5,9 @@ $hostname\
 $directory\
 $git_branch\
 $git_status\
-$custom\
 $cmd_duration\
 $battery\
+$custom\
 $shell
 $character\
 """
@@ -86,3 +86,9 @@ vimcmd_symbol = '[<](bold green)'
 vimcmd_replace_one_symbol = '[<](bold purple)'
 vimcmd_replace_symbol = '[<](bold bold purple)'
 vimcmd_visual_symbol = '[<](bold yellow)'
+
+[custom.sticky_note]
+command = "cat ~/.sticky_note 2>/dev/null"
+when = "test -f ~/.sticky_note"
+format = "📌 [$output]($style) "
+style = "bold yellow"

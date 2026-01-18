@@ -55,6 +55,16 @@ y () {
   rm -f -- "$tmp"
 }
 
+note() {
+  if [[ $# -eq 0 ]]; then
+    cat ~/.sticky_note 2>/dev/null || echo "No note set"
+  elif [[ "$1" == "-c" ]]; then
+    rm -f ~/.sticky_note
+  else
+    echo "$*" > ~/.sticky_note
+  fi
+}
+
 alias -s md="bat"
 alias -s txt="bat"
 
