@@ -1,6 +1,16 @@
 {
   "agent_servers": {
+    "claude": {
+      "favorite_models": [
+        "opus"
+      ],
+      "default_config_options": {},
+      "favorite_config_option_values": {}
+    },
     "codex": {
+      "favorite_models": [
+        "gpt-5.2/xhigh"
+      ],
       "default_mode": "full-access",
     },
   },
