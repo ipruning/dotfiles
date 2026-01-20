@@ -1,4 +1,4 @@
-start-at-login = true
+# start-at-login = true
 
 accordion-padding = 0
 after-startup-command = ['workspace 6']
