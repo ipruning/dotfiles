@@ -1,4 +1,7 @@
 {
+  "[jinja-html]": {
+    "editor.formatOnSave": false
+  },
   "[jsonc]": {
     "editor.defaultFormatter": "vscode.json-language-features"
   },
