@@ -164,8 +164,10 @@ api.unmap("u", /\b(x\.com)\b/i); // Mute account
 // );
 
 const LIMITED_DOMAINS = [
+  "app.graphite.com",
   "boot.dev",
   "excalidraw.com",
+  "exe.dev",
   "feishu.cn",
   "figma.com",
   "linear.app",
