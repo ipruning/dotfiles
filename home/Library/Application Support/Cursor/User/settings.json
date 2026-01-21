@@ -58,6 +58,7 @@
   "catppuccin-icons.associations.extensions": {
     "bean": "markdown",
     "mdc": "markdown",
+    "modalignore": "gitignore",
     "repo_ignore": "gitignore",
     "tpl": "env"
   },
@@ -92,7 +93,6 @@
   "code-runner.runInTerminal": true,
   "code-runner.saveFileBeforeRun": true,
   "cursor.cmdk.useThemedDiffBackground2": false,
-  "cursor.composer.collapsePaneInputBoxPills": true,
   "cursor.composer.queueMessageDefaultBehavior": "queue",
   "cursor.composer.shouldChimeAfterChatFinishes": true,
   "cursor.windowSwitcher.sidebarHoverCollapsed": true,
@@ -248,6 +248,7 @@
     ".env*": "dotenv",
     ".fdignore": "ignore",
     ".mdc": "markdown",
+    ".modalignore": "ignore",
     ".repo_ignore": "ignore",
     ".rgignore": "ignore",
     ".secrets.baseline": "json",
