@@ -1,2 +1,4 @@
-export LINEAR_API_KEY="op://jihuanshe/Linear/LINEAR_API_KEY"
-export LINEAR_API_TOKEN=$LINEAR_API_KEY
+# https://linear.app/settings/api-keys
+export LINEAR_API_KEY=""
+# https://github.com/settings/tokens/new?description=MISE_GITHUB_TOKEN
+export MISE_GITHUB_TOKEN=""
