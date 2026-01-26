@@ -79,6 +79,7 @@ OrbStack
 Pages
 pcsuite
 Pearcleaner
+Pencil
 PlayCover
 ProNotes
 qBittorrent
