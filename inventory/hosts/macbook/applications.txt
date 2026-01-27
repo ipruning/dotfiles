@@ -115,6 +115,7 @@ The Powder Toy
 Things3
 TickTick
 Trimmy
+Typeless
 uBlock Origin Lite
 VideoFusion-macOS
 VirtualBuddy
