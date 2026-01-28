@@ -1,14 +1,15 @@
 # command = /opt/homebrew/bin/nu
 
-# font-family = MonoLisa
-font-family = Berkeley Mono Variable
+font-family = MonoLisa
+# font-family = Berkeley Mono Variable
 font-family = Maple Mono NF CN
 
 confirm-close-surface = false
 cursor-style = block
 cursor-style-blink = false
 font-size = 12
-font-style = Medium
+font-style = Regular
+# font-style = Medium
 macos-option-as-alt = true
 maximize = true
 shell-integration-features = no-cursor, title, ssh-terminfo, ssh-env, sudo
