@@ -1,6 +1,7 @@
 # command = /opt/homebrew/bin/nu
 
-font-family = MonoLisa
+# font-family = MonoLisa
+font-family = Berkeley Mono Variable
 font-family = Maple Mono NF CN
 
 confirm-close-surface = false
@@ -15,4 +16,5 @@ theme = Catppuccin Mocha
 undo-timeout = 5m
 
 keybind = cmd+n=new_tab
+keybind = cmd+q=ignore
 keybind = cmd+t=new_tab
