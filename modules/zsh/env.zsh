@@ -152,6 +152,11 @@ if command -v brew >/dev/null 2>&1; then
   export PKG_CONFIG_PATH="/opt/homebrew/opt/mysql-client/lib/pkgconfig:$PKG_CONFIG_PATH"
 fi
 
+# 👇 try-rs
+if [[ -f "$HOME/Library/Application Support/try-rs/try-rs.zsh" ]]; then
+  source "$HOME/Library/Application Support/try-rs/try-rs.zsh"
+fi
+
 # 👇 Mojo
 export PATH="$HOME/.modular/bin:$PATH"
 
