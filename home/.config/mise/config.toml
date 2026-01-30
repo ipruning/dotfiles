@@ -151,4 +151,5 @@ _.path = [
     "~/dotfiles/generated/bin",
     "~/dotfiles/vendor/bin",
     "~/.local/bin",
+    "/opt/homebrew/opt/postgresql@18/bin",
 ]
