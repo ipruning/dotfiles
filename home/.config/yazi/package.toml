@@ -1,21 +1,21 @@
 [[plugin.deps]]
 use = "yazi-rs/plugins:smart-enter"
-rev = "d078b01"
+rev = "230b9c6"
 hash = "56fdabc96fc1f4d53c96eb884b02a5be"
 
 [[plugin.deps]]
 use = "yazi-rs/plugins:toggle-pane"
-rev = "d078b01"
+rev = "230b9c6"
 hash = "8a7c58225816a163a6e8730c0adafbc8"
 
 [[plugin.deps]]
 use = "yazi-rs/plugins:mount"
-rev = "d078b01"
-hash = "f1967e991e727ce45b1be5e8f0d1ff8e"
+rev = "230b9c6"
+hash = "9ad20d763df07ce40fd09de549d914b0"
 
 [[plugin.deps]]
 use = "yazi-rs/plugins:diff"
-rev = "d078b01"
+rev = "230b9c6"
 hash = "2f08b8249b57737e7257298a3b2a2edc"
 
 [[plugin.deps]]
@@ -45,17 +45,17 @@ hash = "f3375d21ceb5f49d2d50ad199262006a"
 
 [[plugin.deps]]
 use = "yazi-rs/plugins:vcs-files"
-rev = "d078b01"
+rev = "230b9c6"
 hash = "f69e4737c2fb8ceec58a2950faf13c46"
 
 [[plugin.deps]]
 use = "yazi-rs/plugins:full-border"
-rev = "d078b01"
+rev = "230b9c6"
 hash = "3996fc74044bc44144b323686f887e1"
 
 [[plugin.deps]]
 use = "yazi-rs/plugins:git"
-rev = "d078b01"
+rev = "230b9c6"
 hash = "270915fa8282a19908449530ff66f7e2"
 
 [flavor]
