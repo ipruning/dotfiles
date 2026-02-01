@@ -27,12 +27,12 @@ curl -fsSL -o home/.config/zellij/plugins/zellij-sessionizer.wasm https://github
 
 log_info "Updating ZSH Plugins..."
 
-mkdir -p vendor/plugins
-[ -d vendor/plugins/fzf-tab ]                  || git clone --depth=1 https://github.com/Aloxaf/fzf-tab                             vendor/plugins/fzf-tab
-[ -d vendor/plugins/ugit ]                     || git clone --depth=1 https://github.com/Bhupesh-V/ugit.git                         vendor/plugins/ugit
-[ -d vendor/plugins/zsh-autocomplete ]         || git clone --depth=1 https://github.com/marlonrichert/zsh-autocomplete             vendor/plugins/zsh-autocomplete
-[ -d vendor/plugins/zsh-autosuggestions ]      || git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions              vendor/plugins/zsh-autosuggestions
-[ -d vendor/plugins/fast-syntax-highlighting ] || git clone --depth=1 https://github.com/zdharma-continuum/fast-syntax-highlighting vendor/plugins/fast-syntax-highlighting
+mkdir -p generated/plugins
+[ -d generated/plugins/fzf-tab ]                  || git clone --depth=1 https://github.com/Aloxaf/fzf-tab                             generated/plugins/fzf-tab
+[ -d generated/plugins/ugit ]                     || git clone --depth=1 https://github.com/Bhupesh-V/ugit.git                         generated/plugins/ugit
+[ -d generated/plugins/zsh-autocomplete ]         || git clone --depth=1 https://github.com/marlonrichert/zsh-autocomplete             generated/plugins/zsh-autocomplete
+[ -d generated/plugins/zsh-autosuggestions ]      || git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions              generated/plugins/zsh-autosuggestions
+[ -d generated/plugins/fast-syntax-highlighting ] || git clone --depth=1 https://github.com/zdharma-continuum/fast-syntax-highlighting generated/plugins/fast-syntax-highlighting
 
 if command -v gfold >/dev/null 2>&1 && gfold --version 2>&1 | grep -q "gfold"; then
   require_cmd jq

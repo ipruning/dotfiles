@@ -1,6 +1,6 @@
 GENERATED_COMPLETIONS_DIR="$HOME/dotfiles/generated/completions"
 GENERATED_FUNCTIONS_DIR="$HOME/dotfiles/generated/functions"
-PLUGINS_DIR="$HOME/dotfiles/vendor/plugins"
+PLUGINS_DIR="$HOME/dotfiles/generated/plugins"
 
 # 👇 XDG Config Home
 export XDG_CONFIG_HOME="$HOME/.config"

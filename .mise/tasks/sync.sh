@@ -13,7 +13,7 @@ cd "$REPO_ROOT"
 
 printf "\033[34m==> Syncing Vendor Plugins (git pull)...\033[0m\n"
 
-PLUGINS_DIR="$REPO_ROOT/vendor/plugins"
+PLUGINS_DIR="$REPO_ROOT/generated/plugins"
 
 if [ -d "$PLUGINS_DIR" ]; then
   shopt -s nullglob
@@ -44,7 +44,7 @@ if [ -d "$PLUGINS_DIR" ]; then
   done
   shopt -u nullglob
 else
-  printf " - vendor/plugins not found; skipping\n"
+  printf " - generated/plugins not found; skipping\n"
 fi
 
 printf "\033[34m==> Syncing Shell Completion...\033[0m\n"

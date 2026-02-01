@@ -5,9 +5,9 @@
 - `modules/` is the canonical source of configs, scripts, and templates. Common areas: `modules/bin/`, `modules/zsh/`, `modules/mackup/`, `modules/surfingkeys/`.
 - `home/` is a Mackup snapshot tree (artifact). Avoid hand edits unless you are intentionally changing backup output.
 - `.mise/tasks/` contains the primary task scripts used for bootstrap, backup, restore, and sync.
-- `generated/` holds regenerated outputs (completions/functions). Safe to delete when regeneration is available.
-- `vendor/` is a local cache for third-party plugins/binaries (git-ignored).
-- `inventory/hosts/<hostname>/` stores host-specific snapshots (brew/apps/extensions).
+- `generated/` holds regenerated outputs (completions/functions/plugins/docs). Safe to delete when regeneration is available.
+  - `generated/plugins/` contains third-party ZSH plugins (git-ignored).
+  - `generated/docs/<hostname>/` stores host-specific snapshots (brew/apps/extensions, git-ignored).
 
 ## Build, Test, and Development Commands
 
@@ -39,4 +39,4 @@
 
 ## Security & Configuration Tips
 
-- Never commit secrets. Use templates and `*.private.*` files, and keep sensitive data out of `vendor/` and `home/`.
+- Never commit secrets. Use templates and `*.private.*` files, and keep sensitive data out of `generated/` and `home/`.
