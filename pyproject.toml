@@ -9,9 +9,9 @@ dependencies = [
     "autocorrect-py>=2.14.0",
     "fire>=0.7.1",
     "loguru>=0.7.3",
-    "pydantic-ai>=1.39.0",
-    "rich>=14.2.0",
+    "pydantic-ai>=1.51.0",
+    "rich>=14.3.2",
     "tiktoken>=0.12.0",
-    "typer>=0.21.0",
-    "youtube-transcript-api>=1.2.3",
+    "typer>=0.21.1",
+    "youtube-transcript-api>=1.2.4",
 ]
