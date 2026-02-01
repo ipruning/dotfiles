@@ -90,7 +90,29 @@
                         ]
                     },
                     {
-                        "description": "yper b / f 👉 alt ← / →",
+                        "description": "shift back 👉 alt back",
+                        "enabled": false,
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "delete_or_backspace",
+                                    "modifiers": {
+                                        "mandatory": ["shift"],
+                                        "optional": ["any"]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "delete_or_backspace",
+                                        "modifiers": ["left_option"]
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "yper b / f 👉 alt ← / → (Migrating to a keyboard layer mapping makes it convenient to use on other people’s computers.)",
                         "enabled": false,
                         "manipulators": [
                             {
@@ -154,7 +176,7 @@
                         ]
                     },
                     {
-                        "description": "yper s / d 👉 cmd [ / ] (with conditions)",
+                        "description": "yper s / d 👉 cmd [ / ] (with conditions) (Migrating to a keyboard layer mapping makes it convenient to use on other people’s computers.)",
                         "enabled": false,
                         "manipulators": [
                             {
@@ -206,7 +228,7 @@
                         ]
                     },
                     {
-                        "description": "yper e / r 👉 cmd shift [ / ] (with conditions)",
+                        "description": "yper e / r 👉 cmd shift [ / ] (with conditions) (Migrating to a keyboard layer mapping makes it convenient to use on other people’s computers.)",
                         "enabled": false,
                         "manipulators": [
                             {
@@ -260,29 +282,7 @@
                         ]
                     },
                     {
-                        "description": "shift back 👉 alt back",
-                        "enabled": false,
-                        "manipulators": [
-                            {
-                                "from": {
-                                    "key_code": "delete_or_backspace",
-                                    "modifiers": {
-                                        "mandatory": ["shift"],
-                                        "optional": ["any"]
-                                    }
-                                },
-                                "to": [
-                                    {
-                                        "key_code": "delete_or_backspace",
-                                        "modifiers": ["left_option"]
-                                    }
-                                ],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "left_cmd / right_cmd (alone) 👉 en / zh",
+                        "description": "left_cmd / right_cmd (alone) 👉 en / zh (There are compatibility issues with the Rime input method.)",
                         "enabled": false,
                         "manipulators": [
                             {
