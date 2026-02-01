@@ -4,7 +4,7 @@ description = "Find prompt template files"
 requirements = ["bat", "fd"]
 
 [source]
-command = "fd . ~/Developer/ipruning/prototypes/utils --type file -e txt -e md -e mdx -e yaml"
+command = "fd . ~/Developer/ipruning/keel/utils --type file -e txt -e md -e mdx -e yaml"
 display = "{split:/:-1}"
 
 [preview]
