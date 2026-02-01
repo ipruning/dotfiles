@@ -7,7 +7,7 @@
 - `.mise/tasks/` contains the primary task scripts used for bootstrap, backup, restore, and sync.
 - `generated/` holds regenerated outputs (completions/functions/plugins/docs). Safe to delete when regeneration is available.
   - `generated/plugins/` contains third-party ZSH plugins (git-ignored).
-  - `generated/docs/<hostname>/` stores host-specific snapshots (brew/apps/extensions, git-ignored).
+  - `generated/docs/<hostname>/` stores host-specific snapshots (brew/apps/extensions).
 
 ## Build, Test, and Development Commands
 
