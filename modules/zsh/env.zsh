@@ -163,12 +163,6 @@ export PATH="$HOME/.modular/bin:$PATH"
 # 👇 Opencode
 export PATH="$HOME/.opencode/bin:$PATH"
 
-# 👇 Path
-# export PATH="$HOME/.local/bin:$PATH"
-# export PATH="$HOME/.local/share/mise/shims:$PATH"
-# export PATH="$HOME/Developer/ipruning/prototypes/utils/scripts:$PATH"
-# export PATH="$HOME/dotfiles/config/shell/bin:$PATH"
-
 # 👇 mise (will cost 40ms)
 if command -v mise >/dev/null 2>&1; then
   source "$GENERATED_FUNCTIONS_DIR/_mise.zsh"
