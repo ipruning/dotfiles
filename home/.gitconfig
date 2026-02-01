@@ -142,4 +142,4 @@ cc = "!sh -c 'git log --format=format: --name-only | grep -v \"^$\" | sort | uni
 stm = "!sh -c 'git status --porcelain | grep \"^ M\" | cut -c 4-'"
 
 [include]
-path = ~/Developer/.gitconfig
+path = ~/.private.gitconfig
