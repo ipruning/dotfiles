@@ -1,6 +1,7 @@
 .Karabiner-VirtualHIDDevice-Manager
 1Password
 1Password for Safari
+42cc
 A Better Finder Attributes 7
 Advantage 360 SmartSet
 AeroSpace
@@ -18,6 +19,7 @@ calibre
 Capture One
 ChatGPT Atlas
 Claude
+Codex
 CodexBar
 Comet
 Contexts
