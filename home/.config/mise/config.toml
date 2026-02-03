@@ -147,9 +147,9 @@ trusted_config_paths = ['~/Developer']
 
 [env]
 _.path = [
-    "~/dotfiles/modules/bin",
     "~/dotfiles/generated/bin",
-    "~/dotfiles/vendor/bin",
+    "~/dotfiles/modules/bin",
+    "~/.bun/bin",
     "~/.local/bin",
     "/opt/homebrew/opt/postgresql@18/bin",
 ]
