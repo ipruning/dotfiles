@@ -149,6 +149,7 @@ trusted_config_paths = ['~/Developer']
 _.path = [
     "~/dotfiles/generated/bin",
     "~/dotfiles/modules/bin",
+    "~/Developer/ipruning/keel/utils/scripts",
     "~/.bun/bin",
     "~/.local/bin",
     "/opt/homebrew/opt/postgresql@18/bin",
