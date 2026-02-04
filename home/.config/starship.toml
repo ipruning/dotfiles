@@ -37,12 +37,12 @@ truncation_symbol = ".../"
 [git_branch]
 format = "[$branch]($style) "
 
-[custom.gh_user]
-command = "gh config get user -h github.com"
-format = '[\[$symbol$output\]]($style) '
-require_repo = true
-style = "bold dimmed yellow"
-when = true
+# [custom.gh_user]
+# command = "gh config get user -h github.com"
+# format = '[\[$symbol$output\]]($style) '
+# require_repo = true
+# style = "bold dimmed yellow"
+# when = true
 
 # [custom.git_user]
 # command = "git config --get user.name"
