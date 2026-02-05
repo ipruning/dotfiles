@@ -103,6 +103,8 @@ Shottr
 Skim
 Steam
 Stratoshark
+supacode
+Superset
 Surfingkeys
 Surge
 Suspicious Package
