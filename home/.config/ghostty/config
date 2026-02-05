@@ -12,7 +12,8 @@ font-style = Regular
 # font-style = Medium
 macos-option-as-alt = true
 maximize = true
-shell-integration-features = no-cursor, title, ssh-terminfo, ssh-env, sudo
+# shell-integration-features = no-cursor, title, ssh-terminfo, ssh-env, sudo
+shell-integration-features = no-cursor, title, ssh-env, sudo
 theme = Catppuccin Mocha
 undo-timeout = 5m
 
