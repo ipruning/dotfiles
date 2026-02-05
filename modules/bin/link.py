@@ -74,6 +74,10 @@ CMD_PATTERNS: list[re.Pattern[str]] = [
     re.compile(
         r"(amp\s+threads\s+continue\s+[A-Za-z]-[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})"
     ),
+    # claude --resume <uuid>
+    re.compile(
+        r"(claude\s+--resume\s+[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})"
+    ),
 ]
 
 
@@ -102,6 +106,32 @@ def sanitize_url(raw: str) -> str:
 def sanitize_path(raw: str) -> str:
     s = raw.strip().strip("'\"")
     return s
+
+
+def is_noise_path(path: str) -> bool:
+    """Filter out noisy/partial paths that aren't useful."""
+    # Skip very short paths (likely fragments)
+    if len(path) < 5:
+        return True
+    # Skip paths that are just directory components
+    if path in ("/", "//", "./", "../"):
+        return True
+    # Skip paths ending with common noise patterns
+    noise_suffixes = (
+        ")",  # Trailing paren from markdown/code
+        "|",  # Pipe fragments
+        "&&",  # Shell operator fragments
+        ";",  # Command separator
+    )
+    if path.endswith(noise_suffixes):
+        return True
+    # Skip paths that look like shell command fragments
+    if path.startswith("/dev/") and path != "/dev/null":
+        return True
+    # Skip inline code/markdown artifacts
+    if "`" in path or "```" in path:
+        return True
+    return False
 
 
 def get_zellij_screen() -> str:
@@ -216,8 +246,8 @@ def extract_items(text: str) -> dict[str, str]:
         # Expand a leading tilde to the user home directory.
         candidate = os.path.expanduser(candidate)
 
-        # Finally, only add if we have not seen it before.
-        if candidate not in items_dict:
+        # Finally, only add if we have not seen it before and not noise.
+        if candidate not in items_dict and not is_noise_path(candidate):
             items_dict[candidate] = "PATH"
 
     # Check if there are plain local files in the text
@@ -225,7 +255,7 @@ def extract_items(text: str) -> dict[str, str]:
         words = re.findall(r"\S+", line)
         for word in words:
             clean = sanitize_path(word)
-            if os.path.exists(clean) and clean not in items_dict:
+            if os.path.exists(clean) and clean not in items_dict and not is_noise_path(clean):
                 items_dict[clean] = "PATH"
 
     # Identify URLs
