@@ -20,6 +20,7 @@ Capture One
 ChatGPT Atlas
 Claude
 Codex
+Codex Monitor
 CodexBar
 Comet
 Contexts
