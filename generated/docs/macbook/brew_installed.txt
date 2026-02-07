@@ -67,6 +67,7 @@ peekaboo
 pgcli
 pkgconf
 pngquant
+poppler
 postgresql@18
 procs
 pscale

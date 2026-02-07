@@ -32,7 +32,6 @@ git-filter-repo
 git-lfs
 gitu
 glow
-gnupg
 gum
 httm
 hyperfine
@@ -61,6 +60,7 @@ parallel-disk-usage
 pgcli
 pkgconf
 pngquant
+poppler
 postgresql@18
 procs
 pscale
