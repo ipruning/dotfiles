@@ -60,6 +60,7 @@ parallel
 parallel-disk-usage
 pgcli
 pkgconf
+pngquant
 postgresql@18
 procs
 pscale
