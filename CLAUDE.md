@@ -33,8 +33,11 @@
 
 ## Commit & Pull Request Guidelines
 
-- Follow Conventional Commits: `type(scope): summary` (examples: `chore(mise): ...`, `feat(zsh): ...`).
+- Follow Conventional Commits: `type(scope): summary` (e.g. `chore(brew): update packages`).
+- **Always include a scope** — use the tool or directory name: `brew`, `mise`, `zsh`, `ghostty`, `bin`, `yazi`, `docs`, etc.
+- Multiple scopes: `chore(brew,mise): ...` (cap at 3).
 - Keep commits focused and scoped to a single logical change.
+- Write concise, specific summaries — no LLM filler words.
 - PRs should include: a short summary, impacted paths (for example `modules/zsh/`), and commands run.
 
 ## Security & Configuration Tips
