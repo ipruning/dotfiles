@@ -30,8 +30,6 @@ if [[ $OSTYPE == darwin* ]]; then
   alias surge="/Applications/Surge.app/Contents/Applications/surge-cli"
 fi
 
-command -v try-rs >/dev/null 2>&1 && alias try="try-rs"
-
 jt () {
   local d
   d="$(mktemp -d -t tempe.XXXXXXXX)" || return
