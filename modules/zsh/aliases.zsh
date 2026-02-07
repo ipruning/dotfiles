@@ -28,6 +28,8 @@ if [[ $OSTYPE == darwin* ]]; then
   alias keyboardmaestro="/Applications/Keyboard\ Maestro.app/Contents/MacOS/keyboardmaestro"
 
   alias surge="/Applications/Surge.app/Contents/Applications/surge-cli"
+
+  alias try="try-rs"
 fi
 
 jt () {
