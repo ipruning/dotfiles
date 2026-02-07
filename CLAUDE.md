@@ -5,7 +5,7 @@
 - `modules/` is the canonical source of configs, scripts, and templates. Common areas: `modules/bin/`, `modules/zsh/`, `modules/mackup/`, `modules/surfingkeys/`.
 - `home/` is a Mackup snapshot tree (artifact). Avoid hand edits unless you are intentionally changing backup output.
 - `.mise/tasks/` contains the primary task scripts used for bootstrap, backup, restore, and sync.
-- `generated/` holds regenerated outputs (completions/functions/plugins/docs). Safe to delete when regeneration is available.
+- `generated/` holds regenerated outputs (bin/completions/functions/plugins/docs). Safe to delete when regeneration is available.
   - `generated/plugins/` contains third-party ZSH plugins (git-ignored).
   - `generated/docs/<hostname>/` stores host-specific snapshots (brew/apps/extensions).
 
@@ -14,8 +14,8 @@
 - `mise tasks` lists available tasks.
 - `mise run init` installs/updates tooling, plugins, and Mackup links.
 - `mise run restore` restores the Mackup snapshot into the system.
-- `mise run backup` snapshots the current system state into `home/` and inventories.
-- `mise run sync` regenerates shell completions/functions.
+- `mise run backup` runs `mackup backup --force` to snapshot configs into `home/`.
+- `mise run sync` pulls plugins, regenerates shell completions/functions, and injects secrets.
 - `mise run zsh-profile [runs] [warmup]` profiles Zsh startup (requires `hyperfine`).
 
 ## Coding Style & Naming Conventions
