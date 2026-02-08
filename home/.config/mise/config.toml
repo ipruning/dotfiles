@@ -43,6 +43,7 @@ yq = "latest"
 "npm:codex-sync" = "latest"
 "npm:cursor-opensync-plugin" = "latest"
 "npm:opencode-sync-plugin" = "latest"
+"npm:pnpm" = "latest"
 
 # "cargo:bartib" = "latest"
 # "cargo:bmm" = "latest"
