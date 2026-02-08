@@ -1,2 +1,5 @@
+# macOS
 .DS_Store
-.pi/opensync-debug-jsonl
+
+# opensync
+opensync-debug-jsonl
