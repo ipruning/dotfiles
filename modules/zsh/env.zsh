@@ -163,6 +163,11 @@ export PATH="$HOME/.modular/bin:$PATH"
 # 👇 Opencode
 export PATH="$HOME/.opencode/bin:$PATH"
 
+# 👇 OpenClaw Completion
+if [[ -f "$HOME/.openclaw/completions/openclaw.zsh" ]]; then
+  source "$HOME/.openclaw/completions/openclaw.zsh"
+fi
+
 # 👇 mise (will cost 40ms)
 if command -v mise >/dev/null 2>&1; then
   source "$GENERATED_FUNCTIONS_DIR/_mise.zsh"
