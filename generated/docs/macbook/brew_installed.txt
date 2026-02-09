@@ -49,6 +49,7 @@ just
 litecli
 mactop
 mdq
+memo
 mise
 mkcert
 mongodb-community
@@ -56,6 +57,7 @@ mycli
 mysql-client
 neovim
 nushell
+obsidian-cli
 opam
 ouch
 ov

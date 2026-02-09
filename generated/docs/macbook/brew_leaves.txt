@@ -1,3 +1,4 @@
+antoniorodr/memo/memo
 asciinema
 ast-grep
 awscli
@@ -98,6 +99,7 @@ watchexec
 wget
 withgraphite/tap/graphite
 xh
+yakitrak/yakitrak/obsidian-cli
 yazi
 yek
 yq
