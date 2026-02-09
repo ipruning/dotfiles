@@ -69,6 +69,9 @@ source "$HOME/dotfiles/modules/zsh/surge.zsh"
 # 👇 Brew
 export HOMEBREW_NO_ANALYTICS=1
 
+# 👇 Prek
+export PREK_COLOR="never"
+
 # 👇 tailspin
 if command -v tailspin >/dev/null 2>&1; then
   if command -v ov >/dev/null 2>&1; then
