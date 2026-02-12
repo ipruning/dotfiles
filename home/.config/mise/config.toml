@@ -151,7 +151,7 @@ yq = "latest"
 # yq = "latest"
 
 [settings]
-trusted_config_paths = ['~/Developer']
+trusted_config_paths = ["~/Desktop", "~/Developer", "~/Downloads/", "~/intent"]
 
 [env]
 _.path = [
