@@ -51,6 +51,7 @@ IINA
 iMazing
 Immersive Translate
 Input Source Pro
+Intent by Augment
 Jan
 Kagi for Safari
 Karabiner-Elements
