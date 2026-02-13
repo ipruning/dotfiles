@@ -64,6 +64,7 @@ Lark
 Linear
 LinearMouse
 LM Studio
+Longbridge
 Longbridge Pro
 Loopback
 LyricsX

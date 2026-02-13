@@ -37,12 +37,12 @@ truncation_symbol = ".../"
 [git_branch]
 format = "[$branch]($style) "
 
-# [custom.gh_user]
-# command = "gh config get user -h github.com"
-# format = '[\[$symbol$output\]]($style) '
-# require_repo = true
-# style = "bold dimmed yellow"
-# when = true
+[custom.gh_user]
+command = "gh config get user -h github.com"
+format = '[\[$symbol$output\]]($style) '
+require_repo = true
+style = "bold dimmed yellow"
+when = true
 
 # [custom.git_user]
 # command = "git config --get user.name"
@@ -59,12 +59,12 @@ format = "[$branch]($style) "
 # symbol = ""
 # when = true
 
-# [custom.modal_profile]
-# command = "modal profile current"
-# format = '[\[$symbol$output\]]($style) '
-# require_repo = true
-# style = "bold dimmed yellow"
-# when = "command -v modal"
+[custom.modal_profile]
+command = "modal profile current"
+format = '[\[$symbol$output\]]($style) '
+require_repo = true
+style = "bold dimmed yellow"
+when = "command -v modal"
 
 [cmd_duration]
 format = '[$duration]($style) '

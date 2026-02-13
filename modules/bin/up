@@ -76,8 +76,13 @@ if command -v ya &>/dev/null; then
   ya pkg upgrade
 fi
 
+if command -v sprite &>/dev/null; then
+  logger "Updating Sprite..."
+  sprite upgrade
+fi
+
 if command -v amp &>/dev/null; then
-  logger "Updating amp..."
+  logger "Updating Amp Code..."
   amp update
 fi
 
