@@ -38,11 +38,11 @@ truncation_symbol = ".../"
 format = "[$branch]($style) "
 
 [custom.gh_user]
-command = "gh config get user -h github.com"
+command = "awk -v host=\"${GH_HOST:-github.com}:\" 'index($0,host){found=1} found&&/user:/{print $2;exit}' \"$HOME/.config/gh/hosts.yml\""
 format = '[\[$symbol$output\]]($style) '
 require_repo = true
 style = "bold dimmed yellow"
-when = true
+when = "[ -f ~/.config/gh/hosts.yml ]"
 
 # [custom.git_user]
 # command = "git config --get user.name"
@@ -60,11 +60,11 @@ when = true
 # when = true
 
 [custom.modal_profile]
-command = "modal profile current"
+command = "awk -F'[][]' '/^\\[.*\\]/{section=$2} section&&/active.*=.*true/{print section;exit}' ~/.modal.toml"
 format = '[\[$symbol$output\]]($style) '
 require_repo = true
 style = "bold dimmed yellow"
-when = "command -v modal"
+when = "[ -f ~/.modal.toml ]"
 
 [cmd_duration]
 format = '[$duration]($style) '
