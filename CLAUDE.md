@@ -40,6 +40,14 @@
 - Write concise, specific summaries — no LLM filler words.
 - PRs should include: a short summary, impacted paths (for example `modules/zsh/`), and commands run.
 
+## Performance Optimization Guidelines
+
+- Shell prompt modules (starship, etc.) run on every keystroke — prefer fast tools over correct-by-spec parsers.
+- Tool speed hierarchy: **shell builtins** (`[ -f ]`, `command -v`) > **awk/sed/grep** (~2ms) > **compiled CLI** (yq/jq ~8ms) > **heavy CLI** (gh/modal/uvx ~20-400ms).
+- Always benchmark with `hyperfine` before and after. Don't assume faster — measure.
+- When changing conditional logic (`when`/`if-elif`), enumerate all input combinations in a truth table to catch mismatches between `when` and `command` branches.
+- Acceptable trade-off: sacrifice strict format parsing (yq/jq) for regex matching (awk) on files you control (dotfiles, CLI configs).
+
 ## Security & Configuration Tips
 
 - Never commit secrets. Use templates and `*.private.*` files, and keep sensitive data out of `generated/` and `home/`.
