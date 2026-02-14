@@ -8,7 +8,7 @@ ruby = "latest"
 rust = "latest"
 zig = "latest"
 
-"github:badlogic/pi-mono" = "0.52.10"
+"github:badlogic/pi-mono" = "0.52.12"
 "github:huacnlee/autocorrect" = "latest"
 "github:schpet/linear-cli" = "latest"
 "go:github.com/bootdotdev/bootdev" = "latest"
