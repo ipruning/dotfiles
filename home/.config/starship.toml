@@ -60,7 +60,7 @@ when = "[ -f ~/.config/gh/hosts.yml ]"
 # when = true
 
 [custom.modal_profile]
-command = "awk -F'[][]' '/^\\[.*\\]/{section=$2} section&&/active.*=.*true/{print section;exit}' ~/.modal.toml"
+command = "awk -F'[][]' '/^\\[[^]]+\\]$/{if (section && active==\"true\" && env!=\"\" && !found) { print section \" (\" env \")\"; found=1; exit } section=$2; active=\"\"; env=\"\"} /^[[:space:]]*active[[:space:]]*=/ {v=$0; sub(/^[[:space:]]*active[[:space:]]*=[[:space:]]*/, \"\", v); gsub(/[[:space:]]/, \"\", v); if (v == \"true\") active=\"true\"} /^[[:space:]]*environment[[:space:]]*=/ {env=$0; sub(/^[[:space:]]*environment[[:space:]]*=[[:space:]]*/, \"\", env); gsub(/[[:space:]]/, \"\", env); gsub(/^\"|\"$/, \"\", env)} END {if (!found && section && active==\"true\" && env!=\"\") print section \" (\" env \")\"}' ~/.modal.toml"
 format = '[\[$symbol$output\]]($style) '
 require_repo = true
 style = "bold dimmed yellow"
