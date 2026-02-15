@@ -1,16 +1,15 @@
 {
+  "edit_predictions": {
+    "provider": "zed",
+  },
   "agent_servers": {
     "claude": {
-      "favorite_models": [
-        "opus"
-      ],
+      "favorite_models": ["opus"],
       "default_config_options": {},
-      "favorite_config_option_values": {}
+      "favorite_config_option_values": {},
     },
     "codex": {
-      "favorite_models": [
-        "gpt-5.2/xhigh"
-      ],
+      "favorite_models": ["gpt-5.2/xhigh"],
       "default_mode": "full-access",
     },
   },
@@ -36,9 +35,6 @@
     "dock": "right",
   },
   "cursor_blink": false,
-  "features": {
-    "edit_prediction_provider": "zed",
-  },
   "file_types": {
     "Dockerfile": ["Dockerfile", "Dockerfile.*"],
     "JSON": ["json"],
