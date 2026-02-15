@@ -23,6 +23,7 @@ fio
 fish
 flock
 flyctl
+forty-two-plugin
 fpp
 fzf
 geesefs

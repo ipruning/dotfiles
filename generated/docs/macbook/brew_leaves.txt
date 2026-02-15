@@ -1,3 +1,4 @@
+42ailab/42plugin/forty-two-plugin
 antoniorodr/memo/memo
 asciinema
 ast-grep
