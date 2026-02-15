@@ -41,7 +41,7 @@ format = "[$branch]($style) "
 command = "awk -v host=\"${GH_HOST:-github.com}:\" 'index($0,host){found=1} found&&/user:/{print $2;exit}' \"$HOME/.config/gh/hosts.yml\""
 format = '[\[$symbol$output\]]($style) '
 require_repo = true
-style = "yellow"
+style = "bold dimmed yellow"
 when = "[ -f ~/.config/gh/hosts.yml ]"
 
 # [custom.git_user]
@@ -63,7 +63,7 @@ when = "[ -f ~/.config/gh/hosts.yml ]"
 command = "awk -F'[][]' '/^\\[[^]]+\\]$/{if (section && active==\"true\" && !found) { if (env != \"\") { print section \" \" env } else { print section }; found=1; exit } section=$2; active=\"\"; env=\"\"} /^[[:space:]]*active[[:space:]]*=[[:space:]]*/ {v=$0; sub(/^[[:space:]]*active[[:space:]]*=[[:space:]]*/, \"\", v); gsub(/[[:space:]]/, \"\", v); if (v == \"true\") active=\"true\"} /^[[:space:]]*environment[[:space:]]*=[[:space:]]*/ {env=$0; sub(/^[[:space:]]*environment[[:space:]]*=[[:space:]]*/, \"\", env); gsub(/[[:space:]]/, \"\", env); gsub(/^\\\"|\\\"$/, \"\", env)} END {if (!found && section && active==\"true\") { if (env != \"\") { print section \" \" env } else { print section }}}' ~/.modal.toml"
 format = '[\[$symbol$output\]]($style) '
 require_repo = true
-style = "dimmed green"
+style = "bold dimmed green"
 when = "[ -f ~/.modal.toml ]"
 
 [cmd_duration]
