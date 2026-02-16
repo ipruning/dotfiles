@@ -45,7 +45,6 @@ yq = "latest"
 "npm:claude-code-sync" = "latest"
 "npm:codex-sync" = "latest"
 "npm:cursor-opensync-plugin" = "latest"
-"npm:openclaw" = "latest"
 "npm:opencode-sync-plugin" = "latest"
 "npm:pi-opensync-plugin" = "latest"
 
