@@ -23,6 +23,8 @@ Codex
 Codex Monitor
 CodexBar
 Comet
+Commander
+Conductor
 Contexts
 CrossOver
 Cursor

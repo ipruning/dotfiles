@@ -41,6 +41,7 @@ hyperfine
 jaq
 jd
 jjui
+joshavant/tap/clawbox
 jq
 just
 litecli

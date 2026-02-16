@@ -10,6 +10,7 @@ bird
 blueutil
 btop
 carapace
+clawbox
 coreutils
 csvlens
 difftastic
