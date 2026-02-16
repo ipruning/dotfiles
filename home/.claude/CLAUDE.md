@@ -19,5 +19,5 @@ After writing code, list what could break and suggest tests to cover it.
 
 When there’s a bug, start by writing a test that reproduces it, then fix it until the test passes.
 
-Every time I correct you, add a new rule to the CLAUDE .md file so it never happens again.
+Every time I correct you, add a new rule to the CLAUDE.md file so it never happens again.
 </2>
