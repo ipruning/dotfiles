@@ -96,6 +96,11 @@ if command -v opencode &>/dev/null; then
   opencode upgrade
 fi
 
+if command -v pi &>/dev/null; then
+  logger "Updating Pi Plugin..."
+  pi update
+fi
+
 logger "Backing up all packages..."
 host="$(hostname -s || true)"
 host="${host:-unknown-host}"
