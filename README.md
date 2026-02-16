@@ -16,7 +16,7 @@ This repo is intentionally organized around **long-term stable semantics**:
   - `generated/plugins/` contains third-party ZSH plugins (git-ignored).
   - `generated/docs/<hostname>/` stores host-specific snapshots (brew/apps/extensions).
 
-If you want to manage Agents / Skills / Prompts inside this repo, start from **`CLAUDE.md`**.
+If you want to manage Agents / Skills / Prompts inside this repo, start from **`AGENTS.md`**.
 
 ## Quick start
 
@@ -110,7 +110,7 @@ These are the invariants that keep the repo understandable over time:
 | `modules/`                  | **Canonical** meta-config modules, reusable configs, non-dotfile configs, helper scripts              | Source (hand-edited)        |
 | `home/`                     | **Mackup snapshot tree** for dotfiles + app configs (copied by Mackup)                                | Artifact (managed by tools) |
 | `generated/`                | Generated outputs; `docs/` tracked, others (`bin/`, `completions/`, `functions/`, `plugins/`) ignored | Artifact (mixed)            |
-| `CLAUDE.md`                 | Contract for Agents / Skills / Prompts in this repo                                                   | Source                      |
+| `AGENTS.md`                 | Contract for Agents / Skills / Prompts in this repo                                                   | Source                      |
 | `pyproject.toml`, `uv.lock` | Python tooling for scripts/automation in this repo                                                    | Source                      |
 
 ### `modules/`
@@ -196,7 +196,7 @@ They are snapshot artifacts (brew/apps/gh extensions, etc.), not canonical confi
 
 This repo is designed to host all agent-related assets (agents, skills, prompts, evaluation fixtures) **alongside dotfiles**, under clear lifecycle boundaries.
 
-See **`CLAUDE.md`** for conventions and a recommended directory layout.
+See **`AGENTS.md`** for conventions and a recommended directory layout.
 
 ## License
 
