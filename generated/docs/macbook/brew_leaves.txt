@@ -10,6 +10,7 @@ beancount-language-server
 blueutil
 btop
 carapace
+cirruslabs/cli/tart
 coreutils
 csvlens
 difftastic
@@ -36,12 +37,12 @@ git-lfs
 gitu
 glow
 gum
+hashicorp/tap/packer
 httm
 hyperfine
 jaq
 jd
 jjui
-joshavant/tap/clawbox
 jq
 just
 litecli
@@ -82,7 +83,6 @@ somo
 sqlfluff
 sshx
 starship
-steipete/tap/bird
 steipete/tap/peekaboo
 tailspin
 tealdeer
