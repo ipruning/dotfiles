@@ -20,4 +20,8 @@ After writing code, list what could break and suggest tests to cover it.
 When there’s a bug, start by writing a test that reproduces it, then fix it until the test passes.
 
 Every time I correct you, add a new rule to the AGENTS.md file so it never happens again.
+
+When user specifies exact output artifacts/formats, generate only those artifacts; avoid producing extra files by default.
+
+For CLI UX, default to plain professional output (no emoji), and prefer clearly structured tables when summarizing results.
 </2>
