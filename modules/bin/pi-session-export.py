@@ -1,45 +1,94 @@
 #!/usr/bin/env -S uv run --script
 # /// script
 # requires-python = ">=3.13"
+# dependencies = ["typer>=0.21.1", "pydantic>=2.10.0", "rich>=14.3.2"]
 # ///
-"""Export Pi sessions into two JSONL artifacts only.
+"""Export Pi session files into two JSONL artifacts.
 
 Outputs:
 1) <session-id>.jsonl
    Raw event stream (session/header + entries), preserving original data.
 
 2) <session-id>.turns.with-tools.jsonl
-   Multi-turn JSONL, each line one turn, containing user + assistant messages.
+   Multi-turn JSONL (one turn per line), containing user + assistant messages.
    Assistant tool calls are preserved from message.content[type=toolCall].
 
-Usage:
-  pi-session-export.py /path/to/pi-session-xxx.html
-  pi-session-export.py /path/to/session.jsonl
-  pi-session-export.py /path/to/session.jsonl -o /tmp/out
+Supports input:
+- Pi exported HTML (contains base64 session payload)
+- Raw session JSONL
+
+Examples:
+  pi-session-export.py convert ~/Downloads/pi-session-xxx.html
+  pi-session-export.py convert ~/Downloads/abc.jsonl -o ~/Downloads
+
+Backward-compatible shortcut (no explicit command):
+  pi-session-export.py ~/Downloads/pi-session-xxx.html
 """
 
 from __future__ import annotations
 
-import argparse
 import base64
 import json
 import re
 import shutil
 import sys
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
+
+import typer
+from pydantic import BaseModel, Field
+from rich import box
+from rich.console import Console
+from rich.table import Table
+
+app = typer.Typer(
+    add_completion=False,
+    no_args_is_help=True,
+    help="Pi session export utilities",
+)
+console = Console()
 
 SESSION_DATA_RE = re.compile(
     r'<script\s+id="session-data"\s+type="application/json">(.*?)</script>',
     re.S,
 )
 
-VALID_ROLES = {"user", "assistant"}
+
+class ToolCallPreview(BaseModel):
+    id: str | None = None
+    name: str | None = None
+    arguments_chars: int = 0
+    arguments_preview: str = ""
+    command_preview: str | None = None
+    partial_json_preview: str | None = None
 
 
-def read_jsonl(path: Path) -> list[dict[str, Any]]:
+class TurnMessage(BaseModel):
+    id: str | None = None
+    parentId: str | None = None
+    timestamp: str | None = None
+    role: Literal["user", "assistant"]
+    text: str = ""
+    tool_calls: list[ToolCallPreview] = Field(default_factory=list)
+
+
+class TurnRecord(BaseModel):
+    turn: int
+    messages: list[TurnMessage]
+
+
+class TurnSummary(BaseModel):
+    turns: int
+    user_messages: int
+    assistant_messages: int
+    tool_calls: int
+
+
+def read_jsonl_records(path: Path) -> list[dict[str, Any]]:
     records: list[dict[str, Any]] = []
-    for lineno, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+    lines = path.read_text(encoding="utf-8").splitlines()
+
+    for lineno, line in enumerate(lines, start=1):
         stripped = line.strip()
         if not stripped:
             continue
@@ -47,22 +96,31 @@ def read_jsonl(path: Path) -> list[dict[str, Any]]:
             obj = json.loads(stripped)
         except json.JSONDecodeError as exc:
             raise ValueError(f"{path}:{lineno}: invalid JSONL line: {exc}") from exc
+
         if not isinstance(obj, dict):
             raise ValueError(f"{path}:{lineno}: expected JSON object line")
+
         records.append(obj)
+
     if not records:
         raise ValueError(f"{path}: empty JSONL")
+
     return records
 
 
-def write_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
+def write_dict_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
     content = "\n".join(json.dumps(row, ensure_ascii=False) for row in rows)
     path.write_text(content + "\n", encoding="utf-8")
 
 
-def extract_session_from_html(path: Path) -> tuple[dict[str, Any], list[dict[str, Any]]]:
-    text = path.read_text(encoding="utf-8")
-    match = SESSION_DATA_RE.search(text)
+def write_turns_jsonl(path: Path, turns: list[TurnRecord]) -> None:
+    rows = [turn.model_dump(exclude_none=True) for turn in turns]
+    write_dict_jsonl(path, rows)
+
+
+def parse_html_to_records(path: Path) -> tuple[list[dict[str, Any]], str]:
+    html = path.read_text(encoding="utf-8")
+    match = SESSION_DATA_RE.search(html)
     if not match:
         raise ValueError(f"{path}: session-data block not found")
 
@@ -87,15 +145,16 @@ def extract_session_from_html(path: Path) -> tuple[dict[str, Any], list[dict[str
             f"{path}: decoded session JSON must contain object 'header' and array 'entries'"
         )
 
-    dict_entries = [e for e in entries if isinstance(e, dict)]
-    return header, dict_entries
+    records: list[dict[str, Any]] = [header] + [e for e in entries if isinstance(e, dict)]
+    session_id = str(header.get("id") or path.stem)
+    return records, session_id
 
 
 def infer_session_id(records: list[dict[str, Any]], fallback: str) -> str:
-    for rec in records[:5]:
-        t = rec.get("type")
+    for rec in records[:8]:
+        kind = rec.get("type")
         sid = rec.get("id")
-        if t in {"session", "header"} and isinstance(sid, str) and sid.strip():
+        if kind in {"session", "header"} and isinstance(sid, str) and sid.strip():
             return sid.strip()
 
     for rec in records:
@@ -104,6 +163,11 @@ def infer_session_id(records: list[dict[str, Any]], fallback: str) -> str:
             return sid.strip()
 
     return fallback
+
+
+def parse_jsonl_to_records(path: Path) -> tuple[list[dict[str, Any]], str]:
+    records = read_jsonl_records(path)
+    return records, infer_session_id(records, path.stem)
 
 
 def extract_text_from_blocks(content: Any) -> str:
@@ -119,14 +183,16 @@ def extract_text_from_blocks(content: Any) -> str:
             continue
         if block.get("type") == "text" and isinstance(block.get("text"), str):
             chunks.append(block["text"])
+
     return "\n".join(chunks).strip()
 
 
-def extract_tool_calls_from_blocks(content: Any) -> list[dict[str, Any]]:
+def extract_tool_calls_from_blocks(content: Any) -> list[ToolCallPreview]:
     if not isinstance(content, list):
         return []
 
-    calls: list[dict[str, Any]] = []
+    calls: list[ToolCallPreview] = []
+
     for block in content:
         if not isinstance(block, dict):
             continue
@@ -139,7 +205,7 @@ def extract_tool_calls_from_blocks(content: Any) -> list[dict[str, Any]]:
         except Exception:  # noqa: BLE001
             arguments_raw = str(arguments)
 
-        call: dict[str, Any] = {
+        payload = {
             "id": block.get("id"),
             "name": block.get("name"),
             "arguments_chars": len(arguments_raw),
@@ -147,101 +213,92 @@ def extract_tool_calls_from_blocks(content: Any) -> list[dict[str, Any]]:
         }
 
         if isinstance(arguments, dict) and isinstance(arguments.get("command"), str):
-            call["command_preview"] = arguments["command"][:240]
+            payload["command_preview"] = arguments["command"][:240]
 
         if block.get("partialJson") is not None:
-            partial_raw = str(block.get("partialJson"))
-            call["partial_json_preview"] = partial_raw[:240]
+            payload["partial_json_preview"] = str(block.get("partialJson"))[:240]
 
-        calls.append(call)
+        calls.append(ToolCallPreview(**payload))
 
     return calls
 
 
-def normalize_message_event(record: dict[str, Any]) -> dict[str, Any] | None:
+def normalize_message(record: dict[str, Any]) -> TurnMessage | None:
     if record.get("type") != "message":
         return None
 
-    msg = record.get("message")
-    if not isinstance(msg, dict):
+    message = record.get("message")
+    if not isinstance(message, dict):
         return None
 
-    role = msg.get("role")
-    if role not in VALID_ROLES:
+    role = message.get("role")
+    if role not in {"user", "assistant"}:
         return None
 
-    event: dict[str, Any] = {
-        "id": record.get("id"),
-        "parentId": record.get("parentId"),
-        "timestamp": record.get("timestamp"),
-        "role": role,
-        "text": extract_text_from_blocks(msg.get("content")),
-    }
+    content = message.get("content")
 
-    if role == "assistant":
-        tool_calls = extract_tool_calls_from_blocks(msg.get("content"))
-        if tool_calls:
-            event["tool_calls"] = tool_calls
-
-    return event
+    return TurnMessage(
+        id=record.get("id"),
+        parentId=record.get("parentId"),
+        timestamp=record.get("timestamp"),
+        role=role,
+        text=extract_text_from_blocks(content),
+        tool_calls=extract_tool_calls_from_blocks(content) if role == "assistant" else [],
+    )
 
 
-def extract_message_events(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    events: list[dict[str, Any]] = []
-    for rec in records:
-        event = normalize_message_event(rec)
-        if event is not None:
-            events.append(event)
-    return events
+def records_to_turns_with_tools(records: list[dict[str, Any]]) -> list[TurnRecord]:
+    messages = [m for rec in records if (m := normalize_message(rec)) is not None]
 
+    turns: list[TurnRecord] = []
 
-def build_turns_with_tools(events: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    turns: list[dict[str, Any]] = []
-
-    for event in events:
-        role = event.get("role")
-
-        if role == "user":
-            turns.append({"turn": len(turns) + 1, "messages": [event]})
+    for msg in messages:
+        if msg.role == "user":
+            turns.append(TurnRecord(turn=len(turns) + 1, messages=[msg]))
             continue
 
         if not turns:
-            turns.append({"turn": 1, "messages": [event]})
+            turns.append(TurnRecord(turn=1, messages=[msg]))
             continue
 
-        turns[-1]["messages"].append(event)
+        turns[-1].messages.append(msg)
 
     return turns
 
 
-def summarize_turns(turns: list[dict[str, Any]]) -> tuple[int, int, int, int]:
+def summarize_turns(turns: list[TurnRecord]) -> TurnSummary:
     users = 0
     assistants = 0
     tool_calls = 0
 
     for turn in turns:
-        for msg in turn.get("messages", []):
-            role = msg.get("role")
-            if role == "user":
+        for msg in turn.messages:
+            if msg.role == "user":
                 users += 1
-            elif role == "assistant":
+            else:
                 assistants += 1
-                tool_calls += len(msg.get("tool_calls") or [])
+                tool_calls += len(msg.tool_calls)
 
-    return len(turns), users, assistants, tool_calls
+    return TurnSummary(
+        turns=len(turns),
+        user_messages=users,
+        assistant_messages=assistants,
+        tool_calls=tool_calls,
+    )
 
 
 def format_bytes(size: int) -> str:
     units = ["B", "KB", "MB", "GB", "TB"]
     value = float(size)
-    unit = units[0]
+
     for unit in units:
         if value < 1024 or unit == units[-1]:
-            break
+            if unit == "B":
+                return f"{int(value)} {unit}"
+            return f"{value:.1f} {unit}"
         value /= 1024
-    if unit == "B":
-        return f"{int(value)} {unit}"
-    return f"{value:.1f} {unit}"
+
+    return f"{int(size)} B"
 
 
 def print_report(
@@ -249,113 +306,118 @@ def print_report(
     input_path: Path,
     raw_path: Path,
     turns_path: Path,
-    summary: tuple[int, int, int, int],
+    summary: TurnSummary,
 ) -> None:
-    turns_n, users_n, assistants_n, tool_calls_n = summary
-    raw_size = format_bytes(raw_path.stat().st_size)
-    turns_size = format_bytes(turns_path.stat().st_size)
+    source_table = Table(title="pi-session-export", box=box.ASCII)
+    source_table.add_column("Field", style="cyan", no_wrap=True)
+    source_table.add_column("Value", overflow="fold")
+    source_table.add_row("status", "ok")
+    source_table.add_row("source", source_kind)
+    source_table.add_row("input", str(input_path))
 
-    print("✅ pi-session-export complete")
-    print(f"  source   : {source_kind}  {input_path}")
-    print("  outputs  :")
-    print(f"    - raw   : {raw_path} ({raw_size})")
-    print(f"    - turns : {turns_path} ({turns_size})")
-    print("  summary  :")
-    print(f"    - turns          : {turns_n}")
-    print(f"    - user messages  : {users_n}")
-    print(f"    - assistant msgs : {assistants_n}")
-    print(f"    - tool calls     : {tool_calls_n}")
+    outputs_table = Table(title="outputs", box=box.ASCII)
+    outputs_table.add_column("artifact", style="cyan", no_wrap=True)
+    outputs_table.add_column("path", overflow="fold")
+    outputs_table.add_column("size", justify="right", no_wrap=True)
+    outputs_table.add_row("raw", str(raw_path), format_bytes(raw_path.stat().st_size))
+    outputs_table.add_row(
+        "turns_with_tools",
+        str(turns_path),
+        format_bytes(turns_path.stat().st_size),
+    )
+
+    summary_table = Table(title="summary", box=box.ASCII)
+    summary_table.add_column("metric", style="cyan", no_wrap=True)
+    summary_table.add_column("value", justify="right")
+    summary_table.add_row("turns", str(summary.turns))
+    summary_table.add_row("user messages", str(summary.user_messages))
+    summary_table.add_row("assistant messages", str(summary.assistant_messages))
+    summary_table.add_row("tool calls", str(summary.tool_calls))
+
+    console.print(source_table)
+    console.print(outputs_table)
+    console.print(summary_table)
 
 
-def export_from_html(
+def write_raw_output(
+    source_kind: str,
     input_path: Path,
-    output_dir: Path,
-    stem: str | None,
-) -> tuple[Path, Path, tuple[int, int, int, int]]:
-    header, entries = extract_session_from_html(input_path)
-    session_id = stem or str(header.get("id") or input_path.stem)
+    output_path: Path,
+    records: list[dict[str, Any]],
+) -> None:
+    if source_kind == "jsonl":
+        if input_path.resolve() != output_path.resolve():
+            shutil.copyfile(input_path, output_path)
+        return
 
-    raw_jsonl_path = output_dir / f"{session_id}.jsonl"
-    raw_records = [header] + entries
-    write_jsonl(raw_jsonl_path, raw_records)
+    write_dict_jsonl(output_path, records)
 
-    events = extract_message_events(raw_records)
-    turns = build_turns_with_tools(events)
 
-    turns_jsonl_path = output_dir / f"{session_id}.turns.with-tools.jsonl"
-    write_jsonl(turns_jsonl_path, turns)
+@app.callback()
+def root() -> None:
+    """Pi session export CLI."""
 
+
+@app.command("convert")
+def convert(
+    input_path: Path = typer.Argument(
+        ...,
+        exists=True,
+        file_okay=True,
+        dir_okay=False,
+        readable=True,
+        resolve_path=True,
+        help="Path to pi-session HTML or session JSONL",
+    ),
+    output_dir: Path | None = typer.Option(
+        None,
+        "--output-dir",
+        "-o",
+        help="Output directory (default: same dir as input)",
+    ),
+    stem: str | None = typer.Option(
+        None,
+        "--stem",
+        help="Override output stem/session id",
+    ),
+) -> None:
+    """Convert input into raw JSONL + turns-with-tools JSONL."""
+
+    out_dir = output_dir.expanduser().resolve() if output_dir else input_path.parent
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    suffix = input_path.suffix.lower()
+    if suffix == ".html":
+        source_kind = "html"
+        records, inferred_session_id = parse_html_to_records(input_path)
+    elif suffix == ".jsonl":
+        source_kind = "jsonl"
+        records, inferred_session_id = parse_jsonl_to_records(input_path)
+    else:
+        raise typer.BadParameter("input must be .html or .jsonl")
+
+    session_id = stem or inferred_session_id
+    raw_path = out_dir / f"{session_id}.jsonl"
+    turns_path = out_dir / f"{session_id}.turns.with-tools.jsonl"
+
+    write_raw_output(source_kind, input_path, raw_path, records)
+    turns = records_to_turns_with_tools(records)
+    write_turns_jsonl(turns_path, turns)
     summary = summarize_turns(turns)
-    return raw_jsonl_path, turns_jsonl_path, summary
 
-
-def export_from_jsonl(
-    input_path: Path,
-    output_dir: Path,
-    stem: str | None,
-) -> tuple[Path, Path, tuple[int, int, int, int]]:
-    records = read_jsonl(input_path)
-    session_id = stem or infer_session_id(records, input_path.stem)
-
-    raw_jsonl_path = output_dir / f"{session_id}.jsonl"
-
-    if input_path.resolve() != raw_jsonl_path.resolve():
-        shutil.copyfile(input_path, raw_jsonl_path)
-
-    events = extract_message_events(records)
-    turns = build_turns_with_tools(events)
-
-    turns_jsonl_path = output_dir / f"{session_id}.turns.with-tools.jsonl"
-    write_jsonl(turns_jsonl_path, turns)
-
-    summary = summarize_turns(turns)
-    return raw_jsonl_path, turns_jsonl_path, summary
+    print_report(source_kind, input_path, raw_path, turns_path, summary)
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="Convert Pi session HTML/JSONL into raw JSONL + turns-with-tools JSONL"
-    )
-    parser.add_argument("input", help="Path to pi-session HTML file or session JSONL file")
-    parser.add_argument(
-        "-o",
-        "--output-dir",
-        help="Output directory (default: same dir as input)",
-    )
-    parser.add_argument(
-        "--stem",
-        help="Override output stem/session id (default: inferred from session/header id)",
-    )
+    # Backward compatibility: allow `pi-session-export.py <input>` by injecting
+    # default command when first arg looks like a positional input path.
+    if len(sys.argv) > 1:
+        first = sys.argv[1]
+        known = {"convert", "--help", "-h", "--version"}
+        if first not in known and not first.startswith("-"):
+            sys.argv.insert(1, "convert")
 
-    args = parser.parse_args()
-
-    input_path = Path(args.input).expanduser().resolve()
-    if not input_path.exists() or not input_path.is_file():
-        print(f"Error: input file not found: {input_path}", file=sys.stderr)
-        sys.exit(1)
-
-    output_dir = (
-        Path(args.output_dir).expanduser().resolve()
-        if args.output_dir
-        else input_path.parent
-    )
-    output_dir.mkdir(parents=True, exist_ok=True)
-
-    try:
-        suffix = input_path.suffix.lower()
-        if suffix == ".html":
-            raw_path, turns_path, summary = export_from_html(input_path, output_dir, args.stem)
-            source_kind = "html"
-        elif suffix == ".jsonl":
-            raw_path, turns_path, summary = export_from_jsonl(input_path, output_dir, args.stem)
-            source_kind = "jsonl"
-        else:
-            raise ValueError("input must be .html or .jsonl")
-    except Exception as exc:  # noqa: BLE001
-        print(f"Error: {exc}", file=sys.stderr)
-        sys.exit(1)
-
-    print_report(source_kind, input_path, raw_path, turns_path, summary)
+    app()
 
 
 if __name__ == "__main__":
