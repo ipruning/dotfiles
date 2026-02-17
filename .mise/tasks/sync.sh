@@ -100,7 +100,7 @@ if command -v mise >/dev/null 2>&1; then
 fi
 
 if command -v sesh >/dev/null 2>&1; then
-  sesh completion zsh > "$GENERATED_FUNCTIONS_DIR/_sesh"
+  sesh completion zsh > "$GENERATED_COMPLETIONS_DIR/_sesh"
 fi
 
 MODULES_DIR="$REPO_ROOT/modules"
