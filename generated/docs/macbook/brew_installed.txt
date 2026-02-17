@@ -83,6 +83,7 @@ rip2
 ripgrep
 rust-parallel
 rustscan
+sesh
 shellcheck
 sk
 somo

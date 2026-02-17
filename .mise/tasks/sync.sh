@@ -81,6 +81,14 @@ if command -v linear >/dev/null 2>&1; then
   linear completions zsh > "$GENERATED_COMPLETIONS_DIR/_linear"
 fi
 
+if command -v sesh >/dev/null 2>&1; then
+  sesh completion zsh > "$GENERATED_COMPLETIONS_DIR/_sesh"
+fi
+
+if command -v op >/dev/null 2>&1; then
+  op completion zsh > "$GENERATED_COMPLETIONS_DIR/_op"
+fi
+
 printf "\033[34m==> Syncing Shell Functions...\033[0m\n"
 
 GENERATED_FUNCTIONS_DIR="$REPO_ROOT/generated/functions"
@@ -97,10 +105,6 @@ fi
 
 if command -v mise >/dev/null 2>&1; then
   mise activate zsh > "$GENERATED_FUNCTIONS_DIR/_mise.zsh"
-fi
-
-if command -v sesh >/dev/null 2>&1; then
-  sesh completion zsh > "$GENERATED_COMPLETIONS_DIR/_sesh"
 fi
 
 MODULES_DIR="$REPO_ROOT/modules"

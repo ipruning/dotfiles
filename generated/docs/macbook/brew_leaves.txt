@@ -77,6 +77,7 @@ riff
 rip2
 rust-parallel
 rustscan
+sesh
 shellcheck
 sk
 somo
