@@ -66,6 +66,29 @@ fi
 source "$HOME/dotfiles/modules/zsh/macos.zsh"
 source "$HOME/dotfiles/modules/zsh/surge.zsh"
 
+# 👇 1Password Environment Loader
+openv() {
+  local id="${1:-}"
+
+  if [[ -z "$id" ]]; then
+    echo "Usage: openv <1password-environment-id>" >&2
+    return 2
+  fi
+
+  if ! command -v op >/dev/null 2>&1; then
+    echo "op CLI not found" >&2
+    return 1
+  fi
+
+  while IFS= read -r line; do
+    [[ -n "$line" ]] && export "$line"
+  done < <(op environment read "$id")
+}
+
+openv-longbridge() {
+  openv qikdfxnulzghidg6iu7jf3sboq
+}
+
 # 👇 Brew
 export HOMEBREW_NO_ANALYTICS=1
 
