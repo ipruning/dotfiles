@@ -1,10 +1,77 @@
-db_path = "~/.local/share/atuin/history.db"
-key_path = "~/.local/share/atuin/key"
+## ── Search ─────────────────────────────────────────────────────────────
+## Up arrow searches current directory only; ctrl-r cycles filter modes globally
+filter_mode_shell_up_key_binding = "directory"
 
-enter_accept = false
-exit_mode = "return-query"
-# inline_height = 0
-# search_mode = "fulltext"
-show_help = false
+## ── UI ────────────────────────────────────────────────────────────────
+show_help = false                # hide version/keymap hint row
+exit_mode = "return-query"       # esc returns search text, not original input
+ctrl_n_shortcuts = true          # macOS: Ctrl-0..9 instead of Alt-0..9 (avoids Option key conflicts)
 
-history_filter = ["^secret-cmd", "^innocuous-cmd .*--secret=.+", "^#.*", "^\\s"]
+## ── Filtering ─────────────────────────────────────────────────────────
+history_filter = [
+  "^secret-cmd",
+  "^innocuous-cmd .*--secret=.+",
+  "^#.*",                        # comments
+  "^\\s",                        # whitespace-prefixed (convention to skip history)
+]
+
+## ── Features ──────────────────────────────────────────────────────────
+command_chaining = true          # smart completion after && / || / |
+
+## ── Daemon ────────────────────────────────────────────────────────────
+[daemon]
+enabled = true                   # route history hooks through background daemon
+autostart = true                 # auto-launch daemon when needed
+sync_frequency = 300             # sync every 5 minutes
+
+## ── Columns ───────────────────────────────────────────────────────────
+[ui]
+columns = ["exit", "duration", "time", "command"]  # exit code for quick failure spotting
+
+## ── Keybindings (replaces [keys] section entirely) ────────────────────
+[keymap.emacs]
+## Exit / cancel
+"ctrl-c" = "return-original"
+"ctrl-g" = "return-original"
+"esc" = "return-original"
+"ctrl-d" = [
+  { when = "cursor-at-start && input-empty", action = "return-original" },
+  { action = "delete-char-after" },
+]
+
+## Accept: enter = edit first, tab = execute immediately
+"enter" = "return-selection"
+"tab" = "accept"
+
+## Navigation
+"up" = [
+  { when = "list-at-start", action = "exit" },
+  { action = "select-previous" },
+]
+"down" = [
+  { when = "no-results", action = "return-query" },
+  { action = "select-next" },
+]
+"left" = [
+  { when = "cursor-at-start", action = "exit" },
+  { action = "cursor-left" },
+]
+"right" = "cursor-right"
+
+## Modes
+"ctrl-r" = "cycle-filter-mode"
+"ctrl-s" = "cycle-search-mode"
+"ctrl-o" = "toggle-tab"
+
+## Editing
+"ctrl-a" = "cursor-start"
+"ctrl-e" = "cursor-end"
+"ctrl-u" = "clear-line"
+"ctrl-w" = "delete-to-word-boundary"
+"backspace" = "delete-char-before"
+"delete" = "delete-char-after"
+"ctrl-y" = "copy"
+
+## Pagination
+"page-up" = "scroll-page-up"
+"page-down" = "scroll-page-down"
