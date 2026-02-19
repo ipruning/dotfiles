@@ -21,7 +21,3 @@ When there’s a bug, start by writing a test that reproduces it, then fix it un
 
 Every time I correct you, add a new rule to the AGENTS.md file so it never happens again.
 </2>
-
-<3>
-When writing tmux skill/scripts: tmux format strings do NOT interpret \t as tab. Use shell $'\t' interpolation in double-quoted format strings. Always verify tmux format variable names against the current man page — e.g. session_created_string was removed; use #{t:session_created} instead. session_attached is a count, not a boolean.
-</3>
