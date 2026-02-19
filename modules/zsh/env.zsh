@@ -138,11 +138,6 @@ zle -N tv-search _tv_search
 
 bindkey '^T' tv-search
 
-# 👇 ugit
-if [[ -f "$PLUGINS_DIR"/ugit/ugit.plugin.zsh ]]; then
-  source "$PLUGINS_DIR"/ugit/ugit.plugin.zsh
-fi
-
 # 👇 fzf
 export FZF_DEFAULT_COMMAND="fd"
 
@@ -183,17 +178,6 @@ if [[ -f "$HOME/Library/Application Support/try-rs/try-rs.zsh" ]]; then
   source "$HOME/Library/Application Support/try-rs/try-rs.zsh"
 fi
 
-# 👇 Mojo
-export PATH="$HOME/.modular/bin:$PATH"
-
-# 👇 Opencode
-export PATH="$HOME/.opencode/bin:$PATH"
-
-# 👇 OpenClaw Completion
-if [[ -f "$HOME/.openclaw/completions/openclaw.zsh" ]]; then
-  source "$HOME/.openclaw/completions/openclaw.zsh"
-fi
-
 # 👇 mise (will cost 40ms)
 if command -v mise >/dev/null 2>&1; then
   source "$GENERATED_FUNCTIONS_DIR/_mise.zsh"
@@ -202,4 +186,17 @@ fi
 # 👇 atuin (need below mise)
 if command -v atuin >/dev/null 2>&1; then
   source "$GENERATED_FUNCTIONS_DIR/_atuin.zsh"
+fi
+
+# 👇 Local bins (keep below mise to avoid PATH reset)
+path=("$HOME/.opencode/bin" "$HOME/.modular/bin" $path)
+
+# 👇 ugit (adds plugin bin to PATH; keep below mise)
+if [[ -f "$PLUGINS_DIR"/ugit/ugit.plugin.zsh ]]; then
+  source "$PLUGINS_DIR"/ugit/ugit.plugin.zsh
+fi
+
+# 👇 OpenClaw Completion
+if [[ -f "$HOME/.openclaw/completions/openclaw.zsh" ]]; then
+  source "$HOME/.openclaw/completions/openclaw.zsh"
 fi

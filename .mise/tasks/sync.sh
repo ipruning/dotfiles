@@ -104,7 +104,13 @@ if command -v atuin >/dev/null 2>&1; then
 fi
 
 if command -v mise >/dev/null 2>&1; then
-  mise activate zsh > "$GENERATED_FUNCTIONS_DIR/_mise.zsh"
+  # Avoid serializing active shell/session state into generated script.
+  env -u __MISE_DIFF \
+    -u __MISE_SESSION \
+    -u __MISE_ORIG_PATH \
+    -u MISE_SHELL \
+    -u __MISE_ZSH_PRECMD_RUN \
+    mise activate zsh > "$GENERATED_FUNCTIONS_DIR/_mise.zsh"
 fi
 
 MODULES_DIR="$REPO_ROOT/modules"
