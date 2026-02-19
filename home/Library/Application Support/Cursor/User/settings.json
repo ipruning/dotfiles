@@ -56,6 +56,7 @@
   "beancountFormatter.fixedCJKWidth": true,
   "biome.requireConfiguration": true,
   "catppuccin-icons.associations.extensions": {
+    ".secretsignore": "gitignore",
     "bean": "markdown",
     "mdc": "markdown",
     "modalignore": "gitignore",
