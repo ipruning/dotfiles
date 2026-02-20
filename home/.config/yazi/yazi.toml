@@ -4,3 +4,13 @@
 ratio = [1, 1, 2]
 show_hidden = true
 show_symlink = false
+
+[[plugin.prepend_fetchers]]
+id = "git"
+url = "*"
+run = "git"
+
+[[plugin.prepend_fetchers]]
+id = "git"
+url = "*/"
+run = "git"
