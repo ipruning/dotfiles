@@ -19,10 +19,10 @@ history_filter = [
 command_chaining = true          # smart completion after && / || / |
 
 ## ── Daemon ────────────────────────────────────────────────────────────
-[daemon]
-enabled = true                   # route history hooks through background daemon
-autostart = true                 # auto-launch daemon when needed
-sync_frequency = 300             # sync every 5 minutes
+# [daemon]
+# enabled = true                   # route history hooks through background daemon
+# autostart = true                 # auto-launch daemon when needed
+# sync_frequency = 300             # sync every 5 minutes
 
 ## ── Columns ───────────────────────────────────────────────────────────
 [ui]
