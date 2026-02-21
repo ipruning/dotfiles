@@ -19,6 +19,7 @@ calibre
 Capture One
 ChatGPT Atlas
 Claude
+cmux
 Codex
 Codex Monitor
 CodexBar
