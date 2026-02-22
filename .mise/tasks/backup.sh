@@ -15,4 +15,8 @@ require_cmd uvx
 REPO_ROOT="$(repo_root)"
 cd "$REPO_ROOT"
 
-gum confirm "Are you sure you want to run mackup backup (force)?" && uvx mackup backup --force
+if [[ "${1:-}" == "--force" ]]; then
+  uvx mackup backup --force
+else
+  gum confirm "Are you sure you want to run mackup backup (force)?" && uvx mackup backup --force
+fi

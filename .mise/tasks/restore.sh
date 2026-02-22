@@ -15,4 +15,8 @@ require_cmd uvx
 REPO_ROOT="$(repo_root)"
 cd "$REPO_ROOT"
 
-gum confirm "Are you sure you want to run mackup restore(force)?" && uvx mackup restore --force
+if [[ "${1:-}" == "--force" ]]; then
+  uvx mackup restore --force
+else
+  gum confirm "Are you sure you want to run mackup restore (force)?" && uvx mackup restore --force
+fi
