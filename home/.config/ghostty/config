@@ -13,6 +13,8 @@ scrollback-limit = 25000000
 shell-integration-features = no-cursor, title, ssh-env, sudo
 theme = Catppuccin Mocha
 undo-timeout = 1m
+window-padding-x = 14
+window-padding-y = 14
 
 keybind = cmd+n=new_tab
 keybind = cmd+q=ignore
