@@ -54,39 +54,39 @@ GENERATED_COMPLETIONS_DIR="$REPO_ROOT/generated/completions"
 [ -d "$GENERATED_COMPLETIONS_DIR" ] || mkdir -p "$GENERATED_COMPLETIONS_DIR"
 
 if command -v uvx >/dev/null 2>&1; then
-  _LLM_COMPLETE=zsh_source uvx llm > "$GENERATED_COMPLETIONS_DIR/_llm"
+  _LLM_COMPLETE=zsh_source uvx llm > "$GENERATED_COMPLETIONS_DIR/_llm" 2>/dev/null || true
 fi
 
 if command -v bootdev >/dev/null 2>&1; then
-  bootdev completion zsh > "$GENERATED_COMPLETIONS_DIR/_bootdev"
+  bootdev completion zsh > "$GENERATED_COMPLETIONS_DIR/_bootdev" 2>/dev/null || true
 fi
 
 if command -v ov >/dev/null 2>&1; then
-  ov --completion zsh > "$GENERATED_COMPLETIONS_DIR/_ov"
+  ov --completion zsh > "$GENERATED_COMPLETIONS_DIR/_ov" 2>/dev/null || true
 fi
 
 if command -v just >/dev/null 2>&1; then
-  just --completions zsh > "$GENERATED_COMPLETIONS_DIR/_just"
+  just --completions zsh > "$GENERATED_COMPLETIONS_DIR/_just" 2>/dev/null || true
 fi
 
 if command -v codex >/dev/null 2>&1; then
-  codex completion zsh > "$GENERATED_COMPLETIONS_DIR/_codex"
+  codex completion zsh > "$GENERATED_COMPLETIONS_DIR/_codex" 2>/dev/null || true
 fi
 
 if command -v jj >/dev/null 2>&1; then
-  jj util completion zsh > "$GENERATED_COMPLETIONS_DIR/_jj"
+  jj util completion zsh > "$GENERATED_COMPLETIONS_DIR/_jj" 2>/dev/null || true
 fi
 
 if command -v linear >/dev/null 2>&1; then
-  linear completions zsh > "$GENERATED_COMPLETIONS_DIR/_linear"
+  linear completions zsh > "$GENERATED_COMPLETIONS_DIR/_linear" 2>/dev/null || true
 fi
 
 if command -v sesh >/dev/null 2>&1; then
-  sesh completion zsh > "$GENERATED_COMPLETIONS_DIR/_sesh"
+  sesh completion zsh > "$GENERATED_COMPLETIONS_DIR/_sesh" 2>/dev/null || true
 fi
 
 if command -v op >/dev/null 2>&1; then
-  op completion zsh > "$GENERATED_COMPLETIONS_DIR/_op"
+  op completion zsh > "$GENERATED_COMPLETIONS_DIR/_op" 2>/dev/null || true
 fi
 
 printf "\033[34m==> Syncing Shell Functions...\033[0m\n"
@@ -96,11 +96,11 @@ GENERATED_FUNCTIONS_DIR="$REPO_ROOT/generated/functions"
 [ -d "$GENERATED_FUNCTIONS_DIR" ] || mkdir -p "$GENERATED_FUNCTIONS_DIR"
 
 if command -v starship >/dev/null 2>&1; then
-  starship init zsh > "$GENERATED_FUNCTIONS_DIR/_starship.zsh"
+  starship init zsh > "$GENERATED_FUNCTIONS_DIR/_starship.zsh" 2>/dev/null || true
 fi
 
 if command -v atuin >/dev/null 2>&1; then
-  atuin init zsh --disable-up-arrow > "$GENERATED_FUNCTIONS_DIR/_atuin.zsh"
+  atuin init zsh --disable-up-arrow > "$GENERATED_FUNCTIONS_DIR/_atuin.zsh" 2>/dev/null || true
 fi
 
 if command -v mise >/dev/null 2>&1; then
@@ -110,13 +110,13 @@ if command -v mise >/dev/null 2>&1; then
     -u __MISE_ORIG_PATH \
     -u MISE_SHELL \
     -u __MISE_ZSH_PRECMD_RUN \
-    mise activate zsh > "$GENERATED_FUNCTIONS_DIR/_mise.zsh"
+    mise activate zsh > "$GENERATED_FUNCTIONS_DIR/_mise.zsh" 2>/dev/null || true
 fi
 
-MODULES_DIR="$REPO_ROOT/modules"
+# MODULES_DIR="$REPO_ROOT/modules"
 
-if command -v op >/dev/null 2>&1; then
-  op inject --in-file "$MODULES_DIR/zsh/env.private.tpl.zsh" --out-file "$MODULES_DIR/zsh/env.private.zsh"
-fi
+# if command -v op >/dev/null 2>&1; then
+#   op inject --in-file "$MODULES_DIR/zsh/env.private.tpl.zsh" --out-file "$MODULES_DIR/zsh/env.private.zsh" 2>/dev/null || true
+# fi
 
 rm -f ~/.zcompdump*
