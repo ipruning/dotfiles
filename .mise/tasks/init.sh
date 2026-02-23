@@ -34,18 +34,6 @@ mkdir -p generated/plugins
 [ -d generated/plugins/zsh-autosuggestions ]      || git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions              generated/plugins/zsh-autosuggestions
 [ -d generated/plugins/fast-syntax-highlighting ] || git clone --depth=1 https://github.com/zdharma-continuum/fast-syntax-highlighting generated/plugins/fast-syntax-highlighting
 
-if command -v gfold >/dev/null 2>&1 && gfold --version 2>&1 | grep -q "gfold"; then
-  require_cmd jq
-  gfold -d json "$@" 2>/dev/null |
-  jq -r '.[] | (.parent | rtrimstr("/")) + "/" + .name' |
-  while read -r repo; do
-    log_info "Updating $repo..."
-    git -C "$repo" pull --ff-only
-  done
-else
-  log_warn "gfold not found, skipping gfold update..."
-fi
-
 log_info "Restoring Mackup..."
 if [ ! -L "$HOME/.mackup" ] || [ ! -L "$HOME/.mackup.cfg" ]; then
   [ ! -L "$HOME/.mackup" ] && ln -sf "$REPO_ROOT/modules/mackup/.mackup" "$HOME"/.mackup
