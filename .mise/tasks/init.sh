@@ -46,7 +46,7 @@ fi
 log_info "Syncing Completion..."
 mise run sync
 
-log_info "Injecting Private Environment..."
-op inject --in-file modules/zsh/env.private.tpl.zsh --out-file modules/zsh/env.private.zsh
+# log_info "Injecting Private Environment..."
+# op inject --in-file modules/zsh/env.private.tpl.zsh --out-file modules/zsh/env.private.zsh
 
 log_info "Done..."
