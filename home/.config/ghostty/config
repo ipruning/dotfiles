@@ -1,3 +1,5 @@
+theme = Catppuccin Mocha
+
 font-family = MonoLisa
 font-family = Maple Mono NF CN
 
@@ -9,9 +11,9 @@ cursor-style = block
 cursor-style-blink = false
 macos-option-as-alt = true
 maximize = true
+resize-overlay = never
 scrollback-limit = 25000000
 shell-integration-features = no-cursor, title, ssh-env, sudo
-theme = Catppuccin Mocha
 undo-timeout = 1m
 window-padding-x = 14
 window-padding-y = 14
@@ -19,6 +21,19 @@ window-padding-y = 14
 keybind = cmd+n=new_tab
 keybind = cmd+q=ignore
 keybind = cmd+t=new_tab
+
+# Linux
+config-file = ?"~/.config/omarchy/current/theme/ghostty.conf"
+
+mouse-scroll-multiplier = 0.95
+
+keybind = f11=toggle_fullscreen
+keybind = shift+insert=paste_from_clipboard
+keybind = control+insert=copy_to_clipboard
+keybind = super+control+shift+alt+arrow_down=resize_split:down,100
+keybind = super+control+shift+alt+arrow_up=resize_split:up,100
+keybind = super+control+shift+alt+arrow_left=resize_split:left,100
+keybind = super+control+shift+alt+arrow_right=resize_split:right,100
 
 # command = /opt/homebrew/bin/nu
 
