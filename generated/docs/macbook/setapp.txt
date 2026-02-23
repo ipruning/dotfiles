@@ -2,6 +2,7 @@ BetterZip
 CleanMyMac
 CleanShot X
 Clop
+Craft
 Downie
 Focus 2
 ForkLift
