@@ -46,6 +46,7 @@ Google Docs
 Google Drive
 Google Sheets
 Google Slides
+Goose
 Graphite
 Heptabase
 Hush
@@ -83,6 +84,7 @@ Numbers
 OBS
 Obsidian
 OnyX
+OpenCode
 OrbStack
 Pages
 pcsuite

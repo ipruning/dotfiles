@@ -5,7 +5,7 @@ go = "latest"
 node = "latest"
 python = "3.13"
 ruby = "latest"
-rust = "latest"
+rust = "nightly"
 zig = "latest"
 
 "github:badlogic/pi-mono" = "0.54"
