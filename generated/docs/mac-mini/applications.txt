@@ -4,6 +4,7 @@
 AdGuard for Safari
 AeroSpace
 AltTab
+BetterDisplay
 Bob
 ChatGPT Atlas
 Cursor
@@ -24,6 +25,8 @@ Mos
 OrbStack
 PasteNow
 qBittorrent
+Raycast
+Rectangle
 Repo Prompt
 Roam Research
 Safari
