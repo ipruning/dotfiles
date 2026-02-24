@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# amp-ghostty — Open a 3-pane Ghostty dev layout
+#
+# Usage: amp-ghostty [directory]
+#
+#   ┌──────────┬──────────┐
+#   │          │ lazygit  │
+#   │   amp    ├──────────┤
+#   │          │  yazi    │
+#   └──────────┴──────────┘
+#
+# Ghostty keybindings required:
+#   super+d       = new_split:right
+#   super+shift+d = new_split:down
+
+dir="${1:-$(pwd)}"
+dir="$(cd "$dir" && pwd -P)" || { echo "directory not found: $1" >&2; exit 1; }
+
+for cmd in amp lazygit yazi; do
+  command -v "$cmd" >/dev/null 2>&1 || { echo "required: $cmd" >&2; exit 1; }
+done
+
+osascript <<APPLESCRIPT
+try
+  set oldClip to the clipboard as text
+on error
+  set oldClip to ""
+end try
+
+tell application id "com.mitchellh.ghostty" to activate
+delay 0.05
+
+tell application "System Events"
+  tell process "Ghostty"
+    -- New tab
+    keystroke "t" using {command down}
+    delay 0.3
+
+    -- Left pane: amp
+    set the clipboard to "cd '${dir}' && amp"
+    keystroke "v" using {command down}
+    delay 0.1
+    key code 36
+    delay 0.3
+
+    -- Split right: lazygit
+    keystroke "d" using {command down}
+    delay 0.1
+    set the clipboard to "cd '${dir}' && lazygit"
+    keystroke "v" using {command down}
+    delay 0.1
+    key code 36
+    delay 0.3
+
+    -- Split bottom-right: yazi
+    keystroke "d" using {command down, shift down}
+    delay 0.1
+    set the clipboard to "cd '${dir}' && yazi"
+    keystroke "v" using {command down}
+    delay 0.3
+    key code 36
+    delay 0.3
+
+    -- Focus back to left pane (amp)
+    keystroke "]" using {command down}
+  end tell
+end tell
+
+delay 0.3
+set the clipboard to oldClip
+APPLESCRIPT
