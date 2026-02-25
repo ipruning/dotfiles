@@ -39,7 +39,53 @@ If you want to manage Agents / Skills / Prompts inside this repo, start from **`
 ```bash
 git clone <your-repo-url> ~/dotfiles
 cd ~/dotfiles
-````
+```
+
+### Arch Linux note: 1Password CLI beta for `openv`
+
+`modules/zsh/env.zsh` contains `openv`, which uses `op environment read`.
+
+On some Arch setups:
+
+- `/usr/bin/op` (stable) may be too old and not include `environment` commands.
+- A manually downloaded beta binary in `$HOME` may fail desktop integration with errors like
+  `connection reset` / `PipeAuthError(NoCreds)`.
+
+Use this setup so both app integration and `environment read` work:
+
+```bash
+# 1) Download beta package using stable op
+mkdir -p ~/.cache/op
+PATH=/usr/bin:$PATH op update --channel beta --directory ~/.cache/op
+
+# 2) Extract
+zip="$(ls -t ~/.cache/op/op_linux_*_v*.zip | head -n1)"
+unzip -o "$zip" -d ~/.cache/op
+
+# 3) Install with correct owner/group/mode (important)
+# Use /usr/bin/install explicitly (don't rely on shell alias/function/path shadowing)
+sudo /usr/bin/install -o root -g onepassword-cli -m 2755 ~/.cache/op/op /usr/local/bin/op
+
+# 4) Verify
+hash -r
+op --version
+ls -l /usr/local/bin/op
+op environment read --help >/dev/null
+```
+
+Expected `ls -l` shape:
+
+- owner/group: `root onepassword-cli`
+- mode includes setgid: `-rwxr-sr-x` (`2755`)
+
+Quick runtime checks:
+
+```bash
+op signin --account my.1password.com
+openv-longbridge
+# safer verification: print only variable names, not secret values
+env | rg '^LONGPORT_' | cut -d= -f1
+```
 
 ### Run tasks (preferred)
 
