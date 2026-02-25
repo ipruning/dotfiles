@@ -15,9 +15,6 @@ alias ls="ls --color=auto"
 
 alias q="exit"
 
-# Use histx (atuin-formatted history helper) via a short alias to avoid colliding with shell builtin `history`.
-alias h="histx"
-
 alias rsyncssh="rsync -Pr --rsh=ssh"
 
 alias cdr='cd $(git rev-parse --show-toplevel)'
