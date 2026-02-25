@@ -188,13 +188,22 @@ if command -v atuin >/dev/null 2>&1; then
   source "$GENERATED_FUNCTIONS_DIR/_atuin.zsh"
 fi
 
-# 👇 Local bins (keep below mise to avoid PATH reset)
-path=("$HOME/.opencode/bin" "$HOME/.modular/bin" $path)
+# 👇 Optional local bins (shared across machines)
+# Add only if directory exists, and append to avoid shadowing system/core tools.
+for optional_bin in "$HOME/.opencode/bin" "$HOME/.modular/bin"; do
+  # normalize: remove inherited/prepended copies first, then append only if present
+  path=(${path:#$optional_bin})
+  path=(${path:#$optional_bin/})
+  [[ -d "$optional_bin" ]] && path+=("$optional_bin")
+done
 
-# 👇 ugit (adds plugin bin to PATH; keep below mise)
-if [[ -f "$PLUGINS_DIR"/ugit/ugit.plugin.zsh ]]; then
-  source "$PLUGINS_DIR"/ugit/ugit.plugin.zsh
-fi
+# 👇 ugit disabled (plugin adds its repo root to PATH, including generic names like `install`)
+# Remove stale ugit PATH entries inherited from older shells/sessions.
+path=(${path:#$PLUGINS_DIR/ugit})
+path=(${path:#$PLUGINS_DIR/ugit/})
+# if [[ -f "$PLUGINS_DIR"/ugit/ugit.plugin.zsh ]]; then
+#   source "$PLUGINS_DIR"/ugit/ugit.plugin.zsh
+# fi
 
 # 👇 OpenClaw Completion
 if [[ -f "$HOME/.openclaw/completions/openclaw.zsh" ]]; then
