@@ -30,7 +30,7 @@ For CLI UX, default to plain professional output (no emoji), and prefer clearly 
 When you need to look something up on the web,
 
 ```bash
-codex codex -m gpt-5.3-codex-spark -c model_reasoning_effort=xhigh --search exec --ephemeral --skip-git-repo-check --sandbox read-only "<question>. Use the web search tool. Search for the latest available information as of <early|mid|late> <year>. Do not execute commands or modify files. Return an answer with source URLs (if available)."
+codex -m gpt-5.3-codex-spark -c model_reasoning_effort=xhigh --search exec --ephemeral --skip-git-repo-check --sandbox read-only "<question>. Use the web search tool. Search for the latest available information as of <early|mid|late> <year>. Do not execute commands or modify files. Return an answer with source URLs (if available)."
 ```
 
 use Codex web search.

@@ -57,10 +57,12 @@
   "biome.requireConfiguration": true,
   "catppuccin-icons.associations.extensions": {
     "bean": "markdown",
+    "coverage": "python",
     "mdc": "markdown",
     "modalignore": "gitignore",
     "repo_ignore": "gitignore",
     "secretsignore": "gitignore",
+    "shellcheckrc": "env",
     "tpl": "env"
   },
   "catppuccin-icons.associations.files": {
