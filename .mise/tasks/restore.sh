@@ -18,5 +18,9 @@ cd "$REPO_ROOT"
 if [[ "${1:-}" == "--force" ]]; then
   uvx mackup restore --force
 else
-  gum confirm "Are you sure you want to run mackup restore (force)?" && uvx mackup restore --force
+  gum confirm "Are you sure you want to run mackup restore (force)?" \
+    --prompt.foreground="15" \
+    --selected.foreground="0" --selected.background="10" \
+    --unselected.foreground="250" --unselected.background="238" \
+    && uvx mackup restore --force
 fi
