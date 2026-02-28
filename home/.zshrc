@@ -34,9 +34,9 @@ completion_paths+=("${fpath[@]}")
 fpath=("${completion_paths[@]}")
 autoload -Uz compinit
 for dump in ~/.zcompdump(N.mh+24); do
-  compinit
+  compinit -i
 done
-compinit -C
+compinit -i -C
 
 ZSH_MODULES_DIR="$HOME/dotfiles/modules/zsh"
 
