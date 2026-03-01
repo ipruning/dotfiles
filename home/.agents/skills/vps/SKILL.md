@@ -2,7 +2,7 @@
 name: vps
 description: "Linux VPS/server security audit, hardening, and maintenance. Triggers: remote Linux host + SSH hardening, firewall rules, Debian/Ubuntu patching, unknown server audit, fail2ban, unattended-upgrades. Not for macOS."
 metadata:
-  version: "2"
+  version: "3"
 ---
 
 # VPS Security & Maintenance Manual
@@ -537,6 +537,76 @@ Hetzner's Robot firewall is a stateless filter at the switch port level with a 1
 - The "Hetzner Services" checkbox prevents accidentally blocking Rescue, DHCP, DNS, and monitoring
 
 If the OS-level nftables firewall is stable and well-tested, the Robot firewall is optional. If used, configure only inbound minimal allow and avoid outbound filtering to prevent self-lockout.
+
+### Non-Root Admin User Transition
+
+The standard hardening path after Day-0 bootstrap (firewall + key-only SSH as root):
+
+**Create admin user with sudo:**
+
+```bash
+useradd -m -s /bin/bash -G sudo alex
+```
+
+**Set a local password for sudo** — SSH is key-only, but sudo still needs a password. Locking the password (`passwd -l`) forces you into either `NOPASSWD: ALL` (insecure) or being unable to sudo at all:
+
+```bash
+passwd alex
+```
+
+**Copy SSH public key:**
+
+```bash
+mkdir -p /home/alex/.ssh
+cp /root/.ssh/authorized_keys /home/alex/.ssh/authorized_keys
+chown -R alex:alex /home/alex/.ssh
+chmod 700 /home/alex/.ssh && chmod 600 /home/alex/.ssh/authorized_keys
+```
+
+**Verify in a NEW session** (keep the root session open as fallback):
+
+```bash
+ssh alex@host
+sudo -i
+```
+
+**Lock down SSH** — only after verifying the new user works:
+
+```bash
+# In /etc/ssh/sshd_config.d/hardening.conf:
+# PermitRootLogin no
+# AllowUsers alex
+# X11Forwarding no
+# PermitUserRC no
+sshd -T | grep -E 'permitrootlogin|allowusers|x11forwarding|permituserrc'
+systemctl reload ssh
+```
+
+**Verify root is locked out** from a third session — should be rejected.
+
+**Password strategy pitfall:** "SSH key-only" and "no system password" are different things. SSH `PasswordAuthentication no` prevents remote password login. But the local user password is still used by `sudo`, `su`, and console login. Deleting or locking the admin password while SSH password auth is disabled creates a dead end where key compromise = immediate root (via `NOPASSWD` sudo) with no second factor.
+
+### SSH Key Separation
+
+Do not reuse the same SSH key across privilege levels. Recommended minimum for a single admin:
+
+- **Daily admin key** — used for `ssh alex@host`, the key you carry on your workstation
+- **Break-glass key** — stored offline or in a hardware token, used only for emergency recovery (e.g., temporarily re-enabling root login). Never loaded in your SSH agent day-to-day
+
+If the admin key is compromised, the attacker gets user-level access + sudo (still needs password). The break-glass key remains uncompromised and can be used to rotate the admin key.
+
+For multi-person teams: one key per person, never shared accounts or shared keys. Revocation = delete that person's key and account.
+
+### Docker Group Privilege Escalation
+
+Adding a user to the `docker` group grants root-equivalent access to the host. Any member can `docker run -v /:/host` to read/write the entire filesystem, extract `/etc/shadow`, inject SSH keys, or install rootkits — all without `sudo`.
+
+**Rules for multi-user hosts:**
+
+- Do not add users to the `docker` group by default
+- Users who need container access should use `sudo docker ...` (auditable via syslog)
+- For untrusted users, consider rootless Docker or Podman (runs containers in user namespaces without root privileges)
+- When auditing an unknown server, check `getent group docker` for unexpected members
 
 ### Useful Debian Tools
 
