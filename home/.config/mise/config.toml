@@ -13,11 +13,13 @@ zig = "latest"
 "github:schpet/linear-cli" = "latest"
 "go:github.com/bootdotdev/bootdev" = "latest"
 "go:github.com/xdevplatform/xurl" = "latest"
+1password = "2.33.0-beta.02"
 ast-grep = "latest"
 biome = "latest"
 duckdb = "latest"
 fd = "latest"
 fzf = "latest"
+gh = "latest"
 gum = "latest"
 jq = "latest"
 k6 = "latest"
@@ -36,11 +38,6 @@ uv = "latest"
 xh = "latest"
 yarn = "latest"
 yq = "latest"
-
-# gh = "latest"
-# $ MISE_AQUA_DISABLE_ATTESTATIONS=1 mise install aqua:cli/cli
-# mise ERROR Failed to install aqua:cli/cli@latest: GitHub attestations verification failed for aqua:cli/cli@2.87.3: HTTP error: error decoding response body
-# mise ERROR Run with --verbose or MISE_VERBOSE=1 for more information
 
 "cargo:mq-run" = "latest"
 "cargo:try-rs" = "latest"
