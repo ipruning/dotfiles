@@ -57,6 +57,7 @@ mongodb-community
 mycli
 mysql-client
 neovim
+nexttrace
 nushell
 obsidian-cli
 opam
@@ -97,6 +98,7 @@ temporal
 terminal-notifier
 tmux
 tokei
+trippy
 trufflehog
 trzsz-ssh
 typst
