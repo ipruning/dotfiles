@@ -327,6 +327,7 @@ Configured package sources:
 ```bash
 ls -la /etc/apt/sources.list.d/
 cat /etc/apt/sources.list.d/*.sources 2>/dev/null
+cat /etc/apt/sources.list.d/*.list 2>/dev/null
 ```
 
 Upgradable packages:
@@ -399,8 +400,8 @@ Changing the port provides minimal security value. Focus on what matters:
 - `PermitRootLogin prohibit-password` — switch to `no` after creating a non-root admin
 - `X11Forwarding no` — Debian's openssh-server defaults to `yes`; disable on all headless servers
 - `PermitUserRC no` — Debian defaults to `yes`, providing a login-time persistence vector via `~/.ssh/rc`
-- Tighten connection timeouts and max auth retries
-- `AllowUsers` / `AllowGroups` to restrict who can log in (supports `user@host` and CIDR for source restriction)
+- Tighten connection timeouts and max auth retries. **Client-side pitfall:** if `MaxAuthTries` is low (e.g. 3) and the local SSH agent has multiple keys loaded, the correct key may never be attempted before the server disconnects with `Too many authentication failures`. Fix: use `IdentitiesOnly yes` in `~/.ssh/config` or `ssh -i` to pin the correct key
+- `AllowUsers` / `AllowGroups` to restrict who can log in (supports `user@host` and CIDR for source restriction). **Maintenance trap:** when adding a new user to a hardened server, you must also add them to the `AllowUsers` directive — otherwise SSH rejects the connection silently. Diagnose with `journalctl -u ssh` (look for `not allowed because not listed in AllowUsers`)
 - Restrict source IPs or use Tailscale for further lockdown
 - Audit Match blocks — they can silently override any of the above
 
@@ -435,9 +436,38 @@ Workflow:
 1. Run `ss -tlnp` and `ss -ulnp` to discover all listeners
 2. Extract allowed ports from `nft list ruleset` (`grep -oP 'dport \K\S+'`)
 3. Flag any mismatch: listeners without allow rules, and allow rules without listeners
-4. Write/adjust rules based on actual + planned ports only
-5. Dry-run with `nft -c -f <ruleset>` before applying
-6. Verify with `nft list ruleset` after applying
+4. If containers are present (Docker, Podman), check the `forward` chain for bridge interface rules — see §3 nftables Forward Chain and Containers
+5. Write/adjust rules based on actual + planned ports only
+6. Dry-run with `nft -c -f <ruleset>` before applying
+7. Verify with `nft list ruleset` after applying
+
+### nftables Forward Chain and Containers
+
+When nftables uses `policy drop` on the `forward` chain in an `inet filter` table, container networking (Docker, Podman) breaks silently. Containers report `Network is unreachable` on outbound connections; ACME challenges and API calls fail with timeouts.
+
+**Why this happens:** Docker manages its own rules in the `ip filter` table (legacy iptables). However, if an `inet filter` table exists in nftables with a `forward` hook, **both** must allow the traffic. The nftables drop policy discards packets that the Docker iptables rules have already "accepted" — nftables `inet` hooks and iptables `ip` hooks are independent chains evaluated in parallel.
+
+**Diagnosis:**
+
+```bash
+nft list chain inet filter forward 2>/dev/null
+docker run --rm alpine ping -c1 1.1.1.1
+```
+
+If the chain exists with `policy drop` and no container interface rules, that's the cause.
+
+**Fix — add explicit forward rules for container bridges:**
+
+```bash
+nft add rule inet filter forward iifname "br-*" accept
+nft add rule inet filter forward oifname "br-*" accept
+nft add rule inet filter forward iifname "docker0" accept
+nft add rule inet filter forward oifname "docker0" accept
+```
+
+Then persist to `/etc/nftables.conf` and verify with `nft -c -f /etc/nftables.conf`.
+
+**Prevention:** when designing nftables rules for a host that will run containers, include forward rules for container interfaces from the start. The firewall alignment workflow (§3 Firewall Rule Alignment) should check FORWARD rules against container bridge interfaces, not just INPUT against listeners.
 
 ### iptables/nftables Coexistence
 
