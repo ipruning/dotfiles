@@ -2,7 +2,7 @@
 name: vps
 description: "Linux VPS/server security audit, hardening, and maintenance. Triggers: remote Linux host + SSH hardening, firewall rules, Debian/Ubuntu patching, unknown server audit, fail2ban, unattended-upgrades. Not for macOS."
 metadata:
-  version: "1"
+  version: "2"
 ---
 
 # VPS Security & Maintenance Manual
@@ -23,6 +23,8 @@ All commands use `apt-get` for script stability (not `apt`, which is designed fo
    - Services: `systemctl status` + `ss -tlnup` confirms what is actually listening.
 
 4. **Cross-version upgrades require human approval.** This SOP covers same-version patch upgrades only. Upgrading across Debian/Ubuntu major versions requires source list changes, release notes review, third-party repo compatibility checks, and explicit human sign-off.
+
+5. **Separate audit from apply.** Audit steps use only read-only commands (`sshd -T`, `ss`, `nft list ruleset`, `apt-get -s upgrade`). Apply steps modify system state and require explicit human sign-off. Any command containing `-y`, `install`, `upgrade` (without `-s`), `nft -f`, `systemctl restart/reload`, or config file writes belongs in the apply phase. This boundary prevents "health check that accidentally became hardening."
 
 ## 1. Routine Maintenance Checklist
 
@@ -64,6 +66,21 @@ Firewall still matches expectations:
 
 ```bash
 nft list ruleset 2>/dev/null | head -50
+```
+
+nftables boot persistence — confirm rules survive reboot and the on-disk file is syntactically valid:
+
+```bash
+systemctl is-enabled nftables
+systemctl is-active nftables
+nft -c -f /etc/nftables.conf
+```
+
+Exposure surface consistency — compare allowed ports against actual listeners. Any port allowed by the firewall but not actively listening is unnecessary exposure (e.g. 80/443 open in nftables but nothing bound):
+
+```bash
+echo "=== Listening ===" && ss -tlnp | awk 'NR>1{print $4}' | sort -u
+echo "=== Allowed ===" && nft list ruleset 2>/dev/null | grep -oP 'dport \K\S+' | sort -u
 ```
 
 fail2ban operational:
@@ -234,6 +251,15 @@ iptables -S 2>/dev/null
 ip6tables -S 2>/dev/null
 ```
 
+Identify whether iptables uses the legacy kernel backend or the nf_tables translation layer. Mixed backends cause silent rule conflicts and confuse anyone using `iptables` commands expecting them to be authoritative:
+
+```bash
+iptables -V
+update-alternatives --display iptables 2>/dev/null
+```
+
+If the system uses nftables as its primary firewall, document this as policy and do not install competing firewall managers (ufw, firewalld, iptables-persistent).
+
 Cloud providers may have an additional security group layer. Check the cloud console separately.
 
 ### 2.6 Running Services
@@ -327,14 +353,30 @@ last -20
 lastb -20 2>/dev/null
 ```
 
+Search for evidence of successful access — "no evidence" is not proof of absence, but finding only your own IPs is a strong positive signal. Focus on `Accepted` lines and cross-reference source IPs against known-good:
+
+```bash
+journalctl -u ssh --since "7 days ago" --no-pager | grep -E 'Accepted (publickey|password|keyboard-interactive)' | tail -50
+last -50
+```
+
+Check for authorized_keys and SSH config tampering (mtime/content drift):
+
+```bash
+stat /root/.ssh/authorized_keys 2>/dev/null
+for f in /home/*/.ssh/authorized_keys; do stat "$f" 2>/dev/null; done
+stat /etc/ssh/sshd_config
+ls -la /etc/ssh/sshd_config.d/ 2>/dev/null
+```
+
 ### 2.10 Remediation Priority
 
 After the read-only audit, fix in this order:
 
-1. **SSH** — disable password auth, restrict root login to key-only, limit source IPs, set `PermitUserRC no`
-2. **Firewall** — default drop policy, whitelist only required ports, align TCP + UDP + IPv6 with actual listeners
-3. **Anti-brute-force** — fail2ban or CrowdSec
-4. **Updates** — enable unattended-upgrades, verify apt-daily timers fire, configure needrestart >= 3.8
+1. **SSH** — disable password auth, restrict root login to key-only, override Debian defaults (`X11Forwarding no`, `PermitUserRC no`), limit source IPs via `AllowUsers`
+2. **Firewall** — default drop policy, whitelist only required ports, align allowed ports with actual listeners (both directions), verify nftables boot persistence
+3. **Anti-brute-force** — fail2ban or CrowdSec. When password auth is already disabled, the primary value shifts from brute-force prevention to log noise reduction and connection-layer DoS mitigation. If SSH is further restricted to known source IPs or a VPN, this becomes optional
+4. **Updates** — enable unattended-upgrades, verify apt-daily timers fire, confirm Allowed-Origins covers security updates, configure needrestart >= 3.8
 5. **Hardening** — sysctl tuning, AppArmor, centralized logging, monitoring, backup
 
 ## 3. Best Practices
@@ -355,11 +397,14 @@ Changing the port provides minimal security value. Focus on what matters:
 
 - `PasswordAuthentication no`
 - `PermitRootLogin prohibit-password` — switch to `no` after creating a non-root admin
-- Disable X11 forwarding
+- `X11Forwarding no` — Debian's openssh-server defaults to `yes`; disable on all headless servers
+- `PermitUserRC no` — Debian defaults to `yes`, providing a login-time persistence vector via `~/.ssh/rc`
 - Tighten connection timeouts and max auth retries
-- `PermitUserRC no` unless explicitly needed
+- `AllowUsers` / `AllowGroups` to restrict who can log in (supports `user@host` and CIDR for source restriction)
 - Restrict source IPs or use Tailscale for further lockdown
 - Audit Match blocks — they can silently override any of the above
+
+**Debian default pitfall:** several openssh-server defaults are designed for general-purpose usability, not hardened servers. After overriding them via `/etc/ssh/sshd_config.d/`, always verify with `sshd -T` (not by reading config files) and test Match-aware resolution with `sshd -T -C user=root,addr=...`.
 
 ### Firewall Modification with Rollback
 
@@ -380,14 +425,48 @@ systemctl stop nft-rollback.timer 2>/dev/null
 
 ### Firewall Rule Alignment
 
-Always match firewall rules to actual listeners. A common pitfall: a service opens an unexpected UDP port that the firewall does not cover.
+Match firewall rules to actual listeners in both directions:
+
+- **Listening but not allowed** — a service opens a port the firewall does not cover (common with unexpected UDP listeners)
+- **Allowed but not listening** — the firewall permits traffic to a port with no active service. This is unnecessary exposure: scanners can fingerprint the host more precisely, and any accidentally started service (container, panel, daemon) becomes instantly reachable
 
 Workflow:
 
 1. Run `ss -tlnp` and `ss -ulnp` to discover all listeners
-2. Write rules based on discovered ports
-3. Dry-run with `nft -c -f <ruleset>` before applying
-4. Verify with `nft list ruleset` after applying
+2. Extract allowed ports from `nft list ruleset` (`grep -oP 'dport \K\S+'`)
+3. Flag any mismatch: listeners without allow rules, and allow rules without listeners
+4. Write/adjust rules based on actual + planned ports only
+5. Dry-run with `nft -c -f <ruleset>` before applying
+6. Verify with `nft list ruleset` after applying
+
+### iptables/nftables Coexistence
+
+On Debian, `iptables` may use the legacy kernel backend or the nf_tables translation layer (`iptables-nft`). When nftables is the primary firewall, having iptables with default ACCEPT policies creates two risks:
+
+- Tools or team members may use `iptables`/`ufw`/`firewalld` thinking they control the firewall, while the actual rules live in nftables
+- Mixed backends can cause silent rule conflicts or bypass
+
+Verify the active backend:
+
+```bash
+iptables -V
+update-alternatives --display iptables 2>/dev/null
+```
+
+Designate one firewall framework as authoritative and enforce it as policy. Do not install competing managers on the same host.
+
+### nftables Boot Persistence
+
+`nft list ruleset` proves rules are loaded in the running kernel but does not prove they survive reboot. Always verify the full chain:
+
+```bash
+systemctl is-enabled nftables
+systemctl is-active nftables
+nft -c -f /etc/nftables.conf
+sha256sum /etc/nftables.conf
+```
+
+The `-c` flag dry-runs the rule file without loading it, catching syntax errors before they cause a reboot into an unprotected state. The hash provides an evidence trail for config drift detection.
 
 ### Service Verification After Updates
 
@@ -407,6 +486,27 @@ Always verify the version first: `needrestart --version`. In automated contexts,
 Close the loop: patch → restart affected services → verify. If the installed kernel differs from the running kernel, document it and schedule a reboot window.
 
 Upgrade evidence lives in `/var/log/apt/history.log` and `/var/log/unattended-upgrades/`. Review these after each maintenance window.
+
+### Hetzner Control Plane Security
+
+OS-level hardening is necessary but not sufficient. If the hosting provider's control panel is compromised, an attacker can bypass all OS defenses via Rescue System, KVM, or disk re-imaging.
+
+**Must do (requires console access, cannot be done via SSH):**
+
+- **2FA**: Enable two-factor authentication on the Hetzner account
+- **Login-OTP / Support-OTP**: Configure one-time passwords for login and support channel verification (anti-social-engineering)
+- **Rescue System familiarity**: Understand how to activate Rescue (PXE-booted Debian live environment in RAM that does not touch your disks) and upload SSH keys to it — this is the recovery path when SSH or firewall changes lock you out
+
+**Optional (Robot firewall):**
+
+Hetzner's Robot firewall is a stateless filter at the switch port level with a 10-rule limit per direction. Trade-offs:
+
+- Stateless: you must manually write return traffic rules (ACK + ephemeral ports)
+- IPv6 filtering requires separate activation; enabling without rules blocks all IPv6
+- ICMPv6 cannot be filtered (required for IPv6 neighbor discovery)
+- The "Hetzner Services" checkbox prevents accidentally blocking Rescue, DHCP, DNS, and monitoring
+
+If the OS-level nftables firewall is stable and well-tested, the Robot firewall is optional. If used, configure only inbound minimal allow and avoid outbound filtering to prevent self-lockout.
 
 ### Useful Debian Tools
 
