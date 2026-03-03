@@ -40,6 +40,7 @@ gum
 hashicorp/tap/packer
 httm
 hyperfine
+jademind/tap/pi-statusbar
 jaq
 jd
 jjui
