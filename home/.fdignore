@@ -1,14 +1,17 @@
-# cache
-*cache*
-
 # macos
 .DS_Store
 
 # git
 .git/
 
+# cache
+.cache/
+
 # typescript
 node_modules/
 
 # python
+__pycache__/
+.pytest_cache/
+.ruff_cache/
 .venv/
