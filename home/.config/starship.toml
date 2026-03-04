@@ -16,21 +16,21 @@ command_timeout = 1_000
 
 [sudo]
 disabled = false
-format = '[$symbol]($style)'
+format = "[$symbol]($style)"
 style = "bold red"
-symbol = 'SU '
+symbol = "SU "
 
 [username]
-format = '[$user@]($style)'
+format = "[$user@]($style)"
 style_root = "bold red"
 style_user = "bold yellow"
 
 [hostname]
-format = '[$hostname]($style) '
+format = "[$hostname]($style) "
 style = "bold yellow"
 
 [directory]
-read_only = ' [RO]'
+read_only = " [RO]"
 read_only_style = "bold red"
 truncation_symbol = ".../"
 
@@ -66,8 +66,14 @@ require_repo = true
 style = "bold dimmed green"
 when = "[ -f ~/.modal.toml ]"
 
+[custom.sticky_note]
+command = "cat ~/.sticky_note 2>/dev/null"
+when = "test -f ~/.sticky_note"
+format = "📌 [$output]($style) "
+style = "bold yellow"
+
 [cmd_duration]
-format = '[$duration]($style) '
+format = "[$duration]($style) "
 min_time = 10_000
 min_time_to_notify = 3600_000
 show_notifications = false
@@ -82,13 +88,7 @@ threshold = 30
 [character]
 success_symbol = '[\$](bold green)'
 error_symbol = '[\$](bold red)'
-vimcmd_symbol = '[<](bold green)'
-vimcmd_replace_one_symbol = '[<](bold purple)'
-vimcmd_replace_symbol = '[<](bold bold purple)'
-vimcmd_visual_symbol = '[<](bold yellow)'
-
-[custom.sticky_note]
-command = "cat ~/.sticky_note 2>/dev/null"
-when = "test -f ~/.sticky_note"
-format = "📌 [$output]($style) "
-style = "bold yellow"
+vimcmd_symbol = "[<](bold green)"
+vimcmd_replace_one_symbol = "[<](bold purple)"
+vimcmd_replace_symbol = "[<](bold bold purple)"
+vimcmd_visual_symbol = "[<](bold yellow)"

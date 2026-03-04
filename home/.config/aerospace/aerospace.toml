@@ -1,14 +1,14 @@
 # start-at-login = true
 
 accordion-padding = 0
-after-startup-command = ['workspace 6']
-default-root-container-layout = 'accordion'
-default-root-container-orientation = 'vertical'
+after-startup-command = ["workspace 6"]
+default-root-container-layout = "accordion"
+default-root-container-orientation = "vertical"
 enable-normalization-flatten-containers = true
 enable-normalization-opposite-orientation-for-nested-containers = true
 
 [key-mapping]
-preset = 'qwerty'
+preset = "qwerty"
 
 [gaps]
 inner.horizontal = 0
@@ -19,65 +19,65 @@ outer.top = 0
 outer.right = 0
 
 [workspace-to-monitor-force-assignment]
-1 = '^built-in retina display$'
-2 = '^built-in retina display$'
-3 = '^built-in retina display$'
-4 = '^built-in retina display$'
-5 = '^built-in retina display$'
+1 = "^built-in retina display$"
+2 = "^built-in retina display$"
+3 = "^built-in retina display$"
+4 = "^built-in retina display$"
+5 = "^built-in retina display$"
 
-6 = '^LG ULTRAGEAR.*$'
-7 = '^LG ULTRAGEAR.*$'
-8 = '^LG ULTRAGEAR.*$'
-9 = '^LG ULTRAGEAR.*$'
-0 = '^LG ULTRAGEAR.*$'
+6 = "^LG ULTRAGEAR.*$"
+7 = "^LG ULTRAGEAR.*$"
+8 = "^LG ULTRAGEAR.*$"
+9 = "^LG ULTRAGEAR.*$"
+0 = "^LG ULTRAGEAR.*$"
 
 [mode.main.binding]
-alt-shift-p = 'mode pass'
+alt-shift-p = "mode pass"
 
-alt-tab = 'workspace-back-and-forth'
-alt-comma = 'layout tiles vertical horizontal'
-alt-period = 'layout accordion vertical'
-alt-slash = 'mode service'
+alt-tab = "workspace-back-and-forth"
+alt-comma = "layout tiles vertical horizontal"
+alt-period = "layout accordion vertical"
+alt-slash = "mode service"
 
-alt-1 = 'workspace 1'
-alt-2 = 'workspace 2'
-alt-3 = 'workspace 3'
-alt-4 = 'workspace 4'
-alt-5 = 'workspace 5'
+alt-1 = "workspace 1"
+alt-2 = "workspace 2"
+alt-3 = "workspace 3"
+alt-4 = "workspace 4"
+alt-5 = "workspace 5"
 
-alt-6 = 'workspace 6'
-alt-7 = 'workspace 7'
-alt-8 = 'workspace 8'
-alt-9 = 'workspace 9'
-alt-0 = 'workspace 0'
+alt-6 = "workspace 6"
+alt-7 = "workspace 7"
+alt-8 = "workspace 8"
+alt-9 = "workspace 9"
+alt-0 = "workspace 0"
 
-alt-shift-1 = 'move-node-to-workspace 1'
-alt-shift-2 = 'move-node-to-workspace 2'
-alt-shift-3 = 'move-node-to-workspace 3'
-alt-shift-4 = 'move-node-to-workspace 4'
-alt-shift-5 = 'move-node-to-workspace 5'
+alt-shift-1 = "move-node-to-workspace 1"
+alt-shift-2 = "move-node-to-workspace 2"
+alt-shift-3 = "move-node-to-workspace 3"
+alt-shift-4 = "move-node-to-workspace 4"
+alt-shift-5 = "move-node-to-workspace 5"
 
-alt-shift-6 = 'move-node-to-workspace 6'
-alt-shift-7 = 'move-node-to-workspace 7'
-alt-shift-8 = 'move-node-to-workspace 8'
-alt-shift-9 = 'move-node-to-workspace 9'
-alt-shift-0 = 'move-node-to-workspace 0'
+alt-shift-6 = "move-node-to-workspace 6"
+alt-shift-7 = "move-node-to-workspace 7"
+alt-shift-8 = "move-node-to-workspace 8"
+alt-shift-9 = "move-node-to-workspace 9"
+alt-shift-0 = "move-node-to-workspace 0"
 
-alt-h = 'focus left --boundaries all-monitors-outer-frame'
-alt-j = 'focus down --boundaries all-monitors-outer-frame'
-alt-k = 'focus up --boundaries all-monitors-outer-frame'
-alt-l = 'focus right --boundaries all-monitors-outer-frame'
-alt-shift-h = ['move left', 'mode main']
-alt-shift-j = ['move down', 'mode main']
-alt-shift-k = ['move up', 'mode main']
-alt-shift-l = ['move right', 'mode main']
+alt-h = "focus left --boundaries all-monitors-outer-frame"
+alt-j = "focus down --boundaries all-monitors-outer-frame"
+alt-k = "focus up --boundaries all-monitors-outer-frame"
+alt-l = "focus right --boundaries all-monitors-outer-frame"
+alt-shift-h = ["move left", "mode main"]
+alt-shift-j = ["move down", "mode main"]
+alt-shift-k = ["move up", "mode main"]
+alt-shift-l = ["move right", "mode main"]
 
-alt-b = 'exec-and-forget ~/dotfiles/modules/bin/newwin chrome'
-alt-c = 'exec-and-forget ~/dotfiles/modules/bin/newwin cursor'
-alt-g = 'exec-and-forget open -a /Applications/Ghostty.app'
+alt-b = "exec-and-forget ~/dotfiles/modules/bin/newwin chrome"
+alt-c = "exec-and-forget ~/dotfiles/modules/bin/newwin cursor"
+alt-g = "exec-and-forget open -a /Applications/Ghostty.app"
 alt-p = 'exec-and-forget open -a /Applications/Repo\ Prompt.app'
 alt-r = 'exec-and-forget open -a /Applications/Roam\ Research.app'
-alt-z = 'exec-and-forget ~/dotfiles/modules/bin/newwin zed'
+alt-z = "exec-and-forget ~/dotfiles/modules/bin/newwin zed"
 
 # cmd-enter = 'exec-and-forget ~/dotfiles/modules/bin/newwin ghostty'
 
@@ -85,115 +85,115 @@ cmd-m = []
 cmd-h = []
 
 [mode.pass.binding]
-alt-p = 'mode main'
+alt-p = "mode main"
 
 [mode.service.binding]
-esc = 'mode main'
+esc = "mode main"
 
-cmd-r = ['reload-config', 'mode main']
+cmd-r = ["reload-config", "mode main"]
 
 alt-h = [
-  'move-node-to-monitor left',
-  'focus left --boundaries all-monitors-outer-frame',
-  'mode main',
+    "move-node-to-monitor left",
+    "focus left --boundaries all-monitors-outer-frame",
+    "mode main",
 ]
 alt-j = [
-  'move-node-to-monitor down',
-  'focus down --boundaries all-monitors-outer-frame',
-  'mode main',
+    "move-node-to-monitor down",
+    "focus down --boundaries all-monitors-outer-frame",
+    "mode main",
 ]
 alt-k = [
-  'move-node-to-monitor up',
-  'focus up --boundaries all-monitors-outer-frame',
-  'mode main',
+    "move-node-to-monitor up",
+    "focus up --boundaries all-monitors-outer-frame",
+    "mode main",
 ]
 alt-l = [
-  'move-node-to-monitor right',
-  'focus right --boundaries all-monitors-outer-frame',
-  'mode main',
+    "move-node-to-monitor right",
+    "focus right --boundaries all-monitors-outer-frame",
+    "mode main",
 ]
 
-alt-shift-h = ['join-with left', 'mode main']
-alt-shift-j = ['join-with down', 'mode main']
-alt-shift-k = ['join-with up', 'mode main']
-alt-shift-l = ['join-with right', 'mode main']
+alt-shift-h = ["join-with left", "mode main"]
+alt-shift-j = ["join-with down", "mode main"]
+alt-shift-k = ["join-with up", "mode main"]
+alt-shift-l = ["join-with right", "mode main"]
 
-minus = 'resize smart -50'
-equal = 'resize smart +50'
+minus = "resize smart -50"
+equal = "resize smart +50"
 
-r = ['flatten-workspace-tree', 'mode main']
-backspace = ['close-all-windows-but-current', 'mode main']
+r = ["flatten-workspace-tree", "mode main"]
+backspace = ["close-all-windows-but-current", "mode main"]
 
-f = ['layout floating tiling', 'mode main']
-shift-f = ['fullscreen', 'mode main']
-
-[[on-window-detected]]
-if.window-title-regex-substring = 'MDPro3'
-run = 'layout floating'
+f = ["layout floating tiling", "mode main"]
+shift-f = ["fullscreen", "mode main"]
 
 [[on-window-detected]]
-if.window-title-regex-substring = 'steam'
-run = 'layout floating'
+if.window-title-regex-substring = "MDPro3"
+run = "layout floating"
 
 [[on-window-detected]]
-if.app-id = 'uk.co.powdertoy.tpt'
-run = 'layout floating'
+if.window-title-regex-substring = "steam"
+run = "layout floating"
 
 [[on-window-detected]]
-if.app-id = 'com.jihuanshe.app'
-run = 'layout floating'
+if.app-id = "uk.co.powdertoy.tpt"
+run = "layout floating"
 
 [[on-window-detected]]
-if.app-id = 'com.xfge.LifeEasy'
-run = 'layout floating'
+if.app-id = "com.jihuanshe.app"
+run = "layout floating"
 
 [[on-window-detected]]
-if.app-id = 'com.xingin.discover'
-run = 'layout floating'
+if.app-id = "com.xfge.LifeEasy"
+run = "layout floating"
 
 [[on-window-detected]]
-if.app-id = 'com.apple.audio.AudioMIDISetup'
-run = 'layout floating'
+if.app-id = "com.xingin.discover"
+run = "layout floating"
 
 [[on-window-detected]]
-if.app-id = 'com.apple.ScreenSharing'
-run = 'layout floating'
+if.app-id = "com.apple.audio.AudioMIDISetup"
+run = "layout floating"
 
 [[on-window-detected]]
-if.app-id = 'org.pqrs.Karabiner-Elements.Settings'
-run = 'layout floating'
+if.app-id = "com.apple.ScreenSharing"
+run = "layout floating"
 
 [[on-window-detected]]
-if.app-id = 'org.pqrs.Karabiner-EventViewer'
-run = 'layout floating'
+if.app-id = "org.pqrs.Karabiner-Elements.Settings"
+run = "layout floating"
 
 [[on-window-detected]]
-if.app-id = 'codes.rambo.VirtualBuddy'
-run = 'layout floating'
+if.app-id = "org.pqrs.Karabiner-EventViewer"
+run = "layout floating"
 
 [[on-window-detected]]
-if.app-id = 'com.hypergryph.arknights'
-run = 'layout floating'
+if.app-id = "codes.rambo.VirtualBuddy"
+run = "layout floating"
 
 [[on-window-detected]]
-if.app-id = 'com.rogueamoeba.audiohijack'
-run = 'layout floating'
+if.app-id = "com.hypergryph.arknights"
+run = "layout floating"
 
 [[on-window-detected]]
-if.app-id = 'ai.tcgcard.app'
-run = 'layout floating'
+if.app-id = "com.rogueamoeba.audiohijack"
+run = "layout floating"
 
 [[on-window-detected]]
-if.app-id = 'com.sleeplessmind.Wooshy'
-run = 'layout floating'
+if.app-id = "ai.tcgcard.app"
+run = "layout floating"
 
 [[on-window-detected]]
-if.app-id = 'com.pvncher.repoprompt'
-run = ['move-node-to-workspace 9', 'layout floating']
+if.app-id = "com.sleeplessmind.Wooshy"
+run = "layout floating"
 
 [[on-window-detected]]
-if.app-id = 'com.mitchellh.ghostty'
-run = ['move-node-to-workspace 0', 'layout tiling']
+if.app-id = "com.pvncher.repoprompt"
+run = ["move-node-to-workspace 9", "layout floating"]
 
 [[on-window-detected]]
-run = 'move-node-to-workspace 6'
+if.app-id = "com.mitchellh.ghostty"
+run = ["move-node-to-workspace 0", "layout tiling"]
+
+[[on-window-detected]]
+run = "move-node-to-workspace 6"

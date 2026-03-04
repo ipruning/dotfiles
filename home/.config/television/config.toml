@@ -57,12 +57,12 @@ position = "top"
 prompt = ">"
 # header = "{}"
 # padding = {"left": 0, "right": 0, "top": 0, "bottom": 0}
-border_type = "rounded" # https://docs.rs/ratatui/latest/ratatui/widgets/block/enum.BorderType.html#variants
+border_type = "rounded"  # https://docs.rs/ratatui/latest/ratatui/widgets/block/enum.BorderType.html#variants
 
 [ui.status_bar]
 # Status bar separators (bubble):
-#separator_open = ""
-#separator_close = ""
+# separator_open = ""
+# separator_close = ""
 # Status bar separators (box):
 separator_open = ""
 separator_close = ""
@@ -75,8 +75,8 @@ border_type = "rounded"
 [ui.preview_panel]
 # Preview panel size (percentage of screen width/height)
 size = 50
-#header = ""
-#footer = ""
+# header = ""
+# footer = ""
 scrollbar = true
 border_type = "rounded"
 # padding = {"left": 0, "right": 0, "top": 0, "bottom": 0}
@@ -216,66 +216,66 @@ fallback_channel = "files"
 "env" = ["export", "unset"]
 "dirs" = ["cd", "ls", "rmdir"]
 "files" = [
-  "cat",
-  "less",
-  "head",
-  "tail",
-  "vim",
-  "nano",
-  "bat",
-  "cp",
-  "mv",
-  "rm",
-  "touch",
-  "chmod",
-  "chown",
-  "ln",
-  "tar",
-  "zip",
-  "unzip",
-  "gzip",
-  "gunzip",
-  "xz",
+    "cat",
+    "less",
+    "head",
+    "tail",
+    "vim",
+    "nano",
+    "bat",
+    "cp",
+    "mv",
+    "rm",
+    "touch",
+    "chmod",
+    "chown",
+    "ln",
+    "tar",
+    "zip",
+    "unzip",
+    "gzip",
+    "gunzip",
+    "xz",
 ]
 "git-diff" = ["git add", "git restore"]
 "git-branch" = [
-  "git checkout",
-  "git branch",
-  "git merge",
-  "git rebase",
-  "git pull",
-  "git push",
+    "git checkout",
+    "git branch",
+    "git merge",
+    "git rebase",
+    "git pull",
+    "git push",
 ]
 "git-log" = ["git log", "git show"]
 "docker-images" = ["docker run"]
 
 "channels" = ["tv"]
 "hidden-dirs" = [
-  "cd",
-  "eza",
-  "j",
+    "cd",
+    "eza",
+    "j",
 ]
 "hidden-files" = [
-  "bat",
-  "cat",
-  "code",
-  "cursor",
-  "hx",
-  "rip",
-  "rm",
-  "vi",
-  "vim",
-  "zed",
+    "bat",
+    "cat",
+    "code",
+    "cursor",
+    "hx",
+    "rip",
+    "rm",
+    "vi",
+    "vim",
+    "zed",
 ]
 "hosts" = ["ssh"]
 "known-hosts" = ["ssh-keygen -R"]
 "marimo-notebooks" = ["marimo edit", "marimo run"]
 "modal-apps" = [
-  "modal deploy",
-  "modal launch",
-  "modal run",
-  "modal serve",
-  "modal shell",
+    "modal deploy",
+    "modal launch",
+    "modal run",
+    "modal serve",
+    "modal shell",
 ]
 "notebooks" = ["modal.bash"]
 "py-files" = ["python", "uv add --script", "uv run"]
