@@ -349,7 +349,6 @@
   "terminal.integrated.scrollback": 50000,
   "typos.diagnosticSeverity": "Information",
   "typos.logLevel": "info",
-  "update.releaseTrack": "prerelease",
   "vim.hlsearch": true,
   "vim.incsearch": true,
   "vim.leader": "<space>",
