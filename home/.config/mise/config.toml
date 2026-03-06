@@ -19,6 +19,7 @@ biome = "latest"
 duckdb = "latest"
 fd = "latest"
 fzf = "latest"
+gh = "latest"
 gum = "latest"
 jq = "latest"
 k6 = "latest"
@@ -166,3 +167,5 @@ _.path = [
     "~/.local/bin",
     "/opt/homebrew/opt/postgresql@18/bin",
 ]
+
+MISE_AQUA_GITHUB_ATTESTATIONS = false
