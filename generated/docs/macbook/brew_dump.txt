@@ -193,5 +193,4 @@ vscode "vscodevim.vim"
 vscode "ziglang.vscode-zig"
 go "cmd/go"
 go "cmd/gofmt"
-go "github.com/ossianhempel/things3-cli/cmd/things"
 uv "sqlit-tui", with: ["psycopg2-binary"]
