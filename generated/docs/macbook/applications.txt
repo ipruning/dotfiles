@@ -116,6 +116,7 @@ Superset
 Surfingkeys
 Surge
 Suspicious Package
+T3 Code (Alpha)
 TabTab
 Tailscale
 Tampermonkey
