@@ -6,6 +6,8 @@ sandbox_mode = "danger-full-access"
 service_tier = "fast"
 web_search = "live"
 
+tool_output_token_limit = 25000
+
 [analytics]
 enabled = false
 
@@ -25,3 +27,9 @@ model_reasoning_effort = "xhigh"
 [profiles.deep]
 model = "gpt-5.4"
 model_reasoning_effort = "high"
+
+[mcp_servers.RepoPrompt]
+command = "/Users/alex/RepoPrompt/repoprompt_cli"
+args = []
+tool_timeout_sec = 10000
+enabled = false
