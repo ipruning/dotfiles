@@ -1,0 +1,27 @@
+file_opener = "cursor"
+model = "gpt-5.4"
+model_reasoning_effort = "high"
+notify = ["codex-sync", "hook", "agent-turn-complete"]
+sandbox_mode = "danger-full-access"
+service_tier = "fast"
+web_search = "live"
+
+[analytics]
+enabled = false
+
+[features]
+js_repl = true
+multi_agent = true
+apps = true
+prevent_idle_sleep = true
+
+[feedback]
+enabled = false
+
+[profiles.fast]
+model = "gpt-5.3-codex-spark"
+model_reasoning_effort = "xhigh"
+
+[profiles.deep]
+model = "gpt-5.4"
+model_reasoning_effort = "high"
