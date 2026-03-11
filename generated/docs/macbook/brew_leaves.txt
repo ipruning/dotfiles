@@ -82,6 +82,7 @@ rustscan
 sesh
 shellcheck
 sk
+skillshare
 somo
 sqlfluff
 sshx
