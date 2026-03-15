@@ -3,19 +3,19 @@
     "provider": "zed",
   },
   "agent_servers": {
-    "claude": {
-      "favorite_models": ["opus"],
-      "default_config_options": {},
-      "favorite_config_option_values": {},
-    },
-    "codex": {
-      "favorite_models": ["gpt-5.2/xhigh"],
+    "codex-acp": {
+      "type": "registry",
       "default_mode": "full-access",
+      "favorite_models": ["gpt-5.2/xhigh"],
+    },
+    "claude-acp": {
+      "type": "registry",
+      "favorite_models": ["opus"],
     },
   },
   "agent": {
     "tool_permissions": {
-      "default": "allow"
+      "default": "allow",
     },
     "default_model": {
       "model": "gpt-5",
@@ -29,7 +29,7 @@
   "buffer_font_fallbacks": ["Maple Mono NF CN"],
   "buffer_font_family": "MonoLisa",
   "buffer_font_size": 11.0,
-  "buffer_font_weight": 400,
+  "buffer_font_weight": 500,
   "buffer_line_height": {
     "custom": 1.5,
   },
@@ -92,7 +92,7 @@
     },
     "font_family": "MonoLisa",
     "font_size": 11.0,
-    "font_weight": 400,
+    "font_weight": 500,
     "line_height": {
       "custom": 1.5,
     },
