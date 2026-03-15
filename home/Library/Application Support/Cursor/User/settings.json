@@ -260,6 +260,7 @@
     ".repo_ignore": "ignore",
     ".rgignore": "ignore",
     ".secrets.baseline": "json",
+    ".secretsignore": "ignore",
     ".tpl": "plaintext",
     "config": "dotenv",
     "secrets": "dotenv",
