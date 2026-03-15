@@ -1,8 +1,9 @@
 file_opener = "cursor"
 model = "gpt-5.4"
 model_reasoning_effort = "high"
-notify = ["codex-sync", "hook", "agent-turn-complete"]
+notify = [ "codex-sync", "hook", "agent-turn-complete" ]
 personality = "pragmatic"
+plan_mode_reasoning_effort = "high"
 sandbox_mode = "danger-full-access"
 service_tier = "fast"
 tool_output_token_limit = 25000
