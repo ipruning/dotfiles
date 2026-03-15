@@ -2,6 +2,7 @@
 excludesfile = ~/.gitignore
 ignorecase = false
 pager = delta
+quotePath = false
 
 [interactive]
 diffFilter = delta --color-only --features=interactive-catppuccin-mocha
