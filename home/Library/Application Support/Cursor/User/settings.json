@@ -48,7 +48,6 @@
   "[typst]": {
     "editor.wordSeparators": "`~!@#$%^&*()=+[{]}\\|;:'\",.<>/?"
   },
-  "amp.url": "https://ampcode.com/",
   "autocorrect.formatOnSave": false,
   "beancount.fixedCJKWidth": true,
   "beancount.mainBeanFile": "~/Databases/Ledger/main.bean",
@@ -59,9 +58,6 @@
     "bean": "markdown",
     "coverage": "python",
     "mdc": "markdown",
-    "modalignore": "gitignore",
-    "repo_ignore": "gitignore",
-    "secretsignore": "gitignore",
     "shellcheckrc": "env",
     "tpl": "env"
   },
@@ -194,7 +190,7 @@
     "*.w": "$(capture).*.w, I$(capture).w",
     "*.wat": "$(capture).wasm",
     "*.xaml": "$(capture).xaml.cs",
-    "//": "Last update at 3/4/2026, 8:02:40 AM",
+    "//": "Last update at 3/17/2026, 3:31:19 PM",
     "+layout.svelte": "+layout.ts,+layout.js,+layout.server.ts,+layout.server.js,+layout.gql",
     "+page.svelte": "+page.server.ts,+page.server.js,+page.ts,+page.js,+page.gql",
     "AGENTS.md": ".clinerules, .cursorrules, .replit.md, .windsurfrules, AGENT.md, CLAUDE.local.md, CLAUDE.md, GEMINI.md",
@@ -261,6 +257,7 @@
     ".rgignore": "ignore",
     ".secrets.baseline": "json",
     ".secretsignore": "ignore",
+    ".skillignore": "ignore",
     ".tpl": "plaintext",
     "config": "dotenv",
     "secrets": "dotenv",
