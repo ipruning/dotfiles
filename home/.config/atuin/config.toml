@@ -2,48 +2,9 @@ command_chaining = true
 ctrl_n_shortcuts = true
 exit_mode = "return-query"
 history_filter = ["^secret-cmd", "^innocuous-cmd .*--secret=.+", "^#.*", "^\\s"]
+search_mode = "daemon-fuzzy"
 show_help = false
 
-# [ui]
-# columns = ["exit", "duration", "time", "command"]
-
-# [keymap.emacs]
-# "ctrl-c" = "return-original"
-# "ctrl-g" = "return-original"
-# "esc" = "return-original"
-# "ctrl-d" = [
-#   { when = "cursor-at-start && input-empty", action = "return-original" },
-#   { action = "delete-char-after" },
-# ]
-
-# "enter" = "return-selection"
-# "tab" = "accept"
-
-# "up" = [
-#   { when = "list-at-start", action = "exit" },
-#   { action = "select-previous" },
-# ]
-# "down" = [
-#   { when = "no-results", action = "return-query" },
-#   { action = "select-next" },
-# ]
-# "left" = [
-#   { when = "cursor-at-start", action = "exit" },
-#   { action = "cursor-left" },
-# ]
-# "right" = "cursor-right"
-
-# "ctrl-r" = "cycle-filter-mode"
-# "ctrl-s" = "cycle-search-mode"
-# "ctrl-o" = "toggle-tab"
-
-# "ctrl-a" = "cursor-start"
-# "ctrl-e" = "cursor-end"
-# "ctrl-u" = "clear-line"
-# "ctrl-w" = "delete-to-word-boundary"
-# "backspace" = "delete-char-before"
-# "delete" = "delete-char-after"
-# "ctrl-y" = "copy"
-
-# "page-up" = "scroll-page-up"
-# "page-down" = "scroll-page-down"
+[daemon]
+autostart = true
+enabled = true
