@@ -17,6 +17,7 @@ MindNode Next
 Muse
 Nitro PDF Pro
 One Switch
+PDF Squeezer
 Permute
 PhotoBulk
 Presentify
