@@ -26,7 +26,6 @@ fish
 flock
 flyctl
 fpp
-fzf
 geesefs
 gemini-cli
 gh
