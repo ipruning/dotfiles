@@ -17,7 +17,6 @@ BetterDisplay
 Bob
 calibre
 Capture One
-ChatGPT Atlas
 Claude
 cmux
 Codex
