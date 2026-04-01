@@ -57,11 +57,11 @@ yq = "latest"
 
 [settings]
 trusted_config_paths = [
-  "~/Desktop",
-  "~/Developer",
-  "~/Documents",
-  "~/Downloads/",
-  "~/intent",
+    "~/Desktop",
+    "~/Developer",
+    "~/Documents",
+    "~/Downloads/",
+    "~/intent",
 ]
 
 [settings.ruby]
@@ -69,12 +69,12 @@ compile = false
 
 [env]
 _.path = [
-  "~/dotfiles/generated/bin",
-  "~/dotfiles/modules/bin",
-  "~/Developer/ipruning/keel/utils/scripts",
-  "~/.bun/bin",
-  "~/.local/bin",
-  "/opt/homebrew/opt/postgresql@18/bin",
+    "~/dotfiles/generated/bin",
+    "~/dotfiles/modules/bin",
+    "~/Developer/ipruning/aura/utils/scripts",
+    "~/.bun/bin",
+    "~/.local/bin",
+    "/opt/homebrew/opt/postgresql@18/bin",
 ]
 
 MISE_AQUA_GITHUB_ATTESTATIONS = false
