@@ -256,8 +256,8 @@ if command -v brew >/dev/null 2>&1; then
 fi
 
 # 👇 try-rs
-if [[ -f "$HOME/Library/Application Support/try-rs/try-rs.zsh" ]]; then
-  source "$HOME/Library/Application Support/try-rs/try-rs.zsh"
+if [[ -f "$HOME/.config/try-rs/try-rs.zsh" ]]; then
+  source "$HOME/.config/try-rs/try-rs.zsh"
 fi
 
 # 👇 mise (will cost 40ms)
