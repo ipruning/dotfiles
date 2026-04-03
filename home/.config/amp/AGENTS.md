@@ -25,3 +25,9 @@ When there’s a bug, start by writing a test that reproduces it, then fix it un
 Every time I correct you, add a new rule to the AGENTS.md file so it never happens again.
 
 </2>
+
+<3>
+
+在当前目录不是 Repository，且任务一次性时，可在 $TMPDIR 中缓存代码与数据。
+
+</3>

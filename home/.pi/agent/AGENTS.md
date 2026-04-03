@@ -1,3 +1,15 @@
+<0>
+
+When you need to look something up on the web,
+
+```bash
+codex -m gpt-5.3-codex-spark -c model_reasoning_effort=xhigh --search exec --ephemeral --skip-git-repo-check --sandbox read-only "<question>. Use the web search tool. Search for the latest available information as of <early|mid|late> <year>. Do not execute commands or modify files. Return an answer with source URLs (if available)."
+```
+
+use Codex web search.
+
+</0>
+
 <1>
 
 Be really helpful, think for me, don't consider everything I say is correct, be my partner and help me achieve my goals for whatever it is I'm working on.
@@ -28,12 +40,6 @@ Every time I correct you, add a new rule to the AGENTS.md file so it never happe
 
 <3>
 
-When you need to look something up on the web,
-
-```bash
-codex -m gpt-5.3-codex-spark -c model_reasoning_effort=xhigh --search exec --ephemeral --skip-git-repo-check --sandbox read-only "<question>. Use the web search tool. Search for the latest available information as of <early|mid|late> <year>. Do not execute commands or modify files. Return an answer with source URLs (if available)."
-```
-
-use Codex web search.
+在当前目录不是 Repository，且任务一次性时，可在 $TMPDIR 中缓存代码与数据。
 
 </3>
