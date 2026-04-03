@@ -1,5 +1,3 @@
-42ailab/42plugin/forty-two-plugin
-antoniorodr/memo/memo
 asciinema
 ast-grep
 awscli
@@ -10,7 +8,6 @@ beancount-language-server
 blueutil
 btop
 carapace
-cirruslabs/cli/tart
 coreutils
 csvlens
 difftastic
@@ -26,6 +23,7 @@ fish
 flock
 flyctl
 fpp
+fzf
 geesefs
 gemini-cli
 gh
@@ -36,10 +34,8 @@ git-lfs
 gitu
 glow
 gum
-hashicorp/tap/packer
 httm
 hyperfine
-jademind/tap/pi-statusbar
 jaq
 jd
 jjui
@@ -48,7 +44,6 @@ just
 litecli
 mactop
 mdq
-minorole/tap/gpane
 mise
 mkcert
 mongodb/brew/mongodb-community
@@ -103,9 +98,7 @@ valkey
 viddy
 watchexec
 wget
-withgraphite/tap/graphite
 xh
-yakitrak/yakitrak/obsidian-cli
 yazi
 yek
 yq

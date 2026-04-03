@@ -1,14 +1,12 @@
 .Karabiner-VirtualHIDDevice-Manager
 1Password
 1Password for Safari
-42cc
 A Better Finder Attributes 7
 Advantage 360 SmartSet
 AeroSpace
 Alfred 5
 AltTab
 Anki
-Antigravity
 Audio Hijack
 Avenue
 BaiduNetdisk_mac
@@ -17,17 +15,13 @@ BetterDisplay
 Bob
 calibre
 Capture One
-Claude
-cmux
 Codex
 Codex Monitor
 CodexBar
 Comet
 Commander
-Conductor
 Contexts
 CrossOver
-Cursor
 DaisyDisk
 Dark Reader for Safari
 DataGrip
@@ -45,8 +39,6 @@ Google Docs
 Google Drive
 Google Sheets
 Google Slides
-Goose
-Graphite
 Heptabase
 Hush
 Ice
@@ -55,7 +47,6 @@ iMazing
 Immersive Translate
 Input Source Pro
 Intent by Augment
-Jan
 Kagi for Safari
 Karabiner-Elements
 Karabiner-EventViewer
@@ -71,7 +62,6 @@ Longbridge
 Longbridge Pro
 Loopback
 LyricsX
-Manus
 Microsoft Excel
 Microsoft PowerPoint
 Microsoft Word
@@ -82,15 +72,12 @@ MyCard
 NeteaseMusic
 Numbers
 OBS
-Obsidian
 OnyX
-OpenCode
 OrbStack
 Pages
 pcsuite
 Pearcleaner
 Pencil
-PlayCover
 ProNotes
 qBittorrent
 QQ
@@ -116,13 +103,11 @@ Superset
 Surfingkeys
 Surge
 Suspicious Package
-T3 Code (Alpha)
 TabTab
 Tailscale
 Tampermonkey
 Telegram
 TencentMeeting
-Termius
 TestFlight
 The Powder Toy
 Things3
@@ -136,7 +121,6 @@ VirtualBuddy
 Warp
 WeChat
 Wireshark
-Wispr Flow
 Wooshy
 Xcodes
 YACReader

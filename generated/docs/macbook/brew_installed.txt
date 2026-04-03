@@ -23,7 +23,6 @@ fio
 fish
 flock
 flyctl
-forty-two-plugin
 fpp
 fzf
 geesefs
@@ -36,8 +35,6 @@ git-lfs
 gitu
 glow
 gnupg
-gpane
-graphite
 gum
 httm
 hyperfine
@@ -50,7 +47,6 @@ just
 litecli
 mactop
 mdq
-memo
 mise
 mkcert
 mongodb-community
@@ -59,7 +55,6 @@ mysql-client
 neovim
 nexttrace
 nushell
-obsidian-cli
 opam
 ouch
 ov
@@ -69,7 +64,6 @@ parallel
 parallel-disk-usage
 peekaboo
 pgcli
-pi-statusbar
 pkgconf
 pngquant
 poppler
