@@ -18,10 +18,10 @@ zig = "latest"
 "github:j178/prek" = "latest"
 "github:runkids/skillshare" = "latest"
 "github:schpet/linear-cli" = "latest"
-"github:tigrisdata/cli" = "latest"
 "github:vercel-labs/agent-browser" = "latest"
 "go:github.com/bootdotdev/bootdev" = "latest"
 "go:github.com/xdevplatform/xurl" = "latest"
+"npm:@tigrisdata/cli" = "v2.15.0"
 "npm:claude-code-sync" = "latest"
 "npm:codex-sync" = "latest"
 "npm:cursor-opensync-plugin" = "latest"
@@ -57,10 +57,9 @@ yq = "latest"
 [settings]
 trusted_config_paths = [
     "~/Desktop",
-    "~/Developer",
     "~/Documents",
     "~/Downloads/",
-    "~/intent",
+    "~/Developer",
 ]
 
 [settings.ruby]
@@ -70,7 +69,6 @@ compile = false
 _.path = [
     "~/dotfiles/generated/bin",
     "~/dotfiles/modules/bin",
-    "~/Developer/ipruning/aura/utils/scripts",
     "~/.bun/bin",
     "~/.local/bin",
     "/opt/homebrew/opt/postgresql@18/bin",
