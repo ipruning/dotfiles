@@ -15,6 +15,7 @@ BetterDisplay
 Bob
 calibre
 Capture One
+cmux
 Codex
 Codex Monitor
 CodexBar
@@ -120,6 +121,7 @@ VideoFusion-macOS
 VirtualBuddy
 Warp
 WeChat
+wechatwebdevtools
 Wireshark
 Wooshy
 Xcodes
