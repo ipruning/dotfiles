@@ -89,6 +89,38 @@ if command -v op >/dev/null 2>&1; then
   op completion zsh > "$GENERATED_COMPLETIONS_DIR/_op" 2>/dev/null || true
 fi
 
+if command -v try-rs >/dev/null 2>&1; then
+  cat > "$GENERATED_COMPLETIONS_DIR/_try-rs" <<'TRYEOF'
+# try-rs shell wrapper (cd into selected experiment)
+try-rs() {
+  for arg in "$@"; do
+    case "$arg" in
+      -*) command try-rs "$@"; return ;;
+    esac
+  done
+  local output
+  output=$(command try-rs "$@")
+  if [[ -n "$output" ]]; then
+    eval "$output"
+  fi
+}
+alias try="try-rs"
+
+# native zsh completion for try-rs
+_try_rs_complete() {
+  local tries_path="${TRY_PATH:-$HOME/work/tries}"
+  local -a dirs=()
+  local p
+  for p in ${(s:,:)tries_path}; do
+    [[ -d "$p" ]] && dirs+=("$p"/*(/N:t))
+  done
+  compadd -a dirs
+}
+compdef _try_rs_complete try-rs
+compdef _try_rs_complete try
+TRYEOF
+fi
+
 printf "\033[34m==> Syncing Shell Functions...\033[0m\n"
 
 GENERATED_FUNCTIONS_DIR="$REPO_ROOT/generated/functions"

@@ -256,8 +256,10 @@ if command -v brew >/dev/null 2>&1; then
 fi
 
 # 👇 try-rs
-if [[ -f "$HOME/.config/try-rs/try-rs.zsh" ]]; then
-  source "$HOME/.config/try-rs/try-rs.zsh"
+export TRY_PATH="$HOME/Developer/tries"
+export TRY_CONFIG_DIR="$HOME/.config/try-rs"
+if [[ -f "$GENERATED_COMPLETIONS_DIR/_try-rs" ]]; then
+  source "$GENERATED_COMPLETIONS_DIR/_try-rs"
 fi
 
 # 👇 nanobrew
