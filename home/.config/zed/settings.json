@@ -1,4 +1,11 @@
 {
+  "lsp": {
+    "markdownlint": {
+      "settings": {
+        "MD013": false,
+      },
+    },
+  },
   "edit_predictions": {
     "provider": "zed",
   },
