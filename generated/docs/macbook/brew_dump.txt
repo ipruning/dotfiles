@@ -130,4 +130,6 @@ cask "stainless-api/tap/stl"
 cask "warp"
 cask "xcodes-app"
 cask "zed"
+go "cmd/go"
+go "cmd/gofmt"
 uv "sqlit-tui", with: ["psycopg2-binary"]

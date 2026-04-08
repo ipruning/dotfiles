@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+
+set -e
+set -u
+set -o pipefail
+
+if [[ "${ZED_FILE:-}" != *.md ]]; then
+    echo "Not a Markdown file"
+    exit 1
+fi
+
+PASTE_IMAGE_SAVE_PATH="${ZED_WORKTREE_ROOT}/${IMG_SAVE_PATH}"
+mkdir -p "$PASTE_IMAGE_SAVE_PATH"
+
+timestamp="$(date +"%Y-%m-%d-%H-%M-%S")"
+filename="${ZED_STEM}__${timestamp}.png"
+filepath="${PASTE_IMAGE_SAVE_PATH}/${filename}"
+
+osascript_result="$(
+osascript <<EOF
+try
+    set theImage to the clipboard as «class PNGf»
+    set theFile to POSIX file "$filepath"
+    set outFile to open for access theFile with write permission
+    set eof outFile to 0
+    write theImage to outFile
+    close access outFile
+    return "ok"
+on error
+    try
+        close access POSIX file "$filepath"
+    end try
+    return "no_image"
+end try
+EOF
+)"
+
+if [[ "$osascript_result" != "ok" || ! -f "$filepath" ]]; then
+    echo "No image in clipboard"
+    exit 2
+fi
+
+RELATIVE_PATH="$(python3 - <<PY
+import os
+print(os.path.relpath(r'''$PASTE_IMAGE_SAVE_PATH''', r'''$ZED_DIRNAME'''))
+PY
+)"
+
+printf '![%s](%s/%s)\n' "$filename" "$RELATIVE_PATH" "$filename" | pbcopy
+echo "Copied markdown link to clipboard"

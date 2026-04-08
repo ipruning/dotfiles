@@ -1,5 +1,17 @@
 [
   {
+    "label": "zed Paste Img",
+    "command": "~/dotfiles/modules/bin/zed-image-paste",
+    "env": {
+      "IMG_SAVE_PATH": "attachments",
+    },
+    "use_new_terminal": false,
+    "allow_concurrent_runs": true,
+    "reveal": "never",
+    "hide": "always",
+    "shell": "system",
+  },
+  {
     "label": "live_grep",
     "command": "selection=$(tv text); [ -n \"$selection\" ] && zed \"$selection\"",
     "hide": "always",

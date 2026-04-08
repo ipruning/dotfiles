@@ -1,5 +1,12 @@
 [
   {
+    "context": "Workspace",
+    "bindings": {
+      "alt-ctrl-p": ["task::Spawn", { "task_name": "zed Paste Img" }],
+      "alt-ctrl-r": ["task::Rerun", { "reevaluate_context": true }],
+    },
+  },
+  {
     "context": "MessageEditor > Editor",
     "bindings": {
       "enter": "editor::Newline",
