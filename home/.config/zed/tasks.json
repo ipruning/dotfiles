@@ -3,7 +3,7 @@
     "label": "zed Paste Img",
     "command": "~/dotfiles/modules/bin/zed-image-paste",
     "env": {
-      "IMG_SAVE_PATH": "attachments",
+      "IMG_SAVE_PATH": "assets",
     },
     "use_new_terminal": false,
     "allow_concurrent_runs": true,
