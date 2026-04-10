@@ -23,6 +23,7 @@ Comet
 Commander
 Contexts
 CrossOver
+Cursor
 DaisyDisk
 Dark Reader for Safari
 DataGrip

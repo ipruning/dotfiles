@@ -47,6 +47,7 @@ just
 litecli
 mactop
 mdq
+miniserve
 mise
 mkcert
 mongodb-community
