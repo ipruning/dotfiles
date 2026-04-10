@@ -145,7 +145,9 @@ def parse_html_to_records(path: Path) -> tuple[list[dict[str, Any]], str]:
             f"{path}: decoded session JSON must contain object 'header' and array 'entries'"
         )
 
-    records: list[dict[str, Any]] = [header] + [e for e in entries if isinstance(e, dict)]
+    records: list[dict[str, Any]] = [header] + [
+        e for e in entries if isinstance(e, dict)
+    ]
     session_id = str(header.get("id") or path.stem)
     return records, session_id
 
@@ -205,7 +207,7 @@ def extract_tool_calls_from_blocks(content: Any) -> list[ToolCallPreview]:
         except Exception:  # noqa: BLE001
             arguments_raw = str(arguments)
 
-        payload = {
+        payload: dict[str, Any] = {
             "id": block.get("id"),
             "name": block.get("name"),
             "arguments_chars": len(arguments_raw),
@@ -243,7 +245,9 @@ def normalize_message(record: dict[str, Any]) -> TurnMessage | None:
         timestamp=record.get("timestamp"),
         role=role,
         text=extract_text_from_blocks(content),
-        tool_calls=extract_tool_calls_from_blocks(content) if role == "assistant" else [],
+        tool_calls=extract_tool_calls_from_blocks(content)
+        if role == "assistant"
+        else [],
     )
 
 

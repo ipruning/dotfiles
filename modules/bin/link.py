@@ -255,7 +255,11 @@ def extract_items(text: str) -> dict[str, str]:
         words = re.findall(r"\S+", line)
         for word in words:
             clean = sanitize_path(word)
-            if os.path.exists(clean) and clean not in items_dict and not is_noise_path(clean):
+            if (
+                os.path.exists(clean)
+                and clean not in items_dict
+                and not is_noise_path(clean)
+            ):
                 items_dict[clean] = "PATH"
 
     # Identify URLs
