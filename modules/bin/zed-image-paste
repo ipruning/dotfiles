@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
-set -u
-set -o pipefail
-
+set -euo pipefail
 if [[ "${ZED_FILE:-}" != *.md ]]; then
     echo "Not a Markdown file"
     exit 1

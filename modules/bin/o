@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
-set -u
-set -o pipefail
-
+set -euo pipefail
 target="${1:-.}"
 if [[ $OSTYPE == darwin* ]]; then
   exec open "$target"

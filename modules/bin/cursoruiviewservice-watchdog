@@ -1,9 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-set -e
-set -u
-set -o pipefail
-
+set -euo pipefail
 APP="${1:-CursorUIViewService}"
 
 is_hung=$(/usr/bin/osascript - "$APP" <<'AS'

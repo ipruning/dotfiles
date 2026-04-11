@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
-set -u
-set -o pipefail
-
+set -euo pipefail
 if [[ $OSTYPE == linux* ]]; then
   exec ss -tulpn
 elif [[ $OSTYPE == darwin* ]]; then

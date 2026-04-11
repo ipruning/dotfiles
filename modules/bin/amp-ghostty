@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 set -euo pipefail
 
 # amp-ghostty — Open a 3-pane Ghostty dev layout

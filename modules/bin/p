@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
-set -u
-set -o pipefail
-
+set -euo pipefail
 if command -v pbpaste >/dev/null 2>&1; then
   exec pbpaste
 elif command -v xclip >/dev/null 2>&1; then
