@@ -1,12 +1,17 @@
 bat
 btop
+gh
 git-delta
 htop
+lazydocker
+lazygit
 mise
 mysql-client
 pkgconf
+prek
 pueue
 rip2
+simonbs/brrr-cli/brrr
 starship
 television
 tmux
@@ -14,4 +19,6 @@ tokei
 try-rs
 uv
 xcodes
+xh
+yazi
 zoxide
