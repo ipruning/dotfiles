@@ -1,0 +1,40 @@
+.Karabiner-VirtualHIDDevice-Manager
+1Password
+1Password for Safari
+AeroSpace
+AltTab
+Codex
+Contexts
+Cursor
+GarageBand
+Ghostty
+Google Chrome
+Immersive Translate
+iMovie
+Input Source Pro
+Karabiner-Elements
+Karabiner-EventViewer
+Keynote
+Lark
+Linear
+LinearMouse
+Longbridge
+Mos
+Numbers
+Pages
+qBittorrent
+Raycast
+Repo Prompt
+Roam Research
+Safari
+Setapp
+Superconductor
+Surfingkeys
+Surge
+Tailscale
+Tampermonkey
+Things3
+Typeless
+uBlock Origin Lite
+WeChat
+Zed

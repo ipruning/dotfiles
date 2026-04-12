@@ -1,0 +1,14 @@
+bat
+btop
+git-delta
+htop
+mise
+pueue
+rip2
+starship
+television
+tmux
+tokei
+try-rs
+uv
+zoxide
