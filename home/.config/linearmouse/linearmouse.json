@@ -15,6 +15,25 @@
         "acceleration" : 3,
         "disableAcceleration" : true
       }
+    },
+    {
+      "if" : {
+        "device" : {
+          "category" : "trackpad",
+          "productID" : "0x0",
+          "productName" : "Apple Internal Keyboard \/ Trackpad",
+          "serialNumber" : "FM7HQG0CR5Z0000YCG+ALRM",
+          "vendorID" : "0x0"
+        }
+      },
+      "scrolling" : {
+        "acceleration" : {
+          "vertical" : 1.25
+        },
+        "speed" : {
+          "vertical" : 2
+        }
+      }
     }
   ]
 }
