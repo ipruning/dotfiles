@@ -185,7 +185,9 @@ if command -v tailspin >/dev/null 2>&1; then
 fi
 
 # 👇 OrbStack
-source "$HOME/.orbstack/shell/init.zsh" 2>/dev/null || :
+if [[ -f "$HOME/.orbstack/shell/init.zsh" ]]; then
+  source "$HOME/.orbstack/shell/init.zsh"
+fi
 
 # 👇 zoxide
 if command -v zoxide >/dev/null 2>&1; then
