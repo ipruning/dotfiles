@@ -3,12 +3,20 @@
 1Password for Safari
 AeroSpace
 AltTab
+calibre
 Codex
 Contexts
 Cursor
+DEVONthink
+Discord
+Eagle
 GarageBand
 Ghostty
 Google Chrome
+Google Docs
+Google Drive
+Google Sheets
+Google Slides
 Immersive Translate
 iMovie
 Input Source Pro
@@ -21,6 +29,7 @@ LinearMouse
 Longbridge
 Mos
 Numbers
+OrbStack
 Pages
 qBittorrent
 Raycast
@@ -33,8 +42,12 @@ Surfingkeys
 Surge
 Tailscale
 Tampermonkey
+Telegram
 Things3
 Typeless
 uBlock Origin Lite
 WeChat
+YACReader
+YACReaderLibrary
 Zed
+Zotero

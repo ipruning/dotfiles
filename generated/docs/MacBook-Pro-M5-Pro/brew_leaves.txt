@@ -3,6 +3,8 @@ btop
 git-delta
 htop
 mise
+mysql-client
+pkgconf
 pueue
 rip2
 starship
@@ -11,4 +13,5 @@ tmux
 tokei
 try-rs
 uv
+xcodes
 zoxide
