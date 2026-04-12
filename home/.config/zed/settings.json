@@ -1,6 +1,6 @@
 {
-  "agent_buffer_font_size": 12.0,
-  "agent_ui_font_size": 14.0,
+  "agent_buffer_font_size": 11.0,
+  "agent_ui_font_size": 13.0,
   "lsp": {
     "markdownlint": {
       "settings": {
@@ -37,7 +37,7 @@
   "autosave": "on_focus_change",
   "buffer_font_fallbacks": ["Maple Mono NF CN"],
   "buffer_font_family": "MonoLisa",
-  "buffer_font_size": 12.0,
+  "buffer_font_size": 11.0,
   "buffer_font_weight": 500,
   "buffer_line_height": {
     "custom": 1.5,
@@ -111,7 +111,7 @@
   },
   "theme": "Catppuccin Mocha",
   "ui_font_family": "MonoLisa",
-  "ui_font_size": 14.0,
+  "ui_font_size": 13.0,
   "ui_font_weight": 500,
   "vim": {
     "highlight_on_yank_duration": 250,
