@@ -83,24 +83,9 @@ if command -v amp >/dev/null 2>&1; then
   amp update
 fi
 
-# if command -v claude >/dev/null 2>&1; then
-#   logger "Updating Claude..."
-#   claude update
-# fi
-
-# if command -v opencode >/dev/null 2>&1; then
-#   logger "Updating OpenCode..."
-#   opencode upgrade
-# fi
-
 if command -v pi >/dev/null 2>&1; then
   logger "Updating Pi Plugin..."
   pi update
-fi
-
-if command -v longbridge >/dev/null 2>&1; then
-  logger "Updating LongBridge CLI..."
-  longbridge update
 fi
 
 logger "Backing up all packages..."
