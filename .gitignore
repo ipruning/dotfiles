@@ -1,16 +1,16 @@
 .DS_Store
 *private*
 
-.git/
 .jj/
 .repoprompt/
 .ruff_cache/
 .venv/
 
-generated/bin/
-generated/completions/
-generated/functions/
-generated/plugins/
+generated/bin/*
+generated/completions/*
+generated/functions/*
+generated/plugins/*
+!**/.gitkeep
 
 home/.config/karabiner/automatic_backups/
 home/.config/zellij/plugins/
