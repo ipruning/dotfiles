@@ -3,94 +3,59 @@
 
 set -euo pipefail
 
-SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck disable=SC1091
-source "$SCRIPT_DIR/_lib.sh"
+cd "$(git rev-parse --show-toplevel)"
 
-require_cmd git
-REPO_ROOT="$(repo_root)"
-cd "$REPO_ROOT"
+# -- Vendor plugins ------------------------------------------------------------
 
-printf "\033[34m==> Syncing Vendor Plugins (git pull)...\033[0m\n"
+gum log --level info "Syncing vendor plugins (git pull)..."
 
-PLUGINS_DIR="$REPO_ROOT/generated/plugins"
-
-if [ -d "$PLUGINS_DIR" ]; then
+if [ -d generated/plugins ]; then
   shopt -s nullglob
-  for plugin_dir in "$PLUGINS_DIR"/*; do
+  for plugin_dir in generated/plugins/*; do
     [ -d "$plugin_dir" ] || continue
+    git -C "$plugin_dir" rev-parse --is-inside-work-tree &>/dev/null || continue
 
-    if ! git -C "$plugin_dir" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-      continue
-    fi
+    name="$(basename "$plugin_dir")"
 
-    plugin_name="$(basename "$plugin_dir")"
-
-    if ! git -C "$plugin_dir" remote get-url origin >/dev/null 2>&1; then
-      printf " - %s (no origin remote; skipping)\n" "$plugin_name"
+    if ! git -C "$plugin_dir" remote get-url origin &>/dev/null; then
+      gum log --level warn "$name (no origin remote; skipping)"
       continue
     fi
 
     branch="$(git -C "$plugin_dir" symbolic-ref -q --short HEAD 2>/dev/null || true)"
     if [ -z "$branch" ]; then
-      printf " - %s (detached HEAD; skipping)\n" "$plugin_name"
+      gum log --level warn "$name (detached HEAD; skipping)"
       continue
     fi
 
-    printf " - %s (%s)\n" "$plugin_name" "$branch"
-    if ! git -C "$plugin_dir" pull --ff-only; then
-      printf "   -> pull failed; continuing\n"
+    if ! gum spin --title "  Pulling $name..." -- git -C "$plugin_dir" pull --ff-only; then
+      gum log --level warn "$name pull failed; continuing"
     fi
   done
   shopt -u nullglob
 else
-  printf " - generated/plugins not found; skipping\n"
+  gum log --level warn "generated/plugins not found; skipping"
 fi
 
-printf "\033[34m==> Syncing Shell Completion...\033[0m\n"
+# -- Shell completions ---------------------------------------------------------
 
-GENERATED_COMPLETIONS_DIR="$REPO_ROOT/generated/completions"
+gum log --level info "Syncing shell completions..."
 
-[ -d "$GENERATED_COMPLETIONS_DIR" ] || mkdir -p "$GENERATED_COMPLETIONS_DIR"
+mkdir -p generated/completions
+C="generated/completions"
 
-if command -v uvx >/dev/null 2>&1; then
-  _LLM_COMPLETE=zsh_source uvx llm > "$GENERATED_COMPLETIONS_DIR/_llm" 2>/dev/null || true
-fi
+command -v uvx      &>/dev/null && { _LLM_COMPLETE=zsh_source uvx llm > "$C/_llm" 2>/dev/null || true; }
+command -v bootdev  &>/dev/null && { bootdev completion zsh    > "$C/_bootdev" 2>/dev/null || true; }
+command -v ov       &>/dev/null && { ov --completion zsh       > "$C/_ov"      2>/dev/null || true; }
+command -v just     &>/dev/null && { just --completions zsh    > "$C/_just"    2>/dev/null || true; }
+command -v codex    &>/dev/null && { codex completion zsh      > "$C/_codex"   2>/dev/null || true; }
+command -v jj       &>/dev/null && { jj util completion zsh    > "$C/_jj"      2>/dev/null || true; }
+command -v linear   &>/dev/null && { linear completions zsh    > "$C/_linear"  2>/dev/null || true; }
+command -v sesh     &>/dev/null && { sesh completion zsh       > "$C/_sesh"    2>/dev/null || true; }
+command -v op       &>/dev/null && { op completion zsh         > "$C/_op"      2>/dev/null || true; }
 
-if command -v bootdev >/dev/null 2>&1; then
-  bootdev completion zsh > "$GENERATED_COMPLETIONS_DIR/_bootdev" 2>/dev/null || true
-fi
-
-if command -v ov >/dev/null 2>&1; then
-  ov --completion zsh > "$GENERATED_COMPLETIONS_DIR/_ov" 2>/dev/null || true
-fi
-
-if command -v just >/dev/null 2>&1; then
-  just --completions zsh > "$GENERATED_COMPLETIONS_DIR/_just" 2>/dev/null || true
-fi
-
-if command -v codex >/dev/null 2>&1; then
-  codex completion zsh > "$GENERATED_COMPLETIONS_DIR/_codex" 2>/dev/null || true
-fi
-
-if command -v jj >/dev/null 2>&1; then
-  jj util completion zsh > "$GENERATED_COMPLETIONS_DIR/_jj" 2>/dev/null || true
-fi
-
-if command -v linear >/dev/null 2>&1; then
-  linear completions zsh > "$GENERATED_COMPLETIONS_DIR/_linear" 2>/dev/null || true
-fi
-
-if command -v sesh >/dev/null 2>&1; then
-  sesh completion zsh > "$GENERATED_COMPLETIONS_DIR/_sesh" 2>/dev/null || true
-fi
-
-if command -v op >/dev/null 2>&1; then
-  op completion zsh > "$GENERATED_COMPLETIONS_DIR/_op" 2>/dev/null || true
-fi
-
-if command -v try-rs >/dev/null 2>&1; then
-  cat > "$GENERATED_COMPLETIONS_DIR/_try-rs" <<'TRYEOF'
+if command -v try-rs &>/dev/null; then
+  cat > "$C/_try-rs" <<'TRYEOF'
 # try-rs shell wrapper (cd into selected experiment)
 try-rs() {
   for arg in "$@"; do
@@ -121,34 +86,23 @@ compdef _try_rs_complete try
 TRYEOF
 fi
 
-printf "\033[34m==> Syncing Shell Functions...\033[0m\n"
+# -- Shell functions -----------------------------------------------------------
 
-GENERATED_FUNCTIONS_DIR="$REPO_ROOT/generated/functions"
+gum log --level info "Syncing shell functions..."
 
-[ -d "$GENERATED_FUNCTIONS_DIR" ] || mkdir -p "$GENERATED_FUNCTIONS_DIR"
+mkdir -p generated/functions
+F="generated/functions"
 
-if command -v starship >/dev/null 2>&1; then
-  starship init zsh > "$GENERATED_FUNCTIONS_DIR/_starship.zsh" 2>/dev/null || true
-fi
+command -v starship &>/dev/null && { starship init zsh > "$F/_starship.zsh" 2>/dev/null || true; }
+command -v atuin    &>/dev/null && { atuin init zsh --disable-up-arrow > "$F/_atuin.zsh" 2>/dev/null || true; }
 
-if command -v atuin >/dev/null 2>&1; then
-  atuin init zsh --disable-up-arrow > "$GENERATED_FUNCTIONS_DIR/_atuin.zsh" 2>/dev/null || true
-fi
-
-if command -v mise >/dev/null 2>&1; then
-  # Avoid serializing active shell/session state into generated script.
+if command -v mise &>/dev/null; then
   env -u __MISE_DIFF \
     -u __MISE_SESSION \
     -u __MISE_ORIG_PATH \
     -u MISE_SHELL \
     -u __MISE_ZSH_PRECMD_RUN \
-    mise activate zsh > "$GENERATED_FUNCTIONS_DIR/_mise.zsh" 2>/dev/null || true
+    mise activate zsh > "$F/_mise.zsh" 2>/dev/null || true
 fi
-
-# MODULES_DIR="$REPO_ROOT/modules"
-
-# if command -v op >/dev/null 2>&1; then
-#   op inject --in-file "$MODULES_DIR/zsh/env.private.tpl.zsh" --out-file "$MODULES_DIR/zsh/env.private.zsh" 2>/dev/null || true
-# fi
 
 rm -f ~/.zcompdump*

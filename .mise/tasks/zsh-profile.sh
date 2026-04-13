@@ -3,36 +3,26 @@
 
 set -euo pipefail
 
-SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=/dev/null
-source "$SCRIPT_DIR/_lib.sh"
-
-require_cmd zsh
-require_cmd hyperfine
-require_cmd python3
-
 RUNS="${1:-50}"
 WARMUP="${2:-10}"
-TRACE_FILE=""
 
-[[ "$RUNS" =~ ^[0-9]+$ ]] || die "RUNS must be an integer (got: $RUNS)"
-[[ "$WARMUP" =~ ^[0-9]+$ ]] || die "WARMUP must be an integer (got: $WARMUP)"
+[[ "$RUNS" =~ ^[0-9]+$ ]]   || { gum log --level error "RUNS must be an integer (got: $RUNS)";     exit 1; }
+[[ "$WARMUP" =~ ^[0-9]+$ ]] || { gum log --level error "WARMUP must be an integer (got: $WARMUP)"; exit 1; }
 
-cleanup() { [[ -n "$TRACE_FILE" && -f "$TRACE_FILE" ]] && rm -f "$TRACE_FILE"; true; }
+TRACE_FILE="/tmp/zsh_profile_$$.log"
+cleanup() { rm -f "$TRACE_FILE"; }
 trap cleanup EXIT
 
-# Clean up any old trace files first
 rm -f /tmp/zsh_profile_*.log
 
-printf "\033[34m==> Benchmarking zsh startup (%d runs, %d warmup)...\033[0m\n" "$RUNS" "$WARMUP"
+gum log --level info "Benchmarking zsh startup ($RUNS runs, $WARMUP warmup)..."
 hyperfine "zsh -i -c exit" --warmup "$WARMUP" --runs "$RUNS"
 
-printf "\n\033[34m==> Generating trace profile (interactive shell)...\033[0m\n"
-TRACE_FILE="/tmp/zsh_profile_$$.log"
+gum log --level info "Generating trace profile (interactive shell)..."
 ZSH_TRACE_STARTUP=1 ZSH_TRACE_FILE="$TRACE_FILE" zsh -i -c exit 2>&1
 
 if [[ ! -f "$TRACE_FILE" ]]; then
-  echo "Error: No trace file found at $TRACE_FILE. Ensure ~/.zshrc has the ZSH_TRACE_STARTUP hook."
+  gum log --level error "No trace file found at $TRACE_FILE. Ensure ~/.zshrc has the ZSH_TRACE_STARTUP hook."
   exit 1
 fi
 
@@ -109,5 +99,3 @@ for c, t in sorted(cats.items(), key=lambda x: -x[1]):
 other = total_ms - sum(cats.values())
 print(f"{other:7.1f} ms ({other/total_ms*100:4.1f}%) | other")
 PYEOF
-
-rm -f "$TRACE_FILE"
