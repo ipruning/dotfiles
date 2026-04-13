@@ -1,4 +1,8 @@
 Bartender
+CleanMyMac
 CleanShot X
+Downie
 Lungo
+Permute
+TablePlus
 Timing

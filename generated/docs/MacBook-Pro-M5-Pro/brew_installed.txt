@@ -8,6 +8,7 @@ lazydocker
 lazygit
 mise
 mysql-client
+neovim
 pkgconf
 prek
 pueue
