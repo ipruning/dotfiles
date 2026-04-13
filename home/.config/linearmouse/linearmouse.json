@@ -34,6 +34,21 @@
           "vertical" : 3
         }
       }
+    },
+    {
+      "if" : {
+        "device" : {
+          "category" : "mouse",
+          "productID" : "0xb020",
+          "productName" : "MX Vertical",
+          "serialNumber" : "1439B10F26EAEDEE",
+          "vendorID" : "0x46d"
+        }
+      },
+      "pointer" : {
+        "acceleration" : 3,
+        "disableAcceleration" : true
+      }
     }
   ]
 }
