@@ -73,14 +73,22 @@ if command -v ya >/dev/null 2>&1; then
   ya pkg upgrade
 fi
 
+# curl -fsSL https://sprites.dev/install.sh | sh
 if command -v sprite >/dev/null 2>&1; then
   logger "Updating Sprite..."
   sprite upgrade
 fi
 
+# curl -fsSL https://ampcode.com/install.sh | bash
 if command -v amp >/dev/null 2>&1; then
   logger "Updating Amp Code..."
   amp update
+fi
+
+# curl -fsSL https://raw.githubusercontent.com/tigrisdata/cli/main/scripts/install.sh | sh
+if command -v tigris >/dev/null 2>&1; then
+  logger "Updating Tigris..."
+  tigris update
 fi
 
 if command -v pi >/dev/null 2>&1; then
