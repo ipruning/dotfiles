@@ -1,9 +1,12 @@
 bat
 brrr
 btop
+cairo
+ffmpeg
 gh
 git-delta
 htop
+hyperfine
 lazydocker
 lazygit
 mise
@@ -14,6 +17,7 @@ prek
 pueue
 rip2
 starship
+stripe
 television
 tmux
 tokei

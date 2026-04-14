@@ -1,8 +1,11 @@
 bat
 btop
+cairo
+ffmpeg
 gh
 git-delta
 htop
+hyperfine
 lazydocker
 lazygit
 mise
@@ -14,6 +17,7 @@ pueue
 rip2
 simonbs/brrr-cli/brrr
 starship
+stripe/stripe-cli/stripe
 television
 tmux
 tokei
