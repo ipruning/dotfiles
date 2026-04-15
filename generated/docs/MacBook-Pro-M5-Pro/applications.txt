@@ -47,6 +47,7 @@ Telegram
 Things3
 Typeless
 uBlock Origin Lite
+Visual Studio Code
 WeChat
 YACReader
 YACReaderLibrary
