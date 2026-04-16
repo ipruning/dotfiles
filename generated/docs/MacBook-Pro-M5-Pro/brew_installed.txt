@@ -3,6 +3,7 @@ ast-grep
 autocorrect
 bat
 biome
+broot
 brrr
 btop
 cairo

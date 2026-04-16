@@ -12,6 +12,7 @@ DEVONthink
 Discord
 Eagle
 GarageBand
+Gemini
 Ghostty
 Google Chrome
 Google Docs
