@@ -43,6 +43,7 @@ tmux
 tokei
 try-rs
 typos-cli
+typst
 uv
 xcodes
 xh
