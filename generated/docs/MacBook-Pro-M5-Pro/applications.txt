@@ -1,3 +1,4 @@
+カドラバ - トレカ総合アプリ
 .Karabiner-VirtualHIDDevice-Manager
 1Password
 1Password for Safari
@@ -45,6 +46,7 @@ Surge
 Tailscale
 Tampermonkey
 Telegram
+TestFlight
 Things3
 Typeless
 uBlock Origin Lite
