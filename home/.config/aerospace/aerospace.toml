@@ -140,10 +140,6 @@ if.app-id = "uk.co.powdertoy.tpt"
 run = "layout floating"
 
 [[on-window-detected]]
-if.app-id = "com.jihuanshe.app"
-run = "layout floating"
-
-[[on-window-detected]]
 if.app-id = "com.xfge.LifeEasy"
 run = "layout floating"
 
