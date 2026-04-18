@@ -162,7 +162,7 @@ def remove(name: str):
 def exec(name: str, cmd: list[str]):
     """Run a command with a temporary source, then restore.
 
-    Example: ss exec jihuanshe -- skillshare install foo --track
+    Example: ss exec <source-name> -- skillshare install foo --track
     """
     sources = _load_sources()
     if name not in sources:
