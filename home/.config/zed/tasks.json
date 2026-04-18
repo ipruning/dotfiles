@@ -148,15 +148,6 @@
     },
   },
   {
-    "label": "agents-zellij",
-    "command": "agents-zellij",
-    "hide": "always",
-    "show_summary": false,
-    "show_command": false,
-    "allow_concurrent_runs": true,
-    "use_new_terminal": true,
-  },
-  {
     "label": "amp-tmux",
     "command": "amp-tmux",
     "hide": "always",
@@ -164,6 +155,21 @@
     "show_command": false,
     "allow_concurrent_runs": true,
     "use_new_terminal": true,
+  },
+  {
+    "label": "tmux",
+    "command": "repo_path=$(pwd -P); if [[ \"$repo_path\" != \"$HOME\" ]] && git rev-parse --is-inside-work-tree >/dev/null 2>&1 && [[ \"$(git rev-parse --show-toplevel)\" == \"$repo_path\" ]]; then session_name=zed-$(basename \"$repo_path\"); tmux new-session -A -s \"$session_name\"; fi",
+    "hide": "always",
+    "show_summary": false,
+    "show_command": false,
+    "allow_concurrent_runs": true,
+    "use_new_terminal": true,
+    "shell": {
+      "with_arguments": {
+        "program": "/bin/bash",
+        "args": ["--noediting", "--norc", "--noprofile"],
+      },
+    },
   },
   {
     "label": "zellij",
@@ -182,9 +188,14 @@
   },
   {
     "label": "run",
-    "command": "runner.bash",
-    "args": ["$ZED_FILE"],
+    "command": "file=\"$ZED_FILE\"; ext=\"${file##*.}\"; case \"$ext\" in bash) exec bash \"$file\" ;; sh) exec sh \"$file\" ;; py) exec mise exec -- uv run \"$file\" ;; js|jsx|mjs|cjs|ts|tsx) exec mise exec -- bun run \"$file\" ;; *) echo \"Unsupported file type: .$ext\" >&2; exit 2 ;; esac",
     "allow_concurrent_runs": true,
     "use_new_terminal": true,
+    "shell": {
+      "with_arguments": {
+        "program": "/bin/bash",
+        "args": ["--noediting", "--norc", "--noprofile"],
+      },
+    },
   },
 ]

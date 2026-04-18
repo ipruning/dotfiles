@@ -31,7 +31,7 @@
       "provider": "openai",
     },
     "default_profile": "write",
-    "play_sound_when_agent_done": true,
+    "play_sound_when_agent_done": "always",
     "use_modifier_to_send": true,
   },
   "autosave": "on_focus_change",
@@ -77,7 +77,6 @@
   "project_panel": {
     "dock": "left",
   },
-  "relative_line_numbers": "enabled",
   "restore_on_startup": "last_session",
   "scroll_beyond_last_line": "off",
   "scrollbar": {

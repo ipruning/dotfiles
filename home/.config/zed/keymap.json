@@ -89,11 +89,18 @@
       "space u": [
         "task::Spawn",
         {
-          "task_name": "lazygit",
+          "task_name": "gitu",
           "reveal_target": "center",
         },
       ],
       "space n": [
+        "task::Spawn",
+        {
+          "task_name": "tmux",
+          "reveal_target": "center",
+        },
+      ],
+      "space shift-n": [
         "task::Spawn",
         {
           "task_name": "zellij",
@@ -229,11 +236,18 @@
       "space u": [
         "task::Spawn",
         {
-          "task_name": "lazygit",
+          "task_name": "gitu",
           "reveal_target": "center",
         },
       ],
       "space n": [
+        "task::Spawn",
+        {
+          "task_name": "tmux",
+          "reveal_target": "center",
+        },
+      ],
+      "space shift-n": [
         "task::Spawn",
         {
           "task_name": "zellij",
