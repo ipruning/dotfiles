@@ -12,6 +12,7 @@ ffmpeg
 fzf
 gh
 git-delta
+gitu
 gum
 htop
 hyperfine
