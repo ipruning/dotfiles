@@ -76,3 +76,70 @@ alias -g JQ='| jq'
 
 alias -g C='| c'
 alias -g P='p |'
+
+exe-dev-switch() {
+  emulate -L zsh
+
+  # IdentityFile intentionally points at the .pub key; the matching private
+  # key lives in the 1Password SSH agent, not on disk.
+  local conf="$HOME/.ssh/exe-dev-profile.conf"
+
+  local -a names
+  local p name
+  for p in "$HOME"/.ssh/exe-dev-*.pub(N); do
+    name="${${p:t:r}#exe-dev-}"
+    [[ "$name" == "profile" ]] && continue
+    names+=("$name")
+  done
+
+  if (( ${#names} == 0 )); then
+    print -u2 'exe-dev-switch: no ~/.ssh/exe-dev-*.pub found'
+    return 1
+  fi
+
+  local current=""
+  if [[ -r "$conf" ]]; then
+    current="$(awk '/^[[:space:]]*IdentityFile[[:space:]]+/ {print $2; exit}' "$conf")"
+    current="${${current:t:r}#exe-dev-}"
+  fi
+
+  local target="$1"
+  if [[ -z "$target" ]]; then
+    if (( ${#names} == 1 )); then
+      target="${names[1]}"
+    elif (( ${#names} == 2 )); then
+      if [[ "$current" == "${names[1]}" ]]; then
+        target="${names[2]}"
+      else
+        target="${names[1]}"
+      fi
+    else
+      print -u2 "usage: exe-dev-switch {${(j:|:)names}}${current:+  (current: $current)}"
+      return 2
+    fi
+  fi
+
+  if ! (( ${names[(Ie)$target]} )); then
+    print -u2 "exe-dev-switch: unknown profile '$target' (available: ${(j:, :)names})"
+    return 2
+  fi
+
+  if [[ "$target" == "$current" ]]; then
+    print "exe-dev: already on $target"
+    return 0
+  fi
+
+  local pub="$HOME/.ssh/exe-dev-$target.pub"
+  local tmp="$conf.tmp.$$"
+
+  cat > "$tmp" <<EOF
+Host exe.dev *.exe.xyz
+  IdentitiesOnly yes
+  IdentityFile $pub
+EOF
+
+  chmod 600 "$tmp"
+  mv "$tmp" "$conf"
+
+  print "exe-dev: ${current:-?} -> $target"
+}
