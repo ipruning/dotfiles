@@ -106,7 +106,7 @@ def list_sources():
 
 @app.command()
 def switch(name: str | None = typer.Argument(None)):
-    """Switch active source. Toggle when only 2, prompt when 3+."""
+    """Switch active source: auto-pick the other when 2 sources total; prompt otherwise."""
     sources = _load_sources()
     if not sources:
         console.print("[dim]No sources registered.[/dim]")
@@ -185,7 +185,7 @@ def _check(ok: bool, label: str, detail: str) -> bool:
 
 @app.command()
 def doctor():
-    """Check environment health."""
+    """Check skillshare config, registered sources, and required tools."""
     errors = 0
 
     console.print("[bold]Checking environment[/bold]")
