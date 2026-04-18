@@ -29,6 +29,7 @@ Keynote
 Lark
 Linear
 LinearMouse
+LM Studio
 Longbridge
 Mos
 Numbers
