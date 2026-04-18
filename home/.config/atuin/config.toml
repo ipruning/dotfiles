@@ -1,17 +1,7 @@
 command_chaining = true
 ctrl_n_shortcuts = true
-enter_accept = true
 exit_mode = "return-query"
 history_filter = ["^secret-cmd", "^innocuous-cmd .*--secret=.+", "^#.*", "^\\s"]
-max_preview_height = 6
-search_mode = "daemon-fuzzy"
-secrets_filter = true
-show_help = false
-style = "compact"
-
-[daemon]
-autostart = true
-enabled = true
 
 [stats]
 common_subcommands = [
