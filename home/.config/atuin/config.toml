@@ -1,7 +1,32 @@
 command_chaining = true
 ctrl_n_shortcuts = true
 exit_mode = "return-query"
-history_filter = ["^secret-cmd", "^innocuous-cmd .*--secret=.+", "^#.*", "^\\s"]
+history_filter = [
+    # original
+    "^secret-cmd",
+    "^innocuous-cmd .*--secret=.+",
+    "^#.*",
+    "^\\s",
+    # AI/SaaS key prefixes (not covered by built-in secrets_filter)
+    "sk-proj-[A-Za-z0-9_-]{20,}",
+    "sk-ant-[A-Za-z0-9_-]{20,}",
+    "sk-or-[A-Za-z0-9_-]{20,}",
+    "xai-[A-Za-z0-9]{20,}",
+    "fc-[A-Za-z0-9]{20,}",
+    "tpuf_[A-Za-z0-9]{20,}",
+    "pylf_v1_[a-z]+_[A-Za-z0-9]{20,}",
+    "pplx-[A-Za-z0-9]{20,}",
+    "gsk_[A-Za-z0-9]{20,}",
+    "nvapi-[A-Za-z0-9_-]{20,}",
+    "r8_[A-Za-z0-9]{20,}",
+    "hf_[A-Za-z0-9]{20,}",
+    "SG\\.[A-Za-z0-9_-]{20,}",
+    "whsec_[A-Za-z0-9]{20,}",
+    # generic patterns
+    "\\b\\w*(API_KEY|SECRET_KEY|ACCESS_TOKEN|AUTH_TOKEN)\\w*=[\"']?\\S+",
+    "--(api[-_]?key|token|secret|password)[= ]\\S+",
+    "\\b([a-z]+\\s){11,}[a-z]+\\b",
+]
 
 [stats]
 common_subcommands = [
