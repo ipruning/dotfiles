@@ -3,6 +3,7 @@
     "containers.orchestratorClient": "com.microsoft.visualstudio.orchestrators.dockercompose",
     "editor.accessibilitySupport": "off",
     "explorer.confirmDelete": false,
+    "explorer.confirmDragAndDrop": false,
     "explorer.fileNesting.enabled": true,
     "explorer.fileNesting.expand": false,
     "explorer.fileNesting.patterns": {
@@ -56,7 +57,7 @@
         "*.w": "$(capture).*.w, I$(capture).w",
         "*.wat": "$(capture).wasm",
         "*.xaml": "$(capture).xaml.cs",
-        "//": "Last update at 4/15/2026, 3:07:59 PM",
+        "//": "Last update at 4/18/2026, 8:50:46 PM",
         "+layout.svelte": "+layout.ts,+layout.js,+layout.server.ts,+layout.server.js,+layout.gql",
         "+page.svelte": "+page.server.ts,+page.server.js,+page.ts,+page.js,+page.gql",
         "AGENTS.md": ".clinerules, .cursorrules, .replit.md, .windsurfrules, AGENT.md, CLAUDE.local.md, CLAUDE.md, GEMINI.md",
@@ -126,6 +127,5 @@
     "workbench.colorTheme": "Catppuccin Mocha",
     "workbench.iconTheme": "catppuccin-mocha",
     "workbench.secondarySideBar.defaultVisibility": "hidden",
-    "workbench.startupEditor": "none",
-    "explorer.confirmDragAndDrop": false
+    "workbench.startupEditor": "none"
 }
