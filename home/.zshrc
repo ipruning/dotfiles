@@ -45,6 +45,7 @@ ZSH_MODULES_DIR="$HOME/dotfiles/modules/zsh"
     "$ZSH_MODULES_DIR/aliases.zsh"
     "$ZSH_MODULES_DIR/env.zsh"
     "$ZSH_MODULES_DIR/env.private.zsh"
+    "$ZSH_MODULES_DIR/completions.zsh"  # after env.zsh so fzf-tab plugin is loaded first
   )
   for file in "${config_files[@]}"; do
     [[ -e "$file" ]] && builtin source "$file"

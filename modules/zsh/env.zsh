@@ -15,7 +15,6 @@ fi
 
 # 👇 zsh options
 setopt interactivecomments
-zstyle ":completion:*" matcher-list "m:{a-z}={A-Za-z}"
 
 # 👇 Tips
 autoload -U edit-command-line
@@ -237,9 +236,6 @@ export FZF_DEFAULT_OPTS=" \
 # 👇 fzf-tab
 if [[ -f "$PLUGINS_DIR"/fzf-tab/fzf-tab.plugin.zsh ]]; then
   source "$PLUGINS_DIR"/fzf-tab/fzf-tab.plugin.zsh
-  zstyle ':completion:*:descriptions' format '[%d]'
-  zstyle ':completion:*' menu no
-  zstyle ':fzf-tab:*' use-fzf-default-opts yes
 fi
 
 # 👇 zsh-autosuggestions
