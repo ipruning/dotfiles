@@ -9,6 +9,7 @@ rust = "stable"
 zig = "latest"
 
 "cargo:https://github.com/immanuwell/dockerfile-roast" = "latest"
+"cargo:sigye" = "latest"
 "gem:kamal" = "latest"
 "github:actionbook/actionbook" = "latest"
 "github:Loongphy/codex-auth" = "latest"
@@ -20,6 +21,8 @@ zig = "latest"
 "npm:cursor-opensync-plugin" = "latest"
 "npm:opencode-sync-plugin" = "latest"
 "npm:pi-opensync-plugin" = "latest"
+pnpm = "latest"
+yarn = "latest"
 
 [settings]
 trusted_config_paths = [
