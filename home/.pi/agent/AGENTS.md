@@ -56,3 +56,9 @@ Rewriting the message on HEAD is straightforward: `git commit --amend -m "..."`.
 Before any commit, `git status --short` shows what is staged. Stage only the files that belong to the current logical change — prior staging state is not trustworthy.
 
 </4>
+
+<5>
+
+macOS ships BSD grep which lacks -P. Use rg instead of grep.
+
+</5>
