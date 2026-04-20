@@ -7,6 +7,7 @@ AltTab
 brrr
 calibre
 Codex
+CodexBar
 Contexts
 Cursor
 DEVONthink
