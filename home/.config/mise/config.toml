@@ -8,6 +8,7 @@ ruby = "latest"
 rust = "stable"
 zig = "latest"
 
+"cargo:https://github.com/clouedoc/hzfind" = "latest"
 "cargo:https://github.com/immanuwell/dockerfile-roast" = "latest"
 "cargo:sigye" = "latest"
 "gem:kamal" = "latest"
