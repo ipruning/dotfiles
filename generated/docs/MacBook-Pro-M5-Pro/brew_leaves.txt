@@ -6,6 +6,8 @@ biome
 broot
 btop
 cairo
+cirruslabs/cli/sshpass
+cirruslabs/cli/tart
 duckdb
 fd
 ffmpeg

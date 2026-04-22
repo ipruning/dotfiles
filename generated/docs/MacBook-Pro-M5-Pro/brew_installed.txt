@@ -38,8 +38,10 @@ ripgrep
 ripsecrets
 shellcheck
 skillshare
+sshpass
 starship
 stripe
+tart
 television
 tmux
 tokei
