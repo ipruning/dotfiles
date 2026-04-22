@@ -77,23 +77,31 @@ fi
 if command -v sprite >/dev/null 2>&1; then
   logger "Updating Sprite..."
   sprite upgrade
+else
+  logger "sprite not found. Install: curl -fsSL https://sprites.dev/install.sh | sh" "WARN"
 fi
 
 # curl -fsSL https://ampcode.com/install.sh | bash
 if command -v amp >/dev/null 2>&1; then
   logger "Updating Amp Code..."
   amp update
+else
+  logger "amp not found. Install: curl -fsSL https://ampcode.com/install.sh | bash" "WARN"
 fi
 
 # curl -fsSL https://raw.githubusercontent.com/tigrisdata/cli/main/scripts/install.sh | sh
 if command -v tigris >/dev/null 2>&1; then
   logger "Updating Tigris..."
   tigris update
+else
+  logger "tigris not found. Install: curl -fsSL https://raw.githubusercontent.com/tigrisdata/cli/main/scripts/install.sh | sh" "WARN"
 fi
 
 if command -v pi >/dev/null 2>&1; then
   logger "Updating Pi Plugin..."
   pi update
+else
+  logger "pi not found. Install: brew install pi-coding-agent" "WARN"
 fi
 
 logger "Backing up all packages..."
