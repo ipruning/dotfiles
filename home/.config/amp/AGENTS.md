@@ -30,7 +30,7 @@ When the working directory is not a repository and the task is disposable, `$TMP
 
 <4>
 
-Rewriting the message on HEAD is straightforward: `git commit --amend -m "..."`. For an older commit, the non-interactive form is `GIT_SEQUENCE_EDITOR="sed -i '' '<N>s/^pick/reword/'" GIT_EDITOR="sed -i '' '1s/old/new/'" git rebase -i HEAD~<N>`. There is no reason to open an interactive editor.
+Rewriting the message on HEAD is straightforward: `git commit --amend -m "..."`. For an older commit, the non-interactive form is `GIT_SEQUENCE_EDITOR="sed -i '' '1s/^pick/reword/'" GIT_EDITOR="sed -i '' '1s/old/new/'" git rebase -i HEAD~<N>`. The target commit is always line 1 in the todo because rebase lists oldest-first. There is no reason to open an interactive editor.
 
 Before any commit, `git status --short` shows what is staged. Stage only the files that belong to the current logical change — prior staging state is not trustworthy.
 
