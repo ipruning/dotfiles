@@ -13,16 +13,14 @@
   },
   "agent_servers": {
     "codex-acp": {
-      "type": "registry",
-      "default_mode": "full-access",
-      "favorite_models": ["gpt-5.2/xhigh"],
+      "type": "registry"
     },
-    "claude-acp": {
-      "type": "registry",
-      "favorite_models": ["opus"],
-    },
+    "amp-acp": {
+      "type": "registry"
+    }
   },
   "agent": {
+    "dock": "left",
     "tool_permissions": {
       "default": "allow",
     },
@@ -75,7 +73,7 @@
   },
   "preferred_line_length": 120,
   "project_panel": {
-    "dock": "left",
+    "dock": "right",
   },
   "restore_on_startup": "last_session",
   "scroll_beyond_last_line": "off",
