@@ -31,7 +31,6 @@ brew "mise"
 brew "mq"
 brew "mysql-client"
 brew "neovim"
-brew "pi-coding-agent"
 brew "pkgconf"
 brew "postgresql@18", link: true
 brew "prek"
