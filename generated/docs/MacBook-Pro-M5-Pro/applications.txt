@@ -37,6 +37,7 @@ Numbers
 OrbStack
 Pages
 qBittorrent
+Quark
 Raycast
 Repo Prompt
 Roam Research
