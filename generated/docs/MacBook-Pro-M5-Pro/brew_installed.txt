@@ -38,6 +38,7 @@ ripgrep
 ripsecrets
 shellcheck
 skillshare
+sqlfluff
 sshpass
 starship
 stripe

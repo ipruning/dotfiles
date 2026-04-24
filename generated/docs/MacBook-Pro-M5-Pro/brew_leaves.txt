@@ -39,6 +39,7 @@ ripsecrets
 shellcheck
 simonbs/brrr-cli/brrr
 skillshare
+sqlfluff
 starship
 stripe/stripe-cli/stripe
 television
