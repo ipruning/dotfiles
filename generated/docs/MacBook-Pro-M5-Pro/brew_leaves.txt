@@ -19,6 +19,7 @@ gum
 htop
 hyperfine
 jq
+just
 k6
 lazydocker
 lazygit
