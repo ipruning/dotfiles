@@ -7,6 +7,8 @@
 #     "typer>=0.24.2",
 # ]
 # ///
+# NOTE: ruamel.yaml is still needed for _set_source() (config write).
+# No `skillshare config set` command exists yet.
 """Skillshare source switcher — manage multiple skillshare source directories."""
 
 from __future__ import annotations
@@ -34,7 +36,7 @@ app = typer.Typer(help="Skillshare source switcher.", no_args_is_help=True)
 console = Console()
 
 def _config_path() -> Path:
-    """Mirror Go's ConfigPath(): $SKILLSHARE_CONFIG > $XDG_CONFIG_HOME > ~/.config."""
+    """Mirror Go's ConfigPath() for config writes (used by _set_source only)."""
     if p := os.environ.get("SKILLSHARE_CONFIG"):
         return Path(p)
     base = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config"))
@@ -60,12 +62,26 @@ def _save_sources(sources: dict[str, str]) -> None:
     SOURCES_CFG.write_text(json.dumps(sources, indent=2) + "\n")
 
 
-def _current_source() -> str:
-    if not SKILLSHARE_CFG.exists():
-        console.print("[red]skillshare config not found[/red]")
+def _skillshare_json(*args: str) -> dict | list:
+    """Run a skillshare command with --global --json and return parsed output."""
+    result = subprocess.run(
+        ["skillshare", *args, "--global", "--json"],
+        capture_output=True, text=True,
+    )
+    if result.returncode != 0:
+        console.print(f"[red]skillshare {' '.join(args)} failed[/red]")
+        if result.stderr.strip():
+            console.print(Text(result.stderr.strip(), style="dim"))
         raise typer.Exit(1)
-    data = _yaml.load(SKILLSHARE_CFG)
-    raw = data.get("source", "") or ""
+    return json.loads(result.stdout)
+
+
+def _current_source() -> str:
+    data = _skillshare_json("status")
+    raw = data.get("source", {}).get("path", "")
+    if not raw:
+        console.print("[red]skillshare config has no source[/red]")
+        raise typer.Exit(1)
     return str(Path(raw).expanduser()).rstrip("/")
 
 
@@ -228,37 +244,35 @@ def rename(old: str, new: str):
                 console.print(Text.assemble(("Invalid --into segment: ", "red"), (seg, "bold")))
                 raise typer.Exit(1)
 
-    # --- load metadata ---
+    # --- load skill list via CLI ---
     source_dir = Path(_current_source())
-    meta_file = source_dir / ".metadata.json"
-    if not meta_file.exists():
-        console.print(Text.assemble(("[red]No .metadata.json in [/red]", ""), (str(source_dir), "bold")))
-        raise typer.Exit(1)
+    items = _skillshare_json("list")
+    skills_by_rel: dict[str, dict] = {}
+    for item in items:
+        if item.get("kind", "skill") == "skill":
+            skills_by_rel[item["relPath"]] = item
 
-    meta = json.loads(meta_file.read_text())
-    entries = meta.get("entries", {})
-
-    # --- resolve old name (exact match, then basename fallback) ---
-    entry_key = old if old in entries else None
-    if entry_key is None:
-        matches = [k for k in entries if PurePosixPath(k).name == old]
+    # --- resolve old name (exact relPath match, then basename fallback) ---
+    entry: dict | None = skills_by_rel.get(old)
+    entry_key = old if entry else None
+    if entry is None:
+        matches = {k: v for k, v in skills_by_rel.items() if PurePosixPath(k).name == old}
         if len(matches) == 1:
-            entry_key = matches[0]
+            entry_key, entry = next(iter(matches.items()))
         elif len(matches) > 1:
             console.print(Text.assemble(("Ambiguous name: ", "red"), (old, "bold")))
             for m in sorted(matches):
                 console.print(Text(f"  {m}", style="dim"))
             raise typer.Exit(1)
 
-    if entry_key is None:
+    if entry is None or entry_key is None:
         console.print(Text.assemble(("Skill not found: ", "red"), (old, "bold")))
-        available = sorted(entries.keys())
+        available = sorted(skills_by_rel.keys())
         if available:
             console.print(Text(f"Available: {', '.join(available)}", style="dim"))
         raise typer.Exit(1)
 
-    entry = entries[entry_key]
-    if entry.get("tracked"):
+    if entry.get("repoName"):
         console.print(Text.assemble(
             ("Cannot rename tracked repo skill: ", "red"), (entry_key, "bold"),
             ("\nUse 'skillshare uninstall' on the tracked repo instead.", "dim"),
@@ -267,8 +281,6 @@ def rename(old: str, new: str):
 
     # --- derive canonical current path ---
     cur_name, cur_into = _parse_skill_name(entry_key)
-    if not cur_into and entry.get("group"):
-        cur_into = entry["group"]
     current_rel = _build_rel(cur_name, cur_into)
     target_rel = _build_rel(new_name, new_into)
 
@@ -279,18 +291,18 @@ def rename(old: str, new: str):
 
     # --- preflight: target already exists ---
     target_path = source_dir / Path(*PurePosixPath(target_rel).parts)
-    if target_path.exists() or target_rel in entries:
+    if target_path.exists() or target_rel in skills_by_rel:
         console.print(Text.assemble(("Target already exists: ", "red"), (target_rel, "bold")))
         raise typer.Exit(1)
 
-    source = entry.get("source", "")
-    if not source:
+    install_url = entry.get("source", "")
+    if not install_url:
         console.print(Text.assemble(("No source recorded for: ", "red"), (current_rel, "bold")))
         raise typer.Exit(1)
 
     console.print(Text.assemble(
         ("Renaming ", ""), (current_rel, "bold"), " → ", (target_rel, "bold"),
-        ("\n  source: ", "dim"), (source, "dim"),
+        ("\n  source: ", "dim"), (install_url, "dim"),
     ))
 
     # --- uninstall ---
@@ -300,20 +312,20 @@ def rename(old: str, new: str):
         raise typer.Exit(1)
 
     # --- reinstall ---
-    install_cmd = ["skillshare", "install", source, "--name", new_name]
+    install_cmd = ["skillshare", "install", install_url, "--name", new_name]
     if new_into:
         install_cmd += ["--into", new_into]
     r2 = subprocess.run(install_cmd)
     if r2.returncode != 0:
         console.print("[yellow]Reinstall failed, rolling back…[/yellow]")
-        rollback_cmd = ["skillshare", "install", source, "--name", cur_name]
+        rollback_cmd = ["skillshare", "install", install_url, "--name", cur_name]
         if cur_into:
             rollback_cmd += ["--into", cur_into]
         rb = subprocess.run(rollback_cmd)
         if rb.returncode == 0:
             console.print("[green]✓ Rolled back to original name[/green]")
         else:
-            restore_hint = f"skillshare install {source} --name {cur_name}"
+            restore_hint = f"skillshare install {install_url} --name {cur_name}"
             if cur_into:
                 restore_hint += f" --into {cur_into}"
             console.print(Text.assemble(
