@@ -105,4 +105,8 @@ if command -v mise &>/dev/null; then
     mise activate zsh > "$F/_mise.zsh" 2>/dev/null || true
 fi
 
+# -- Bat cache -----------------------------------------------------------------
+
+command -v bat &>/dev/null && { gum spin --title "Building bat cache..." -- bat cache --build; }
+
 rm -f ~/.zcompdump*
