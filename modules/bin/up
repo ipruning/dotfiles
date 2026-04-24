@@ -97,6 +97,11 @@ else
   logger "tigris not found. Install: curl -fsSL https://raw.githubusercontent.com/tigrisdata/cli/main/scripts/install.sh | sh" "WARN"
 fi
 
+if command -v skillshare >/dev/null 2>&1; then
+  logger "Updating Skillshare skills..."
+  skillshare update --all
+fi
+
 if command -v pi >/dev/null 2>&1; then
   logger "Updating Pi Plugin..."
   pi update
