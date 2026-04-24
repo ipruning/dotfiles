@@ -2,8 +2,8 @@
 # /// script
 # requires-python = ">=3.13"
 # dependencies = [
-#     "loguru==0.7.3",
-#     "rich==14.2.0",
+#     "loguru>=0.7.3",
+#     "rich>=15.0.0",
 # ]
 # ///
 

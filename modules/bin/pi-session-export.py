@@ -1,7 +1,7 @@
 #!/usr/bin/env -S uv run --script
 # /// script
 # requires-python = ">=3.13"
-# dependencies = ["typer>=0.21.1", "pydantic>=2.10.0", "rich>=14.3.2"]
+# dependencies = ["typer>=0.24.2","pydantic>=2.13.3", "rich>=15.0.0"]
 # ///
 """Export Pi session files into two JSONL artifacts.
 

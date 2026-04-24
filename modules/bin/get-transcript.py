@@ -1,7 +1,7 @@
 #!/usr/bin/env -S uv run --script
 # /// script
 # requires-python = ">=3.13"
-# dependencies = ["youtube-transcript-api==1.2.3"]
+# dependencies = ["youtube-transcript-api>=1.2.4"]
 # ///
 """
 Extract transcript from a YouTube video.

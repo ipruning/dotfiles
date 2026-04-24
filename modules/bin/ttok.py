@@ -1,7 +1,7 @@
 #!/usr/bin/env -S uv run --script
 # /// script
 # requires-python = ">=3.13"
-# dependencies = ["tiktoken==0.12.0"]
+# dependencies = ["tiktoken>=0.12.0"]
 # ///
 """Count tokens in text using tiktoken (o200k_base encoding).
 

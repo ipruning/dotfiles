@@ -9,10 +9,11 @@ dependencies = [
     "autocorrect-py>=2.14.0",
     "fire>=0.7.1",
     "loguru>=0.7.3",
-    "pydantic-ai>=1.68.0",
-    "rich>=14.3.3",
+    "pydantic-ai>=1.86.1",
+    "rich>=15.0.0",
+    "ruamel-yaml>=0.19.1",
     "tiktoken>=0.12.0",
-    "typer>=0.24.1",
+    "typer>=0.24.2",
     "youtube-transcript-api>=1.2.4",
 ]
 
