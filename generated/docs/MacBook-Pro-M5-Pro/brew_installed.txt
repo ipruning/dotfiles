@@ -36,6 +36,8 @@ rclone
 rip2
 ripgrep
 ripsecrets
+rush-parallel
+rust-parallel
 shellcheck
 skillshare
 sqlfluff
