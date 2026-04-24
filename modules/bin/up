@@ -42,89 +42,53 @@ function logger() {
 
   printf "${color}[%s] [%s] %s${NC}\n" "$timestamp" "$loglevel_upper" "$message"
 }
+export -f logger
 
+# Collect all update commands for parallel execution
+parallel_cmds=()
 if command -v brew >/dev/null 2>&1; then
-  logger "Updating Homebrew..."
-  brew update
-  brew upgrade
-  brew cleanup
-  brew autoremove
+  parallel_cmds+=('SECONDS=0; logger "Updating Homebrew..." && brew update && brew upgrade && brew cleanup && brew autoremove; logger "Homebrew done in ${SECONDS}s"')
 fi
-
 if command -v mise >/dev/null 2>&1; then
-  logger "Updating mise..."
-  mise upgrade
-  mise prune --yes
-  mise reshim
+  parallel_cmds+=('SECONDS=0; logger "Updating mise..." && mise upgrade && mise prune --yes && mise reshim; logger "mise done in ${SECONDS}s"')
 fi
-
 if command -v gh >/dev/null 2>&1; then
-  logger "Updating GitHub CLI extensions..."
-  gh extension upgrade --all
+  parallel_cmds+=('SECONDS=0; logger "Updating GitHub CLI extensions..." && gh extension upgrade --all; logger "GitHub CLI done in ${SECONDS}s"')
 fi
-
 if command -v tldr >/dev/null 2>&1; then
-  logger "Updating tldr pages..."
-  tldr --update
+  parallel_cmds+=('SECONDS=0; logger "Updating tldr pages..." && tldr --update; logger "tldr done in ${SECONDS}s"')
 fi
-
 if command -v ya >/dev/null 2>&1; then
-  logger "Updating ya packages..."
-  ya pkg upgrade
+  parallel_cmds+=('SECONDS=0; logger "Updating ya packages..." && ya pkg upgrade; logger "ya done in ${SECONDS}s"')
 fi
-
 # curl -fsSL https://sprites.dev/install.sh | sh
 if command -v sprite >/dev/null 2>&1; then
-  logger "Updating Sprite..."
-  sprite upgrade
+  parallel_cmds+=('SECONDS=0; logger "Updating Sprite..." && sprite upgrade; logger "Sprite done in ${SECONDS}s"')
 else
   logger "sprite not found. Install: curl -fsSL https://sprites.dev/install.sh | sh" "WARN"
 fi
-
 # curl -fsSL https://ampcode.com/install.sh | bash
 if command -v amp >/dev/null 2>&1; then
-  logger "Updating Amp Code..."
-  amp update
+  parallel_cmds+=('SECONDS=0; logger "Updating Amp Code..." && amp update; logger "Amp done in ${SECONDS}s"')
 else
   logger "amp not found. Install: curl -fsSL https://ampcode.com/install.sh | bash" "WARN"
 fi
-
 # curl -fsSL https://raw.githubusercontent.com/tigrisdata/cli/main/scripts/install.sh | sh
 if command -v tigris >/dev/null 2>&1; then
-  logger "Updating Tigris..."
-  tigris update
+  parallel_cmds+=('SECONDS=0; logger "Updating Tigris..." && tigris update; logger "Tigris done in ${SECONDS}s"')
 else
   logger "tigris not found. Install: curl -fsSL https://raw.githubusercontent.com/tigrisdata/cli/main/scripts/install.sh | sh" "WARN"
 fi
-
-if command -v skillshare >/dev/null 2>&1; then
-  logger "Updating Skillshare skills..."
-  skillshare update --all
-fi
-
+# skillshare update moved to mise run sync
 if command -v pi >/dev/null 2>&1; then
-  logger "Updating Pi Plugin..."
-  pi update
+  parallel_cmds+=('SECONDS=0; logger "Updating Pi Plugin..." && pi update; logger "Pi done in ${SECONDS}s"')
 else
   logger "pi not found. Install: brew install pi-coding-agent" "WARN"
 fi
 
-logger "Backing up all packages..."
-host="$(hostname -s || true)"
-host="${host:-unknown-host}"
-host="${host//[^A-Za-z0-9._-]/-}"
-mkdir -p "$HOME/dotfiles/generated/docs/$host"
-if command -v brew >/dev/null 2>&1; then
-  brew bundle dump --file="$HOME/dotfiles/generated/docs/$host/brew_dump.txt" --force
-  brew leaves | LC_ALL=en_US.UTF-8 sort >"$HOME/dotfiles/generated/docs/$host/brew_leaves.txt"
-  brew list --installed-on-request | LC_ALL=en_US.UTF-8 sort >"$HOME/dotfiles/generated/docs/$host/brew_installed.txt"
+if [[ ${#parallel_cmds[@]} -gt 0 ]]; then
+  logger "Running ${#parallel_cmds[@]} updates in parallel..."
+  printf '%s\n' "${parallel_cmds[@]}" | rust-parallel -s -k
 fi
-if command -v gh >/dev/null 2>&1; then
-  gh extension list | awk '{print $3}' | LC_ALL=en_US.UTF-8 sort >"$HOME/dotfiles/generated/docs/$host/gh_extensions.txt"
-fi
-if [ -d "/Applications" ]; then
-  find /Applications -maxdepth 1 -name "*.app" -exec basename {} .app \; | LC_ALL=en_US.UTF-8 sort >"$HOME/dotfiles/generated/docs/$host/applications.txt"
-fi
-if [ -d "/Applications/Setapp" ]; then
-  find /Applications/Setapp -maxdepth 1 -name "*.app" -exec basename {} .app \; | LC_ALL=en_US.UTF-8 sort >"$HOME/dotfiles/generated/docs/$host/setapp.txt"
-fi
+
+# backup moved to mise run sync

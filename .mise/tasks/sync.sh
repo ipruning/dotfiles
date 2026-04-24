@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#MISE description="Sync shell completion files"
+#MISE description="Sync plugins, completions, functions, skillshare, and backup package lists"
 
 set -euo pipefail
 
@@ -110,3 +110,34 @@ fi
 command -v bat &>/dev/null && { gum spin --title "Building bat cache..." -- bat cache --build; }
 
 rm -f ~/.zcompdump*
+
+# -- Skillshare ----------------------------------------------------------------
+
+if command -v skillshare &>/dev/null; then
+  gum log --level info "Syncing Skillshare skills..."
+  skillshare update --all
+fi
+
+# -- Backup installed packages -------------------------------------------------
+
+gum log --level info "Backing up installed packages..."
+
+host="$(hostname -s || true)"
+host="${host:-unknown-host}"
+host="${host//[^A-Za-z0-9._-]/-}"
+mkdir -p "generated/docs/$host"
+
+command -v brew &>/dev/null && {
+  brew bundle dump --file="generated/docs/$host/brew_dump.txt" --force
+  brew leaves | LC_ALL=en_US.UTF-8 sort >"generated/docs/$host/brew_leaves.txt"
+  brew list --installed-on-request | LC_ALL=en_US.UTF-8 sort >"generated/docs/$host/brew_installed.txt"
+}
+command -v gh &>/dev/null && {
+  gh extension list | awk '{print $3}' | LC_ALL=en_US.UTF-8 sort >"generated/docs/$host/gh_extensions.txt"
+}
+[ -d "/Applications" ] && {
+  find /Applications -maxdepth 1 -name "*.app" -exec basename {} .app \; | LC_ALL=en_US.UTF-8 sort >"generated/docs/$host/applications.txt"
+}
+[ -d "/Applications/Setapp" ] && {
+  find /Applications/Setapp -maxdepth 1 -name "*.app" -exec basename {} .app \; | LC_ALL=en_US.UTF-8 sort >"generated/docs/$host/setapp.txt"
+}
