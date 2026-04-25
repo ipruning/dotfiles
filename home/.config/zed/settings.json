@@ -13,11 +13,11 @@
   },
   "agent_servers": {
     "codex-acp": {
-      "type": "registry"
+      "type": "registry",
     },
     "amp-acp": {
-      "type": "registry"
-    }
+      "type": "registry",
+    },
   },
   "agent": {
     "dock": "left",
