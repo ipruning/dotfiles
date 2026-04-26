@@ -53,6 +53,7 @@ Things3
 Typeless
 uBlock Origin Lite
 Visual Studio Code
+Warp
 WeChat
 YACReader
 YACReaderLibrary

@@ -6,6 +6,7 @@ biome
 broot
 btop
 cairo
+charmbracelet/tap/crush
 cirruslabs/cli/sshpass
 cirruslabs/cli/tart
 duckdb
@@ -55,4 +56,5 @@ xcodes
 xh
 yazi
 yq
+zellij
 zoxide
