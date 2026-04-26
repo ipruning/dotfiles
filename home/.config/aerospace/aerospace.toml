@@ -1,5 +1,3 @@
-# start-at-login = true
-
 accordion-padding = 0
 after-startup-command = ["workspace 6"]
 default-root-container-layout = "accordion"
@@ -73,13 +71,11 @@ alt-shift-k = ["move up", "mode main"]
 alt-shift-l = ["move right", "mode main"]
 
 alt-b = "exec-and-forget ~/dotfiles/modules/bin/newwin chrome"
-alt-c = "exec-and-forget ~/dotfiles/modules/bin/newwin cursor"
-alt-g = "exec-and-forget open -a /Applications/Ghostty.app"
+alt-c = "exec-and-forget open -a /Applications/Codex.app"
+alt-g = "exec-and-forget ~/dotfiles/modules/bin/newwin ghostty"
 alt-p = 'exec-and-forget open -a /Applications/Repo\ Prompt.app'
 alt-r = 'exec-and-forget open -a /Applications/Roam\ Research.app'
 alt-z = "exec-and-forget ~/dotfiles/modules/bin/newwin zed"
-
-# cmd-enter = 'exec-and-forget ~/dotfiles/modules/bin/newwin ghostty'
 
 cmd-m = []
 cmd-h = []
@@ -182,14 +178,3 @@ run = "layout floating"
 [[on-window-detected]]
 if.app-id = "com.sleeplessmind.Wooshy"
 run = "layout floating"
-
-[[on-window-detected]]
-if.app-id = "com.pvncher.repoprompt"
-run = ["move-node-to-workspace 9", "layout floating"]
-
-[[on-window-detected]]
-if.app-id = "com.mitchellh.ghostty"
-run = ["move-node-to-workspace 0", "layout tiling"]
-
-[[on-window-detected]]
-run = "move-node-to-workspace 6"
