@@ -21,9 +21,13 @@ undo-timeout = 1m
 window-padding-x = 14
 window-padding-y = 14
 
-keybind = cmd+n=new_tab
+# keybind = cmd+n=new_tab
+# keybind = cmd+q=ignore
+# keybind = cmd+t=new_tab
+
+keybind = cmd+n=new_window
 keybind = cmd+q=ignore
-keybind = cmd+t=new_tab
+keybind = cmd+t=new_window
 
 # Linux
 config-file = ?"~/.config/omarchy/current/theme/ghostty.conf"
