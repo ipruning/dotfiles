@@ -1,0 +1,153 @@
+#!/usr/bin/env bash
+#
+# bag-mode — keep MacBook running with the lid closed (e.g. in a bag)
+#
+# Startup:
+#   - capture built-in display brightness as INITIAL_BRIGHTNESS
+#   - capture current lowpowermode as INITIAL_LPM
+#   - sudo pmset -a disablesleep 1   (clamshell sleep disabled)
+#
+# While running (polled every $INTERVAL seconds):
+#   - lid closed  → brightness 0 + lowpowermode 1
+#   - lid open    → brightness INITIAL_BRIGHTNESS + lowpowermode INITIAL_LPM
+#
+# Periodic logging:
+#   - battery line every $BATTERY_EVERY seconds
+#
+# Output goes to stdout. Redirect or pipe if you want a file:
+#   bag-mode | tee /tmp/bag-mode.log
+#   bag-mode > /tmp/bag-mode.log
+#
+# Ctrl+C / SIGTERM:
+#   - restore brightness, lowpowermode, disablesleep
+#
+# kill -9 will not run cleanup. Recover manually:
+#   sudo pmset -a disablesleep 0
+#   sudo pmset -a lowpowermode 0
+#   /usr/local/bin/brightness-head -m 1.0
+
+set -euo pipefail
+
+INTERVAL="${INTERVAL:-0.5}"
+BATTERY_EVERY="${BATTERY_EVERY:-60}"
+BRIGHTNESS_BIN="${BRIGHTNESS_BIN:-/usr/local/bin/brightness-head}"
+
+if [[ ! -x "$BRIGHTNESS_BIN" ]]; then
+  echo "brightness binary not found: $BRIGHTNESS_BIN" >&2
+  exit 1
+fi
+
+log() {
+  printf '[%s] %s\n' "$(date '+%F %T')" "$*"
+}
+
+lid_state() {
+  # Avoid `ioreg | grep -q` because grep -q exits early, sending SIGPIPE to
+  # ioreg, and `set -o pipefail` then reports the pipeline as failed.
+  local out
+  out="$(/usr/sbin/ioreg -r -k AppleClamshellState -d 4)"
+  if [[ "$out" == *'"AppleClamshellState" = Yes'* ]]; then
+    echo closed
+  else
+    echo open
+  fi
+}
+
+# e.g. "75%; discharging; 4:23 remaining" or "100%; charged"
+battery_status() {
+  /usr/bin/pmset -g batt | awk -F'\t' '/InternalBattery/ {
+    n = split($2, a, "; ")
+    out = a[1]
+    for (i = 2; i <= n; i++) {
+      sub(/ present:.*/, "", a[i])
+      out = out "; " a[i]
+    }
+    print out
+    exit
+  }'
+}
+
+set_brightness() {
+  local value="$1" rc=0 out
+  out="$("$BRIGHTNESS_BIN" -d "$DISPLAY_ID" "$value" 2>&1)" || rc=$?
+  log "brightness $value rc=$rc${out:+ ($out)}"
+}
+
+set_lowpowermode() {
+  local value="$1" rc=0 out
+  out="$(sudo /usr/bin/pmset -a lowpowermode "$value" 2>&1)" || rc=$?
+  log "pmset lowpowermode $value rc=$rc${out:+ ($out)}"
+}
+
+set_disablesleep() {
+  local value="$1" rc=0 out
+  out="$(sudo /usr/bin/pmset -a disablesleep "$value" 2>&1)" || rc=$?
+  log "pmset disablesleep $value rc=$rc${out:+ ($out)}"
+}
+
+# Detect built-in display index + initial brightness in one pass.
+DISPLAY_ID=""
+INITIAL_BRIGHTNESS=""
+read -r DISPLAY_ID INITIAL_BRIGHTNESS < <(
+  "$BRIGHTNESS_BIN" -l 2>/dev/null | awk '
+    /built-in/ {
+      gsub(":", "", $2); idx = $2; getline
+      if ($0 ~ /brightness/) { print idx, $NF; exit }
+    }
+  '
+) || true
+DISPLAY_ID="${DISPLAY_ID:-0}"
+INITIAL_BRIGHTNESS="${INITIAL_BRIGHTNESS:-1.0}"
+
+# Capture current lowpowermode (empty / missing = 0).
+INITIAL_LPM="$(/usr/bin/pmset -g | awk '/lowpowermode/ {print $2; exit}')"
+INITIAL_LPM="${INITIAL_LPM:-0}"
+
+# Sudo bootstrap + keep cache warm in background.
+if ! sudo -n true 2>/dev/null; then
+  sudo -v
+fi
+( while true; do sudo -n true 2>/dev/null || exit; sleep 60; done ) &
+SUDO_REFRESH_PID=$!
+
+cleanup() {
+  trap '' INT TERM
+  log "cleanup: brightness=$INITIAL_BRIGHTNESS lowpowermode=$INITIAL_LPM disablesleep=0"
+  set_brightness "$INITIAL_BRIGHTNESS"
+  set_lowpowermode "$INITIAL_LPM"
+  set_disablesleep 0
+  kill "$SUDO_REFRESH_PID" 2>/dev/null || true
+  log "stopped"
+  exit 0
+}
+trap cleanup INT TERM
+
+log "started; display=$DISPLAY_ID initial_brightness=$INITIAL_BRIGHTNESS initial_lpm=$INITIAL_LPM interval=${INTERVAL}s battery_every=${BATTERY_EVERY}s"
+
+set_disablesleep 1
+
+last_state=""
+last_battery=0
+while true; do
+  state="$(lid_state)"
+  now="$(date +%s)"
+
+  if [[ "$state" != "$last_state" ]]; then
+    log "lid=$state"
+    if [[ "$state" == "closed" ]]; then
+      set_brightness 0
+      set_lowpowermode 1
+    else
+      set_brightness "$INITIAL_BRIGHTNESS"
+      set_lowpowermode "$INITIAL_LPM"
+    fi
+    last_state="$state"
+  fi
+
+  if (( now - last_battery >= BATTERY_EVERY )); then
+    log "battery $(battery_status)"
+    last_battery=$now
+  fi
+
+  sleep "$INTERVAL"
+done
