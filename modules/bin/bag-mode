@@ -8,8 +8,13 @@
 #   - sudo pmset -a disablesleep 1   (clamshell sleep disabled)
 #
 # While running (polled every $INTERVAL seconds):
-#   - lid closed  → brightness 0 + lowpowermode 1
-#   - lid open    → brightness INITIAL_BRIGHTNESS + lowpowermode INITIAL_LPM
+#   - lid closed  → brightness 0 + battery-side lowpowermode 1
+#   - lid open    → brightness INITIAL_BRIGHTNESS + battery-side lowpowermode INITIAL_LPM
+#
+# Only the battery-side (`pmset -b`) lowpowermode is touched; the AC-side is
+# left alone. macOS automatically applies the correct setting based on the
+# current power source, so plugging/unplugging while the lid is closed is
+# handled by the kernel and needs no polling here.
 #
 # Periodic logging:
 #   - battery line every $BATTERY_EVERY seconds
@@ -23,7 +28,7 @@
 #
 # kill -9 will not run cleanup. Recover manually:
 #   sudo pmset -a disablesleep 0
-#   sudo pmset -a lowpowermode 0
+#   sudo pmset -b lowpowermode 0
 #   /usr/local/bin/brightness-head -m 1.0
 
 set -euo pipefail
@@ -36,6 +41,22 @@ if [[ ! -x "$BRIGHTNESS_BIN" ]]; then
   echo "brightness binary not found: $BRIGHTNESS_BIN" >&2
   exit 1
 fi
+
+# Single-instance lock. `mkdir` is atomic; if another bag-mode is alive we
+# bail out, otherwise we treat the lock as stale and take it over.
+LOCKDIR="${LOCKDIR:-${TMPDIR:-/tmp}/bag-mode.lock}"
+LOCKDIR="${LOCKDIR%/}"
+if ! mkdir "$LOCKDIR" 2>/dev/null; then
+  existing_pid="$(cat "$LOCKDIR/pid" 2>/dev/null || true)"
+  if [[ -n "$existing_pid" ]] && kill -0 "$existing_pid" 2>/dev/null; then
+    echo "bag-mode already running (pid=$existing_pid, lock=$LOCKDIR)" >&2
+    exit 1
+  fi
+  echo "stale lock at $LOCKDIR (pid=${existing_pid:-?}); reclaiming" >&2
+  rm -rf "$LOCKDIR"
+  mkdir "$LOCKDIR"
+fi
+echo $$ > "$LOCKDIR/pid"
 
 log() {
   printf '[%s] %s\n' "$(date '+%F %T')" "$*"
@@ -75,8 +96,8 @@ set_brightness() {
 
 set_lowpowermode() {
   local value="$1" rc=0 out
-  out="$(sudo /usr/bin/pmset -a lowpowermode "$value" 2>&1)" || rc=$?
-  log "pmset lowpowermode $value rc=$rc${out:+ ($out)}"
+  out="$(sudo /usr/bin/pmset -b lowpowermode "$value" 2>&1)" || rc=$?
+  log "pmset -b lowpowermode $value rc=$rc${out:+ ($out)}"
 }
 
 set_disablesleep() {
@@ -99,8 +120,14 @@ read -r DISPLAY_ID INITIAL_BRIGHTNESS < <(
 DISPLAY_ID="${DISPLAY_ID:-0}"
 INITIAL_BRIGHTNESS="${INITIAL_BRIGHTNESS:-1.0}"
 
-# Capture current lowpowermode (empty / missing = 0).
-INITIAL_LPM="$(/usr/bin/pmset -g | awk '/lowpowermode/ {print $2; exit}')"
+# Capture battery-side lowpowermode (empty / missing = 0).
+# `pmset -g custom` lists both sources; field is `lowpowermode` on newer macOS
+# and `powermode` on some versions, so match both.
+INITIAL_LPM="$(/usr/bin/pmset -g custom | awk '
+  /^Battery Power:/ { f = 1; next }
+  /^AC Power:/      { f = 0 }
+  f && /(low)?powermode/ { print $2; exit }
+')"
 INITIAL_LPM="${INITIAL_LPM:-0}"
 
 # Sudo bootstrap + keep cache warm in background.
@@ -111,16 +138,17 @@ fi
 SUDO_REFRESH_PID=$!
 
 cleanup() {
-  trap '' INT TERM
-  log "cleanup: brightness=$INITIAL_BRIGHTNESS lowpowermode=$INITIAL_LPM disablesleep=0"
-  set_brightness "$INITIAL_BRIGHTNESS"
-  set_lowpowermode "$INITIAL_LPM"
+  trap '' INT TERM EXIT
+  log "cleanup: brightness=${INITIAL_BRIGHTNESS:-?} lowpowermode=${INITIAL_LPM:-?} disablesleep=0"
+  [[ -n "${DISPLAY_ID:-}" ]] && set_brightness "${INITIAL_BRIGHTNESS:-1.0}"
+  [[ -n "${INITIAL_LPM:-}" ]] && set_lowpowermode "$INITIAL_LPM"
   set_disablesleep 0
-  kill "$SUDO_REFRESH_PID" 2>/dev/null || true
+  [[ -n "${SUDO_REFRESH_PID:-}" ]] && kill "$SUDO_REFRESH_PID" 2>/dev/null || true
+  rm -rf "$LOCKDIR"
   log "stopped"
-  exit 0
 }
-trap cleanup INT TERM
+trap 'cleanup; exit 0' INT TERM
+trap cleanup EXIT
 
 log "started; display=$DISPLAY_ID initial_brightness=$INITIAL_BRIGHTNESS initial_lpm=$INITIAL_LPM interval=${INTERVAL}s battery_every=${BATTERY_EVERY}s"
 
