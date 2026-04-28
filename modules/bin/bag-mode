@@ -29,13 +29,13 @@
 # kill -9 will not run cleanup. Recover manually:
 #   sudo pmset -a disablesleep 0
 #   sudo pmset -b lowpowermode 0
-#   /usr/local/bin/brightness-head -m 1.0
+#   /usr/local/bin/brightness -m 1.0
 
 set -euo pipefail
 
 INTERVAL="${INTERVAL:-0.5}"
 BATTERY_EVERY="${BATTERY_EVERY:-60}"
-BRIGHTNESS_BIN="${BRIGHTNESS_BIN:-/usr/local/bin/brightness-head}"
+BRIGHTNESS_BIN="${BRIGHTNESS_BIN:-/usr/local/bin/brightness}"
 
 if [[ ! -x "$BRIGHTNESS_BIN" ]]; then
   echo "brightness binary not found: $BRIGHTNESS_BIN" >&2
