@@ -11,12 +11,25 @@ function unset-all-proxy() {
 }
 
 function _surge-api-key() {
-  perl -ne 'print $1 if /http-api = (.*?)@/' "$HOME/Library/Application Support/Surge/Profiles/default.conf"
+  local conf="$HOME/Library/Application Support/Surge/Profiles/default.conf"
+  if [[ ! -r "$conf" ]]; then
+    print -u2 "surge: profile not found at $conf"
+    return 1
+  fi
+  local key
+  key=$(perl -ne 'print $1 if /http-api = (.*?)@/' "$conf")
+  if [[ -z "$key" ]]; then
+    print -u2 "surge: no http-api key found in $conf"
+    return 1
+  fi
+  echo "$key"
 }
 
 function toggle-enhanced-mode() {
-  local x_key=$(_surge-api-key)
-  local current=$(xh --body GET https://localhost:6171/v1/features/enhanced_mode X-Key:$x_key | jq -r '.enabled')
+  local x_key
+  x_key=$(_surge-api-key) || return
+  local current
+  current=$(xh --body GET https://localhost:6171/v1/features/enhanced_mode X-Key:$x_key | jq -r '.enabled')
   if [[ "$current" == "false" ]]; then
     xh --quiet POST https://localhost:6171/v1/features/enhanced_mode X-Key:$x_key enabled:=true
   else
@@ -27,8 +40,10 @@ function toggle-enhanced-mode() {
 }
 
 function toggle-outbound-mode() {
-  local x_key=$(_surge-api-key)
-  local current=$(xh --body GET https://localhost:6171/v1/outbound X-Key:$x_key | jq -r '.mode')
+  local x_key
+  x_key=$(_surge-api-key) || return
+  local current
+  current=$(xh --body GET https://localhost:6171/v1/outbound X-Key:$x_key | jq -r '.mode')
   if [[ "$current" == "rule" ]]; then
     xh --quiet POST https://localhost:6171/v1/outbound X-Key:$x_key mode=direct
   else
