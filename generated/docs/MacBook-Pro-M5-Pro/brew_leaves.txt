@@ -15,7 +15,9 @@ ffmpeg
 fzf
 gh
 git-delta
+git-lfs
 gitu
+govulncheck
 gum
 htop
 hyperfine
@@ -26,6 +28,7 @@ lazydocker
 lazygit
 ls-lint
 markdownlint-cli2
+mdbook
 mise
 mq
 mysql-client
