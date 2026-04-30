@@ -4,7 +4,7 @@
 # dependencies = [
 #     "rich>=15.0.0",
 #     "ruamel.yaml>=0.19.1",
-#     "typer>=0.24.2",
+#     "typer>=0.25.1",
 # ]
 # ///
 # NOTE: ruamel.yaml is still needed for _set_source() (config write).
@@ -26,14 +26,14 @@ if platform.system() == "Windows":
     print("ss: Windows is not supported", file=sys.stderr)
     sys.exit(1)
 
-from ruamel.yaml import YAML
-
 import typer
 from rich.console import Console
 from rich.text import Text
+from ruamel.yaml import YAML
 
 app = typer.Typer(help="Skillshare source switcher.", no_args_is_help=True)
 console = Console()
+
 
 def _config_path() -> Path:
     """Mirror Go's ConfigPath() for config writes (used by _set_source only)."""
@@ -66,7 +66,8 @@ def _skillshare_json(*args: str) -> dict | list:
     """Run a skillshare command with --global --json and return parsed output."""
     result = subprocess.run(
         ["skillshare", *args, "--global", "--json"],
-        capture_output=True, text=True,
+        capture_output=True,
+        text=True,
     )
     if result.returncode != 0:
         console.print(f"[red]skillshare {' '.join(args)} failed[/red]")
@@ -78,7 +79,7 @@ def _skillshare_json(*args: str) -> dict | list:
 
 def _current_source() -> str:
     data = _skillshare_json("status")
-    raw = data.get("source", {}).get("path", "")
+    raw = data.get("source", {}).get("path", "")  # ty:ignore[unresolved-attribute]
     if not raw:
         console.print("[red]skillshare config has no source[/red]")
         raise typer.Exit(1)
@@ -201,7 +202,17 @@ def exec_cmd(name: str, cmd: list[str]):
         result = subprocess.run(cmd)
         raise typer.Exit(result.returncode)
     finally:
-        _set_source(orig)
+        try:
+            _set_source(orig)
+        except Exception as e:
+            console.print(f"[red]Failed to restore source: {e}[/red]")
+            console.print(
+                Text.assemble(
+                    ("Restore manually by editing ", "red"),
+                    (str(SKILLSHARE_CFG), "bold"),
+                    (f"\n  source: {orig}", "dim"),
+                )
+            )
 
 
 def _parse_skill_name(name: str) -> tuple[str, str | None]:
@@ -236,12 +247,18 @@ def rename(old: str, new: str):
     # --- validate new name and --into segments ---
     new_name, new_into = _parse_skill_name(new)
     if err := _validate_name(new_name):
-        console.print(Text.assemble(("Invalid skill name: ", "red"), (new_name, "bold"), f"\n{err}"))
+        console.print(
+            Text.assemble(
+                ("Invalid skill name: ", "red"), (new_name, "bold"), f"\n{err}"
+            )
+        )
         raise typer.Exit(1)
     if new_into:
         for seg in PurePosixPath(new_into).parts:
             if seg in (".", "..") or not _VALID_NAME.match(seg):
-                console.print(Text.assemble(("Invalid --into segment: ", "red"), (seg, "bold")))
+                console.print(
+                    Text.assemble(("Invalid --into segment: ", "red"), (seg, "bold"))
+                )
                 raise typer.Exit(1)
 
     # --- load skill list via CLI ---
@@ -256,7 +273,9 @@ def rename(old: str, new: str):
     entry: dict | None = skills_by_rel.get(old)
     entry_key = old if entry else None
     if entry is None:
-        matches = {k: v for k, v in skills_by_rel.items() if PurePosixPath(k).name == old}
+        matches = {
+            k: v for k, v in skills_by_rel.items() if PurePosixPath(k).name == old
+        }
         if len(matches) == 1:
             entry_key, entry = next(iter(matches.items()))
         elif len(matches) > 1:
@@ -273,10 +292,13 @@ def rename(old: str, new: str):
         raise typer.Exit(1)
 
     if entry.get("repoName"):
-        console.print(Text.assemble(
-            ("Cannot rename tracked repo skill: ", "red"), (entry_key, "bold"),
-            ("\nUse 'skillshare uninstall' on the tracked repo instead.", "dim"),
-        ))
+        console.print(
+            Text.assemble(
+                ("Cannot rename tracked repo skill: ", "red"),
+                (entry_key, "bold"),
+                ("\nUse 'skillshare uninstall' on the tracked repo instead.", "dim"),
+            )
+        )
         raise typer.Exit(1)
 
     # --- derive canonical current path ---
@@ -286,24 +308,36 @@ def rename(old: str, new: str):
 
     # --- preflight: no-op check ---
     if current_rel == target_rel:
-        console.print("[yellow]Old and new resolve to the same path; nothing to do.[/yellow]")
+        console.print(
+            "[yellow]Old and new resolve to the same path; nothing to do.[/yellow]"
+        )
         raise typer.Exit(0)
 
     # --- preflight: target already exists ---
     target_path = source_dir / Path(*PurePosixPath(target_rel).parts)
     if target_path.exists() or target_rel in skills_by_rel:
-        console.print(Text.assemble(("Target already exists: ", "red"), (target_rel, "bold")))
+        console.print(
+            Text.assemble(("Target already exists: ", "red"), (target_rel, "bold"))
+        )
         raise typer.Exit(1)
 
     install_url = entry.get("source", "")
     if not install_url:
-        console.print(Text.assemble(("No source recorded for: ", "red"), (current_rel, "bold")))
+        console.print(
+            Text.assemble(("No source recorded for: ", "red"), (current_rel, "bold"))
+        )
         raise typer.Exit(1)
 
-    console.print(Text.assemble(
-        ("Renaming ", ""), (current_rel, "bold"), " → ", (target_rel, "bold"),
-        ("\n  source: ", "dim"), (install_url, "dim"),
-    ))
+    console.print(
+        Text.assemble(
+            ("Renaming ", ""),
+            (current_rel, "bold"),
+            " → ",
+            (target_rel, "bold"),
+            ("\n  source: ", "dim"),
+            (install_url, "dim"),
+        )
+    )
 
     # --- uninstall ---
     r1 = subprocess.run(["skillshare", "uninstall", "--force", current_rel])
@@ -328,13 +362,23 @@ def rename(old: str, new: str):
             restore_hint = f"skillshare install {install_url} --name {cur_name}"
             if cur_into:
                 restore_hint += f" --into {cur_into}"
-            console.print(Text.assemble(
-                ("[red]Rollback also failed. Restore manually:[/red]\n  ", ""),
-                (restore_hint, "dim"),
-            ))
+            console.print(
+                Text.assemble(
+                    ("[red]Rollback also failed. Restore manually:[/red]\n  ", ""),
+                    (restore_hint, "dim"),
+                )
+            )
         raise typer.Exit(1)
 
-    console.print(Text.assemble(("✓ ", "green"), "Renamed ", (current_rel, "bold"), " → ", (target_rel, "bold")))
+    console.print(
+        Text.assemble(
+            ("✓ ", "green"),
+            "Renamed ",
+            (current_rel, "bold"),
+            " → ",
+            (target_rel, "bold"),
+        )
+    )
 
 
 def _check(ok: bool, label: str, detail: str) -> bool:
