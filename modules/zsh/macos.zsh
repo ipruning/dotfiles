@@ -11,46 +11,46 @@ function x86_64-zsh-run() {
 }
 
 function jump-to-session() {
-  local zellij_path="/opt/homebrew/bin/zellij"
+  local zellij_path
+  zellij_path="$(command -v zellij)" || { print -u2 "zellij not found"; return 1; }
 
   if [[ -n "$ZELLIJ" ]]; then
-    :
-  else
-    zj_sessions=$($zellij_path list-sessions --no-formatting --short)
-    case $(echo "$zj_sessions" | grep -c '^.') in
-    0)
-      $zellij_path
-      ;;
-    *)
-      if local selected_session; selected_session=$(echo "$zj_sessions" | tv --no-preview); then
-        if [[ -n "$selected_session" ]]; then
-          $zellij_path attach "$selected_session"
-        fi
-      else
-        :
-      fi
-      ;;
-    esac
+    return 0
   fi
+
+  local zj_sessions
+  zj_sessions=$("$zellij_path" list-sessions --no-formatting --short)
+  if [[ -z "$zj_sessions" ]]; then
+    "$zellij_path"
+    return
+  fi
+
+  local selected_session
+  selected_session=$(echo "$zj_sessions" | tv --no-preview) || return
+  [[ -n "$selected_session" ]] && "$zellij_path" attach "$selected_session"
 }
 
 function jump-to-repo() {
-  local repo_path
+  local repo_path zellij_path
   repo_path=$(tv git-repos)
-  local zellij_path="/opt/homebrew/bin/zellij"
-
   [[ -z "$repo_path" ]] && return
+
+  cd "${repo_path}"
   if [[ -n "$ZELLIJ" ]]; then
-    cd "${repo_path}"
-  else
-    cd "${repo_path}"
-    local repo_name=$(basename "${repo_path}")
-    $zellij_path attach "${repo_name}" 2>/dev/null || $zellij_path --session "${repo_name}" --new-session-with-layout dev
+    return 0
   fi
+
+  zellij_path="$(command -v zellij)" || { print -u2 "zellij not found"; return 1; }
+  local repo_name
+  repo_name=$(basename "${repo_path}")
+  "$zellij_path" attach "${repo_name}" 2>/dev/null \
+    || "$zellij_path" --session "${repo_name}" --new-session-with-layout dev
 }
 
 function pf() {
-  set -f
+  emulate -L zsh
+  setopt local_options noglob
+
   local PUEUE_TASKS=$(cat <<'EOF'
 pueue status --json | jq -c '.tasks' | jq -r '
   .[] |
@@ -64,7 +64,7 @@ EOF
 )
   local header=" ctrl-[p]ause [s]tart [r]estart [k]ill [l]og [f]ilter"
 
-local bind="\
+  local bind="\
 ctrl-p:execute-silent(echo {} | cut -d'|' -f1 | xargs pueue pause > /dev/null)+reload^$PUEUE_TASKS^,\
 ctrl-s:execute-silent(echo {} | cut -d'|' -f1 | xargs pueue start > /dev/null)+reload^$PUEUE_TASKS^,\
 ctrl-r:execute-silent(echo {} | cut -d'|' -f1 | xargs pueue restart -ik > /dev/null)+reload^$PUEUE_TASKS^,\
@@ -73,20 +73,20 @@ ctrl-l:execute-silent(echo {} | cut -d'|' -f1 | xargs pueue log | less > /dev/tt
 ctrl-f:reload^$PUEUE_TASKS^\
 "
 
-  echo $PUEUE_TASKS | sh | fzf --header "${header}" -m \
+  fzf --header "${header}" -m \
     --preview="echo {} | cut -d'|' -f1 | xargs pueue log | bat -l log --style=rule,numbers --color=always -r ':200'" \
-    --bind="$bind"
-  set +f
-}
-
-function mkdircd() {
-  mkdir -p "$@" && cd "$1"
+    --bind="$bind" \
+    < <(eval "$PUEUE_TASKS")
 }
 
 function serve() {
   local port=${1:-8000}
-  local ip=$(ipconfig getifaddr en0)
+  local ip
+  for iface in en0 en1 en2; do
+    ip=$(ipconfig getifaddr "$iface" 2>/dev/null) && [[ -n "$ip" ]] && break
+  done
+  ip="${ip:-127.0.0.1}"
 
   echo "Serving on ${ip}:${port} ..."
-  uv run python -m http.server ${port}
+  uv run python -m http.server "${port}"
 }
