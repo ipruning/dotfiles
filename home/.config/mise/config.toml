@@ -13,6 +13,7 @@ zig = "latest"
 "cargo:sigye" = "latest"
 "gem:kamal" = "latest"
 "github:actionbook/actionbook" = "latest"
+"github:badlogic/pi-mono" = "0.70.2"
 "github:larksuite/cli" = "latest"
 "github:Loongphy/codex-auth" = "latest"
 "github:schpet/linear-cli" = "latest"
@@ -34,6 +35,7 @@ trusted_config_paths = [
     "~/Downloads/",
     "~/Developer",
 ]
+lockfile = true
 
 [settings.ruby]
 compile = false
