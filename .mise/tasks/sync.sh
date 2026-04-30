@@ -109,6 +109,8 @@ fi
 
 command -v bat &>/dev/null && { gum spin --title "Building bat cache..." -- bat cache --build; }
 
+# Drop completion caches so the next interactive shell rebuilds compinit
+# against the freshly generated `_*` files in generated/completions.
 rm -f ~/.zcompdump*
 
 # -- Skillshare ----------------------------------------------------------------
@@ -127,17 +129,35 @@ host="${host:-unknown-host}"
 host="${host//[^A-Za-z0-9._-]/-}"
 mkdir -p "generated/docs/$host"
 
-command -v brew &>/dev/null && {
-  brew bundle dump --file="generated/docs/$host/brew_dump.txt" --force
-  brew leaves | LC_ALL=en_US.UTF-8 sort >"generated/docs/$host/brew_leaves.txt"
-  brew list --installed-on-request | LC_ALL=en_US.UTF-8 sort >"generated/docs/$host/brew_installed.txt"
+if command -v brew &>/dev/null; then
+  brew bundle dump --file="generated/docs/$host/brew_dump.txt" --force \
+    || gum log --level warn "brew bundle dump failed"
+  brew leaves | LC_ALL=en_US.UTF-8 sort >"generated/docs/$host/brew_leaves.txt" \
+    || gum log --level warn "brew leaves failed"
+  brew list --installed-on-request | LC_ALL=en_US.UTF-8 sort >"generated/docs/$host/brew_installed.txt" \
+    || gum log --level warn "brew list failed"
+fi
+
+if command -v gh &>/dev/null; then
+  gh extension list | awk '{print $3}' | LC_ALL=en_US.UTF-8 sort >"generated/docs/$host/gh_extensions.txt" \
+    || gum log --level warn "gh extension list failed"
+fi
+
+# `find ... -exec basename` forks once per .app and is fragile under
+# pipefail. Use a single-pass print + sed instead.
+list_apps() {
+  local dir="$1"
+  find "$dir" -maxdepth 1 -name '*.app' -print 2>/dev/null \
+    | sed -E 's|^.*/||; s|\.app$||' \
+    | LC_ALL=en_US.UTF-8 sort
 }
-command -v gh &>/dev/null && {
-  gh extension list | awk '{print $3}' | LC_ALL=en_US.UTF-8 sort >"generated/docs/$host/gh_extensions.txt"
-}
-[ -d "/Applications" ] && {
-  find /Applications -maxdepth 1 -name "*.app" -exec basename {} .app \; | LC_ALL=en_US.UTF-8 sort >"generated/docs/$host/applications.txt"
-}
-[ -d "/Applications/Setapp" ] && {
-  find /Applications/Setapp -maxdepth 1 -name "*.app" -exec basename {} .app \; | LC_ALL=en_US.UTF-8 sort >"generated/docs/$host/setapp.txt"
-}
+
+if [ -d "/Applications" ]; then
+  list_apps /Applications >"generated/docs/$host/applications.txt" \
+    || gum log --level warn "applications scan failed"
+fi
+
+if [ -d "/Applications/Setapp" ]; then
+  list_apps /Applications/Setapp >"generated/docs/$host/setapp.txt" \
+    || gum log --level warn "setapp scan failed"
+fi
