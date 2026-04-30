@@ -56,7 +56,6 @@ if [[ "$TERM_PROGRAM" == "zed" ]]; then
 fi
 
 if [[ "$TERM_PROGRAM" == "ghostty" ]]; then
-  export EDITOR="/opt/homebrew/bin/nvim"
   export EDITOR="/opt/homebrew/bin/zed --wait"
   export VISUAL="$EDITOR"
 fi
