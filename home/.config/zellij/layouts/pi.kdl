@@ -6,9 +6,9 @@ layout {
         }
     }
 
-    tab name="amp" {
+    tab name="pi" {
         pane {
-            command "amp" close_on_exit=true
+            command "pi" close_on_exit=true
         }
     }
 }

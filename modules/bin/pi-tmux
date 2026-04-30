@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+# shellcheck source=_lib/session-id.sh
+# shellcheck disable=SC1091
+source "$(dirname "${BASH_SOURCE[0]}")/_lib/session-id.sh"
+
+pwd_abs="$(pwd -P)"
+session="$(session_id_for_dir "$pwd_abs")"
+
+tmux has-session -t "$session" 2>/dev/null || \
+  tmux new-session -d -s "$session" -n pi -c "$pwd_abs" 'zsh -i -c "pi"' || true
+
+tmux list-windows -t "$session" -F '#W' 2>/dev/null | grep -qx pi || \
+  tmux new-window -t "$session" -n pi -c "$pwd_abs" 'zsh -i -c "pi"' || true
+
+if [ -n "${TMUX-}" ]; then
+  tmux switch-client -t "$session"
+  tmux select-window -t "$session:pi"
+else
+  tmux select-window -t "$session:pi"
+  tmux attach -t "$session"
+fi

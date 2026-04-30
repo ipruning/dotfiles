@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+# shellcheck disable=SC1091
+source "$(dirname "${BASH_SOURCE[0]}")/_lib/session-id.sh"
+
+pwd_abs="$(pwd -P)"
+session="$(session_id_for_dir "$pwd_abs")"
+layout="pi"
+
+# zellij list-sessions 的输出可能包含时间/EXITED 信息；取第一列做判断更稳
+if ! zellij list-sessions 2>/dev/null | awk '{print $1}' | grep -qx "$session"; then
+  # 这里会直接进入 zellij；用户 detach 后命令返回
+  zellij --session "$session" --new-session-with-layout "$layout" && exit 0
+fi
+
+exec zellij attach "$session"
