@@ -1,10 +1,23 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
+
+require_env() {
+  local name="$1"
+  if [[ -z "${!name:-}" ]]; then
+    echo "zed-image-paste: required env var \$$name is not set" >&2
+    exit 1
+  fi
+}
+
 if [[ "${ZED_FILE:-}" != *.md ]]; then
     echo "Not a Markdown file"
     exit 1
 fi
+require_env ZED_WORKTREE_ROOT
+require_env IMG_SAVE_PATH
+require_env ZED_STEM
+require_env ZED_DIRNAME
 
 PASTE_IMAGE_SAVE_PATH="${ZED_WORKTREE_ROOT}/${IMG_SAVE_PATH}"
 mkdir -p "$PASTE_IMAGE_SAVE_PATH"
@@ -13,11 +26,16 @@ timestamp="$(date +"%Y-%m-%d-%H-%M-%S")"
 filename="${ZED_STEM}__${timestamp}.png"
 filepath="${PASTE_IMAGE_SAVE_PATH}/${filename}"
 
+# Escape backslash and double-quote for safe interpolation into the
+# AppleScript string literal below.
+filepath_q="${filepath//\\/\\\\}"
+filepath_q="${filepath_q//\"/\\\"}"
+
 osascript_result="$(
 osascript <<EOF
 try
     set theImage to the clipboard as «class PNGf»
-    set theFile to POSIX file "$filepath"
+    set theFile to POSIX file "$filepath_q"
     set outFile to open for access theFile with write permission
     set eof outFile to 0
     write theImage to outFile
@@ -25,7 +43,7 @@ try
     return "ok"
 on error
     try
-        close access POSIX file "$filepath"
+        close access POSIX file "$filepath_q"
     end try
     return "no_image"
 end try
