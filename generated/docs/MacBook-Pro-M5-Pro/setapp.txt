@@ -2,7 +2,6 @@ Bartender
 CleanMyMac
 CleanShot X
 Downie
-Lungo
 One Switch
 Permute
 TablePlus

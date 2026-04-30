@@ -316,6 +316,7 @@
     "redhat.telemetry.enabled": false,
     "ruff.configurationPreference": "filesystemFirst",
     "security.promptForLocalFileProtocolHandling": false,
+    "security.promptForRemoteFileProtocolHandling": false,
     "shellcheck.customArgs": [],
     "shellcheck.enable": true,
     "shellcheck.enableQuickFix": true,

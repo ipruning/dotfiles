@@ -61,36 +61,52 @@ version = "0.4.3"
 backend = "cargo:sigye"
 
 [[tools.deno]]
-version = "2.7.13"
+version = "2.7.14"
 backend = "core:deno"
 
 [tools.deno."platforms.linux-arm64"]
-checksum = "sha256:c017fa8389bd96b6b07b3416bdb8d37074ab2ff1c83a9c94f7b2a6a7da026dac"
-url = "https://dl.deno.land/release/v2.7.13/deno-aarch64-unknown-linux-gnu.zip"
+checksum = "sha256:b815c919452b5993a7c22df018a88c2f706eea6b5e0aa7802b2b0709edde01e8"
+url = "https://dl.deno.land/release/v2.7.14/deno-aarch64-unknown-linux-gnu.zip"
 
 [tools.deno."platforms.linux-arm64-musl"]
-checksum = "sha256:c017fa8389bd96b6b07b3416bdb8d37074ab2ff1c83a9c94f7b2a6a7da026dac"
-url = "https://dl.deno.land/release/v2.7.13/deno-aarch64-unknown-linux-gnu.zip"
+checksum = "sha256:b815c919452b5993a7c22df018a88c2f706eea6b5e0aa7802b2b0709edde01e8"
+url = "https://dl.deno.land/release/v2.7.14/deno-aarch64-unknown-linux-gnu.zip"
 
 [tools.deno."platforms.linux-x64"]
-checksum = "sha256:d7b452de2578742889b70a7e3cf90eb14b8e6b1bca4758380da3630d694f04ff"
-url = "https://dl.deno.land/release/v2.7.13/deno-x86_64-unknown-linux-gnu.zip"
+checksum = "sha256:3287efef53606966469cb6a02781327be22b908959397f976e2996dc1b64ae0f"
+url = "https://dl.deno.land/release/v2.7.14/deno-x86_64-unknown-linux-gnu.zip"
+
+[tools.deno."platforms.linux-x64-baseline"]
+checksum = "sha256:3287efef53606966469cb6a02781327be22b908959397f976e2996dc1b64ae0f"
+url = "https://dl.deno.land/release/v2.7.14/deno-x86_64-unknown-linux-gnu.zip"
 
 [tools.deno."platforms.linux-x64-musl"]
-checksum = "sha256:d7b452de2578742889b70a7e3cf90eb14b8e6b1bca4758380da3630d694f04ff"
-url = "https://dl.deno.land/release/v2.7.13/deno-x86_64-unknown-linux-gnu.zip"
+checksum = "sha256:3287efef53606966469cb6a02781327be22b908959397f976e2996dc1b64ae0f"
+url = "https://dl.deno.land/release/v2.7.14/deno-x86_64-unknown-linux-gnu.zip"
+
+[tools.deno."platforms.linux-x64-musl-baseline"]
+checksum = "sha256:3287efef53606966469cb6a02781327be22b908959397f976e2996dc1b64ae0f"
+url = "https://dl.deno.land/release/v2.7.14/deno-x86_64-unknown-linux-gnu.zip"
 
 [tools.deno."platforms.macos-arm64"]
-checksum = "sha256:e2e63288d11e3f36855b60d77585844cbc5146600cbc7224e2d9276a35378089"
-url = "https://dl.deno.land/release/v2.7.13/deno-aarch64-apple-darwin.zip"
+checksum = "sha256:aeb5825f83b4a9cd7f9355a1c4ddd666205dacf76ccb7b98c2b10e066bc9e4bb"
+url = "https://dl.deno.land/release/v2.7.14/deno-aarch64-apple-darwin.zip"
 
 [tools.deno."platforms.macos-x64"]
-checksum = "sha256:b4153bee3c24074c83513e1a209ffc982277f88b184caccd4de9ba5113cfa2e5"
-url = "https://dl.deno.land/release/v2.7.13/deno-x86_64-apple-darwin.zip"
+checksum = "sha256:c89149513bf8e82ab5b351dac544f8c0cada90753bd2f576f46325fb67997ae1"
+url = "https://dl.deno.land/release/v2.7.14/deno-x86_64-apple-darwin.zip"
+
+[tools.deno."platforms.macos-x64-baseline"]
+checksum = "sha256:c89149513bf8e82ab5b351dac544f8c0cada90753bd2f576f46325fb67997ae1"
+url = "https://dl.deno.land/release/v2.7.14/deno-x86_64-apple-darwin.zip"
 
 [tools.deno."platforms.windows-x64"]
 checksum = "sha256:Algorithm"
-url = "https://dl.deno.land/release/v2.7.13/deno-x86_64-pc-windows-msvc.zip"
+url = "https://dl.deno.land/release/v2.7.14/deno-x86_64-pc-windows-msvc.zip"
+
+[tools.deno."platforms.windows-x64-baseline"]
+checksum = "sha256:Algorithm"
+url = "https://dl.deno.land/release/v2.7.14/deno-x86_64-pc-windows-msvc.zip"
 
 [[tools."gem:kamal"]]
 version = "2.11.0"
@@ -214,43 +230,63 @@ url = "https://github.com/badlogic/pi-mono/releases/download/v0.70.2/pi-windows-
 url_api = "https://api.github.com/repos/badlogic/pi-mono/releases/assets/404412493"
 
 [[tools."github:larksuite/cli"]]
-version = "1.0.22"
+version = "1.0.23"
 backend = "github:larksuite/cli"
 
 [tools."github:larksuite/cli"."platforms.linux-arm64"]
-checksum = "sha256:5bd899a36a1d481544bcd78e0564c219b1239dc7326406f1e9420074088f8016"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.22/lark-cli-1.0.22-linux-arm64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/408228282"
+checksum = "sha256:e216f85f25a102bfeac4d6af22d5754140a0838c6462f56ea0b41dc35e51012a"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.23/lark-cli-1.0.23-linux-arm64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/408968182"
 
 [tools."github:larksuite/cli"."platforms.linux-arm64-musl"]
-checksum = "sha256:5bd899a36a1d481544bcd78e0564c219b1239dc7326406f1e9420074088f8016"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.22/lark-cli-1.0.22-linux-arm64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/408228282"
+checksum = "sha256:e216f85f25a102bfeac4d6af22d5754140a0838c6462f56ea0b41dc35e51012a"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.23/lark-cli-1.0.23-linux-arm64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/408968182"
 
 [tools."github:larksuite/cli"."platforms.linux-x64"]
-checksum = "sha256:55893c0875aa69cb6fc04eb6617486e6371a00603fe90dbc4ddf8334e45d2ac5"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.22/lark-cli-1.0.22-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/408228288"
+checksum = "sha256:513c1e5e6c717cc06d27360dff12cc86e979b78363b896f6e35ae99e82dddff2"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.23/lark-cli-1.0.23-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/408968187"
+
+[tools."github:larksuite/cli"."platforms.linux-x64-baseline"]
+checksum = "sha256:513c1e5e6c717cc06d27360dff12cc86e979b78363b896f6e35ae99e82dddff2"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.23/lark-cli-1.0.23-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/408968187"
 
 [tools."github:larksuite/cli"."platforms.linux-x64-musl"]
-checksum = "sha256:55893c0875aa69cb6fc04eb6617486e6371a00603fe90dbc4ddf8334e45d2ac5"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.22/lark-cli-1.0.22-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/408228288"
+checksum = "sha256:513c1e5e6c717cc06d27360dff12cc86e979b78363b896f6e35ae99e82dddff2"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.23/lark-cli-1.0.23-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/408968187"
+
+[tools."github:larksuite/cli"."platforms.linux-x64-musl-baseline"]
+checksum = "sha256:513c1e5e6c717cc06d27360dff12cc86e979b78363b896f6e35ae99e82dddff2"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.23/lark-cli-1.0.23-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/408968187"
 
 [tools."github:larksuite/cli"."platforms.macos-arm64"]
-checksum = "sha256:18e1a5b6b90490e1f1868a3453f871c26a605306bfa5c6cb3dda7ca7484dbda5"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.22/lark-cli-1.0.22-darwin-arm64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/408228289"
+checksum = "sha256:fa741daf946b494548b92828dc1ba55661080468e0bfa238a38e594705656698"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.23/lark-cli-1.0.23-darwin-arm64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/408968185"
 
 [tools."github:larksuite/cli"."platforms.macos-x64"]
-checksum = "sha256:033edea9a89156c4746dac3a80763a80b316f38619283b2f2a9ede405cab053c"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.22/lark-cli-1.0.22-darwin-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/408228287"
+checksum = "sha256:aa8cb7e52f79ee73eaa3dee30becbc84be290cb22614528ec459f06ed591992f"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.23/lark-cli-1.0.23-darwin-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/408968186"
+
+[tools."github:larksuite/cli"."platforms.macos-x64-baseline"]
+checksum = "sha256:aa8cb7e52f79ee73eaa3dee30becbc84be290cb22614528ec459f06ed591992f"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.23/lark-cli-1.0.23-darwin-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/408968186"
 
 [tools."github:larksuite/cli"."platforms.windows-x64"]
-checksum = "sha256:532ff25e9e7c11676003fa672dd8e621910500202d0220bca0982393e468a33d"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.22/lark-cli-1.0.22-windows-amd64.zip"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/408228312"
+checksum = "sha256:20e5e02c4e7ba779ba9721bb51d5b5eb86b2883659d29667eaf4437f41c2b169"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.23/lark-cli-1.0.23-windows-amd64.zip"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/408968211"
+
+[tools."github:larksuite/cli"."platforms.windows-x64-baseline"]
+checksum = "sha256:20e5e02c4e7ba779ba9721bb51d5b5eb86b2883659d29667eaf4437f41c2b169"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.23/lark-cli-1.0.23-windows-amd64.zip"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/408968211"
 
 [[tools."github:schpet/linear-cli"]]
 version = "2.0.0"
@@ -324,7 +360,7 @@ checksum = "sha256:98eb3570bade15cb826b0909338df6cc6d2cf590bc39c471142002db3832b
 url = "https://dl.google.com/go/go1.26.2.windows-amd64.zip"
 
 [[tools."go:github.com/bootdotdev/bootdev"]]
-version = "1.29.2"
+version = "1.29.3"
 backend = "go:github.com/bootdotdev/bootdev"
 
 [[tools."go:github.com/xdevplatform/xurl"]]
@@ -388,36 +424,52 @@ version = "0.3.0"
 backend = "npm:pi-opensync-plugin"
 
 [[tools.pnpm]]
-version = "11.0.1"
+version = "11.0.2"
 backend = "aqua:pnpm/pnpm"
 
 [tools.pnpm."platforms.linux-arm64"]
-checksum = "sha256:a04fd2e07580011061db897dcb9951e0d95ba95795aff16cbaee1ceb721ff131"
-url = "https://github.com/pnpm/pnpm/releases/download/v11.0.1/pnpm-linux-arm64.tar.gz"
+checksum = "sha256:6bcc527193a6c1dc5c141d20a2b6c9b49aec30f68958c1373555e7fb3378bc19"
+url = "https://github.com/pnpm/pnpm/releases/download/v11.0.2/pnpm-linux-arm64.tar.gz"
 
 [tools.pnpm."platforms.linux-arm64-musl"]
-checksum = "sha256:0314aae1c52f44b1c7e03df667690a729dbb5e96ec1a2528a5c9c44312b52f1b"
-url = "https://github.com/pnpm/pnpm/releases/download/v11.0.1/pnpm-linux-arm64-musl.tar.gz"
+checksum = "sha256:5f3654095219ea7c19252e8bb15eec72ece728f1916e297ff8ec8a2a244d4748"
+url = "https://github.com/pnpm/pnpm/releases/download/v11.0.2/pnpm-linux-arm64-musl.tar.gz"
 
 [tools.pnpm."platforms.linux-x64"]
-checksum = "sha256:8094c4cea89440c2a4208f5a6402de7b3802bb39c480c1d854519b0545c1554d"
-url = "https://github.com/pnpm/pnpm/releases/download/v11.0.1/pnpm-linux-x64.tar.gz"
+checksum = "sha256:f4b5eb97c1040173bd654f62284e362be3009b57f572ace95689e99cb60ce42b"
+url = "https://github.com/pnpm/pnpm/releases/download/v11.0.2/pnpm-linux-x64.tar.gz"
+
+[tools.pnpm."platforms.linux-x64-baseline"]
+checksum = "sha256:f4b5eb97c1040173bd654f62284e362be3009b57f572ace95689e99cb60ce42b"
+url = "https://github.com/pnpm/pnpm/releases/download/v11.0.2/pnpm-linux-x64.tar.gz"
 
 [tools.pnpm."platforms.linux-x64-musl"]
-checksum = "sha256:acca60f1d57c50d37d0ac418837a4697c5a2f0ebc243de1c009efdab24a16e90"
-url = "https://github.com/pnpm/pnpm/releases/download/v11.0.1/pnpm-linux-x64-musl.tar.gz"
+checksum = "sha256:c4b450470689075a19297205c449b59a4b822a1d8530b5bc3acadb021030e4b5"
+url = "https://github.com/pnpm/pnpm/releases/download/v11.0.2/pnpm-linux-x64-musl.tar.gz"
+
+[tools.pnpm."platforms.linux-x64-musl-baseline"]
+checksum = "sha256:c4b450470689075a19297205c449b59a4b822a1d8530b5bc3acadb021030e4b5"
+url = "https://github.com/pnpm/pnpm/releases/download/v11.0.2/pnpm-linux-x64-musl.tar.gz"
 
 [tools.pnpm."platforms.macos-arm64"]
-checksum = "sha256:e857b8422c26137cb8d43fa8fd91e79e588cf74151125b3fd51c0860b8e2c34b"
-url = "https://github.com/pnpm/pnpm/releases/download/v11.0.1/pnpm-darwin-arm64.tar.gz"
+checksum = "sha256:c817122761618c2c31ddec7c5d0f2e399a80a6b24252938d0f3e2b7de792319d"
+url = "https://github.com/pnpm/pnpm/releases/download/v11.0.2/pnpm-darwin-arm64.tar.gz"
 
 [tools.pnpm."platforms.macos-x64"]
-checksum = "sha256:2e9fdba84cbcdfab8ea217338ae8dca8b983bae621786150da8ade247fae10b4"
-url = "https://github.com/pnpm/pnpm/releases/download/v11.0.1/pnpm-darwin-x64.tar.gz"
+checksum = "sha256:806a023e6cccc4ee2426fa24e77505dcf91a6be0a22a9adde48f7092b9f4bded"
+url = "https://github.com/pnpm/pnpm/releases/download/v11.0.2/pnpm-darwin-x64.tar.gz"
+
+[tools.pnpm."platforms.macos-x64-baseline"]
+checksum = "sha256:806a023e6cccc4ee2426fa24e77505dcf91a6be0a22a9adde48f7092b9f4bded"
+url = "https://github.com/pnpm/pnpm/releases/download/v11.0.2/pnpm-darwin-x64.tar.gz"
 
 [tools.pnpm."platforms.windows-x64"]
-checksum = "sha256:08f1301a2fe9d089ca0e5c31c4377d52316b38a09434dec443e656883de254af"
-url = "https://github.com/pnpm/pnpm/releases/download/v11.0.1/pnpm-win32-x64.zip"
+checksum = "sha256:a388e7abd426cdc89dda71be0d6340e11564aa6d75899335a4f3bc96572079c4"
+url = "https://github.com/pnpm/pnpm/releases/download/v11.0.2/pnpm-win32-x64.zip"
+
+[tools.pnpm."platforms.windows-x64-baseline"]
+checksum = "sha256:a388e7abd426cdc89dda71be0d6340e11564aa6d75899335a4f3bc96572079c4"
+url = "https://github.com/pnpm/pnpm/releases/download/v11.0.2/pnpm-win32-x64.zip"
 
 [[tools.python]]
 version = "3.14.4"
