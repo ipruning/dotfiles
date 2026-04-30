@@ -12,6 +12,7 @@ Cursor
 DEVONthink
 Discord
 Eagle
+ESTKme
 GarageBand
 Gemini
 Ghostty
