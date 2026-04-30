@@ -11,7 +11,12 @@ alias free="free -h"
 
 alias grep="grep --color=auto"
 
-alias ls="ls --color=auto"
+# BSD ls (macOS default) doesn't accept --color=auto
+if [[ $OSTYPE == darwin* ]]; then
+  alias ls="ls -G"
+else
+  alias ls="ls --color=auto"
+fi
 
 alias q="exit"
 
@@ -25,19 +30,21 @@ if [[ $OSTYPE == darwin* ]]; then
 
   alias js="jump-to-session"
 
-  alias keyboardmaestro="/Applications/Keyboard\ Maestro.app/Contents/MacOS/keyboardmaestro"
+  alias keyboardmaestro='/Applications/Keyboard Maestro.app/Contents/MacOS/keyboardmaestro'
 
   alias surge="/Applications/Surge.app/Contents/Applications/surge-cli"
 fi
 
 jt () {
-  local d
+  local d saved_umask
   d="$(mktemp -d -t tempe.XXXXXXXX)" || return
+  saved_umask=$(umask)
   umask 077
-  builtin cd "$d" || return
+  builtin cd "$d" || { umask "$saved_umask"; return; }
   if [[ $# -eq 1 ]]; then
     mkdir -m 700 -p -- "$1" && builtin cd -- "$1"
   fi
+  umask "$saved_umask"
   pwd
 }
 
@@ -47,7 +54,8 @@ mcd () {
 }
 
 y () {
-  local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+  local tmp cwd
+  tmp="$(mktemp -t "yazi-cwd.XXXXXX")" || return
   yazi "$@" --cwd-file="$tmp"
   if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
     builtin cd -- "$cwd"
