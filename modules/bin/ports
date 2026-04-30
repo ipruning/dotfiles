@@ -5,9 +5,9 @@ if [[ $OSTYPE == linux* ]]; then
   exec ss -tulpn
 elif [[ $OSTYPE == darwin* ]]; then
   if command -v viddy >/dev/null 2>&1; then
-    exec viddy --interval 1s 'lsof -i @127.0.0.1 | grep LISTEN'
+    exec viddy --interval 1s 'lsof -nP -iTCP -sTCP:LISTEN'
   else
-    exec lsof -i @127.0.0.1 | grep LISTEN
+    exec lsof -nP -iTCP -sTCP:LISTEN
   fi
 else
   exit 1
