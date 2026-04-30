@@ -41,4 +41,13 @@ tell application "System Events" to tell process "Zed" ¬
   to click menu item "New Window" of menu 1 of menu bar item "File" of menu bar 1
 APPLESCRIPT
     ;;
+  ""|-h|--help|help)
+    echo "usage: newwin {atlas|chrome|cursor|ghostty|zed}" >&2
+    exit 2
+    ;;
+  *)
+    echo "newwin: unknown app '$app'" >&2
+    echo "usage: newwin {atlas|chrome|cursor|ghostty|zed}" >&2
+    exit 2
+    ;;
 esac
