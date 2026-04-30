@@ -8,7 +8,7 @@ cd "$(git rev-parse --show-toplevel)"
 # -- Core init ----------------------------------------------------------------
 
 gum spin --title "Updating mise packages..." -- mise upgrade
-find .mise/tasks/ -type f -exec chmod +x {} \;
+find .mise/tasks/ -type f -name '*.sh' -exec chmod +x {} \;
 
 gum spin --title "Updating Zellij plugins..." -- bash -c '
   mkdir -p home/.config/zellij/plugins/
@@ -37,9 +37,29 @@ done
 
 # -- Mackup --------------------------------------------------------------------
 
-if [ ! -L "$HOME/.mackup" ] || [ ! -L "$HOME/.mackup.cfg" ]; then
-  [ ! -L "$HOME/.mackup" ] && ln -sf "$PWD/modules/mackup/.mackup" "$HOME"/.mackup
-  [ ! -L "$HOME/.mackup.cfg" ] && ln -sf "$PWD/modules/mackup/.mackup.cfg" "$HOME"/.mackup.cfg
+# `ln -sf` cannot replace a non-empty directory or a regular file at the
+# target path, so explicitly handle each link's existing state.
+# Returns 0 if a *new* link was created (caller decides whether to restore),
+# 1 if the link was already correct or could not be created safely.
+ensure_mackup_link() {
+  local target="$1" link="$2"
+  if [ -L "$link" ]; then
+    # Already a symlink — keep as-is to avoid unnecessary churn.
+    return 1
+  fi
+  if [ -e "$link" ]; then
+    gum log --level warn "$link exists and is not a symlink; skipping (move it aside to fix)"
+    return 1
+  fi
+  ln -s "$target" "$link"
+  return 0
+}
+
+newly_linked=0
+ensure_mackup_link "$PWD/modules/mackup/.mackup"     "$HOME/.mackup"     && newly_linked=1 || true
+ensure_mackup_link "$PWD/modules/mackup/.mackup.cfg" "$HOME/.mackup.cfg" && newly_linked=1 || true
+
+if [ "$newly_linked" = 1 ]; then
   gum spin --title "Restoring Mackup..." -- uvx mackup restore
 else
   gum log --level info "Mackup already configured"
@@ -61,22 +81,17 @@ fi
 
 # -- Optional CLIs -------------------------------------------------------------
 
+# Each entry: "Label|binary-name|install-cmd". Pipe is unused in URLs.
 optional_clis=(
-  "Amp CLI:curl -fsSL https://ampcode.com/install.sh | bash"
-  "Sprites CLI:curl -fsSL https://sprites.dev/install.sh | sh"
-  "Tigris CLI:curl -fsSL https://raw.githubusercontent.com/tigrisdata/cli/main/scripts/install.sh | sh"
+  "Amp CLI|amp|curl -fsSL https://ampcode.com/install.sh | bash"
+  "Sprites CLI|sprite|curl -fsSL https://sprites.dev/install.sh | sh"
+  "Tigris CLI|tigris|curl -fsSL https://raw.githubusercontent.com/tigrisdata/cli/main/scripts/install.sh | sh"
 )
 
 available=()
 for item in "${optional_clis[@]}"; do
-  label="${item%%:*}"
-  bin="${label%% *}"
-  bin="$(echo "$bin" | tr '[:upper:]' '[:lower:]')"
-  case "$bin" in
-    amp)     command -v amp     &>/dev/null && continue ;;
-    sprites) command -v sprites &>/dev/null && continue ;;
-    tigris)  command -v tigris  &>/dev/null && continue ;;
-  esac
+  IFS='|' read -r label bin _ <<< "$item"
+  command -v "$bin" &>/dev/null && continue
   available+=("$label")
 done
 
@@ -85,8 +100,7 @@ if [ ${#available[@]} -gt 0 ]; then
   while IFS= read -r pick; do
     [ -n "$pick" ] || continue
     for item in "${optional_clis[@]}"; do
-      label="${item%%:*}"
-      cmd="${item#*:}"
+      IFS='|' read -r label _ cmd <<< "$item"
       if [[ "$label" == "$pick" ]]; then
         gum spin --title "Installing $label..." -- bash -c "$cmd"
       fi
