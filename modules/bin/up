@@ -44,6 +44,11 @@ function logger() {
 }
 export -f logger
 
+if ! command -v rust-parallel >/dev/null 2>&1; then
+  logger "rust-parallel not found. Install: brew install rust-parallel" "ERROR"
+  exit 1
+fi
+
 # Collect all update commands for parallel execution
 parallel_cmds=()
 if command -v brew >/dev/null 2>&1; then
