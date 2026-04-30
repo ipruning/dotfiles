@@ -32,4 +32,7 @@ for candidate in "${candidates[@]}"; do
   exec "${cmd[@]}" "$file"
 done
 
-exec vi "$file"
+# `vi` is in the candidate list above, so this is only reached if even
+# /usr/bin/vi is missing — then there is nothing left to fall back to.
+echo "scratch: no usable editor found ($VISUAL/$EDITOR/cursor/code/nvim/vim/vi)" >&2
+exit 1
