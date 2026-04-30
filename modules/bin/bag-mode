@@ -54,6 +54,12 @@ fi
 # bail out, otherwise we treat the lock as stale and take it over.
 LOCKDIR="${LOCKDIR:-${TMPDIR:-/tmp}/bag-mode.lock}"
 LOCKDIR="${LOCKDIR%/}"
+# Refuse to operate on a path we'd be embarrassed to `rm -rf`. The lock dir
+# must end in /bag-mode.lock so cleanup can safely remove it.
+if [[ "$LOCKDIR" != */bag-mode.lock ]]; then
+  echo "refusing LOCKDIR=$LOCKDIR (must end with /bag-mode.lock)" >&2
+  exit 1
+fi
 if ! mkdir "$LOCKDIR" 2>/dev/null; then
   existing_pid="$(cat "$LOCKDIR/pid" 2>/dev/null || true)"
   if [[ -n "$existing_pid" ]] && kill -0 "$existing_pid" 2>/dev/null; then
