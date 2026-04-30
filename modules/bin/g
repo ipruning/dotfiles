@@ -4,5 +4,6 @@ set -euo pipefail
 if command -v lazygit >/dev/null 2>&1; then
   exec lazygit
 else
+  echo "lazygit not found. Install: brew install lazygit" >&2
   exit 1
 fi

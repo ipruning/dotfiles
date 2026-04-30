@@ -4,5 +4,6 @@ set -euo pipefail
 if command -v lazydocker >/dev/null 2>&1; then
   exec lazydocker
 else
+  echo "lazydocker not found. Install: brew install lazydocker" >&2
   exit 1
 fi

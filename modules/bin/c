@@ -8,5 +8,6 @@ elif command -v xclip >/dev/null 2>&1; then
 elif command -v putclip >/dev/null 2>&1; then
   exec putclip
 else
+  echo "no clipboard tool found (pbcopy/xclip/putclip)" >&2
   exit 1
 fi
