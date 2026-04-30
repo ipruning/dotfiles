@@ -5,6 +5,9 @@ if command -v pbpaste >/dev/null 2>&1; then
   exec pbpaste
 elif command -v xclip >/dev/null 2>&1; then
   exec xclip -selection clipboard -o
+elif command -v getclip >/dev/null 2>&1; then
+  exec getclip
 else
+  echo "no clipboard tool found (pbpaste/xclip/getclip)" >&2
   exit 1
 fi
