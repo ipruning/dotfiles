@@ -25,6 +25,20 @@ fi
 
 # Function to create a folder with a bird name
 mkbir() {
+  # Serialize the read-modify-write of the counter so two concurrent
+  # invocations don't collide on the same bird name. `mkdir` is atomic.
+  local lockdir="${BIRD_COUNT_FILE}.lock"
+  local waited=0
+  while ! mkdir "$lockdir" 2>/dev/null; do
+    sleep 0.05
+    waited=$((waited + 1))
+    if (( waited > 200 )); then
+      echo "mkbir: timed out waiting for lock at $lockdir" >&2
+      return 1
+    fi
+  done
+  trap 'rmdir "$lockdir" 2>/dev/null || true' RETURN
+
   local count
   count=$(<"$BIRD_COUNT_FILE")
 
@@ -46,9 +60,12 @@ mkbir() {
   mkdir -p "$target_dir"
   echo "Created folder: $target_dir"
 
-  # Increment and save count
+  # Increment and save count atomically (write temp + rename).
   count=$((count + 1))
-  echo "$count" > "$BIRD_COUNT_FILE"
+  local tmpfile
+  tmpfile="$(mktemp "${BIRD_COUNT_FILE}.XXXXXX")"
+  echo "$count" > "$tmpfile"
+  mv "$tmpfile" "$BIRD_COUNT_FILE"
 
   # Fun messages when running out of bird names
   if [[ $count -gt 30 ]]; then
