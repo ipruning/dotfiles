@@ -13,8 +13,6 @@ TRACE_FILE="/tmp/zsh_profile_$$.log"
 cleanup() { rm -f "$TRACE_FILE"; }
 trap cleanup EXIT
 
-rm -f /tmp/zsh_profile_*.log
-
 gum log --level info "Benchmarking zsh startup ($RUNS runs, $WARMUP warmup)..."
 hyperfine "zsh -i -c exit" --warmup "$WARMUP" --runs "$RUNS"
 
