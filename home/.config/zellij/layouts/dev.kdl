@@ -13,14 +13,14 @@ layout {
     tab name="editor" {
         pane {
             command "zsh"
-            args "-i" "-c" "hx ."
+            args "-i" "-c" "nvim ."
         }
     }
 
-    tab name="codex" {
+    tab name="pi" {
         pane {
             command "zsh"
-            args "-i" "-c" "codex"
+            args "-i" "-c" "pi"
         }
     }
 }
