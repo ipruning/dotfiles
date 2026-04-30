@@ -8,8 +8,14 @@
 #   - sudo pmset -a disablesleep 1   (clamshell sleep disabled)
 #
 # While running (polled every $INTERVAL seconds):
-#   - lid closed  → brightness 0 + battery-side lowpowermode 1
-#   - lid open    → brightness INITIAL_BRIGHTNESS + battery-side lowpowermode INITIAL_LPM
+#   - lid closed  → snapshot built-in brightness into LAST_BRIGHTNESS, then
+#                   brightness 0 + battery-side lowpowermode 1
+#   - lid open    → brightness LAST_BRIGHTNESS + battery-side lowpowermode INITIAL_LPM
+#
+# When no external display is attached and the lid is closed, macOS
+# unenumerates the built-in panel from CGDisplay; `brightness -l` will not
+# list it and the brightness step is logged as "skipped". The panel is
+# powered off anyway, so this is harmless — pmset/disablesleep still apply.
 #
 # Only the battery-side (`pmset -b`) lowpowermode is touched; the AC-side is
 # left alone. macOS automatically applies the correct setting based on the
@@ -29,7 +35,9 @@
 # kill -9 will not run cleanup. Recover manually:
 #   sudo pmset -a disablesleep 0
 #   sudo pmset -b lowpowermode 0
-#   /usr/local/bin/brightness -m 1.0
+#   /usr/local/bin/brightness 1.0
+# (omit `-m`: with an external display attached, `-m` targets the external
+# panel which usually does not respond, leaving the built-in still dark.)
 
 set -euo pipefail
 
@@ -88,10 +96,40 @@ battery_status() {
   }'
 }
 
+# Resolve the built-in display index from `brightness -l` on every call.
+# External displays can be hot-plugged after startup and the index assigned
+# to the built-in panel may shift (e.g. external becomes main → index 0,
+# built-in → index 1), so a value captured once at startup goes stale.
+builtin_display_id() {
+  "$BRIGHTNESS_BIN" -l 2>/dev/null | awk '
+    /built-in/ { gsub(":", "", $2); print $2; exit }
+  '
+}
+
+# Read the built-in panel's current brightness (empty string if not found).
+builtin_brightness() {
+  "$BRIGHTNESS_BIN" -l 2>/dev/null | awk '
+    /built-in/ { gsub(":", "", $2); id = $2; next }
+    id != "" && $0 ~ ("^display " id ": brightness") { print $NF; exit }
+  '
+}
+
+# Flatten `brightness -l` (incl. stderr) onto one line for diagnostic logs.
+# Useful when the built-in panel disappears from the list (e.g. lid closed
+# with no external display attached → macOS unenumerates it).
+displays_oneline() {
+  "$BRIGHTNESS_BIN" -l 2>&1 | tr '\n' '|' | sed 's/|$//'
+}
+
 set_brightness() {
-  local value="$1" rc=0 out
-  out="$("$BRIGHTNESS_BIN" -d "$DISPLAY_ID" "$value" 2>&1)" || rc=$?
-  log "brightness $value rc=$rc${out:+ ($out)}"
+  local value="$1" rc=0 out id
+  id="$(builtin_display_id)"
+  if [[ -z "$id" ]]; then
+    log "brightness $value skipped (no built-in display found); displays: $(displays_oneline)"
+    return
+  fi
+  out="$("$BRIGHTNESS_BIN" -d "$id" "$value" 2>&1)" || rc=$?
+  log "brightness $value display=$id rc=$rc${out:+ ($out)}"
 }
 
 set_lowpowermode() {
@@ -106,19 +144,13 @@ set_disablesleep() {
   log "pmset disablesleep $value rc=$rc${out:+ ($out)}"
 }
 
-# Detect built-in display index + initial brightness in one pass.
-DISPLAY_ID=""
-INITIAL_BRIGHTNESS=""
-read -r DISPLAY_ID INITIAL_BRIGHTNESS < <(
-  "$BRIGHTNESS_BIN" -l 2>/dev/null | awk '
-    /built-in/ {
-      gsub(":", "", $2); idx = $2; getline
-      if ($0 ~ /brightness/) { print idx, $NF; exit }
-    }
-  '
-) || true
-DISPLAY_ID="${DISPLAY_ID:-0}"
+# Capture the built-in panel's current brightness so we can restore it on
+# exit. Also seeds LAST_BRIGHTNESS, the rolling "value to restore" that gets
+# refreshed every time the lid closes (so opening restores whatever the user
+# had before closing, not what was set at script startup).
+INITIAL_BRIGHTNESS="$(builtin_brightness)"
 INITIAL_BRIGHTNESS="${INITIAL_BRIGHTNESS:-1.0}"
+LAST_BRIGHTNESS="$INITIAL_BRIGHTNESS"
 
 # Capture battery-side lowpowermode (empty / missing = 0).
 # `pmset -g custom` lists both sources; field is `lowpowermode` on newer macOS
@@ -139,8 +171,8 @@ SUDO_REFRESH_PID=$!
 
 cleanup() {
   trap '' INT TERM EXIT
-  log "cleanup: brightness=${INITIAL_BRIGHTNESS:-?} lowpowermode=${INITIAL_LPM:-?} disablesleep=0"
-  [[ -n "${DISPLAY_ID:-}" ]] && set_brightness "${INITIAL_BRIGHTNESS:-1.0}"
+  log "cleanup: brightness=${LAST_BRIGHTNESS:-?} lowpowermode=${INITIAL_LPM:-?} disablesleep=0"
+  set_brightness "${LAST_BRIGHTNESS:-1.0}"
   [[ -n "${INITIAL_LPM:-}" ]] && set_lowpowermode "$INITIAL_LPM"
   set_disablesleep 0
   [[ -n "${SUDO_REFRESH_PID:-}" ]] && kill "$SUDO_REFRESH_PID" 2>/dev/null || true
@@ -150,26 +182,65 @@ cleanup() {
 trap 'cleanup; exit 0' INT TERM
 trap cleanup EXIT
 
-log "started; display=$DISPLAY_ID initial_brightness=$INITIAL_BRIGHTNESS initial_lpm=$INITIAL_LPM interval=${INTERVAL}s battery_every=${BATTERY_EVERY}s"
+log "started; initial_brightness=$INITIAL_BRIGHTNESS initial_lpm=$INITIAL_LPM interval=${INTERVAL}s battery_every=${BATTERY_EVERY}s"
 
 set_disablesleep 1
 
 last_state=""
 last_battery=0
+last_tracked=""
 while true; do
   state="$(lid_state)"
   now="$(date +%s)"
 
   if [[ "$state" != "$last_state" ]]; then
     log "lid=$state"
+    log "displays: $(displays_oneline)"
     if [[ "$state" == "closed" ]]; then
+      # Final-chance snapshot before darkening. With an external display
+      # attached, macOS unenumerates the built-in panel the moment the lid
+      # closes, so this read is usually too late and returns empty. The
+      # real source of truth is the continuous tracker below, which keeps
+      # LAST_BRIGHTNESS fresh while the lid is open. Skip snapshots that
+      # are empty or ~0 (panel gone, or already darkened by us) so we
+      # never overwrite a good restore target with 0.
+      cur="$(builtin_brightness)"
+      if [[ -n "$cur" ]] && awk -v v="$cur" 'BEGIN { exit !(v > 0.01) }'; then
+        LAST_BRIGHTNESS="$cur"
+        log "snapshot brightness=$LAST_BRIGHTNESS"
+      else
+        log "snapshot skipped (cur='${cur:-<empty>}'); keeping LAST_BRIGHTNESS=$LAST_BRIGHTNESS"
+      fi
       set_brightness 0
       set_lowpowermode 1
+      # Don't let the post-restore tracker run until the lid opens again.
+      last_tracked=""
     else
-      set_brightness "$INITIAL_BRIGHTNESS"
+      log "restoring brightness=$LAST_BRIGHTNESS lpm=$INITIAL_LPM"
+      set_brightness "$LAST_BRIGHTNESS"
       set_lowpowermode "$INITIAL_LPM"
+      # Seed the tracker with the value we just restored so the very next
+      # poll doesn't treat it as a "user change".
+      last_tracked="$LAST_BRIGHTNESS"
     fi
     last_state="$state"
+  fi
+
+  # Continuously track user brightness adjustments while the lid is open.
+  # Without this, `LAST_BRIGHTNESS` only updates on the close-transition,
+  # which is too late when an external display is attached: macOS has
+  # already unenumerated the built-in panel by then and the snapshot read
+  # returns empty. Polling here captures the value while it's still
+  # readable.
+  if [[ "$state" == "open" ]]; then
+    cur="$(builtin_brightness)"
+    if [[ -n "$cur" ]] \
+       && [[ "$cur" != "$last_tracked" ]] \
+       && awk -v v="$cur" 'BEGIN { exit !(v > 0.01) }'; then
+      LAST_BRIGHTNESS="$cur"
+      last_tracked="$cur"
+      log "tracked brightness=$LAST_BRIGHTNESS"
+    fi
   fi
 
   if (( now - last_battery >= BATTERY_EVERY )); then
