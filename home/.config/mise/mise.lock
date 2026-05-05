@@ -52,14 +52,6 @@ url = "https://github.com/oven-sh/bun/releases/download/bun-v1.3.13/bun-windows-
 version = "HEAD"
 backend = "cargo:https://github.com/clouedoc/hzfind"
 
-[[tools."cargo:https://github.com/immanuwell/dockerfile-roast"]]
-version = "HEAD"
-backend = "cargo:https://github.com/immanuwell/dockerfile-roast"
-
-[[tools."cargo:sigye"]]
-version = "0.4.3"
-backend = "cargo:sigye"
-
 [[tools.deno]]
 version = "2.7.14"
 backend = "core:deno"
@@ -131,7 +123,17 @@ checksum = "sha256:b8ec1b9af041a45a81327163813f4dddb5542f205d67a3c883ece92627604
 url = "https://github.com/Loongphy/codex-auth/releases/download/v0.2.8/codex-auth-Linux-X64.tar.gz"
 url_api = "https://api.github.com/repos/Loongphy/codex-auth/releases/assets/404320011"
 
+[tools."github:Loongphy/codex-auth"."platforms.linux-x64-baseline"]
+checksum = "sha256:b8ec1b9af041a45a81327163813f4dddb5542f205d67a3c883ece9262760492d"
+url = "https://github.com/Loongphy/codex-auth/releases/download/v0.2.8/codex-auth-Linux-X64.tar.gz"
+url_api = "https://api.github.com/repos/Loongphy/codex-auth/releases/assets/404320011"
+
 [tools."github:Loongphy/codex-auth"."platforms.linux-x64-musl"]
+checksum = "sha256:b8ec1b9af041a45a81327163813f4dddb5542f205d67a3c883ece9262760492d"
+url = "https://github.com/Loongphy/codex-auth/releases/download/v0.2.8/codex-auth-Linux-X64.tar.gz"
+url_api = "https://api.github.com/repos/Loongphy/codex-auth/releases/assets/404320011"
+
+[tools."github:Loongphy/codex-auth"."platforms.linux-x64-musl-baseline"]
 checksum = "sha256:b8ec1b9af041a45a81327163813f4dddb5542f205d67a3c883ece9262760492d"
 url = "https://github.com/Loongphy/codex-auth/releases/download/v0.2.8/codex-auth-Linux-X64.tar.gz"
 url_api = "https://api.github.com/repos/Loongphy/codex-auth/releases/assets/404320011"
@@ -146,49 +148,20 @@ checksum = "sha256:4a092bc5c105ff4f79dc135fbf3ec56f3786eec6e6fa6398a986cda5aa27f
 url = "https://github.com/Loongphy/codex-auth/releases/download/v0.2.8/codex-auth-macOS-X64.tar.gz"
 url_api = "https://api.github.com/repos/Loongphy/codex-auth/releases/assets/404320007"
 
+[tools."github:Loongphy/codex-auth"."platforms.macos-x64-baseline"]
+checksum = "sha256:4a092bc5c105ff4f79dc135fbf3ec56f3786eec6e6fa6398a986cda5aa27fc6a"
+url = "https://github.com/Loongphy/codex-auth/releases/download/v0.2.8/codex-auth-macOS-X64.tar.gz"
+url_api = "https://api.github.com/repos/Loongphy/codex-auth/releases/assets/404320007"
+
 [tools."github:Loongphy/codex-auth"."platforms.windows-x64"]
 checksum = "sha256:c64c618c17140e7da05aeb3392eea601bc65d7bfa88e336bd613724bd20f63f4"
 url = "https://github.com/Loongphy/codex-auth/releases/download/v0.2.8/codex-auth-Windows-X64.zip"
 url_api = "https://api.github.com/repos/Loongphy/codex-auth/releases/assets/404320009"
 
-[[tools."github:actionbook/actionbook"]]
-version = "actionbook-cli-v1.6.0"
-backend = "github:actionbook/actionbook"
-
-[tools."github:actionbook/actionbook"."platforms.linux-arm64"]
-checksum = "sha256:463c32280901dd785faa2330458c6f052c68e2416227a38916e47420083a5d8a"
-url = "https://github.com/actionbook/actionbook/releases/download/actionbook-cli-v1.6.0/actionbook-linux-arm64"
-url_api = "https://api.github.com/repos/actionbook/actionbook/releases/assets/402271848"
-
-[tools."github:actionbook/actionbook"."platforms.linux-arm64-musl"]
-checksum = "sha256:463c32280901dd785faa2330458c6f052c68e2416227a38916e47420083a5d8a"
-url = "https://github.com/actionbook/actionbook/releases/download/actionbook-cli-v1.6.0/actionbook-linux-arm64"
-url_api = "https://api.github.com/repos/actionbook/actionbook/releases/assets/402271848"
-
-[tools."github:actionbook/actionbook"."platforms.linux-x64"]
-checksum = "sha256:056d138c768cea1c50032d772e78cff41e2a0f220137b231756c981f034438c2"
-url = "https://github.com/actionbook/actionbook/releases/download/actionbook-cli-v1.6.0/actionbook-linux-x64"
-url_api = "https://api.github.com/repos/actionbook/actionbook/releases/assets/402271847"
-
-[tools."github:actionbook/actionbook"."platforms.linux-x64-musl"]
-checksum = "sha256:056d138c768cea1c50032d772e78cff41e2a0f220137b231756c981f034438c2"
-url = "https://github.com/actionbook/actionbook/releases/download/actionbook-cli-v1.6.0/actionbook-linux-x64"
-url_api = "https://api.github.com/repos/actionbook/actionbook/releases/assets/402271847"
-
-[tools."github:actionbook/actionbook"."platforms.macos-arm64"]
-checksum = "sha256:8969d4df6e1a21348c409acdc6a09d00f6e2bb3fd7a1377efd3d33bae79cfaa6"
-url = "https://github.com/actionbook/actionbook/releases/download/actionbook-cli-v1.6.0/actionbook-darwin-arm64"
-url_api = "https://api.github.com/repos/actionbook/actionbook/releases/assets/402271844"
-
-[tools."github:actionbook/actionbook"."platforms.macos-x64"]
-checksum = "sha256:fda54675ad45b8f99ba6340f105ef4831973489a2b101df51ac2fa0c78d832b7"
-url = "https://github.com/actionbook/actionbook/releases/download/actionbook-cli-v1.6.0/actionbook-darwin-x64"
-url_api = "https://api.github.com/repos/actionbook/actionbook/releases/assets/402271845"
-
-[tools."github:actionbook/actionbook"."platforms.windows-x64"]
-checksum = "sha256:6cb5150e0dc536935a3aeaefd84775b79216e2e8511d208a5f009185a147236d"
-url = "https://github.com/actionbook/actionbook/releases/download/actionbook-cli-v1.6.0/actionbook-win32-x64.exe"
-url_api = "https://api.github.com/repos/actionbook/actionbook/releases/assets/402271849"
+[tools."github:Loongphy/codex-auth"."platforms.windows-x64-baseline"]
+checksum = "sha256:c64c618c17140e7da05aeb3392eea601bc65d7bfa88e336bd613724bd20f63f4"
+url = "https://github.com/Loongphy/codex-auth/releases/download/v0.2.8/codex-auth-Windows-X64.zip"
+url_api = "https://api.github.com/repos/Loongphy/codex-auth/releases/assets/404320009"
 
 [[tools."github:badlogic/pi-mono"]]
 version = "0.70.2"
@@ -209,7 +182,17 @@ checksum = "sha256:54312268e486b7268dafed5476ac8b7424d0876cd727dc325d4e00ec7446f
 url = "https://github.com/badlogic/pi-mono/releases/download/v0.70.2/pi-linux-x64.tar.gz"
 url_api = "https://api.github.com/repos/badlogic/pi-mono/releases/assets/404412494"
 
+[tools."github:badlogic/pi-mono"."platforms.linux-x64-baseline"]
+checksum = "sha256:54312268e486b7268dafed5476ac8b7424d0876cd727dc325d4e00ec7446f749"
+url = "https://github.com/badlogic/pi-mono/releases/download/v0.70.2/pi-linux-x64.tar.gz"
+url_api = "https://api.github.com/repos/badlogic/pi-mono/releases/assets/404412494"
+
 [tools."github:badlogic/pi-mono"."platforms.linux-x64-musl"]
+checksum = "sha256:54312268e486b7268dafed5476ac8b7424d0876cd727dc325d4e00ec7446f749"
+url = "https://github.com/badlogic/pi-mono/releases/download/v0.70.2/pi-linux-x64.tar.gz"
+url_api = "https://api.github.com/repos/badlogic/pi-mono/releases/assets/404412494"
+
+[tools."github:badlogic/pi-mono"."platforms.linux-x64-musl-baseline"]
 checksum = "sha256:54312268e486b7268dafed5476ac8b7424d0876cd727dc325d4e00ec7446f749"
 url = "https://github.com/badlogic/pi-mono/releases/download/v0.70.2/pi-linux-x64.tar.gz"
 url_api = "https://api.github.com/repos/badlogic/pi-mono/releases/assets/404412494"
@@ -224,7 +207,17 @@ checksum = "sha256:0ffed2128efb469ef23c46f861cd1d848022153ba7247dab3ee7ea41bf6c3
 url = "https://github.com/badlogic/pi-mono/releases/download/v0.70.2/pi-darwin-x64.tar.gz"
 url_api = "https://api.github.com/repos/badlogic/pi-mono/releases/assets/404412495"
 
+[tools."github:badlogic/pi-mono"."platforms.macos-x64-baseline"]
+checksum = "sha256:0ffed2128efb469ef23c46f861cd1d848022153ba7247dab3ee7ea41bf6c3864"
+url = "https://github.com/badlogic/pi-mono/releases/download/v0.70.2/pi-darwin-x64.tar.gz"
+url_api = "https://api.github.com/repos/badlogic/pi-mono/releases/assets/404412495"
+
 [tools."github:badlogic/pi-mono"."platforms.windows-x64"]
+checksum = "sha256:310ddb4797edf460e0023387efddba01d8200b611def9c1ab36542f84c9722b4"
+url = "https://github.com/badlogic/pi-mono/releases/download/v0.70.2/pi-windows-x64.zip"
+url_api = "https://api.github.com/repos/badlogic/pi-mono/releases/assets/404412493"
+
+[tools."github:badlogic/pi-mono"."platforms.windows-x64-baseline"]
 checksum = "sha256:310ddb4797edf460e0023387efddba01d8200b611def9c1ab36542f84c9722b4"
 url = "https://github.com/badlogic/pi-mono/releases/download/v0.70.2/pi-windows-x64.zip"
 url_api = "https://api.github.com/repos/badlogic/pi-mono/releases/assets/404412493"
@@ -307,7 +300,17 @@ checksum = "sha256:affb594672c2f220cef68fa7cfeb813945c4010789a4b8cc2c0e46468feb7
 url = "https://github.com/schpet/linear-cli/releases/download/v2.0.0/linear-x86_64-unknown-linux-gnu.tar.xz"
 url_api = "https://api.github.com/repos/schpet/linear-cli/releases/assets/388120649"
 
+[tools."github:schpet/linear-cli"."platforms.linux-x64-baseline"]
+checksum = "sha256:affb594672c2f220cef68fa7cfeb813945c4010789a4b8cc2c0e46468feb7870"
+url = "https://github.com/schpet/linear-cli/releases/download/v2.0.0/linear-x86_64-unknown-linux-gnu.tar.xz"
+url_api = "https://api.github.com/repos/schpet/linear-cli/releases/assets/388120649"
+
 [tools."github:schpet/linear-cli"."platforms.linux-x64-musl"]
+checksum = "sha256:affb594672c2f220cef68fa7cfeb813945c4010789a4b8cc2c0e46468feb7870"
+url = "https://github.com/schpet/linear-cli/releases/download/v2.0.0/linear-x86_64-unknown-linux-gnu.tar.xz"
+url_api = "https://api.github.com/repos/schpet/linear-cli/releases/assets/388120649"
+
+[tools."github:schpet/linear-cli"."platforms.linux-x64-musl-baseline"]
 checksum = "sha256:affb594672c2f220cef68fa7cfeb813945c4010789a4b8cc2c0e46468feb7870"
 url = "https://github.com/schpet/linear-cli/releases/download/v2.0.0/linear-x86_64-unknown-linux-gnu.tar.xz"
 url_api = "https://api.github.com/repos/schpet/linear-cli/releases/assets/388120649"
@@ -322,7 +325,17 @@ checksum = "sha256:729e67166c5094c895150b672cd3a4461fa899897e1f24dbcd07c13bb3b48
 url = "https://github.com/schpet/linear-cli/releases/download/v2.0.0/linear-x86_64-apple-darwin.tar.xz"
 url_api = "https://api.github.com/repos/schpet/linear-cli/releases/assets/388120619"
 
+[tools."github:schpet/linear-cli"."platforms.macos-x64-baseline"]
+checksum = "sha256:729e67166c5094c895150b672cd3a4461fa899897e1f24dbcd07c13bb3b48c13"
+url = "https://github.com/schpet/linear-cli/releases/download/v2.0.0/linear-x86_64-apple-darwin.tar.xz"
+url_api = "https://api.github.com/repos/schpet/linear-cli/releases/assets/388120619"
+
 [tools."github:schpet/linear-cli"."platforms.windows-x64"]
+checksum = "sha256:f1055b96a70c8bb403ca34b65283986b1d6bc9830e27c5f3571106db5dd92715"
+url = "https://github.com/schpet/linear-cli/releases/download/v2.0.0/linear-x86_64-pc-windows-msvc.zip"
+url_api = "https://api.github.com/repos/schpet/linear-cli/releases/assets/388120631"
+
+[tools."github:schpet/linear-cli"."platforms.windows-x64-baseline"]
 checksum = "sha256:f1055b96a70c8bb403ca34b65283986b1d6bc9830e27c5f3571106db5dd92715"
 url = "https://github.com/schpet/linear-cli/releases/download/v2.0.0/linear-x86_64-pc-windows-msvc.zip"
 url_api = "https://api.github.com/repos/schpet/linear-cli/releases/assets/388120631"
@@ -343,7 +356,15 @@ url = "https://dl.google.com/go/go1.26.2.linux-arm64.tar.gz"
 checksum = "sha256:990e6b4bbba816dc3ee129eaeaf4b42f17c2800b88a2166c265ac1a200262282"
 url = "https://dl.google.com/go/go1.26.2.linux-amd64.tar.gz"
 
+[tools.go."platforms.linux-x64-baseline"]
+checksum = "sha256:990e6b4bbba816dc3ee129eaeaf4b42f17c2800b88a2166c265ac1a200262282"
+url = "https://dl.google.com/go/go1.26.2.linux-amd64.tar.gz"
+
 [tools.go."platforms.linux-x64-musl"]
+checksum = "sha256:990e6b4bbba816dc3ee129eaeaf4b42f17c2800b88a2166c265ac1a200262282"
+url = "https://dl.google.com/go/go1.26.2.linux-amd64.tar.gz"
+
+[tools.go."platforms.linux-x64-musl-baseline"]
 checksum = "sha256:990e6b4bbba816dc3ee129eaeaf4b42f17c2800b88a2166c265ac1a200262282"
 url = "https://dl.google.com/go/go1.26.2.linux-amd64.tar.gz"
 
@@ -355,7 +376,15 @@ url = "https://dl.google.com/go/go1.26.2.darwin-arm64.tar.gz"
 checksum = "sha256:bc3f1500d9968c36d705442d90ba91addf9271665033748b82532682e90a7966"
 url = "https://dl.google.com/go/go1.26.2.darwin-amd64.tar.gz"
 
+[tools.go."platforms.macos-x64-baseline"]
+checksum = "sha256:bc3f1500d9968c36d705442d90ba91addf9271665033748b82532682e90a7966"
+url = "https://dl.google.com/go/go1.26.2.darwin-amd64.tar.gz"
+
 [tools.go."platforms.windows-x64"]
+checksum = "sha256:98eb3570bade15cb826b0909338df6cc6d2cf590bc39c471142002db3832b708"
+url = "https://dl.google.com/go/go1.26.2.windows-amd64.zip"
+
+[tools.go."platforms.windows-x64-baseline"]
 checksum = "sha256:98eb3570bade15cb826b0909338df6cc6d2cf590bc39c471142002db3832b708"
 url = "https://dl.google.com/go/go1.26.2.windows-amd64.zip"
 
@@ -383,7 +412,15 @@ url = "https://unofficial-builds.nodejs.org/download/release/v25.9.0/node-v25.9.
 checksum = "sha256:134e55b2408448a219760fe04dc44d6851f9de8a79549021ffd870e9082d9e7b"
 url = "https://nodejs.org/dist/v25.9.0/node-v25.9.0-linux-x64.tar.gz"
 
+[tools.node."platforms.linux-x64-baseline"]
+checksum = "sha256:134e55b2408448a219760fe04dc44d6851f9de8a79549021ffd870e9082d9e7b"
+url = "https://nodejs.org/dist/v25.9.0/node-v25.9.0-linux-x64.tar.gz"
+
 [tools.node."platforms.linux-x64-musl"]
+checksum = "sha256:1ac44af012be6bc17f1e3723edbf12897c0baeae5d1dc75b9f97d71413e4c8f5"
+url = "https://unofficial-builds.nodejs.org/download/release/v25.9.0/node-v25.9.0-linux-x64-musl.tar.gz"
+
+[tools.node."platforms.linux-x64-musl-baseline"]
 checksum = "sha256:1ac44af012be6bc17f1e3723edbf12897c0baeae5d1dc75b9f97d71413e4c8f5"
 url = "https://unofficial-builds.nodejs.org/download/release/v25.9.0/node-v25.9.0-linux-x64-musl.tar.gz"
 
@@ -395,7 +432,15 @@ url = "https://nodejs.org/dist/v25.9.0/node-v25.9.0-darwin-arm64.tar.gz"
 checksum = "sha256:7d737b53ce191142bfa1c17cfa5b070d96e84eebf76b8dd06d84981cbdc3f7e3"
 url = "https://nodejs.org/dist/v25.9.0/node-v25.9.0-darwin-x64.tar.gz"
 
+[tools.node."platforms.macos-x64-baseline"]
+checksum = "sha256:7d737b53ce191142bfa1c17cfa5b070d96e84eebf76b8dd06d84981cbdc3f7e3"
+url = "https://nodejs.org/dist/v25.9.0/node-v25.9.0-darwin-x64.tar.gz"
+
 [tools.node."platforms.windows-x64"]
+checksum = "sha256:929552b8305effac843ba7b4270c437aefb702fc3fbd73fcd1bffd35d4ac284e"
+url = "https://nodejs.org/dist/v25.9.0/node-v25.9.0-win-x64.zip"
+
+[tools.node."platforms.windows-x64-baseline"]
 checksum = "sha256:929552b8305effac843ba7b4270c437aefb702fc3fbd73fcd1bffd35d4ac284e"
 url = "https://nodejs.org/dist/v25.9.0/node-v25.9.0-win-x64.zip"
 
@@ -490,7 +535,17 @@ checksum = "sha256:fe9a9c32d13870af632cbac3dfc7528ae53597e94472aa4c7d6a42e816613
 url = "https://github.com/astral-sh/python-build-standalone/releases/download/20260414/cpython-3.14.4+20260414-x86_64-unknown-linux-gnu-install_only_stripped.tar.gz"
 provenance = "github-attestations"
 
+[tools.python."platforms.linux-x64-baseline"]
+checksum = "sha256:fe9a9c32d13870af632cbac3dfc7528ae53597e94472aa4c7d6a42e8166136cd"
+url = "https://github.com/astral-sh/python-build-standalone/releases/download/20260414/cpython-3.14.4+20260414-x86_64-unknown-linux-gnu-install_only_stripped.tar.gz"
+provenance = "github-attestations"
+
 [tools.python."platforms.linux-x64-musl"]
+checksum = "sha256:d6005226cd24e780630626232c7a63243d4885fdf975dcf930a0758a0759ce14"
+url = "https://github.com/astral-sh/python-build-standalone/releases/download/20260414/cpython-3.14.4+20260414-x86_64-unknown-linux-musl-install_only_stripped.tar.gz"
+provenance = "github-attestations"
+
+[tools.python."platforms.linux-x64-musl-baseline"]
 checksum = "sha256:d6005226cd24e780630626232c7a63243d4885fdf975dcf930a0758a0759ce14"
 url = "https://github.com/astral-sh/python-build-standalone/releases/download/20260414/cpython-3.14.4+20260414-x86_64-unknown-linux-musl-install_only_stripped.tar.gz"
 provenance = "github-attestations"
@@ -505,7 +560,17 @@ checksum = "sha256:d51250a32fa5d9f0799c7bcb71720c27b10a3afd4a7de288120f96085d508
 url = "https://github.com/astral-sh/python-build-standalone/releases/download/20260414/cpython-3.14.4+20260414-x86_64-apple-darwin-install_only_stripped.tar.gz"
 provenance = "github-attestations"
 
+[tools.python."platforms.macos-x64-baseline"]
+checksum = "sha256:d51250a32fa5d9f0799c7bcb71720c27b10a3afd4a7de288120f96085d508a5a"
+url = "https://github.com/astral-sh/python-build-standalone/releases/download/20260414/cpython-3.14.4+20260414-x86_64-apple-darwin-install_only_stripped.tar.gz"
+provenance = "github-attestations"
+
 [tools.python."platforms.windows-x64"]
+checksum = "sha256:a976991dcd085c1bb5d9a8084823a6bc8b7f9b079d8c432574a6ddd68c3a6fe1"
+url = "https://github.com/astral-sh/python-build-standalone/releases/download/20260414/cpython-3.14.4+20260414-x86_64-pc-windows-msvc-install_only_stripped.tar.gz"
+provenance = "github-attestations"
+
+[tools.python."platforms.windows-x64-baseline"]
 checksum = "sha256:a976991dcd085c1bb5d9a8084823a6bc8b7f9b079d8c432574a6ddd68c3a6fe1"
 url = "https://github.com/astral-sh/python-build-standalone/releases/download/20260414/cpython-3.14.4+20260414-x86_64-pc-windows-msvc-install_only_stripped.tar.gz"
 provenance = "github-attestations"
@@ -529,7 +594,17 @@ checksum = "sha256:becd14e477a1b32a37a86be6fd8b0980f276d8c365b122c0ff4c644beb899
 url = "https://github.com/jdx/ruby/releases/download/4.0.3-1/ruby-4.0.3.x86_64_linux.tar.gz"
 provenance = "github-attestations"
 
+[tools.ruby."platforms.linux-x64-baseline"]
+checksum = "sha256:becd14e477a1b32a37a86be6fd8b0980f276d8c365b122c0ff4c644beb8991f8"
+url = "https://github.com/jdx/ruby/releases/download/4.0.3-1/ruby-4.0.3.x86_64_linux.tar.gz"
+provenance = "github-attestations"
+
 [tools.ruby."platforms.linux-x64-musl"]
+checksum = "sha256:becd14e477a1b32a37a86be6fd8b0980f276d8c365b122c0ff4c644beb8991f8"
+url = "https://github.com/jdx/ruby/releases/download/4.0.3-1/ruby-4.0.3.x86_64_linux.tar.gz"
+provenance = "github-attestations"
+
+[tools.ruby."platforms.linux-x64-musl-baseline"]
 checksum = "sha256:becd14e477a1b32a37a86be6fd8b0980f276d8c365b122c0ff4c644beb8991f8"
 url = "https://github.com/jdx/ruby/releases/download/4.0.3-1/ruby-4.0.3.x86_64_linux.tar.gz"
 provenance = "github-attestations"
@@ -543,7 +618,15 @@ provenance = "github-attestations"
 checksum = "sha256:77964acc370d5c8375b9502e5ba6c13c03ef91ab9eb9f521c84fb42b9c9a6b0f"
 url = "https://cache.ruby-lang.org/pub/ruby/4.0/ruby-4.0.3.tar.gz"
 
+[tools.ruby."platforms.macos-x64-baseline"]
+checksum = "sha256:77964acc370d5c8375b9502e5ba6c13c03ef91ab9eb9f521c84fb42b9c9a6b0f"
+url = "https://cache.ruby-lang.org/pub/ruby/4.0/ruby-4.0.3.tar.gz"
+
 [tools.ruby."platforms.windows-x64"]
+checksum = "sha256:a4094317397511e09242be1c95b32c8700fe91ebca713fb4e190de595eea5699"
+url = "https://github.com/oneclick/rubyinstaller2/releases/download/RubyInstaller-4.0.3-1/rubyinstaller-4.0.3-1-x64.7z"
+
+[tools.ruby."platforms.windows-x64-baseline"]
 checksum = "sha256:a4094317397511e09242be1c95b32c8700fe91ebca713fb4e190de595eea5699"
 url = "https://github.com/oneclick/rubyinstaller2/releases/download/RubyInstaller-4.0.3-1/rubyinstaller-4.0.3-1-x64.7z"
 
@@ -571,7 +654,15 @@ url = "https://ziglang.org/download/0.16.0/zig-aarch64-linux-0.16.0.tar.xz"
 checksum = "sha256:70e49664a74374b48b51e6f3fdfbf437f6395d42509050588bd49abe52ba3d00"
 url = "https://ziglang.org/download/0.16.0/zig-x86_64-linux-0.16.0.tar.xz"
 
+[tools.zig."platforms.linux-x64-baseline"]
+checksum = "sha256:70e49664a74374b48b51e6f3fdfbf437f6395d42509050588bd49abe52ba3d00"
+url = "https://ziglang.org/download/0.16.0/zig-x86_64-linux-0.16.0.tar.xz"
+
 [tools.zig."platforms.linux-x64-musl"]
+checksum = "sha256:70e49664a74374b48b51e6f3fdfbf437f6395d42509050588bd49abe52ba3d00"
+url = "https://ziglang.org/download/0.16.0/zig-x86_64-linux-0.16.0.tar.xz"
+
+[tools.zig."platforms.linux-x64-musl-baseline"]
 checksum = "sha256:70e49664a74374b48b51e6f3fdfbf437f6395d42509050588bd49abe52ba3d00"
 url = "https://ziglang.org/download/0.16.0/zig-x86_64-linux-0.16.0.tar.xz"
 
@@ -583,6 +674,14 @@ url = "https://ziglang.org/download/0.16.0/zig-aarch64-macos-0.16.0.tar.xz"
 checksum = "sha256:0387557ed1877bc6a2e1802c8391953baddba76081876301c522f52977b52ba7"
 url = "https://ziglang.org/download/0.16.0/zig-x86_64-macos-0.16.0.tar.xz"
 
+[tools.zig."platforms.macos-x64-baseline"]
+checksum = "sha256:0387557ed1877bc6a2e1802c8391953baddba76081876301c522f52977b52ba7"
+url = "https://ziglang.org/download/0.16.0/zig-x86_64-macos-0.16.0.tar.xz"
+
 [tools.zig."platforms.windows-x64"]
+checksum = "sha256:68659eb5f1e4eb1437a722f1dd889c5a322c9954607f5edcf337bc3684a75a7e"
+url = "https://ziglang.org/download/0.16.0/zig-x86_64-windows-0.16.0.zip"
+
+[tools.zig."platforms.windows-x64-baseline"]
 checksum = "sha256:68659eb5f1e4eb1437a722f1dd889c5a322c9954607f5edcf337bc3684a75a7e"
 url = "https://ziglang.org/download/0.16.0/zig-x86_64-windows-0.16.0.zip"
