@@ -5,6 +5,7 @@ AeroSpace
 AltTab
 brrr
 calibre
+Capture One
 Codex
 CodexBar
 Contexts
