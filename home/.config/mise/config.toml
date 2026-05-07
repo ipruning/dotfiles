@@ -1,18 +1,15 @@
 [tools]
-bun = "latest"
-deno = "latest"
-go = "latest"
-node = "latest"
-python = "latest"
-ruby = "latest"
-rust = "stable"
-zig = "latest"
+bun = { version = "latest", backend = "core:bun" }
+deno = { version = "latest", backend = "core:deno" }
+go = { version = "latest", backend = "core:go" }
+node = { version = "latest", backend = "core:node" }
+python = { version = "latest", backend = "core:python" }
+ruby = { version = "latest", backend = "core:ruby" }
+rust = { version = "stable", backend = "core:rust" }
+zig = { version = "latest", backend = "core:zig" }
 
 "cargo:https://github.com/clouedoc/hzfind" = "latest"
-# "cargo:https://github.com/immanuwell/dockerfile-roast" = "latest"
-# "cargo:sigye" = "latest"
 "gem:kamal" = "latest"
-# "github:actionbook/actionbook" = "latest"
 "github:badlogic/pi-mono" = "0.70.2"
 "github:larksuite/cli" = "latest"
 "github:Loongphy/codex-auth" = "latest"
@@ -25,8 +22,8 @@ zig = "latest"
 "npm:cursor-opensync-plugin" = "latest"
 "npm:opencode-sync-plugin" = "latest"
 "npm:pi-opensync-plugin" = "latest"
-pnpm = "latest"
-yarn = "latest"
+pnpm = { version = "latest", backend = "aqua:pnpm/pnpm" }
+yarn = { version = "latest", backend = "vfox:mise-plugins/vfox-yarn" }
 
 [settings]
 trusted_config_paths = [
@@ -35,7 +32,9 @@ trusted_config_paths = [
     "~/Downloads/",
     "~/Developer",
 ]
-lockfile = true
+
+lockfile_platforms = ["macos-arm64", "linux-x64"]
+minimum_release_age = "7d"
 
 [settings.ruby]
 compile = false
