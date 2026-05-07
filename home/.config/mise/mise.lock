@@ -132,10 +132,6 @@ url = "https://nodejs.org/dist/v26.0.0/node-v26.0.0-linux-x64.tar.gz"
 checksum = "sha256:dcee8564c1a9342f9594dd5e52d533894dfef6b85aa771bbbb870baa3c403235"
 url = "https://nodejs.org/dist/v26.0.0/node-v26.0.0-darwin-arm64.tar.gz"
 
-[[tools."npm:@mariozechner/pi-coding-agent"]]
-version = "0.70.2"
-backend = "npm:@mariozechner/pi-coding-agent"
-
 [[tools."npm:claude-code-sync"]]
 version = "0.1.15"
 backend = "npm:claude-code-sync"
