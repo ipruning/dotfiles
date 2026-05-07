@@ -58,33 +58,33 @@ checksum = "sha256:64c9997ed0dfeb581035b039948d155c0f62a498039382da728c4ecb3d77a
 url = "https://github.com/Loongphy/codex-auth/releases/download/v0.2.8/codex-auth-macOS-ARM64.tar.gz"
 url_api = "https://api.github.com/repos/Loongphy/codex-auth/releases/assets/404320006"
 
-[[tools."github:badlogic/pi-mono"]]
-version = "0.70.2"
-backend = "github:badlogic/pi-mono"
+[[tools."github:earendil-works/pi"]]
+version = "0.73.1"
+backend = "github:earendil-works/pi"
 
-[tools."github:badlogic/pi-mono"."platforms.linux-x64"]
-checksum = "sha256:54312268e486b7268dafed5476ac8b7424d0876cd727dc325d4e00ec7446f749"
-url = "https://github.com/badlogic/pi-mono/releases/download/v0.70.2/pi-linux-x64.tar.gz"
-url_api = "https://api.github.com/repos/badlogic/pi-mono/releases/assets/404412494"
+[tools."github:earendil-works/pi"."platforms.linux-x64"]
+checksum = "sha256:00f0db9e93f6ba33deb1bb4d75b4eafede9fa5379b635a908cf967d5b37e366d"
+url = "https://github.com/earendil-works/pi/releases/download/v0.73.1/pi-linux-x64.tar.gz"
+url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/414478556"
 
-[tools."github:badlogic/pi-mono"."platforms.macos-arm64"]
-checksum = "sha256:4e039050367d82bff963e15fea8d85ca268f7b0284b83f5f15939aad087353a4"
-url = "https://github.com/badlogic/pi-mono/releases/download/v0.70.2/pi-darwin-arm64.tar.gz"
-url_api = "https://api.github.com/repos/badlogic/pi-mono/releases/assets/404412490"
+[tools."github:earendil-works/pi"."platforms.macos-arm64"]
+checksum = "sha256:c64f501cad8fa0a581257dc9e878e1b2f351f295d0d85d573fe8d7967bfb1bee"
+url = "https://github.com/earendil-works/pi/releases/download/v0.73.1/pi-darwin-arm64.tar.gz"
+url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/414478559"
 
 [[tools."github:larksuite/cli"]]
-version = "1.0.24"
+version = "1.0.25"
 backend = "github:larksuite/cli"
 
 [tools."github:larksuite/cli"."platforms.linux-x64"]
-checksum = "sha256:7d41ac2da3cf985c639a9a675610da7e0e0910b91fbb0f9a775d3265b926240d"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.24/lark-cli-1.0.24-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/413520200"
+checksum = "sha256:ed5db1a7e0794446a3d95c0110b3af11245f48288710b2d86645fbca5a8a0724"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.25/lark-cli-1.0.25-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/414423208"
 
 [tools."github:larksuite/cli"."platforms.macos-arm64"]
-checksum = "sha256:bf1050f31d2a301f7cf890aad67aa3a7daeec9e7ec915bb90efbeab632498996"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.24/lark-cli-1.0.24-darwin-arm64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/413520212"
+checksum = "sha256:a7765ea6e1f9ccfc8d17a4a03cd2c1856d28640cc2c173b616dfb3ee1e79104b"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.25/lark-cli-1.0.25-darwin-arm64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/414423225"
 
 [[tools."github:schpet/linear-cli"]]
 version = "2.0.0"
