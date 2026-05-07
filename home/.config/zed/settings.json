@@ -1,37 +1,27 @@
 {
-  "agent_buffer_font_size": 11.0,
-  "agent_ui_font_size": 13.0,
-  "lsp": {
-    "markdownlint": {
-      "settings": {
-        "MD013": false,
-      },
-    },
-  },
-  "edit_predictions": {
-    "provider": "zed",
-  },
-  "agent_servers": {
-    "codex-acp": {
-      "type": "registry",
-    },
-    "amp-acp": {
-      "type": "registry",
-    },
-  },
   "agent": {
-    "dock": "left",
-    "tool_permissions": {
-      "default": "allow",
-    },
     "default_model": {
       "model": "gpt-5",
       "provider": "openai",
     },
     "default_profile": "write",
+    "dock": "left",
     "play_sound_when_agent_done": "always",
+    "tool_permissions": {
+      "default": "allow",
+    },
     "use_modifier_to_send": true,
   },
+  "agent_buffer_font_size": 11.0,
+  "agent_servers": {
+    "amp-acp": {
+      "type": "registry",
+    },
+    "codex-acp": {
+      "type": "registry",
+    },
+  },
+  "agent_ui_font_size": 13.0,
   "autosave": "on_focus_change",
   "buffer_font_fallbacks": ["Maple Mono NF CN"],
   "buffer_font_family": "MonoLisa",
@@ -40,10 +30,14 @@
   "buffer_line_height": {
     "custom": 1.5,
   },
+  "cli_default_open_behavior": "existing_window",
   "collaboration_panel": {
     "dock": "right",
   },
   "cursor_blink": false,
+  "edit_predictions": {
+    "provider": "zed",
+  },
   "file_types": {
     "Dockerfile": ["Dockerfile", "Dockerfile.*"],
     "JSON": ["json"],
@@ -63,9 +57,22 @@
   },
   "languages": {
     "Python": {
-      "language_servers": ["ty", "ruff", "!basedpyright", "!pylsp"],
       "format_on_save": "on",
-      "formatter": [{ "language_server": { "name": "ruff" } }],
+      "formatter": [
+        {
+          "language_server": {
+            "name": "ruff",
+          },
+        },
+      ],
+      "language_servers": ["ty", "ruff", "!basedpyright", "!pylsp"],
+    },
+  },
+  "lsp": {
+    "markdownlint": {
+      "settings": {
+        "MD013": false,
+      },
     },
   },
   "outline_panel": {
