@@ -144,6 +144,10 @@ backend = "npm:codex-sync"
 version = "1.0.17"
 backend = "npm:cursor-opensync-plugin"
 
+[[tools."npm:hunkdiff"]]
+version = "0.10.0"
+backend = "npm:hunkdiff"
+
 [[tools."npm:opencode-sync-plugin"]]
 version = "0.3.7"
 backend = "npm:opencode-sync-plugin"
