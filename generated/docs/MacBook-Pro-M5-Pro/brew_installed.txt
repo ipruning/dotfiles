@@ -9,6 +9,7 @@ btop
 cairo
 crush
 duckdb
+eza
 fd
 ffmpeg
 fzf
