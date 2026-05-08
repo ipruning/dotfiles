@@ -157,19 +157,19 @@ version = "0.3.0"
 backend = "npm:pi-opensync-plugin"
 
 [[tools.pnpm]]
-version = "11.0.2"
+version = "11.0.3"
 backend = "aqua:pnpm/pnpm"
 
 [tools.pnpm.options]
 "vars.backend" = "aqua:pnpm/pnpm"
 
 [tools.pnpm."platforms.linux-x64"]
-checksum = "sha256:f4b5eb97c1040173bd654f62284e362be3009b57f572ace95689e99cb60ce42b"
-url = "https://github.com/pnpm/pnpm/releases/download/v11.0.2/pnpm-linux-x64.tar.gz"
+checksum = "sha256:5c236f22568453e76f05c2c0a37b483d326ddb3c7759f3b7a7f13a8860109771"
+url = "https://github.com/pnpm/pnpm/releases/download/v11.0.3/pnpm-linux-x64.tar.gz"
 
 [tools.pnpm."platforms.macos-arm64"]
-checksum = "sha256:c817122761618c2c31ddec7c5d0f2e399a80a6b24252938d0f3e2b7de792319d"
-url = "https://github.com/pnpm/pnpm/releases/download/v11.0.2/pnpm-darwin-arm64.tar.gz"
+checksum = "sha256:a24f12a75b371acfbb69cee3ffd54dd7865daa25323d4f12bb22be12edff0ed2"
+url = "https://github.com/pnpm/pnpm/releases/download/v11.0.3/pnpm-darwin-arm64.tar.gz"
 
 [[tools.python]]
 version = "3.14.4"
