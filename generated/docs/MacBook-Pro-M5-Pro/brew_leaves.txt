@@ -33,6 +33,7 @@ mise
 mq
 mysql-client
 neovim
+nushell
 pkgconf
 postgresql@18
 prek
