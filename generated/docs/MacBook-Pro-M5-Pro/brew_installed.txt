@@ -30,6 +30,8 @@ ls-lint
 markdownlint-cli2
 mdbook
 mise
+mosh
+moshi-hook
 mq
 mysql-client
 neovim

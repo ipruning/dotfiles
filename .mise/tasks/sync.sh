@@ -118,6 +118,7 @@ rm -f ~/.zcompdump*
 if command -v skillshare &>/dev/null; then
   gum log --level info "Syncing Skillshare skills..."
   skillshare update --all
+  skillshare sync
 fi
 
 # -- Backup installed packages -------------------------------------------------

@@ -31,6 +31,7 @@ ls-lint
 markdownlint-cli2
 mdbook
 mise
+mosh
 mq
 mysql-client
 neovim
@@ -42,6 +43,7 @@ pueue
 rclone
 rip2
 ripsecrets
+rjyo/moshi/moshi-hook
 rush-parallel
 rust-parallel
 shellcheck

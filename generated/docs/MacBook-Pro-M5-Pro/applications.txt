@@ -45,6 +45,7 @@ Repo Prompt
 Roam Research
 Safari
 Setapp
+Slack
 Superconductor
 Surfingkeys
 Surge
