@@ -1,6 +1,6 @@
 [
   {
-    "label": "zed Paste Img",
+    "label": "zed-image-paste",
     "command": "~/dotfiles/modules/bin/zed-image-paste",
     "env": {
       "IMG_SAVE_PATH": "assets",
@@ -104,7 +104,7 @@
   },
   {
     "label": "lazygit",
-    "command": "~/.local/share/mise/shims/lazygit",
+    "command": "lazygit",
     "hide": "always",
     "show_summary": false,
     "show_command": false,
@@ -119,7 +119,7 @@
   },
   {
     "label": "lazydocker",
-    "command": "~/.local/share/mise/shims/lazydocker",
+    "command": "lazydocker",
     "hide": "always",
     "show_summary": false,
     "show_command": false,

@@ -2,7 +2,7 @@
   {
     "context": "Workspace",
     "bindings": {
-      "alt-ctrl-p": ["task::Spawn", { "task_name": "zed Paste Img" }],
+      "alt-ctrl-p": ["task::Spawn", { "task_name": "zed-image-paste" }],
       "alt-ctrl-r": ["task::Rerun", { "reevaluate_context": true }],
     },
   },
