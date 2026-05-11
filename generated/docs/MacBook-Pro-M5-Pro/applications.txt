@@ -54,6 +54,7 @@ Tampermonkey
 Telegram
 TestFlight
 Things3
+Trimmy
 Typeless
 uBlock Origin Lite
 Visual Studio Code
