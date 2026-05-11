@@ -346,13 +346,13 @@ def rename(old: str, new: str):
         raise typer.Exit(1)
 
     # --- reinstall ---
-    install_cmd = ["skillshare", "install", install_url, "--name", new_name]
+    install_cmd = ["skillshare", "install", install_url, "--name", new_name, "--force"]
     if new_into:
         install_cmd += ["--into", new_into]
     r2 = subprocess.run(install_cmd)
     if r2.returncode != 0:
         console.print("[yellow]Reinstall failed, rolling back…[/yellow]")
-        rollback_cmd = ["skillshare", "install", install_url, "--name", cur_name]
+        rollback_cmd = ["skillshare", "install", install_url, "--name", cur_name, "--force"]
         if cur_into:
             rollback_cmd += ["--into", cur_into]
         rb = subprocess.run(rollback_cmd)
