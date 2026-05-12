@@ -64,26 +64,31 @@ backend = "github:Loongphy/codex-auth"
 checksum = "sha256:b8ec1b9af041a45a81327163813f4dddb5542f205d67a3c883ece9262760492d"
 url = "https://github.com/Loongphy/codex-auth/releases/download/v0.2.8/codex-auth-Linux-X64.tar.gz"
 url_api = "https://api.github.com/repos/Loongphy/codex-auth/releases/assets/404320011"
+github_attestations = "unavailable"
 
 [tools."github:Loongphy/codex-auth"."platforms.linux-x64-baseline"]
 checksum = "sha256:b8ec1b9af041a45a81327163813f4dddb5542f205d67a3c883ece9262760492d"
 url = "https://github.com/Loongphy/codex-auth/releases/download/v0.2.8/codex-auth-Linux-X64.tar.gz"
 url_api = "https://api.github.com/repos/Loongphy/codex-auth/releases/assets/404320011"
+github_attestations = "unavailable"
 
 [tools."github:Loongphy/codex-auth"."platforms.linux-x64-musl"]
 checksum = "sha256:b8ec1b9af041a45a81327163813f4dddb5542f205d67a3c883ece9262760492d"
 url = "https://github.com/Loongphy/codex-auth/releases/download/v0.2.8/codex-auth-Linux-X64.tar.gz"
 url_api = "https://api.github.com/repos/Loongphy/codex-auth/releases/assets/404320011"
+github_attestations = "unavailable"
 
 [tools."github:Loongphy/codex-auth"."platforms.linux-x64-musl-baseline"]
 checksum = "sha256:b8ec1b9af041a45a81327163813f4dddb5542f205d67a3c883ece9262760492d"
 url = "https://github.com/Loongphy/codex-auth/releases/download/v0.2.8/codex-auth-Linux-X64.tar.gz"
 url_api = "https://api.github.com/repos/Loongphy/codex-auth/releases/assets/404320011"
+github_attestations = "unavailable"
 
 [tools."github:Loongphy/codex-auth"."platforms.macos-arm64"]
 checksum = "sha256:64c9997ed0dfeb581035b039948d155c0f62a498039382da728c4ecb3d77a419"
 url = "https://github.com/Loongphy/codex-auth/releases/download/v0.2.8/codex-auth-macOS-ARM64.tar.gz"
 url_api = "https://api.github.com/repos/Loongphy/codex-auth/releases/assets/404320006"
+github_attestations = "unavailable"
 
 [[tools."github:earendil-works/pi"]]
 version = "0.74.0"
@@ -93,55 +98,65 @@ backend = "github:earendil-works/pi"
 checksum = "sha256:d67657a30d49c9faca80868d2a4bdba4dfcac04702893f45a6d14b249345eb8d"
 url = "https://github.com/earendil-works/pi/releases/download/v0.74.0/pi-linux-x64.tar.gz"
 url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/414593861"
+github_attestations = "unavailable"
 
 [tools."github:earendil-works/pi"."platforms.linux-x64-baseline"]
 checksum = "sha256:d67657a30d49c9faca80868d2a4bdba4dfcac04702893f45a6d14b249345eb8d"
 url = "https://github.com/earendil-works/pi/releases/download/v0.74.0/pi-linux-x64.tar.gz"
 url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/414593861"
+github_attestations = "unavailable"
 
 [tools."github:earendil-works/pi"."platforms.linux-x64-musl"]
 checksum = "sha256:d67657a30d49c9faca80868d2a4bdba4dfcac04702893f45a6d14b249345eb8d"
 url = "https://github.com/earendil-works/pi/releases/download/v0.74.0/pi-linux-x64.tar.gz"
 url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/414593861"
+github_attestations = "unavailable"
 
 [tools."github:earendil-works/pi"."platforms.linux-x64-musl-baseline"]
 checksum = "sha256:d67657a30d49c9faca80868d2a4bdba4dfcac04702893f45a6d14b249345eb8d"
 url = "https://github.com/earendil-works/pi/releases/download/v0.74.0/pi-linux-x64.tar.gz"
 url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/414593861"
+github_attestations = "unavailable"
 
 [tools."github:earendil-works/pi"."platforms.macos-arm64"]
 checksum = "sha256:3063179823c6a985634312240c57015024316f7fe6661edd41f14c77d8b15e10"
 url = "https://github.com/earendil-works/pi/releases/download/v0.74.0/pi-darwin-arm64.tar.gz"
 url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/414593862"
+github_attestations = "unavailable"
 
 [[tools."github:larksuite/cli"]]
-version = "1.0.27"
+version = "1.0.28"
 backend = "github:larksuite/cli"
 
 [tools."github:larksuite/cli"."platforms.linux-x64"]
-checksum = "sha256:f7b3f3379bf52303f8f239af2e671362aac04486c7068e49cd88eec55ac47108"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.27/lark-cli-1.0.27-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/416004877"
+checksum = "sha256:f6f60ec53a30270b7d41b66c10db56a4bd1d71607d1c7396c144946bf5bbfba3"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.28/lark-cli-1.0.28-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/417444452"
+github_attestations = "unavailable"
 
 [tools."github:larksuite/cli"."platforms.linux-x64-baseline"]
-checksum = "sha256:f7b3f3379bf52303f8f239af2e671362aac04486c7068e49cd88eec55ac47108"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.27/lark-cli-1.0.27-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/416004877"
+checksum = "sha256:f6f60ec53a30270b7d41b66c10db56a4bd1d71607d1c7396c144946bf5bbfba3"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.28/lark-cli-1.0.28-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/417444452"
+github_attestations = "unavailable"
 
 [tools."github:larksuite/cli"."platforms.linux-x64-musl"]
-checksum = "sha256:f7b3f3379bf52303f8f239af2e671362aac04486c7068e49cd88eec55ac47108"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.27/lark-cli-1.0.27-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/416004877"
+checksum = "sha256:f6f60ec53a30270b7d41b66c10db56a4bd1d71607d1c7396c144946bf5bbfba3"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.28/lark-cli-1.0.28-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/417444452"
+github_attestations = "unavailable"
 
 [tools."github:larksuite/cli"."platforms.linux-x64-musl-baseline"]
-checksum = "sha256:f7b3f3379bf52303f8f239af2e671362aac04486c7068e49cd88eec55ac47108"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.27/lark-cli-1.0.27-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/416004877"
+checksum = "sha256:f6f60ec53a30270b7d41b66c10db56a4bd1d71607d1c7396c144946bf5bbfba3"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.28/lark-cli-1.0.28-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/417444452"
+github_attestations = "unavailable"
 
 [tools."github:larksuite/cli"."platforms.macos-arm64"]
-checksum = "sha256:3986dadfd6ddfe807bb7f394a98a04b739cf2c7fd05c7b15d4a2f788d10f02d0"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.27/lark-cli-1.0.27-darwin-arm64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/416004874"
+checksum = "sha256:b93acf4e66a6837b56f0814e36bfcd7ac82b97c3cb69ad8836e19b934bf07d35"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.28/lark-cli-1.0.28-darwin-arm64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/417444464"
+github_attestations = "unavailable"
 
 [[tools."github:schpet/linear-cli"]]
 version = "2.0.0"
@@ -151,26 +166,31 @@ backend = "github:schpet/linear-cli"
 checksum = "sha256:affb594672c2f220cef68fa7cfeb813945c4010789a4b8cc2c0e46468feb7870"
 url = "https://github.com/schpet/linear-cli/releases/download/v2.0.0/linear-x86_64-unknown-linux-gnu.tar.xz"
 url_api = "https://api.github.com/repos/schpet/linear-cli/releases/assets/388120649"
+github_attestations = "unavailable"
 
 [tools."github:schpet/linear-cli"."platforms.linux-x64-baseline"]
 checksum = "sha256:affb594672c2f220cef68fa7cfeb813945c4010789a4b8cc2c0e46468feb7870"
 url = "https://github.com/schpet/linear-cli/releases/download/v2.0.0/linear-x86_64-unknown-linux-gnu.tar.xz"
 url_api = "https://api.github.com/repos/schpet/linear-cli/releases/assets/388120649"
+github_attestations = "unavailable"
 
 [tools."github:schpet/linear-cli"."platforms.linux-x64-musl"]
 checksum = "sha256:affb594672c2f220cef68fa7cfeb813945c4010789a4b8cc2c0e46468feb7870"
 url = "https://github.com/schpet/linear-cli/releases/download/v2.0.0/linear-x86_64-unknown-linux-gnu.tar.xz"
 url_api = "https://api.github.com/repos/schpet/linear-cli/releases/assets/388120649"
+github_attestations = "unavailable"
 
 [tools."github:schpet/linear-cli"."platforms.linux-x64-musl-baseline"]
 checksum = "sha256:affb594672c2f220cef68fa7cfeb813945c4010789a4b8cc2c0e46468feb7870"
 url = "https://github.com/schpet/linear-cli/releases/download/v2.0.0/linear-x86_64-unknown-linux-gnu.tar.xz"
 url_api = "https://api.github.com/repos/schpet/linear-cli/releases/assets/388120649"
+github_attestations = "unavailable"
 
 [tools."github:schpet/linear-cli"."platforms.macos-arm64"]
 checksum = "sha256:121fe1eee6d90b22e76e4e98cbb624474eecd970a4a4c622fd4d50889b57dacc"
 url = "https://github.com/schpet/linear-cli/releases/download/v2.0.0/linear-aarch64-apple-darwin.tar.xz"
 url_api = "https://api.github.com/repos/schpet/linear-cli/releases/assets/388120583"
+github_attestations = "unavailable"
 
 [[tools.go]]
 version = "1.26.3"
@@ -205,28 +225,28 @@ version = "1.1.0"
 backend = "go:github.com/xdevplatform/xurl"
 
 [[tools.node]]
-version = "26.0.0"
+version = "26.1.0"
 backend = "core:node"
 
 [tools.node."platforms.linux-x64"]
-checksum = "sha256:42cee4d7ec80b7f7c89281cf00726b14840ac674462404dd4fd36f03964dc0af"
-url = "https://nodejs.org/dist/v26.0.0/node-v26.0.0-linux-x64.tar.gz"
+checksum = "sha256:62d555c329e05e3625109f2e3a8b5195b368d5ef38266292469d32f63cd98ffd"
+url = "https://nodejs.org/dist/v26.1.0/node-v26.1.0-linux-x64.tar.gz"
 
 [tools.node."platforms.linux-x64-baseline"]
-checksum = "sha256:42cee4d7ec80b7f7c89281cf00726b14840ac674462404dd4fd36f03964dc0af"
-url = "https://nodejs.org/dist/v26.0.0/node-v26.0.0-linux-x64.tar.gz"
+checksum = "sha256:62d555c329e05e3625109f2e3a8b5195b368d5ef38266292469d32f63cd98ffd"
+url = "https://nodejs.org/dist/v26.1.0/node-v26.1.0-linux-x64.tar.gz"
 
 [tools.node."platforms.linux-x64-musl"]
-checksum = "sha256:333c376e342e5e5c0505f19eaab4990cc03f47a15dd5628c30fe64c39048b995"
-url = "https://unofficial-builds.nodejs.org/download/release/v26.0.0/node-v26.0.0-linux-x64-musl.tar.gz"
+checksum = "sha256:e302e820cea1007dfe68f5faaa23c8ed5a7099ad48cf068d6debf3d4958faaef"
+url = "https://unofficial-builds.nodejs.org/download/release/v26.1.0/node-v26.1.0-linux-x64-musl.tar.gz"
 
 [tools.node."platforms.linux-x64-musl-baseline"]
-checksum = "sha256:333c376e342e5e5c0505f19eaab4990cc03f47a15dd5628c30fe64c39048b995"
-url = "https://unofficial-builds.nodejs.org/download/release/v26.0.0/node-v26.0.0-linux-x64-musl.tar.gz"
+checksum = "sha256:e302e820cea1007dfe68f5faaa23c8ed5a7099ad48cf068d6debf3d4958faaef"
+url = "https://unofficial-builds.nodejs.org/download/release/v26.1.0/node-v26.1.0-linux-x64-musl.tar.gz"
 
 [tools.node."platforms.macos-arm64"]
-checksum = "sha256:dcee8564c1a9342f9594dd5e52d533894dfef6b85aa771bbbb870baa3c403235"
-url = "https://nodejs.org/dist/v26.0.0/node-v26.0.0-darwin-arm64.tar.gz"
+checksum = "sha256:91063f665c2f5d6e69e4f8fcb66d3d476bc2785ace82267274bf4da789985ceb"
+url = "https://nodejs.org/dist/v26.1.0/node-v26.1.0-darwin-arm64.tar.gz"
 
 [[tools."npm:claude-code-sync"]]
 version = "0.1.15"
@@ -241,7 +261,7 @@ version = "1.0.17"
 backend = "npm:cursor-opensync-plugin"
 
 [[tools."npm:hunkdiff"]]
-version = "0.10.0"
+version = "0.11.1"
 backend = "npm:hunkdiff"
 
 [[tools."npm:opencode-sync-plugin"]]
@@ -253,35 +273,35 @@ version = "0.3.0"
 backend = "npm:pi-opensync-plugin"
 
 [[tools.pnpm]]
-version = "11.0.5"
+version = "11.1.1"
 backend = "aqua:pnpm/pnpm"
 
 [tools.pnpm.options]
 "vars.backend" = "aqua:pnpm/pnpm"
 
 [tools.pnpm."platforms.linux-x64"]
-checksum = "sha256:c1b55f53f5344cf0e26441d97b9ee2ee3b81791503c5cbd4bb93ae1898b8d211"
-url = "https://github.com/pnpm/pnpm/releases/download/v11.0.5/pnpm-linux-x64.tar.gz"
+checksum = "sha256:f5f72f96d131e19ae5b2ce083914641439c8b5b6b14e4b7157320191eaa24bd4"
+url = "https://github.com/pnpm/pnpm/releases/download/v11.1.1/pnpm-linux-x64.tar.gz"
 provenance = "github-attestations"
 
 [tools.pnpm."platforms.linux-x64-baseline"]
-checksum = "sha256:c1b55f53f5344cf0e26441d97b9ee2ee3b81791503c5cbd4bb93ae1898b8d211"
-url = "https://github.com/pnpm/pnpm/releases/download/v11.0.5/pnpm-linux-x64.tar.gz"
+checksum = "sha256:f5f72f96d131e19ae5b2ce083914641439c8b5b6b14e4b7157320191eaa24bd4"
+url = "https://github.com/pnpm/pnpm/releases/download/v11.1.1/pnpm-linux-x64.tar.gz"
 provenance = "github-attestations"
 
 [tools.pnpm."platforms.linux-x64-musl"]
-checksum = "sha256:8e073c9dd1a02096f55ee412abdc2ae131d72153c530436302e9d8ec33936ac2"
-url = "https://github.com/pnpm/pnpm/releases/download/v11.0.5/pnpm-linux-x64-musl.tar.gz"
+checksum = "sha256:94fd573ff877e3f7dc88c92b57d2c00a96d7b3a134ce9534f6adc541ee98696e"
+url = "https://github.com/pnpm/pnpm/releases/download/v11.1.1/pnpm-linux-x64-musl.tar.gz"
 provenance = "github-attestations"
 
 [tools.pnpm."platforms.linux-x64-musl-baseline"]
-checksum = "sha256:8e073c9dd1a02096f55ee412abdc2ae131d72153c530436302e9d8ec33936ac2"
-url = "https://github.com/pnpm/pnpm/releases/download/v11.0.5/pnpm-linux-x64-musl.tar.gz"
+checksum = "sha256:94fd573ff877e3f7dc88c92b57d2c00a96d7b3a134ce9534f6adc541ee98696e"
+url = "https://github.com/pnpm/pnpm/releases/download/v11.1.1/pnpm-linux-x64-musl.tar.gz"
 provenance = "github-attestations"
 
 [tools.pnpm."platforms.macos-arm64"]
-checksum = "sha256:24d412b2d137c6bc91e09c039b0e8ced6b5ac8f1dc9ea1881f0521cdb3bc5318"
-url = "https://github.com/pnpm/pnpm/releases/download/v11.0.5/pnpm-darwin-arm64.tar.gz"
+checksum = "sha256:e3603ea3bb3911a89f4f8d1a38e8cc6aa6bdbc99b12fad01d94ecba861e8b916"
+url = "https://github.com/pnpm/pnpm/releases/download/v11.1.1/pnpm-darwin-arm64.tar.gz"
 provenance = "github-attestations"
 
 [[tools.python]]
@@ -314,32 +334,32 @@ url = "https://github.com/astral-sh/python-build-standalone/releases/download/20
 provenance = "github-attestations"
 
 [[tools.ruby]]
-version = "4.0.3"
+version = "4.0.4"
 backend = "core:ruby"
 
 [tools.ruby."platforms.linux-x64"]
-checksum = "sha256:650d1ffaac7f29300f939667891c8e8691b83df6803bd3a60414f1c8d7e3b638"
-url = "https://github.com/jdx/ruby/releases/download/4.0.3-2/ruby-4.0.3.x86_64_linux.tar.gz"
+checksum = "sha256:ecc4d8a3ec926b46533e27bb7bba921507406c6fa61e034e8f75cd127ac30796"
+url = "https://github.com/jdx/ruby/releases/download/4.0.4-1/ruby-4.0.4.x86_64_linux.tar.gz"
 provenance = "github-attestations"
 
 [tools.ruby."platforms.linux-x64-baseline"]
-checksum = "sha256:650d1ffaac7f29300f939667891c8e8691b83df6803bd3a60414f1c8d7e3b638"
-url = "https://github.com/jdx/ruby/releases/download/4.0.3-2/ruby-4.0.3.x86_64_linux.tar.gz"
+checksum = "sha256:ecc4d8a3ec926b46533e27bb7bba921507406c6fa61e034e8f75cd127ac30796"
+url = "https://github.com/jdx/ruby/releases/download/4.0.4-1/ruby-4.0.4.x86_64_linux.tar.gz"
 provenance = "github-attestations"
 
 [tools.ruby."platforms.linux-x64-musl"]
-checksum = "sha256:650d1ffaac7f29300f939667891c8e8691b83df6803bd3a60414f1c8d7e3b638"
-url = "https://github.com/jdx/ruby/releases/download/4.0.3-2/ruby-4.0.3.x86_64_linux.tar.gz"
+checksum = "sha256:ecc4d8a3ec926b46533e27bb7bba921507406c6fa61e034e8f75cd127ac30796"
+url = "https://github.com/jdx/ruby/releases/download/4.0.4-1/ruby-4.0.4.x86_64_linux.tar.gz"
 provenance = "github-attestations"
 
 [tools.ruby."platforms.linux-x64-musl-baseline"]
-checksum = "sha256:650d1ffaac7f29300f939667891c8e8691b83df6803bd3a60414f1c8d7e3b638"
-url = "https://github.com/jdx/ruby/releases/download/4.0.3-2/ruby-4.0.3.x86_64_linux.tar.gz"
+checksum = "sha256:ecc4d8a3ec926b46533e27bb7bba921507406c6fa61e034e8f75cd127ac30796"
+url = "https://github.com/jdx/ruby/releases/download/4.0.4-1/ruby-4.0.4.x86_64_linux.tar.gz"
 provenance = "github-attestations"
 
 [tools.ruby."platforms.macos-arm64"]
-checksum = "sha256:a9827d5a2f175b294a09d8a13ec5ddbabe359cc383023e4015a63273fb129446"
-url = "https://github.com/jdx/ruby/releases/download/4.0.3-2/ruby-4.0.3.macos.tar.gz"
+checksum = "sha256:8e94f0e6d0b45636db21804dc2095b7d93d6fa3f639864769a4a7de2a6f3cdea"
+url = "https://github.com/jdx/ruby/releases/download/4.0.4-1/ruby-4.0.4.macos.tar.gz"
 provenance = "github-attestations"
 
 [[tools.rust]]

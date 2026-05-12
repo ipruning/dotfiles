@@ -11,7 +11,7 @@ zig = { version = "latest", backend = "core:zig" }
 "cargo:https://github.com/clouedoc/hzfind" = "latest"
 "gem:kamal" = "latest"
 "github:earendil-works/pi" = "0.74.0"
-"github:larksuite/cli" = "1.0.27"
+"github:larksuite/cli" = "1.0.28"
 "github:Loongphy/codex-auth" = "0.2.8"
 "github:schpet/linear-cli" = "2.0.0"
 "go:github.com/bootdotdev/bootdev" = "latest"
