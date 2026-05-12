@@ -1,7 +1,6 @@
 format = """\
 $sudo\
-$username\
-$hostname\
+${custom.ssh_user_host}\
 $directory\
 $git_branch\
 $git_status\
@@ -21,13 +20,20 @@ style = "bold red"
 symbol = "SU "
 
 [username]
-format = "[$user@]($style)"
+format = "[$user]($style)"
 style_root = "bold red"
 style_user = "bold yellow"
 
 [hostname]
+ssh_only = true
 format = "[$hostname]($style) "
 style = "bold yellow"
+
+[custom.ssh_user_host]
+command = "printf '%s@%s' \"$USER\" \"$(hostname -s)\""
+format = "[$output]($style) "
+style = "bold yellow"
+when = "test -n \"$SSH_CONNECTION$SSH_CLIENT$SSH_TTY\""
 
 [directory]
 read_only = " [RO]"
