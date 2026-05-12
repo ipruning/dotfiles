@@ -7,23 +7,18 @@
 
 Usage:
   echo "hello world" | ttok.py
+  p | ttok.py                # clipboard text, or copied file paths
   ttok.py "hello world"
+  ttok.py file.txt
   ttok.py < file.txt
 """
 
 import sys
+from pathlib import Path
+from urllib.parse import unquote, urlparse
 
 TOKENIZER = "o200k_base"
-
-
-def count_tokens_stream(stream) -> int:
-    import tiktoken
-
-    enc = tiktoken.get_encoding(TOKENIZER)
-    total = 0
-    while chunk := stream.read(65536):
-        total += len(enc.encode(chunk, disallowed_special=()))
-    return total
+MAX_CLIPBOARD_PATHS = 100
 
 
 def count_tokens(text: str) -> int:
@@ -33,12 +28,41 @@ def count_tokens(text: str) -> int:
     return len(enc.encode(text, disallowed_special=()))
 
 
+def count_file(path: Path) -> int:
+    return count_tokens(path.read_text(errors="replace"))
+
+
+def path_from_clipboard_line(line: str) -> Path:
+    if line.startswith("file://"):
+        return Path(unquote(urlparse(line).path))
+    return Path(line).expanduser()
+
+
+def paths_from_clipboard_text(text: str) -> list[Path] | None:
+    lines = [line.strip() for line in text.strip().splitlines() if line.strip()]
+    if not lines or len(lines) > MAX_CLIPBOARD_PATHS:
+        return None
+
+    paths = [path_from_clipboard_line(line) for line in lines]
+    if all(path.is_file() for path in paths):
+        return paths
+    return None
+
+
 def main() -> None:
     if len(sys.argv) > 1:
-        text = " ".join(sys.argv[1:])
-        print(count_tokens(text))
+        paths = [Path(arg).expanduser() for arg in sys.argv[1:]]
+        if all(path.is_file() for path in paths):
+            print(sum(count_file(path) for path in paths))
+        else:
+            text = " ".join(sys.argv[1:])
+            print(count_tokens(text))
     elif not sys.stdin.isatty():
-        print(count_tokens_stream(sys.stdin))
+        text = sys.stdin.read()
+        if paths := paths_from_clipboard_text(text):
+            print(sum(count_file(path) for path in paths))
+        else:
+            print(count_tokens(text))
     else:
         print(__doc__ or "Usage: ttok.py <text> or pipe input", file=sys.stderr)
         sys.exit(1)

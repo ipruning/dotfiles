@@ -2,7 +2,7 @@
 
 set -euo pipefail
 if command -v pbpaste >/dev/null 2>&1; then
-  exec pbpaste
+  exec pbpaste -Prefer txt
 elif command -v xclip >/dev/null 2>&1; then
   exec xclip -selection clipboard -o
 elif command -v getclip >/dev/null 2>&1; then
