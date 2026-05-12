@@ -33,9 +33,6 @@ trusted_config_paths = [
     "~/Developer",
 ]
 
-lockfile_platforms = ["macos-arm64", "linux-x64"]
-minimum_release_age = "7d"
-
 [settings.ruby]
 compile = false
 
@@ -47,5 +44,3 @@ _.path = [
     "~/.local/bin",
     "/opt/homebrew/opt/postgresql@18/bin",
 ]
-
-MISE_AQUA_GITHUB_ATTESTATIONS = false

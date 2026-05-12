@@ -1,5 +1,2 @@
-[settings.python]
-uv_venv_auto = true
-
-[tools]
-python = "3.14"
+[env]
+_.python.venv = { path = ".venv" }
