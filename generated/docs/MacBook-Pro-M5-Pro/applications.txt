@@ -60,6 +60,7 @@ uBlock Origin Lite
 Visual Studio Code
 Warp
 WeChat
+WhatCable
 YACReader
 YACReaderLibrary
 Zed

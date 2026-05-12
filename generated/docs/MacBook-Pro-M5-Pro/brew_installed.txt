@@ -17,6 +17,7 @@ gh
 git-delta
 git-lfs
 gitu
+gnupg
 govulncheck
 gum
 htop
