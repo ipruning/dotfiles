@@ -1,3 +1,5 @@
+config-version = 2
+
 accordion-padding = 0
 after-startup-command = ["workspace 6"]
 default-root-container-layout = "accordion"
@@ -89,26 +91,10 @@ esc = "mode main"
 
 cmd-r = ["reload-config", "mode main"]
 
-alt-h = [
-    "move-node-to-monitor left",
-    "focus left --boundaries all-monitors-outer-frame",
-    "mode main",
-]
-alt-j = [
-    "move-node-to-monitor down",
-    "focus down --boundaries all-monitors-outer-frame",
-    "mode main",
-]
-alt-k = [
-    "move-node-to-monitor up",
-    "focus up --boundaries all-monitors-outer-frame",
-    "mode main",
-]
-alt-l = [
-    "move-node-to-monitor right",
-    "focus right --boundaries all-monitors-outer-frame",
-    "mode main",
-]
+alt-h = ["move-node-to-monitor --focus-follows-window left", "mode main"]
+alt-j = ["move-node-to-monitor --focus-follows-window down", "mode main"]
+alt-k = ["move-node-to-monitor --focus-follows-window up", "mode main"]
+alt-l = ["move-node-to-monitor --focus-follows-window right", "mode main"]
 
 alt-shift-h = ["join-with left", "mode main"]
 alt-shift-j = ["join-with down", "mode main"]
@@ -129,7 +115,7 @@ if.window-title-regex-substring = "MDPro3"
 run = "layout floating"
 
 [[on-window-detected]]
-if.window-title-regex-substring = "steam"
+if.app-id = "com.valvesoftware.steam"
 run = "layout floating"
 
 [[on-window-detected]]
