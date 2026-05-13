@@ -43,13 +43,13 @@ prek
 pueue
 rclone
 rip2
+ripgrep
 ripsecrets
 rjyo/moshi/moshi-hook
 rush-parallel
 rust-parallel
 shellcheck
 simonbs/brrr-cli/brrr
-skillshare
 sqlfluff
 starship
 stripe/stripe-cli/stripe
