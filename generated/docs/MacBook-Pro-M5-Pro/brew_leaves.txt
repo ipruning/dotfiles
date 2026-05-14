@@ -32,6 +32,7 @@ ls-lint
 markdownlint-cli2
 mdbook
 mise
+mole
 mosh
 mq
 mysql-client

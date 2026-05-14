@@ -31,6 +31,7 @@ ls-lint
 markdownlint-cli2
 mdbook
 mise
+mole
 mosh
 moshi-hook
 mq
