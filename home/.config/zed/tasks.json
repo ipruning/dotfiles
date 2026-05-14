@@ -148,8 +148,8 @@
     },
   },
   {
-    "label": "amp-tmux",
-    "command": "amp-tmux",
+    "label": "pi-tmux",
+    "command": "pi-tmux",
     "hide": "always",
     "show_summary": false,
     "show_command": false,

@@ -1,12 +1,13 @@
 {
-  "disable_ai": true,
+  "disable_ai": false,
   "agent": {
+    "flexible": false,
     "default_model": {
       "model": "gpt-5",
       "provider": "openai",
     },
     "default_profile": "write",
-    "dock": "left",
+    "dock": "right",
     "play_sound_when_agent_done": "always",
     "tool_permissions": {
       "default": "allow",
@@ -81,7 +82,7 @@
   },
   "preferred_line_length": 120,
   "project_panel": {
-    "dock": "right",
+    "dock": "left",
   },
   "restore_on_startup": "last_session",
   "scroll_beyond_last_line": "off",

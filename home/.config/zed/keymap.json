@@ -52,7 +52,7 @@
       "space a": [
         "task::Spawn",
         {
-          "task_name": "amp-tmux",
+          "task_name": "pi-tmux",
           "reveal_target": "center",
         },
       ],
@@ -199,7 +199,7 @@
       "space a": [
         "task::Spawn",
         {
-          "task_name": "amp-tmux",
+          "task_name": "pi-tmux",
           "reveal_target": "center",
         },
       ],
