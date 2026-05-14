@@ -115,6 +115,38 @@ def _pick_other(sources: dict[str, str], current: str) -> str | None:
     return None
 
 
+def _managed_skill_paths(source_dir: Path) -> set[str]:
+    metadata_path = source_dir / ".metadata.json"
+    if not metadata_path.exists():
+        return set()
+
+    data = json.loads(metadata_path.read_text())
+    entries = data.get("entries", {})
+    if not isinstance(entries, dict):
+        return set()
+    return {entry for entry in entries if isinstance(entry, str)}
+
+
+def _iter_skill_files(source_dir: Path):
+    for skill_file in sorted(source_dir.glob("**/SKILL.md")):
+        rel_file = skill_file.relative_to(source_dir)
+        if any(part.startswith(".") or part.startswith("_") for part in rel_file.parts):
+            continue
+        yield skill_file
+
+
+def _skill_frontmatter(skill_file: Path) -> dict | None:
+    text = skill_file.read_text()
+    match = re.match(r"\A---\n(.*?)\n---\n", text, re.S)
+    if not match:
+        return None
+
+    data = _yaml.load(match.group(1)) or {}
+    if not isinstance(data, dict):
+        return None
+    return data
+
+
 @app.command(name="list")
 def list_sources():
     """List all registered sources."""
@@ -213,6 +245,58 @@ def exec_cmd(name: str, cmd: list[str]):
                     (f"\n  source: {orig}", "dim"),
                 )
             )
+
+
+@app.command(name="descriptions")
+def descriptions(
+    source: str | None = typer.Option(
+        None,
+        "--source",
+        "-s",
+        help="Skillshare source dir. Defaults to the active global source.",
+    ),
+    include_managed: bool = typer.Option(
+        False,
+        "--include-managed",
+        help="Include skills tracked in .metadata.json.",
+    ),
+):
+    """Export SKILL.md descriptions as JSONL."""
+    source_dir = (
+        Path(source).expanduser().resolve() if source else Path(_current_source())
+    )
+    if not source_dir.is_dir():
+        console.print(
+            Text.assemble(("Source directory not found: ", "red"), str(source_dir))
+        )
+        raise typer.Exit(1)
+
+    managed = _managed_skill_paths(source_dir)
+    for skill_file in _iter_skill_files(source_dir):
+        rel_dir = skill_file.parent.relative_to(source_dir).as_posix()
+        if not include_managed and rel_dir in managed:
+            continue
+
+        frontmatter = _skill_frontmatter(skill_file)
+        if frontmatter is None:
+            continue
+
+        name = str(frontmatter.get("name") or skill_file.parent.name)
+        description = (
+            str(frontmatter.get("description") or "").replace("\n", " ").strip()
+        )
+
+        print(
+            json.dumps(
+                {
+                    "name": name,
+                    "path": rel_dir,
+                    "description": description,
+                },
+                ensure_ascii=False,
+                separators=(",", ":"),
+            )
+        )
 
 
 def _parse_skill_name(name: str) -> tuple[str, str | None]:
@@ -352,7 +436,14 @@ def rename(old: str, new: str):
     r2 = subprocess.run(install_cmd)
     if r2.returncode != 0:
         console.print("[yellow]Reinstall failed, rolling back…[/yellow]")
-        rollback_cmd = ["skillshare", "install", install_url, "--name", cur_name, "--force"]
+        rollback_cmd = [
+            "skillshare",
+            "install",
+            install_url,
+            "--name",
+            cur_name,
+            "--force",
+        ]
         if cur_into:
             rollback_cmd += ["--into", cur_into]
         rb = subprocess.run(rollback_cmd)
