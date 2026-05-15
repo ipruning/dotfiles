@@ -3,8 +3,10 @@
   "agent": {
     "flexible": false,
     "default_model": {
-      "model": "gpt-5",
-      "provider": "openai",
+      "effort": "low",
+      "enable_thinking": true,
+      "model": "gpt-5.5",
+      "provider": "openai-subscribed",
     },
     "default_profile": "write",
     "dock": "right",

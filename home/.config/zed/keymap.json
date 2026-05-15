@@ -48,8 +48,8 @@
   {
     "context": "EmptyPane || SharedScreen",
     "bindings": {
-      "space shift-a": "agent::ToggleFocus",
-      "space a": [
+      "space a": "agent::ToggleFocus",
+      "space p": [
         "task::Spawn",
         {
           "task_name": "pi-tmux",
@@ -195,8 +195,8 @@
         },
       ],
       "space shift-t": "task::Spawn",
-      "space shift-a": "agent::ToggleFocus",
-      "space a": [
+      "space a": "agent::ToggleFocus",
+      "space p": [
         "task::Spawn",
         {
           "task_name": "pi-tmux",
