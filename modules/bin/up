@@ -55,7 +55,7 @@ if command -v brew >/dev/null 2>&1; then
   parallel_cmds+=('SECONDS=0; logger "Updating Homebrew..." && brew update && brew upgrade && brew cleanup && brew autoremove; logger "Homebrew done in ${SECONDS}s"')
 fi
 if command -v mise >/dev/null 2>&1; then
-  parallel_cmds+=('SECONDS=0; logger "Updating mise..." && mise upgrade && mise prune --yes && mise reshim; logger "mise done in ${SECONDS}s"')
+  parallel_cmds+=('SECONDS=0; logger "Updating mise..." && mise upgrade --bump && mise prune --yes && mise reshim; logger "mise done in ${SECONDS}s"')
 fi
 if command -v gh >/dev/null 2>&1; then
   parallel_cmds+=('SECONDS=0; logger "Updating GitHub CLI extensions..." && gh extension upgrade --all; logger "GitHub CLI done in ${SECONDS}s"')

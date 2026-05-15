@@ -7,7 +7,7 @@ cd "$(git rev-parse --show-toplevel)"
 
 # -- Core init ----------------------------------------------------------------
 
-gum spin --title "Updating mise packages..." -- mise upgrade
+gum spin --title "Updating mise packages..." -- mise upgrade --bump
 find .mise/tasks/ -type f -name '*.sh' -exec chmod +x {} \;
 
 gum spin --title "Updating Zellij plugins..." -- bash -c '
