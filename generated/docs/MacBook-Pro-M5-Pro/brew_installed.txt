@@ -25,6 +25,7 @@ hyperfine
 jq
 just
 k6
+lark-cli
 lazydocker
 lazygit
 ls-lint
@@ -57,6 +58,7 @@ tart
 television
 tmux
 tokei
+trove
 try-rs
 typos-cli
 typst

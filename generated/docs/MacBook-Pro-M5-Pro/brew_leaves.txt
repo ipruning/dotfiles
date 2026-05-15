@@ -23,6 +23,8 @@ govulncheck
 gum
 htop
 hyperfine
+jihuanshe/tap/lark-cli
+jihuanshe/tap/trove
 jq
 just
 k6
