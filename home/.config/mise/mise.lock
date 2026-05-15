@@ -163,6 +163,24 @@ url = "https://github.com/larksuite/cli/releases/download/v1.0.32/lark-cli-1.0.3
 url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/421011402"
 github_attestations = "unavailable"
 
+[tools."github:larksuite/cli"."platforms.linux-x64-baseline"]
+checksum = "sha256:9fb554e14bc4a5751d75c5f14d61080efe47a551e4589d15e9a2dec265704c05"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.32/lark-cli-1.0.32-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/421011402"
+github_attestations = "unavailable"
+
+[tools."github:larksuite/cli"."platforms.linux-x64-musl"]
+checksum = "sha256:9fb554e14bc4a5751d75c5f14d61080efe47a551e4589d15e9a2dec265704c05"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.32/lark-cli-1.0.32-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/421011402"
+github_attestations = "unavailable"
+
+[tools."github:larksuite/cli"."platforms.linux-x64-musl-baseline"]
+checksum = "sha256:9fb554e14bc4a5751d75c5f14d61080efe47a551e4589d15e9a2dec265704c05"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.32/lark-cli-1.0.32-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/421011402"
+github_attestations = "unavailable"
+
 [tools."github:larksuite/cli"."platforms.macos-arm64"]
 checksum = "sha256:91d7d2e7ed749a608ca44ca773e198d58f35aee7e3a1368eba19b1f1920f5f79"
 url = "https://github.com/larksuite/cli/releases/download/v1.0.32/lark-cli-1.0.32-darwin-arm64.tar.gz"
