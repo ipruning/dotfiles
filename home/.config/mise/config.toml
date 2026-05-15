@@ -8,8 +8,9 @@ ruby = { version = "latest", backend = "core:ruby" }
 rust = { version = "stable", backend = "core:rust" }
 zig = { version = "latest", backend = "core:zig" }
 
+"aqua:pnpm/pnpm" = "11.1.2"
 "cargo:https://github.com/clouedoc/hzfind" = "latest"
-"gem:kamal" = "latest"
+"gem:kamal" = "2.11.0"
 "github:earendil-works/pi" = "0.74.0"
 "github:larksuite/cli" = "1.0.31"
 "github:Loongphy/codex-auth" = "0.2.8"
@@ -24,15 +25,14 @@ zig = { version = "latest", backend = "core:zig" }
 "npm:hunkdiff" = "0.12.1"
 "npm:opencode-sync-plugin" = "0.3.7"
 "npm:pi-opensync-plugin" = "0.3.0"
-pnpm = { version = "11.1.2", backend = "aqua:pnpm/pnpm" }
-yarn = { version = "4.14.1", backend = "vfox:mise-plugins/vfox-yarn" }
+"vfox:mise-plugins/vfox-yarn" = "4.14.1"
 
 [settings]
 trusted_config_paths = [
-    "~/Desktop",
-    "~/Documents",
-    "~/Downloads/",
-    "~/Developer",
+  "~/Desktop",
+  "~/Documents",
+  "~/Downloads/",
+  "~/Developer",
 ]
 
 [settings.ruby]
@@ -40,9 +40,9 @@ compile = false
 
 [env]
 _.path = [
-    "~/dotfiles/generated/bin",
-    "~/dotfiles/modules/bin",
-    "~/.bun/bin",
-    "~/.local/bin",
-    "/opt/homebrew/opt/postgresql@18/bin",
+  "~/dotfiles/generated/bin",
+  "~/dotfiles/modules/bin",
+  "~/.bun/bin",
+  "~/.local/bin",
+  "/opt/homebrew/opt/postgresql@18/bin",
 ]
