@@ -11,21 +11,21 @@ zig = { version = "latest", backend = "core:zig" }
 "cargo:https://github.com/clouedoc/hzfind" = "latest"
 "gem:kamal" = "latest"
 "github:earendil-works/pi" = "0.74.0"
-"github:larksuite/cli" = "1.0.29"
+"github:larksuite/cli" = "1.0.31"
 "github:Loongphy/codex-auth" = "0.2.8"
-"github:runkids/skillshare" = "0.19.11"
+"github:runkids/skillshare" = "0.19.12"
 "github:schpet/linear-cli" = "2.0.0"
-"go:github.com/bootdotdev/bootdev" = "latest"
-"go:github.com/xdevplatform/xurl" = "latest"
+"go:github.com/bootdotdev/bootdev" = "1.29.4"
+"go:github.com/xdevplatform/xurl" = "1.1.1"
 "npm:@openai/codex" = "0.130.0"
-"npm:claude-code-sync" = "latest"
-"npm:codex-sync" = "latest"
-"npm:cursor-opensync-plugin" = "latest"
-"npm:hunkdiff" = "latest"
-"npm:opencode-sync-plugin" = "latest"
-"npm:pi-opensync-plugin" = "latest"
-pnpm = { version = "latest", backend = "aqua:pnpm/pnpm" }
-yarn = { version = "latest", backend = "vfox:mise-plugins/vfox-yarn" }
+"npm:claude-code-sync" = "0.1.15"
+"npm:codex-sync" = "1.0.12"
+"npm:cursor-opensync-plugin" = "1.0.17"
+"npm:hunkdiff" = "0.12.1"
+"npm:opencode-sync-plugin" = "0.3.7"
+"npm:pi-opensync-plugin" = "0.3.0"
+pnpm = { version = "11.1.2", backend = "aqua:pnpm/pnpm" }
+yarn = { version = "4.14.1", backend = "vfox:mise-plugins/vfox-yarn" }
 
 [settings]
 trusted_config_paths = [
