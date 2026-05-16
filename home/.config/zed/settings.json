@@ -1,6 +1,11 @@
 {
-  "disable_ai": false,
+  "edit_predictions": {
+    "provider": "zed",
+  },
+  "cli_default_open_behavior": "existing_window",
   "agent": {
+    "limit_content_width": false,
+    "default_width": 500.0,
     "flexible": false,
     "default_model": {
       "effort": "low",
@@ -9,23 +14,12 @@
       "provider": "openai-subscribed",
     },
     "default_profile": "write",
-    "dock": "right",
     "play_sound_when_agent_done": "always",
     "tool_permissions": {
       "default": "allow",
     },
     "use_modifier_to_send": true,
   },
-  "agent_buffer_font_size": 11.0,
-  "agent_servers": {
-    "amp-acp": {
-      "type": "registry",
-    },
-    "codex-acp": {
-      "type": "registry",
-    },
-  },
-  "agent_ui_font_size": 13.0,
   "autosave": "on_focus_change",
   "buffer_font_fallbacks": ["Maple Mono NF CN"],
   "buffer_font_family": "MonoLisa",
@@ -34,23 +28,13 @@
   "buffer_line_height": {
     "custom": 1.5,
   },
-  "cli_default_open_behavior": "existing_window",
-  "collaboration_panel": {
-    "dock": "right",
-  },
   "cursor_blink": false,
-  "edit_predictions": {
-    "provider": "zed",
-  },
   "file_types": {
     "Dockerfile": ["Dockerfile", "Dockerfile.*"],
     "JSON": ["json"],
     "JSONC": ["**/.zed/**/*.json", "**/zed/**/*.json", "**/.vscode/**/*.json"],
   },
   "format_on_save": "on",
-  "git_panel": {
-    "dock": "right",
-  },
   "icon_theme": "Catppuccin Mocha",
   "indent_guides": {
     "coloring": "indent_aware",
@@ -79,19 +63,11 @@
       },
     },
   },
-  "outline_panel": {
-    "dock": "right",
-  },
   "preferred_line_length": 120,
-  "project_panel": {
-    "dock": "left",
-  },
-  "restore_on_startup": "last_session",
   "scroll_beyond_last_line": "off",
   "scrollbar": {
     "show": "never",
   },
-  "show_edit_predictions": true,
   "tabs": {
     "file_icons": true,
     "git_status": true,
@@ -102,7 +78,6 @@
     "metrics": false,
   },
   "terminal": {
-    "button": false,
     "env": {
       "EDITOR": "zed --wait",
       "VISUAL": "zed --wait",
