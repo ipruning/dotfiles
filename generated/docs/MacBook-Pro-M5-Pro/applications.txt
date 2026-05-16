@@ -41,6 +41,7 @@ Pages
 qBittorrent
 Quark
 Raycast
+Raycast Beta
 Repo Prompt
 Roam Research
 Safari
