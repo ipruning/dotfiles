@@ -42,7 +42,10 @@ compile = false
 _.path = [
     "~/dotfiles/generated/bin",
     "~/dotfiles/modules/bin",
+    "/opt/homebrew/opt/postgresql@18/bin",
     "~/.bun/bin",
     "~/.local/bin",
-    "/opt/homebrew/opt/postgresql@18/bin",
+    "~/.modular/bin",
+    "~/.opencode/bin",
+    "~/.raindrop/bin",
 ]

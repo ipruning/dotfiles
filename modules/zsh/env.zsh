@@ -259,24 +259,10 @@ if [[ -f "$GENERATED_COMPLETIONS_DIR/_try-rs" ]]; then
   source "$GENERATED_COMPLETIONS_DIR/_try-rs"
 fi
 
-# 👇 nanobrew
-export PATH="/opt/nanobrew/prefix/bin:$PATH"
-
 # 👇 mise (will cost 40ms)
 if command -v mise >/dev/null 2>&1; then
   source "$GENERATED_FUNCTIONS_DIR/_mise.zsh"
 fi
-
-# 👇 sanitize ugit plugin path (avoid shadowing system commands like `install`)
-# path=(${path:#$PLUGINS_DIR/ugit})
-# path=(${path:#$PLUGINS_DIR/ugit/})
-
-# 👇 opencode & modular
-# for optional_bin in "$HOME/.opencode/bin" "$HOME/.modular/bin"; do
-#   path=(${path:#$optional_bin})
-#   path=(${path:#$optional_bin/})
-#   [[ -d "$optional_bin" ]] && path+=("$optional_bin")
-# done
 
 # 👇 atuin
 if command -v atuin >/dev/null 2>&1; then
