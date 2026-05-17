@@ -8,6 +8,7 @@ calibre
 Capture One
 Codex
 CodexBar
+Compressor Creator Studio
 Contexts
 Cursor
 DEVONthink
@@ -15,6 +16,7 @@ Discord
 Eagle
 ESTKme
 Factory
+Final Cut Pro Creator Studio
 GarageBand
 Gemini
 Ghostty
@@ -29,15 +31,22 @@ Input Source Pro
 Karabiner-Elements
 Karabiner-EventViewer
 Keynote
+Keynote Creator Studio
 Lark
 Linear
 LinearMouse
 LM Studio
+Logic Pro Creator Studio
 Longbridge
+MainStage Creator Studio
 Mos
+Motion Creator Studio
 Numbers
+Numbers Creator Studio
 OrbStack
 Pages
+Pages Creator Studio
+Pixelmator Pro Creator Studio
 qBittorrent
 Quark
 Raycast
