@@ -142,5 +142,16 @@ push-it = "!sh -c 'git push --force-with-lease origin HEAD' -"
 cc = "!sh -c 'git log --format=format: --name-only | grep -v \"^$\" | sort | uniq -c | sort -rg | head -42'"
 stm = "!sh -c 'git status --porcelain | grep \"^ M\" | cut -c 4-'"
 
+[url "https://github.com/"]
+insteadOf = git@github.com:
+
+[credential "https://github.com"]
+helper =
+helper = !/opt/homebrew/bin/gh auth git-credential
+
+[credential "https://gist.github.com"]
+helper =
+helper = !/opt/homebrew/bin/gh auth git-credential
+
 [include]
 path = ~/.private.gitconfig
