@@ -23,8 +23,6 @@ govulncheck
 gum
 htop
 hyperfine
-jihuanshe/tap/lark-cli
-jihuanshe/tap/trove
 jq
 just
 k6
@@ -43,6 +41,7 @@ nushell
 pkgconf
 postgresql@18
 prek
+psviderski/tap/uncloud
 pueue
 rclone
 rip2
@@ -55,7 +54,6 @@ shellcheck
 simonbs/brrr-cli/brrr
 sqlfluff
 starship
-stripe/stripe-cli/stripe
 television
 tmux
 tokei

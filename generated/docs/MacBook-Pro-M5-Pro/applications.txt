@@ -38,6 +38,7 @@ LinearMouse
 LM Studio
 Logic Pro Creator Studio
 Longbridge
+MagicPath
 MainStage Creator Studio
 Mos
 Motion Creator Studio
@@ -64,7 +65,6 @@ Tampermonkey
 Telegram
 TestFlight
 Things3
-Trimmy
 Typeless
 uBlock Origin Lite
 Visual Studio Code
