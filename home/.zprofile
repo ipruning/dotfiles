@@ -1,5 +1,15 @@
 typeset -U path
 
+# Make mise shims available to login/app-launched shells before .zshrc runs.
+# Keep this static so it works even before Homebrew's mise is on PATH.
+if [[ ${OSTYPE:-} == darwin* ]]; then
+  [[ -d /usr/local/bin ]] && path=(/usr/local/bin $path)
+  [[ -d /opt/homebrew/bin ]] && path=(/opt/homebrew/bin $path)
+fi
+
+[[ -d "$HOME/.local/share/mise/shims" ]] && path=("$HOME/.local/share/mise/shims" $path)
+export PATH
+
 # if [[ $OSTYPE == darwin* ]]; then
 #   if [[ "$TERM_PROGRAM" == "ghostty" ]]; then
 #     if [[ -z "$ZELLIJ" ]]; then
