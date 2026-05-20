@@ -9,6 +9,21 @@ checksum = "sha256:f8c3f57c8b317c16f18a1c1c82e3413ee34f1cc1a20ca53e428093b65bd42
 url = "https://github.com/pnpm/pnpm/releases/download/v11.2.1/pnpm-linux-x64.tar.gz"
 provenance = "github-attestations"
 
+[tools."aqua:pnpm/pnpm"."platforms.linux-x64-baseline"]
+checksum = "sha256:f8c3f57c8b317c16f18a1c1c82e3413ee34f1cc1a20ca53e428093b65bd42d40"
+url = "https://github.com/pnpm/pnpm/releases/download/v11.2.1/pnpm-linux-x64.tar.gz"
+provenance = "github-attestations"
+
+[tools."aqua:pnpm/pnpm"."platforms.linux-x64-musl"]
+checksum = "sha256:b62eabfbfd1797a1f196e1a71062ec1e1e046d0bcbc02c586aa8d34b7f39ee21"
+url = "https://github.com/pnpm/pnpm/releases/download/v11.2.1/pnpm-linux-x64-musl.tar.gz"
+provenance = "github-attestations"
+
+[tools."aqua:pnpm/pnpm"."platforms.linux-x64-musl-baseline"]
+checksum = "sha256:b62eabfbfd1797a1f196e1a71062ec1e1e046d0bcbc02c586aa8d34b7f39ee21"
+url = "https://github.com/pnpm/pnpm/releases/download/v11.2.1/pnpm-linux-x64-musl.tar.gz"
+provenance = "github-attestations"
+
 [tools."aqua:pnpm/pnpm"."platforms.macos-arm64"]
 checksum = "sha256:938066ba56e379d0555d2fe73c6499b970b0ce9e2b5736f250fa6f53c8b3162c"
 url = "https://github.com/pnpm/pnpm/releases/download/v11.2.1/pnpm-darwin-arm64.tar.gz"
@@ -108,6 +123,21 @@ checksum = "sha256:ebd9c2e5cae82779a2de9e7f34c7be6e453ef4b0b626340d02dacb09f29f7
 url = "https://github.com/earendil-works/pi/releases/download/v0.75.4/pi-linux-x64.tar.gz"
 url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/425336887"
 
+[tools."github:earendil-works/pi"."platforms.linux-x64-baseline"]
+checksum = "sha256:ebd9c2e5cae82779a2de9e7f34c7be6e453ef4b0b626340d02dacb09f29f7639"
+url = "https://github.com/earendil-works/pi/releases/download/v0.75.4/pi-linux-x64.tar.gz"
+url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/425336887"
+
+[tools."github:earendil-works/pi"."platforms.linux-x64-musl"]
+checksum = "sha256:ebd9c2e5cae82779a2de9e7f34c7be6e453ef4b0b626340d02dacb09f29f7639"
+url = "https://github.com/earendil-works/pi/releases/download/v0.75.4/pi-linux-x64.tar.gz"
+url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/425336887"
+
+[tools."github:earendil-works/pi"."platforms.linux-x64-musl-baseline"]
+checksum = "sha256:ebd9c2e5cae82779a2de9e7f34c7be6e453ef4b0b626340d02dacb09f29f7639"
+url = "https://github.com/earendil-works/pi/releases/download/v0.75.4/pi-linux-x64.tar.gz"
+url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/425336887"
+
 [tools."github:earendil-works/pi"."platforms.macos-arm64"]
 checksum = "sha256:36580920657efa192b5c8a6ad3a34d7531c7b5450931a459273e75bb157aa09d"
 url = "https://github.com/earendil-works/pi/releases/download/v0.75.4/pi-darwin-arm64.tar.gz"
@@ -122,6 +152,21 @@ checksum = "sha256:3125da591c0432cea480ccf6f0b323577521fc4a28118204e14fff5edae50
 url = "https://github.com/larksuite/cli/releases/download/v1.0.35/lark-cli-1.0.35-linux-amd64.tar.gz"
 url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/425169790"
 
+[tools."github:larksuite/cli"."platforms.linux-x64-baseline"]
+checksum = "sha256:3125da591c0432cea480ccf6f0b323577521fc4a28118204e14fff5edae5080e"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.35/lark-cli-1.0.35-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/425169790"
+
+[tools."github:larksuite/cli"."platforms.linux-x64-musl"]
+checksum = "sha256:3125da591c0432cea480ccf6f0b323577521fc4a28118204e14fff5edae5080e"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.35/lark-cli-1.0.35-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/425169790"
+
+[tools."github:larksuite/cli"."platforms.linux-x64-musl-baseline"]
+checksum = "sha256:3125da591c0432cea480ccf6f0b323577521fc4a28118204e14fff5edae5080e"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.35/lark-cli-1.0.35-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/425169790"
+
 [tools."github:larksuite/cli"."platforms.macos-arm64"]
 checksum = "sha256:f7f06660e5009e528bf773256a13d3e1fc8104fc8cb2bdcd5f06746f76b5cc41"
 url = "https://github.com/larksuite/cli/releases/download/v1.0.35/lark-cli-1.0.35-darwin-arm64.tar.gz"
@@ -132,6 +177,21 @@ version = "0.19.15"
 backend = "github:runkids/skillshare"
 
 [tools."github:runkids/skillshare"."platforms.linux-x64"]
+checksum = "sha256:5162144c37a5b05b4bf52c412fbb852aa5ac7d5c1a7d908a63dba5d7e2369c4e"
+url = "https://github.com/runkids/skillshare/releases/download/v0.19.15/skillshare_0.19.15_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/425146875"
+
+[tools."github:runkids/skillshare"."platforms.linux-x64-baseline"]
+checksum = "sha256:5162144c37a5b05b4bf52c412fbb852aa5ac7d5c1a7d908a63dba5d7e2369c4e"
+url = "https://github.com/runkids/skillshare/releases/download/v0.19.15/skillshare_0.19.15_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/425146875"
+
+[tools."github:runkids/skillshare"."platforms.linux-x64-musl"]
+checksum = "sha256:5162144c37a5b05b4bf52c412fbb852aa5ac7d5c1a7d908a63dba5d7e2369c4e"
+url = "https://github.com/runkids/skillshare/releases/download/v0.19.15/skillshare_0.19.15_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/425146875"
+
+[tools."github:runkids/skillshare"."platforms.linux-x64-musl-baseline"]
 checksum = "sha256:5162144c37a5b05b4bf52c412fbb852aa5ac7d5c1a7d908a63dba5d7e2369c4e"
 url = "https://github.com/runkids/skillshare/releases/download/v0.19.15/skillshare_0.19.15_linux_amd64.tar.gz"
 url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/425146875"
@@ -209,6 +269,18 @@ backend = "core:node"
 [tools.node."platforms.linux-x64"]
 checksum = "sha256:8e5b4b969bb2414aca2ff84d2b99608511aedca32bf8a8427e6187dbdd703bbe"
 url = "https://nodejs.org/dist/v26.2.0/node-v26.2.0-linux-x64.tar.gz"
+
+[tools.node."platforms.linux-x64-baseline"]
+checksum = "sha256:8e5b4b969bb2414aca2ff84d2b99608511aedca32bf8a8427e6187dbdd703bbe"
+url = "https://nodejs.org/dist/v26.2.0/node-v26.2.0-linux-x64.tar.gz"
+
+[tools.node."platforms.linux-x64-musl"]
+checksum = "sha256:9efc99332e1cf70eeb85618398467c9d339bc208be65115380c611dda4c28407"
+url = "https://unofficial-builds.nodejs.org/download/release/v26.2.0/node-v26.2.0-linux-x64-musl.tar.gz"
+
+[tools.node."platforms.linux-x64-musl-baseline"]
+checksum = "sha256:9efc99332e1cf70eeb85618398467c9d339bc208be65115380c611dda4c28407"
+url = "https://unofficial-builds.nodejs.org/download/release/v26.2.0/node-v26.2.0-linux-x64-musl.tar.gz"
 
 [tools.node."platforms.macos-arm64"]
 checksum = "sha256:2d8575b6a749c0bc66cc6ecd22a952f7d9bbf3b0ea76fcb0ed3ce858018afff7"

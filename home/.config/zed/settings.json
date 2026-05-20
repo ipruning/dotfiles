@@ -1,11 +1,12 @@
 {
+  "proxy": "",
   "edit_predictions": {
     "provider": "zed",
   },
   "cli_default_open_behavior": "existing_window",
   "agent": {
     "limit_content_width": false,
-    "default_width": 500.0,
+    "default_width": 450.0,
     "flexible": false,
     "default_model": {
       "effort": "low",
