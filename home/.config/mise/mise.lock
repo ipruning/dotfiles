@@ -144,33 +144,33 @@ url = "https://github.com/earendil-works/pi/releases/download/v0.75.3/pi-darwin-
 url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/423182112"
 
 [[tools."github:larksuite/cli"]]
-version = "1.0.33"
+version = "1.0.34"
 backend = "github:larksuite/cli"
 
 [tools."github:larksuite/cli"."platforms.linux-x64"]
-checksum = "sha256:56270c2a84ca460eefc44d40682111fe05d4f87963e456e09e17ad04fa18802e"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.33/lark-cli-1.0.33-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/423357341"
+checksum = "sha256:eb2e522021ed34365efc3b7ab74746f00fa2e2f5e730c4f5246053209331c134"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.34/lark-cli-1.0.34-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/424185322"
 
 [tools."github:larksuite/cli"."platforms.linux-x64-baseline"]
-checksum = "sha256:56270c2a84ca460eefc44d40682111fe05d4f87963e456e09e17ad04fa18802e"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.33/lark-cli-1.0.33-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/423357341"
+checksum = "sha256:eb2e522021ed34365efc3b7ab74746f00fa2e2f5e730c4f5246053209331c134"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.34/lark-cli-1.0.34-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/424185322"
 
 [tools."github:larksuite/cli"."platforms.linux-x64-musl"]
-checksum = "sha256:56270c2a84ca460eefc44d40682111fe05d4f87963e456e09e17ad04fa18802e"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.33/lark-cli-1.0.33-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/423357341"
+checksum = "sha256:eb2e522021ed34365efc3b7ab74746f00fa2e2f5e730c4f5246053209331c134"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.34/lark-cli-1.0.34-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/424185322"
 
 [tools."github:larksuite/cli"."platforms.linux-x64-musl-baseline"]
-checksum = "sha256:56270c2a84ca460eefc44d40682111fe05d4f87963e456e09e17ad04fa18802e"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.33/lark-cli-1.0.33-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/423357341"
+checksum = "sha256:eb2e522021ed34365efc3b7ab74746f00fa2e2f5e730c4f5246053209331c134"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.34/lark-cli-1.0.34-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/424185322"
 
 [tools."github:larksuite/cli"."platforms.macos-arm64"]
-checksum = "sha256:1ace060e5d07cc7e80f56b3c090b1b0a8c1b83d018fb4a33a0006cbbbec5a0dc"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.33/lark-cli-1.0.33-darwin-arm64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/423357360"
+checksum = "sha256:e918bbf3203d8fdb58f6a1cad328eb7ecd09c78d4a18b843dc78edd2bf1e44b8"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.34/lark-cli-1.0.34-darwin-arm64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/424185299"
 
 [[tools."github:runkids/skillshare"]]
 version = "0.19.13"
@@ -287,7 +287,7 @@ checksum = "sha256:91063f665c2f5d6e69e4f8fcb66d3d476bc2785ace82267274bf4da789985
 url = "https://nodejs.org/dist/v26.1.0/node-v26.1.0-darwin-arm64.tar.gz"
 
 [[tools."npm:@openai/codex"]]
-version = "0.131.0"
+version = "0.132.0"
 backend = "npm:@openai/codex"
 
 [[tools."npm:claude-code-sync"]]
@@ -303,7 +303,7 @@ version = "1.0.17"
 backend = "npm:cursor-opensync-plugin"
 
 [[tools."npm:hunkdiff"]]
-version = "0.13.0"
+version = "0.13.1"
 backend = "npm:hunkdiff"
 
 [[tools."npm:opencode-sync-plugin"]]
@@ -376,40 +376,35 @@ url = "https://github.com/astral-sh/python-build-standalone/releases/download/20
 provenance = "github-attestations"
 
 [[tools.ruby]]
-version = "4.0.4"
+version = "4.0.5"
 backend = "core:ruby"
 
 [tools.ruby."platforms.linux-x64"]
-checksum = "sha256:ecc4d8a3ec926b46533e27bb7bba921507406c6fa61e034e8f75cd127ac30796"
-url = "https://github.com/jdx/ruby/releases/download/4.0.4-1/ruby-4.0.4.x86_64_linux.tar.gz"
-provenance = "github-attestations"
+checksum = "sha256:7d6149079a63f8ae1d326c9fa65c6019ba2dc3155eae7b39159817911c88958e"
+url = "https://cache.ruby-lang.org/pub/ruby/4.0/ruby-4.0.5.tar.gz"
 
 [tools.ruby."platforms.linux-x64-baseline"]
-checksum = "sha256:ecc4d8a3ec926b46533e27bb7bba921507406c6fa61e034e8f75cd127ac30796"
-url = "https://github.com/jdx/ruby/releases/download/4.0.4-1/ruby-4.0.4.x86_64_linux.tar.gz"
-provenance = "github-attestations"
+checksum = "sha256:7d6149079a63f8ae1d326c9fa65c6019ba2dc3155eae7b39159817911c88958e"
+url = "https://cache.ruby-lang.org/pub/ruby/4.0/ruby-4.0.5.tar.gz"
 
 [tools.ruby."platforms.linux-x64-musl"]
-checksum = "sha256:ecc4d8a3ec926b46533e27bb7bba921507406c6fa61e034e8f75cd127ac30796"
-url = "https://github.com/jdx/ruby/releases/download/4.0.4-1/ruby-4.0.4.x86_64_linux.tar.gz"
-provenance = "github-attestations"
+checksum = "sha256:7d6149079a63f8ae1d326c9fa65c6019ba2dc3155eae7b39159817911c88958e"
+url = "https://cache.ruby-lang.org/pub/ruby/4.0/ruby-4.0.5.tar.gz"
 
 [tools.ruby."platforms.linux-x64-musl-baseline"]
-checksum = "sha256:ecc4d8a3ec926b46533e27bb7bba921507406c6fa61e034e8f75cd127ac30796"
-url = "https://github.com/jdx/ruby/releases/download/4.0.4-1/ruby-4.0.4.x86_64_linux.tar.gz"
-provenance = "github-attestations"
+checksum = "sha256:7d6149079a63f8ae1d326c9fa65c6019ba2dc3155eae7b39159817911c88958e"
+url = "https://cache.ruby-lang.org/pub/ruby/4.0/ruby-4.0.5.tar.gz"
 
 [tools.ruby."platforms.macos-arm64"]
-checksum = "sha256:8e94f0e6d0b45636db21804dc2095b7d93d6fa3f639864769a4a7de2a6f3cdea"
-url = "https://github.com/jdx/ruby/releases/download/4.0.4-1/ruby-4.0.4.macos.tar.gz"
-provenance = "github-attestations"
+checksum = "sha256:7d6149079a63f8ae1d326c9fa65c6019ba2dc3155eae7b39159817911c88958e"
+url = "https://cache.ruby-lang.org/pub/ruby/4.0/ruby-4.0.5.tar.gz"
 
 [[tools.rust]]
 version = "stable"
 backend = "core:rust"
 
 [[tools."vfox:mise-plugins/vfox-yarn"]]
-version = "4.14.1"
+version = "4.15.0"
 backend = "vfox:mise-plugins/vfox-yarn"
 
 [[tools.yarn]]
