@@ -173,33 +173,33 @@ url = "https://github.com/larksuite/cli/releases/download/v1.0.36/lark-cli-1.0.3
 url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/425837732"
 
 [[tools."github:runkids/skillshare"]]
-version = "0.19.15"
+version = "0.19.16"
 backend = "github:runkids/skillshare"
 
 [tools."github:runkids/skillshare"."platforms.linux-x64"]
-checksum = "sha256:5162144c37a5b05b4bf52c412fbb852aa5ac7d5c1a7d908a63dba5d7e2369c4e"
-url = "https://github.com/runkids/skillshare/releases/download/v0.19.15/skillshare_0.19.15_linux_amd64.tar.gz"
-url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/425146875"
+checksum = "sha256:aea1d3963bd1d1d01009d7d715545671b95b981308838846744c762566f916cf"
+url = "https://github.com/runkids/skillshare/releases/download/v0.19.16/skillshare_0.19.16_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/425957286"
 
 [tools."github:runkids/skillshare"."platforms.linux-x64-baseline"]
-checksum = "sha256:5162144c37a5b05b4bf52c412fbb852aa5ac7d5c1a7d908a63dba5d7e2369c4e"
-url = "https://github.com/runkids/skillshare/releases/download/v0.19.15/skillshare_0.19.15_linux_amd64.tar.gz"
-url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/425146875"
+checksum = "sha256:aea1d3963bd1d1d01009d7d715545671b95b981308838846744c762566f916cf"
+url = "https://github.com/runkids/skillshare/releases/download/v0.19.16/skillshare_0.19.16_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/425957286"
 
 [tools."github:runkids/skillshare"."platforms.linux-x64-musl"]
-checksum = "sha256:5162144c37a5b05b4bf52c412fbb852aa5ac7d5c1a7d908a63dba5d7e2369c4e"
-url = "https://github.com/runkids/skillshare/releases/download/v0.19.15/skillshare_0.19.15_linux_amd64.tar.gz"
-url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/425146875"
+checksum = "sha256:aea1d3963bd1d1d01009d7d715545671b95b981308838846744c762566f916cf"
+url = "https://github.com/runkids/skillshare/releases/download/v0.19.16/skillshare_0.19.16_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/425957286"
 
 [tools."github:runkids/skillshare"."platforms.linux-x64-musl-baseline"]
-checksum = "sha256:5162144c37a5b05b4bf52c412fbb852aa5ac7d5c1a7d908a63dba5d7e2369c4e"
-url = "https://github.com/runkids/skillshare/releases/download/v0.19.15/skillshare_0.19.15_linux_amd64.tar.gz"
-url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/425146875"
+checksum = "sha256:aea1d3963bd1d1d01009d7d715545671b95b981308838846744c762566f916cf"
+url = "https://github.com/runkids/skillshare/releases/download/v0.19.16/skillshare_0.19.16_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/425957286"
 
 [tools."github:runkids/skillshare"."platforms.macos-arm64"]
-checksum = "sha256:df7a453891225f4318d794e78c29c59b1af5b2e04415d796d2d66aa29831e60f"
-url = "https://github.com/runkids/skillshare/releases/download/v0.19.15/skillshare_0.19.15_darwin_arm64.tar.gz"
-url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/425146892"
+checksum = "sha256:bfd61577db8bdbff7f9809fe0918d00fec351d87ff5d8b680aab8ca30570b7a5"
+url = "https://github.com/runkids/skillshare/releases/download/v0.19.16/skillshare_0.19.16_darwin_arm64.tar.gz"
+url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/425957289"
 
 [[tools."github:schpet/linear-cli"]]
 version = "2.0.0"
