@@ -86,33 +86,33 @@ version = "2.11.0"
 backend = "gem:kamal"
 
 [[tools."github:Loongphy/codex-auth"]]
-version = "0.2.8"
+version = "0.2.9"
 backend = "github:Loongphy/codex-auth"
 
 [tools."github:Loongphy/codex-auth"."platforms.linux-x64"]
-checksum = "sha256:b8ec1b9af041a45a81327163813f4dddb5542f205d67a3c883ece9262760492d"
-url = "https://github.com/Loongphy/codex-auth/releases/download/v0.2.8/codex-auth-Linux-X64.tar.gz"
-url_api = "https://api.github.com/repos/Loongphy/codex-auth/releases/assets/404320011"
+checksum = "sha256:094d903c3022ebc93aa30c310462c96140caab40df44413e366dc04eb5835c1f"
+url = "https://github.com/Loongphy/codex-auth/releases/download/v0.2.9/codex-auth-Linux-X64.tar.gz"
+url_api = "https://api.github.com/repos/Loongphy/codex-auth/releases/assets/425886003"
 
 [tools."github:Loongphy/codex-auth"."platforms.linux-x64-baseline"]
-checksum = "sha256:b8ec1b9af041a45a81327163813f4dddb5542f205d67a3c883ece9262760492d"
-url = "https://github.com/Loongphy/codex-auth/releases/download/v0.2.8/codex-auth-Linux-X64.tar.gz"
-url_api = "https://api.github.com/repos/Loongphy/codex-auth/releases/assets/404320011"
+checksum = "sha256:094d903c3022ebc93aa30c310462c96140caab40df44413e366dc04eb5835c1f"
+url = "https://github.com/Loongphy/codex-auth/releases/download/v0.2.9/codex-auth-Linux-X64.tar.gz"
+url_api = "https://api.github.com/repos/Loongphy/codex-auth/releases/assets/425886003"
 
 [tools."github:Loongphy/codex-auth"."platforms.linux-x64-musl"]
-checksum = "sha256:b8ec1b9af041a45a81327163813f4dddb5542f205d67a3c883ece9262760492d"
-url = "https://github.com/Loongphy/codex-auth/releases/download/v0.2.8/codex-auth-Linux-X64.tar.gz"
-url_api = "https://api.github.com/repos/Loongphy/codex-auth/releases/assets/404320011"
+checksum = "sha256:094d903c3022ebc93aa30c310462c96140caab40df44413e366dc04eb5835c1f"
+url = "https://github.com/Loongphy/codex-auth/releases/download/v0.2.9/codex-auth-Linux-X64.tar.gz"
+url_api = "https://api.github.com/repos/Loongphy/codex-auth/releases/assets/425886003"
 
 [tools."github:Loongphy/codex-auth"."platforms.linux-x64-musl-baseline"]
-checksum = "sha256:b8ec1b9af041a45a81327163813f4dddb5542f205d67a3c883ece9262760492d"
-url = "https://github.com/Loongphy/codex-auth/releases/download/v0.2.8/codex-auth-Linux-X64.tar.gz"
-url_api = "https://api.github.com/repos/Loongphy/codex-auth/releases/assets/404320011"
+checksum = "sha256:094d903c3022ebc93aa30c310462c96140caab40df44413e366dc04eb5835c1f"
+url = "https://github.com/Loongphy/codex-auth/releases/download/v0.2.9/codex-auth-Linux-X64.tar.gz"
+url_api = "https://api.github.com/repos/Loongphy/codex-auth/releases/assets/425886003"
 
 [tools."github:Loongphy/codex-auth"."platforms.macos-arm64"]
-checksum = "sha256:64c9997ed0dfeb581035b039948d155c0f62a498039382da728c4ecb3d77a419"
-url = "https://github.com/Loongphy/codex-auth/releases/download/v0.2.8/codex-auth-macOS-ARM64.tar.gz"
-url_api = "https://api.github.com/repos/Loongphy/codex-auth/releases/assets/404320006"
+checksum = "sha256:cba047c59dc5582ef5b37fd8051701af02e7f32d65eb7691dee6e2e4e207b42c"
+url = "https://github.com/Loongphy/codex-auth/releases/download/v0.2.9/codex-auth-macOS-ARM64.tar.gz"
+url_api = "https://api.github.com/repos/Loongphy/codex-auth/releases/assets/425886004"
 
 [[tools."github:earendil-works/pi"]]
 version = "0.75.4"
@@ -144,33 +144,33 @@ url = "https://github.com/earendil-works/pi/releases/download/v0.75.4/pi-darwin-
 url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/425336888"
 
 [[tools."github:larksuite/cli"]]
-version = "1.0.35"
+version = "1.0.36"
 backend = "github:larksuite/cli"
 
 [tools."github:larksuite/cli"."platforms.linux-x64"]
-checksum = "sha256:3125da591c0432cea480ccf6f0b323577521fc4a28118204e14fff5edae5080e"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.35/lark-cli-1.0.35-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/425169790"
+checksum = "sha256:1c0871fca9d2479359891fa7bba78ab697652dd305a25a11c563cb03905a6ec3"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.36/lark-cli-1.0.36-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/425837738"
 
 [tools."github:larksuite/cli"."platforms.linux-x64-baseline"]
-checksum = "sha256:3125da591c0432cea480ccf6f0b323577521fc4a28118204e14fff5edae5080e"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.35/lark-cli-1.0.35-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/425169790"
+checksum = "sha256:1c0871fca9d2479359891fa7bba78ab697652dd305a25a11c563cb03905a6ec3"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.36/lark-cli-1.0.36-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/425837738"
 
 [tools."github:larksuite/cli"."platforms.linux-x64-musl"]
-checksum = "sha256:3125da591c0432cea480ccf6f0b323577521fc4a28118204e14fff5edae5080e"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.35/lark-cli-1.0.35-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/425169790"
+checksum = "sha256:1c0871fca9d2479359891fa7bba78ab697652dd305a25a11c563cb03905a6ec3"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.36/lark-cli-1.0.36-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/425837738"
 
 [tools."github:larksuite/cli"."platforms.linux-x64-musl-baseline"]
-checksum = "sha256:3125da591c0432cea480ccf6f0b323577521fc4a28118204e14fff5edae5080e"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.35/lark-cli-1.0.35-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/425169790"
+checksum = "sha256:1c0871fca9d2479359891fa7bba78ab697652dd305a25a11c563cb03905a6ec3"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.36/lark-cli-1.0.36-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/425837738"
 
 [tools."github:larksuite/cli"."platforms.macos-arm64"]
-checksum = "sha256:f7f06660e5009e528bf773256a13d3e1fc8104fc8cb2bdcd5f06746f76b5cc41"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.35/lark-cli-1.0.35-darwin-arm64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/425169787"
+checksum = "sha256:7715e47f78b3c6115ecfab447d3cb557795948189fac2747291a12d8355c103c"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.36/lark-cli-1.0.36-darwin-arm64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/425837732"
 
 [[tools."github:runkids/skillshare"]]
 version = "0.19.15"
