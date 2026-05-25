@@ -114,6 +114,40 @@ checksum = "sha256:cba047c59dc5582ef5b37fd8051701af02e7f32d65eb7691dee6e2e4e207b
 url = "https://github.com/Loongphy/codex-auth/releases/download/v0.2.9/codex-auth-macOS-ARM64.tar.gz"
 url_api = "https://api.github.com/repos/Loongphy/codex-auth/releases/assets/425886004"
 
+[[tools."github:cli/cli"]]
+version = "2.92.0"
+backend = "github:cli/cli"
+
+[tools."github:cli/cli"."platforms.linux-x64"]
+checksum = "sha256:b57848131bdf0c229cd35e1f2a51aa718199858b2e728410b37e89a428943ec4"
+url = "https://github.com/cli/cli/releases/download/v2.92.0/gh_2.92.0_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/cli/cli/releases/assets/407353509"
+provenance = "github-attestations"
+
+[tools."github:cli/cli"."platforms.linux-x64-baseline"]
+checksum = "sha256:b57848131bdf0c229cd35e1f2a51aa718199858b2e728410b37e89a428943ec4"
+url = "https://github.com/cli/cli/releases/download/v2.92.0/gh_2.92.0_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/cli/cli/releases/assets/407353509"
+provenance = "github-attestations"
+
+[tools."github:cli/cli"."platforms.linux-x64-musl"]
+checksum = "sha256:b57848131bdf0c229cd35e1f2a51aa718199858b2e728410b37e89a428943ec4"
+url = "https://github.com/cli/cli/releases/download/v2.92.0/gh_2.92.0_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/cli/cli/releases/assets/407353509"
+provenance = "github-attestations"
+
+[tools."github:cli/cli"."platforms.linux-x64-musl-baseline"]
+checksum = "sha256:b57848131bdf0c229cd35e1f2a51aa718199858b2e728410b37e89a428943ec4"
+url = "https://github.com/cli/cli/releases/download/v2.92.0/gh_2.92.0_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/cli/cli/releases/assets/407353509"
+provenance = "github-attestations"
+
+[tools."github:cli/cli"."platforms.macos-arm64"]
+checksum = "sha256:b11c54f6bd7d15ed6590475079e5b2fcf36f45d3991a80041b29c9d0cc1f1d07"
+url = "https://github.com/cli/cli/releases/download/v2.92.0/gh_2.92.0_macOS_arm64.zip"
+url_api = "https://api.github.com/repos/cli/cli/releases/assets/407353533"
+provenance = "github-attestations"
+
 [[tools."github:earendil-works/pi"]]
 version = "0.75.5"
 backend = "github:earendil-works/pi"
@@ -315,35 +349,32 @@ version = "0.3.0"
 backend = "npm:pi-opensync-plugin"
 
 [[tools.pnpm]]
-version = "11.1.2"
+version = "11.3.0"
 backend = "aqua:pnpm/pnpm"
 
-[tools.pnpm.options]
-"vars.backend" = "aqua:pnpm/pnpm"
-
 [tools.pnpm."platforms.linux-x64"]
-checksum = "sha256:f82f761572d9621c5a646ccc00a1ecec4cf5839d66b714497e6ca10cd2e086ee"
-url = "https://github.com/pnpm/pnpm/releases/download/v11.1.2/pnpm-linux-x64.tar.gz"
+checksum = "sha256:6eb506b53297eb1186ba0cbff1577bb26d17713835a01a5342dcafae550827ce"
+url = "https://github.com/pnpm/pnpm/releases/download/v11.3.0/pnpm-linux-x64.tar.gz"
 provenance = "github-attestations"
 
 [tools.pnpm."platforms.linux-x64-baseline"]
-checksum = "sha256:f82f761572d9621c5a646ccc00a1ecec4cf5839d66b714497e6ca10cd2e086ee"
-url = "https://github.com/pnpm/pnpm/releases/download/v11.1.2/pnpm-linux-x64.tar.gz"
+checksum = "sha256:6eb506b53297eb1186ba0cbff1577bb26d17713835a01a5342dcafae550827ce"
+url = "https://github.com/pnpm/pnpm/releases/download/v11.3.0/pnpm-linux-x64.tar.gz"
 provenance = "github-attestations"
 
 [tools.pnpm."platforms.linux-x64-musl"]
-checksum = "sha256:3c98dfa5f0c2ba86eb48916318108dbfa0a0710dac46861b3f64d72e3defda00"
-url = "https://github.com/pnpm/pnpm/releases/download/v11.1.2/pnpm-linux-x64-musl.tar.gz"
+checksum = "sha256:d728c510e04ac218091ce5dc591b28706bb154a14bd9741a146a0defd3ad466b"
+url = "https://github.com/pnpm/pnpm/releases/download/v11.3.0/pnpm-linux-x64-musl.tar.gz"
 provenance = "github-attestations"
 
 [tools.pnpm."platforms.linux-x64-musl-baseline"]
-checksum = "sha256:3c98dfa5f0c2ba86eb48916318108dbfa0a0710dac46861b3f64d72e3defda00"
-url = "https://github.com/pnpm/pnpm/releases/download/v11.1.2/pnpm-linux-x64-musl.tar.gz"
+checksum = "sha256:d728c510e04ac218091ce5dc591b28706bb154a14bd9741a146a0defd3ad466b"
+url = "https://github.com/pnpm/pnpm/releases/download/v11.3.0/pnpm-linux-x64-musl.tar.gz"
 provenance = "github-attestations"
 
 [tools.pnpm."platforms.macos-arm64"]
-checksum = "sha256:2f46bcb7ac3c693af72e06e68467b3a9127cbf2a24b778382bc8beaff8463aee"
-url = "https://github.com/pnpm/pnpm/releases/download/v11.1.2/pnpm-darwin-arm64.tar.gz"
+checksum = "sha256:788958f77b44d7ac05f05f08ccdd520f1b2253d834df2a5eb0cf5ab9b84d40f6"
+url = "https://github.com/pnpm/pnpm/releases/download/v11.3.0/pnpm-darwin-arm64.tar.gz"
 provenance = "github-attestations"
 
 [[tools.python]]
@@ -380,35 +411,69 @@ version = "4.0.5"
 backend = "core:ruby"
 
 [tools.ruby."platforms.linux-x64"]
-checksum = "sha256:7d6149079a63f8ae1d326c9fa65c6019ba2dc3155eae7b39159817911c88958e"
-url = "https://cache.ruby-lang.org/pub/ruby/4.0/ruby-4.0.5.tar.gz"
+checksum = "sha256:831f0e8bdc423156065d7965116f8d5c5fac943aff9128342094e2d745bd2051"
+url = "https://github.com/jdx/ruby/releases/download/4.0.5-1/ruby-4.0.5.x86_64_linux.tar.gz"
+provenance = "github-attestations"
 
 [tools.ruby."platforms.linux-x64-baseline"]
-checksum = "sha256:7d6149079a63f8ae1d326c9fa65c6019ba2dc3155eae7b39159817911c88958e"
-url = "https://cache.ruby-lang.org/pub/ruby/4.0/ruby-4.0.5.tar.gz"
+checksum = "sha256:831f0e8bdc423156065d7965116f8d5c5fac943aff9128342094e2d745bd2051"
+url = "https://github.com/jdx/ruby/releases/download/4.0.5-1/ruby-4.0.5.x86_64_linux.tar.gz"
+provenance = "github-attestations"
 
 [tools.ruby."platforms.linux-x64-musl"]
-checksum = "sha256:7d6149079a63f8ae1d326c9fa65c6019ba2dc3155eae7b39159817911c88958e"
-url = "https://cache.ruby-lang.org/pub/ruby/4.0/ruby-4.0.5.tar.gz"
+checksum = "sha256:831f0e8bdc423156065d7965116f8d5c5fac943aff9128342094e2d745bd2051"
+url = "https://github.com/jdx/ruby/releases/download/4.0.5-1/ruby-4.0.5.x86_64_linux.tar.gz"
+provenance = "github-attestations"
 
 [tools.ruby."platforms.linux-x64-musl-baseline"]
-checksum = "sha256:7d6149079a63f8ae1d326c9fa65c6019ba2dc3155eae7b39159817911c88958e"
-url = "https://cache.ruby-lang.org/pub/ruby/4.0/ruby-4.0.5.tar.gz"
+checksum = "sha256:831f0e8bdc423156065d7965116f8d5c5fac943aff9128342094e2d745bd2051"
+url = "https://github.com/jdx/ruby/releases/download/4.0.5-1/ruby-4.0.5.x86_64_linux.tar.gz"
+provenance = "github-attestations"
 
 [tools.ruby."platforms.macos-arm64"]
-checksum = "sha256:7d6149079a63f8ae1d326c9fa65c6019ba2dc3155eae7b39159817911c88958e"
-url = "https://cache.ruby-lang.org/pub/ruby/4.0/ruby-4.0.5.tar.gz"
+checksum = "sha256:cc07d78e61eef4a0d04fce62bce56b6822b261dbed30bad306f6bc7f9ca7085d"
+url = "https://github.com/jdx/ruby/releases/download/4.0.5-1/ruby-4.0.5.macos.tar.gz"
+provenance = "github-attestations"
 
 [[tools.rust]]
 version = "stable"
 backend = "core:rust"
+
+[[tools.uv]]
+version = "0.11.16"
+backend = "aqua:astral-sh/uv"
+
+[tools.uv."platforms.linux-x64"]
+checksum = "sha256:1bc4be1be0a000f893b0d1db97906cf392b63fa22fda9a0ecf33d0d4bbb4bc9a"
+url = "https://github.com/astral-sh/uv/releases/download/0.11.16/uv-x86_64-unknown-linux-musl.tar.gz"
+provenance = "github-attestations"
+
+[tools.uv."platforms.linux-x64-baseline"]
+checksum = "sha256:1bc4be1be0a000f893b0d1db97906cf392b63fa22fda9a0ecf33d0d4bbb4bc9a"
+url = "https://github.com/astral-sh/uv/releases/download/0.11.16/uv-x86_64-unknown-linux-musl.tar.gz"
+provenance = "github-attestations"
+
+[tools.uv."platforms.linux-x64-musl"]
+checksum = "sha256:1bc4be1be0a000f893b0d1db97906cf392b63fa22fda9a0ecf33d0d4bbb4bc9a"
+url = "https://github.com/astral-sh/uv/releases/download/0.11.16/uv-x86_64-unknown-linux-musl.tar.gz"
+provenance = "github-attestations"
+
+[tools.uv."platforms.linux-x64-musl-baseline"]
+checksum = "sha256:1bc4be1be0a000f893b0d1db97906cf392b63fa22fda9a0ecf33d0d4bbb4bc9a"
+url = "https://github.com/astral-sh/uv/releases/download/0.11.16/uv-x86_64-unknown-linux-musl.tar.gz"
+provenance = "github-attestations"
+
+[tools.uv."platforms.macos-arm64"]
+checksum = "sha256:2b25be1af546be330b340b0a76b99f989daa6d92678fdffb87438e661e9d88fb"
+url = "https://github.com/astral-sh/uv/releases/download/0.11.16/uv-aarch64-apple-darwin.tar.gz"
+provenance = "github-attestations"
 
 [[tools."vfox:mise-plugins/vfox-yarn"]]
 version = "4.15.0"
 backend = "vfox:mise-plugins/vfox-yarn"
 
 [[tools.yarn]]
-version = "4.14.1"
+version = "4.15.0"
 backend = "vfox:mise-plugins/vfox-yarn"
 
 [[tools.zig]]
