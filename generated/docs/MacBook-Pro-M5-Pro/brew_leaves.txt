@@ -53,6 +53,7 @@ rust-parallel
 shellcheck
 simonbs/brrr-cli/brrr
 sqlfluff
+sshx
 starship
 television
 tmux

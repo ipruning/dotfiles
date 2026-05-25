@@ -51,6 +51,7 @@ rust-parallel
 shellcheck
 sqlfluff
 sshpass
+sshx
 starship
 tart
 television
