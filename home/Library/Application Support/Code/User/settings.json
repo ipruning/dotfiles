@@ -274,6 +274,7 @@
     "git.confirmSync": false,
     "git.enableSmartCommit": true,
     "git.openRepositoryInParentFolders": "never",
+    "go.toolsManagement.autoUpdate": true,
     "json.maxItemsComputed": 8192,
     "json.schemaDownload.trustedDomains": {
         "https://biomejs.dev": true,
