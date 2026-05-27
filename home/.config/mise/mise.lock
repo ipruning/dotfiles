@@ -321,7 +321,7 @@ checksum = "sha256:2d8575b6a749c0bc66cc6ecd22a952f7d9bbf3b0ea76fcb0ed3ce858018af
 url = "https://nodejs.org/dist/v26.2.0/node-v26.2.0-darwin-arm64.tar.gz"
 
 [[tools."npm:@openai/codex"]]
-version = "0.133.0"
+version = "0.134.0"
 backend = "npm:@openai/codex"
 
 [[tools."npm:claude-code-sync"]]
