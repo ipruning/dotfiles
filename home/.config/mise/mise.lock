@@ -58,28 +58,28 @@ version = "HEAD"
 backend = "cargo:https://github.com/clouedoc/hzfind"
 
 [[tools.deno]]
-version = "2.8.0"
+version = "2.8.1"
 backend = "core:deno"
 
 [tools.deno."platforms.linux-x64"]
-checksum = "sha256:be2c8b53c8ca1d66be76feb9b1a524419da708b00d4ca074cf5c633c81c1627b"
-url = "https://dl.deno.land/release/v2.8.0/deno-x86_64-unknown-linux-gnu.zip"
+checksum = "sha256:2d7bb6195226ac832e0bf7109a115f0af65ee69ac797a4bbde5b27a06cc242d9"
+url = "https://dl.deno.land/release/v2.8.1/deno-x86_64-unknown-linux-gnu.zip"
 
 [tools.deno."platforms.linux-x64-baseline"]
-checksum = "sha256:be2c8b53c8ca1d66be76feb9b1a524419da708b00d4ca074cf5c633c81c1627b"
-url = "https://dl.deno.land/release/v2.8.0/deno-x86_64-unknown-linux-gnu.zip"
+checksum = "sha256:2d7bb6195226ac832e0bf7109a115f0af65ee69ac797a4bbde5b27a06cc242d9"
+url = "https://dl.deno.land/release/v2.8.1/deno-x86_64-unknown-linux-gnu.zip"
 
 [tools.deno."platforms.linux-x64-musl"]
-checksum = "sha256:be2c8b53c8ca1d66be76feb9b1a524419da708b00d4ca074cf5c633c81c1627b"
-url = "https://dl.deno.land/release/v2.8.0/deno-x86_64-unknown-linux-gnu.zip"
+checksum = "sha256:2d7bb6195226ac832e0bf7109a115f0af65ee69ac797a4bbde5b27a06cc242d9"
+url = "https://dl.deno.land/release/v2.8.1/deno-x86_64-unknown-linux-gnu.zip"
 
 [tools.deno."platforms.linux-x64-musl-baseline"]
-checksum = "sha256:be2c8b53c8ca1d66be76feb9b1a524419da708b00d4ca074cf5c633c81c1627b"
-url = "https://dl.deno.land/release/v2.8.0/deno-x86_64-unknown-linux-gnu.zip"
+checksum = "sha256:2d7bb6195226ac832e0bf7109a115f0af65ee69ac797a4bbde5b27a06cc242d9"
+url = "https://dl.deno.land/release/v2.8.1/deno-x86_64-unknown-linux-gnu.zip"
 
 [tools.deno."platforms.macos-arm64"]
-checksum = "sha256:dba813b8b69d6218cffb11252b9e4e6036ca2c9d79843cde367b4b369aaf9634"
-url = "https://dl.deno.land/release/v2.8.0/deno-aarch64-apple-darwin.zip"
+checksum = "sha256:8154e2de0ee8c1cae31fa88e078724aaef0295fab9fd2ad6f8520389cee908f6"
+url = "https://dl.deno.land/release/v2.8.1/deno-aarch64-apple-darwin.zip"
 
 [[tools."gem:kamal"]]
 version = "2.11.0"
@@ -115,96 +115,96 @@ url = "https://github.com/Loongphy/codex-auth/releases/download/v0.2.9/codex-aut
 url_api = "https://api.github.com/repos/Loongphy/codex-auth/releases/assets/425886004"
 
 [[tools."github:cli/cli"]]
-version = "2.92.0"
+version = "2.93.0"
 backend = "github:cli/cli"
 
 [tools."github:cli/cli"."platforms.linux-x64"]
-checksum = "sha256:b57848131bdf0c229cd35e1f2a51aa718199858b2e728410b37e89a428943ec4"
-url = "https://github.com/cli/cli/releases/download/v2.92.0/gh_2.92.0_linux_amd64.tar.gz"
-url_api = "https://api.github.com/repos/cli/cli/releases/assets/407353509"
+checksum = "sha256:02d1290eba130e0b896f3709ffff22e1c75a51475ddb70476a85abc6b5807af0"
+url = "https://github.com/cli/cli/releases/download/v2.93.0/gh_2.93.0_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/cli/cli/releases/assets/431301770"
 provenance = "github-attestations"
 
 [tools."github:cli/cli"."platforms.linux-x64-baseline"]
-checksum = "sha256:b57848131bdf0c229cd35e1f2a51aa718199858b2e728410b37e89a428943ec4"
-url = "https://github.com/cli/cli/releases/download/v2.92.0/gh_2.92.0_linux_amd64.tar.gz"
-url_api = "https://api.github.com/repos/cli/cli/releases/assets/407353509"
+checksum = "sha256:02d1290eba130e0b896f3709ffff22e1c75a51475ddb70476a85abc6b5807af0"
+url = "https://github.com/cli/cli/releases/download/v2.93.0/gh_2.93.0_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/cli/cli/releases/assets/431301770"
 provenance = "github-attestations"
 
 [tools."github:cli/cli"."platforms.linux-x64-musl"]
-checksum = "sha256:b57848131bdf0c229cd35e1f2a51aa718199858b2e728410b37e89a428943ec4"
-url = "https://github.com/cli/cli/releases/download/v2.92.0/gh_2.92.0_linux_amd64.tar.gz"
-url_api = "https://api.github.com/repos/cli/cli/releases/assets/407353509"
+checksum = "sha256:02d1290eba130e0b896f3709ffff22e1c75a51475ddb70476a85abc6b5807af0"
+url = "https://github.com/cli/cli/releases/download/v2.93.0/gh_2.93.0_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/cli/cli/releases/assets/431301770"
 provenance = "github-attestations"
 
 [tools."github:cli/cli"."platforms.linux-x64-musl-baseline"]
-checksum = "sha256:b57848131bdf0c229cd35e1f2a51aa718199858b2e728410b37e89a428943ec4"
-url = "https://github.com/cli/cli/releases/download/v2.92.0/gh_2.92.0_linux_amd64.tar.gz"
-url_api = "https://api.github.com/repos/cli/cli/releases/assets/407353509"
+checksum = "sha256:02d1290eba130e0b896f3709ffff22e1c75a51475ddb70476a85abc6b5807af0"
+url = "https://github.com/cli/cli/releases/download/v2.93.0/gh_2.93.0_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/cli/cli/releases/assets/431301770"
 provenance = "github-attestations"
 
 [tools."github:cli/cli"."platforms.macos-arm64"]
-checksum = "sha256:b11c54f6bd7d15ed6590475079e5b2fcf36f45d3991a80041b29c9d0cc1f1d07"
-url = "https://github.com/cli/cli/releases/download/v2.92.0/gh_2.92.0_macOS_arm64.zip"
-url_api = "https://api.github.com/repos/cli/cli/releases/assets/407353533"
+checksum = "sha256:a86be4e0a86c26456cf71177d6572d6f1165cf1679e532b72f7f15918ee51fd2"
+url = "https://github.com/cli/cli/releases/download/v2.93.0/gh_2.93.0_macOS_arm64.zip"
+url_api = "https://api.github.com/repos/cli/cli/releases/assets/431301800"
 provenance = "github-attestations"
 
 [[tools."github:earendil-works/pi"]]
-version = "0.75.5"
+version = "0.76.0"
 backend = "github:earendil-works/pi"
 
 [tools."github:earendil-works/pi"."platforms.linux-x64"]
-checksum = "sha256:ac687acd72705dabe967fd40d365317f68054878be1cb2c0ae9a0592fd108b5d"
-url = "https://github.com/earendil-works/pi/releases/download/v0.75.5/pi-linux-x64.tar.gz"
-url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/427803603"
+checksum = "sha256:b8ed8b905ffbf0d48dd51b5da4758a8fc704b258808f0253e2104bec7b52251a"
+url = "https://github.com/earendil-works/pi/releases/download/v0.76.0/pi-linux-x64.tar.gz"
+url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/431392007"
 
 [tools."github:earendil-works/pi"."platforms.linux-x64-baseline"]
-checksum = "sha256:ac687acd72705dabe967fd40d365317f68054878be1cb2c0ae9a0592fd108b5d"
-url = "https://github.com/earendil-works/pi/releases/download/v0.75.5/pi-linux-x64.tar.gz"
-url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/427803603"
+checksum = "sha256:b8ed8b905ffbf0d48dd51b5da4758a8fc704b258808f0253e2104bec7b52251a"
+url = "https://github.com/earendil-works/pi/releases/download/v0.76.0/pi-linux-x64.tar.gz"
+url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/431392007"
 
 [tools."github:earendil-works/pi"."platforms.linux-x64-musl"]
-checksum = "sha256:ac687acd72705dabe967fd40d365317f68054878be1cb2c0ae9a0592fd108b5d"
-url = "https://github.com/earendil-works/pi/releases/download/v0.75.5/pi-linux-x64.tar.gz"
-url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/427803603"
+checksum = "sha256:b8ed8b905ffbf0d48dd51b5da4758a8fc704b258808f0253e2104bec7b52251a"
+url = "https://github.com/earendil-works/pi/releases/download/v0.76.0/pi-linux-x64.tar.gz"
+url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/431392007"
 
 [tools."github:earendil-works/pi"."platforms.linux-x64-musl-baseline"]
-checksum = "sha256:ac687acd72705dabe967fd40d365317f68054878be1cb2c0ae9a0592fd108b5d"
-url = "https://github.com/earendil-works/pi/releases/download/v0.75.5/pi-linux-x64.tar.gz"
-url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/427803603"
+checksum = "sha256:b8ed8b905ffbf0d48dd51b5da4758a8fc704b258808f0253e2104bec7b52251a"
+url = "https://github.com/earendil-works/pi/releases/download/v0.76.0/pi-linux-x64.tar.gz"
+url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/431392007"
 
 [tools."github:earendil-works/pi"."platforms.macos-arm64"]
-checksum = "sha256:eb8f039c41e87b1431c82baa97f807c4d391b77d66ecb41e096270ae36f9362d"
-url = "https://github.com/earendil-works/pi/releases/download/v0.75.5/pi-darwin-arm64.tar.gz"
-url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/427803600"
+checksum = "sha256:6f21bb0c63527568d807d7ae2db6886ff7d27524673675100c684ffc996afce5"
+url = "https://github.com/earendil-works/pi/releases/download/v0.76.0/pi-darwin-arm64.tar.gz"
+url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/431392003"
 
 [[tools."github:larksuite/cli"]]
-version = "1.0.41"
+version = "1.0.42"
 backend = "github:larksuite/cli"
 
 [tools."github:larksuite/cli"."platforms.linux-x64"]
-checksum = "sha256:f2593ca0fa03fd085a050bc938b76808b42afb6c8d9f6dab6c9b995412b9c1c0"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.41/lark-cli-1.0.41-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/430181196"
+checksum = "sha256:46bd1f3720cb532d3a64badd8ee3007ff61de18a15db2c891a6efbe90cadbb3e"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.42/lark-cli-1.0.42-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/431149317"
 
 [tools."github:larksuite/cli"."platforms.linux-x64-baseline"]
-checksum = "sha256:f2593ca0fa03fd085a050bc938b76808b42afb6c8d9f6dab6c9b995412b9c1c0"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.41/lark-cli-1.0.41-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/430181196"
+checksum = "sha256:46bd1f3720cb532d3a64badd8ee3007ff61de18a15db2c891a6efbe90cadbb3e"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.42/lark-cli-1.0.42-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/431149317"
 
 [tools."github:larksuite/cli"."platforms.linux-x64-musl"]
-checksum = "sha256:f2593ca0fa03fd085a050bc938b76808b42afb6c8d9f6dab6c9b995412b9c1c0"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.41/lark-cli-1.0.41-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/430181196"
+checksum = "sha256:46bd1f3720cb532d3a64badd8ee3007ff61de18a15db2c891a6efbe90cadbb3e"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.42/lark-cli-1.0.42-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/431149317"
 
 [tools."github:larksuite/cli"."platforms.linux-x64-musl-baseline"]
-checksum = "sha256:f2593ca0fa03fd085a050bc938b76808b42afb6c8d9f6dab6c9b995412b9c1c0"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.41/lark-cli-1.0.41-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/430181196"
+checksum = "sha256:46bd1f3720cb532d3a64badd8ee3007ff61de18a15db2c891a6efbe90cadbb3e"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.42/lark-cli-1.0.42-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/431149317"
 
 [tools."github:larksuite/cli"."platforms.macos-arm64"]
-checksum = "sha256:5ed74939c3edb686957d7a56991a45a9c9c290b789079a4c6f12aa69527f7ca3"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.41/lark-cli-1.0.41-darwin-arm64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/430181197"
+checksum = "sha256:d3b1980cc7d31d7273b922bf70fe66025d1bec2dd9f4474d0a899c3c141a4470"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.42/lark-cli-1.0.42-darwin-arm64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/431149315"
 
 [[tools."github:runkids/skillshare"]]
 version = "0.19.24"
@@ -349,32 +349,32 @@ version = "0.3.0"
 backend = "npm:pi-opensync-plugin"
 
 [[tools.pnpm]]
-version = "11.3.0"
+version = "11.4.0"
 backend = "aqua:pnpm/pnpm"
 
 [tools.pnpm."platforms.linux-x64"]
-checksum = "sha256:6eb506b53297eb1186ba0cbff1577bb26d17713835a01a5342dcafae550827ce"
-url = "https://github.com/pnpm/pnpm/releases/download/v11.3.0/pnpm-linux-x64.tar.gz"
+checksum = "sha256:f3f8d1217eef013bbc71a24d52efb1f1041e4aff55edd80e0b08e25f409305a4"
+url = "https://github.com/pnpm/pnpm/releases/download/v11.4.0/pnpm-linux-x64.tar.gz"
 provenance = "github-attestations"
 
 [tools.pnpm."platforms.linux-x64-baseline"]
-checksum = "sha256:6eb506b53297eb1186ba0cbff1577bb26d17713835a01a5342dcafae550827ce"
-url = "https://github.com/pnpm/pnpm/releases/download/v11.3.0/pnpm-linux-x64.tar.gz"
+checksum = "sha256:f3f8d1217eef013bbc71a24d52efb1f1041e4aff55edd80e0b08e25f409305a4"
+url = "https://github.com/pnpm/pnpm/releases/download/v11.4.0/pnpm-linux-x64.tar.gz"
 provenance = "github-attestations"
 
 [tools.pnpm."platforms.linux-x64-musl"]
-checksum = "sha256:d728c510e04ac218091ce5dc591b28706bb154a14bd9741a146a0defd3ad466b"
-url = "https://github.com/pnpm/pnpm/releases/download/v11.3.0/pnpm-linux-x64-musl.tar.gz"
+checksum = "sha256:60010ad00a96b71e20d1618acaca7a71395e710cbd5e88946c030a1d07c56916"
+url = "https://github.com/pnpm/pnpm/releases/download/v11.4.0/pnpm-linux-x64-musl.tar.gz"
 provenance = "github-attestations"
 
 [tools.pnpm."platforms.linux-x64-musl-baseline"]
-checksum = "sha256:d728c510e04ac218091ce5dc591b28706bb154a14bd9741a146a0defd3ad466b"
-url = "https://github.com/pnpm/pnpm/releases/download/v11.3.0/pnpm-linux-x64-musl.tar.gz"
+checksum = "sha256:60010ad00a96b71e20d1618acaca7a71395e710cbd5e88946c030a1d07c56916"
+url = "https://github.com/pnpm/pnpm/releases/download/v11.4.0/pnpm-linux-x64-musl.tar.gz"
 provenance = "github-attestations"
 
 [tools.pnpm."platforms.macos-arm64"]
-checksum = "sha256:788958f77b44d7ac05f05f08ccdd520f1b2253d834df2a5eb0cf5ab9b84d40f6"
-url = "https://github.com/pnpm/pnpm/releases/download/v11.3.0/pnpm-darwin-arm64.tar.gz"
+checksum = "sha256:ba59014c2c1ce8b76af9f559385206a2623de4ff2b694b5c91598a8f44abb4e2"
+url = "https://github.com/pnpm/pnpm/releases/download/v11.4.0/pnpm-darwin-arm64.tar.gz"
 provenance = "github-attestations"
 
 [[tools.python]]
