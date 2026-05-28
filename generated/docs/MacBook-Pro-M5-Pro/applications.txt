@@ -6,6 +6,7 @@ AltTab
 brrr
 calibre
 Capture One
+cmux
 Codex
 CodexBar
 Compressor Creator Studio
