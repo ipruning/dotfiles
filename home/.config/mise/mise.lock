@@ -149,62 +149,62 @@ url_api = "https://api.github.com/repos/cli/cli/releases/assets/431301800"
 provenance = "github-attestations"
 
 [[tools."github:earendil-works/pi"]]
-version = "0.76.0"
+version = "0.77.0"
 backend = "github:earendil-works/pi"
 
 [tools."github:earendil-works/pi"."platforms.linux-x64"]
-checksum = "sha256:b8ed8b905ffbf0d48dd51b5da4758a8fc704b258808f0253e2104bec7b52251a"
-url = "https://github.com/earendil-works/pi/releases/download/v0.76.0/pi-linux-x64.tar.gz"
-url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/431392007"
+checksum = "sha256:e75031cdabc690b43f4d134fdaa6a4d693038d1a13b2cfa705c4c706dfef81c5"
+url = "https://github.com/earendil-works/pi/releases/download/v0.77.0/pi-linux-x64.tar.gz"
+url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/432492409"
 
 [tools."github:earendil-works/pi"."platforms.linux-x64-baseline"]
-checksum = "sha256:b8ed8b905ffbf0d48dd51b5da4758a8fc704b258808f0253e2104bec7b52251a"
-url = "https://github.com/earendil-works/pi/releases/download/v0.76.0/pi-linux-x64.tar.gz"
-url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/431392007"
+checksum = "sha256:e75031cdabc690b43f4d134fdaa6a4d693038d1a13b2cfa705c4c706dfef81c5"
+url = "https://github.com/earendil-works/pi/releases/download/v0.77.0/pi-linux-x64.tar.gz"
+url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/432492409"
 
 [tools."github:earendil-works/pi"."platforms.linux-x64-musl"]
-checksum = "sha256:b8ed8b905ffbf0d48dd51b5da4758a8fc704b258808f0253e2104bec7b52251a"
-url = "https://github.com/earendil-works/pi/releases/download/v0.76.0/pi-linux-x64.tar.gz"
-url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/431392007"
+checksum = "sha256:e75031cdabc690b43f4d134fdaa6a4d693038d1a13b2cfa705c4c706dfef81c5"
+url = "https://github.com/earendil-works/pi/releases/download/v0.77.0/pi-linux-x64.tar.gz"
+url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/432492409"
 
 [tools."github:earendil-works/pi"."platforms.linux-x64-musl-baseline"]
-checksum = "sha256:b8ed8b905ffbf0d48dd51b5da4758a8fc704b258808f0253e2104bec7b52251a"
-url = "https://github.com/earendil-works/pi/releases/download/v0.76.0/pi-linux-x64.tar.gz"
-url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/431392007"
+checksum = "sha256:e75031cdabc690b43f4d134fdaa6a4d693038d1a13b2cfa705c4c706dfef81c5"
+url = "https://github.com/earendil-works/pi/releases/download/v0.77.0/pi-linux-x64.tar.gz"
+url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/432492409"
 
 [tools."github:earendil-works/pi"."platforms.macos-arm64"]
-checksum = "sha256:6f21bb0c63527568d807d7ae2db6886ff7d27524673675100c684ffc996afce5"
-url = "https://github.com/earendil-works/pi/releases/download/v0.76.0/pi-darwin-arm64.tar.gz"
-url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/431392003"
+checksum = "sha256:05917ae1fbc47210fd261430a9246a37e9c60d7c08528298f5eaf7b7be0acb4c"
+url = "https://github.com/earendil-works/pi/releases/download/v0.77.0/pi-darwin-arm64.tar.gz"
+url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/432492408"
 
 [[tools."github:larksuite/cli"]]
-version = "1.0.42"
+version = "1.0.43"
 backend = "github:larksuite/cli"
 
 [tools."github:larksuite/cli"."platforms.linux-x64"]
-checksum = "sha256:46bd1f3720cb532d3a64badd8ee3007ff61de18a15db2c891a6efbe90cadbb3e"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.42/lark-cli-1.0.42-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/431149317"
+checksum = "sha256:390d36befab816529e83a3666b64587da25e8e3de1a2f542d153665f8430f307"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.43/lark-cli-1.0.43-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/432132528"
 
 [tools."github:larksuite/cli"."platforms.linux-x64-baseline"]
-checksum = "sha256:46bd1f3720cb532d3a64badd8ee3007ff61de18a15db2c891a6efbe90cadbb3e"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.42/lark-cli-1.0.42-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/431149317"
+checksum = "sha256:390d36befab816529e83a3666b64587da25e8e3de1a2f542d153665f8430f307"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.43/lark-cli-1.0.43-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/432132528"
 
 [tools."github:larksuite/cli"."platforms.linux-x64-musl"]
-checksum = "sha256:46bd1f3720cb532d3a64badd8ee3007ff61de18a15db2c891a6efbe90cadbb3e"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.42/lark-cli-1.0.42-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/431149317"
+checksum = "sha256:390d36befab816529e83a3666b64587da25e8e3de1a2f542d153665f8430f307"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.43/lark-cli-1.0.43-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/432132528"
 
 [tools."github:larksuite/cli"."platforms.linux-x64-musl-baseline"]
-checksum = "sha256:46bd1f3720cb532d3a64badd8ee3007ff61de18a15db2c891a6efbe90cadbb3e"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.42/lark-cli-1.0.42-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/431149317"
+checksum = "sha256:390d36befab816529e83a3666b64587da25e8e3de1a2f542d153665f8430f307"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.43/lark-cli-1.0.43-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/432132528"
 
 [tools."github:larksuite/cli"."platforms.macos-arm64"]
-checksum = "sha256:d3b1980cc7d31d7273b922bf70fe66025d1bec2dd9f4474d0a899c3c141a4470"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.42/lark-cli-1.0.42-darwin-arm64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/431149315"
+checksum = "sha256:eb5e10263420f688af7d02b70d582f4aa9872b063b52eb61817aae4f17c21766"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.43/lark-cli-1.0.43-darwin-arm64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/432132518"
 
 [[tools."github:runkids/skillshare"]]
 version = "0.19.24"
@@ -321,7 +321,7 @@ checksum = "sha256:2d8575b6a749c0bc66cc6ecd22a952f7d9bbf3b0ea76fcb0ed3ce858018af
 url = "https://nodejs.org/dist/v26.2.0/node-v26.2.0-darwin-arm64.tar.gz"
 
 [[tools."npm:@openai/codex"]]
-version = "0.134.0"
+version = "0.135.0"
 backend = "npm:@openai/codex"
 
 [[tools."npm:claude-code-sync"]]
@@ -440,32 +440,32 @@ version = "stable"
 backend = "core:rust"
 
 [[tools.uv]]
-version = "0.11.16"
+version = "0.11.17"
 backend = "aqua:astral-sh/uv"
 
 [tools.uv."platforms.linux-x64"]
-checksum = "sha256:1bc4be1be0a000f893b0d1db97906cf392b63fa22fda9a0ecf33d0d4bbb4bc9a"
-url = "https://github.com/astral-sh/uv/releases/download/0.11.16/uv-x86_64-unknown-linux-musl.tar.gz"
+checksum = "sha256:4231a429d4e0f7c1937d8916658c08a7706cd7872afebeb87203a18c2e0dc28e"
+url = "https://github.com/astral-sh/uv/releases/download/0.11.17/uv-x86_64-unknown-linux-musl.tar.gz"
 provenance = "github-attestations"
 
 [tools.uv."platforms.linux-x64-baseline"]
-checksum = "sha256:1bc4be1be0a000f893b0d1db97906cf392b63fa22fda9a0ecf33d0d4bbb4bc9a"
-url = "https://github.com/astral-sh/uv/releases/download/0.11.16/uv-x86_64-unknown-linux-musl.tar.gz"
+checksum = "sha256:4231a429d4e0f7c1937d8916658c08a7706cd7872afebeb87203a18c2e0dc28e"
+url = "https://github.com/astral-sh/uv/releases/download/0.11.17/uv-x86_64-unknown-linux-musl.tar.gz"
 provenance = "github-attestations"
 
 [tools.uv."platforms.linux-x64-musl"]
-checksum = "sha256:1bc4be1be0a000f893b0d1db97906cf392b63fa22fda9a0ecf33d0d4bbb4bc9a"
-url = "https://github.com/astral-sh/uv/releases/download/0.11.16/uv-x86_64-unknown-linux-musl.tar.gz"
+checksum = "sha256:4231a429d4e0f7c1937d8916658c08a7706cd7872afebeb87203a18c2e0dc28e"
+url = "https://github.com/astral-sh/uv/releases/download/0.11.17/uv-x86_64-unknown-linux-musl.tar.gz"
 provenance = "github-attestations"
 
 [tools.uv."platforms.linux-x64-musl-baseline"]
-checksum = "sha256:1bc4be1be0a000f893b0d1db97906cf392b63fa22fda9a0ecf33d0d4bbb4bc9a"
-url = "https://github.com/astral-sh/uv/releases/download/0.11.16/uv-x86_64-unknown-linux-musl.tar.gz"
+checksum = "sha256:4231a429d4e0f7c1937d8916658c08a7706cd7872afebeb87203a18c2e0dc28e"
+url = "https://github.com/astral-sh/uv/releases/download/0.11.17/uv-x86_64-unknown-linux-musl.tar.gz"
 provenance = "github-attestations"
 
 [tools.uv."platforms.macos-arm64"]
-checksum = "sha256:2b25be1af546be330b340b0a76b99f989daa6d92678fdffb87438e661e9d88fb"
-url = "https://github.com/astral-sh/uv/releases/download/0.11.16/uv-aarch64-apple-darwin.tar.gz"
+checksum = "sha256:2a162f6b90ff3691a2f9cae1622e066a3ce592e110f66670cdcc841324b28226"
+url = "https://github.com/astral-sh/uv/releases/download/0.11.17/uv-aarch64-apple-darwin.tar.gz"
 provenance = "github-attestations"
 
 [[tools."vfox:mise-plugins/vfox-yarn"]]
