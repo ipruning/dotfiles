@@ -45,7 +45,6 @@ psviderski/tap/uncloud
 pueue
 rclone
 rip2
-ripgrep
 ripsecrets
 rjyo/moshi/moshi-hook
 rush-parallel

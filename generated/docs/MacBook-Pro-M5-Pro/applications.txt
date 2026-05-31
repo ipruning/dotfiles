@@ -3,6 +3,7 @@
 1Password for Safari
 AeroSpace
 AltTab
+BetterDisplay
 brrr
 calibre
 Capture One
@@ -53,6 +54,7 @@ qBittorrent
 Quark
 Raycast
 Raycast Beta
+Rectangle
 Repo Prompt
 Roam Research
 Safari
