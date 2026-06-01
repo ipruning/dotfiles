@@ -49,6 +49,7 @@ ripsecrets
 rush-parallel
 rust-parallel
 shellcheck
+skillshare
 sqlfluff
 sshpass
 sshx

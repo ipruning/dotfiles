@@ -74,6 +74,8 @@ Visual Studio Code
 Warp
 WeChat
 WhatCable
+Xcode
+Xcodes
 YACReader
 YACReaderLibrary
 Zed

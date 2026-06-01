@@ -51,6 +51,7 @@ rush-parallel
 rust-parallel
 shellcheck
 simonbs/brrr-cli/brrr
+skillshare
 sqlfluff
 sshx
 starship
