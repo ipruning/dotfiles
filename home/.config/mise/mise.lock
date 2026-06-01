@@ -178,62 +178,62 @@ url = "https://github.com/earendil-works/pi/releases/download/v0.78.0/pi-darwin-
 url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/433424440"
 
 [[tools."github:larksuite/cli"]]
-version = "1.0.44"
+version = "1.0.45"
 backend = "github:larksuite/cli"
 
 [tools."github:larksuite/cli"."platforms.linux-x64"]
-checksum = "sha256:0e7e0e59b6cb223052ebdd9e5b642dc8f316968e7a24fb0a4cfb426fd4e577b4"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.44/lark-cli-1.0.44-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/432984973"
+checksum = "sha256:12d43b72a2751dd52091b97ea808b0db12fd01fcfdc585620149329eca43c819"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.45/lark-cli-1.0.45-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/435319612"
 
 [tools."github:larksuite/cli"."platforms.linux-x64-baseline"]
-checksum = "sha256:0e7e0e59b6cb223052ebdd9e5b642dc8f316968e7a24fb0a4cfb426fd4e577b4"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.44/lark-cli-1.0.44-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/432984973"
+checksum = "sha256:12d43b72a2751dd52091b97ea808b0db12fd01fcfdc585620149329eca43c819"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.45/lark-cli-1.0.45-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/435319612"
 
 [tools."github:larksuite/cli"."platforms.linux-x64-musl"]
-checksum = "sha256:0e7e0e59b6cb223052ebdd9e5b642dc8f316968e7a24fb0a4cfb426fd4e577b4"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.44/lark-cli-1.0.44-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/432984973"
+checksum = "sha256:12d43b72a2751dd52091b97ea808b0db12fd01fcfdc585620149329eca43c819"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.45/lark-cli-1.0.45-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/435319612"
 
 [tools."github:larksuite/cli"."platforms.linux-x64-musl-baseline"]
-checksum = "sha256:0e7e0e59b6cb223052ebdd9e5b642dc8f316968e7a24fb0a4cfb426fd4e577b4"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.44/lark-cli-1.0.44-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/432984973"
+checksum = "sha256:12d43b72a2751dd52091b97ea808b0db12fd01fcfdc585620149329eca43c819"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.45/lark-cli-1.0.45-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/435319612"
 
 [tools."github:larksuite/cli"."platforms.macos-arm64"]
-checksum = "sha256:2287970779800035ddf9c558a4e70b929108e895b9dd23db7c99e23054d1d8aa"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.44/lark-cli-1.0.44-darwin-arm64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/432984971"
+checksum = "sha256:9caed7157c9f0f3e2198ce15c8a50b9f8b81c140783113046fe36e9f48852c7c"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.45/lark-cli-1.0.45-darwin-arm64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/435319600"
 
 [[tools."github:runkids/skillshare"]]
-version = "0.20.2"
+version = "0.20.3"
 backend = "github:runkids/skillshare"
 
 [tools."github:runkids/skillshare"."platforms.linux-x64"]
-checksum = "sha256:97912d6eea5a8cff1cb2e6e948a81520dbf7e1d13b7786ce851be6ca1789b3dd"
-url = "https://github.com/runkids/skillshare/releases/download/v0.20.2/skillshare_0.20.2_linux_amd64.tar.gz"
-url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/434530165"
+checksum = "sha256:2a12357ec5c9513e30fc4601f052b548e0ca4d7fb0351b0fa6a64511c7dc4600"
+url = "https://github.com/runkids/skillshare/releases/download/v0.20.3/skillshare_0.20.3_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/435098863"
 
 [tools."github:runkids/skillshare"."platforms.linux-x64-baseline"]
-checksum = "sha256:97912d6eea5a8cff1cb2e6e948a81520dbf7e1d13b7786ce851be6ca1789b3dd"
-url = "https://github.com/runkids/skillshare/releases/download/v0.20.2/skillshare_0.20.2_linux_amd64.tar.gz"
-url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/434530165"
+checksum = "sha256:2a12357ec5c9513e30fc4601f052b548e0ca4d7fb0351b0fa6a64511c7dc4600"
+url = "https://github.com/runkids/skillshare/releases/download/v0.20.3/skillshare_0.20.3_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/435098863"
 
 [tools."github:runkids/skillshare"."platforms.linux-x64-musl"]
-checksum = "sha256:97912d6eea5a8cff1cb2e6e948a81520dbf7e1d13b7786ce851be6ca1789b3dd"
-url = "https://github.com/runkids/skillshare/releases/download/v0.20.2/skillshare_0.20.2_linux_amd64.tar.gz"
-url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/434530165"
+checksum = "sha256:2a12357ec5c9513e30fc4601f052b548e0ca4d7fb0351b0fa6a64511c7dc4600"
+url = "https://github.com/runkids/skillshare/releases/download/v0.20.3/skillshare_0.20.3_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/435098863"
 
 [tools."github:runkids/skillshare"."platforms.linux-x64-musl-baseline"]
-checksum = "sha256:97912d6eea5a8cff1cb2e6e948a81520dbf7e1d13b7786ce851be6ca1789b3dd"
-url = "https://github.com/runkids/skillshare/releases/download/v0.20.2/skillshare_0.20.2_linux_amd64.tar.gz"
-url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/434530165"
+checksum = "sha256:2a12357ec5c9513e30fc4601f052b548e0ca4d7fb0351b0fa6a64511c7dc4600"
+url = "https://github.com/runkids/skillshare/releases/download/v0.20.3/skillshare_0.20.3_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/435098863"
 
 [tools."github:runkids/skillshare"."platforms.macos-arm64"]
-checksum = "sha256:4e28a66ced9492e39404db3bf8e69086fc44ca514f7100e8376403cca87cd2b1"
-url = "https://github.com/runkids/skillshare/releases/download/v0.20.2/skillshare_0.20.2_darwin_arm64.tar.gz"
-url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/434530155"
+checksum = "sha256:bf22c2b6788690dc57111daf4e2051a9af82a6d820580535be2abae7c3ef0b0e"
+url = "https://github.com/runkids/skillshare/releases/download/v0.20.3/skillshare_0.20.3_darwin_arm64.tar.gz"
+url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/435098864"
 
 [[tools."github:schpet/linear-cli"]]
 version = "2.0.0"
@@ -297,28 +297,28 @@ version = "1.1.1"
 backend = "go:github.com/xdevplatform/xurl"
 
 [[tools.node]]
-version = "26.2.0"
+version = "26.3.0"
 backend = "core:node"
 
 [tools.node."platforms.linux-x64"]
-checksum = "sha256:8e5b4b969bb2414aca2ff84d2b99608511aedca32bf8a8427e6187dbdd703bbe"
-url = "https://nodejs.org/dist/v26.2.0/node-v26.2.0-linux-x64.tar.gz"
+checksum = "sha256:a6e65cc653e40c1653b77742f9185dbce3ff1f99fa2746d211bddb53530ef206"
+url = "https://nodejs.org/dist/v26.3.0/node-v26.3.0-linux-x64.tar.gz"
 
 [tools.node."platforms.linux-x64-baseline"]
-checksum = "sha256:8e5b4b969bb2414aca2ff84d2b99608511aedca32bf8a8427e6187dbdd703bbe"
-url = "https://nodejs.org/dist/v26.2.0/node-v26.2.0-linux-x64.tar.gz"
+checksum = "sha256:a6e65cc653e40c1653b77742f9185dbce3ff1f99fa2746d211bddb53530ef206"
+url = "https://nodejs.org/dist/v26.3.0/node-v26.3.0-linux-x64.tar.gz"
 
 [tools.node."platforms.linux-x64-musl"]
-checksum = "sha256:9efc99332e1cf70eeb85618398467c9d339bc208be65115380c611dda4c28407"
-url = "https://unofficial-builds.nodejs.org/download/release/v26.2.0/node-v26.2.0-linux-x64-musl.tar.gz"
+checksum = "sha256:6ad2e7c0cf693fecc2febb1abf753940244f3baaa04626361ed52d64843ffc67"
+url = "https://unofficial-builds.nodejs.org/download/release/v26.3.0/node-v26.3.0-linux-x64-musl.tar.gz"
 
 [tools.node."platforms.linux-x64-musl-baseline"]
-checksum = "sha256:9efc99332e1cf70eeb85618398467c9d339bc208be65115380c611dda4c28407"
-url = "https://unofficial-builds.nodejs.org/download/release/v26.2.0/node-v26.2.0-linux-x64-musl.tar.gz"
+checksum = "sha256:6ad2e7c0cf693fecc2febb1abf753940244f3baaa04626361ed52d64843ffc67"
+url = "https://unofficial-builds.nodejs.org/download/release/v26.3.0/node-v26.3.0-linux-x64-musl.tar.gz"
 
 [tools.node."platforms.macos-arm64"]
-checksum = "sha256:2d8575b6a749c0bc66cc6ecd22a952f7d9bbf3b0ea76fcb0ed3ce858018afff7"
-url = "https://nodejs.org/dist/v26.2.0/node-v26.2.0-darwin-arm64.tar.gz"
+checksum = "sha256:77ef7f7a15aa757c2ca19d63cf41c8d9eb3b18590ebc6883871310787d8c6b6c"
+url = "https://nodejs.org/dist/v26.3.0/node-v26.3.0-darwin-arm64.tar.gz"
 
 [[tools."npm:@openai/codex"]]
 version = "0.135.0"
