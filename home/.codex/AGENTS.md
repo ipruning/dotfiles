@@ -21,3 +21,36 @@
 ## 回复格式
 
 用户用中文则用中文回复（你可以用英文思考）；中文段落用直角引号；纯英文段落按英文习惯的半角符号；混排内容从主要语言，比如，中文与英文单词、缩写、数字相邻时插入 1 个半角空格，例如「大模型 LLMs」「版本 2.1」「在 Tokyo 开会」。
+
+## Rust Token Killer
+
+**Usage**: Token-optimized CLI proxy for shell commands.
+
+### Rule
+
+Always prefix shell commands with `rtk`.
+
+Examples:
+
+```bash
+rtk git status
+rtk cargo test
+rtk npm run build
+rtk pytest -q
+```
+
+### Meta Commands
+
+```bash
+rtk gain            # Token savings analytics
+rtk gain --history  # Recent command savings history
+rtk proxy <cmd>     # Run raw command without filtering
+```
+
+### Verification
+
+```bash
+rtk --version
+rtk gain
+which rtk
+```
