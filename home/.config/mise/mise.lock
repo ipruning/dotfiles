@@ -144,33 +144,33 @@ url = "https://github.com/earendil-works/pi/releases/download/v0.78.0/pi-darwin-
 url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/433424440"
 
 [[tools."github:larksuite/cli"]]
-version = "1.0.45"
+version = "1.0.46"
 backend = "github:larksuite/cli"
 
 [tools."github:larksuite/cli"."platforms.linux-x64"]
-checksum = "sha256:12d43b72a2751dd52091b97ea808b0db12fd01fcfdc585620149329eca43c819"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.45/lark-cli-1.0.45-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/435319612"
+checksum = "sha256:e4ca7965caabf64216dc6b493d94be01891937ca9cafb2dffda57af1983eccc5"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.46/lark-cli-1.0.46-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/436276912"
 
 [tools."github:larksuite/cli"."platforms.linux-x64-baseline"]
-checksum = "sha256:12d43b72a2751dd52091b97ea808b0db12fd01fcfdc585620149329eca43c819"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.45/lark-cli-1.0.45-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/435319612"
+checksum = "sha256:e4ca7965caabf64216dc6b493d94be01891937ca9cafb2dffda57af1983eccc5"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.46/lark-cli-1.0.46-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/436276912"
 
 [tools."github:larksuite/cli"."platforms.linux-x64-musl"]
-checksum = "sha256:12d43b72a2751dd52091b97ea808b0db12fd01fcfdc585620149329eca43c819"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.45/lark-cli-1.0.45-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/435319612"
+checksum = "sha256:e4ca7965caabf64216dc6b493d94be01891937ca9cafb2dffda57af1983eccc5"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.46/lark-cli-1.0.46-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/436276912"
 
 [tools."github:larksuite/cli"."platforms.linux-x64-musl-baseline"]
-checksum = "sha256:12d43b72a2751dd52091b97ea808b0db12fd01fcfdc585620149329eca43c819"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.45/lark-cli-1.0.45-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/435319612"
+checksum = "sha256:e4ca7965caabf64216dc6b493d94be01891937ca9cafb2dffda57af1983eccc5"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.46/lark-cli-1.0.46-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/436276912"
 
 [tools."github:larksuite/cli"."platforms.macos-arm64"]
-checksum = "sha256:9caed7157c9f0f3e2198ce15c8a50b9f8b81c140783113046fe36e9f48852c7c"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.45/lark-cli-1.0.45-darwin-arm64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/435319600"
+checksum = "sha256:51da594fbe9f3614c16431dddb0e5f1b959a118f4438de64e725ffed709f3d39"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.46/lark-cli-1.0.46-darwin-arm64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/436276916"
 
 [[tools."github:schpet/linear-cli"]]
 version = "2.0.0"
@@ -202,28 +202,28 @@ url = "https://github.com/schpet/linear-cli/releases/download/v2.0.0/linear-aarc
 url_api = "https://api.github.com/repos/schpet/linear-cli/releases/assets/388120583"
 
 [[tools.go]]
-version = "1.26.3"
+version = "1.26.4"
 backend = "core:go"
 
 [tools.go."platforms.linux-x64"]
-checksum = "sha256:2b2cfc7148493da5e73981bffbf3353af381d5f93e789c82c79aff64962eb556"
-url = "https://dl.google.com/go/go1.26.3.linux-amd64.tar.gz"
+checksum = "sha256:1153d3d50e0ac764b447adfe05c2bcf08e889d42a02e0fe0259bd47f6733ad7f"
+url = "https://dl.google.com/go/go1.26.4.linux-amd64.tar.gz"
 
 [tools.go."platforms.linux-x64-baseline"]
-checksum = "sha256:2b2cfc7148493da5e73981bffbf3353af381d5f93e789c82c79aff64962eb556"
-url = "https://dl.google.com/go/go1.26.3.linux-amd64.tar.gz"
+checksum = "sha256:1153d3d50e0ac764b447adfe05c2bcf08e889d42a02e0fe0259bd47f6733ad7f"
+url = "https://dl.google.com/go/go1.26.4.linux-amd64.tar.gz"
 
 [tools.go."platforms.linux-x64-musl"]
-checksum = "sha256:2b2cfc7148493da5e73981bffbf3353af381d5f93e789c82c79aff64962eb556"
-url = "https://dl.google.com/go/go1.26.3.linux-amd64.tar.gz"
+checksum = "sha256:1153d3d50e0ac764b447adfe05c2bcf08e889d42a02e0fe0259bd47f6733ad7f"
+url = "https://dl.google.com/go/go1.26.4.linux-amd64.tar.gz"
 
 [tools.go."platforms.linux-x64-musl-baseline"]
-checksum = "sha256:2b2cfc7148493da5e73981bffbf3353af381d5f93e789c82c79aff64962eb556"
-url = "https://dl.google.com/go/go1.26.3.linux-amd64.tar.gz"
+checksum = "sha256:1153d3d50e0ac764b447adfe05c2bcf08e889d42a02e0fe0259bd47f6733ad7f"
+url = "https://dl.google.com/go/go1.26.4.linux-amd64.tar.gz"
 
 [tools.go."platforms.macos-arm64"]
-checksum = "sha256:875cf54a15311eee2c99b9dd67c68c4a49351d489ab622bf2cfd28c8f2078d3c"
-url = "https://dl.google.com/go/go1.26.3.darwin-arm64.tar.gz"
+checksum = "sha256:b62ad2b6d7d2464f12a5bcad7ff47f19d08325773b5efd21610e445a05a9bf53"
+url = "https://dl.google.com/go/go1.26.4.darwin-arm64.tar.gz"
 
 [[tools."go:github.com/xdevplatform/xurl"]]
 version = "1.1.1"
@@ -278,32 +278,32 @@ version = "0.3.0"
 backend = "npm:pi-opensync-plugin"
 
 [[tools.pnpm]]
-version = "11.5.0"
+version = "11.5.1"
 backend = "aqua:pnpm/pnpm"
 
 [tools.pnpm."platforms.linux-x64"]
-checksum = "sha256:d45c4338299cae5b7fcaf5e95294643edb10de98258fc0b1d566ffa00b0c353c"
-url = "https://github.com/pnpm/pnpm/releases/download/v11.5.0/pnpm-linux-x64.tar.gz"
+checksum = "sha256:5cebc2fa002cabc2008075148427e1aa7baaa7df17dd9f5226e2b1b401e83583"
+url = "https://github.com/pnpm/pnpm/releases/download/v11.5.1/pnpm-linux-x64.tar.gz"
 provenance = "github-attestations"
 
 [tools.pnpm."platforms.linux-x64-baseline"]
-checksum = "sha256:d45c4338299cae5b7fcaf5e95294643edb10de98258fc0b1d566ffa00b0c353c"
-url = "https://github.com/pnpm/pnpm/releases/download/v11.5.0/pnpm-linux-x64.tar.gz"
+checksum = "sha256:5cebc2fa002cabc2008075148427e1aa7baaa7df17dd9f5226e2b1b401e83583"
+url = "https://github.com/pnpm/pnpm/releases/download/v11.5.1/pnpm-linux-x64.tar.gz"
 provenance = "github-attestations"
 
 [tools.pnpm."platforms.linux-x64-musl"]
-checksum = "sha256:f114fa068bb5b45472e3389b19722feb9cb47b72ca656fb5a5cbb7d5fbb7ed06"
-url = "https://github.com/pnpm/pnpm/releases/download/v11.5.0/pnpm-linux-x64-musl.tar.gz"
+checksum = "sha256:103e77f25422802a89c6206a09466b05042e9f8e40921db177550944abc7882c"
+url = "https://github.com/pnpm/pnpm/releases/download/v11.5.1/pnpm-linux-x64-musl.tar.gz"
 provenance = "github-attestations"
 
 [tools.pnpm."platforms.linux-x64-musl-baseline"]
-checksum = "sha256:f114fa068bb5b45472e3389b19722feb9cb47b72ca656fb5a5cbb7d5fbb7ed06"
-url = "https://github.com/pnpm/pnpm/releases/download/v11.5.0/pnpm-linux-x64-musl.tar.gz"
+checksum = "sha256:103e77f25422802a89c6206a09466b05042e9f8e40921db177550944abc7882c"
+url = "https://github.com/pnpm/pnpm/releases/download/v11.5.1/pnpm-linux-x64-musl.tar.gz"
 provenance = "github-attestations"
 
 [tools.pnpm."platforms.macos-arm64"]
-checksum = "sha256:966f2ed3587457e1135b7102569b08f21c717f49d5676d63f9435bac9682c45b"
-url = "https://github.com/pnpm/pnpm/releases/download/v11.5.0/pnpm-darwin-arm64.tar.gz"
+checksum = "sha256:6533dc62f42eafc1965ef3170fb0bf750ae5c3064d0fd9bcc50bc72c5b95e4c2"
+url = "https://github.com/pnpm/pnpm/releases/download/v11.5.1/pnpm-darwin-arm64.tar.gz"
 provenance = "github-attestations"
 
 [[tools.python]]
