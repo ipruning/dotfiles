@@ -58,28 +58,28 @@ version = "HEAD"
 backend = "cargo:https://github.com/clouedoc/hzfind"
 
 [[tools.deno]]
-version = "2.8.1"
+version = "2.8.2"
 backend = "core:deno"
 
 [tools.deno."platforms.linux-x64"]
-checksum = "sha256:2d7bb6195226ac832e0bf7109a115f0af65ee69ac797a4bbde5b27a06cc242d9"
-url = "https://dl.deno.land/release/v2.8.1/deno-x86_64-unknown-linux-gnu.zip"
+checksum = "sha256:184da7a5267ab649bc08821b3bc3ce6805d8e6985fb82707cb8d5e9fd6535362"
+url = "https://dl.deno.land/release/v2.8.2/deno-x86_64-unknown-linux-gnu.zip"
 
 [tools.deno."platforms.linux-x64-baseline"]
-checksum = "sha256:2d7bb6195226ac832e0bf7109a115f0af65ee69ac797a4bbde5b27a06cc242d9"
-url = "https://dl.deno.land/release/v2.8.1/deno-x86_64-unknown-linux-gnu.zip"
+checksum = "sha256:184da7a5267ab649bc08821b3bc3ce6805d8e6985fb82707cb8d5e9fd6535362"
+url = "https://dl.deno.land/release/v2.8.2/deno-x86_64-unknown-linux-gnu.zip"
 
 [tools.deno."platforms.linux-x64-musl"]
-checksum = "sha256:2d7bb6195226ac832e0bf7109a115f0af65ee69ac797a4bbde5b27a06cc242d9"
-url = "https://dl.deno.land/release/v2.8.1/deno-x86_64-unknown-linux-gnu.zip"
+checksum = "sha256:184da7a5267ab649bc08821b3bc3ce6805d8e6985fb82707cb8d5e9fd6535362"
+url = "https://dl.deno.land/release/v2.8.2/deno-x86_64-unknown-linux-gnu.zip"
 
 [tools.deno."platforms.linux-x64-musl-baseline"]
-checksum = "sha256:2d7bb6195226ac832e0bf7109a115f0af65ee69ac797a4bbde5b27a06cc242d9"
-url = "https://dl.deno.land/release/v2.8.1/deno-x86_64-unknown-linux-gnu.zip"
+checksum = "sha256:184da7a5267ab649bc08821b3bc3ce6805d8e6985fb82707cb8d5e9fd6535362"
+url = "https://dl.deno.land/release/v2.8.2/deno-x86_64-unknown-linux-gnu.zip"
 
 [tools.deno."platforms.macos-arm64"]
-checksum = "sha256:8154e2de0ee8c1cae31fa88e078724aaef0295fab9fd2ad6f8520389cee908f6"
-url = "https://dl.deno.land/release/v2.8.1/deno-aarch64-apple-darwin.zip"
+checksum = "sha256:02e5eb795c9f763772dfd081429cead9029e0a4a6aaff6d4e5f3ed6d2e94d361"
+url = "https://dl.deno.land/release/v2.8.2/deno-aarch64-apple-darwin.zip"
 
 [[tools."gem:kamal"]]
 version = "2.11.0"
@@ -144,33 +144,33 @@ url = "https://github.com/earendil-works/pi/releases/download/v0.78.0/pi-darwin-
 url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/433424440"
 
 [[tools."github:larksuite/cli"]]
-version = "1.0.46"
+version = "1.0.47"
 backend = "github:larksuite/cli"
 
 [tools."github:larksuite/cli"."platforms.linux-x64"]
-checksum = "sha256:e4ca7965caabf64216dc6b493d94be01891937ca9cafb2dffda57af1983eccc5"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.46/lark-cli-1.0.46-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/436276912"
+checksum = "sha256:36e4b60c7287d4ede7658a677fdf0ad98b498150f77d736cd1eb6022873db90d"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.47/lark-cli-1.0.47-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/437343030"
 
 [tools."github:larksuite/cli"."platforms.linux-x64-baseline"]
-checksum = "sha256:e4ca7965caabf64216dc6b493d94be01891937ca9cafb2dffda57af1983eccc5"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.46/lark-cli-1.0.46-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/436276912"
+checksum = "sha256:36e4b60c7287d4ede7658a677fdf0ad98b498150f77d736cd1eb6022873db90d"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.47/lark-cli-1.0.47-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/437343030"
 
 [tools."github:larksuite/cli"."platforms.linux-x64-musl"]
-checksum = "sha256:e4ca7965caabf64216dc6b493d94be01891937ca9cafb2dffda57af1983eccc5"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.46/lark-cli-1.0.46-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/436276912"
+checksum = "sha256:36e4b60c7287d4ede7658a677fdf0ad98b498150f77d736cd1eb6022873db90d"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.47/lark-cli-1.0.47-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/437343030"
 
 [tools."github:larksuite/cli"."platforms.linux-x64-musl-baseline"]
-checksum = "sha256:e4ca7965caabf64216dc6b493d94be01891937ca9cafb2dffda57af1983eccc5"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.46/lark-cli-1.0.46-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/436276912"
+checksum = "sha256:36e4b60c7287d4ede7658a677fdf0ad98b498150f77d736cd1eb6022873db90d"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.47/lark-cli-1.0.47-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/437343030"
 
 [tools."github:larksuite/cli"."platforms.macos-arm64"]
-checksum = "sha256:51da594fbe9f3614c16431dddb0e5f1b959a118f4438de64e725ffed709f3d39"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.46/lark-cli-1.0.46-darwin-arm64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/436276916"
+checksum = "sha256:6efa3924a3fbb214715bb57ffccb6b47199d907f889ce399d05e8c9ddf1a005e"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.47/lark-cli-1.0.47-darwin-arm64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/437343013"
 
 [[tools."github:schpet/linear-cli"]]
 version = "2.0.0"
