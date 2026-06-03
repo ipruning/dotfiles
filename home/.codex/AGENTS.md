@@ -10,17 +10,19 @@
 
 ## 你的品味
 
-- **代码坚决不做任何 Mock，遇到 Mock 必须清理并换成「真实」场景的测试，如果不确定，询问用户真实用例。**
+- 代码和测试优先使用真实场景。遇到 Mock，先判断它是在替代真实业务用例，还是在隔离不可控外部边界；前者必须清理并换成真实场景测试，后者要保留边界说明。如果不确定真实用例，询问用户。
 
 ## 工作规则
 
 - When the working directory is not a repository and the task is disposable, `$TMPDIR` is the right place for code and data.
-- Rewriting the message on HEAD is straightforward: `git commit --amend -m "..."`. For an older commit, the non-interactive form is `GIT_SEQUENCE_EDITOR="sed -i '' '1s/^pick/reword/'" GIT_EDITOR="sed -i '' '1s/old/new/'" git rebase -i HEAD~<N>`. The target commit is always line 1 in the todo because rebase lists oldest-first. There is no reason to open an interactive editor. Before any commit, `git status --short` shows what is staged. Stage only the files that belong to the current logical change — prior staging state is not trustworthy.
-- macOS ships BSD grep which lacks -P. Use rg instead of grep.
+- Before any commit, run `git status --short`. Stage only the files that belong to the current logical change; prior staging state is not trustworthy.
+- Rewriting the message on HEAD is straightforward: `git commit --amend -m "..."`.
+- For an older commit message, use a non-interactive rebase: `GIT_SEQUENCE_EDITOR="sed -i '' '1s/^pick/reword/'" GIT_EDITOR="sed -i '' '1s/old/new/'" git rebase -i HEAD~<N>`. The target commit is line 1 in the todo because rebase lists commits oldest-first. Do not open an interactive editor for this.
+- macOS ships BSD grep, which lacks `-P`. Use `rg` instead of `grep`.
 
 ## 回复格式
 
-用户用中文则用中文回复（你可以用英文思考）；中文段落用直角引号；纯英文段落按英文习惯的半角符号；混排内容从主要语言，比如，中文与英文单词、缩写、数字相邻时插入 1 个半角空格，例如「大模型 LLMs」「版本 2.1」「在 Tokyo 开会」。
+用户用中文则用中文回复。中文段落使用直角引号；纯英文段落按英文习惯使用半角符号；中文与英文单词、缩写、数字相邻时，插入 1 个半角空格，例如「大模型 LLMs」「版本 2.1」「在 Tokyo 开会」。
 
 ## Rust Token Killer
 
@@ -30,13 +32,25 @@
 
 Always prefix shell commands with `rtk`.
 
-Examples:
+Use `rtk <cmd>` when command output is only for human inspection.
+
+Use `rtk proxy <cmd>` when command output will be written into a file, piped into another command, parsed as structured data, used as exact machine input, or needs unfiltered stdout / stderr semantics.
+
+For complex shell syntax, environment variables, pipes, or redirects, wrap the command explicitly:
 
 ```bash
-rtk git status
+rtk proxy zsh -lc 'jq -r ".plans[].repo" snapshot.json > repos.txt'
+```
+
+### Examples
+
+```bash
+rtk git status --short
 rtk cargo test
 rtk npm run build
 rtk pytest -q
+rtk proxy zsh -lc 'gh api repos/OWNER/REPO > repo.json'
+rtk proxy zsh -lc 'git diff --binary > change.patch'
 ```
 
 ### Meta Commands
@@ -54,3 +68,8 @@ rtk --version
 rtk gain
 which rtk
 ```
+
+## Codex
+
+- 启动其他 Thread 或子 Agent 时，默认优先使用 GPT-5.5 low，除非任务明确需要更强推理、长上下文或高精度代码修改。
+- 启动子 Agent 前，先决定上下文暴露范围：复核任务给证据、约束和待验证结论；探索任务不给判断，只给目标、边界和入口，让 Agent 在真实情景中观察、学习，并独立形成结论。
