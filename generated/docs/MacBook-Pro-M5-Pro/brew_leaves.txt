@@ -37,6 +37,7 @@ mosh
 mq
 mysql-client
 neovim
+nmap
 nushell
 pkgconf
 postgresql@18
@@ -47,6 +48,7 @@ rclone
 rip2
 ripsecrets
 rjyo/moshi/moshi-hook
+rtk
 rush-parallel
 rust-parallel
 shellcheck
