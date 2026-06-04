@@ -10,19 +10,28 @@
 
 ## 你的品味
 
-- 代码和测试优先使用真实场景。遇到 Mock，先判断它是在替代真实业务用例，还是在隔离不可控外部边界；前者必须清理并换成真实场景测试，后者要保留边界说明。如果不确定真实用例，询问用户。
+代码和测试优先使用真实场景。遇到 Mock，先判断它是在替代真实业务用例，还是在隔离不可控外部边界；前者必须清理并换成真实场景测试，后者要保留边界说明。如果不确定真实用例，询问用户。
 
-## 工作规则
-
-- When the working directory is not a repository and the task is disposable, `$TMPDIR` is the right place for code and data.
-- Before any commit, run `git status --short`. Stage only the files that belong to the current logical change; prior staging state is not trustworthy.
-- Rewriting the message on HEAD is straightforward: `git commit --amend -m "..."`.
-- For an older commit message, use a non-interactive rebase: `GIT_SEQUENCE_EDITOR="sed -i '' '1s/^pick/reword/'" GIT_EDITOR="sed -i '' '1s/old/new/'" git rebase -i HEAD~<N>`. The target commit is line 1 in the todo because rebase lists commits oldest-first. Do not open an interactive editor for this.
-- macOS ships BSD grep, which lacks `-P`. Use `rg` instead of `grep`.
-
-## 回复格式
+## 你的文风
 
 用户用中文则用中文回复。中文段落使用直角引号；纯英文段落按英文习惯使用半角符号；中文与英文单词、缩写、数字相邻时，插入 1 个半角空格，例如「大模型 LLMs」「版本 2.1」「在 Tokyo 开会」。
+
+## Unblock Notifications
+
+如果工作被用户的具体动作阻塞，且静默等待会让任务停住，就通知。
+
+每次通知后你可以 Sleep 自己，然后重新检查 Blocker。
+
+先语音：
+
+```bash
+rtk sag --voice Jessica --model-id eleven_v3 --lang en --speed 1.12 --stability 0.5 --style 0.30 --similarity 0.84 --timeout 30s "<blocker and action needed>."
+rtk proxy sleep 180
+```
+
+仍阻塞，加载 Brrr 技能，发 1 条 `time-sensitive` 的 Push。
+
+如果时间敏感，发 1 条 `critical` Push。
 
 ## Rust Token Killer
 
@@ -69,7 +78,15 @@ rtk gain
 which rtk
 ```
 
+## MISC
+
+- When the working directory is not a repository and the task is disposable, `$TMPDIR` is the right place for code and data.
+- Before any commit, run `git status --short`. Stage only the files that belong to the current logical change; prior staging state is not trustworthy.
+- Rewriting the message on HEAD is straightforward: `git commit --amend -m "..."`.
+- For an older commit message, use a non-interactive rebase: `GIT_SEQUENCE_EDITOR="sed -i '' '1s/^pick/reword/'" GIT_EDITOR="sed -i '' '1s/old/new/'" git rebase -i HEAD~<N>`. The target commit is line 1 in the todo because rebase lists commits oldest-first. Do not open an interactive editor for this.
+- macOS ships BSD grep, which lacks `-P`. Use `rg` instead of `grep`.
+
 ## Codex
 
-- 启动其他 Thread 或子 Agent 时，默认优先使用 GPT-5.5 low，除非任务明确需要更强推理、长上下文或高精度代码修改。
+- 启动其他 Thread 或子 Agent 时，默认用 GPT-5.5 Medium。
 - 启动子 Agent 前，先决定上下文暴露范围：复核任务给证据、约束和待验证结论；探索任务不给判断，只给目标、边界和入口，让 Agent 在真实情景中观察、学习，并独立形成结论。
