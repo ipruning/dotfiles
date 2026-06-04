@@ -14,6 +14,8 @@ generated/functions/*
 generated/plugins/*
 !**/.gitkeep
 
+home/.zshenv
+
 home/.config/karabiner/automatic_backups/
 home/.config/zellij/plugins/
 
