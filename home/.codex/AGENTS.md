@@ -33,51 +33,6 @@ rtk proxy sleep 180
 
 如果时间敏感，发 1 条 `critical` Push。
 
-## Rust Token Killer
-
-**Usage**: Token-optimized CLI proxy for shell commands.
-
-### Rule
-
-Always prefix shell commands with `rtk`.
-
-Use `rtk <cmd>` when command output is only for human inspection.
-
-Use `rtk proxy <cmd>` when command output will be written into a file, piped into another command, parsed as structured data, used as exact machine input, or needs unfiltered stdout / stderr semantics.
-
-For complex shell syntax, environment variables, pipes, or redirects, wrap the command explicitly:
-
-```bash
-rtk proxy zsh -lc 'jq -r ".plans[].repo" snapshot.json > repos.txt'
-```
-
-### Examples
-
-```bash
-rtk git status --short
-rtk cargo test
-rtk npm run build
-rtk pytest -q
-rtk proxy zsh -lc 'gh api repos/OWNER/REPO > repo.json'
-rtk proxy zsh -lc 'git diff --binary > change.patch'
-```
-
-### Meta Commands
-
-```bash
-rtk gain            # Token savings analytics
-rtk gain --history  # Recent command savings history
-rtk proxy <cmd>     # Run raw command without filtering
-```
-
-### Verification
-
-```bash
-rtk --version
-rtk gain
-which rtk
-```
-
 ## MISC
 
 - When the working directory is not a repository and the task is disposable, `$TMPDIR` is the right place for code and data.
