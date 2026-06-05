@@ -50,6 +50,7 @@ ripsecrets
 rtk
 rush-parallel
 rust-parallel
+sag
 shellcheck
 skillshare
 sqlfluff
