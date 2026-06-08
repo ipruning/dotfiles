@@ -25,8 +25,8 @@
 先语音：
 
 ```bash
-rtk sag --voice Jessica --model-id eleven_v3 --lang en --speed 1.12 --stability 0.5 --style 0.30 --similarity 0.84 --timeout 30s "<blocker and action needed>."
-rtk proxy sleep 180
+sag --voice Jessica --model-id eleven_v3 --lang en --speed 1.12 --stability 0.5 --style 0.30 --similarity 0.84 --timeout 30s "<blocker and action needed>."
+sleep 180
 ```
 
 仍阻塞，加载 Brrr 技能，发 1 条 `time-sensitive` 的 Push。
@@ -39,7 +39,9 @@ rtk proxy sleep 180
 - Before any commit, run `git status --short`. Stage only the files that belong to the current logical change; prior staging state is not trustworthy.
 - Rewriting the message on HEAD is straightforward: `git commit --amend -m "..."`.
 - For an older commit message, use a non-interactive rebase: `GIT_SEQUENCE_EDITOR="sed -i '' '1s/^pick/reword/'" GIT_EDITOR="sed -i '' '1s/old/new/'" git rebase -i HEAD~<N>`. The target commit is line 1 in the todo because rebase lists commits oldest-first. Do not open an interactive editor for this.
-- macOS ships BSD grep, which lacks `-P`. Use `rg` instead of `grep`.
+- macOS ships BSD userland tools. Prefer portable shell forms when writing commands that may run across machines:
+  - `mktemp` on macOS does not accept GNU-style templates with suffixes after `XXXXXX`, such as `/tmp/name.XXXXXX.md`; use `mktemp "${TMPDIR:-/tmp}/name.XXXXXX"` or `mktemp -t name`.
+  - macOS ships BSD `grep`, which lacks `-P`. Use `rg` instead of `grep`.
 
 ## Codex
 

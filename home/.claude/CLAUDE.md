@@ -10,14 +10,35 @@
 
 ## 你的品味
 
-- **代码坚决不做任何 Mock，遇到 Mock 必须清理并换成「真实」场景的测试，如果不确定，询问用户真实用例。**
+代码和测试优先使用真实场景。遇到 Mock，先判断它是在替代真实业务用例，还是在隔离不可控外部边界；前者必须清理并换成真实场景测试，后者要保留边界说明。如果不确定真实用例，询问用户。
 
-## 工作规则
+## 你的文风
+
+用户用中文则用中文回复。中文段落使用直角引号；纯英文段落按英文习惯使用半角符号；中文与英文单词、缩写、数字相邻时，插入 1 个半角空格，例如「大模型 LLMs」「版本 2.1」「在 Tokyo 开会」。
+
+## Unblock Notifications
+
+如果工作被用户的具体动作阻塞，且静默等待会让任务停住，就通知。
+
+每次通知后你可以 Sleep 自己，然后重新检查 Blocker。
+
+先语音：
+
+```bash
+sag --voice Jessica --model-id eleven_v3 --lang en --speed 1.12 --stability 0.5 --style 0.30 --similarity 0.84 --timeout 30s "<blocker and action needed>."
+sleep 180
+```
+
+仍阻塞，加载 Brrr 技能，发 1 条 `time-sensitive` 的 Push。
+
+如果时间敏感，发 1 条 `critical` Push。
+
+## MISC
 
 - When the working directory is not a repository and the task is disposable, `$TMPDIR` is the right place for code and data.
-- Rewriting the message on HEAD is straightforward: `git commit --amend -m "..."`. For an older commit, the non-interactive form is `GIT_SEQUENCE_EDITOR="sed -i '' '1s/^pick/reword/'" GIT_EDITOR="sed -i '' '1s/old/new/'" git rebase -i HEAD~<N>`. The target commit is always line 1 in the todo because rebase lists oldest-first. There is no reason to open an interactive editor. Before any commit, `git status --short` shows what is staged. Stage only the files that belong to the current logical change — prior staging state is not trustworthy.
-- macOS ships BSD grep which lacks -P. Use rg instead of grep.
-
-## 回复格式
-
-用户用中文则用中文回复（你可以用英文思考）；中文段落用直角引号；纯英文段落按英文习惯的半角符号；混排内容从主要语言，比如，中文与英文单词、缩写、数字相邻时插入 1 个半角空格，例如「大模型 LLMs」「版本 2.1」「在 Tokyo 开会」。
+- Before any commit, run `git status --short`. Stage only the files that belong to the current logical change; prior staging state is not trustworthy.
+- Rewriting the message on HEAD is straightforward: `git commit --amend -m "..."`.
+- For an older commit message, use a non-interactive rebase: `GIT_SEQUENCE_EDITOR="sed -i '' '1s/^pick/reword/'" GIT_EDITOR="sed -i '' '1s/old/new/'" git rebase -i HEAD~<N>`. The target commit is line 1 in the todo because rebase lists commits oldest-first. Do not open an interactive editor for this.
+- macOS ships BSD userland tools. Prefer portable shell forms when writing commands that may run across machines:
+  - `mktemp` on macOS does not accept GNU-style templates with suffixes after `XXXXXX`, such as `/tmp/name.XXXXXX.md`; use `mktemp "${TMPDIR:-/tmp}/name.XXXXXX"` or `mktemp -t name`.
+  - macOS ships BSD `grep`, which lacks `-P`. Use `rg` instead of `grep`.
