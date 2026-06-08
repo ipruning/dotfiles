@@ -4,10 +4,8 @@ autocorrect
 bat
 biome
 broot
-brrr
 btop
 cairo
-crush
 duckdb
 eza
 fd
@@ -33,7 +31,6 @@ mdbook
 mise
 mole
 mosh
-moshi-hook
 mq
 mysql-client
 neovim
@@ -54,17 +51,14 @@ sag
 shellcheck
 skillshare
 sqlfluff
-sshpass
 sshx
 starship
-tart
 television
 tmux
 tokei
 try-rs
 typos-cli
 typst
-uncloud
 uv
 xcodes
 xh
