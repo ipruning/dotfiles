@@ -44,66 +44,103 @@ function logger() {
 }
 export -f logger
 
-# Collect all update commands for parallel execution
+# Homebrew can upgrade CLIs used below, so run it before parallel tool-specific
+# updates to avoid racing executable replacement with command execution.
+if command -v brew >/dev/null 2>&1; then
+  SECONDS=0
+  logger "Updating Homebrew..."
+  brew update && brew upgrade && brew cleanup && brew autoremove
+  logger "Homebrew done in ${SECONDS}s"
+fi
+
+# Collect non-Homebrew update commands for parallel execution
 parallel_cmds=()
 parallel_names=()
-if command -v brew >/dev/null 2>&1; then
-  parallel_names+=("Homebrew")
-  parallel_cmds+=('SECONDS=0; logger "Updating Homebrew..." && brew update && brew upgrade && brew cleanup && brew autoremove; logger "Homebrew done in ${SECONDS}s"')
-fi
 if command -v mise >/dev/null 2>&1; then
   parallel_names+=("mise")
-  parallel_cmds+=('SECONDS=0; logger "Updating mise..." && mise upgrade --bump && mise prune --yes && mise reshim; logger "mise done in ${SECONDS}s"')
+  parallel_cmds+=('SECONDS=0; logger "Updating mise..." && mise upgrade --bump -C "$HOME" && mise prune --yes && mise reshim && logger "mise done in ${SECONDS}s"')
 fi
 if command -v gh >/dev/null 2>&1; then
   parallel_names+=("GitHub CLI")
-  parallel_cmds+=('SECONDS=0; logger "Updating GitHub CLI extensions..." && gh extension upgrade --all; logger "GitHub CLI done in ${SECONDS}s"')
+  parallel_cmds+=('SECONDS=0; logger "Updating GitHub CLI extensions..." && gh extension upgrade --all && logger "GitHub CLI done in ${SECONDS}s"')
 fi
 if command -v tldr >/dev/null 2>&1; then
   parallel_names+=("tldr")
-  parallel_cmds+=('SECONDS=0; logger "Updating tldr pages..." && tldr --update; logger "tldr done in ${SECONDS}s"')
+  parallel_cmds+=('SECONDS=0; logger "Updating tldr pages..." && tldr --update && logger "tldr done in ${SECONDS}s"')
 fi
 if command -v ya >/dev/null 2>&1; then
   parallel_names+=("ya")
-  parallel_cmds+=('SECONDS=0; logger "Updating ya packages..." && ya pkg upgrade; logger "ya done in ${SECONDS}s"')
+  parallel_cmds+=('SECONDS=0; logger "Updating ya packages..." && ya pkg upgrade && logger "ya done in ${SECONDS}s"')
 fi
 # curl -fsSL https://sprites.dev/install.sh | sh
 if command -v sprite >/dev/null 2>&1; then
   parallel_names+=("Sprite")
-  parallel_cmds+=('SECONDS=0; logger "Updating Sprite..." && sprite upgrade; logger "Sprite done in ${SECONDS}s"')
+  parallel_cmds+=('SECONDS=0; logger "Checking Sprite updates..." && sprite upgrade --check && logger "Sprite check done in ${SECONDS}s"')
 else
   logger "sprite not found. Install: curl -fsSL https://sprites.dev/install.sh | sh" "WARN"
 fi
 # curl -fsSL https://ampcode.com/install.sh | bash
 if command -v amp >/dev/null 2>&1; then
   parallel_names+=("Amp Code")
-  parallel_cmds+=('SECONDS=0; logger "Updating Amp Code..." && amp update; logger "Amp done in ${SECONDS}s"')
+  parallel_cmds+=('SECONDS=0; logger "Updating Amp Code..." && amp update && logger "Amp done in ${SECONDS}s"')
 else
   logger "amp not found. Install: curl -fsSL https://ampcode.com/install.sh | bash" "WARN"
 fi
 # curl -fsSL https://raw.githubusercontent.com/tigrisdata/cli/main/scripts/install.sh | sh
 if command -v tigris >/dev/null 2>&1; then
   parallel_names+=("Tigris")
-  parallel_cmds+=('SECONDS=0; logger "Updating Tigris..." && tigris update; logger "Tigris done in ${SECONDS}s"')
+  parallel_cmds+=('SECONDS=0; logger "Updating Tigris..." && tigris update && logger "Tigris done in ${SECONDS}s"')
 else
   logger "tigris not found. Install: curl -fsSL https://raw.githubusercontent.com/tigrisdata/cli/main/scripts/install.sh | sh" "WARN"
 fi
 # skillshare update moved to mise run sync
 if command -v pi >/dev/null 2>&1; then
   parallel_names+=("Pi Plugin")
-  parallel_cmds+=('SECONDS=0; logger "Updating Pi Plugin..." && pi update; logger "Pi done in ${SECONDS}s"')
+  parallel_cmds+=('SECONDS=0; logger "Updating Pi Plugin..." && pi update && logger "Pi done in ${SECONDS}s"')
 else
   logger "pi not found. Install: brew install pi-coding-agent" "WARN"
 fi
 
 if [[ ${#parallel_cmds[@]} -gt 0 ]]; then
-  logger "Running ${#parallel_cmds[@]} updates in parallel..."
+  logger "Running ${#parallel_cmds[@]} updates in parallel; output will be grouped by task..."
 
   log_dir=$(mktemp -d "${TMPDIR:-/tmp}/up.XXXXXX")
-  trap 'rm -rf "$log_dir"' EXIT
-
   pids=()
   logs=()
+  statuses=()
+
+  cleanup_logs() {
+    rm -rf "$log_dir"
+  }
+
+  kill_process_tree() {
+    local pid=$1
+    local child
+
+    while IFS= read -r child; do
+      if [[ -n "$child" ]]; then
+        kill_process_tree "$child"
+      fi
+    done < <(pgrep -P "$pid" 2>/dev/null || true)
+
+    kill "$pid" 2>/dev/null || true
+  }
+
+  terminate_children() {
+    trap - INT TERM
+    if [[ ${#pids[@]} -gt 0 ]]; then
+      for pid in "${pids[@]}"; do
+        kill_process_tree "$pid"
+      done
+      wait "${pids[@]}" 2>/dev/null || true
+    fi
+    cleanup_logs
+    exit 130
+  }
+
+  trap cleanup_logs EXIT
+  trap terminate_children INT TERM
+
   for i in "${!parallel_cmds[@]}"; do
     log_file="$log_dir/$i.log"
     logs+=("$log_file")
@@ -113,13 +150,20 @@ if [[ ${#parallel_cmds[@]} -gt 0 ]]; then
 
   exit_code=0
   for i in "${!pids[@]}"; do
-    if ! wait "${pids[$i]}"; then
+    if wait "${pids[$i]}"; then
+      statuses[$i]=0
+    else
+      statuses[$i]=$?
       exit_code=1
     fi
   done
 
   for i in "${!logs[@]}"; do
-    printf '\n==> %s\n' "${parallel_names[$i]}"
+    if [[ ${statuses[$i]} -eq 0 ]]; then
+      printf '\n==> %s [OK]\n' "${parallel_names[$i]}"
+    else
+      printf '\n==> %s [FAILED exit=%s]\n' "${parallel_names[$i]}" "${statuses[$i]}"
+    fi
     cat "${logs[$i]}"
   done
 
