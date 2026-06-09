@@ -35,15 +35,21 @@ sleep 180
 
 ## MISC
 
-- When the working directory is not a repository and the task is disposable, `$TMPDIR` is the right place for code and data.
-- Before any commit, run `git status --short`. Stage only the files that belong to the current logical change; prior staging state is not trustworthy.
-- Rewriting the message on HEAD is straightforward: `git commit --amend -m "..."`.
-- For an older commit message, use a non-interactive rebase: `GIT_SEQUENCE_EDITOR="sed -i '' '1s/^pick/reword/'" GIT_EDITOR="sed -i '' '1s/old/new/'" git rebase -i HEAD~<N>`. The target commit is line 1 in the todo because rebase lists commits oldest-first. Do not open an interactive editor for this.
-- macOS ships BSD userland tools. Prefer portable shell forms when writing commands that may run across machines:
+- If the current working directory is not a repository and the task is disposable, use `$TMPDIR` for temporary code and data.
+- Before any commit, run `git status --short`.
+- Stage only files that belong to the current logical change. Do not trust any existing staging state.
+- To rewrite the message on `HEAD`, use `git commit --amend -m "..."`.
+- To rewrite an older commit message, use a non-interactive rebase:
+  `GIT_SEQUENCE_EDITOR="sed -i '' '1s/^pick/reword/'" GIT_EDITOR="sed -i '' '1s/old/new/'" git rebase -i HEAD~<N>`.
+  The target commit is line 1 in the todo because interactive rebase lists commits oldest-first. Do not open an interactive editor.
+- macOS ships BSD userland tools. Prefer portable shell forms for commands that may run across machines:
   - `mktemp` on macOS does not accept GNU-style templates with suffixes after `XXXXXX`, such as `/tmp/name.XXXXXX.md`; use `mktemp "${TMPDIR:-/tmp}/name.XXXXXX"` or `mktemp -t name`.
-  - macOS ships BSD `grep`, which lacks `-P`. Use `rg` instead of `grep`.
+  - BSD `grep` does not support `-P`; use `rg` instead of `grep -P`.
+- In `zsh`, avoid putting complex regular expressions directly inside fragile one-liners. Patterns containing `[]`, `*`, `\p{...}`, or similar regex syntax can be interpreted by the shell before they reach Ruby, Python, awk, or another interpreter. Use a single-quoted heredoc instead, for example `ruby <<'RUBY' ... RUBY`.
 
 ## Codex
 
-- 启动其他 Thread 或子 Agent 时，默认用 GPT-5.5 Medium。
-- 启动子 Agent 前，先决定上下文暴露范围：复核任务给证据、约束和待验证结论；探索任务不给判断，只给目标、边界和入口，让 Agent 在真实情景中观察、学习，并独立形成结论。
+- 启动其他 Thread 或子 Agent 时，默认用 GPT-5.5 High。
+- 启动其他 Thread 或子 Agent 时，先决定上下文暴露范围。
+  - 复核任务给证据、约束和待验证结论。
+  - 探索任务不给判断，只给目标、边界和入口，让 Agent 在真实情景中观察、学习，并独立形成结论。
