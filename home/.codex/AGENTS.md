@@ -4,7 +4,7 @@
 
 每次对话的场景是：两个人站在一起看同一件事。你碰巧先看过，现在把对方的视线引过去。对方和你一样聪明，只是还没往那个方向看。
 
-默认呈现，不预设对方看不懂。只有当用户明确要求教学、推导、调试、对比，或任务本身需要建立中间概念时，才展开必要解释。
+默认直接呈现结论和证据，不预设对方看不懂。只有当用户明确要求教学、推导、调试、对比，或任务本身需要建立中间概念时，才展开必要解释。
 
 真相是可以被认知的，语言是胜任这个任务的。不要对自己的工具表示焦虑；不说「这个问题很复杂，很难一概而论」，不说「语言难以完全表达」。如果暂时说不清，先收窄问题，而不是把模糊包装成深刻。
 
@@ -20,9 +20,7 @@
 
 如果工作被用户的具体动作阻塞，且静默等待会让任务停住，就通知。
 
-每次通知后你可以 Sleep 自己，然后重新检查 Blocker。
-
-先语音：
+先语音提醒，然后 Sleep 180 秒并重新检查 Blocker：
 
 ```bash
 sag --voice Jessica --model-id eleven_v3 --lang en --speed 1.12 --stability 0.5 --style 0.30 --similarity 0.84 --timeout 30s "<blocker and action needed>."
@@ -33,7 +31,18 @@ sleep 180
 
 如果时间敏感，发 1 条 `critical` Push。
 
-## MISC
+## Shell
+
+- 默认当前 shell 可能是 `zsh`，不要把 bash 的隐式拆词规则带过来。
+- 在 `zsh` 中，未引用的标量参数不会按空白拆分。不要写 `set -- $spec` 来解析字段；使用显式分隔符、数组，或必要时使用 `${=spec}` 并说明原因。
+- 变量展开默认加引号：`"$repo"`、`"$branch"`、`"$work_root"`。
+- 结构化字段优先使用 `repo:branch` 这类明确分隔符，然后用 `${spec%%:*}` 和 `${spec#*:}` 解析。
+- 避免把复杂正则直接塞进 fragile one-liner。包含 `[]`、`*`、`\p{...}` 等语法时，使用单引号 heredoc，例如 `ruby <<'RUBY' ... RUBY`。
+- macOS ships BSD userland tools. Prefer portable shell forms for commands that may run across machines:
+  - `mktemp` on macOS does not accept GNU-style templates with suffixes after `XXXXXX`, such as `/tmp/name.XXXXXX.md`; use `mktemp "${TMPDIR:-/tmp}/name.XXXXXX"` or `mktemp -t name`.
+  - BSD `grep` does not support `-P`; use `rg` instead of `grep -P`.
+
+## Git
 
 - If the current working directory is not a repository and the task is disposable, use `$TMPDIR` for temporary code and data.
 - Before any commit, run `git status --short`.
@@ -42,10 +51,6 @@ sleep 180
 - To rewrite an older commit message, use a non-interactive rebase:
   `GIT_SEQUENCE_EDITOR="sed -i '' '1s/^pick/reword/'" GIT_EDITOR="sed -i '' '1s/old/new/'" git rebase -i HEAD~<N>`.
   The target commit is line 1 in the todo because interactive rebase lists commits oldest-first. Do not open an interactive editor.
-- macOS ships BSD userland tools. Prefer portable shell forms for commands that may run across machines:
-  - `mktemp` on macOS does not accept GNU-style templates with suffixes after `XXXXXX`, such as `/tmp/name.XXXXXX.md`; use `mktemp "${TMPDIR:-/tmp}/name.XXXXXX"` or `mktemp -t name`.
-  - BSD `grep` does not support `-P`; use `rg` instead of `grep -P`.
-- In `zsh`, avoid putting complex regular expressions directly inside fragile one-liners. Patterns containing `[]`, `*`, `\p{...}`, or similar regex syntax can be interpreted by the shell before they reach Ruby, Python, awk, or another interpreter. Use a single-quoted heredoc instead, for example `ruby <<'RUBY' ... RUBY`.
 
 ## Codex
 
