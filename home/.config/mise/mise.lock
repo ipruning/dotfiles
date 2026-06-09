@@ -270,7 +270,7 @@ version = "1.0.17"
 backend = "npm:cursor-opensync-plugin"
 
 [[tools."npm:hunkdiff"]]
-version = "0.14.1"
+version = "0.15.0"
 backend = "npm:hunkdiff"
 
 [[tools."npm:opencode-sync-plugin"]]

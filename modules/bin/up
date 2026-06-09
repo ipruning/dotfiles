@@ -44,48 +44,53 @@ function logger() {
 }
 export -f logger
 
-if ! command -v rust-parallel >/dev/null 2>&1; then
-  logger "rust-parallel not found. Install: brew install rust-parallel" "ERROR"
-  exit 1
-fi
-
 # Collect all update commands for parallel execution
 parallel_cmds=()
+parallel_names=()
 if command -v brew >/dev/null 2>&1; then
+  parallel_names+=("Homebrew")
   parallel_cmds+=('SECONDS=0; logger "Updating Homebrew..." && brew update && brew upgrade && brew cleanup && brew autoremove; logger "Homebrew done in ${SECONDS}s"')
 fi
 if command -v mise >/dev/null 2>&1; then
+  parallel_names+=("mise")
   parallel_cmds+=('SECONDS=0; logger "Updating mise..." && mise upgrade --bump && mise prune --yes && mise reshim; logger "mise done in ${SECONDS}s"')
 fi
 if command -v gh >/dev/null 2>&1; then
+  parallel_names+=("GitHub CLI")
   parallel_cmds+=('SECONDS=0; logger "Updating GitHub CLI extensions..." && gh extension upgrade --all; logger "GitHub CLI done in ${SECONDS}s"')
 fi
 if command -v tldr >/dev/null 2>&1; then
+  parallel_names+=("tldr")
   parallel_cmds+=('SECONDS=0; logger "Updating tldr pages..." && tldr --update; logger "tldr done in ${SECONDS}s"')
 fi
 if command -v ya >/dev/null 2>&1; then
+  parallel_names+=("ya")
   parallel_cmds+=('SECONDS=0; logger "Updating ya packages..." && ya pkg upgrade; logger "ya done in ${SECONDS}s"')
 fi
 # curl -fsSL https://sprites.dev/install.sh | sh
 if command -v sprite >/dev/null 2>&1; then
+  parallel_names+=("Sprite")
   parallel_cmds+=('SECONDS=0; logger "Updating Sprite..." && sprite upgrade; logger "Sprite done in ${SECONDS}s"')
 else
   logger "sprite not found. Install: curl -fsSL https://sprites.dev/install.sh | sh" "WARN"
 fi
 # curl -fsSL https://ampcode.com/install.sh | bash
 if command -v amp >/dev/null 2>&1; then
+  parallel_names+=("Amp Code")
   parallel_cmds+=('SECONDS=0; logger "Updating Amp Code..." && amp update; logger "Amp done in ${SECONDS}s"')
 else
   logger "amp not found. Install: curl -fsSL https://ampcode.com/install.sh | bash" "WARN"
 fi
 # curl -fsSL https://raw.githubusercontent.com/tigrisdata/cli/main/scripts/install.sh | sh
 if command -v tigris >/dev/null 2>&1; then
+  parallel_names+=("Tigris")
   parallel_cmds+=('SECONDS=0; logger "Updating Tigris..." && tigris update; logger "Tigris done in ${SECONDS}s"')
 else
   logger "tigris not found. Install: curl -fsSL https://raw.githubusercontent.com/tigrisdata/cli/main/scripts/install.sh | sh" "WARN"
 fi
 # skillshare update moved to mise run sync
 if command -v pi >/dev/null 2>&1; then
+  parallel_names+=("Pi Plugin")
   parallel_cmds+=('SECONDS=0; logger "Updating Pi Plugin..." && pi update; logger "Pi done in ${SECONDS}s"')
 else
   logger "pi not found. Install: brew install pi-coding-agent" "WARN"
@@ -93,7 +98,32 @@ fi
 
 if [[ ${#parallel_cmds[@]} -gt 0 ]]; then
   logger "Running ${#parallel_cmds[@]} updates in parallel..."
-  printf '%s\n' "${parallel_cmds[@]}" | rust-parallel -s -k
+
+  log_dir=$(mktemp -d "${TMPDIR:-/tmp}/up.XXXXXX")
+  trap 'rm -rf "$log_dir"' EXIT
+
+  pids=()
+  logs=()
+  for i in "${!parallel_cmds[@]}"; do
+    log_file="$log_dir/$i.log"
+    logs+=("$log_file")
+    bash -c "${parallel_cmds[$i]}" >"$log_file" 2>&1 &
+    pids+=("$!")
+  done
+
+  exit_code=0
+  for i in "${!pids[@]}"; do
+    if ! wait "${pids[$i]}"; then
+      exit_code=1
+    fi
+  done
+
+  for i in "${!logs[@]}"; do
+    printf '\n==> %s\n' "${parallel_names[$i]}"
+    cat "${logs[$i]}"
+  done
+
+  exit "$exit_code"
 fi
 
 # backup moved to mise run sync
