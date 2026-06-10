@@ -15,9 +15,12 @@ run_restore() {
   dotfiles_prepare_private_zshenv
   dotfiles_mackup_restore_safely "Running mackup restore..." --force
 
-  # Agent prompt files are generated, not Mackup-managed (see modules/agents/).
-  # Restore semantics: make the system match the repository.
-  bash "$(dirname "${BASH_SOURCE[0]}")/../tasks/agents.sh" --force
+  # Agent prompt files are Skillshare extras, not Mackup-managed.
+  # Restore semantics: make the system match the configured Skillshare source.
+  if command -v skillshare &>/dev/null; then
+    dotfiles_run_with_timeout "${DOTFILES_SKILLSHARE_TIMEOUT:-120}" skillshare sync extras --force \
+      || gum log --level warn "skillshare extras sync failed"
+  fi
 }
 
 if dotfiles_confirm_force "mise run restore [--force]" \

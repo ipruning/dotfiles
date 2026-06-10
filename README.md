@@ -16,7 +16,7 @@ This repo is intentionally organized around **long-term stable semantics**:
   - `generated/plugins/` contains third-party ZSH plugins (git-ignored).
   - `generated/docs/<hostname>/` stores host-specific snapshots (brew/apps/extensions).
 
-If you want to manage Agents / Skills / Prompts inside this repo, start from **`AGENTS.md`**.
+Global harness prompts and AI skills are managed in the Skillshare source repo. This repo only bootstraps their sync during `restore` and `sync`; start from **`AGENTS.md`** for dotfiles-specific operating rules.
 
 ## Quick start
 
@@ -158,7 +158,7 @@ These are the invariants that keep the repo understandable over time:
 | `modules/`                  | **Canonical** meta-config modules, reusable configs, non-dotfile configs, helper scripts              | Source (hand-edited)        |
 | `home/`                     | **Mackup snapshot tree** for dotfiles + app configs (copied by Mackup)                                | Artifact (managed by tools) |
 | `generated/`                | Generated outputs; `docs/` tracked, others (`bin/`, `completions/`, `functions/`, `plugins/`) ignored | Artifact (mixed)            |
-| `AGENTS.md`                 | Contract for Agents / Skills / Prompts in this repo                                                   | Source                      |
+| `AGENTS.md`                 | Operating contract for agents working in this dotfiles repo                                           | Source                      |
 | `pyproject.toml`, `uv.lock` | Python tooling for scripts/automation in this repo                                                    | Source                      |
 
 ### `modules/`
@@ -222,8 +222,8 @@ mise run sync
 Where:
 
 - `init` sets up baseline tooling
-- `restore` optionally generates ignored private materializations such as `home/.zshenv.private.zsh`, then pulls the Mackup snapshot into the correct locations
-- `sync` regenerates shell completions/functions, plugin snapshots, Skillshare assets, and host inventories
+- `restore` optionally generates ignored private materializations such as `home/.zshenv.private.zsh`, pulls the Mackup snapshot into the correct locations, then syncs Skillshare extras such as global harness prompt files
+- `sync` regenerates shell completions/functions, plugin snapshots, Skillshare skills/extras, and host inventories
 
 ### 3) Host snapshots
 
@@ -242,11 +242,11 @@ Examples:
 These are intentionally host-specific and are expected to change over time.
 They are snapshot artifacts (brew/apps/gh extensions, etc.), not canonical config.
 
-## Agents / Skills / Prompts
+## Agents and skills
 
-This repo is designed to host all agent-related assets (agents, skills, prompts, evaluation fixtures) **alongside dotfiles**, under clear lifecycle boundaries.
+This repo is no longer the source of truth for global harness prompt files such as `~/.codex/AGENTS.md`, `~/.claude/CLAUDE.md`, or `~/.config/amp/AGENTS.md`. Those files live in the Skillshare source repo under `extras/{codex,claude,amp}/` and are distributed with `skillshare sync extras`.
 
-See **`AGENTS.md`** for conventions and a recommended directory layout.
+Dotfiles keeps only the bootstrap hooks that call Skillshare during `restore` and `sync`. See **`AGENTS.md`** for the local operating contract.
 
 ## License
 

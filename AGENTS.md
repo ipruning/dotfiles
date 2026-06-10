@@ -15,8 +15,8 @@
 - `mise run init` installs/updates tooling, plugins, and Mackup links.
 - `mise run restore` restores the Mackup snapshot into the system.
 - `mise run backup` runs `mackup backup --force` to snapshot configs into `home/`.
-- `mise run agents` regenerates agent prompt files (`~/.codex/AGENTS.md`, `~/.claude/CLAUDE.md`, `~/.config/amp/AGENTS.md` plus their `home/` snapshots) from `modules/agents/` (base + per-harness appendix). These files are not Mackup-managed; edit `modules/agents/`, never the outputs. If a live file was hand-edited since the last generation, the task prints the diff and exits 1 instead of clobbering — port edits worth keeping into `modules/agents/`, then overwrite the live files with `mise run agents --force`.
-- `mise run sync` pulls plugins, regenerates shell completions/functions, runs Skillshare sync, and snapshots host package/app inventories.
+- Agent prompt files (`~/.codex/AGENTS.md`, `~/.claude/CLAUDE.md`, `~/.config/amp/AGENTS.md`) are maintained in the Skillshare source repo under `extras/{codex,claude,amp}/` and distributed by `skillshare sync extras`; do not add them to Mackup or regenerate them from this repo.
+- `mise run sync` pulls plugins, regenerates shell completions/functions, runs Skillshare sync (skills + extras), and snapshots host package/app inventories.
 - `mise run zsh-profile [runs] [warmup]` profiles Zsh startup (requires `hyperfine`).
 
 ## Coding Style & Naming Conventions

@@ -128,10 +128,10 @@ sync_bat_cache() {
 
 sync_skillshare() {
   command -v skillshare &>/dev/null || return 0
-  gum log --level info "Syncing Skillshare skills..."
+  gum log --level info "Syncing Skillshare skills and extras..."
   dotfiles_run_with_timeout "${DOTFILES_SKILLSHARE_TIMEOUT:-120}" skillshare update --all \
     || gum log --level warn "skillshare update failed"
-  dotfiles_run_with_timeout "${DOTFILES_SKILLSHARE_TIMEOUT:-120}" skillshare sync \
+  dotfiles_run_with_timeout "${DOTFILES_SKILLSHARE_TIMEOUT:-120}" skillshare sync --all \
     || gum log --level warn "skillshare sync failed"
 }
 
