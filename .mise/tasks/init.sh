@@ -59,7 +59,7 @@ done
 # -- Secrets & sync ------------------------------------------------------------
 
 dotfiles_prepare_private_zshenv
-gum log --level info "Syncing completions & plugins..."
+gum log --level info "Syncing generated assets and Skillshare..."
 dotfiles_run_with_timeout "${DOTFILES_SYNC_TIMEOUT:-300}" mise run sync \
   || gum log --level warn "sync failed; continuing"
 
@@ -81,6 +81,9 @@ done
 
 if [ ${#available[@]} -gt 0 ] && [ -t 0 ] && [ -t 1 ]; then
   selected=$(gum choose --no-limit --header "Install optional CLIs?" "${available[@]}" || true)
+  if [ -z "$selected" ]; then
+    gum log --level info "No optional CLIs selected"
+  fi
   while IFS= read -r pick; do
     [ -n "$pick" ] || continue
     for item in "${optional_clis[@]}"; do
@@ -94,6 +97,8 @@ if [ ${#available[@]} -gt 0 ] && [ -t 0 ] && [ -t 1 ]; then
   done <<< "$selected"
 elif [ ${#available[@]} -gt 0 ]; then
   gum log --level warn "Non-interactive shell; skipping optional CLI installer prompt"
+else
+  gum log --level info "Optional CLIs already installed"
 fi
 
 gum log --level info "Done ✓"

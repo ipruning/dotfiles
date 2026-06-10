@@ -127,7 +127,11 @@ sync_bat_cache() {
 }
 
 sync_skillshare() {
-  command -v skillshare &>/dev/null || return 0
+  if ! command -v skillshare &>/dev/null; then
+    gum log --level warn "skillshare not found; skipping Skillshare sync"
+    return 0
+  fi
+
   gum log --level info "Syncing Skillshare skills and extras..."
   dotfiles_run_with_timeout "${DOTFILES_SKILLSHARE_TIMEOUT:-120}" skillshare update --all \
     || gum log --level warn "skillshare update failed"
@@ -190,6 +194,7 @@ sync_vendor_plugins
 sync_shell_completions
 sync_shell_functions
 sync_bat_cache
+gum log --level info "Clearing zsh completion dump cache..."
 rm -f ~/.zcompdump*
 sync_skillshare
 sync_host_inventory
