@@ -7,16 +7,26 @@ set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/../scripts/task-lib.sh"
 
 dotfiles_enter_repo
-dotfiles_require_commands gum git curl mise
+dotfiles_require_commands gum git curl mise uvx
 
 # shellcheck source=.mise/scripts/mackup-lib.sh
 source "$(dirname "${BASH_SOURCE[0]}")/../scripts/mackup-lib.sh"
 
+# -- Mackup --------------------------------------------------------------------
+
+dotfiles_configure_mackup_symlinks
+if [ "${DOTFILES_MACKUP_SYMLINKS_CHANGED:-0}" = 1 ]; then
+  dotfiles_prepare_private_zshenv
+  dotfiles_mackup_restore_safely "Restoring Mackup..."
+else
+  gum log --level info "Mackup already configured"
+fi
+
 # -- Core init ----------------------------------------------------------------
 
-gum log --level info "Updating mise packages..."
-dotfiles_run_with_timeout "${DOTFILES_INIT_NETWORK_TIMEOUT:-300}" mise upgrade --bump \
-  || gum log --level warn "mise upgrade failed; continuing"
+gum log --level info "Installing mise tools..."
+dotfiles_run_with_timeout "${DOTFILES_INIT_NETWORK_TIMEOUT:-300}" mise install \
+  || gum log --level warn "mise install failed; continuing"
 find .mise/tasks/ -type f -name '*.sh' -exec chmod +x {} \;
 
 dotfiles_run_with_timeout "${DOTFILES_INIT_NETWORK_TIMEOUT:-300}" bash -c '
@@ -45,19 +55,6 @@ for entry in "${plugins[@]}"; do
       || gum log --level warn "$name clone failed; continuing"
   fi
 done
-
-# -- Mackup --------------------------------------------------------------------
-
-newly_linked=0
-dotfiles_ensure_mackup_symlink "$PWD/modules/mackup/.mackup"     "$HOME/.mackup"     && newly_linked=1 || true
-dotfiles_ensure_mackup_symlink "$PWD/modules/mackup/.mackup.cfg" "$HOME/.mackup.cfg" && newly_linked=1 || true
-
-if [ "$newly_linked" = 1 ]; then
-  dotfiles_prepare_private_zshenv
-  dotfiles_mackup_restore_safely "Restoring Mackup..."
-else
-  gum log --level info "Mackup already configured"
-fi
 
 # -- Secrets & sync ------------------------------------------------------------
 

@@ -47,40 +47,58 @@ dotfiles_mackup_restore_safely() {
   local title="$1"
   shift
 
-  # Do not restore Mackup's `mise` app while this task is running under mise.
-  # Replacing ~/.config/mise/config.toml or mise.lock mid-task can make the
-  # task runner itself disappear from under the running process.
-  local mackup_config exit_status
-  mackup_config=$(mktemp "$PWD/.mackup-restore.XXXXXX")
-  awk '$0 != "mise" { print }' modules/mackup/.mackup.cfg >"$mackup_config"
+  dotfiles_configure_mackup_symlinks
 
   gum log --level info "$title"
-  if dotfiles_run_with_timeout "${DOTFILES_MACKUP_TIMEOUT:-300}" \
-    uvx mackup --config-file "$mackup_config" restore "$@"; then
-    rm -f "$mackup_config"
-    return 0
-  else
-    exit_status=$?
-    rm -f "$mackup_config"
-    return "$exit_status"
-  fi
+  dotfiles_run_with_timeout "${DOTFILES_MACKUP_TIMEOUT:-300}" uvx mackup restore "$@"
 }
 
 dotfiles_mackup_backup_force() {
+  dotfiles_configure_mackup_symlinks
+
   gum log --level info "Running mackup backup..."
   dotfiles_run_with_timeout "${DOTFILES_MACKUP_TIMEOUT:-300}" uvx mackup backup --force
+}
+
+dotfiles_configure_mackup_symlinks() {
+  DOTFILES_MACKUP_SYMLINKS_CHANGED=0
+
+  local status
+
+  if dotfiles_ensure_mackup_symlink "$PWD/modules/mackup/.mackup" "$HOME/.mackup"; then
+    DOTFILES_MACKUP_SYMLINKS_CHANGED=1
+  else
+    status=$?
+    [ "$status" -eq 1 ] || return "$status"
+  fi
+
+  if dotfiles_ensure_mackup_symlink "$PWD/modules/mackup/.mackup.cfg" "$HOME/.mackup.cfg"; then
+    DOTFILES_MACKUP_SYMLINKS_CHANGED=1
+  else
+    status=$?
+    [ "$status" -eq 1 ] || return "$status"
+  fi
+
+  return 0
 }
 
 dotfiles_ensure_mackup_symlink() {
   local target="$1" link="$2"
 
   if [ -L "$link" ]; then
-    # Already a symlink — keep as-is to avoid unnecessary churn.
-    return 1
+    if [ "$(readlink "$link")" = "$target" ]; then
+      # Already a symlink to this repository — keep as-is to avoid churn.
+      return 1
+    fi
+
+    gum log --level warn "$link points to $(readlink "$link"); relinking to $target"
+    ln -sfn "$target" "$link"
+    return 0
   fi
+
   if [ -e "$link" ]; then
     gum log --level warn "$link exists and is not a symlink; skipping (move it aside to fix)"
-    return 1
+    return 2
   fi
 
   ln -s "$target" "$link"

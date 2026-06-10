@@ -9,7 +9,7 @@ export XDG_CONFIG_HOME="$HOME/.config"
 bindkey -e
 
 # 👇 zsh Theme
-if command -v starship >/dev/null 2>&1; then
+if command -v starship >/dev/null 2>&1 && [[ -f "$GENERATED_FUNCTIONS_DIR/_starship.zsh" ]]; then
   source "$GENERATED_FUNCTIONS_DIR/_starship.zsh"
 fi
 
@@ -260,12 +260,12 @@ if [[ -f "$GENERATED_COMPLETIONS_DIR/_try-rs" ]]; then
 fi
 
 # 👇 mise (will cost 40ms)
-if command -v mise >/dev/null 2>&1; then
+if command -v mise >/dev/null 2>&1 && [[ -f "$GENERATED_FUNCTIONS_DIR/_mise.zsh" ]]; then
   source "$GENERATED_FUNCTIONS_DIR/_mise.zsh"
 fi
 
 # 👇 atuin
-if command -v atuin >/dev/null 2>&1; then
+if command -v atuin >/dev/null 2>&1 && [[ -f "$GENERATED_FUNCTIONS_DIR/_atuin.zsh" ]]; then
   source "$GENERATED_FUNCTIONS_DIR/_atuin.zsh"
 fi
 
