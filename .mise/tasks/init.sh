@@ -49,7 +49,7 @@ dotfiles_ensure_mackup_symlink "$PWD/modules/mackup/.mackup"     "$HOME/.mackup"
 dotfiles_ensure_mackup_symlink "$PWD/modules/mackup/.mackup.cfg" "$HOME/.mackup.cfg" && newly_linked=1 || true
 
 if [ "$newly_linked" = 1 ]; then
-  dotfiles_prepare_zshenv
+  dotfiles_prepare_private_zshenv
   dotfiles_mackup_restore_safely "Restoring Mackup..."
 else
   gum log --level info "Mackup already configured"
@@ -57,7 +57,7 @@ fi
 
 # -- Secrets & sync ------------------------------------------------------------
 
-dotfiles_prepare_zshenv
+dotfiles_prepare_private_zshenv
 dotfiles_spin "Syncing completions & plugins..." mise run sync
 
 # -- Optional CLIs -------------------------------------------------------------

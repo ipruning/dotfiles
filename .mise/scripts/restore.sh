@@ -12,7 +12,7 @@ dotfiles_require_commands gum uvx
 source "$(dirname "${BASH_SOURCE[0]}")/mackup-lib.sh"
 
 run_restore() {
-  dotfiles_prepare_zshenv
+  dotfiles_prepare_private_zshenv
   dotfiles_mackup_restore_safely "Running mackup restore..." --force
 }
 
