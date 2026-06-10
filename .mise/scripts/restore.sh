@@ -14,6 +14,10 @@ source "$(dirname "${BASH_SOURCE[0]}")/mackup-lib.sh"
 run_restore() {
   dotfiles_prepare_private_zshenv
   dotfiles_mackup_restore_safely "Running mackup restore..." --force
+
+  # Agent prompt files are generated, not Mackup-managed (see modules/agents/).
+  # Restore semantics: make the system match the repository.
+  bash "$(dirname "${BASH_SOURCE[0]}")/../tasks/agents.sh" --force
 }
 
 if dotfiles_confirm_force "mise run restore [--force]" \
