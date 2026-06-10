@@ -44,6 +44,65 @@ function logger() {
 }
 export -f logger
 
+update_mise() {
+  SECONDS=0
+  logger "Updating mise..."
+  mise upgrade --bump -C "$HOME"
+  mise prune --yes
+  mise reshim
+  logger "mise done in ${SECONDS}s"
+}
+
+update_gh_extensions() {
+  SECONDS=0
+  logger "Updating GitHub CLI extensions..."
+  gh extension upgrade --all
+  logger "GitHub CLI done in ${SECONDS}s"
+}
+
+update_tldr() {
+  SECONDS=0
+  logger "Updating tldr pages..."
+  tldr --update
+  logger "tldr done in ${SECONDS}s"
+}
+
+update_ya() {
+  SECONDS=0
+  logger "Updating ya packages..."
+  ya pkg upgrade
+  logger "ya done in ${SECONDS}s"
+}
+
+update_sprite() {
+  SECONDS=0
+  logger "Checking Sprite updates..."
+  sprite upgrade --check
+  logger "Sprite check done in ${SECONDS}s"
+}
+
+update_amp() {
+  SECONDS=0
+  logger "Updating Amp Code..."
+  amp update
+  logger "Amp done in ${SECONDS}s"
+}
+
+update_tigris() {
+  SECONDS=0
+  logger "Updating Tigris..."
+  tigris update
+  logger "Tigris done in ${SECONDS}s"
+}
+
+update_pi() {
+  SECONDS=0
+  logger "Updating Pi Plugin..."
+  pi update
+  logger "Pi done in ${SECONDS}s"
+}
+export -f update_mise update_gh_extensions update_tldr update_ya update_sprite update_amp update_tigris update_pi
+
 # Homebrew can upgrade CLIs used below, so run it before parallel tool-specific
 # updates to avoid racing executable replacement with command execution.
 if command -v brew >/dev/null 2>&1; then
@@ -58,45 +117,45 @@ parallel_cmds=()
 parallel_names=()
 if command -v mise >/dev/null 2>&1; then
   parallel_names+=("mise")
-  parallel_cmds+=('SECONDS=0; logger "Updating mise..." && mise upgrade --bump -C "$HOME" && mise prune --yes && mise reshim && logger "mise done in ${SECONDS}s"')
+  parallel_cmds+=(update_mise)
 fi
 if command -v gh >/dev/null 2>&1; then
   parallel_names+=("GitHub CLI")
-  parallel_cmds+=('SECONDS=0; logger "Updating GitHub CLI extensions..." && gh extension upgrade --all && logger "GitHub CLI done in ${SECONDS}s"')
+  parallel_cmds+=(update_gh_extensions)
 fi
 if command -v tldr >/dev/null 2>&1; then
   parallel_names+=("tldr")
-  parallel_cmds+=('SECONDS=0; logger "Updating tldr pages..." && tldr --update && logger "tldr done in ${SECONDS}s"')
+  parallel_cmds+=(update_tldr)
 fi
 if command -v ya >/dev/null 2>&1; then
   parallel_names+=("ya")
-  parallel_cmds+=('SECONDS=0; logger "Updating ya packages..." && ya pkg upgrade && logger "ya done in ${SECONDS}s"')
+  parallel_cmds+=(update_ya)
 fi
 # curl -fsSL https://sprites.dev/install.sh | sh
 if command -v sprite >/dev/null 2>&1; then
   parallel_names+=("Sprite")
-  parallel_cmds+=('SECONDS=0; logger "Checking Sprite updates..." && sprite upgrade --check && logger "Sprite check done in ${SECONDS}s"')
+  parallel_cmds+=(update_sprite)
 else
   logger "sprite not found. Install: curl -fsSL https://sprites.dev/install.sh | sh" "WARN"
 fi
 # curl -fsSL https://ampcode.com/install.sh | bash
 if command -v amp >/dev/null 2>&1; then
   parallel_names+=("Amp Code")
-  parallel_cmds+=('SECONDS=0; logger "Updating Amp Code..." && amp update && logger "Amp done in ${SECONDS}s"')
+  parallel_cmds+=(update_amp)
 else
   logger "amp not found. Install: curl -fsSL https://ampcode.com/install.sh | bash" "WARN"
 fi
 # curl -fsSL https://raw.githubusercontent.com/tigrisdata/cli/main/scripts/install.sh | sh
 if command -v tigris >/dev/null 2>&1; then
   parallel_names+=("Tigris")
-  parallel_cmds+=('SECONDS=0; logger "Updating Tigris..." && tigris update && logger "Tigris done in ${SECONDS}s"')
+  parallel_cmds+=(update_tigris)
 else
   logger "tigris not found. Install: curl -fsSL https://raw.githubusercontent.com/tigrisdata/cli/main/scripts/install.sh | sh" "WARN"
 fi
 # skillshare update moved to mise run sync
 if command -v pi >/dev/null 2>&1; then
   parallel_names+=("Pi Plugin")
-  parallel_cmds+=('SECONDS=0; logger "Updating Pi Plugin..." && pi update && logger "Pi done in ${SECONDS}s"')
+  parallel_cmds+=(update_pi)
 else
   logger "pi not found. Install: brew install pi-coding-agent" "WARN"
 fi
@@ -109,10 +168,12 @@ if [[ ${#parallel_cmds[@]} -gt 0 ]]; then
   logs=()
   statuses=()
 
+  # shellcheck disable=SC2329 # invoked by EXIT/INT/TERM traps
   cleanup_logs() {
     rm -rf "$log_dir"
   }
 
+  # shellcheck disable=SC2329 # invoked by terminate_children trap handler
   kill_process_tree() {
     local pid=$1
     local child
@@ -126,6 +187,7 @@ if [[ ${#parallel_cmds[@]} -gt 0 ]]; then
     kill "$pid" 2>/dev/null || true
   }
 
+  # shellcheck disable=SC2329 # invoked by INT/TERM traps
   terminate_children() {
     trap - INT TERM
     if [[ ${#pids[@]} -gt 0 ]]; then
@@ -151,9 +213,9 @@ if [[ ${#parallel_cmds[@]} -gt 0 ]]; then
   exit_code=0
   for i in "${!pids[@]}"; do
     if wait "${pids[$i]}"; then
-      statuses[$i]=0
+      statuses[i]=0
     else
-      statuses[$i]=$?
+      statuses[i]=$?
       exit_code=1
     fi
   done
