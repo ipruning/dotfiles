@@ -3,7 +3,7 @@
 ## Project Structure & Module Organization
 
 - `modules/` is the canonical source of configs, scripts, and templates. Common areas: `modules/bin/`, `modules/zsh/`, `modules/mackup/`, `modules/surfingkeys/`.
-- `home/` is a Mackup snapshot tree (artifact). Avoid hand edits unless you are intentionally changing backup output.
+- `home/` is a Mackup snapshot tree (artifact). Avoid hand edits unless you are intentionally changing backup output. Exception: tracked shell bootstrap files under `home/` (`.zprofile`, `.zshrc`, `.zshenv.tpl`) are intentionally edited when changing Mackup-restored shell startup behavior; ignored `home/.zshenv` is generated locally from `home/.zshenv.tpl`.
 - `.mise/tasks/` contains the primary task scripts used for bootstrap, backup, restore, and sync.
 - `generated/` holds regenerated outputs (bin/completions/functions/plugins/docs). Safe to delete when regeneration is available.
   - `generated/plugins/` contains third-party ZSH plugins (git-ignored).
@@ -15,7 +15,7 @@
 - `mise run init` installs/updates tooling, plugins, and Mackup links.
 - `mise run restore` restores the Mackup snapshot into the system.
 - `mise run backup` runs `mackup backup --force` to snapshot configs into `home/`.
-- `mise run sync` pulls plugins, regenerates shell completions/functions, and injects secrets.
+- `mise run sync` pulls plugins, regenerates shell completions/functions, runs Skillshare sync, and snapshots host package/app inventories.
 - `mise run zsh-profile [runs] [warmup]` profiles Zsh startup (requires `hyperfine`).
 
 ## Coding Style & Naming Conventions
@@ -50,4 +50,4 @@
 
 ## Security & Configuration Tips
 
-- Never commit secrets. Use templates and `*.private.*` files, and keep sensitive data out of `generated/` and `home/`.
+- Never commit secrets. Use templates and `*.private.*` files. Tracked files under `home/` must not contain secrets; ignored materialized files such as `home/.zshenv` may be generated locally from templates.

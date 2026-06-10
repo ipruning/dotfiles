@@ -1,14 +1,8 @@
-typeset -U path
-
-# Make mise shims available to login/app-launched shells before .zshrc runs.
-# Keep this static so it works even before Homebrew's mise is on PATH.
-if [[ ${OSTYPE:-} == darwin* ]]; then
-  [[ -d /usr/local/bin ]] && path=(/usr/local/bin $path)
-  [[ -d /opt/homebrew/bin ]] && path=(/opt/homebrew/bin $path)
-fi
-
-[[ -d "$HOME/.local/share/mise/shims" ]] && path=("$HOME/.local/share/mise/shims" $path)
-export PATH
+# .zprofile is login-shell only. Do not duplicate the PATH list here: `.zshenv`
+# owns it so non-login shells used by agents and scripts get the same baseline.
+# macOS may run /etc/zprofile/path_helper after `.zshenv`, so re-assert the
+# shared ordering for login shells if the helper function is available.
+(( $+functions[_dotfiles_core_path] )) && _dotfiles_core_path
 
 # if [[ $OSTYPE == darwin* ]]; then
 #   if [[ "$TERM_PROGRAM" == "ghostty" ]]; then

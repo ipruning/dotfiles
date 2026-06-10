@@ -8,14 +8,27 @@ fi
 typeset -U path
 typeset -U fpath
 
-if [[ $OSTYPE == darwin* ]]; then
-  export HOMEBREW_PREFIX="/opt/homebrew";
-  export HOMEBREW_CELLAR="/opt/homebrew/Cellar";
-  export HOMEBREW_REPOSITORY="/opt/homebrew";
-  fpath[1,0]="/opt/homebrew/share/zsh/site-functions";
-  eval "$(/usr/bin/env PATH_HELPER_ROOT="/opt/homebrew" /usr/libexec/path_helper -s)"
-  [ -z "${MANPATH-}" ] || export MANPATH=":${MANPATH#:}";
-  export INFOPATH="/opt/homebrew/share/info:${INFOPATH:-}";
+# .zshrc is interactive-only. Base PATH belongs in `.zshenv`; do not call
+# path_helper here because it can reorder PATH after our non-interactive-safe
+# setup. Keep Homebrew metadata and completion paths here for interactive use.
+if [[ ${OSTYPE:-} == darwin* ]]; then
+  if [[ -d /opt/homebrew ]]; then
+    export HOMEBREW_PREFIX="/opt/homebrew"
+    export HOMEBREW_CELLAR="/opt/homebrew/Cellar"
+    export HOMEBREW_REPOSITORY="/opt/homebrew"
+
+    [[ -d /opt/homebrew/share/zsh/site-functions ]] && \
+      fpath=(/opt/homebrew/share/zsh/site-functions $fpath)
+    export INFOPATH="/opt/homebrew/share/info:${INFOPATH:-}"
+  elif [[ -d /usr/local/Homebrew ]]; then
+    export HOMEBREW_PREFIX="/usr/local"
+    export HOMEBREW_CELLAR="/usr/local/Cellar"
+    export HOMEBREW_REPOSITORY="/usr/local/Homebrew"
+
+    [[ -d /usr/local/share/zsh/site-functions ]] && \
+      fpath=(/usr/local/share/zsh/site-functions $fpath)
+    export INFOPATH="/usr/local/share/info:${INFOPATH:-}"
+  fi
 fi
 
 if [[ $OSTYPE == linux* ]]; then

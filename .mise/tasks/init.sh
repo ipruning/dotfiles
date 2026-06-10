@@ -37,6 +37,27 @@ done
 
 # -- Mackup --------------------------------------------------------------------
 
+# Mackup restores `~/.zshenv` from ignored `home/.zshenv` because it contains
+# injected secrets. Generate it from the tracked template before any restore so
+# fresh machines also get the non-interactive PATH bootstrap.
+home_zshenv_generated=0
+
+generate_home_zshenv() {
+  [ "$home_zshenv_generated" = 1 ] && return 0
+
+  if command -v op &>/dev/null && op account list &>/dev/null; then
+    gum spin --title "Injecting ~/.zshenv..." -- \
+      op inject --in-file home/.zshenv.tpl \
+                --out-file home/.zshenv
+    home_zshenv_generated=1
+  elif [ -f home/.zshenv ]; then
+    gum log --level warn "1Password CLI not signed in — keeping existing home/.zshenv"
+    home_zshenv_generated=1
+  else
+    gum log --level warn "1Password CLI not signed in — home/.zshenv was not generated"
+  fi
+}
+
 # `ln -sf` cannot replace a non-empty directory or a regular file at the
 # target path, so explicitly handle each link's existing state.
 # Returns 0 if a *new* link was created (caller decides whether to restore),
@@ -60,6 +81,7 @@ ensure_mackup_link "$PWD/modules/mackup/.mackup"     "$HOME/.mackup"     && newl
 ensure_mackup_link "$PWD/modules/mackup/.mackup.cfg" "$HOME/.mackup.cfg" && newly_linked=1 || true
 
 if [ "$newly_linked" = 1 ]; then
+  generate_home_zshenv
   gum spin --title "Restoring Mackup..." -- uvx mackup restore
 else
   gum log --level info "Mackup already configured"
@@ -68,6 +90,7 @@ fi
 # -- Secrets & sync ------------------------------------------------------------
 
 if op account list &>/dev/null; then
+  generate_home_zshenv
   gum spin --title "Injecting secrets..." -- \
     op inject --in-file modules/zsh/env.private.tpl.zsh \
               --out-file modules/zsh/env.private.zsh

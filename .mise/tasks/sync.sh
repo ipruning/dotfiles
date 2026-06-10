@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#MISE description="Sync plugins, completions, functions, skillshare, and backup package lists"
+#MISE description="Sync plugins, completions, functions, Skillshare, and host inventories"
 
 set -euo pipefail
 
@@ -97,6 +97,9 @@ command -v starship &>/dev/null && { starship init zsh > "$F/_starship.zsh" 2>/d
 command -v atuin    &>/dev/null && { atuin init zsh --disable-up-arrow > "$F/_atuin.zsh" 2>/dev/null || true; }
 
 if command -v mise &>/dev/null; then
+  # Cache full interactive mise activation for `.zshrc` to source quickly.
+  # Non-interactive shells do not use this file; they get the mise shims from
+  # `.zshenv`, which is safe for `zsh -c`, agents, IDEs, and automations.
   env -u __MISE_DIFF \
     -u __MISE_SESSION \
     -u __MISE_ORIG_PATH \
