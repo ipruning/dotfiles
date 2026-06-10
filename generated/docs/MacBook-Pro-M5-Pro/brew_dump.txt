@@ -1,13 +1,14 @@
-tap "boldsoftware/tap"
-tap "charmbracelet/tap"
-tap "cirruslabs/cli"
-tap "entireio/tap"
-tap "longbridge/tap"
-tap "nikitabobko/tap"
-tap "openai/tools"
-tap "psviderski/tap"
-tap "simonbs/brrr-cli", "https://github.com/simonbs/brrr-cli.git"
-tap "steipete/tap"
+tap "boldsoftware/tap", trusted: true
+tap "charmbracelet/tap", trusted: true
+tap "cirruslabs/cli", trusted: true
+tap "entireio/tap", trusted: true
+tap "longbridge/tap", trusted: true
+tap "nikitabobko/tap", trusted: true
+tap "openai/tools", trusted: true
+tap "parallel-web/tap"
+tap "psviderski/tap", trusted: true
+tap "simonbs/brrr-cli", "https://github.com/simonbs/brrr-cli.git", trusted: true
+tap "steipete/tap", trusted: true
 # Browser automation CLI for AI agents
 brew "agent-browser"
 # Code searching, linting, rewriting
@@ -142,12 +143,24 @@ brew "yq"
 brew "zellij"
 # Shell extension to navigate your filesystem faster
 brew "zoxide"
+# A powerful terminal-based AI assistant for developers, providing intelligent coding assistance directly in your terminal.
+brew "charmbracelet/tap/crush"
+# Non-interactive ssh password auth Files
+brew "cirruslabs/cli/sshpass"
+# Run macOS and Linux VMs on Apple Hardware
+brew "cirruslabs/cli/tart"
+# Uncloud CLI
+brew "psviderski/tap/uncloud"
+# Webhook notifications for Claude Code and Codex
+brew "simonbs/brrr-cli/brrr"
 # Command-line ElevenLabs TTS with mac-style flags
 brew "steipete/tap/sag", trusted: true
 # Command-line helper for the 1Password password manager
 cask "1password-cli@beta"
 # Password manager
 cask "1password@beta"
+# AeroSpace is an i3-like tiling window manager for macOS
+cask "nikitabobko/tap/aerospace"
 # Display management tool
 cask "betterdisplay"
 # Ghostty-based terminal with vertical tabs and notifications for AI coding agents
@@ -161,18 +174,28 @@ cask "cursor"
 cask "font-maple-mono-nf-cn"
 # Terminal emulator that uses platform-native UI and GPU acceleration
 cask "ghostty"
+# git-sync — replicate and sync Git repositories
+cask "entireio/tap/git-sync"
 # Keyboard customiser
 cask "karabiner-elements"
 # Customise mouse behavior
 cask "linearmouse"
+# Longbridge Terminal CLI for US and HK stock market data and trading
+cask "longbridge/tap/longbridge-terminal"
 # Smooths scrolling and set mouse scroll directions independently
 cask "mos"
+# The official CLI for the OpenAI API.
+cask "openai/tools/openai"
 # Replacement for Docker Desktop
 cask "orbstack"
+# CLI for the Parallel API - search, extract, research, and enrich data
+cask "parallel-web/tap/parallel-cli", trusted: true
 # Control your tools with a few keystrokes
 cask "raycast"
 # Move and resize windows using keyboard shortcuts or snap areas
 cask "rectangle"
+# A mobile-friendly, web-based, multi-modal coding agent
+cask "boldsoftware/tap/shelley"
 # Rime input method engine
 cask "squirrel-app"
 # Open-source code editor
@@ -221,5 +244,3 @@ go "cmd/gofmt"
 go "golang.org/x/tools/gopls"
 cargo "mdbook-mermaid"
 uv "harness"
-npm "@plannotator/pi-extension"
-npm "pi-subagents"

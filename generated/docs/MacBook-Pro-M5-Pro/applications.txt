@@ -27,6 +27,7 @@ Google Docs
 Google Drive
 Google Sheets
 Google Slides
+Helmor
 Immersive Translate
 iMovie
 Input Source Pro
@@ -44,6 +45,7 @@ MagicPath
 MainStage Creator Studio
 Mos
 Motion Creator Studio
+MyCard
 Numbers
 Numbers Creator Studio
 OrbStack
