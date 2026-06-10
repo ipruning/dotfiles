@@ -11,11 +11,21 @@ dotfiles_generate_home_zshenv() {
   [ "${DOTFILES_HOME_ZSHENV_READY:-0}" = 1 ] && return 0
 
   if dotfiles_has_op_session; then
-    gum spin --title "Injecting ~/.zshenv..." -- \
+    if gum spin --title "Injecting ~/.zshenv..." -- \
       op inject --in-file home/.zshenv.tpl \
                 --out-file home/.zshenv \
-                --force
-    DOTFILES_HOME_ZSHENV_READY=1
+                --force; then
+      DOTFILES_HOME_ZSHENV_READY=1
+      return 0
+    fi
+
+    if [ -f home/.zshenv ]; then
+      gum log --level warn "1Password injection failed — using existing home/.zshenv"
+      DOTFILES_HOME_ZSHENV_READY=1
+      return 0
+    fi
+
+    gum log --level warn "1Password injection failed — home/.zshenv was not generated"
   elif [ -f home/.zshenv ]; then
     gum log --level warn "1Password CLI not signed in — using existing home/.zshenv"
     DOTFILES_HOME_ZSHENV_READY=1
