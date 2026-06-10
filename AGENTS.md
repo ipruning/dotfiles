@@ -4,7 +4,7 @@
 
 - `modules/` is the canonical source of configs, scripts, and templates. Common areas: `modules/bin/`, `modules/zsh/`, `modules/mackup/`, `modules/surfingkeys/`.
 - `home/` is a Mackup snapshot tree (artifact). Avoid hand edits unless you are intentionally changing backup output. Exception: tracked shell bootstrap files under `home/` (`.zprofile`, `.zshrc`, `.zshenv.tpl`) are intentionally edited when changing Mackup-restored shell startup behavior; ignored `home/.zshenv` is generated locally from `home/.zshenv.tpl`.
-- `.mise/tasks/` contains the primary task scripts used for bootstrap, backup, restore, and sync.
+- `.mise/tasks/` contains primary task entrypoint scripts; `.mise/scripts/` contains helper implementations used by TOML-defined tasks.
 - `generated/` holds regenerated outputs (bin/completions/functions/plugins/docs). Safe to delete when regeneration is available.
   - `generated/plugins/` contains third-party ZSH plugins (git-ignored).
   - `generated/docs/<hostname>/` stores host-specific snapshots (brew/apps/extensions).

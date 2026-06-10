@@ -48,13 +48,32 @@ generate_home_zshenv() {
   if command -v op &>/dev/null && op account list &>/dev/null; then
     gum spin --title "Injecting ~/.zshenv..." -- \
       op inject --in-file home/.zshenv.tpl \
-                --out-file home/.zshenv
+                --out-file home/.zshenv \
+                --force
     home_zshenv_generated=1
   elif [ -f home/.zshenv ]; then
     gum log --level warn "1Password CLI not signed in — keeping existing home/.zshenv"
     home_zshenv_generated=1
   else
     gum log --level warn "1Password CLI not signed in — home/.zshenv was not generated"
+  fi
+}
+
+restore_mackup_without_mise_self() {
+  # Do not restore Mackup's `mise` app while this task is running under mise.
+  # Replacing ~/.config/mise/config.toml or mise.lock mid-task can make the
+  # mise task runner report "no exit status" even when Mackup itself succeeds.
+  local cfg status
+  cfg=$(mktemp "$PWD/.mackup-restore.XXXXXX")
+  awk '$0 != "mise" { print }' modules/mackup/.mackup.cfg >"$cfg"
+
+  if gum spin --title "Restoring Mackup..." -- uvx mackup --config-file "$cfg" restore; then
+    rm -f "$cfg"
+    return 0
+  else
+    status=$?
+    rm -f "$cfg"
+    return "$status"
   fi
 }
 
@@ -82,7 +101,7 @@ ensure_mackup_link "$PWD/modules/mackup/.mackup.cfg" "$HOME/.mackup.cfg" && newl
 
 if [ "$newly_linked" = 1 ]; then
   generate_home_zshenv
-  gum spin --title "Restoring Mackup..." -- uvx mackup restore
+  restore_mackup_without_mise_self
 else
   gum log --level info "Mackup already configured"
 fi
@@ -91,14 +110,9 @@ fi
 
 if op account list &>/dev/null; then
   generate_home_zshenv
-  gum spin --title "Injecting secrets..." -- \
-    op inject --in-file modules/zsh/env.private.tpl.zsh \
-              --out-file modules/zsh/env.private.zsh
-  # shellcheck source=/dev/null
-  source modules/zsh/env.private.zsh
   gum spin --title "Syncing completions & plugins..." -- mise run sync
 else
-  gum log --level warn "1Password CLI not signed in — skipping secret injection and sync."
+  gum log --level warn "1Password CLI not signed in — skipping ~/.zshenv generation and sync."
   gum log --level warn "Run 'eval \$(op signin)', then re-run 'mise run init'."
 fi
 
