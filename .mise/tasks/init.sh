@@ -3,21 +3,21 @@
 
 set -euo pipefail
 
-# shellcheck source=.mise/scripts/common.sh
-source "$(dirname "${BASH_SOURCE[0]}")/../scripts/common.sh"
+# shellcheck source=.mise/scripts/task-lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/../scripts/task-lib.sh"
 
-dotfiles_cd_root
-dotfiles_require gum git curl mise
+dotfiles_enter_repo
+dotfiles_require_commands gum git curl mise
 
-# shellcheck source=.mise/scripts/mackup.sh
-source "$(dirname "${BASH_SOURCE[0]}")/../scripts/mackup.sh"
+# shellcheck source=.mise/scripts/mackup-lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/../scripts/mackup-lib.sh"
 
 # -- Core init ----------------------------------------------------------------
 
-dotfiles_run "Updating mise packages..." mise upgrade --bump
+dotfiles_spin "Updating mise packages..." mise upgrade --bump
 find .mise/tasks/ -type f -name '*.sh' -exec chmod +x {} \;
 
-dotfiles_run "Updating Zellij plugins..." bash -c '
+dotfiles_spin "Updating Zellij plugins..." bash -c '
   mkdir -p home/.config/zellij/plugins/
   curl -fsSL -o home/.config/zellij/plugins/zjstatus.wasm \
     https://github.com/dj95/zjstatus/releases/latest/download/zjstatus.wasm
@@ -45,21 +45,21 @@ done
 # -- Mackup --------------------------------------------------------------------
 
 newly_linked=0
-dotfiles_ensure_mackup_link "$PWD/modules/mackup/.mackup"     "$HOME/.mackup"     && newly_linked=1 || true
-dotfiles_ensure_mackup_link "$PWD/modules/mackup/.mackup.cfg" "$HOME/.mackup.cfg" && newly_linked=1 || true
+dotfiles_ensure_mackup_symlink "$PWD/modules/mackup/.mackup"     "$HOME/.mackup"     && newly_linked=1 || true
+dotfiles_ensure_mackup_symlink "$PWD/modules/mackup/.mackup.cfg" "$HOME/.mackup.cfg" && newly_linked=1 || true
 
 if [ "$newly_linked" = 1 ]; then
-  dotfiles_generate_home_zshenv
-  dotfiles_restore_mackup_without_mise_self "Restoring Mackup..."
+  dotfiles_prepare_zshenv
+  dotfiles_mackup_restore_safely "Restoring Mackup..."
 else
   gum log --level info "Mackup already configured"
 fi
 
 # -- Secrets & sync ------------------------------------------------------------
 
-if dotfiles_has_op_session; then
-  dotfiles_generate_home_zshenv
-  dotfiles_run "Syncing completions & plugins..." mise run sync
+if dotfiles_op_signed_in; then
+  dotfiles_prepare_zshenv
+  dotfiles_spin "Syncing completions & plugins..." mise run sync
 else
   gum log --level warn "1Password CLI not signed in — skipping ~/.zshenv generation and sync."
   gum log --level warn "Run 'eval \$(op signin)', then re-run 'mise run init'."
@@ -88,7 +88,7 @@ if [ ${#available[@]} -gt 0 ]; then
     for item in "${optional_clis[@]}"; do
       IFS='|' read -r label _ cmd <<< "$item"
       if [[ "$label" == "$pick" ]]; then
-        dotfiles_run "Installing $label..." bash -c "$cmd"
+        dotfiles_spin "Installing $label..." bash -c "$cmd"
       fi
     done
   done <<< "$selected"

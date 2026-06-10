@@ -3,14 +3,14 @@
 
 set -euo pipefail
 
-# shellcheck source=.mise/scripts/common.sh
-source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
+# shellcheck source=.mise/scripts/task-lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/task-lib.sh"
 
-dotfiles_cd_root
-dotfiles_require gum git
+dotfiles_enter_repo
+dotfiles_require_commands gum git
 
-C="generated/completions"
-F="generated/functions"
+completions_dir="generated/completions"
+functions_dir="generated/functions"
 
 sync_vendor_plugins() {
   gum log --level info "Syncing vendor plugins (git pull)..."
@@ -39,7 +39,7 @@ sync_vendor_plugins() {
       continue
     fi
 
-    dotfiles_run "  Pulling $name..." git -C "$plugin_dir" pull --ff-only \
+    dotfiles_spin "  Pulling $name..." git -C "$plugin_dir" pull --ff-only \
       || gum log --level warn "$name pull failed; continuing"
   done
   shopt -u nullglob
@@ -47,24 +47,24 @@ sync_vendor_plugins() {
 
 sync_shell_completions() {
   gum log --level info "Syncing shell completions..."
-  mkdir -p "$C"
+  mkdir -p "$completions_dir"
 
   if command -v uvx &>/dev/null; then
-    _LLM_COMPLETE=zsh_source uvx llm >"$C/_llm" 2>/dev/null \
+    _LLM_COMPLETE=zsh_source uvx llm >"$completions_dir/_llm" 2>/dev/null \
       || gum log --level warn "llm completion generation failed"
   fi
 
-  dotfiles_write_if_command bootdev "$C/_bootdev" bootdev completion zsh
-  dotfiles_write_if_command ov      "$C/_ov"      ov --completion zsh
-  dotfiles_write_if_command just    "$C/_just"    just --completions zsh
-  dotfiles_write_if_command codex   "$C/_codex"   codex completion zsh
-  dotfiles_write_if_command jj      "$C/_jj"      jj util completion zsh
-  dotfiles_write_if_command linear  "$C/_linear"  linear completions zsh
-  dotfiles_write_if_command sesh    "$C/_sesh"    sesh completion zsh
-  dotfiles_write_if_command op      "$C/_op"      op completion zsh
+  dotfiles_write_if_available bootdev "$completions_dir/_bootdev" bootdev completion zsh
+  dotfiles_write_if_available ov      "$completions_dir/_ov"      ov --completion zsh
+  dotfiles_write_if_available just    "$completions_dir/_just"    just --completions zsh
+  dotfiles_write_if_available codex   "$completions_dir/_codex"   codex completion zsh
+  dotfiles_write_if_available jj      "$completions_dir/_jj"      jj util completion zsh
+  dotfiles_write_if_available linear  "$completions_dir/_linear"  linear completions zsh
+  dotfiles_write_if_available sesh    "$completions_dir/_sesh"    sesh completion zsh
+  dotfiles_write_if_available op      "$completions_dir/_op"      op completion zsh
 
   if command -v try-rs &>/dev/null; then
-    cat >"$C/_try-rs" <<'TRYEOF'
+    cat >"$completions_dir/_try-rs" <<'TRYEOF'
 # try-rs shell wrapper (cd into selected experiment)
 try-rs() {
   for arg in "$@"; do
@@ -98,10 +98,10 @@ TRYEOF
 
 sync_shell_functions() {
   gum log --level info "Syncing shell functions..."
-  mkdir -p "$F"
+  mkdir -p "$functions_dir"
 
-  dotfiles_write_if_command starship "$F/_starship.zsh" starship init zsh
-  dotfiles_write_if_command atuin    "$F/_atuin.zsh"    atuin init zsh --disable-up-arrow
+  dotfiles_write_if_available starship "$functions_dir/_starship.zsh" starship init zsh
+  dotfiles_write_if_available atuin    "$functions_dir/_atuin.zsh"    atuin init zsh --disable-up-arrow
 
   if command -v mise &>/dev/null; then
     # Cache full interactive mise activation for `.zshrc` to source quickly.
@@ -111,14 +111,14 @@ sync_shell_functions() {
       -u __MISE_ORIG_PATH \
       -u MISE_SHELL \
       -u __MISE_ZSH_PRECMD_RUN \
-      mise activate zsh >"$F/_mise.zsh" 2>/dev/null \
+      mise activate zsh >"$functions_dir/_mise.zsh" 2>/dev/null \
       || gum log --level warn "mise activation cache generation failed"
   fi
 }
 
 sync_bat_cache() {
   command -v bat &>/dev/null || return 0
-  dotfiles_run "Building bat cache..." bat cache --build
+  dotfiles_spin "Building bat cache..." bat cache --build
 }
 
 sync_skillshare() {
@@ -128,7 +128,7 @@ sync_skillshare() {
   skillshare sync
 }
 
-host_docs_dir() {
+sync_host_docs_dir() {
   local host
   host="$(hostname -s || true)"
   host="${host:-unknown-host}"
@@ -136,7 +136,7 @@ host_docs_dir() {
   printf 'generated/docs/%s\n' "$host"
 }
 
-list_apps() {
+sync_list_apps() {
   local dir="$1"
   find "$dir" -maxdepth 1 -name '*.app' -print 2>/dev/null \
     | sed -E 's|^.*/||; s|\.app$||' \
@@ -147,7 +147,7 @@ sync_host_inventory() {
   gum log --level info "Backing up installed packages..."
 
   local docs_dir
-  docs_dir="$(host_docs_dir)"
+  docs_dir="$(sync_host_docs_dir)"
   mkdir -p "$docs_dir"
 
   if command -v brew &>/dev/null; then
@@ -165,12 +165,12 @@ sync_host_inventory() {
   fi
 
   if [ -d "/Applications" ]; then
-    list_apps /Applications >"$docs_dir/applications.txt" \
+    sync_list_apps /Applications >"$docs_dir/applications.txt" \
       || gum log --level warn "applications scan failed"
   fi
 
   if [ -d "/Applications/Setapp" ]; then
-    list_apps /Applications/Setapp >"$docs_dir/setapp.txt" \
+    sync_list_apps /Applications/Setapp >"$docs_dir/setapp.txt" \
       || gum log --level warn "setapp scan failed"
   fi
 }

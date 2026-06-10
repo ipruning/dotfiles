@@ -3,11 +3,11 @@
 # Shared helpers for dotfiles mise tasks.
 # Keep this file small: it is sourced by interactive and non-interactive tasks.
 
-dotfiles_cd_root() {
+dotfiles_enter_repo() {
   cd "$(git rev-parse --show-toplevel)" || return
 }
 
-dotfiles_require() {
+dotfiles_require_commands() {
   local missing=() cmd
   for cmd in "$@"; do
     command -v "$cmd" &>/dev/null || missing+=("$cmd")
@@ -23,13 +23,13 @@ dotfiles_require() {
   fi
 }
 
-dotfiles_run() {
+dotfiles_spin() {
   local title="$1"
   shift
   gum spin --title "$title" -- "$@"
 }
 
-dotfiles_confirm_or_force() {
+dotfiles_confirm_force() {
   local usage="$1"
   local prompt="$2"
   shift 2
@@ -54,7 +54,7 @@ dotfiles_confirm_or_force() {
     --unselected.foreground="250" --unselected.background="238"
 }
 
-dotfiles_write_if_command() {
+dotfiles_write_if_available() {
   local cmd="$1" output="$2"
   shift 2
 

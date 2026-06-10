@@ -3,35 +3,35 @@
 
 set -euo pipefail
 
-# shellcheck source=.mise/scripts/common.sh
-source "$(dirname "${BASH_SOURCE[0]}")/../scripts/common.sh"
+# shellcheck source=.mise/scripts/task-lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/../scripts/task-lib.sh"
 
-dotfiles_cd_root
-dotfiles_require gum hyperfine uv zsh
+dotfiles_enter_repo
+dotfiles_require_commands gum hyperfine uv zsh
 
-RUNS="${1:-50}"
-WARMUP="${2:-10}"
+run_count="${1:-50}"
+warmup_count="${2:-10}"
 
-[[ "$RUNS" =~ ^[0-9]+$ ]]   || { gum log --level error "RUNS must be an integer (got: $RUNS)";     exit 1; }
-[[ "$WARMUP" =~ ^[0-9]+$ ]] || { gum log --level error "WARMUP must be an integer (got: $WARMUP)"; exit 1; }
+[[ "$run_count" =~ ^[0-9]+$ ]]    || { gum log --level error "runs must be an integer (got: $run_count)";       exit 1; }
+[[ "$warmup_count" =~ ^[0-9]+$ ]] || { gum log --level error "warmup must be an integer (got: $warmup_count)"; exit 1; }
 [[ $# -le 2 ]] || { gum log --level error "Usage: mise run zsh-profile [runs] [warmup]"; exit 2; }
 
-TRACE_FILE="$(mktemp "${TMPDIR:-/tmp}/zsh_profile.XXXXXX")"
-cleanup() { rm -f "$TRACE_FILE"; }
+trace_file="$(mktemp "${TMPDIR:-/tmp}/zsh_profile.XXXXXX")"
+cleanup() { rm -f "$trace_file"; }
 trap cleanup EXIT
 
-gum log --level info "Benchmarking zsh startup ($RUNS runs, $WARMUP warmup)..."
-hyperfine "zsh -i -c exit" --warmup "$WARMUP" --runs "$RUNS"
+gum log --level info "Benchmarking zsh startup ($run_count runs, $warmup_count warmup)..."
+hyperfine "zsh -i -c exit" --warmup "$warmup_count" --runs "$run_count"
 
 gum log --level info "Generating trace profile (interactive shell)..."
-ZSH_TRACE_STARTUP=1 ZSH_TRACE_FILE="$TRACE_FILE" zsh -i -c exit 2>&1
+ZSH_TRACE_STARTUP=1 ZSH_TRACE_FILE="$trace_file" zsh -i -c exit 2>&1
 
-if [[ ! -f "$TRACE_FILE" ]]; then
-  gum log --level error "No trace file found at $TRACE_FILE. Ensure ~/.zshrc has the ZSH_TRACE_STARTUP hook."
+if [[ ! -f "$trace_file" ]]; then
+  gum log --level error "No trace file found at $trace_file. Ensure ~/.zshrc has the ZSH_TRACE_STARTUP hook."
   exit 1
 fi
 
-uv run --no-project --python 3.14 python - "$TRACE_FILE" <<'PYEOF'
+uv run --no-project --python 3.14 python - "$trace_file" <<'PYEOF'
 import re
 import sys
 from collections import defaultdict
