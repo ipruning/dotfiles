@@ -244,7 +244,7 @@ They are snapshot artifacts (brew/apps/gh extensions, etc.), not canonical confi
 
 ## Agents and skills
 
-This repo is no longer the source of truth for global harness prompt files such as `~/.codex/AGENTS.md`, `~/.claude/CLAUDE.md`, or `~/.config/amp/AGENTS.md`. Those files live in the Skillshare source repo under `extras/{codex,claude,amp}/` and are distributed with `skillshare sync extras`.
+This repo is no longer the source of truth for global harness prompt files such as `~/.codex/AGENTS.md`, `~/.claude/CLAUDE.md`, or `~/.config/amp/AGENTS.md`. Those files live in the Skillshare source repo under `extras/{codex,claude,amp}/` and are distributed with `skillshare sync extras`. The Skillshare routing config itself (`~/.config/skillshare/config.yaml`) is Mackup-managed here so restored machines know where to sync from.
 
 Dotfiles keeps only the bootstrap hooks that call Skillshare during `restore` and `sync`. See **`AGENTS.md`** for the local operating contract.
 

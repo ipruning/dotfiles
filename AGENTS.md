@@ -24,6 +24,7 @@
 - This repo owns only the bootstrap hooks for Skillshare during `restore` and `sync`; it is not the source of truth for global harness prompt content.
 - Do not reintroduce `modules/agents/`, `mise run agents`, or prompt snapshots under `home/.codex/`, `home/.claude/`, or `home/.config/amp/`.
 - Mackup should not manage `~/.codex/AGENTS.md`, `~/.claude/CLAUDE.md`, or `~/.config/amp/AGENTS.md`; keep `modules/mackup/.mackup/agents.cfg` limited to independent agent configs such as `.pi/agent/AGENTS.md`.
+- Mackup should manage Skillshare's routing config (`~/.config/skillshare/config.yaml`) via `modules/mackup/.mackup/skillshare.cfg`, so a restored machine knows where the skills/extras source repo and prompt targets are.
 - When changing Skillshare prompt routing, update the Skillshare source repo and the active Skillshare config together, then verify from this repo with `skillshare extras list --json` and `skillshare sync --all --dry-run --json`.
 - For extras that target tool root directories containing unrelated files (for example `~/.codex`, `~/.claude`, or `~/.config/amp`), prefer `mode: copy`; `merge` may prune unrelated Skillshare-managed symlinks in the same tree.
 

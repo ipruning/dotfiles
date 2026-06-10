@@ -1,0 +1,29 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/runkids/skillshare/main/schemas/config.schema.json
+source: /Users/alex/Developer/ipruning/skills
+extras_source: /Users/alex/Developer/ipruning/skills/extras
+mode: merge
+targets:
+  amp:
+    skills:
+      path: /Users/alex/.config/agents/skills
+  codex:
+    skills:
+      path: /Users/alex/.codex/skills/
+ignore:
+- '**/.DS_Store'
+- '**/.git/**'
+audit:
+  block_threshold: CRITICAL
+extras:
+- name: amp
+  targets:
+  - path: /Users/alex/.config/amp
+    mode: copy
+- name: codex
+  targets:
+  - path: /Users/alex/.codex
+    mode: copy
+- name: claude
+  targets:
+  - path: /Users/alex/.claude
+    mode: copy
