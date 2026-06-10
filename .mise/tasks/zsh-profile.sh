@@ -3,13 +3,20 @@
 
 set -euo pipefail
 
+# shellcheck source=.mise/scripts/common.sh
+source "$(dirname "${BASH_SOURCE[0]}")/../scripts/common.sh"
+
+dotfiles_cd_root
+dotfiles_require gum hyperfine uv zsh
+
 RUNS="${1:-50}"
 WARMUP="${2:-10}"
 
 [[ "$RUNS" =~ ^[0-9]+$ ]]   || { gum log --level error "RUNS must be an integer (got: $RUNS)";     exit 1; }
 [[ "$WARMUP" =~ ^[0-9]+$ ]] || { gum log --level error "WARMUP must be an integer (got: $WARMUP)"; exit 1; }
+[[ $# -le 2 ]] || { gum log --level error "Usage: mise run zsh-profile [runs] [warmup]"; exit 2; }
 
-TRACE_FILE="/tmp/zsh_profile_$$.log"
+TRACE_FILE="$(mktemp "${TMPDIR:-/tmp}/zsh_profile.XXXXXX")"
 cleanup() { rm -f "$TRACE_FILE"; }
 trap cleanup EXIT
 
@@ -24,7 +31,7 @@ if [[ ! -f "$TRACE_FILE" ]]; then
   exit 1
 fi
 
-python3 - "$TRACE_FILE" << 'PYEOF'
+uv run --no-project --python 3.14 python - "$TRACE_FILE" <<'PYEOF'
 import re
 import sys
 from collections import defaultdict
@@ -60,7 +67,7 @@ for dur, cmd in sorted(durations, key=lambda x: -x[0])[:20]:
     print(f"{color}{dur:8.2f} ms\033[0m | {cmd[:70]}")
 
 keywords = [
-    'brew', 'mise', 'atuin', 'starship', 'zoxide', 'compinit', 'zcompdump',
+    'mise', 'brew', 'atuin', 'starship', 'zoxide', 'compinit', 'zcompdump',
     'fzf', 'ftb', 'fast-syntax', 'FAST_HIGHLIGHT', 'autosuggestions'
 ]
 

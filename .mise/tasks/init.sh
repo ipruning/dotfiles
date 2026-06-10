@@ -3,14 +3,21 @@
 
 set -euo pipefail
 
-cd "$(git rev-parse --show-toplevel)"
+# shellcheck source=.mise/scripts/common.sh
+source "$(dirname "${BASH_SOURCE[0]}")/../scripts/common.sh"
+
+dotfiles_cd_root
+dotfiles_require gum git curl mise
+
+# shellcheck source=.mise/scripts/mackup.sh
+source "$(dirname "${BASH_SOURCE[0]}")/../scripts/mackup.sh"
 
 # -- Core init ----------------------------------------------------------------
 
-gum spin --title "Updating mise packages..." -- mise upgrade --bump
+dotfiles_run "Updating mise packages..." mise upgrade --bump
 find .mise/tasks/ -type f -name '*.sh' -exec chmod +x {} \;
 
-gum spin --title "Updating Zellij plugins..." -- bash -c '
+dotfiles_run "Updating Zellij plugins..." bash -c '
   mkdir -p home/.config/zellij/plugins/
   curl -fsSL -o home/.config/zellij/plugins/zjstatus.wasm \
     https://github.com/dj95/zjstatus/releases/latest/download/zjstatus.wasm
@@ -37,80 +44,22 @@ done
 
 # -- Mackup --------------------------------------------------------------------
 
-# Mackup restores `~/.zshenv` from ignored `home/.zshenv` because it contains
-# injected secrets. Generate it from the tracked template before any restore so
-# fresh machines also get the non-interactive PATH bootstrap.
-home_zshenv_generated=0
-
-generate_home_zshenv() {
-  [ "$home_zshenv_generated" = 1 ] && return 0
-
-  if command -v op &>/dev/null && op account list &>/dev/null; then
-    gum spin --title "Injecting ~/.zshenv..." -- \
-      op inject --in-file home/.zshenv.tpl \
-                --out-file home/.zshenv \
-                --force
-    home_zshenv_generated=1
-  elif [ -f home/.zshenv ]; then
-    gum log --level warn "1Password CLI not signed in — keeping existing home/.zshenv"
-    home_zshenv_generated=1
-  else
-    gum log --level warn "1Password CLI not signed in — home/.zshenv was not generated"
-  fi
-}
-
-restore_mackup_without_mise_self() {
-  # Do not restore Mackup's `mise` app while this task is running under mise.
-  # Replacing ~/.config/mise/config.toml or mise.lock mid-task can make the
-  # mise task runner report "no exit status" even when Mackup itself succeeds.
-  local cfg status
-  cfg=$(mktemp "$PWD/.mackup-restore.XXXXXX")
-  awk '$0 != "mise" { print }' modules/mackup/.mackup.cfg >"$cfg"
-
-  if gum spin --title "Restoring Mackup..." -- uvx mackup --config-file "$cfg" restore; then
-    rm -f "$cfg"
-    return 0
-  else
-    status=$?
-    rm -f "$cfg"
-    return "$status"
-  fi
-}
-
-# `ln -sf` cannot replace a non-empty directory or a regular file at the
-# target path, so explicitly handle each link's existing state.
-# Returns 0 if a *new* link was created (caller decides whether to restore),
-# 1 if the link was already correct or could not be created safely.
-ensure_mackup_link() {
-  local target="$1" link="$2"
-  if [ -L "$link" ]; then
-    # Already a symlink — keep as-is to avoid unnecessary churn.
-    return 1
-  fi
-  if [ -e "$link" ]; then
-    gum log --level warn "$link exists and is not a symlink; skipping (move it aside to fix)"
-    return 1
-  fi
-  ln -s "$target" "$link"
-  return 0
-}
-
 newly_linked=0
-ensure_mackup_link "$PWD/modules/mackup/.mackup"     "$HOME/.mackup"     && newly_linked=1 || true
-ensure_mackup_link "$PWD/modules/mackup/.mackup.cfg" "$HOME/.mackup.cfg" && newly_linked=1 || true
+dotfiles_ensure_mackup_link "$PWD/modules/mackup/.mackup"     "$HOME/.mackup"     && newly_linked=1 || true
+dotfiles_ensure_mackup_link "$PWD/modules/mackup/.mackup.cfg" "$HOME/.mackup.cfg" && newly_linked=1 || true
 
 if [ "$newly_linked" = 1 ]; then
-  generate_home_zshenv
-  restore_mackup_without_mise_self
+  dotfiles_generate_home_zshenv
+  dotfiles_restore_mackup_without_mise_self "Restoring Mackup..."
 else
   gum log --level info "Mackup already configured"
 fi
 
 # -- Secrets & sync ------------------------------------------------------------
 
-if op account list &>/dev/null; then
-  generate_home_zshenv
-  gum spin --title "Syncing completions & plugins..." -- mise run sync
+if dotfiles_has_op_session; then
+  dotfiles_generate_home_zshenv
+  dotfiles_run "Syncing completions & plugins..." mise run sync
 else
   gum log --level warn "1Password CLI not signed in — skipping ~/.zshenv generation and sync."
   gum log --level warn "Run 'eval \$(op signin)', then re-run 'mise run init'."
@@ -139,7 +88,7 @@ if [ ${#available[@]} -gt 0 ]; then
     for item in "${optional_clis[@]}"; do
       IFS='|' read -r label _ cmd <<< "$item"
       if [[ "$label" == "$pick" ]]; then
-        gum spin --title "Installing $label..." -- bash -c "$cmd"
+        dotfiles_run "Installing $label..." bash -c "$cmd"
       fi
     done
   done <<< "$selected"

@@ -3,19 +3,20 @@
 
 set -euo pipefail
 
-cd "$(git rev-parse --show-toplevel)"
+# shellcheck source=.mise/scripts/common.sh
+source "$(dirname "${BASH_SOURCE[0]}")/../scripts/common.sh"
 
-if [[ "${1:-}" == "--force" ]]; then
-  gum spin --title "Running mackup backup..." -- uvx mackup backup --force
-  exit 0
-fi
+dotfiles_cd_root
+dotfiles_require gum uvx
 
-if gum confirm "Are you sure you want to run mackup backup (force)?" \
-  --prompt.foreground="15" \
-  --selected.foreground="0" --selected.background="2" \
-  --unselected.foreground="250" --unselected.background="238"; then
-  gum spin --title "Running mackup backup..." -- uvx mackup backup --force
+# shellcheck source=.mise/scripts/mackup.sh
+source "$(dirname "${BASH_SOURCE[0]}")/../scripts/mackup.sh"
+
+if dotfiles_confirm_or_force "mise run backup [--force]" \
+  "Backup current dotfiles into the repository now?" "$@"; then
+  dotfiles_mackup_backup
 else
+  status=$?
+  [ "$status" -eq 1 ] || exit "$status"
   gum log --level info "Cancelled."
-  exit 0
 fi

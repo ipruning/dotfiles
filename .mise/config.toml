@@ -4,3 +4,7 @@ _.python.venv = { path = ".venv" }
 [tasks.restore]
 description = "Restore your dotfiles"
 run = 'bash .mise/scripts/restore.sh "$@"'
+
+[tasks.sync]
+description = "Sync plugins, completions, functions, Skillshare, and host inventories"
+run = 'bash .mise/scripts/sync.sh "$@"'

@@ -89,9 +89,10 @@ env | rg '^LONGPORT_' | cut -d= -f1
 
 ### Run tasks (preferred)
 
-Most task entrypoints live in `.mise/tasks/*.sh`. The `restore` task is defined
-in `.mise/config.toml` and runs `.mise/scripts/restore.sh` via `bash` so `mise`
-does not directly exec a script that restores Mackup-managed mise config.
+Most tasks are exposed through `mise run ...`. Simple tasks may live directly in
+`.mise/tasks/*.sh`; longer or environment-sensitive tasks are defined in
+`.mise/config.toml` and run `.mise/scripts/*.sh` via `bash` so `mise` does not
+directly exec scripts that mutate shell, Mackup, or mise-related state.
 
 List tasks:
 
@@ -115,7 +116,7 @@ If you do not use `mise`, you can also run the scripts directly:
 ./.mise/tasks/init.sh
 ./.mise/scripts/restore.sh
 ./.mise/tasks/backup.sh
-./.mise/tasks/sync.sh
+./.mise/scripts/sync.sh
 ./.mise/tasks/zsh-profile.sh
 ```
 
@@ -152,8 +153,8 @@ These are the invariants that keep the repo understandable over time:
 
 | Path                        | Meaning                                                                                               | Lifecycle                   |
 | --------------------------- | ----------------------------------------------------------------------------------------------------- | --------------------------- |
-| `.mise/tasks/`              | Primary task entrypoint scripts                                                                       | Source (hand-edited)        |
-| `.mise/scripts/`            | Helper implementations used by TOML-defined tasks                                                     | Source (hand-edited)        |
+| `.mise/tasks/`              | Simple task entrypoint scripts                                                                        | Source (hand-edited)        |
+| `.mise/scripts/`            | Shared helpers and bash implementations for TOML-defined tasks                                         | Source (hand-edited)        |
 | `modules/`                  | **Canonical** meta-config modules, reusable configs, non-dotfile configs, helper scripts              | Source (hand-edited)        |
 | `home/`                     | **Mackup snapshot tree** for dotfiles + app configs (copied by Mackup)                                | Artifact (managed by tools) |
 | `generated/`                | Generated outputs; `docs/` tracked, others (`bin/`, `completions/`, `functions/`, `plugins/`) ignored | Artifact (mixed)            |
