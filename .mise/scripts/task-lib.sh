@@ -23,6 +23,35 @@ dotfiles_require_commands() {
   fi
 }
 
+dotfiles_run_with_timeout() {
+  local timeout_seconds="$1"
+  shift
+
+  "$@" &
+  local command_pid=$!
+
+  (
+    sleep "$timeout_seconds"
+    if kill -0 "$command_pid" 2>/dev/null; then
+      kill "$command_pid" 2>/dev/null || true
+      sleep 1
+      kill -9 "$command_pid" 2>/dev/null || true
+    fi
+  ) &
+  local timer_pid=$!
+
+  local exit_status=0
+  if wait "$command_pid" 2>/dev/null; then
+    exit_status=0
+  else
+    exit_status=$?
+  fi
+
+  kill "$timer_pid" 2>/dev/null || true
+  wait "$timer_pid" 2>/dev/null || true
+  return "$exit_status"
+}
+
 dotfiles_spin() {
   local title="$1"
   shift
@@ -59,5 +88,6 @@ dotfiles_write_if_available() {
   shift 2
 
   command -v "$cmd" &>/dev/null || return 0
-  "$@" >"$output" 2>/dev/null || gum log --level warn "$cmd generation failed: $output"
+  dotfiles_run_with_timeout "${DOTFILES_OPTIONAL_COMMAND_TIMEOUT:-15}" "$@" >"$output" 2>/dev/null \
+    || gum log --level warn "$cmd generation failed: $output"
 }

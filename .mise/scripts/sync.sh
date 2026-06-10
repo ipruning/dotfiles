@@ -39,7 +39,8 @@ sync_vendor_plugins() {
       continue
     fi
 
-    dotfiles_spin "  Pulling $name..." git -C "$plugin_dir" pull --ff-only \
+    gum log --level info "  Pulling $name..."
+    dotfiles_run_with_timeout "${DOTFILES_GIT_PULL_TIMEOUT:-30}" git -C "$plugin_dir" pull --ff-only \
       || gum log --level warn "$name pull failed; continuing"
   done
   shopt -u nullglob
@@ -50,7 +51,8 @@ sync_shell_completions() {
   mkdir -p "$completions_dir"
 
   if command -v uvx &>/dev/null; then
-    _LLM_COMPLETE=zsh_source uvx llm >"$completions_dir/_llm" 2>/dev/null \
+    dotfiles_run_with_timeout "${DOTFILES_OPTIONAL_COMMAND_TIMEOUT:-15}" \
+      env _LLM_COMPLETE=zsh_source uvx llm >"$completions_dir/_llm" 2>/dev/null \
       || gum log --level warn "llm completion generation failed"
   fi
 
@@ -106,26 +108,31 @@ sync_shell_functions() {
   if command -v mise &>/dev/null; then
     # Cache full interactive mise activation for `.zshrc` to source quickly.
     # Non-interactive shells use mise shims from `.zshenv` instead.
-    env -u __MISE_DIFF \
-      -u __MISE_SESSION \
-      -u __MISE_ORIG_PATH \
-      -u MISE_SHELL \
-      -u __MISE_ZSH_PRECMD_RUN \
-      mise activate zsh >"$functions_dir/_mise.zsh" 2>/dev/null \
+    dotfiles_run_with_timeout "${DOTFILES_OPTIONAL_COMMAND_TIMEOUT:-15}" \
+      env -u __MISE_DIFF \
+        -u __MISE_SESSION \
+        -u __MISE_ORIG_PATH \
+        -u MISE_SHELL \
+        -u __MISE_ZSH_PRECMD_RUN \
+        mise activate zsh >"$functions_dir/_mise.zsh" 2>/dev/null \
       || gum log --level warn "mise activation cache generation failed"
   fi
 }
 
 sync_bat_cache() {
   command -v bat &>/dev/null || return 0
-  dotfiles_spin "Building bat cache..." bat cache --build
+  gum log --level info "Building bat cache..."
+  dotfiles_run_with_timeout "${DOTFILES_BAT_CACHE_TIMEOUT:-30}" bat cache --build \
+    || gum log --level warn "bat cache build failed"
 }
 
 sync_skillshare() {
   command -v skillshare &>/dev/null || return 0
   gum log --level info "Syncing Skillshare skills..."
-  skillshare update --all
-  skillshare sync
+  dotfiles_run_with_timeout "${DOTFILES_SKILLSHARE_TIMEOUT:-120}" skillshare update --all \
+    || gum log --level warn "skillshare update failed"
+  dotfiles_run_with_timeout "${DOTFILES_SKILLSHARE_TIMEOUT:-120}" skillshare sync \
+    || gum log --level warn "skillshare sync failed"
 }
 
 sync_host_docs_dir() {
@@ -151,16 +158,20 @@ sync_host_inventory() {
   mkdir -p "$docs_dir"
 
   if command -v brew &>/dev/null; then
-    brew bundle dump --file="$docs_dir/brew_dump.txt" --force \
+    dotfiles_run_with_timeout "${DOTFILES_INVENTORY_TIMEOUT:-120}" \
+      brew bundle dump --file="$docs_dir/brew_dump.txt" --force \
       || gum log --level warn "brew bundle dump failed"
-    brew leaves | LC_ALL=en_US.UTF-8 sort >"$docs_dir/brew_leaves.txt" \
+    dotfiles_run_with_timeout "${DOTFILES_INVENTORY_TIMEOUT:-120}" \
+      brew leaves | LC_ALL=en_US.UTF-8 sort >"$docs_dir/brew_leaves.txt" \
       || gum log --level warn "brew leaves failed"
-    brew list --installed-on-request | LC_ALL=en_US.UTF-8 sort >"$docs_dir/brew_installed.txt" \
+    dotfiles_run_with_timeout "${DOTFILES_INVENTORY_TIMEOUT:-120}" \
+      brew list --installed-on-request | LC_ALL=en_US.UTF-8 sort >"$docs_dir/brew_installed.txt" \
       || gum log --level warn "brew list failed"
   fi
 
   if command -v gh &>/dev/null; then
-    gh extension list | awk '{print $3}' | LC_ALL=en_US.UTF-8 sort >"$docs_dir/gh_extensions.txt" \
+    dotfiles_run_with_timeout "${DOTFILES_INVENTORY_TIMEOUT:-120}" \
+      gh extension list | awk '{print $3}' | LC_ALL=en_US.UTF-8 sort >"$docs_dir/gh_extensions.txt" \
       || gum log --level warn "gh extension list failed"
   fi
 

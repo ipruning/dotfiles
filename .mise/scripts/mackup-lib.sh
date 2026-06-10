@@ -1,17 +1,26 @@
 #!/usr/bin/env bash
 
 # Shared Mackup helpers for mise tasks.
-# Assumes callers have already `cd`ed to the repository root.
+# Assumes callers have already sourced task-lib.sh and `cd`ed to the repository root.
 
 dotfiles_op_signed_in() {
-  command -v op &>/dev/null && op account list &>/dev/null
+  command -v op &>/dev/null || return 1
+
+  local accounts probe_timeout
+  probe_timeout="${DOTFILES_OP_PROBE_TIMEOUT:-2}"
+  accounts=$(dotfiles_run_with_timeout "$probe_timeout" op account list --format json 2>/dev/null) || return 1
+  [[ "$accounts" == *'"email"'* || "$accounts" == *'"url"'* ]] || return 1
+
+  dotfiles_run_with_timeout "$probe_timeout" op whoami >/dev/null 2>&1
 }
 
 dotfiles_prepare_private_zshenv() {
   [ "${DOTFILES_PRIVATE_ZSHENV_READY:-0}" = 1 ] && return 0
 
   if dotfiles_op_signed_in; then
-    if gum spin --title "Injecting ~/.zshenv.private.zsh..." -- \
+    local inject_timeout="${DOTFILES_OP_INJECT_TIMEOUT:-20}"
+    gum log --level info "Injecting ~/.zshenv.private.zsh..."
+    if dotfiles_run_with_timeout "$inject_timeout" \
       op inject --in-file home/.zshenv.private.tpl.zsh \
                 --out-file home/.zshenv.private.zsh \
                 --force; then
@@ -45,7 +54,9 @@ dotfiles_mackup_restore_safely() {
   mackup_config=$(mktemp "$PWD/.mackup-restore.XXXXXX")
   awk '$0 != "mise" { print }' modules/mackup/.mackup.cfg >"$mackup_config"
 
-  if gum spin --title "$title" -- uvx mackup --config-file "$mackup_config" restore "$@"; then
+  gum log --level info "$title"
+  if dotfiles_run_with_timeout "${DOTFILES_MACKUP_TIMEOUT:-300}" \
+    uvx mackup --config-file "$mackup_config" restore "$@"; then
     rm -f "$mackup_config"
     return 0
   else
@@ -56,7 +67,8 @@ dotfiles_mackup_restore_safely() {
 }
 
 dotfiles_mackup_backup_force() {
-  dotfiles_spin "Running mackup backup..." uvx mackup backup --force
+  gum log --level info "Running mackup backup..."
+  dotfiles_run_with_timeout "${DOTFILES_MACKUP_TIMEOUT:-300}" uvx mackup backup --force
 }
 
 dotfiles_ensure_mackup_symlink() {

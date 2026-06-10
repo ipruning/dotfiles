@@ -16,7 +16,11 @@ _exe_hosts() {
   fi
   if (( age > ttl )); then
     mkdir -p "$HOME/.cache"
-    ssh exe.dev ls --json 2>/dev/null | jq -r '.vms[].ssh_dest' > "$cache" 2>/dev/null
+    local tmp="${cache}.$$"
+    ssh -o BatchMode=yes -o ConnectTimeout=2 -o ServerAliveInterval=2 -o ServerAliveCountMax=1 \
+      exe.dev ls --json 2>/dev/null | jq -r '.vms[].ssh_dest' > "$tmp" 2>/dev/null \
+      && [[ -s "$tmp" ]] && mv "$tmp" "$cache"
+    rm -f "$tmp"
   fi
   [[ -s "$cache" ]] && reply=(${(f)"$(<"$cache")"})
 }
