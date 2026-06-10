@@ -29,6 +29,6 @@ _dotfiles_core_path() {
 _dotfiles_core_path
 
 # Optional machine/private environment. This file is generated from
-# `home/.zshenv.private.tpl` with `op inject` when 1Password is available.
+# `home/.zshenv.private.tpl.zsh` with `op inject` when 1Password is available.
 # Missing private env must not break PATH bootstrap or non-interactive shells.
-[[ -r "$HOME/.zshenv.private" ]] && source "$HOME/.zshenv.private"
+[[ -r "$HOME/.zshenv.private.zsh" ]] && source "$HOME/.zshenv.private.zsh"

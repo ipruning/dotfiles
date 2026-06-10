@@ -3,7 +3,7 @@
 ## Project Structure & Module Organization
 
 - `modules/` is the canonical source of configs, scripts, and templates. Common areas: `modules/bin/`, `modules/zsh/`, `modules/mackup/`, `modules/surfingkeys/`.
-- `home/` is a Mackup snapshot tree (artifact). Avoid hand edits unless you are intentionally changing backup output. Exception: tracked shell bootstrap files under `home/` (`.zshenv`, `.zprofile`, `.zshrc`) are intentionally edited when changing Mackup-restored shell startup behavior; ignored `home/.zshenv.private` is generated locally from `home/.zshenv.private.tpl` when 1Password is available.
+- `home/` is a Mackup snapshot tree (artifact). Avoid hand edits unless you are intentionally changing backup output. Exception: tracked shell bootstrap files under `home/` (`.zshenv`, `.zprofile`, `.zshrc`) are intentionally edited when changing Mackup-restored shell startup behavior; ignored `home/.zshenv.private.zsh` is generated locally from `home/.zshenv.private.tpl.zsh` when 1Password is available.
 - `.mise/tasks/` contains simple task entrypoint scripts; `.mise/scripts/` contains shared helpers and bash implementations used by TOML-defined tasks.
 - `generated/` holds regenerated outputs (bin/completions/functions/plugins/docs). Safe to delete when regeneration is available.
   - `generated/plugins/` contains third-party ZSH plugins (git-ignored).
@@ -50,4 +50,4 @@
 
 ## Security & Configuration Tips
 
-- Never commit secrets. Use templates and `*.private.*` files. Tracked files under `home/` must not contain secrets; ignored materialized files such as `home/.zshenv.private` may be generated locally from templates.
+- Never commit secrets. Use templates and `*.private.*` files. Tracked files under `home/` must not contain secrets; ignored materialized files such as `home/.zshenv.private.zsh` may be generated locally from templates.

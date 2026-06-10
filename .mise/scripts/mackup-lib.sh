@@ -11,23 +11,23 @@ dotfiles_prepare_private_zshenv() {
   [ "${DOTFILES_PRIVATE_ZSHENV_READY:-0}" = 1 ] && return 0
 
   if dotfiles_op_signed_in; then
-    if gum spin --title "Injecting ~/.zshenv.private..." -- \
-      op inject --in-file home/.zshenv.private.tpl \
-                --out-file home/.zshenv.private \
+    if gum spin --title "Injecting ~/.zshenv.private.zsh..." -- \
+      op inject --in-file home/.zshenv.private.tpl.zsh \
+                --out-file home/.zshenv.private.zsh \
                 --force; then
       DOTFILES_PRIVATE_ZSHENV_READY=1
       return 0
     fi
 
-    if [ -f home/.zshenv.private ]; then
-      gum log --level warn "1Password injection failed — using existing home/.zshenv.private"
+    if [ -f home/.zshenv.private.zsh ]; then
+      gum log --level warn "1Password injection failed — using existing home/.zshenv.private.zsh"
       DOTFILES_PRIVATE_ZSHENV_READY=1
       return 0
     fi
 
     gum log --level warn "1Password injection failed — private zsh env was not generated"
-  elif [ -f home/.zshenv.private ]; then
-    gum log --level warn "1Password CLI not signed in — using existing home/.zshenv.private"
+  elif [ -f home/.zshenv.private.zsh ]; then
+    gum log --level warn "1Password CLI not signed in — using existing home/.zshenv.private.zsh"
     DOTFILES_PRIVATE_ZSHENV_READY=1
   else
     gum log --level warn "1Password CLI not signed in — private zsh env was not generated"
