@@ -57,13 +57,8 @@ fi
 
 # -- Secrets & sync ------------------------------------------------------------
 
-if dotfiles_op_signed_in; then
-  dotfiles_prepare_zshenv
-  dotfiles_spin "Syncing completions & plugins..." mise run sync
-else
-  gum log --level warn "1Password CLI not signed in — skipping ~/.zshenv generation and sync."
-  gum log --level warn "Run 'eval \$(op signin)', then re-run 'mise run init'."
-fi
+dotfiles_prepare_zshenv
+dotfiles_spin "Syncing completions & plugins..." mise run sync
 
 # -- Optional CLIs -------------------------------------------------------------
 
