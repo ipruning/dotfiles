@@ -51,8 +51,10 @@ Numbers Creator Studio
 OrbStack
 Pages
 Pages Creator Studio
+Pencil
 Pixelmator Pro Creator Studio
 qBittorrent
+QQ
 Quark
 Raycast
 Raycast Beta
