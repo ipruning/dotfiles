@@ -3,21 +3,10 @@
 # Shared Mackup helpers for mise tasks.
 # Assumes callers have already sourced task-lib.sh and `cd`ed to the repository root.
 
-dotfiles_op_signed_in() {
-  command -v op &>/dev/null || return 1
-
-  local accounts probe_timeout
-  probe_timeout="${DOTFILES_OP_PROBE_TIMEOUT:-2}"
-  accounts=$(dotfiles_run_with_timeout "$probe_timeout" op account list --format json 2>/dev/null) || return 1
-  [[ "$accounts" == *'"email"'* || "$accounts" == *'"url"'* ]] || return 1
-
-  dotfiles_run_with_timeout "$probe_timeout" op whoami >/dev/null 2>&1
-}
-
 dotfiles_prepare_private_zshenv() {
   [ "${DOTFILES_PRIVATE_ZSHENV_READY:-0}" = 1 ] && return 0
 
-  if dotfiles_op_signed_in; then
+  if command -v op &>/dev/null; then
     local inject_timeout="${DOTFILES_OP_INJECT_TIMEOUT:-20}"
     gum log --level info "Injecting ~/.zshenv.private.zsh..."
     if dotfiles_run_with_timeout "$inject_timeout" \
@@ -36,10 +25,10 @@ dotfiles_prepare_private_zshenv() {
 
     gum log --level warn "1Password injection failed — private zsh env was not generated"
   elif [ -f home/.zshenv.private.zsh ]; then
-    gum log --level warn "1Password CLI not signed in — using existing home/.zshenv.private.zsh"
+    gum log --level warn "1Password CLI not found — using existing home/.zshenv.private.zsh"
     DOTFILES_PRIVATE_ZSHENV_READY=1
   else
-    gum log --level warn "1Password CLI not signed in — private zsh env was not generated"
+    gum log --level warn "1Password CLI not found — private zsh env was not generated"
   fi
 }
 
