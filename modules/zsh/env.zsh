@@ -34,6 +34,126 @@ bindkey ' ' magic-space
 WORDCHARS=${WORDCHARS//.}
 WORDCHARS=${WORDCHARS//\/}
 WORDCHARS=${WORDCHARS//=}
+WORDCHARS=${WORDCHARS//&}
+
+autoload -Uz backward-word-match forward-word-match
+zstyle ':zle:*' word-style normal
+zstyle ':zle:*' word-chars "$WORDCHARS"
+
+zle_shell_word_boundaries=(
+  '\|' shell-token \
+  '\|\|' shell-token \
+  '\|&' shell-token \
+  '\&' shell-token \
+  '&&' shell-token \
+  '\;' shell-token \
+  '\(' shell-token \
+  '\)' shell-token \
+  '<' shell-token \
+  '<<' shell-token \
+  '<<<' shell-token \
+  '<&' shell-token \
+  '<>' shell-token \
+  '>' shell-token \
+  '>>' shell-token \
+  '>&' shell-token \
+  '[0-9]##<' shell-token \
+  '[0-9]##>' shell-token \
+  '[0-9]##>>' shell-token \
+  '[0-9]##<&' shell-token \
+  '[0-9]##>&' shell-token \
+)
+zstyle ':zle:backward-word' word-context "${zle_shell_word_boundaries[@]}"
+zstyle ':zle:forward-word' word-context "${zle_shell_word_boundaries[@]}"
+unset zle_shell_word_boundaries
+zstyle ':zle:*:shell-token' word-style shell
+
+_dotfiles_zle_shell_boundary_token() {
+  emulate -L zsh
+  setopt extendedglob
+
+  case "$1" in
+    ('|'|'||'|'|&'|'&'|'&&'|';'|'('|')'|'<'|'<<'|'<<<'|'<&'|'<>'|'>'|'>>'|'>&')
+      return 0
+      ;;
+    (<->'<'|<->'>'|<->'>>'|<->'<&'|<->'>&')
+      return 0
+      ;;
+  esac
+
+  return 1
+}
+
+_dotfiles_zle_shell_boundary_prefix_length() {
+  emulate -L zsh
+  setopt extendedglob
+
+  REPLY=0
+  local text=$1
+
+  if [[ $text = (#b)([0-9]##)(*) ]]; then
+    local fd_length=${#match[1]}
+    local after_fd=$match[2]
+    local redirect
+    for redirect in '>>' '>&' '<&' '>' '<'; do
+      if [[ $after_fd[1,${#redirect}] == "$redirect" ]]; then
+        REPLY=$(( fd_length + ${#redirect} ))
+        return 0
+      fi
+    done
+  fi
+
+  local token
+  for token in '<<<' '||' '|&' '&&' '>>' '<<' '<&' '<>' '>&' '|' '&' ';' '(' ')' '<' '>'; do
+    if [[ $text[1,${#token}] == "$token" ]]; then
+      REPLY=${#token}
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+_dotfiles_zle_backward_word() {
+  emulate -L zsh
+  setopt extendedglob
+
+  local -a words
+  words=(${(z)LBUFFER})
+  local token=$words[-1]
+
+  if [[ -n $token ]] && _dotfiles_zle_shell_boundary_token "$token"; then
+    local without_trailing_space=${LBUFFER%%[[:space:]]##}
+    local trailing_space_count=$(( ${#LBUFFER} - ${#without_trailing_space} ))
+    (( CURSOR -= ${#token} + trailing_space_count ))
+    return
+  fi
+
+  zle dotfiles-backward-word-match
+}
+
+_dotfiles_zle_forward_word() {
+  emulate -L zsh
+  setopt extendedglob
+
+  if _dotfiles_zle_shell_boundary_prefix_length "$RBUFFER"; then
+    local token_length=$REPLY
+    local after_token=${RBUFFER[token_length + 1,-1]}
+    local following_space_count=0
+    if [[ $after_token = (#b)([[:space:]]##)* ]]; then
+      following_space_count=${#match[1]}
+    fi
+    (( CURSOR += token_length + following_space_count ))
+    return
+  fi
+
+  zle dotfiles-forward-word-match
+}
+
+zle -N dotfiles-backward-word-match backward-word-match
+zle -N dotfiles-forward-word-match forward-word-match
+zle -N backward-word _dotfiles_zle_backward_word
+zle -N forward-word _dotfiles_zle_forward_word
 
 # 👇 Keybindings
 bindkey '\e[1;5C' forward-word
