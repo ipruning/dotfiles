@@ -114,18 +114,68 @@ _dotfiles_zle_shell_boundary_prefix_length() {
   return 1
 }
 
+_dotfiles_zle_shell_boundary_suffix_length() {
+  emulate -L zsh
+  setopt extendedglob
+
+  REPLY=0
+  local text=$1
+  local token
+
+  for token in '||' '|&' '&&' '|' '&' ';' '(' ')'; do
+    if [[ $text[-${#token},-1] == "$token" ]]; then
+      REPLY=${#token}
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+_dotfiles_zle_quoted_shell_token() {
+  emulate -L zsh
+
+  local token=$1
+  (( ${#token} >= 2 )) || return 1
+
+  if [[ $token[1] == "'" && $token[-1] == "'" ]]; then
+    return 0
+  fi
+
+  if [[ $token[1] == '"' && $token[-1] == '"' ]]; then
+    return 0
+  fi
+
+  if (( ${#token} >= 3 )) && [[ $token[1,2] == "\$'" && $token[-1] == "'" ]]; then
+    return 0
+  fi
+
+  return 1
+}
+
 _dotfiles_zle_backward_word() {
   emulate -L zsh
   setopt extendedglob
+
+  local without_trailing_space=${LBUFFER%%[[:space:]]##}
+  local trailing_space_count=$(( ${#LBUFFER} - ${#without_trailing_space} ))
 
   local -a words
   words=(${(z)LBUFFER})
   local token=$words[-1]
 
   if [[ -n $token ]] && _dotfiles_zle_shell_boundary_token "$token"; then
-    local without_trailing_space=${LBUFFER%%[[:space:]]##}
-    local trailing_space_count=$(( ${#LBUFFER} - ${#without_trailing_space} ))
     (( CURSOR -= ${#token} + trailing_space_count ))
+    return
+  fi
+
+  if [[ -n $token ]] && _dotfiles_zle_quoted_shell_token "$token"; then
+    (( CURSOR -= ${#token} + trailing_space_count ))
+    return
+  fi
+
+  if _dotfiles_zle_shell_boundary_suffix_length "$without_trailing_space"; then
+    (( CURSOR -= REPLY + trailing_space_count ))
     return
   fi
 
@@ -144,6 +194,20 @@ _dotfiles_zle_forward_word() {
       following_space_count=${#match[1]}
     fi
     (( CURSOR += token_length + following_space_count ))
+    return
+  fi
+
+  local -a words
+  words=(${(z)RBUFFER})
+  local token=$words[1]
+
+  if [[ -n $token ]] && _dotfiles_zle_quoted_shell_token "$token"; then
+    local after_token=${RBUFFER[${#token} + 1,-1]}
+    local following_space_count=0
+    if [[ $after_token = (#b)([[:space:]]##)* ]]; then
+      following_space_count=${#match[1]}
+    fi
+    (( CURSOR += ${#token} + following_space_count ))
     return
   fi
 
