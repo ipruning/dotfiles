@@ -3,17 +3,9 @@ source: /Users/alex/Developer/ipruning/skills
 extras_source: /Users/alex/Developer/ipruning/skills/extras
 mode: merge
 targets:
-  amp:
+  universal:
     skills:
-      path: /Users/alex/.config/agents/skills
-  codex:
-    skills:
-      path: /Users/alex/.codex/skills/
-ignore:
-- '**/.DS_Store'
-- '**/.git/**'
-audit:
-  block_threshold: CRITICAL
+      path: /Users/alex/.agents/skills
 extras:
 - name: amp
   targets:
@@ -27,3 +19,8 @@ extras:
   targets:
   - path: /Users/alex/.claude
     mode: copy
+ignore:
+- '**/.DS_Store'
+- '**/.git/**'
+audit:
+  block_threshold: CRITICAL

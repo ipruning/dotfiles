@@ -144,18 +144,18 @@ url = "https://github.com/earendil-works/pi/releases/download/v0.79.1/pi-darwin-
 url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/443075248"
 
 [[tools."github:larksuite/cli"]]
-version = "1.0.50"
+version = "1.0.51"
 backend = "github:larksuite/cli"
 
 [tools."github:larksuite/cli"."platforms.linux-x64"]
-checksum = "sha256:b963db8737de1a59355d7619d44d9dacc2d38b996f0ac77d5e5a64b82737bf6e"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.50/lark-cli-1.0.50-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/442803308"
+checksum = "sha256:307c5f0b03185da976911d9cf8ca7ccb0854eebc6ead6ae49f5293217161e70c"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.51/lark-cli-1.0.51-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/443813888"
 
 [tools."github:larksuite/cli"."platforms.macos-arm64"]
-checksum = "sha256:74623bb5b30d5dfd7c4e42653d88cbe1078cece268b0fd6ab5c401562d3e0e5c"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.50/lark-cli-1.0.50-darwin-arm64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/442803282"
+checksum = "sha256:8ec0d3422ea54c81e36044b135714dadd7be2b8846d69e44cc99b9523082f03c"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.51/lark-cli-1.0.51-darwin-arm64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/443813886"
 
 [[tools."github:schpet/linear-cli"]]
 version = "2.0.0"
@@ -267,32 +267,17 @@ version = "0.3.0"
 backend = "npm:pi-opensync-plugin"
 
 [[tools.pnpm]]
-version = "11.5.2"
+version = "11.5.3"
 backend = "aqua:pnpm/pnpm"
 
 [tools.pnpm."platforms.linux-x64"]
-checksum = "sha256:2033a702618c8576dc6bb0f6adb3a67ab506031351ddd59ca50d1bcaf5d13dc5"
-url = "https://github.com/pnpm/pnpm/releases/download/v11.5.2/pnpm-linux-x64.tar.gz"
-provenance = "github-attestations"
-
-[tools.pnpm."platforms.linux-x64-baseline"]
-checksum = "sha256:2033a702618c8576dc6bb0f6adb3a67ab506031351ddd59ca50d1bcaf5d13dc5"
-url = "https://github.com/pnpm/pnpm/releases/download/v11.5.2/pnpm-linux-x64.tar.gz"
-provenance = "github-attestations"
-
-[tools.pnpm."platforms.linux-x64-musl"]
-checksum = "sha256:0b794b23461c7475f7ffc29c4945692838b51ddadd857a2ace8edf0018798305"
-url = "https://github.com/pnpm/pnpm/releases/download/v11.5.2/pnpm-linux-x64-musl.tar.gz"
-provenance = "github-attestations"
-
-[tools.pnpm."platforms.linux-x64-musl-baseline"]
-checksum = "sha256:0b794b23461c7475f7ffc29c4945692838b51ddadd857a2ace8edf0018798305"
-url = "https://github.com/pnpm/pnpm/releases/download/v11.5.2/pnpm-linux-x64-musl.tar.gz"
+checksum = "sha256:a360e22e34ebe3fc77f26750f1e570d0fae3a0f6f9d2bfcd1c80e78263766205"
+url = "https://github.com/pnpm/pnpm/releases/download/v11.5.3/pnpm-linux-x64.tar.gz"
 provenance = "github-attestations"
 
 [tools.pnpm."platforms.macos-arm64"]
-checksum = "sha256:54993dae26bea0f3c1b0e15f9427f6f6a86827d56f32d1d1554d8cda59a62399"
-url = "https://github.com/pnpm/pnpm/releases/download/v11.5.2/pnpm-darwin-arm64.tar.gz"
+checksum = "sha256:252d9a126d37bcdf640275ac40946f7f9d4ab5d801811f66207ad97d7a9aa7ee"
+url = "https://github.com/pnpm/pnpm/releases/download/v11.5.3/pnpm-darwin-arm64.tar.gz"
 provenance = "github-attestations"
 
 [[tools.python]]
