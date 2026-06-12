@@ -155,22 +155,17 @@ sync_list_apps() {
 }
 
 sync_host_inventory() {
-  gum log --level info "Backing up installed packages..."
+  gum log --level info "Backing up host inventory..."
 
   local docs_dir
   docs_dir="$(sync_host_docs_dir)"
   mkdir -p "$docs_dir"
 
   if command -v brew &>/dev/null; then
-    dotfiles_run_with_timeout "${DOTFILES_INVENTORY_TIMEOUT:-120}" \
+    dotfiles_run_visible "Writing Homebrew bundle..." "${DOTFILES_INVENTORY_TIMEOUT:-120}" \
       brew bundle dump --file="$docs_dir/brew_dump.txt" --force \
       || gum log --level warn "brew bundle dump failed"
-    dotfiles_run_with_timeout "${DOTFILES_INVENTORY_TIMEOUT:-120}" \
-      brew leaves | LC_ALL=en_US.UTF-8 sort >"$docs_dir/brew_leaves.txt" \
-      || gum log --level warn "brew leaves failed"
-    dotfiles_run_with_timeout "${DOTFILES_INVENTORY_TIMEOUT:-120}" \
-      brew list --installed-on-request | LC_ALL=en_US.UTF-8 sort >"$docs_dir/brew_installed.txt" \
-      || gum log --level warn "brew list failed"
+    rm -f "$docs_dir/brew_leaves.txt" "$docs_dir/brew_installed.txt"
   fi
 
   if command -v gh &>/dev/null; then
