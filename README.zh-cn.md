@@ -6,9 +6,8 @@
 
 <!--rehype:style=text-align: center;-->
 
-## ChangeLog
+## 说明
 
-- 2025-06-24 更新 README，包含最新工具、结构和详细文档
-- 2025-06-23 完全重写 README，添加详细文档
-- 2022-05-25 更新 README
-- 2022-03-01 公开仓库
+当前维护的完整仓库说明在 [README.md](README.md)。
+
+任务入口、Skillshare 边界、Mackup 规则和 host inventory 说明以英文 README 为准，避免双写后漂移。
