@@ -49,6 +49,9 @@ dotfiles_mackup_backup_force() {
   dotfiles_run_with_timeout "${DOTFILES_MACKUP_TIMEOUT:-300}" uvx mackup backup --force
 }
 
+# DOTFILES_MACKUP_SYMLINKS_CHANGED is read by .mise/tasks/init.sh after this
+# library mutates Mackup links.
+# shellcheck disable=SC2034
 dotfiles_configure_mackup_symlinks() {
   DOTFILES_MACKUP_SYMLINKS_CHANGED=0
 
