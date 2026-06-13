@@ -144,33 +144,33 @@ url = "https://github.com/earendil-works/pi/releases/download/v0.79.1/pi-darwin-
 url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/443075248"
 
 [[tools."github:larksuite/cli"]]
-version = "1.0.52"
+version = "1.0.53"
 backend = "github:larksuite/cli"
 
 [tools."github:larksuite/cli"."platforms.linux-x64"]
-checksum = "sha256:5f3eac829ec2d05affe8fbf121b3a86d2f09ef6570dbafcf1f3c953d47ab1322"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.52/lark-cli-1.0.52-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/444755394"
+checksum = "sha256:4b2223241074417f61d8b2e174f2647d26a37d0628a89494b6991a1e3f4f954e"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.53/lark-cli-1.0.53-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/445662783"
 
 [tools."github:larksuite/cli"."platforms.linux-x64-baseline"]
-checksum = "sha256:5f3eac829ec2d05affe8fbf121b3a86d2f09ef6570dbafcf1f3c953d47ab1322"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.52/lark-cli-1.0.52-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/444755394"
+checksum = "sha256:4b2223241074417f61d8b2e174f2647d26a37d0628a89494b6991a1e3f4f954e"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.53/lark-cli-1.0.53-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/445662783"
 
 [tools."github:larksuite/cli"."platforms.linux-x64-musl"]
-checksum = "sha256:5f3eac829ec2d05affe8fbf121b3a86d2f09ef6570dbafcf1f3c953d47ab1322"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.52/lark-cli-1.0.52-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/444755394"
+checksum = "sha256:4b2223241074417f61d8b2e174f2647d26a37d0628a89494b6991a1e3f4f954e"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.53/lark-cli-1.0.53-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/445662783"
 
 [tools."github:larksuite/cli"."platforms.linux-x64-musl-baseline"]
-checksum = "sha256:5f3eac829ec2d05affe8fbf121b3a86d2f09ef6570dbafcf1f3c953d47ab1322"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.52/lark-cli-1.0.52-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/444755394"
+checksum = "sha256:4b2223241074417f61d8b2e174f2647d26a37d0628a89494b6991a1e3f4f954e"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.53/lark-cli-1.0.53-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/445662783"
 
 [tools."github:larksuite/cli"."platforms.macos-arm64"]
-checksum = "sha256:bf75766fb9f262a7fae7a46645ed2493086fc0ccd7df786a33ad8191e0ca80e6"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.52/lark-cli-1.0.52-darwin-arm64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/444755373"
+checksum = "sha256:f0a1aacaea7a2af3eb15786a5e8fdb96e690124af7f6186eb406c6a46dc5e665"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.53/lark-cli-1.0.53-darwin-arm64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/445662782"
 
 [[tools."github:schpet/linear-cli"]]
 version = "2.0.0"
