@@ -196,6 +196,7 @@ If you see noise such as `.DS_Store` or auto-backups inside `home/`, prefer to i
 - Prefer editing **`modules/`** (source), except tracked shell bootstrap files under `home/` when changing Mackup-restored shell startup behavior
 - Apply changes to your machine via your own linking mechanism
 - `sync` regenerates shell completions/functions, refreshes generated plugins, syncs Skillshare assets, and updates host inventories under `generated/docs/<hostname>/`
+- `up` updates Homebrew-managed packages, mise tools, and selected developer CLIs
 - Refresh `home/` via `backup` task when you want to record the current machine state into the Mackup snapshot
 
 Typical loop:
@@ -237,12 +238,14 @@ generated/docs/<hostname>/
 
 Examples:
 
-- `brew_dump.txt`, `brew_installed.txt`, `brew_leaves.txt`
+- `brew_dump.txt`
 - `applications.txt`, `setapp.txt`
 - `gh_extensions.txt`
 
 These are intentionally host-specific and are expected to change over time.
 They are snapshot artifacts (brew/apps/gh extensions, etc.), not canonical config.
+Homebrew is tracked as a single `brew bundle dump` output; derived reports such
+as leaves or explicitly requested formulae are not kept.
 
 ## Agents and skills
 

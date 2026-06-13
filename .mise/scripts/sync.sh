@@ -165,7 +165,6 @@ sync_host_inventory() {
     dotfiles_run_visible "Writing Homebrew bundle..." "${DOTFILES_INVENTORY_TIMEOUT:-120}" \
       brew bundle dump --file="$docs_dir/brew_dump.txt" --force \
       || gum log --level warn "brew bundle dump failed"
-    rm -f "$docs_dir/brew_leaves.txt" "$docs_dir/brew_installed.txt"
   fi
 
   if command -v gh &>/dev/null; then
