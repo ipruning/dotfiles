@@ -17,6 +17,7 @@
 - `mise run backup` runs `mackup backup --force` to snapshot configs into `home/`.
 - Agent prompt files (`~/.codex/AGENTS.md`, `~/.claude/CLAUDE.md`, `~/.config/amp/AGENTS.md`) are maintained in the Skillshare source repo under `extras/{codex,claude,amp}/` and distributed by `skillshare sync extras`; do not add them to Mackup or regenerate them from this repo.
 - `mise run sync` pulls plugins, regenerates shell completions/functions, runs Skillshare sync (skills + extras), and snapshots host package/app inventories.
+- `mise run up` updates Homebrew-managed packages, mise tools, and selected developer CLIs.
 - `mise run zsh-profile [runs] [warmup]` profiles Zsh startup (requires `hyperfine`).
 
 ## Skillshare Prompt Boundary

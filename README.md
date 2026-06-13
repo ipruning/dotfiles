@@ -27,7 +27,7 @@ Global harness prompts and AI skills are managed in the Skillshare source repo. 
 - Tasks assume:
   - `mise` (task runner)
   - `uv` (for `uvx mackup ...`)
-  - `gum` (confirmation prompts)
+  - `gum` (task logs, confirmation prompts, and spinner output)
 - Task-specific:
   - `init`: `curl` and `op` (1Password CLI) for env injection
   - `backup` / `restore`: `mackup` (invoked via `uvx`, which will install it if missing)
@@ -107,6 +107,7 @@ mise run init
 mise run restore
 mise run backup
 mise run sync
+mise run up
 mise run zsh-profile
 ```
 
@@ -117,6 +118,7 @@ If you do not use `mise`, you can also run the scripts directly:
 ./.mise/scripts/restore.sh
 ./.mise/tasks/backup.sh
 ./.mise/scripts/sync.sh
+./.mise/tasks/up.sh
 ./.mise/tasks/zsh-profile.sh
 ```
 
