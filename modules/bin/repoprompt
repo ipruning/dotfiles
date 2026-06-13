@@ -4,5 +4,6 @@ set -euo pipefail
 if [[ $OSTYPE == darwin* ]]; then
   exec open "repoprompt://open/$(pwd)"
 else
+  echo "repoprompt: unsupported OS: ${OSTYPE:-unknown}" >&2
   exit 1
 fi

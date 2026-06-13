@@ -79,30 +79,3 @@ mkbir() {
 }
 
 mkbir "$@"
-
-# If you want to provide a custom name while still using a bird prefix
-# mkbir_custom() {
-#   if [[ -z "$1" ]]; then
-#     echo "Usage: mkbir_custom [name]"
-#     return 1
-#   fi
-
-#   local count
-#   count=$(<"$BIRD_COUNT_FILE")
-#   if [[ ! $count =~ ^[0-9]+$ ]]; then
-#     count=0
-#   fi
-#   local num_birds=${#BIRD_NAMES[@]}
-#   local bird_index=$(( count % num_birds ))
-#   local bird_name="${BIRD_NAMES[$bird_index]}"
-#   local custom_name="$1"
-
-#   # Create folder with bird name + custom name
-#   mkdir -p "${bird_name}_${custom_name}"
-
-#   # Increment and save count
-#   count=$((count + 1))
-#   echo "$count" > "$BIRD_COUNT_FILE"
-
-#   echo "Created folder: ${bird_name}_${custom_name}"
-# }

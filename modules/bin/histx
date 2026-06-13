@@ -3,6 +3,9 @@
 set -euo pipefail
 if command -v atuin >/dev/null 2>&1; then
   exec atuin history list --format '{time} - [{duration}] - {command}'
+elif [ -r "${HISTFILE:-}" ]; then
+  tail -n "${1:-1}" "$HISTFILE"
 else
-  exec history 1
+  echo "histx: atuin not found and HISTFILE is unavailable" >&2
+  exit 1
 fi

@@ -7,5 +7,6 @@ if [[ $OSTYPE == darwin* ]]; then
 elif [[ $OSTYPE == linux* ]]; then
   exec xdg-open "$target"
 else
+  echo "o: unsupported OS: ${OSTYPE:-unknown}" >&2
   exit 1
 fi

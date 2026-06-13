@@ -11,8 +11,8 @@ require_env() {
 }
 
 if [[ "${ZED_FILE:-}" != *.md ]]; then
-    echo "Not a Markdown file"
-    exit 1
+  echo "Not a Markdown file"
+  exit 1
 fi
 require_env ZED_WORKTREE_ROOT
 require_env IMG_SAVE_PATH
@@ -51,8 +51,8 @@ EOF
 )"
 
 if [[ "$osascript_result" != "ok" || ! -f "$filepath" ]]; then
-    echo "No image in clipboard"
-    exit 2
+  echo "No image in clipboard"
+  exit 2
 fi
 
 RELATIVE_PATH="$(python3 - <<PY
