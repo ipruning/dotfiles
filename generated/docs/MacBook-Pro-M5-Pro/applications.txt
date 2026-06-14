@@ -7,7 +7,6 @@ BetterDisplay
 brrr
 calibre
 Capture One
-cmux
 Codex
 CodexBar
 Compressor Creator Studio

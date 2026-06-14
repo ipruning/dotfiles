@@ -107,6 +107,8 @@ brew "rtk"
 brew "rush-parallel"
 # Run commands in parallel with Rust's Tokio framework
 brew "rust-parallel"
+# Semantic version control CLI with entity-level diffs and blame
+brew "sem-cli"
 # Static analysis and lint tool, for (ba)sh scripts
 brew "shellcheck"
 # Sync skills across AI CLI tools
@@ -163,8 +165,6 @@ cask "1password@beta"
 cask "nikitabobko/tap/aerospace"
 # Display management tool
 cask "betterdisplay"
-# Ghostty-based terminal with vertical tabs and notifications for AI coding agents
-cask "cmux"
 # OpenAI's coding agent that runs in your terminal
 cask "codex"
 # OpenAI's Codex desktop app for managing coding agents
