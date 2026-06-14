@@ -12,9 +12,11 @@ typeset -U path
 # the cached script sourced by `.zshrc`.
 _dotfiles_core_path() {
   if [[ ${OSTYPE:-} == darwin* ]]; then
-    # Intel Homebrew, Apple Silicon Homebrew. Add both when present so restored
-    # dotfiles work across Macs without conditional edits.
+    # Intel Homebrew, Apple Silicon Homebrew. Add bin and sbin when present so
+    # restored dotfiles work across Macs without conditional edits.
+    [[ -d /usr/local/sbin ]] && path=(/usr/local/sbin $path)
     [[ -d /usr/local/bin ]] && path=(/usr/local/bin $path)
+    [[ -d /opt/homebrew/sbin ]] && path=(/opt/homebrew/sbin $path)
     [[ -d /opt/homebrew/bin ]] && path=(/opt/homebrew/bin $path)
   fi
 
