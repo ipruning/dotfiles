@@ -16,7 +16,7 @@
 bun = "latest"
 deno = "latest"
 go = "latest"
-node = "latest"
+node = "26"
 pnpm = "latest"
 python = "latest"
 ruby = "latest"
