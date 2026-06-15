@@ -20,7 +20,7 @@ extras:
   - path: /Users/alex/.claude
     mode: copy
 ignore:
-- '**/.DS_Store'
-- '**/.git/**'
+- "**/.DS_Store"
+- "**/.git/**"
 audit:
   block_threshold: CRITICAL
