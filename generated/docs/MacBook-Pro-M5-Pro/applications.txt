@@ -13,7 +13,6 @@ Compressor Creator Studio
 Contexts
 Cursor
 DEVONthink
-Discord
 Eagle
 ESTKme
 Factory
