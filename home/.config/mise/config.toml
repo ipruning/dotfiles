@@ -13,6 +13,8 @@
 "npm:hunkdiff" = "latest"
 "npm:opencode-sync-plugin" = "latest"
 "npm:pi-opensync-plugin" = "latest"
+"pipx:kaggle" = "latest"
+"pipx:modal" = "latest"
 bun = "latest"
 deno = "latest"
 go = "latest"
