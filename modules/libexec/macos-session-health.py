@@ -24,7 +24,7 @@ from pathlib import Path
 from typing import Any
 
 
-VERSION = "0.3.2"
+VERSION = "0.4.0"
 DEFAULT_DB = (
     Path.home()
     / "Library"
@@ -147,6 +147,20 @@ def run_command(
     except OSError as exc:
         duration_ms = (time.monotonic() - started) * 1000
         return 127, "", f"{type(exc).__name__}: {exc}", False, duration_ms
+
+
+def run_interactive_command(args: list[str], *, timeout: float) -> tuple[int, bool, float, str]:
+    started = time.monotonic()
+    try:
+        completed = subprocess.run(args, timeout=timeout, check=False)
+        duration_ms = (time.monotonic() - started) * 1000
+        return completed.returncode, False, duration_ms, ""
+    except subprocess.TimeoutExpired:
+        duration_ms = (time.monotonic() - started) * 1000
+        return 124, True, duration_ms, "command timed out"
+    except OSError as exc:
+        duration_ms = (time.monotonic() - started) * 1000
+        return 127, False, duration_ms, f"{type(exc).__name__}: {exc}"
 
 
 class Store:
@@ -325,6 +339,167 @@ def parse_launchctl_print(output: str) -> dict[str, str]:
         if key in {"active count", "path", "type", "state", "program", "runs", "pid", "last exit code"}:
             parsed[key.replace(" ", "_")] = value
     return parsed
+
+
+def syspolicyd_status(timeout: float) -> dict[str, Any]:
+    pgrep_code, pgrep_out, pgrep_err, pgrep_timed_out, pgrep_ms = run_command(
+        ["pgrep", "-x", "syspolicyd"],
+        timeout=timeout,
+    )
+    pids = [line.strip() for line in pgrep_out.splitlines() if line.strip()]
+    pid = pids[0] if pids else ""
+    status: dict[str, Any] = {
+        "pid": pid,
+        "pids": pids,
+        "pgrep_exit": pgrep_code,
+        "pgrep_timeout": pgrep_timed_out,
+        "pgrep_duration_ms": round(pgrep_ms, 1),
+        "pgrep_error": pgrep_err.strip(),
+    }
+    if not pid:
+        return status
+
+    ps_code, ps_out, ps_err, ps_timed_out, ps_ms = run_command(
+        ["ps", "-p", pid, "-o", "pid=,ppid=,stat=,%cpu=,rss=,etime=,comm="],
+        timeout=timeout,
+    )
+    status.update(
+        {
+            "ps_exit": ps_code,
+            "ps_timeout": ps_timed_out,
+            "ps_duration_ms": round(ps_ms, 1),
+            "ps_error": ps_err.strip(),
+        }
+    )
+    parts = ps_out.strip().split(None, 6)
+    if len(parts) >= 7:
+        parsed_pid, ppid, stat, cpu, rss, etime, comm = parts
+        rss_kb = parse_int(rss)
+        status.update(
+            {
+                "pid": parsed_pid,
+                "ppid": ppid,
+                "stat": stat,
+                "cpu_percent": parse_float(cpu),
+                "rss_kb": rss_kb,
+                "rss_mb": round(rss_kb / 1024, 1) if rss_kb is not None else None,
+                "etime": etime,
+                "comm": comm,
+            }
+        )
+    elif ps_out.strip():
+        status["ps_row"] = ps_out.strip()
+    return status
+
+
+def render_recovery_markdown(report: dict[str, Any]) -> str:
+    before = report.get("before") or {}
+    after = report.get("after") or {}
+    commands = report.get("manual_commands") or []
+    lines = [
+        "# macos-session-health Recovery Plan",
+        "",
+        f"- generated_at: `{report['generated_at']}`",
+        f"- action: `{report['action']}`",
+        f"- execute: `{report['execute']}`",
+        f"- confirmed_codex_desktop_closed: `{report['confirmed_codex_desktop_closed']}`",
+        "",
+        "## syspolicyd Before",
+        "",
+        (
+            f"- pid={before.get('pid', '')} cpu_percent={before.get('cpu_percent', '')} "
+            f"rss_mb={before.get('rss_mb', '')} etime={before.get('etime', '')} "
+            f"stat={before.get('stat', '')}"
+        ),
+    ]
+    if after:
+        lines.extend(
+            [
+                "",
+                "## syspolicyd After",
+                "",
+                (
+                    f"- pid={after.get('pid', '')} cpu_percent={after.get('cpu_percent', '')} "
+                    f"rss_mb={after.get('rss_mb', '')} etime={after.get('etime', '')} "
+                    f"stat={after.get('stat', '')}"
+                ),
+            ]
+        )
+    if report.get("error"):
+        lines.extend(["", "## Error", "", f"- {report['error']}"])
+    if commands:
+        lines.extend(["", "## Manual Commands", ""])
+        lines.append("```zsh")
+        lines.extend(commands)
+        lines.append("```")
+    if report.get("notes"):
+        lines.extend(["", "## Notes", ""])
+        lines.extend(f"- {note}" for note in report["notes"])
+    return "\n".join(lines)
+
+
+def recover_syspolicyd(args: argparse.Namespace) -> int:
+    before = syspolicyd_status(args.command_timeout)
+    commands = [
+        "pkill -TERM -f '^/Applications/Codex\\.app/Contents/MacOS/Codex$'",
+        "sleep 5",
+        "old=\"$(pgrep -x syspolicyd)\"",
+        "sudo kill -TERM \"$old\"",
+        "sleep 5",
+        "pgrep -x syspolicyd | xargs ps -o pid,ppid,stat,%cpu,rss,etime,comm= -p",
+    ]
+    report: dict[str, Any] = {
+        "generated_at": utc_now(),
+        "action": "restart_syspolicyd",
+        "execute": args.execute,
+        "confirmed_codex_desktop_closed": args.assume_codex_desktop_closed,
+        "before": before,
+        "manual_commands": commands,
+        "notes": [
+            "Close Codex Desktop before restarting syspolicyd; otherwise Codex can refill the failure state.",
+            "This command never closes Codex Desktop itself.",
+            "Use --execute only after confirming Codex Desktop is closed or safe to close.",
+        ],
+    }
+
+    if not before.get("pid"):
+        report["error"] = "syspolicyd pid not found"
+        print_recovery_report(report, args.format)
+        return 1
+
+    if not args.execute:
+        print_recovery_report(report, args.format)
+        return 0
+
+    if not args.assume_codex_desktop_closed:
+        report["error"] = "refusing to execute without --assume-codex-desktop-closed"
+        print_recovery_report(report, args.format)
+        return 2
+
+    pid = str(before["pid"])
+    code, timed_out, duration_ms, error = run_interactive_command(
+        ["sudo", "kill", f"-{args.signal}", pid],
+        timeout=args.command_timeout,
+    )
+    report["kill"] = {
+        "signal": args.signal,
+        "pid": pid,
+        "exit": code,
+        "timeout": timed_out,
+        "duration_ms": round(duration_ms, 1),
+        "error": error,
+    }
+    time.sleep(args.wait_seconds)
+    report["after"] = syspolicyd_status(args.command_timeout)
+    print_recovery_report(report, args.format)
+    return 0 if code == 0 and not timed_out else 1
+
+
+def print_recovery_report(report: dict[str, Any], output_format: str) -> None:
+    if output_format == "json":
+        print(json.dumps(report, ensure_ascii=False))
+        return
+    print(render_recovery_markdown(report))
 
 
 def collect_launch_service(
@@ -2271,6 +2446,7 @@ def build_parser() -> argparse.ArgumentParser:
   macos-session-health query --format json --event health_signal --limit 5
   macos-session-health trend --hours 6 --event fd_top --limit 20
   macos-session-health incident --hours 6 --format markdown
+  macos-session-health recover
   macos-session-health events --format json
 
 See modules/bin/macos-session-health.md for the syspolicyd incident runbook.
@@ -2468,6 +2644,34 @@ See modules/bin/macos-session-health.md for the syspolicyd incident runbook.
     incident_parser.add_argument("--limit", type=int, default=20)
     incident_parser.add_argument("--format", choices=["markdown", "json"], default="markdown")
 
+    recover_parser = subparsers.add_parser(
+        "recover",
+        help="Print or execute the guarded syspolicyd recovery plan.",
+    )
+    recover_parser.add_argument("--format", choices=["markdown", "json"], default="markdown")
+    recover_parser.add_argument(
+        "--execute",
+        action="store_true",
+        help="Restart syspolicyd with sudo kill. Refuses to run without --assume-codex-desktop-closed.",
+    )
+    recover_parser.add_argument(
+        "--assume-codex-desktop-closed",
+        action="store_true",
+        help="Confirm Codex Desktop is closed or safe to leave closed during recovery.",
+    )
+    recover_parser.add_argument(
+        "--signal",
+        choices=["TERM", "KILL"],
+        default="TERM",
+        help="Signal used with sudo kill when --execute is set.",
+    )
+    recover_parser.add_argument(
+        "--wait-seconds",
+        type=float,
+        default=5,
+        help="Seconds to wait after signaling syspolicyd before reading the new status.",
+    )
+
     return parser
 
 
@@ -2513,6 +2717,9 @@ def main() -> int:
         except CliError as exc:
             print_error(str(exc), db=args.db)
             return 1
+
+    if args.command == "recover":
+        return recover_syspolicyd(args)
 
     store = Store(None if args.no_db else args.db, emit_stdout=not args.quiet)
     try:

@@ -66,6 +66,15 @@ runaway can continue after the limit is higher.
 
 ## Recovery
 
+Start with the guarded recovery plan:
+
+```zsh
+macos-session-health recover
+```
+
+The default command is read-only. It prints the current `syspolicyd` PID, RSS,
+CPU, and the manual recovery commands.
+
 Close Codex Desktop only after the user confirms it is safe to close the app.
 Do not kill Codex CLI sessions:
 
@@ -75,7 +84,17 @@ sleep 5
 pkill -KILL -f '^/Applications/Codex\.app/Contents/MacOS/Codex$' 2>/dev/null
 ```
 
-Terminate the unhealthy `syspolicyd` process. launchd starts the replacement:
+After Codex Desktop is closed, execute the guarded recovery:
+
+```zsh
+macos-session-health recover --execute --assume-codex-desktop-closed
+```
+
+The command sends `TERM` to the current `syspolicyd` PID, waits, then prints the
+replacement PID and RSS. It does not close Codex Desktop. The command inherits
+the current terminal for `sudo`, so it can prompt for a password when needed.
+
+The manual equivalent is:
 
 ```zsh
 old="$(pgrep -x syspolicyd)"
@@ -115,6 +134,7 @@ Start triage with these commands:
 
 ```zsh
 macos-session-health incident --hours 6 --format markdown
+macos-session-health recover
 launchctl print gui/$UID/com.alex.macos-session-health | sed -n '1,140p'
 pgrep -x syspolicyd | xargs ps -o pid,ppid,stat,%cpu,rss,etime,comm= -p
 ```
@@ -201,6 +221,8 @@ After changing the script or plist:
 mise exec -- uv run python -m py_compile modules/libexec/macos-session-health.py
 modules/bin/macos-session-health --version
 modules/bin/macos-session-health incident --hours 1 --limit 3 --format json \
+  | python3 -m json.tool >/dev/null
+modules/bin/macos-session-health recover --format json \
   | python3 -m json.tool >/dev/null
 plutil -lint modules/launchagents/com.alex.macos-session-health.plist
 git diff --check
