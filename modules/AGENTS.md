@@ -3,9 +3,9 @@
 ## Scope
 
 `modules/` stores reusable dotfile modules: executable helpers, shell config
-fragments, Mackup config, LaunchAgent plist sources, and templates. Keep runtime
-state and generated local files outside this tree unless the repository
-already marks those paths as generated output.
+fragments, Mackup config, LaunchAgent and LaunchDaemon plist sources, and
+templates. Keep runtime state and generated local files outside this tree
+unless the repository already marks those paths as generated output.
 
 ## `bin/`
 
@@ -54,7 +54,7 @@ already marks those paths as generated output.
   `modules/launchdaemons/`.
 - Install these plist files to `/Library/LaunchDaemons/` at runtime.
 - Use this directory only for root-owned system-domain jobs. Do not add
-  logged-in user session jobs here.
+  logged-in user-session jobs here.
 - Validate plist changes with `plutil -lint`.
 - Installed LaunchDaemon plist files must be owned by `root:wheel` and have
   mode `0644`.
@@ -72,5 +72,8 @@ already marks those paths as generated output.
 - For script changes, run the relevant CLI directly with representative inputs.
 - For LaunchAgent changes, validate the source plist and inspect the loaded job
   with `launchctl print gui/$UID/<label>`.
+- For LaunchDaemon changes, validate the source plist, install it with
+  `root:wheel` ownership and `0644` mode, then inspect the loaded job with
+  `sudo launchctl print system/<label>`.
 - Keep verification output focused: report the command, exit status, and the
   behavior that proves the change.

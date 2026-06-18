@@ -1990,12 +1990,12 @@ def compact_record(record: dict[str, Any], keys: list[str]) -> str:
 
 def render_incident_markdown(report: dict[str, Any]) -> str:
     lines = [
-        "# macos-session-health Incident Packet",
+        "# macos-session-health Incident Report",
         "",
         f"- generated_at: `{report['generated_at']}`",
         f"- db: `{report['db']}`",
         f"- window_hours: `{report['window_hours']}`",
-        f"- runbook: `modules/bin/macos-session-health.md`",
+        "- runbook: `modules/bin/macos-session-health.md`",
         "",
         "## Snapshot Summary",
         "",
@@ -2092,7 +2092,7 @@ def render_incident_markdown(report: dict[str, Any]) -> str:
     if not report["latest_fd_top"]:
         lines.append("No FD top samples.")
 
-    lines.extend(["", "## Current Interpretation", ""])
+    lines.extend(["", "## Interpretation", ""])
     lines.extend(report["interpretation"])
     lines.append("")
     return "\n".join(lines)
@@ -2220,12 +2220,12 @@ def incident_report(db_path: Path, hours: float, limit: int, output_format: str)
     ]
     if syspolicyd_pressure:
         interpretation.append(
-            f"- This window has `{syspolicyd_pressure['count']}` syspolicyd FD-pressure signal(s); "
+            f"- Window contains `{syspolicyd_pressure['count']}` syspolicyd FD-pressure signal(s); "
             f"max_value=`{syspolicyd_pressure['max_value']}`."
         )
     if runaway:
         interpretation.append(
-            f"- This window has syspolicyd runaway RSS signal(s); max_value=`{runaway['max_value']}` MiB."
+            f"- Window contains syspolicyd runaway RSS signal(s); max_value=`{runaway['max_value']}` MiB."
         )
 
     report = {
@@ -2462,7 +2462,7 @@ See modules/bin/macos-session-health.md for the syspolicyd incident runbook.
 
     incident_parser = subparsers.add_parser(
         "incident",
-        help="Print an AI-ready incident packet from recent SQLite evidence.",
+        help="Print a recent incident report from SQLite evidence.",
     )
     incident_parser.add_argument("--hours", type=float, default=6)
     incident_parser.add_argument("--limit", type=int, default=20)

@@ -1,13 +1,13 @@
 # macos-session-health Runbook
 
-`macos-session-health` records macOS user-session launch health into SQLite and
+`macos-session-health` records macOS user-session launch health in SQLite and
 sends brrr alerts for high-severity signals. Runtime data belongs in
 `~/Library/Application Support/macos-session-health/health.sqlite3`; logs belong
 in `~/Library/Logs/macos-session-health/`.
 
 ## Incident Pattern
 
-The failure pattern this monitor is built for:
+`macos-session-health` watches this failure pattern:
 
 - Apps bounce in the Dock or open with no usable window.
 - Shell commands report fork, pty, or open failures.
@@ -15,9 +15,9 @@ The failure pattern this monitor is built for:
 - Music can report error `9405`.
 - Restarting the Mac clears the symptoms.
 
-The important service is usually `syspolicyd`, not the shell. When `syspolicyd`
-is unhealthy, Gatekeeper and static-code checks fail, and unrelated apps look
-broken.
+In the observed incidents, the failing service was `syspolicyd`, not the shell.
+When `syspolicyd` is unhealthy, Gatekeeper and static-code checks fail, and
+unrelated apps look broken.
 
 Evidence from the 2026-06-19 incident:
 
@@ -33,12 +33,13 @@ Evidence from the 2026-06-19 incident:
 - Closing Codex Desktop stopped new matching log lines in the next observation
   window.
 
-Treat Codex Desktop as the current primary trigger candidate. Treat VS Code and
-Music as affected clients unless new evidence says otherwise.
+Treat Codex Desktop as the primary trigger candidate from the 2026-06-19
+evidence. Treat VS Code and Music as affected clients unless new evidence says
+otherwise.
 
-## Do Not Do This
+## Risky Actions
 
-Do not try to restart system `syspolicyd` with launchctl:
+Do not restart the system `syspolicyd` service with launchctl:
 
 ```zsh
 sudo launchctl kickstart -k system/com.apple.security.syspolicy
@@ -50,21 +51,23 @@ SIP blocks that operation:
 Operation not permitted while System Integrity Protection is engaged
 ```
 
-Do not run repeated `spctl` or `codesign` probes during an active incident.
-They ask `syspolicyd` to do more work and can amplify the failure. The
-LaunchAgent keeps both probes disabled by default:
+Do not run repeated `spctl` or `codesign` active assessment probes during an
+active incident. These probes ask `syspolicyd` to do more work and can amplify
+the failure. The LaunchAgent keeps both probes disabled by default:
 
 ```text
 --spctl-interval-minutes 0
 --codesign-interval-minutes 0
 ```
 
-Do not fix this by raising `maxfiles` first. A low GUI soft limit is useful
-context, but raising it can delay visible symptoms while the leak continues.
+Do not treat `maxfiles` as the root-cause fix. The LaunchDaemon raises the GUI
+soft limit to reduce secondary launch failures, but a `syspolicyd` RSS or FD
+runaway can continue after the limit is higher.
 
 ## Recovery
 
-First close Codex Desktop, without killing Codex CLI sessions:
+Close Codex Desktop only after the user confirms it is safe to close the app.
+Do not kill Codex CLI sessions:
 
 ```zsh
 pkill -TERM -f '^/Applications/Codex\.app/Contents/MacOS/Codex$'
@@ -72,8 +75,7 @@ sleep 5
 pkill -KILL -f '^/Applications/Codex\.app/Contents/MacOS/Codex$' 2>/dev/null
 ```
 
-Then ask launchd to replace the unhealthy `syspolicyd` by terminating the
-process:
+Terminate the unhealthy `syspolicyd` process. launchd starts the replacement:
 
 ```zsh
 old="$(pgrep -x syspolicyd)"
@@ -109,7 +111,7 @@ the remaining clean recovery.
 
 ## Queries
 
-For the next AI or a fresh shell, start here:
+Start triage with these commands:
 
 ```zsh
 macos-session-health incident --hours 6 --format markdown
@@ -117,16 +119,16 @@ launchctl print gui/$UID/com.alex.macos-session-health | sed -n '1,140p'
 pgrep -x syspolicyd | xargs ps -o pid,ppid,stat,%cpu,rss,etime,comm= -p
 ```
 
-This is enough for first-pass triage. Do not start with `spctl`, `codesign`, or
-`sudo launchctl kickstart`.
+These commands provide first-pass triage evidence. Do not start with `spctl`,
+`codesign`, or `sudo launchctl kickstart`.
 
-AI-ready incident packet:
+Incident report:
 
 ```zsh
 macos-session-health incident --hours 6 --format markdown
 ```
 
-Machine-readable packet:
+Machine-readable report:
 
 ```zsh
 macos-session-health incident --hours 6 --format json
@@ -176,7 +178,7 @@ small repeated `syspolicyd_fd_pressure` signal should stay quiet during
 cooldown, but a jump from tens of matches to tens of thousands of matches should
 produce a distinct alert.
 
-Current important signals:
+Health signals:
 
 - `syspolicyd_fd_pressure`: unified logs show `syspolicyd` FD or static-code
   failures. Low-volume matches are warning-only by default; the LaunchAgent
@@ -211,3 +213,16 @@ launchctl print gui/$UID/com.alex.macos-session-health
 
 Keep `spctl` and `codesign` probes disabled unless deliberately testing a
 healthy system.
+
+After changing the maxfiles LaunchDaemon:
+
+```zsh
+plutil -lint modules/launchdaemons/com.alex.limit.maxfiles.plist
+sudo install -o root -g wheel -m 644 \
+  modules/launchdaemons/com.alex.limit.maxfiles.plist \
+  /Library/LaunchDaemons/com.alex.limit.maxfiles.plist
+sudo launchctl bootout system /Library/LaunchDaemons/com.alex.limit.maxfiles.plist 2>/dev/null || true
+sudo launchctl bootstrap system /Library/LaunchDaemons/com.alex.limit.maxfiles.plist
+sudo launchctl print system/com.alex.limit.maxfiles
+launchctl limit maxfiles
+```
