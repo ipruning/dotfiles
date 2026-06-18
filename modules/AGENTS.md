@@ -48,6 +48,25 @@ already marks those paths as generated output.
   logs. Disable or rate-limit probes that repeatedly wake, restart, or query
   unstable macOS services.
 
+## `launchdaemons/`
+
+- Put source plist files for macOS system LaunchDaemons in
+  `modules/launchdaemons/`.
+- Install these plist files to `/Library/LaunchDaemons/` at runtime.
+- Use this directory only for root-owned system-domain jobs. Do not add
+  logged-in user session jobs here.
+- Validate plist changes with `plutil -lint`.
+- Installed LaunchDaemon plist files must be owned by `root:wheel` and have
+  mode `0644`.
+- After changing a loaded LaunchDaemon, use
+  `sudo launchctl bootout system /Library/LaunchDaemons/<file>.plist` and then
+  `sudo launchctl bootstrap system /Library/LaunchDaemons/<file>.plist` so
+  launchd rereads the plist.
+- Inspect loaded jobs with `sudo launchctl print system/<label>`.
+- Keep LaunchDaemons narrow and quiet. Prefer one-shot setup jobs for system
+  limits and privileged helpers; keep long-running user-facing monitors in
+  `launchagents/` unless they require root.
+
 ## Verification
 
 - For script changes, run the relevant CLI directly with representative inputs.
