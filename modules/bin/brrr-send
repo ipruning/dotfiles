@@ -1,0 +1,212 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  cat <<'EOF'
+Usage:
+  brrr-send --message TEXT [options]
+
+Options:
+  --title TEXT
+  --thread-id TEXT
+  --open-url URL
+  --sound NAME
+  --interruption-level passive|active|time-sensitive|critical
+  --volume 0..1
+  --dry-run
+
+Environment:
+  exe.dev: detected automatically; sends to https://brrr.int.exe.xyz/v1/send
+  BRRR_SECRET: preferred public API auth secret for Authorization header
+  BRRR_ENV_FILE: optional shell env file to source before sending
+  BRRR_TIMEOUT: curl timeout in seconds, default 10
+EOF
+}
+
+load_brrr_env() {
+  if [ -n "${BRRR_SECRET:-}" ]; then
+    return
+  fi
+
+  local candidates=()
+  if [ -n "${BRRR_ENV_FILE:-}" ]; then
+    candidates+=("$BRRR_ENV_FILE")
+  fi
+  if [ -n "${HOME:-}" ]; then
+    candidates+=("$HOME/.config/brrr/env" "$HOME/.config/notify/brrr.env")
+  fi
+
+  local env_file
+  for env_file in "${candidates[@]}"; do
+    if [ -r "$env_file" ]; then
+      # shellcheck disable=SC1090
+      source "$env_file"
+      return
+    fi
+  done
+}
+
+message=
+title=
+thread_id=
+open_url=
+sound=
+interruption_level=
+volume=
+dry_run=0
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --message)
+      message="${2:?missing value for --message}"
+      shift 2
+      ;;
+    --title)
+      title="${2:?missing value for --title}"
+      shift 2
+      ;;
+    --thread-id)
+      thread_id="${2:?missing value for --thread-id}"
+      shift 2
+      ;;
+    --open-url)
+      open_url="${2:?missing value for --open-url}"
+      shift 2
+      ;;
+    --sound)
+      sound="${2:?missing value for --sound}"
+      shift 2
+      ;;
+    --interruption-level)
+      interruption_level="${2:?missing value for --interruption-level}"
+      shift 2
+      ;;
+    --volume)
+      volume="${2:?missing value for --volume}"
+      shift 2
+      ;;
+    --dry-run)
+      dry_run=1
+      shift
+      ;;
+    -h | --help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "unknown argument: $1" >&2
+      usage >&2
+      exit 2
+      ;;
+  esac
+done
+
+if [ -z "$message" ]; then
+  echo "missing required --message" >&2
+  usage >&2
+  exit 2
+fi
+
+load_brrr_env
+
+timeout="${BRRR_TIMEOUT:-10}"
+endpoint=
+auth_mode=
+
+if [ -f /exe.dev/shelley.json ]; then
+  endpoint="https://brrr.int.exe.xyz/v1/send"
+  auth_mode="exe.dev-proxy"
+elif [ -n "${BRRR_SECRET:-}" ]; then
+  endpoint="https://api.brrr.now/v1/send"
+  auth_mode="bearer"
+elif [ "$dry_run" -eq 1 ]; then
+  auth_mode="unconfigured"
+else
+  cat >&2 <<'EOF'
+brrr is not configured.
+
+Configure one of:
+  - exe.dev brrr HTTP Proxy integration, if running on exe.dev
+  - BRRR_SECRET, preferred for public API Authorization header
+  - BRRR_ENV_FILE, or ~/.config/brrr/env with BRRR_SECRET='<secret>'
+
+Do not paste secrets into chat or commit them to a repo.
+EOF
+  exit 3
+fi
+
+if ! command -v python3 >/dev/null 2>&1; then
+  echo "python3 is required for JSON payload construction" >&2
+  exit 4
+fi
+
+payload="$(
+  python3 - "$message" "$title" "$thread_id" "$open_url" "$sound" "$interruption_level" "$volume" <<'PY'
+import json
+import sys
+
+names = [
+    "message",
+    "title",
+    "thread_id",
+    "open_url",
+    "sound",
+    "interruption_level",
+    "volume",
+]
+if len(sys.argv) != len(names) + 1:
+    print("internal argument mismatch", file=sys.stderr)
+    sys.exit(2)
+values = dict(zip(names, sys.argv[1:]))
+
+fields = {
+    "message": values["message"],
+    "title": values["title"],
+    "thread_id": values["thread_id"],
+    "open_url": values["open_url"],
+    "sound": values["sound"],
+    "interruption_level": values["interruption_level"],
+}
+
+payload = {key: value for key, value in fields.items() if value}
+interruption_level = values["interruption_level"]
+if interruption_level and interruption_level not in {
+    "passive",
+    "active",
+    "time-sensitive",
+    "critical",
+}:
+    print("interruption_level must be passive, active, time-sensitive, or critical", file=sys.stderr)
+    sys.exit(2)
+
+volume = values["volume"]
+if volume:
+    try:
+        payload["volume"] = float(volume)
+    except ValueError:
+        print("volume must be numeric", file=sys.stderr)
+        sys.exit(2)
+    if payload["volume"] < 0 or payload["volume"] > 1:
+        print("volume must be between 0 and 1", file=sys.stderr)
+        sys.exit(2)
+
+print(json.dumps(payload, separators=(",", ":")))
+PY
+)"
+
+if [ "$dry_run" -eq 1 ]; then
+  echo "auth_mode=$auth_mode"
+  echo "payload=json"
+  printf '%s\n' "$payload"
+  exit 0
+fi
+
+curl_args=(-fsS --max-time "$timeout" -X POST)
+if [ "$auth_mode" = "bearer" ]; then
+  curl_args+=(-H "Authorization: Bearer $BRRR_SECRET")
+fi
+
+curl "${curl_args[@]}" \
+  -H 'Content-Type: application/json' \
+  --data-binary "$payload" \
+  "$endpoint" >/dev/null
