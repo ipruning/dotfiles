@@ -25,6 +25,12 @@ already marks those paths as generated output.
   and logs under `~/Library/Logs`. Do not write runtime state into the
   repository.
 
+## `libexec/`
+
+- Put implementation files behind user-facing wrappers in `modules/libexec/`.
+- Keep direct user commands in `modules/bin/`; `modules/libexec/` files may rely
+  on their wrapper for runtime selection, environment setup, and stable argv.
+
 ## `launchagents/`
 
 - Put source plist files for macOS user LaunchAgents in `modules/launchagents/`.
