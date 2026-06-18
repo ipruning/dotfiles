@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.alex.macos-session-health</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/alex/.local/share/mise/installs/uv/0.11.21/uv-aarch64-apple-darwin/uv</string>
+    <string>run</string>
+    <string>--script</string>
+    <string>/Users/alex/dotfiles/modules/bin/macos-session-health</string>
+    <string>--quiet</string>
+    <string>--top</string>
+    <string>40</string>
+    <string>--fd-warn</string>
+    <string>512</string>
+    <string>--lsof-timeout</string>
+    <string>5</string>
+    <string>--app-assess-timeout</string>
+    <string>5</string>
+    <string>--smoke-timeout</string>
+    <string>5</string>
+    <string>--spctl-interval-minutes</string>
+    <string>0</string>
+    <string>--log-timeout</string>
+    <string>5</string>
+    <string>--log-lines</string>
+    <string>120</string>
+    <string>--log-excerpt-cooldown-minutes</string>
+    <string>30</string>
+    <string>--retention-days</string>
+    <string>14</string>
+    <string>--app</string>
+    <string>/Applications/Visual Studio Code.app</string>
+    <string>--app</string>
+    <string>/Applications/Codex.app</string>
+    <string>watch</string>
+    <string>--interval</string>
+    <string>60</string>
+  </array>
+
+  <key>RunAtLoad</key>
+  <true/>
+
+  <key>KeepAlive</key>
+  <true/>
+
+  <key>StandardOutPath</key>
+  <string>/Users/alex/Library/Logs/macos-session-health/agent.out.log</string>
+
+  <key>StandardErrorPath</key>
+  <string>/Users/alex/Library/Logs/macos-session-health/agent.err.log</string>
+
+  <key>WorkingDirectory</key>
+  <string>/Users/alex/dotfiles</string>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/Users/alex/.local/share/mise/installs/uv/0.11.21/uv-aarch64-apple-darwin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+    <key>PYTHONUNBUFFERED</key>
+    <string>1</string>
+  </dict>
+</dict>
+</plist>
