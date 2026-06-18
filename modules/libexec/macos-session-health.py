@@ -24,7 +24,7 @@ from pathlib import Path
 from typing import Any
 
 
-VERSION = "0.3.0"
+VERSION = "0.3.2"
 DEFAULT_DB = (
     Path.home()
     / "Library"
@@ -1290,6 +1290,7 @@ def collect_passive_log_signals(
     timeout: float,
     max_lines: int,
     last_minutes: int,
+    syspolicyd_log_error_count: int,
 ) -> bool:
     predicate = (
         'eventMessage CONTAINS[c] "UNIX error exception: 24" OR '
@@ -1363,15 +1364,20 @@ def collect_passive_log_signals(
 
     ok = True
     for (category, severity), count in sorted(category_counts.items()):
-        if severity == "error":
+        signal_severity = severity
+        detail = f"matched {count} macOS unified log line(s) in the last {last_minutes} minute(s)"
+        if category == "syspolicyd_fd_pressure" and count < syspolicyd_log_error_count:
+            signal_severity = "warning"
+            detail = f"{detail}; below error threshold {syspolicyd_log_error_count}"
+        if signal_severity == "error":
             ok = False
         store.emit(
             snapshot_id,
             "health_signal",
-            severity,
+            signal_severity,
             signal=category,
             value=count,
-            detail=f"matched {count} macOS unified log line(s) in the last {last_minutes} minute(s)",
+            detail=detail,
         )
     return ok
 
@@ -1693,6 +1699,7 @@ def snapshot(args: argparse.Namespace, store: Store, mode: str) -> str:
                 args.log_timeout,
                 args.passive_log_lines,
                 args.passive_log_last_minutes,
+                args.syspolicyd_log_error_count,
             )
         spawn_ok = collect_spawn_smoke(store, snapshot_id, args.smoke_timeout)
         run_spctl = should_run_periodic_probe(
@@ -1715,7 +1722,10 @@ def snapshot(args: argparse.Namespace, store: Store, mode: str) -> str:
             run_codesign=run_codesign,
             run_spctl=run_spctl,
         )
-        if not spawn_ok or not app_ok or not passive_log_ok:
+        signal_unhealthy = any(
+            signal_meets_min_severity(signal, "error") for signal in store.current_signals
+        )
+        if signal_unhealthy or not spawn_ok or not app_ok or not passive_log_ok:
             status = "unhealthy"
             if (not spawn_ok or not app_ok) and args.collect_log_excerpt and should_collect_log_excerpt(
                 store,
@@ -2299,7 +2309,7 @@ See modules/bin/macos-session-health.md for the syspolicyd incident runbook.
     parser.add_argument(
         "--syspolicyd-rss-error-mb",
         type=float,
-        default=float(os.getenv("MACOS_SESSION_HEALTH_SYSPOLICYD_RSS_ERROR_MB", "3072")),
+        default=float(os.getenv("MACOS_SESSION_HEALTH_SYSPOLICYD_RSS_ERROR_MB", "2048")),
         help="Error when syspolicyd RSS reaches this many MiB.",
     )
     parser.add_argument(
@@ -2307,6 +2317,12 @@ See modules/bin/macos-session-health.md for the syspolicyd incident runbook.
         type=float,
         default=float(os.getenv("MACOS_SESSION_HEALTH_SYSPOLICYD_RSS_GROWTH_WARN_MB_PER_MINUTE", "128")),
         help="Warn when syspolicyd RSS grows this many MiB per minute between snapshots.",
+    )
+    parser.add_argument(
+        "--syspolicyd-log-error-count",
+        type=int,
+        default=int(os.getenv("MACOS_SESSION_HEALTH_SYSPOLICYD_LOG_ERROR_COUNT", "100")),
+        help="Treat syspolicyd FD-pressure log scans below this match count as warning-only.",
     )
     parser.add_argument("--app", action="append", default=[], help="App bundle to include in bundle and optional signing probes. Repeatable.")
     parser.add_argument("--command-timeout", type=float, default=5)

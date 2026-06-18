@@ -179,9 +179,11 @@ produce a distinct alert.
 Current important signals:
 
 - `syspolicyd_fd_pressure`: unified logs show `syspolicyd` FD or static-code
-  failures.
+  failures. Low-volume matches are warning-only by default; the LaunchAgent
+  promotes a scan to error at `--syspolicyd-log-error-count 100`.
 - `process_rss_high`: `syspolicyd` crossed the warning RSS threshold.
-- `process_rss_runaway`: `syspolicyd` crossed the error RSS threshold.
+- `process_rss_runaway`: `syspolicyd` crossed the error RSS threshold. The
+  LaunchAgent uses `--syspolicyd-rss-error-mb 2048`.
 - `process_rss_growth_high`: `syspolicyd` RSS grew too fast between snapshots.
 - `process_pid_changed`: monitored process restarted.
 - `spawn_failed`: simple process spawning failed.

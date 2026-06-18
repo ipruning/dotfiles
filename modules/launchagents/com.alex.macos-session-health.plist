@@ -23,9 +23,11 @@
     <string>--syspolicyd-rss-warn-mb</string>
     <string>1536</string>
     <string>--syspolicyd-rss-error-mb</string>
-    <string>3072</string>
+    <string>2048</string>
     <string>--syspolicyd-rss-growth-warn-mb-per-minute</string>
     <string>128</string>
+    <string>--syspolicyd-log-error-count</string>
+    <string>100</string>
     <string>--lsof-timeout</string>
     <string>5</string>
     <string>--app-assess-timeout</string>
