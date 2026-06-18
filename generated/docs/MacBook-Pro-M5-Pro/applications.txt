@@ -54,7 +54,6 @@ Pixelmator Pro Creator Studio
 qBittorrent
 QQ
 Quark
-Raycast
 Raycast Beta
 Rectangle
 Repo Prompt
