@@ -7,6 +7,7 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import getpass
+import glob
 import hashlib
 import json
 import os
@@ -19,12 +20,13 @@ import sqlite3
 import subprocess
 import sys
 import time
+import tomllib
 import uuid
 from pathlib import Path
 from typing import Any
 
 
-VERSION = "0.4.0"
+VERSION = "0.5.0"
 DEFAULT_DB = (
     Path.home()
     / "Library"
@@ -33,6 +35,10 @@ DEFAULT_DB = (
     / "health.sqlite3"
 )
 DEFAULT_APP = "/Applications/Visual Studio Code.app"
+CODEX_APP = Path("/Applications/Codex.app")
+CODEX_CONFIG = Path.home() / ".codex" / "config.toml"
+CODEX_CHROME_NATIVE_HOSTS = Path.home() / ".codex" / "chrome-native-hosts-v2.json"
+CODEX_CHROME_EXTENSION_ID = "hehggadaopoacecdllhhajmbjkdcmajg"
 RESOURCE_ERROR_RE = re.compile(
     r"too many open files|resource temporarily unavailable|fork|forkpty|cannot allocate memory|unable to spawn",
     re.IGNORECASE,
@@ -45,7 +51,11 @@ KNOWN_EVENTS = {
     "app_codesign_verify_skipped",
     "brrr_notification",
     "brrr_notification_skipped",
+    "code_sign_clone_delta",
+    "code_sign_clone_status",
     "command_process_count",
+    "codex_config_snapshot",
+    "codex_process_summary",
     "fd_top",
     "health_signal",
     "launch_service",
@@ -66,7 +76,7 @@ KNOWN_EVENTS = {
     "retention_prune",
     "snapshot_begin",
     "snapshot_end",
-    "spawn_smoke",
+    "spawn_check",
     "system_context",
     "user_process_count",
     "zombie",
@@ -339,6 +349,59 @@ def parse_launchctl_print(output: str) -> dict[str, str]:
         if key in {"active count", "path", "type", "state", "program", "runs", "pid", "last exit code"}:
             parsed[key.replace(" ", "_")] = value
     return parsed
+
+
+def plugin_enabled(config: dict[str, Any], plugin_name: str) -> bool | None:
+    plugins = config.get("plugins")
+    if not isinstance(plugins, dict):
+        return None
+    plugin = plugins.get(plugin_name)
+    if not isinstance(plugin, dict):
+        return None
+    enabled = plugin.get("enabled")
+    return enabled if isinstance(enabled, bool) else None
+
+
+def candidate_code_sign_clone_paths() -> list[Path]:
+    paths: list[Path] = []
+    seen: set[str] = set()
+
+    tmpdir = os.getenv("TMPDIR")
+    if tmpdir:
+        candidate = Path(tmpdir).expanduser().resolve().parent / "X" / "com.openai.codex.code_sign_clone"
+        paths.append(candidate)
+
+    for raw_path in glob.glob("/var/folders/*/*/X/com.openai.codex.code_sign_clone"):
+        paths.append(Path(raw_path))
+
+    unique: list[Path] = []
+    for path in paths:
+        key = str(path.resolve(strict=False))
+        if key in seen:
+            continue
+        seen.add(key)
+        unique.append(path)
+    return unique
+
+
+def codex_process_role(command: str) -> str:
+    if command.startswith("/Applications/Codex.app/Contents/MacOS/Codex"):
+        return "codex_main"
+    if "/Applications/Codex.app/Contents/Resources/codex app-server" in command:
+        return "codex_app_server"
+    if "/Codex (Service).app/Contents/MacOS/Codex (Service)" in command:
+        return "codex_service"
+    if "/Codex (Renderer).app/Contents/MacOS/Codex (Renderer)" in command:
+        return "codex_renderer"
+    if "/browser_crashpad_handler" in command and "Codex" in command:
+        return "codex_crashpad"
+    if "/Applications/Codex.app/Contents/Resources/cua_node/bin/node_repl" in command:
+        return "codex_node_repl"
+    if "SkyComputerUseClient" in command and " mcp" in command:
+        return "codex_sky_computer_use"
+    if "extension-host" in command and f"chrome-extension://{CODEX_CHROME_EXTENSION_ID}/" in command:
+        return "codex_chrome_extension_host"
+    return ""
 
 
 def syspolicyd_status(timeout: float) -> dict[str, Any]:
@@ -742,11 +805,11 @@ def collect_process_resource_delta(
             snapshot_id,
             "health_signal",
             "error",
-            signal="process_rss_runaway",
+            signal="process_rss_error",
             role=role,
             pid=pid,
             value=rss_mb,
-            detail="process RSS exceeded runaway threshold",
+            detail="process RSS exceeded error threshold",
         )
 
     store.set_state(state_key, json.dumps(current_state, sort_keys=True))
@@ -929,6 +992,334 @@ def collect_audio_registrar_health(
             service=service,
             timeout=args.command_timeout,
         )
+
+
+def read_plist_value(plist_path: Path, key: str, timeout: float) -> str:
+    code, out, _err, timed_out, _duration_ms = run_command(
+        ["plutil", "-extract", key, "raw", "-o", "-", str(plist_path)],
+        timeout=timeout,
+    )
+    return out.strip() if code == 0 and not timed_out else ""
+
+
+def collect_codex_config_snapshot(
+    store: Store,
+    snapshot_id: str,
+    args: argparse.Namespace,
+) -> dict[str, Any]:
+    config_path = args.codex_config.expanduser()
+    info_plist = args.codex_app.expanduser() / "Contents" / "Info.plist"
+    app_path = args.codex_app.expanduser()
+    app_version = ""
+    app_build = ""
+    if info_plist.exists():
+        app_version = read_plist_value(info_plist, "CFBundleShortVersionString", args.command_timeout)
+        app_build = read_plist_value(info_plist, "CFBundleVersion", args.command_timeout)
+
+    data: dict[str, Any] = {}
+    parse_error = ""
+    if config_path.exists():
+        try:
+            data = tomllib.loads(config_path.read_text(encoding="utf-8"))
+        except (OSError, tomllib.TOMLDecodeError) as exc:
+            parse_error = f"{type(exc).__name__}: {exc}"
+
+    notify = data.get("notify") if isinstance(data, dict) else None
+    notify_items = notify if isinstance(notify, list) else []
+    notify_uses_sky = any("SkyComputerUseClient" in str(item) for item in notify_items)
+
+    computer_use_enabled = plugin_enabled(data, "computer-use@openai-bundled")
+    chrome_enabled = plugin_enabled(data, "chrome@openai-bundled")
+
+    native_hosts_path = args.codex_chrome_native_hosts.expanduser()
+    native_host_parse_error = ""
+    native_host_extension_present = False
+    if native_hosts_path.exists():
+        try:
+            native_hosts_text = native_hosts_path.read_text(encoding="utf-8")
+            json.loads(native_hosts_text)
+            native_host_extension_present = CODEX_CHROME_EXTENSION_ID in native_hosts_text
+        except (OSError, json.JSONDecodeError) as exc:
+            native_host_parse_error = f"{type(exc).__name__}: {exc}"
+
+    snapshot = {
+        "app_path": str(app_path),
+        "app_exists": app_path.exists(),
+        "info_plist_exists": info_plist.exists(),
+        "app_version": app_version,
+        "app_build": app_build,
+        "config_path": str(config_path),
+        "config_exists": config_path.exists(),
+        "config_parse_ok": config_path.exists() and not parse_error,
+        "config_error": parse_error,
+        "notify_uses_sky_computer_use": notify_uses_sky,
+        "plugin_computer_use_enabled": computer_use_enabled if computer_use_enabled is not None else "",
+        "plugin_chrome_enabled": chrome_enabled if chrome_enabled is not None else "",
+        "chrome_native_hosts_path": str(native_hosts_path),
+        "chrome_native_hosts_exists": native_hosts_path.exists(),
+        "chrome_native_hosts_parse_ok": native_hosts_path.exists() and not native_host_parse_error,
+        "chrome_native_hosts_error": native_host_parse_error,
+        "chrome_native_extension_id_present": native_host_extension_present,
+    }
+    store.emit(snapshot_id, "codex_config_snapshot", **snapshot)
+
+    if parse_error:
+        store.emit(
+            snapshot_id,
+            "health_signal",
+            "warning",
+            signal="codex_config_parse_failed",
+            value=1,
+            detail=parse_error,
+        )
+    if native_host_parse_error:
+        store.emit(
+            snapshot_id,
+            "health_signal",
+            "warning",
+            signal="codex_chrome_native_hosts_parse_failed",
+            value=1,
+            detail=native_host_parse_error,
+        )
+    if computer_use_enabled is False and notify_uses_sky:
+        store.emit(
+            snapshot_id,
+            "health_signal",
+            "warning",
+            signal="codex_computer_use_notify_configured",
+            value=1,
+            detail="Codex notify still points to SkyComputerUseClient while the bundled computer-use plugin is disabled",
+        )
+    return snapshot
+
+
+def collect_codex_process_summary(
+    store: Store,
+    snapshot_id: str,
+    args: argparse.Namespace,
+    codex_config: dict[str, Any],
+) -> dict[str, Any]:
+    code, out, err, timed_out, duration_ms = run_command(
+        ["ps", "axww", "-o", "command="],
+        timeout=args.command_timeout,
+    )
+    if code != 0 or timed_out:
+        store.emit(
+            snapshot_id,
+            "codex_process_summary",
+            exit=code,
+            timeout=timed_out,
+            duration_ms=round(duration_ms, 1),
+            error=err.strip(),
+        )
+        store.emit(
+            snapshot_id,
+            "health_signal",
+            "warning",
+            signal="codex_process_summary_failed",
+            value=code,
+            timeout=timed_out,
+            detail=err.strip() or "ps did not finish before timeout",
+        )
+        return {}
+
+    role_counts: dict[str, int] = {}
+    for command in out.splitlines():
+        role = codex_process_role(command)
+        if not role:
+            continue
+        role_counts[role] = role_counts.get(role, 0) + 1
+
+    def count(role: str) -> int:
+        return role_counts.get(role, 0)
+
+    process_summary = {
+        "exit": code,
+        "timeout": timed_out,
+        "duration_ms": round(duration_ms, 1),
+        "codex_main_count": count("codex_main"),
+        "codex_app_server_count": count("codex_app_server"),
+        "codex_service_count": count("codex_service"),
+        "codex_renderer_count": count("codex_renderer"),
+        "codex_crashpad_count": count("codex_crashpad"),
+        "node_repl_count": count("codex_node_repl"),
+        "sky_computer_use_count": count("codex_sky_computer_use"),
+        "chrome_extension_host_count": count("codex_chrome_extension_host"),
+    }
+    store.emit(snapshot_id, "codex_process_summary", **process_summary)
+
+    computer_use_enabled = codex_config.get("plugin_computer_use_enabled")
+    chrome_enabled = codex_config.get("plugin_chrome_enabled")
+    if computer_use_enabled is False and count("codex_sky_computer_use") > 0:
+        store.emit(
+            snapshot_id,
+            "health_signal",
+            "warning",
+            signal="codex_disabled_computer_use_process_running",
+            value=count("codex_sky_computer_use"),
+            detail="SkyComputerUseClient is running while the bundled computer-use plugin is disabled",
+        )
+    if chrome_enabled is False and count("codex_chrome_extension_host") > 0:
+        store.emit(
+            snapshot_id,
+            "health_signal",
+            "warning",
+            signal="codex_disabled_chrome_process_running",
+            value=count("codex_chrome_extension_host"),
+            detail="Codex Chrome extension host is running while the bundled chrome plugin is disabled",
+        )
+    if count("codex_node_repl") >= args.codex_node_repl_warn:
+        store.emit(
+            snapshot_id,
+            "health_signal",
+            "warning",
+            signal="codex_node_repl_many",
+            value=count("codex_node_repl"),
+            detail="Codex app-server has many node_repl child processes",
+        )
+    return process_summary
+
+
+def collect_trustd_health(
+    store: Store,
+    snapshot_id: str,
+    args: argparse.Namespace,
+) -> None:
+    code, out, err, timed_out, _duration_ms = run_command(["pgrep", "-x", "trustd"], timeout=args.command_timeout)
+    pids = [line.strip() for line in out.splitlines() if line.strip()]
+    if timed_out:
+        store.emit(
+            snapshot_id,
+            "health_signal",
+            "warning",
+            signal="trustd_pgrep_timeout",
+            value=code,
+            detail=err.strip() or "pgrep trustd did not finish before timeout",
+        )
+        return
+
+    resources: list[dict[str, Any]] = []
+    for pid in pids:
+        resource_data = collect_process_resource(
+            store,
+            snapshot_id,
+            pid,
+            role="trustd",
+            service="process/trustd",
+            timeout=args.command_timeout,
+            cpu_warn=args.trustd_cpu_warn,
+            rss_warn_mb=args.trustd_rss_warn_mb,
+        )
+        if resource_data:
+            resources.append(resource_data)
+
+    if not resources:
+        return
+    largest = max(
+        resources,
+        key=lambda item: parse_float(str(item.get("rss_mb") or "")) or 0,
+    )
+    collect_process_resource_delta(
+        store,
+        snapshot_id,
+        largest,
+        role="trustd",
+        rss_growth_warn_mb_per_minute=args.trustd_rss_growth_warn_mb_per_minute,
+        rss_error_mb=args.trustd_rss_error_mb,
+    )
+
+
+def collect_code_sign_clone_status(
+    store: Store,
+    snapshot_id: str,
+    args: argparse.Namespace,
+) -> None:
+    for path in candidate_code_sign_clone_paths():
+        exists = path.exists()
+        status: dict[str, Any] = {
+            "path": str(path),
+            "exists": exists,
+        }
+        if not exists:
+            store.emit(snapshot_id, "code_sign_clone_status", **status)
+            continue
+
+        code, out, err, timed_out, _duration_ms = run_command(
+            ["du", "-sk", str(path)],
+            timeout=args.code_sign_clone_timeout,
+        )
+        size_kb: int | None = None
+        if code == 0 and not timed_out and out.strip():
+            size_kb = parse_int(out.split()[0])
+        size_mb = round(size_kb / 1024, 1) if size_kb is not None else ""
+        status.update(
+            {
+                "size_mb": size_mb,
+                "du_timeout": timed_out,
+                "du_error": err.strip(),
+            }
+        )
+        store.emit(snapshot_id, "code_sign_clone_status", **status)
+
+        if timed_out:
+            store.emit(
+                snapshot_id,
+                "health_signal",
+                "warning",
+                signal="code_sign_clone_du_timeout",
+                value=code,
+                detail=f"du timed out for {path}",
+            )
+            continue
+
+        if not isinstance(size_mb, float):
+            continue
+        if size_mb >= args.code_sign_clone_warn_mb:
+            store.emit(
+                snapshot_id,
+                "health_signal",
+                "warning",
+                signal="code_sign_clone_size_high",
+                value=size_mb,
+                detail=f"Codex code_sign_clone is {size_mb} MiB",
+            )
+
+        if store.conn is None:
+            continue
+        state_key = f"last_code_sign_clone_status:{path}"
+        previous_raw = store.get_state(state_key)
+        current = {"ts": utc_now(), "size_mb": size_mb}
+        if previous_raw:
+            try:
+                previous = json.loads(previous_raw)
+                previous_ts = dt.datetime.fromisoformat(str(previous["ts"]).replace("Z", "+00:00"))
+                previous_size = float(previous.get("size_mb"))
+                now = dt.datetime.now(dt.timezone.utc)
+                elapsed_seconds = max((now - previous_ts).total_seconds(), 1)
+                delta_mb = round(size_mb - previous_size, 1)
+                growth = round((size_mb - previous_size) / elapsed_seconds * 60, 1)
+                store.emit(
+                    snapshot_id,
+                    "code_sign_clone_delta",
+                    path=str(path),
+                    size_mb=size_mb,
+                    previous_size_mb=previous_size,
+                    delta_mb=delta_mb,
+                    growth_mb_per_minute=growth,
+                    elapsed_seconds=round(elapsed_seconds, 1),
+                )
+                if growth >= args.code_sign_clone_growth_warn_mb_per_minute:
+                    store.emit(
+                        snapshot_id,
+                        "health_signal",
+                        "warning",
+                        signal="code_sign_clone_growth_high",
+                        value=growth,
+                        detail="Codex code_sign_clone is growing quickly",
+                    )
+            except (KeyError, TypeError, ValueError, json.JSONDecodeError):
+                pass
+        store.set_state(state_key, json.dumps(current, sort_keys=True))
 
 
 def collect_limits(store: Store, snapshot_id: str, timeout: float) -> None:
@@ -1213,7 +1604,7 @@ def collect_cpu_top(store: Store, snapshot_id: str, top_n: int, timeout: float) 
         )
 
 
-def collect_spawn_smoke(store: Store, snapshot_id: str, timeout: float) -> bool:
+def collect_spawn_check(store: Store, snapshot_id: str, timeout: float) -> bool:
     checks = [
         ("true", ["/usr/bin/true"]),
         ("bash_colon", ["/bin/bash", "-c", ":"]),
@@ -1225,7 +1616,7 @@ def collect_spawn_smoke(store: Store, snapshot_id: str, timeout: float) -> bool:
         code, out, err, timed_out, duration_ms = run_command(command, timeout=timeout)
         store.emit(
             snapshot_id,
-            "spawn_smoke",
+            "spawn_check",
             name=name,
             command=shlex.join(command),
             exit=code,
@@ -1244,7 +1635,7 @@ def collect_spawn_smoke(store: Store, snapshot_id: str, timeout: float) -> bool:
                 value=code,
                 name=name,
                 timeout=timed_out,
-                detail=err.strip() or out.strip() or "spawn smoke failed",
+                detail=err.strip() or out.strip() or "spawn check failed",
             )
     return ok
 
@@ -1442,7 +1833,28 @@ def classify_passive_log_line(line: str) -> tuple[str, str] | None:
             or "failed to generate secstaticcode" in lower
         )
     ):
-        return "syspolicyd_fd_pressure", "error"
+        return "syspolicyd_assessment_failure", "error"
+    if (
+        ("syspolicyd[" in lower or "trustd[" in lower)
+        and ("application-groups" in lower or "entitlement" in lower)
+        and ("codex" in lower or "openai" in lower or "com.openai.sky" in lower)
+    ):
+        return "codex_entitlement_log_warning", "warning"
+    if (
+        ("syspolicyd[" in lower or "trustd[" in lower)
+        and "extension-host" in lower
+        and ("codex" in lower or "openai" in lower or CODEX_CHROME_EXTENSION_ID in lower)
+    ):
+        return "codex_extension_host_log_warning", "warning"
+    if (
+        ("syspolicyd[" in lower or "trustd[" in lower)
+        and ("skycomputeruseclient" in lower or "codex computer use" in lower or "com.openai.sky" in lower)
+    ):
+        return "codex_computer_use_log_warning", "warning"
+    if "devicecheck" in lower and ("codex" in lower or "openai" in lower):
+        return "codex_devicecheck_log_warning", "warning"
+    if "code_sign_clone" in lower and ("codex" in lower or "openai" in lower):
+        return "codex_code_sign_clone_log_warning", "warning"
     if "-9405" in lower and "music" in lower:
         return "music_audio_9405", "error"
     if "failed lookup: name = com.apple.audio.audiocomponentregistrar" in lower:
@@ -1471,6 +1883,22 @@ def collect_passive_log_signals(
         'eventMessage CONTAINS[c] "UNIX error exception: 24" OR '
         'eventMessage CONTAINS[c] "Too many open files" OR '
         'eventMessage CONTAINS[c] "Failed to generate SecStaticCode" OR '
+        '(eventMessage CONTAINS[c] "application-groups" AND '
+        '(eventMessage CONTAINS[c] "Codex" OR eventMessage CONTAINS[c] "OpenAI" OR '
+        'eventMessage CONTAINS[c] "com.openai.sky")) OR '
+        '(eventMessage CONTAINS[c] "entitlement" AND '
+        '(eventMessage CONTAINS[c] "Codex" OR eventMessage CONTAINS[c] "OpenAI" OR '
+        'eventMessage CONTAINS[c] "com.openai.sky")) OR '
+        '(eventMessage CONTAINS[c] "DeviceCheck" AND '
+        '(eventMessage CONTAINS[c] "Codex" OR eventMessage CONTAINS[c] "OpenAI")) OR '
+        '(eventMessage CONTAINS[c] "extension-host" AND '
+        '(eventMessage CONTAINS[c] "Codex" OR eventMessage CONTAINS[c] "OpenAI" OR '
+        f'eventMessage CONTAINS[c] "{CODEX_CHROME_EXTENSION_ID}")) OR '
+        'eventMessage CONTAINS[c] "SkyComputerUseClient" OR '
+        'eventMessage CONTAINS[c] "Codex Computer Use" OR '
+        'eventMessage CONTAINS[c] "com.openai.sky" OR '
+        '(eventMessage CONTAINS[c] "code_sign_clone" AND '
+        '(eventMessage CONTAINS[c] "Codex" OR eventMessage CONTAINS[c] "OpenAI")) OR '
         'eventMessage CONTAINS[c] "OpenOutputUnit() failed! status:-9405" OR '
         'eventMessage CONTAINS[c] "SetupLocalAudioDevice() failed! status=-9405" OR '
         'eventMessage CONTAINS[c] "failed lookup: name = com.apple.audio.AudioComponentRegistrar" OR '
@@ -1541,7 +1969,7 @@ def collect_passive_log_signals(
     for (category, severity), count in sorted(category_counts.items()):
         signal_severity = severity
         detail = f"matched {count} macOS unified log line(s) in the last {last_minutes} minute(s)"
-        if category == "syspolicyd_fd_pressure" and count < syspolicyd_log_error_count:
+        if category == "syspolicyd_assessment_failure" and count < syspolicyd_log_error_count:
             signal_severity = "warning"
             detail = f"{detail}; below error threshold {syspolicyd_log_error_count}"
         if signal_severity == "error":
@@ -1575,36 +2003,78 @@ def signal_fingerprint(signals: list[dict[str, Any]]) -> str:
     return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
 
 
-def notification_fingerprint(signals: list[dict[str, Any]]) -> str:
-    def value_bucket(value: Any) -> str:
-        numeric = parse_float(str(value))
-        if numeric is None:
-            return ""
-        if numeric < 10:
-            return "<10"
-        if numeric < 100:
-            return "10-99"
-        if numeric < 1000:
-            return "100-999"
-        if numeric < 10000:
-            return "1000-9999"
-        return "10000+"
+def strongest_signal(signals: list[dict[str, Any]], signal_name: str, *, role: str = "") -> dict[str, Any] | None:
+    matches = [
+        signal
+        for signal in signals
+        if signal.get("signal") == signal_name and (not role or signal.get("role") == role)
+    ]
+    if not matches:
+        return None
+    return max(matches, key=lambda item: parse_float(str(item.get("value") or "")) or 0)
 
-    normalized = []
-    for signal in signals:
-        normalized.append(
-            {
-                "severity": signal.get("severity"),
-                "signal": signal.get("signal"),
-                "role": signal.get("role"),
-                "service": signal.get("service"),
-                "name": signal.get("name"),
-                "app": signal.get("app"),
-                "value_bucket": value_bucket(signal.get("value")),
-            }
-        )
-    encoded = json.dumps(sorted(normalized, key=lambda item: json.dumps(item, sort_keys=True)), sort_keys=True)
-    return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
+
+def build_brrr_incident(signals: list[dict[str, Any]], snapshot_id: str, status: str) -> dict[str, Any] | None:
+    spawn_failed = strongest_signal(signals, "spawn_failed")
+    syspolicyd_assessment_failure = strongest_signal(signals, "syspolicyd_assessment_failure")
+    syspolicyd_rss_error = strongest_signal(signals, "process_rss_error", role="syspolicyd")
+    collector_exception = strongest_signal(signals, "collector_exception")
+
+    if spawn_failed:
+        title = "macOS 无法正常启动进程"
+        summary = "简单 spawn 检查失败，新的 app 或 shell 命令可能会打不开。"
+        primary = spawn_failed
+        kind = "spawn_failed"
+    elif (
+        syspolicyd_assessment_failure
+        and (parse_float(str(syspolicyd_assessment_failure.get("value") or "")) or 0) >= 1000
+    ):
+        count = syspolicyd_assessment_failure.get("value", "")
+        title = "Gatekeeper 正在大量失败"
+        summary = f"最近日志里有 {count} 条 syspolicyd assessment 失败，app 启动可能受影响。"
+        primary = syspolicyd_assessment_failure
+        kind = "syspolicyd_assessment_failure"
+    elif syspolicyd_rss_error:
+        rss = syspolicyd_rss_error.get("value", "")
+        title = "syspolicyd 内存异常增长"
+        summary = f"syspolicyd RSS 已到 {rss} MiB，Gatekeeper 评估可能开始拖慢或失败。"
+        primary = syspolicyd_rss_error
+        kind = "syspolicyd_rss_error"
+    elif collector_exception:
+        title = "macOS 监控采集器异常"
+        summary = "macos-session-health 自身采集失败，需要查看本机日志。"
+        primary = collector_exception
+        kind = "collector_exception"
+    else:
+        return None
+
+    context: list[str] = []
+    if syspolicyd_assessment_failure and syspolicyd_assessment_failure is not primary:
+        context.append(f"syspolicyd_assessment_failure={syspolicyd_assessment_failure.get('value', '')}")
+    if syspolicyd_rss_error and syspolicyd_rss_error is not primary:
+        context.append(f"syspolicyd_rss_mb={syspolicyd_rss_error.get('value', '')}")
+    if spawn_failed and spawn_failed is not primary:
+        context.append(f"spawn_failed={spawn_failed.get('name', '') or spawn_failed.get('value', '')}")
+
+    message_lines = [
+        summary,
+        f"状态：{status}。",
+    ]
+    if context:
+        message_lines.append("同时看到：" + "，".join(context) + "。")
+    message_lines.extend(
+        [
+            "建议：先看 `macos-session-health incident --hours 6 --format markdown`。",
+            f"snapshot={snapshot_id}",
+        ]
+    )
+    return {
+        "kind": kind,
+        "title": title,
+        "message": "\n".join(message_lines),
+        "primary_signal": primary.get("signal", ""),
+        "primary_value": primary.get("value", ""),
+    }
 
 
 def signal_meets_min_severity(signal: dict[str, Any], min_severity: str) -> bool:
@@ -1612,30 +2082,14 @@ def signal_meets_min_severity(signal: dict[str, Any], min_severity: str) -> bool
     return SEVERITY_RANK.get(severity, 0) >= SEVERITY_RANK[min_severity]
 
 
-def format_signal_line(signal: dict[str, Any]) -> str:
-    fields = [
-        f"{signal.get('severity', '')}:{signal.get('signal', '')}",
-    ]
-    for key in ("value", "role", "service", "pid", "app", "name"):
-        value = signal.get(key)
-        if value not in (None, ""):
-            fields.append(f"{key}={value}")
-    detail = signal.get("detail")
-    if detail:
-        fields.append(str(detail))
-    return " ".join(fields)
-
-
 def should_send_brrr_notification(
     store: Store,
     snapshot_id: str,
-    fingerprint: str,
     cooldown_minutes: int,
 ) -> bool:
     if store.conn is None:
         return True
 
-    last_fingerprint = store.get_state("last_brrr_notification_fingerprint")
     last_sent_at = store.get_state("last_brrr_notification_sent_at")
     now = dt.datetime.now(dt.timezone.utc)
     cooldown_elapsed = True
@@ -1647,18 +2101,16 @@ def should_send_brrr_notification(
         except ValueError:
             cooldown_elapsed = True
 
-    if fingerprint == last_fingerprint and not cooldown_elapsed:
+    if not cooldown_elapsed:
         store.emit(
             snapshot_id,
             "brrr_notification_skipped",
             reason="cooldown_active",
             cooldown_minutes=cooldown_minutes,
-            signal_fingerprint=fingerprint,
             last_sent_at=last_sent_at or "",
         )
         return False
 
-    store.set_state("last_brrr_notification_fingerprint", fingerprint)
     store.set_state("last_brrr_notification_sent_at", utc_now())
     return True
 
@@ -1673,12 +2125,8 @@ def maybe_send_brrr_notification(
         return
 
     helper = Path(args.brrr_helper).expanduser()
-    matching_signals = [
-        signal
-        for signal in store.current_signals
-        if signal_meets_min_severity(signal, args.brrr_min_severity)
-    ]
-    if not matching_signals:
+    incident = build_brrr_incident(store.current_signals, snapshot_id, status)
+    if incident is None:
         return
 
     if not helper.exists():
@@ -1694,31 +2142,19 @@ def maybe_send_brrr_notification(
         )
         return
 
-    fingerprint = notification_fingerprint(matching_signals)
     if not should_send_brrr_notification(
         store,
         snapshot_id,
-        fingerprint,
         args.brrr_notify_cooldown_minutes,
     ):
         return
 
-    signal_lines = [format_signal_line(signal) for signal in matching_signals[:5]]
-    if len(matching_signals) > 5:
-        signal_lines.append(f"... {len(matching_signals) - 5} more signal(s)")
-    message = "\n".join(
-        [
-            f"status={status}",
-            f"snapshot={snapshot_id}",
-            *signal_lines,
-        ]
-    )
     command = [
         str(helper),
         "--title",
-        args.brrr_title,
+        str(incident["title"]),
         "--message",
-        message,
+        str(incident["message"]),
         "--thread-id",
         args.brrr_thread_id,
         "--interruption-level",
@@ -1740,13 +2176,15 @@ def maybe_send_brrr_notification(
         duration_ms=round(duration_ms, 1),
         helper=str(helper),
         status=status,
-        title=args.brrr_title,
+        title=incident["title"],
+        incident_kind=incident["kind"],
+        primary_signal=incident["primary_signal"],
+        primary_value=incident["primary_value"],
         thread_id=args.brrr_thread_id,
         interruption_level=args.brrr_interruption_level,
         sent=code == 0 and not timed_out,
         stdout=out.strip(),
         stderr=err.strip(),
-        signal_fingerprint=fingerprint,
     )
 
 
@@ -1858,7 +2296,11 @@ def snapshot(args: argparse.Namespace, store: Store, mode: str) -> str:
         collect_process_counts(store, snapshot_id, args.top, args.command_timeout)
         collect_cpu_top(store, snapshot_id, args.top, args.command_timeout)
         collect_fd_top(store, snapshot_id, args.top, args.fd_warn, args.lsof_timeout)
+        codex_config = collect_codex_config_snapshot(store, snapshot_id, args)
+        collect_codex_process_summary(store, snapshot_id, args, codex_config)
+        collect_code_sign_clone_status(store, snapshot_id, args)
         collect_syspolicyd_health(store, snapshot_id, args)
+        collect_trustd_health(store, snapshot_id, args)
         collect_audio_registrar_health(store, snapshot_id, args)
         passive_log_ok = True
         run_passive_log = should_run_periodic_probe(
@@ -1876,7 +2318,7 @@ def snapshot(args: argparse.Namespace, store: Store, mode: str) -> str:
                 args.passive_log_last_minutes,
                 args.syspolicyd_log_error_count,
             )
-        spawn_ok = collect_spawn_smoke(store, snapshot_id, args.smoke_timeout)
+        spawn_ok = collect_spawn_check(store, snapshot_id, args.spawn_check_timeout)
         run_spctl = should_run_periodic_probe(
             store,
             snapshot_id,
@@ -2231,6 +2673,78 @@ def render_incident_markdown(report: dict[str, Any]) -> str:
     if not report["syspolicyd_deltas"]:
         lines.append("No syspolicyd delta samples.")
 
+    lines.extend(["", "## Codex Diagnostics", ""])
+    config = report.get("latest_codex_config") or {}
+    if config:
+        lines.append(
+            "- config "
+            + compact_record(
+                config,
+                [
+                    "ts",
+                    "app_version",
+                    "app_build",
+                    "plugin_computer_use_enabled",
+                    "plugin_chrome_enabled",
+                    "notify_uses_sky_computer_use",
+                    "chrome_native_extension_id_present",
+                ],
+            )
+        )
+    else:
+        lines.append("- config unavailable")
+
+    process_summary = report.get("latest_codex_process_summary") or {}
+    if process_summary:
+        lines.append(
+            "- processes "
+            + compact_record(
+                process_summary,
+                [
+                    "ts",
+                    "codex_main_count",
+                    "codex_app_server_count",
+                    "node_repl_count",
+                    "sky_computer_use_count",
+                    "chrome_extension_host_count",
+                    "codex_service_count",
+                    "codex_renderer_count",
+                ],
+            )
+        )
+    else:
+        lines.append("- processes unavailable")
+
+    for record in report["code_sign_clone_status"]:
+        lines.append(
+            f"- code_sign_clone `{record['ts']}` "
+            + compact_record(record, ["exists", "size_mb", "du_timeout", "path"])
+        )
+    if not report["code_sign_clone_status"]:
+        lines.append("- code_sign_clone unavailable")
+    for record in report["code_sign_clone_delta"]:
+        lines.append(
+            f"- code_sign_clone_delta `{record['ts']}` "
+            + compact_record(record, ["size_mb", "previous_size_mb", "delta_mb", "growth_mb_per_minute"])
+        )
+
+    for record in report["trustd_resources"]:
+        lines.append(
+            f"- trustd `{record['ts']}` "
+            + compact_record(record, ["pid", "cpu_percent", "rss_mb", "etime", "stat"])
+        )
+    if not report["trustd_resources"]:
+        lines.append("- trustd resource samples unavailable")
+
+    if report["codex_diagnostic_signals"]:
+        lines.append("")
+        lines.append("Recent Codex diagnostic signals:")
+        for record in report["codex_diagnostic_signals"]:
+            lines.append(
+                f"- `{record['ts']}` `{record.get('severity', '')}` "
+                + compact_record(record, ["signal", "value", "role", "pid", "detail"])
+            )
+
     lines.extend(["", "## Passive Log Scans", ""])
     for record in report["passive_log_scans"]:
         lines.append(
@@ -2240,11 +2754,22 @@ def render_incident_markdown(report: dict[str, Any]) -> str:
     if not report["passive_log_scans"]:
         lines.append("No passive log scans.")
 
-    lines.extend(["", "## BRRR Decisions", ""])
+    lines.extend(["", "## brrr Notification History", ""])
     for record in report["brrr_events"]:
         lines.append(
             f"- `{record['ts']}` `{record['event']}` "
-            + compact_record(record, ["sent", "reason", "status", "signal_fingerprint", "last_sent_at"])
+            + compact_record(
+                record,
+                [
+                    "sent",
+                    "reason",
+                    "status",
+                    "incident_kind",
+                    "primary_signal",
+                    "primary_value",
+                    "last_sent_at",
+                ],
+            )
         )
     if not report["brrr_events"]:
         lines.append("No brrr events.")
@@ -2267,8 +2792,8 @@ def render_incident_markdown(report: dict[str, Any]) -> str:
     if not report["latest_fd_top"]:
         lines.append("No FD top samples.")
 
-    lines.extend(["", "## Interpretation", ""])
-    lines.extend(report["interpretation"])
+    lines.extend(["", "## Findings", ""])
+    lines.extend(report["findings"])
     lines.append("")
     return "\n".join(lines)
 
@@ -2326,11 +2851,32 @@ def incident_report(db_path: Path, hours: float, limit: int, output_format: str)
         syspolicyd_resources = [
             record for record in process_resources if record.get("role") == "syspolicyd"
         ][:limit]
+        trustd_resources = [
+            record for record in process_resources if record.get("role") == "trustd"
+        ][:limit]
         syspolicyd_deltas = load_recent_events(
-            conn, cutoff=cutoff, event="process_resource_delta", limit=limit
+            conn, cutoff=cutoff, event="process_resource_delta", limit=limit * 4
+        )
+        syspolicyd_deltas = [
+            record for record in syspolicyd_deltas if record.get("role") == "syspolicyd"
+        ][:limit]
+        latest_codex_config_records = load_latest_events(
+            conn, event="codex_config_snapshot", limit=1
+        )
+        latest_codex_process_summary_records = load_latest_events(
+            conn, event="codex_process_summary", limit=1
+        )
+        code_sign_clone_status = load_recent_events(
+            conn, cutoff=cutoff, event="code_sign_clone_status", limit=limit
+        )
+        code_sign_clone_delta = load_recent_events(
+            conn, cutoff=cutoff, event="code_sign_clone_delta", limit=limit
         )
         passive_log_scans = load_recent_events(
             conn, cutoff=cutoff, event="macos_passive_log_scan", limit=limit
+        )
+        codex_diagnostic_signal_candidates = load_recent_events(
+            conn, cutoff=cutoff, event="health_signal", limit=max(limit * 8, 80)
         )
         brrr_events = [
             *load_recent_events(conn, cutoff=cutoff, event="brrr_notification", limit=limit),
@@ -2380,28 +2926,89 @@ def incident_report(db_path: Path, hours: float, limit: int, output_format: str)
         "unhealthy": int(summary_row["unhealthy"] or 0),
         "error": int(summary_row["error"] or 0),
     }
-    syspolicyd_pressure = next(
-        (row for row in signal_counts if row["signal"] == "syspolicyd_fd_pressure"),
-        None,
-    )
-    runaway = next(
-        (row for row in signal_counts if row["signal"] == "process_rss_runaway"),
-        None,
-    )
-    interpretation = [
-        "- Treat `syspolicyd_fd_pressure` as the strongest sign that Gatekeeper/static-code checks are failing.",
+    syspolicyd_assessment_failure_rows = [
+        row for row in signal_counts if row["signal"] == "syspolicyd_assessment_failure"
+    ]
+    rss_error_rows = [
+        row for row in signal_counts if row["signal"] == "process_rss_error"
+    ]
+    findings = [
+        "- Treat `syspolicyd_assessment_failure` as the strongest sign that Gatekeeper/static-code checks are failing.",
         "- Treat `maxfiles_soft_low` as context, not proof of cause.",
         "- Keep `spctl` and `codesign` probes disabled during an active incident.",
     ]
-    if syspolicyd_pressure:
-        interpretation.append(
-            f"- Window contains `{syspolicyd_pressure['count']}` syspolicyd FD-pressure signal(s); "
-            f"max_value=`{syspolicyd_pressure['max_value']}`."
+    if syspolicyd_assessment_failure_rows:
+        total_assessment_failures = sum(int(row["count"] or 0) for row in syspolicyd_assessment_failure_rows)
+        max_assessment_failures = max(
+            parse_float(str(row["max_value"] or "")) or 0 for row in syspolicyd_assessment_failure_rows
         )
-    if runaway:
-        interpretation.append(
-            f"- Window contains syspolicyd runaway RSS signal(s); max_value=`{runaway['max_value']}` MiB."
+        findings.append(
+            f"- Window contains `{total_assessment_failures}` syspolicyd assessment failure signal(s); "
+            f"max_value=`{round(max_assessment_failures, 1)}`."
         )
+    if rss_error_rows:
+        total_rss_error = sum(int(row["count"] or 0) for row in rss_error_rows)
+        max_rss_error = max(
+            parse_float(str(row["max_value"] or "")) or 0 for row in rss_error_rows
+        )
+        findings.append(
+            f"- Window contains `{total_rss_error}` RSS error signal(s); max_value=`{round(max_rss_error, 1)}` MiB."
+        )
+    latest_codex_config = latest_codex_config_records[0] if latest_codex_config_records else {}
+    latest_codex_process_summary = (
+        latest_codex_process_summary_records[0] if latest_codex_process_summary_records else {}
+    )
+    codex_diagnostic_signal_prefixes = (
+        "codex_",
+        "code_sign_clone",
+        "trustd_",
+    )
+    codex_diagnostic_signals = [
+        record
+        for record in codex_diagnostic_signal_candidates
+        if str(record.get("signal") or "").startswith(codex_diagnostic_signal_prefixes)
+        or str(record.get("role") or "").startswith("trustd")
+    ][:limit]
+
+    if latest_codex_process_summary:
+        sky_count = parse_int(str(latest_codex_process_summary.get("sky_computer_use_count") or "0")) or 0
+        chrome_host_count = parse_int(
+            str(latest_codex_process_summary.get("chrome_extension_host_count") or "0")
+        ) or 0
+        node_repl_count = parse_int(str(latest_codex_process_summary.get("node_repl_count") or "0")) or 0
+        if sky_count:
+            findings.append(
+                f"- Latest Codex process snapshot: SkyComputerUseClient count=`{sky_count}`."
+            )
+        if chrome_host_count:
+            findings.append(
+                f"- Latest Codex process snapshot: Chrome extension host count=`{chrome_host_count}`."
+            )
+        if node_repl_count:
+            findings.append(
+                f"- Latest Codex process snapshot: node_repl child count=`{node_repl_count}`."
+            )
+    if latest_codex_config:
+        if latest_codex_config.get("plugin_computer_use_enabled") is False and latest_codex_config.get(
+            "notify_uses_sky_computer_use"
+        ):
+            findings.append(
+                "- Codex config disables the bundled computer-use plugin, but notify still points to SkyComputerUseClient."
+            )
+        if latest_codex_config.get("plugin_chrome_enabled") is False and latest_codex_config.get(
+            "chrome_native_extension_id_present"
+        ):
+            findings.append(
+                "- Codex config disables the bundled chrome plugin, but the Chrome native-host registry still references the Codex extension."
+            )
+    if code_sign_clone_status:
+        largest_clone = max(
+            code_sign_clone_status,
+            key=lambda item: parse_float(str(item.get("size_mb") or "")) or 0,
+        )
+        size = largest_clone.get("size_mb")
+        if size not in (None, ""):
+            findings.append(f"- Latest code_sign_clone size is `{size}` MiB.")
 
     report = {
         "generated_at": utc_now(),
@@ -2422,11 +3029,17 @@ def incident_report(db_path: Path, hours: float, limit: int, output_format: str)
         "recent_health_signals": recent_health_signals,
         "syspolicyd_resources": syspolicyd_resources,
         "syspolicyd_deltas": syspolicyd_deltas,
+        "latest_codex_config": latest_codex_config,
+        "latest_codex_process_summary": latest_codex_process_summary,
+        "code_sign_clone_status": code_sign_clone_status,
+        "code_sign_clone_delta": code_sign_clone_delta,
+        "trustd_resources": trustd_resources,
+        "codex_diagnostic_signals": codex_diagnostic_signals,
         "passive_log_scans": passive_log_scans,
         "brrr_events": brrr_events,
         "latest_cpu_top": latest_cpu_top,
         "latest_fd_top": latest_fd_top,
-        "interpretation": interpretation,
+        "findings": findings,
     }
 
     if output_format == "json":
@@ -2458,6 +3071,35 @@ See modules/bin/macos-session-health.md for the syspolicyd incident runbook.
     parser.add_argument("--quiet", action="store_true", help="Write SQLite without stdout logfmt output.")
     parser.add_argument("--top", type=int, default=int(os.getenv("MACOS_SESSION_HEALTH_TOP", "25")))
     parser.add_argument("--fd-warn", type=int, default=int(os.getenv("MACOS_SESSION_HEALTH_FD_WARN", "1024")))
+    parser.add_argument(
+        "--codex-app",
+        type=Path,
+        default=Path(os.getenv("MACOS_SESSION_HEALTH_CODEX_APP", str(CODEX_APP))),
+        help="Codex Desktop app bundle path used for Codex diagnostics.",
+    )
+    parser.add_argument(
+        "--codex-config",
+        type=Path,
+        default=Path(os.getenv("MACOS_SESSION_HEALTH_CODEX_CONFIG", str(CODEX_CONFIG))),
+        help="Codex config.toml path used for non-secret Codex diagnostics.",
+    )
+    parser.add_argument(
+        "--codex-chrome-native-hosts",
+        type=Path,
+        default=Path(
+            os.getenv(
+                "MACOS_SESSION_HEALTH_CODEX_CHROME_NATIVE_HOSTS",
+                str(CODEX_CHROME_NATIVE_HOSTS),
+            )
+        ),
+        help="Codex Chrome native-host registry path.",
+    )
+    parser.add_argument(
+        "--codex-node-repl-warn",
+        type=int,
+        default=int(os.getenv("MACOS_SESSION_HEALTH_CODEX_NODE_REPL_WARN", "20")),
+        help="Warn when Codex app-server has at least this many node_repl children.",
+    )
     parser.add_argument(
         "--syspolicyd-fd-warn",
         type=int,
@@ -2498,7 +3140,49 @@ See modules/bin/macos-session-health.md for the syspolicyd incident runbook.
         "--syspolicyd-log-error-count",
         type=int,
         default=int(os.getenv("MACOS_SESSION_HEALTH_SYSPOLICYD_LOG_ERROR_COUNT", "100")),
-        help="Treat syspolicyd FD-pressure log scans below this match count as warning-only.",
+        help="Treat syspolicyd assessment-failure log scans below this match count as warning-only.",
+    )
+    parser.add_argument(
+        "--trustd-cpu-warn",
+        type=float,
+        default=float(os.getenv("MACOS_SESSION_HEALTH_TRUSTD_CPU_WARN", "80")),
+        help="Warn when any trustd CPU percent reaches this value in ps output.",
+    )
+    parser.add_argument(
+        "--trustd-rss-warn-mb",
+        type=float,
+        default=float(os.getenv("MACOS_SESSION_HEALTH_TRUSTD_RSS_WARN_MB", "1024")),
+        help="Warn when any trustd RSS reaches this many MiB.",
+    )
+    parser.add_argument(
+        "--trustd-rss-error-mb",
+        type=float,
+        default=float(os.getenv("MACOS_SESSION_HEALTH_TRUSTD_RSS_ERROR_MB", "2048")),
+        help="Error when the largest trustd RSS reaches this many MiB.",
+    )
+    parser.add_argument(
+        "--trustd-rss-growth-warn-mb-per-minute",
+        type=float,
+        default=float(os.getenv("MACOS_SESSION_HEALTH_TRUSTD_RSS_GROWTH_WARN_MB_PER_MINUTE", "128")),
+        help="Warn when the largest trustd RSS grows this many MiB per minute.",
+    )
+    parser.add_argument(
+        "--code-sign-clone-warn-mb",
+        type=float,
+        default=float(os.getenv("MACOS_SESSION_HEALTH_CODE_SIGN_CLONE_WARN_MB", "1024")),
+        help="Warn when Codex code_sign_clone reaches this many MiB.",
+    )
+    parser.add_argument(
+        "--code-sign-clone-growth-warn-mb-per-minute",
+        type=float,
+        default=float(os.getenv("MACOS_SESSION_HEALTH_CODE_SIGN_CLONE_GROWTH_WARN_MB_PER_MINUTE", "512")),
+        help="Warn when Codex code_sign_clone grows this many MiB per minute.",
+    )
+    parser.add_argument(
+        "--code-sign-clone-timeout",
+        type=float,
+        default=float(os.getenv("MACOS_SESSION_HEALTH_CODE_SIGN_CLONE_TIMEOUT", "3")),
+        help="Timeout for measuring Codex code_sign_clone size with du.",
     )
     parser.add_argument("--app", action="append", default=[], help="App bundle to include in bundle and optional signing probes. Repeatable.")
     parser.add_argument("--command-timeout", type=float, default=5)
@@ -2508,7 +3192,13 @@ See modules/bin/macos-session-health.md for the syspolicyd incident runbook.
         type=float,
         default=float(os.getenv("MACOS_SESSION_HEALTH_APP_ASSESS_TIMEOUT", "8")),
     )
-    parser.add_argument("--smoke-timeout", type=float, default=5)
+    parser.add_argument(
+        "--spawn-check-timeout",
+        dest="spawn_check_timeout",
+        type=float,
+        default=5,
+        help="Timeout in seconds for each spawn check command.",
+    )
     parser.add_argument(
         "--spctl-interval-minutes",
         type=int,
@@ -2558,24 +3248,13 @@ See modules/bin/macos-session-health.md for the syspolicyd incident runbook.
         "--brrr-helper",
         type=Path,
         default=os.getenv("MACOS_SESSION_HEALTH_BRRR_HELPER"),
-        help="Optional brrr sender helper path. Sends notifications only for matching health signals.",
-    )
-    parser.add_argument(
-        "--brrr-min-severity",
-        choices=["warning", "error", "critical"],
-        default=os.getenv("MACOS_SESSION_HEALTH_BRRR_MIN_SEVERITY", "error"),
-        help="Minimum health signal severity that triggers brrr notification.",
+        help="Optional brrr sender helper path. Sends notifications only for matching incident signals.",
     )
     parser.add_argument(
         "--brrr-notify-cooldown-minutes",
         type=int,
-        default=int(os.getenv("MACOS_SESSION_HEALTH_BRRR_COOLDOWN_MINUTES", "30")),
-        help="Suppress repeated brrr notifications with the same signal fingerprint for this long.",
-    )
-    parser.add_argument(
-        "--brrr-title",
-        default=os.getenv("MACOS_SESSION_HEALTH_BRRR_TITLE", "macOS session unhealthy"),
-        help="brrr notification title.",
+        default=int(os.getenv("MACOS_SESSION_HEALTH_BRRR_COOLDOWN_MINUTES", "120")),
+        help="Suppress all later brrr notifications for this many minutes after one notification is sent.",
     )
     parser.add_argument(
         "--brrr-thread-id",
@@ -2585,8 +3264,8 @@ See modules/bin/macos-session-health.md for the syspolicyd incident runbook.
     parser.add_argument(
         "--brrr-interruption-level",
         choices=["passive", "active", "time-sensitive", "critical"],
-        default=os.getenv("MACOS_SESSION_HEALTH_BRRR_INTERRUPTION_LEVEL", "active"),
-        help="brrr interruption level for health alerts.",
+        default=os.getenv("MACOS_SESSION_HEALTH_BRRR_INTERRUPTION_LEVEL", "passive"),
+        help="brrr interruption level for health notifications.",
     )
     parser.add_argument(
         "--brrr-open-url",
@@ -2638,7 +3317,7 @@ See modules/bin/macos-session-health.md for the syspolicyd incident runbook.
 
     incident_parser = subparsers.add_parser(
         "incident",
-        help="Print a recent incident report from SQLite evidence.",
+        help="Print a recent incident report from SQLite diagnostics.",
     )
     incident_parser.add_argument("--hours", type=float, default=6)
     incident_parser.add_argument("--limit", type=int, default=20)

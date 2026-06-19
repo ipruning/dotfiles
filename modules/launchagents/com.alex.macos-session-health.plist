@@ -14,6 +14,14 @@
     <string>40</string>
     <string>--fd-warn</string>
     <string>512</string>
+    <string>--codex-app</string>
+    <string>/Applications/Codex.app</string>
+    <string>--codex-config</string>
+    <string>/Users/alex/.codex/config.toml</string>
+    <string>--codex-chrome-native-hosts</string>
+    <string>/Users/alex/.codex/chrome-native-hosts-v2.json</string>
+    <string>--codex-node-repl-warn</string>
+    <string>20</string>
     <string>--syspolicyd-fd-warn</string>
     <string>2048</string>
     <string>--syspolicyd-path-warn</string>
@@ -28,11 +36,25 @@
     <string>128</string>
     <string>--syspolicyd-log-error-count</string>
     <string>100</string>
+    <string>--trustd-cpu-warn</string>
+    <string>80</string>
+    <string>--trustd-rss-warn-mb</string>
+    <string>1024</string>
+    <string>--trustd-rss-error-mb</string>
+    <string>2048</string>
+    <string>--trustd-rss-growth-warn-mb-per-minute</string>
+    <string>128</string>
+    <string>--code-sign-clone-warn-mb</string>
+    <string>1024</string>
+    <string>--code-sign-clone-growth-warn-mb-per-minute</string>
+    <string>512</string>
+    <string>--code-sign-clone-timeout</string>
+    <string>3</string>
     <string>--lsof-timeout</string>
     <string>5</string>
     <string>--app-assess-timeout</string>
     <string>5</string>
-    <string>--smoke-timeout</string>
+    <string>--spawn-check-timeout</string>
     <string>5</string>
     <string>--spctl-interval-minutes</string>
     <string>0</string>
@@ -54,12 +76,10 @@
     <string>14</string>
     <string>--brrr-helper</string>
     <string>/Users/alex/dotfiles/modules/bin/brrr-send</string>
-    <string>--brrr-min-severity</string>
-    <string>error</string>
     <string>--brrr-notify-cooldown-minutes</string>
-    <string>30</string>
+    <string>120</string>
     <string>--brrr-interruption-level</string>
-    <string>active</string>
+    <string>passive</string>
     <string>--app</string>
     <string>/Applications/Visual Studio Code.app</string>
     <string>--app</string>
