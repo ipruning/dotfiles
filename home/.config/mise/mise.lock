@@ -115,33 +115,33 @@ url = "https://github.com/Loongphy/codex-auth/releases/download/v0.2.10/codex-au
 url_api = "https://api.github.com/repos/Loongphy/codex-auth/releases/assets/435885074"
 
 [[tools."github:earendil-works/pi"]]
-version = "0.79.6"
+version = "0.79.7"
 backend = "github:earendil-works/pi"
 
 [tools."github:earendil-works/pi"."platforms.linux-x64"]
-checksum = "sha256:05000ec8f5b2a8a2df8e2f505aab89eb80552dcf6dc11680fa0f3285839bb4cf"
-url = "https://github.com/earendil-works/pi/releases/download/v0.79.6/pi-linux-x64.tar.gz"
-url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/449629395"
+checksum = "sha256:bcb8dee8bb074f2dc08ae7f60e0061aca788e171d5481cf1ad5379c881e40f4b"
+url = "https://github.com/earendil-works/pi/releases/download/v0.79.7/pi-linux-x64.tar.gz"
+url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/451383017"
 
 [tools."github:earendil-works/pi"."platforms.linux-x64-baseline"]
-checksum = "sha256:05000ec8f5b2a8a2df8e2f505aab89eb80552dcf6dc11680fa0f3285839bb4cf"
-url = "https://github.com/earendil-works/pi/releases/download/v0.79.6/pi-linux-x64.tar.gz"
-url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/449629395"
+checksum = "sha256:bcb8dee8bb074f2dc08ae7f60e0061aca788e171d5481cf1ad5379c881e40f4b"
+url = "https://github.com/earendil-works/pi/releases/download/v0.79.7/pi-linux-x64.tar.gz"
+url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/451383017"
 
 [tools."github:earendil-works/pi"."platforms.linux-x64-musl"]
-checksum = "sha256:05000ec8f5b2a8a2df8e2f505aab89eb80552dcf6dc11680fa0f3285839bb4cf"
-url = "https://github.com/earendil-works/pi/releases/download/v0.79.6/pi-linux-x64.tar.gz"
-url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/449629395"
+checksum = "sha256:bcb8dee8bb074f2dc08ae7f60e0061aca788e171d5481cf1ad5379c881e40f4b"
+url = "https://github.com/earendil-works/pi/releases/download/v0.79.7/pi-linux-x64.tar.gz"
+url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/451383017"
 
 [tools."github:earendil-works/pi"."platforms.linux-x64-musl-baseline"]
-checksum = "sha256:05000ec8f5b2a8a2df8e2f505aab89eb80552dcf6dc11680fa0f3285839bb4cf"
-url = "https://github.com/earendil-works/pi/releases/download/v0.79.6/pi-linux-x64.tar.gz"
-url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/449629395"
+checksum = "sha256:bcb8dee8bb074f2dc08ae7f60e0061aca788e171d5481cf1ad5379c881e40f4b"
+url = "https://github.com/earendil-works/pi/releases/download/v0.79.7/pi-linux-x64.tar.gz"
+url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/451383017"
 
 [tools."github:earendil-works/pi"."platforms.macos-arm64"]
-checksum = "sha256:ec0d7bf5c855376fb904732e702b1ad3b4fa5425bf6fe66e0fd90d1cc2f57595"
-url = "https://github.com/earendil-works/pi/releases/download/v0.79.6/pi-darwin-arm64.tar.gz"
-url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/449629392"
+checksum = "sha256:2961795fdb933f0a37611cd9913dbee22ad82c5ecb4c38a67539f353fd973d6b"
+url = "https://github.com/earendil-works/pi/releases/download/v0.79.7/pi-darwin-arm64.tar.gz"
+url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/451383018"
 
 [[tools."github:larksuite/cli"]]
 version = "1.0.56"
