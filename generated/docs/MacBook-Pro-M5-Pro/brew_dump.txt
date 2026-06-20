@@ -7,6 +7,7 @@ tap "nikitabobko/tap", trusted: true
 tap "openai/tools", trusted: true
 tap "parallel-web/tap"
 tap "psviderski/tap", trusted: true
+tap "rjyo/moshi", trusted: true
 tap "simonbs/brrr-cli", "https://github.com/simonbs/brrr-cli.git", trusted: true
 tap "steipete/tap", trusted: true
 # Browser automation CLI for AI agents
@@ -155,6 +156,8 @@ brew "cirruslabs/cli/sshpass"
 brew "cirruslabs/cli/tart", trusted: true
 # Uncloud CLI
 brew "psviderski/tap/uncloud"
+# Portable daemon + CLI that bridges AI coding agents to the Moshi mobile app
+brew "rjyo/moshi/moshi-hook"
 # Webhook notifications for Claude Code and Codex
 brew "simonbs/brrr-cli/brrr"
 # Command-line ElevenLabs TTS with mac-style flags
@@ -246,6 +249,3 @@ go "cmd/gofmt"
 go "golang.org/x/tools/gopls"
 cargo "mdbook-mermaid"
 uv "harness"
-npm "stlc-python"
-npm "stlc-typescript"
-npm "stlc"
