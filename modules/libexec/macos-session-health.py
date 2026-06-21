@@ -2149,7 +2149,10 @@ def maybe_send_brrr_notification(
     ):
         return
 
-    command = [
+    command = []
+    if helper.suffix == ".sh":
+        command.append("/bin/bash")
+    command.extend([
         str(helper),
         "--title",
         str(incident["title"]),
@@ -2159,7 +2162,7 @@ def maybe_send_brrr_notification(
         args.brrr_thread_id,
         "--interruption-level",
         args.brrr_interruption_level,
-    ]
+    ])
     if args.brrr_open_url:
         command.extend(["--open-url", args.brrr_open_url])
 
