@@ -21,6 +21,7 @@ yarn = "latest"
 zig = "latest"
 
 [settings]
+lockfile_platforms = ["macos-arm64", "linux-x64"]
 trusted_config_paths = [
     "~/Desktop",
     "~/Developer",
