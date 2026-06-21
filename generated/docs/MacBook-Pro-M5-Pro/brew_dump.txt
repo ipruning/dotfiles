@@ -3,6 +3,7 @@ tap "charmbracelet/tap", trusted: true
 tap "cirruslabs/cli", trusted: true
 tap "entireio/tap", trusted: true
 tap "longbridge/tap", trusted: true
+tap "modem-dev/tap"
 tap "nikitabobko/tap", trusted: true
 tap "openai/tools", trusted: true
 tap "parallel-web/tap"
@@ -96,6 +97,8 @@ brew "postgresql@18", link: true
 brew "prek"
 # Command-line tool for managing long-running shell commands
 brew "pueue", restart_service: :changed
+# Better WHOIS and domain intelligence toolkit
+brew "quien"
 # Rsync for cloud storage
 brew "rclone"
 # Safe and ergonomic alternative to rm
@@ -154,6 +157,8 @@ brew "charmbracelet/tap/crush"
 brew "cirruslabs/cli/sshpass"
 # Run macOS and Linux VMs on Apple Hardware
 brew "cirruslabs/cli/tart", trusted: true
+# Desktop-inspired terminal diff viewer for agent-authored changesets
+brew "modem-dev/tap/hunk", trusted: true
 # Uncloud CLI
 brew "psviderski/tap/uncloud"
 # Portable daemon + CLI that bridges AI coding agents to the Moshi mobile app
