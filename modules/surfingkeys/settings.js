@@ -5,7 +5,7 @@ settings.focusFirstCandidate = true;
 settings.tabsThreshold = 0;
 
 api.Hints.style(`
-  font-family: MonoLisa;
+  font-family: MonoLisaCode;
   font-size: 12px;
 `);
 settings.theme = `

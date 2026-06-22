@@ -105,7 +105,7 @@
     "editor.bracketPairColorization.enabled": true,
     "editor.cursorBlinking": "solid",
     "editor.cursorSmoothCaretAnimation": "on",
-    "editor.fontFamily": "'MonoLisa', 'Maple Mono NF CN'",
+    "editor.fontFamily": "'MonoLisaCode', 'Maple Mono NF CN'",
     "editor.fontSize": 12,
     "editor.fontWeight": "400",
     "editor.formatOnSave": true,
