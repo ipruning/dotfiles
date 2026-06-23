@@ -124,43 +124,18 @@ url = "https://github.com/Loongphy/codex-auth/releases/download/v0.3.0-alpha.10/
 url_api = "https://api.github.com/repos/Loongphy/codex-auth/releases/assets/440707811"
 
 [[tools."github:Loongphy/codext"]]
-version = "codext-v0.141.0-811b278"
+version = "0.106.0"
 backend = "github:Loongphy/codext"
 
-[tools."github:Loongphy/codext"."platforms.linux-arm64"]
-checksum = "sha256:a1c0a06478d88a1249bd7a6ddb3fe3ce2e23e95228f710a83dbfa4f927f0c388"
-url = "https://github.com/Loongphy/codext/releases/download/codext-v0.141.0-811b278/codext-linux-arm64-0.141.0-811b278.tar.gz"
-url_api = "https://api.github.com/repos/Loongphy/codext/releases/assets/453156151"
-
-[tools."github:Loongphy/codext"."platforms.linux-arm64-musl"]
-checksum = "sha256:a1c0a06478d88a1249bd7a6ddb3fe3ce2e23e95228f710a83dbfa4f927f0c388"
-url = "https://github.com/Loongphy/codext/releases/download/codext-v0.141.0-811b278/codext-linux-arm64-0.141.0-811b278.tar.gz"
-url_api = "https://api.github.com/repos/Loongphy/codext/releases/assets/453156151"
-
 [tools."github:Loongphy/codext"."platforms.linux-x64"]
-checksum = "sha256:c2d39e6789df1b18717e385c007aa2e99f576239da3b1f71d48b1bae9d724099"
-url = "https://github.com/Loongphy/codext/releases/download/codext-v0.141.0-811b278/codext-linux-x64-0.141.0-811b278.tar.gz"
-url_api = "https://api.github.com/repos/Loongphy/codext/releases/assets/453156150"
-
-[tools."github:Loongphy/codext"."platforms.linux-x64-musl"]
-checksum = "sha256:c2d39e6789df1b18717e385c007aa2e99f576239da3b1f71d48b1bae9d724099"
-url = "https://github.com/Loongphy/codext/releases/download/codext-v0.141.0-811b278/codext-linux-x64-0.141.0-811b278.tar.gz"
-url_api = "https://api.github.com/repos/Loongphy/codext/releases/assets/453156150"
+checksum = "sha256:2d0228456d206a76e6b7ca3098fc731b010a784b50c5e9ae95c8c7e7cb431d2b"
+url = "https://github.com/Loongphy/codext/releases/download/v0.106.0/codex-x86_64-unknown-linux-gnu.tar.gz"
+url_api = "https://api.github.com/repos/Loongphy/codext/releases/assets/368720518"
 
 [tools."github:Loongphy/codext"."platforms.macos-arm64"]
-checksum = "sha256:f3551e9c9640251373d5a21cf2949624f3c1dcbaeca716f1636f87795f21c44a"
-url = "https://github.com/Loongphy/codext/releases/download/codext-v0.141.0-811b278/codext-darwin-arm64-0.141.0-811b278.tar.gz"
-url_api = "https://api.github.com/repos/Loongphy/codext/releases/assets/453156148"
-
-[tools."github:Loongphy/codext"."platforms.macos-x64"]
-checksum = "sha256:0687d1bcda97a297b85be720e7ce7336c95912d2182670a9b771385db3e7f17b"
-url = "https://github.com/Loongphy/codext/releases/download/codext-v0.141.0-811b278/codext-darwin-x64-0.141.0-811b278.tar.gz"
-url_api = "https://api.github.com/repos/Loongphy/codext/releases/assets/453156147"
-
-[tools."github:Loongphy/codext"."platforms.windows-x64"]
-checksum = "sha256:d4e9c300717f48adc928583633adf4c46b86a4df1a6e3a302a08f4afaa8ac7b1"
-url = "https://github.com/Loongphy/codext/releases/download/codext-v0.141.0-811b278/codext-win32-x64-0.141.0-811b278.zip"
-url_api = "https://api.github.com/repos/Loongphy/codext/releases/assets/453156152"
+checksum = "sha256:37e9900c84a603b1c5d8bfa3056a469032fabbb5ba7a90b45ee8048f5fcdb612"
+url = "https://github.com/Loongphy/codext/releases/download/v0.106.0/codex-aarch64-apple-darwin.tar.gz"
+url_api = "https://api.github.com/repos/Loongphy/codext/releases/assets/368720520"
 
 [[tools."github:earendil-works/pi"]]
 version = "0.79.10"
