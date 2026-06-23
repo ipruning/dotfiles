@@ -6,8 +6,6 @@
 "github:Loongphy/codext" = "latest"
 "github:schpet/linear-cli" = "latest"
 "go:github.com/xdevplatform/xurl" = "latest"
-"npm:codex-sync" = "latest"
-"npm:pi-opensync-plugin" = "latest"
 bun = "latest"
 deno = "latest"
 go = "latest"
