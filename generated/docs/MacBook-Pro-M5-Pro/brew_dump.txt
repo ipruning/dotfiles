@@ -11,6 +11,10 @@ tap "psviderski/tap", trusted: true
 tap "rjyo/moshi", trusted: true
 tap "simonbs/brrr-cli", "https://github.com/simonbs/brrr-cli.git", trusted: true
 tap "steipete/tap", trusted: true
+# Static analysis and lint tool, for (ba)sh scripts
+brew "shellcheck"
+# Static checker for GitHub Actions workflow files
+brew "actionlint"
 # Browser automation CLI for AI agents
 brew "agent-browser"
 # Code searching, linting, rewriting
@@ -29,6 +33,8 @@ brew "broot"
 brew "btop"
 # Vector graphics library with cross-device output support
 brew "cairo"
+# GNU File, Shell, and Text utilities
+brew "coreutils"
 # Embeddable SQL OLAP Database Management System
 brew "duckdb"
 # Modern, maintained replacement for ls
@@ -115,8 +121,6 @@ brew "rush-parallel"
 brew "rust-parallel"
 # Semantic version control CLI with entity-level diffs and blame
 brew "sem-cli"
-# Static analysis and lint tool, for (ba)sh scripts
-brew "shellcheck"
 # Sync skills across AI CLI tools
 brew "skillshare"
 # SQL linter and auto-formatter for Humans
@@ -131,6 +135,8 @@ brew "television"
 brew "tmux"
 # Program that allows you to count code, quickly
 brew "tokei"
+# TOML formatter, linter and language server
+brew "tombi"
 # Temporary workspace manager for fast experimentation in the terminal
 brew "try-rs"
 # Source code spell checker
@@ -254,3 +260,4 @@ go "cmd/gofmt"
 go "golang.org/x/tools/gopls"
 cargo "mdbook-mermaid"
 uv "harness"
+npm "codex-sync"

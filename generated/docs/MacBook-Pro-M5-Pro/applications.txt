@@ -46,6 +46,7 @@ Motion Creator Studio
 MyCard
 Numbers
 Numbers Creator Studio
+Open Design
 OrbStack
 Pages
 Pages Creator Studio
