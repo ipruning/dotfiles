@@ -42,7 +42,15 @@ The monitor records the Codex facts needed to explain a `syspolicyd` incident:
 Desktop version, non-secret config switches, helper process counts, `trustd`
 resources, and Codex `code_sign_clone` size. It also records warning-only
 config mismatch signals, such as a disabled bundled plugin with its helper still
-running.
+running. The Codex config snapshot also classifies SkyComputerUseClient `notify`
+paths as stable bundled paths, volatile `~/.codex/computer-use` paths, or other
+paths.
+
+The monitor checks Codex trusted project roots at a low cadence. It only checks
+direct roots from `~/.codex/config.toml`; it does not recursively scan all
+workspaces. When a trusted root has a direct `.git`, the monitor runs one
+bounded `git rev-parse --git-dir --is-inside-work-tree` validation and records
+missing roots or invalid `.git` shells as warning-only context.
 
 No system LaunchAgent, Codex automation, or CLI subcommand is named `自动分析`.
 Use `macos-session-health incident` for a current report. The current Codex
@@ -75,6 +83,15 @@ the failure. The LaunchAgent keeps both probes disabled by default:
 Do not treat `maxfiles` as the root-cause fix. The LaunchDaemon raises the GUI
 soft limit to reduce secondary launch failures, but a `syspolicyd` RSS or FD
 failure can continue after the limit is higher.
+
+Do not run a high-frequency `lsof` loop against `syspolicyd`. The LaunchAgent
+samples `syspolicyd` RSS and CPU every minute, but expensive FD sampling is
+rate-limited:
+
+```text
+--fd-top-interval-minutes 5
+--syspolicyd-lsof-interval-minutes 5
+```
 
 ## Recovery
 
@@ -208,14 +225,16 @@ notification only for these incident signals:
 - process spawning is failing;
 - `syspolicyd_assessment_failure` has reached high volume;
 - `syspolicyd` RSS crossed the error threshold;
+- `syspolicyd` RSS is growing quickly;
+- Codex `code_sign_clone` is growing quickly;
 - the collector itself crashed.
 
-Config mismatch, Codex helper counts, `code_sign_clone` growth, and `trustd`
+Config mismatch, Codex helper counts, trusted-root warnings, and `trustd`
 warnings stay in SQLite and the `incident` report. They do not send brrr
 notifications on their own.
 
 Each brrr notification uses `passive` interruption level and a global
-120-minute cooldown. After any brrr notification, later incidents are recorded
+10-minute cooldown. After any brrr notification, later incidents are recorded
 but not sent until the cooldown expires. The title names the failure. The body
 gives the key value, the likely app-launch impact, and the
 `macos-session-health incident --hours 6 --format markdown` command.
@@ -224,6 +243,18 @@ gives the key value, the likely app-launch impact, and the
 LaunchAgent treats low-volume matches as warning-only and promotes a scan to
 error at `--syspolicyd-log-error-count 100`. `maxfiles_soft_low` is context, not
 proof of cause.
+
+The core passive unified-log scan is intentionally narrower than the wider Codex
+diagnostic scan. Core syspolicyd and audio failure terms run every five minutes;
+Codex-specific warning terms run less often:
+
+```text
+--passive-log-interval-minutes 5
+--codex-passive-log-interval-minutes 30
+```
+
+Early RSS or `code_sign_clone` growth notifications are still passive
+notifications and do not execute recovery.
 
 ## Monitor Maintenance
 

@@ -26,6 +26,8 @@
     <string>2048</string>
     <string>--syspolicyd-path-warn</string>
     <string>512</string>
+    <string>--syspolicyd-lsof-interval-minutes</string>
+    <string>5</string>
     <string>--syspolicyd-cpu-warn</string>
     <string>80</string>
     <string>--syspolicyd-rss-warn-mb</string>
@@ -50,7 +52,13 @@
     <string>512</string>
     <string>--code-sign-clone-timeout</string>
     <string>3</string>
+    <string>--codex-trusted-root-check-interval-minutes</string>
+    <string>60</string>
+    <string>--codex-trusted-root-check-timeout</string>
+    <string>3</string>
     <string>--lsof-timeout</string>
+    <string>5</string>
+    <string>--fd-top-interval-minutes</string>
     <string>5</string>
     <string>--app-assess-timeout</string>
     <string>5</string>
@@ -70,6 +78,8 @@
     <string>6</string>
     <string>--passive-log-lines</string>
     <string>80</string>
+    <string>--codex-passive-log-interval-minutes</string>
+    <string>30</string>
     <string>--log-excerpt-cooldown-minutes</string>
     <string>30</string>
     <string>--retention-days</string>
@@ -77,7 +87,7 @@
     <string>--brrr-helper</string>
     <string>/Users/alex/.agents/skills/skills-stable__brrr-now/scripts/brrr-send.sh</string>
     <string>--brrr-notify-cooldown-minutes</string>
-    <string>120</string>
+    <string>10</string>
     <string>--brrr-interruption-level</string>
     <string>passive</string>
     <string>--app</string>
