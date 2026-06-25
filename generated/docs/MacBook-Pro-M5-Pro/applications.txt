@@ -7,7 +7,6 @@ BetterDisplay
 brrr
 calibre
 Capture One
-Codex
 CodexBar
 Compressor Creator Studio
 Contexts
@@ -66,6 +65,7 @@ Slack
 Superconductor
 Surfingkeys
 Surge
+T3 Code (Alpha)
 Tailscale
 Tampermonkey
 Telegram
