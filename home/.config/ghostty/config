@@ -9,6 +9,7 @@ font-style = Medium
 confirm-close-surface = false
 cursor-style = block
 cursor-style-blink = false
+macos-option-as-alt = right
 maximize = true
 notify-on-command-finish = unfocused
 notify-on-command-finish-action = no-bell,notify
@@ -24,13 +25,13 @@ window-padding-y = 14
 # keybind = cmd+q=ignore
 # keybind = cmd+t=ignore
 
-# keybind = cmd+n=new_tab
-# keybind = cmd+q=ignore
-# keybind = cmd+t=new_tab
-
-keybind = cmd+n=new_window
+keybind = cmd+n=new_tab
 keybind = cmd+q=ignore
-keybind = cmd+t=new_window
+keybind = cmd+t=new_tab
+
+# keybind = cmd+n=new_window
+# keybind = cmd+q=ignore
+# keybind = cmd+t=new_window
 
 # Linux
 config-file = ?"~/.config/omarchy/current/theme/ghostty.conf"
