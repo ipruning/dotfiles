@@ -2,14 +2,12 @@
 "gem:kamal" = "latest"
 "github:earendil-works/pi" = "latest"
 "github:larksuite/cli" = "latest"
-"github:Loongphy/codex-auth" = "v0.3.0-alpha.10"
-"github:Loongphy/codext" = "latest"
 "github:schpet/linear-cli" = "latest"
 "go:github.com/xdevplatform/xurl" = "latest"
 bun = "latest"
 deno = "latest"
 go = "latest"
-node = "26"
+node = "latest"
 pnpm = "latest"
 python = "latest"
 ruby = "latest"
@@ -20,6 +18,7 @@ zig = "latest"
 
 [settings]
 lockfile_platforms = ["macos-arm64", "linux-x64"]
+minimum_release_age = "0s"
 trusted_config_paths = [
     "~/Desktop",
     "~/Developer",
