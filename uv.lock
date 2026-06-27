@@ -363,7 +363,7 @@ requires-dist = [
     { name = "pydantic-ai", specifier = ">=2.0.0" },
     { name = "rich", specifier = ">=15.0.0" },
     { name = "ruamel-yaml", specifier = ">=0.19.1" },
-    { name = "tiktoken", specifier = "==0.13.0" },
+    { name = "tiktoken", specifier = ">=0.13.0" },
     { name = "typer", specifier = ">=0.26.8" },
     { name = "youtube-transcript-api", specifier = ">=1.2.4" },
 ]

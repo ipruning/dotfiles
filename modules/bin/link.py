@@ -321,7 +321,7 @@ def open_item(item: str, kind: str) -> None:
 
 def fuzzy_select_items(items_dict: dict[str, str]) -> None:
     if not items_dict:
-        logger.info("No URLs or file paths found.")
+        logger.info("No supported links, paths, UUIDs, or commands found.")
         return
 
     console = Console()

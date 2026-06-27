@@ -136,7 +136,7 @@ def main(
         typer.Option("-o", "--output", help="Output file path. Defaults to stdout."),
     ] = None,
 ) -> None:
-    """Export Codex CLI session logs to readable XML format."""
+    """Export Codex CLI session logs to XML-like tagged text."""
     resolved = resolve_input(path)
     if isinstance(resolved, ParseError):
         typer.echo(f"Error: {resolved.path}: {resolved.reason}", err=True)

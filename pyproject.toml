@@ -12,7 +12,7 @@ dependencies = [
     "pydantic-ai>=2.0.0",
     "rich>=15.0.0",
     "ruamel-yaml>=0.19.1",
-    "tiktoken==0.13.0",
+    "tiktoken>=0.13.0",
     "typer>=0.26.8",
     "youtube-transcript-api>=1.2.4",
 ]

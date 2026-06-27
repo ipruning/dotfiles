@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#MISE description="Sync plugins, completions, functions, Skillshare, and host inventories"
+#MISE description="Sync plugins, completions, functions, Skillshare, and host snapshots"
 
 set -euo pipefail
 
@@ -154,21 +154,21 @@ sync_list_apps() {
     | LC_ALL=en_US.UTF-8 sort
 }
 
-sync_host_inventory() {
-  gum log --level info "Backing up host inventory..."
+sync_host_snapshots() {
+  gum log --level info "Writing host snapshots..."
 
   local docs_dir
   docs_dir="$(sync_host_docs_dir)"
   mkdir -p "$docs_dir"
 
   if command -v brew &>/dev/null; then
-    dotfiles_run_visible "Writing Homebrew bundle..." "${DOTFILES_INVENTORY_TIMEOUT:-120}" \
+    dotfiles_run_visible "Writing Homebrew bundle..." "${DOTFILES_HOST_SNAPSHOT_TIMEOUT:-120}" \
       brew bundle dump --file="$docs_dir/brew_dump.txt" --force \
       || gum log --level warn "brew bundle dump failed"
   fi
 
   if command -v gh &>/dev/null; then
-    dotfiles_run_with_timeout "${DOTFILES_INVENTORY_TIMEOUT:-120}" \
+    dotfiles_run_with_timeout "${DOTFILES_HOST_SNAPSHOT_TIMEOUT:-120}" \
       gh extension list | awk '{print $3}' | LC_ALL=en_US.UTF-8 sort >"$docs_dir/gh_extensions.txt" \
       || gum log --level warn "gh extension list failed"
   fi
@@ -191,6 +191,6 @@ sync_bat_cache
 gum log --level info "Clearing zsh completion dump cache..."
 rm -f ~/.zcompdump*
 sync_skillshare
-sync_host_inventory
+sync_host_snapshots
 
 gum log --level info "Sync done ✓"

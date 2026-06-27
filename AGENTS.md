@@ -2,10 +2,10 @@
 
 ## Project Structure & Module Organization
 
-- `modules/` is the canonical source for configs, scripts, and templates. Common areas include `modules/bin/`, `modules/zsh/`, `modules/mackup/`, `modules/launchagents/`, and `modules/surfingkeys/`.
+- `modules/` contains hand-edited source for configs, scripts, and templates. Common areas include `modules/bin/`, `modules/zsh/`, `modules/mackup/`, `modules/launchagents/`, and `modules/surfingkeys/`.
 - `home/` is a Mackup snapshot tree. Avoid hand edits unless you are changing backup output. Tracked shell bootstrap files under `home/` (`.zshenv`, `.zprofile`, `.zshrc`) are the exception; edit them when changing Mackup-restored shell startup behavior. The ignored `home/.zshenv.private.zsh` file is generated locally from `home/.zshenv.private.tpl.zsh` when 1Password is available.
 - `.mise/tasks/` contains simple task entrypoint scripts; `.mise/scripts/` contains shared helpers and bash implementations used by TOML-defined tasks.
-- `generated/` holds regenerated outputs for binaries, completions, functions, plugins, and docs. Delete these files only when regeneration is available.
+- `generated/` contains generated output for files with a regeneration path, such as completions, functions, plugins, and host snapshots. Delete these files only when regeneration is available.
   - `generated/plugins/` contains third-party Zsh plugins (git-ignored).
   - `generated/docs/<hostname>/` stores host-specific snapshots (brew/apps/extensions).
 
@@ -16,7 +16,7 @@
 - `mise run restore` restores the Mackup snapshot into the system.
 - `mise run backup` runs `mackup backup --force` to snapshot configs into `home/`.
 - The Skillshare source repo owns agent prompt files such as `~/.codex/AGENTS.md`, `~/.claude/CLAUDE.md`, and `~/.config/amp/AGENTS.md`. It stores them under `extras/{codex,claude,amp}/` and distributes them with `skillshare sync extras`. Do not add these files to Mackup or regenerate them from this repo.
-- `mise run sync` pulls plugins, regenerates shell completions/functions, runs Skillshare sync (skills + extras), and snapshots host package/app inventories.
+- `mise run sync` pulls plugins, regenerates shell completions/functions, runs Skillshare sync (skills + extras), and writes host package/app snapshots.
 - `mise run up` updates Homebrew-managed packages, mise tools, and selected developer CLIs.
 - `mise run zsh-profile [runs] [warmup]` profiles Zsh startup (requires `hyperfine`).
 

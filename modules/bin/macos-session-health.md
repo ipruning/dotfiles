@@ -1,13 +1,25 @@
 # macos-session-health Runbook
 
-`macos-session-health` records macOS user-session launch health in SQLite and
-can send brrr notifications for high-severity incident signals. Runtime data
-belongs in `~/Library/Application Support/macos-session-health/health.sqlite3`;
-logs belong in `~/Library/Logs/macos-session-health/`.
+The LaunchAgent runs `macos-session-health`. The collector writes events to
+SQLite and sends brrr notifications for a small allow-list of health signals.
+SQLite data lives in `~/Library/Application Support/macos-session-health/health.sqlite3`;
+logs live in `~/Library/Logs/macos-session-health/`.
 
-## Incident Pattern
+## Terms
 
-`macos-session-health` watches this failure pattern:
+- **collector**: the `macos-session-health` process that gathers data.
+- **collector run**: one pass through the configured checks; incident reports summarize collector runs in the selected time window.
+- **LaunchAgent**: the launchd job that starts the collector.
+- **event**: one row in the SQLite `events` table.
+- **health signal**: an event with `event='health_signal'`; it has a signal name and severity.
+- **incident report**: the output of `macos-session-health incident`.
+- **notification**: a brrr message sent for an allow-listed health signal.
+- **recovery**: the guarded `syspolicyd` restart flow in `macos-session-health recover`.
+- **Unix signal**: a POSIX signal, such as TERM or KILL, sent to a process by `recover --signal`.
+
+## Observed Failure Pattern
+
+The collector watches this failure pattern:
 
 - Apps bounce in the Dock or open with no usable window.
 - Shell commands report fork, pty, or open failures.
@@ -38,7 +50,7 @@ VS Code and Music are affected clients unless later observations point elsewhere
 
 ## Codex Diagnostics
 
-The monitor records the Codex facts needed to explain a `syspolicyd` incident:
+The collector records the Codex facts needed to explain a `syspolicyd` incident:
 Desktop version, non-secret config switches, helper process counts, `trustd`
 resources, and Codex `code_sign_clone` size. It also records warning-only
 config mismatch signals, such as a disabled bundled plugin with its helper still
@@ -46,16 +58,14 @@ running. The Codex config snapshot also classifies SkyComputerUseClient `notify`
 paths as stable bundled paths, volatile `~/.codex/computer-use` paths, or other
 paths.
 
-The monitor checks Codex trusted project roots at a low cadence. It only checks
+The collector checks Codex trusted project roots at a low cadence. It only checks
 direct roots from `~/.codex/config.toml`; it does not recursively scan all
-workspaces. When a trusted root has a direct `.git`, the monitor runs one
+workspaces. When a trusted root has a direct `.git`, the collector runs one
 bounded `git rev-parse --git-dir --is-inside-work-tree` validation and records
 missing roots or invalid `.git` shells as warning-only context.
 
-No system LaunchAgent, Codex automation, or CLI subcommand is named `自动分析`.
-Use `macos-session-health incident` for a current report. The current Codex
-automations handle separate user workflows such as morning reports and Feishu
-checks; they are not part of this system-health monitor.
+Use `macos-session-health incident` for system launch diagnostics. Morning
+reports and Feishu checks are separate workflows.
 
 ## Risky Actions
 
@@ -73,7 +83,7 @@ Operation not permitted while System Integrity Protection is engaged
 
 Do not run repeated `spctl` or `codesign` active assessment probes during an
 active incident. These probes ask `syspolicyd` to do more work and can amplify
-the failure. The LaunchAgent keeps both probes disabled by default:
+the failure. The collector keeps both probes disabled by default:
 
 ```text
 --spctl-interval-minutes 0
@@ -84,7 +94,7 @@ Do not treat `maxfiles` as the root-cause fix. The LaunchDaemon raises the GUI
 soft limit to reduce secondary launch failures, but a `syspolicyd` RSS or FD
 failure can continue after the limit is higher.
 
-Do not run a high-frequency `lsof` loop against `syspolicyd`. The LaunchAgent
+Do not run a high-frequency `lsof` loop against `syspolicyd`. The collector
 samples `syspolicyd` RSS and CPU every minute, but expensive FD sampling is
 rate-limited:
 
@@ -154,7 +164,7 @@ sleep 5
 pgrep -x syspolicyd | xargs ps -o pid,ppid,stat,%cpu,rss,etime,comm= -p
 ```
 
-If even direct signal delivery fails with `Operation not permitted`, reboot is
+If even direct Unix signal delivery fails with `Operation not permitted`, reboot is
 the remaining clean recovery.
 
 ## Queries
@@ -219,30 +229,32 @@ sqlite3 "$HOME/Library/Application Support/macos-session-health/health.sqlite3" 
 
 ## brrr Notification Rules
 
-The LaunchAgent records every health signal in SQLite. It sends a brrr
-notification only for these incident signals:
+The collector records every health signal in SQLite. It sends a brrr notification only
+when one of these health signals appears:
 
 - process spawning is failing;
-- `syspolicyd_assessment_failure` has reached high volume;
+- `syspolicyd_assessment_failure` reaches the `--brrr-syspolicyd-assessment-failure-count` threshold;
 - `syspolicyd` RSS crossed the error threshold;
 - `syspolicyd` RSS is growing quickly;
 - Codex `code_sign_clone` is growing quickly;
 - the collector itself crashed.
 
 Config mismatch, Codex helper counts, trusted-root warnings, and `trustd`
-warnings stay in SQLite and the `incident` report. They do not send brrr
-notifications on their own.
+warnings stay in SQLite and the incident report. They do not send brrr
+notifications by themselves.
 
 Each brrr notification uses `passive` interruption level and a global
-10-minute cooldown. After any brrr notification, later incidents are recorded
-but not sent until the cooldown expires. The title names the failure. The body
-gives the key value, the likely app-launch impact, and the
+10-minute cooldown. After any brrr notification, later matching health signals are
+recorded but not sent until the cooldown expires. The title names the failure.
+The body gives the key value, the likely app-launch impact, and the
 `macos-session-health incident --hours 6 --format markdown` command.
 
 `syspolicyd_assessment_failure` comes from unified-log assessment failures. The
-LaunchAgent treats low-volume matches as warning-only and promotes a scan to
+collector treats low-volume matches as warning-only and promotes a scan to
 error at `--syspolicyd-log-error-count 100`. `maxfiles_soft_low` is context, not
 proof of cause.
+The brrr notification threshold is separate: syspolicyd assessment-failure
+notifications wait for `--brrr-syspolicyd-assessment-failure-count`.
 
 The core passive unified-log scan is intentionally narrower than the wider Codex
 diagnostic scan. Core syspolicyd and audio failure terms run every five minutes;
@@ -253,12 +265,12 @@ Codex-specific warning terms run less often:
 --codex-passive-log-interval-minutes 30
 ```
 
-Early RSS or `code_sign_clone` growth notifications are still passive
-notifications and do not execute recovery.
+RSS growth and `code_sign_clone` growth are health signals that can send passive
+notifications. They do not execute recovery.
 
-## Monitor Maintenance
+## Maintenance
 
-After changing the script or plist:
+After changing the collector or plist:
 
 ```zsh
 mise exec -- uv run python -m py_compile modules/libexec/macos-session-health.py

@@ -2146,7 +2146,12 @@ def strongest_signal(signals: list[dict[str, Any]], signal_name: str, *, role: s
     return max(matches, key=lambda item: parse_float(str(item.get("value") or "")) or 0)
 
 
-def build_brrr_incident(signals: list[dict[str, Any]], snapshot_id: str, status: str) -> dict[str, Any] | None:
+def build_brrr_incident(
+    signals: list[dict[str, Any]],
+    snapshot_id: str,
+    status: str,
+    syspolicyd_assessment_failure_notify_count: int,
+) -> dict[str, Any] | None:
     spawn_failed = strongest_signal(signals, "spawn_failed")
     syspolicyd_assessment_failure = strongest_signal(signals, "syspolicyd_assessment_failure")
     syspolicyd_rss_error = strongest_signal(signals, "process_rss_error", role="syspolicyd")
@@ -2161,7 +2166,8 @@ def build_brrr_incident(signals: list[dict[str, Any]], snapshot_id: str, status:
         kind = "spawn_failed"
     elif (
         syspolicyd_assessment_failure
-        and (parse_float(str(syspolicyd_assessment_failure.get("value") or "")) or 0) >= 1000
+        and (parse_float(str(syspolicyd_assessment_failure.get("value") or "")) or 0)
+        >= syspolicyd_assessment_failure_notify_count
     ):
         count = syspolicyd_assessment_failure.get("value", "")
         title = "Gatekeeper 正在大量失败"
@@ -2187,8 +2193,8 @@ def build_brrr_incident(signals: list[dict[str, Any]], snapshot_id: str, status:
         primary = code_sign_clone_growth
         kind = "code_sign_clone_growth"
     elif collector_exception:
-        title = "macOS 监控采集器异常"
-        summary = "macos-session-health 自身采集失败，需要查看本机日志。"
+        title = "macOS 采集器异常"
+        summary = "macos-session-health 采集器自身失败，需要查看本机日志。"
         primary = collector_exception
         kind = "collector_exception"
     else:
@@ -2275,7 +2281,12 @@ def maybe_send_brrr_notification(
         return
 
     helper = Path(args.brrr_helper).expanduser()
-    incident = build_brrr_incident(store.current_signals, snapshot_id, status)
+    incident = build_brrr_incident(
+        store.current_signals,
+        snapshot_id,
+        status,
+        args.brrr_syspolicyd_assessment_failure_count,
+    )
     if incident is None:
         return
 
@@ -2802,13 +2813,13 @@ def render_incident_markdown(report: dict[str, Any]) -> str:
         f"- window_hours: `{report['window_hours']}`",
         "- runbook: `modules/bin/macos-session-health.md`",
         "",
-        "## Snapshot Summary",
+        "## Collector Run Summary",
         "",
         f"- total: `{report['snapshot_summary']['total']}`",
         f"- unhealthy: `{report['snapshot_summary']['unhealthy']}`",
         f"- error: `{report['snapshot_summary']['error']}`",
         "",
-        "## Signal Counts",
+        "## Health Signals",
         "",
     ]
     if report["signal_counts"]:
@@ -3012,7 +3023,12 @@ def render_incident_markdown(report: dict[str, Any]) -> str:
     if not report["latest_fd_top"]:
         lines.append("No FD top samples.")
 
+    lines.extend(["", "## Triage Rules", ""])
+    lines.extend(report["triage_rules"])
+
     lines.extend(["", "## Findings", ""])
+    if not report["findings"]:
+        lines.append("No derived findings.")
     lines.extend(report["findings"])
     lines.append("")
     return "\n".join(lines)
@@ -3155,11 +3171,12 @@ def incident_report(db_path: Path, hours: float, limit: int, output_format: str)
     rss_error_rows = [
         row for row in signal_counts if row["signal"] == "process_rss_error"
     ]
-    findings = [
+    triage_rules = [
         "- Treat `syspolicyd_assessment_failure` as the strongest sign that Gatekeeper/static-code checks are failing.",
         "- Treat `maxfiles_soft_low` as context, not proof of cause.",
         "- Keep `spctl` and `codesign` probes disabled during an active incident.",
     ]
+    findings = []
     if syspolicyd_assessment_failure_rows:
         total_assessment_failures = sum(int(row["count"] or 0) for row in syspolicyd_assessment_failure_rows)
         max_assessment_failures = max(
@@ -3264,6 +3281,7 @@ def incident_report(db_path: Path, hours: float, limit: int, output_format: str)
         "brrr_events": brrr_events,
         "latest_cpu_top": latest_cpu_top,
         "latest_fd_top": latest_fd_top,
+        "triage_rules": triage_rules,
         "findings": findings,
     }
 
@@ -3277,7 +3295,7 @@ def incident_report(db_path: Path, hours: float, limit: int, output_format: str)
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="macos-session-health",
-        description="Monitor macOS user-session spawn, FD, and app-launch health.",
+        description="Collect macOS user-session launch diagnostics.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""examples:
   macos-session-health query --signals --limit 20
@@ -3491,7 +3509,7 @@ See modules/bin/macos-session-health.md for the syspolicyd incident runbook.
         "--log-excerpt-cooldown-minutes",
         type=int,
         default=int(os.getenv("MACOS_SESSION_HEALTH_LOG_COOLDOWN_MINUTES", "30")),
-        help="When unhealthy signals repeat, collect macOS log excerpts at most this often.",
+        help="When health signals repeat, collect macOS log excerpts at most this often.",
     )
     parser.add_argument(
         "--retention-days",
@@ -3503,13 +3521,21 @@ See modules/bin/macos-session-health.md for the syspolicyd incident runbook.
         "--brrr-helper",
         type=Path,
         default=os.getenv("MACOS_SESSION_HEALTH_BRRR_HELPER"),
-        help="Optional brrr sender helper path. Sends notifications only for matching incident signals.",
+        help="Optional brrr sender helper path. Sends notifications only for allow-listed health signals.",
     )
     parser.add_argument(
         "--brrr-notify-cooldown-minutes",
         type=int,
         default=int(os.getenv("MACOS_SESSION_HEALTH_BRRR_COOLDOWN_MINUTES", "10")),
         help="Suppress all later brrr notifications for this many minutes after one notification is sent.",
+    )
+    parser.add_argument(
+        "--brrr-syspolicyd-assessment-failure-count",
+        type=int,
+        default=int(
+            os.getenv("MACOS_SESSION_HEALTH_BRRR_SYSPOLICYD_ASSESSMENT_FAILURE_COUNT", "1000")
+        ),
+        help="Send syspolicyd_assessment_failure notifications only at or above this match count.",
     )
     parser.add_argument(
         "--brrr-thread-id",
@@ -3520,7 +3546,7 @@ See modules/bin/macos-session-health.md for the syspolicyd incident runbook.
         "--brrr-interruption-level",
         choices=["passive", "active", "time-sensitive", "critical"],
         default=os.getenv("MACOS_SESSION_HEALTH_BRRR_INTERRUPTION_LEVEL", "passive"),
-        help="brrr interruption level for health notifications.",
+        help="brrr interruption level for notifications.",
     )
     parser.add_argument(
         "--brrr-open-url",
@@ -3547,7 +3573,7 @@ See modules/bin/macos-session-health.md for the syspolicyd incident runbook.
     query_parser = subparsers.add_parser("query", help="Print recent SQLite events.")
     query_parser.add_argument("--limit", type=int, default=50)
     query_parser.add_argument("--event", help="Event name to filter. Use `events` to list known names.")
-    query_parser.add_argument("--signals", action="store_true")
+    query_parser.add_argument("--signals", action="store_true", help="Show only health-signal events (`event=health_signal`).")
     query_parser.add_argument("--format", choices=["logfmt", "json"], default="logfmt")
 
     events_parser = subparsers.add_parser("events", help="List event names present in SQLite.")
@@ -3597,7 +3623,7 @@ See modules/bin/macos-session-health.md for the syspolicyd incident runbook.
         "--signal",
         choices=["TERM", "KILL"],
         default="TERM",
-        help="Signal used with sudo kill when --execute is set.",
+        help="Unix signal used with sudo kill when --execute is set.",
     )
     recover_parser.add_argument(
         "--wait-seconds",

@@ -4,6 +4,7 @@
 # dependencies = [
 #     "rich==15.0.0",
 #     "ruamel-yaml==0.19.1",
+#     "tiktoken==0.13.0",
 #     "typer==0.26.8",
 # ]
 # ///
@@ -55,11 +56,10 @@ SOURCES_CFG = SKILLSHARE_CFG.parent / "sources.json"
 _yaml = YAML()
 _yaml.preserve_quotes = True
 
-CODEX_SKILL_METADATA_CONTEXT_WINDOW_PERCENT = 2
+AVAILABLE_SKILLS_CONTEXT_WINDOW_PERCENT = 2
 CODEX_BYTES_PER_TOKEN = 4
 CODEX_DESCRIPTION_TRUNCATION_WARNING_THRESHOLD_CHARS = 100
 DEFAULT_CODEX_CONTEXT_WINDOW = 258_400
-API_GPT_5_5_CONTEXT_WINDOW = 1_050_000
 
 
 class PathMode(StrEnum):
@@ -85,7 +85,7 @@ def main(
         ),
     ] = False,
 ):
-    """Manage Skillshare sources and inspect skill metadata budgets."""
+    """Manage Skillshare sources and inspect Available skills list budgets."""
 
 
 def _load_sources() -> dict[str, str]:
@@ -319,45 +319,12 @@ def _codex_token_count(text: str) -> int:
 
 
 def _load_tiktoken_counter():
-    code = r"""
-import json
-import sys
+    import tiktoken
 
-import tiktoken
-
-enc = tiktoken.get_encoding("o200k_base")
-texts = json.loads(sys.stdin.read())
-print(json.dumps([len(enc.encode(text, disallowed_special=())) for text in texts]))
-"""
+    enc = tiktoken.get_encoding("o200k_base")
 
     def count_batch(texts: list[str]) -> list[int]:
-        try:
-            result = subprocess.run(
-                [
-                    "uv",
-                    "run",
-                    "--isolated",
-                    "--no-project",
-                    "--with",
-                    "tiktoken==0.13.0",
-                    "python",
-                    "-c",
-                    code,
-                ],
-                input=json.dumps(texts),
-                capture_output=True,
-                text=True,
-                timeout=10,
-            )
-        except subprocess.TimeoutExpired:
-            error_console.print("[red]tiktoken counting timed out after 10s[/red]")
-            raise typer.Exit(1) from None
-        if result.returncode != 0:
-            error_console.print("[red]tiktoken counting failed[/red]")
-            if result.stderr.strip():
-                error_console.print(Text(result.stderr.strip(), style="dim"))
-            raise typer.Exit(result.returncode)
-        return json.loads(result.stdout)
+        return [len(enc.encode(text, disallowed_special=())) for text in texts]
 
     return count_batch
 
@@ -563,13 +530,10 @@ def _resolve_context_window(spec: str, rollout_file: Path | None = None) -> tupl
         if window := _latest_codex_model_context_window():
             return window, "latest-codex-rollout"
         return DEFAULT_CODEX_CONTEXT_WINDOW, "default-codex-fallback"
-    if normalized in {"api-gpt-5.5", "gpt-5.5-api", "gpt-5.5"}:
-        return API_GPT_5_5_CONTEXT_WINDOW, "openai-api-gpt-5.5"
-
     try:
         window = int(spec)
     except ValueError:
-        error_console.print("[red]--context-window must be a positive integer, current, codex, or api-gpt-5.5[/red]")
+        error_console.print("[red]--context-window must be a positive integer, current, or codex[/red]")
         raise typer.Exit(2) from None
     if window <= 0:
         error_console.print("[red]--context-window must be positive[/red]")
@@ -669,7 +633,7 @@ def _analyze_skill_context(
     average_truncated_description_chars = (truncated_description_chars + len(rows) - 1) // len(rows) if rows else 0
     warning = None
     if omitted_count:
-        warning = "Exceeded skills context budget"
+        warning = "Exceeded Available skills list budget"
     elif average_truncated_description_chars > CODEX_DESCRIPTION_TRUNCATION_WARNING_THRESHOLD_CHARS:
         warning = "Skill descriptions were shortened"
 
@@ -969,14 +933,14 @@ def analyze_context(
         "current",
         "--context-window",
         "-w",
-        help="Model context window: positive integer, current, codex, or api-gpt-5.5.",
+        help="Model context window: positive integer, current, or codex.",
     ),
     percent: int = typer.Option(
-        CODEX_SKILL_METADATA_CONTEXT_WINDOW_PERCENT,
+        AVAILABLE_SKILLS_CONTEXT_WINDOW_PERCENT,
         "--percent",
         min=1,
         max=100,
-        help="Percent of context window used for the skills metadata budget.",
+        help="Percent of context window reserved for the rendered Available skills list.",
     ),
     budget: int | None = typer.Option(
         None,
@@ -1006,7 +970,7 @@ def analyze_context(
         help="Output full analysis as JSON.",
     ),
 ):
-    """Analyze skill description cost against Codex's skills context budget."""
+    """Analyze skill description cost against the Available skills list budget."""
     rollout_file = None
     missing_entries = []
     target_dir = Path(target).expanduser().resolve() if target else None
@@ -1088,7 +1052,7 @@ def analyze_context(
         print(json.dumps(analysis, ensure_ascii=False, indent=2))
         return
 
-    console.print("[bold]Skill context analysis[/bold]")
+    console.print("[bold]Available skills list budget analysis[/bold]")
     console.print(f"source: {source_label}")
     console.print("counter: codex:ceil(bytes/4)")
     if use_tiktoken:
@@ -1111,7 +1075,7 @@ def analyze_context(
     console.print(
         f"full: {analysis['full_tokens']} tokens, "
         f"minimum: {analysis['minimum_tokens']} tokens, "
-        f"description budget: {analysis['description_budget_tokens']} tokens"
+        f"remaining for descriptions: {analysis['description_budget_tokens']} tokens"
     )
     console.print(f"over full budget: {analysis['tokens_over_budget_for_full_descriptions']} tokens")
     console.print(
