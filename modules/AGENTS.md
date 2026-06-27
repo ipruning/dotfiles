@@ -2,14 +2,14 @@
 
 ## Scope
 
-`modules/` stores reusable dotfile modules: executable helpers, shell config
-fragments, Mackup config, LaunchAgent and LaunchDaemon plist sources, and
-templates. Keep runtime state and generated local files outside this tree
-unless the repository already marks those paths as generated output.
+`modules/` stores source files: executable commands, command helpers, shell config fragments,
+Mackup config, LaunchAgent and LaunchDaemon plist files, and templates. Keep
+runtime state and generated local files outside this tree unless the repository
+already marks those paths as generated files.
 
 ## `bin/`
 
-- Put user-facing CLI helpers and thin wrappers in `modules/bin/`.
+- Put user-facing commands in `modules/bin/`.
 - New executable names should use kebab-case. Use `.py` for Python helpers that
   are imported or edited as Python modules; otherwise prefer an executable
   script name without an extension.
@@ -27,9 +27,9 @@ unless the repository already marks those paths as generated output.
 
 ## `libexec/`
 
-- Put implementation files behind user-facing wrappers in `modules/libexec/`.
+- Put implementation files behind user-facing commands in `modules/libexec/`.
 - Keep direct user commands in `modules/bin/`; `modules/libexec/` files may rely
-  on their wrapper for runtime selection, environment setup, and stable argv.
+  on those commands for runtime selection, environment setup, and stable argv.
 
 ## `launchagents/`
 

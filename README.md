@@ -6,17 +6,17 @@
 
 <!--rehype:style=text-align: center;-->
 
-Personal dotfiles and workstation bootstrap repo.
+Personal dotfiles and workstation setup repo.
 
 The repo uses three file roles:
 
-- **`modules/` contains hand-edited source.** Put reusable scripts, templates, shell fragments, Mackup config, launchd config, and non-dotfile app config here.
-- **`home/` contains Mackup snapshots.** Mackup copies files between this tree and `$HOME`. Do not use it as an authoring directory, except for tracked shell bootstrap files under `home/` (`.zshenv`, `.zprofile`, `.zshrc`). The ignored `home/.zshenv.private.zsh` file is generated locally from `home/.zshenv.private.tpl.zsh` when 1Password is available.
-- **`generated/` contains generated output** for files with a regeneration path, such as completions, functions, plugins, and host snapshots.
+- **`modules/` contains source files.** Put reusable scripts, templates, shell fragments, Mackup config, launchd config, and app config here.
+- **`home/` contains the Mackup backup tree.** Mackup copies files between this tree and `$HOME`. Do not edit files here, except tracked shell startup files (`.zshenv`, `.zprofile`, `.zshrc`) when changing restored shell behavior. The ignored `home/.zshenv.private.zsh` file is generated from `home/.zshenv.private.tpl.zsh`.
+- **`generated/` contains generated files.** This includes completions, shell functions, plugins, and host inventory files.
   - `generated/plugins/` contains third-party ZSH plugins (git-ignored).
-  - `generated/docs/<hostname>/` stores host-specific snapshots (brew/apps/extensions).
+  - `generated/docs/<hostname>/` stores host inventory files for Homebrew, apps, and extensions.
 
-Global harness prompts and AI skills are managed in the Skillshare source repo. This repo only bootstraps their sync during `restore` and `sync`; start from **`AGENTS.md`** for dotfiles-specific operating rules.
+Skillshare manages global harness prompts and AI skills from its own source repo. This repo runs Skillshare during `restore` and `sync`.
 
 ## Quick start
 
@@ -32,7 +32,7 @@ Global harness prompts and AI skills are managed in the Skillshare source repo. 
   - `init`: `curl` and `op` (1Password CLI) for env injection
   - `backup` / `restore`: `mackup` (invoked via `uvx`, which will install it if missing)
 - Optional:
-  - `brew` (package installation; host snapshots live under `generated/docs/<hostname>/`)
+  - `brew` (package installation; host inventory files live under `generated/docs/<hostname>/`)
 
 ### Clone
 
@@ -87,12 +87,10 @@ openv-longbridge
 env | rg '^LONGPORT_' | cut -d= -f1
 ```
 
-### Run tasks (preferred)
+### Run Commands
 
-Most tasks are exposed through `mise run ...`. Simple tasks may live directly in
-`.mise/tasks/*.sh`; longer or environment-sensitive tasks are defined in
-`.mise/config.toml` and run `.mise/scripts/*.sh` via `bash` so `mise` does not
-directly exec scripts that mutate shell, Mackup, or mise-related state.
+Use `mise run ...` after cloning. Each mise task runs a command in `modules/bin/`.
+After `modules/bin` is on `PATH`, the same commands can be run directly.
 
 List tasks:
 
@@ -108,41 +106,40 @@ mise run restore
 mise run backup
 mise run sync
 mise run up
+mise run doctor
 mise run zsh-profile
 ```
 
-If you do not use `mise`, you can also run the scripts directly:
+If you do not use `mise`, you can also run the commands directly:
 
 ```bash
-./.mise/tasks/init.sh
-./.mise/scripts/restore.sh
-./.mise/tasks/backup.sh
-./.mise/scripts/sync.sh
-./.mise/tasks/up.sh
-./.mise/tasks/zsh-profile.sh
+modules/bin/dotfiles-init
+modules/bin/dotfiles-restore
+modules/bin/dotfiles-backup
+modules/bin/dotfiles-sync
+modules/bin/dotfiles-up
+modules/bin/dotfiles-doctor
+modules/bin/dotfiles-zsh-profile
 ```
 
-> Notes:
->
-> - Scripts are authoritative for command behavior.
+## Repository Rules
 
-## Repository contract
+These rules keep file ownership clear:
 
-These are the invariants that keep the repo understandable over time:
+1. **Edit source files in `modules/`**
+   - Put curated configs, templates, shell fragments, and dotfiles commands there.
+   - `modules/bin/dotfiles-*` contains command behavior. Mise tasks call those commands.
 
-1. **Reusable dotfile module source lives in `modules/`**
-   - Add or edit curated configs, templates, and scripts there. Task entrypoints and shared task scripts live under `.mise/`.
-   - Things in `modules/` should be reviewable, stable, and portable.
+2. **Treat `home/` as Mackup data**
+   - `backup` writes current user config into `home/`.
+   - `restore` copies files from `home/` into `$HOME`.
+   - Edit tracked shell startup files in `home/` only when changing restored shell startup behavior.
+   - `home/.zshenv.private.zsh` is ignored and generated from `home/.zshenv.private.tpl.zsh`.
 
-2. **`home/` is a Mackup snapshot**
-   - Mackup writes to this tree during backup and restores from it during restore.
-   - Do not hand-edit files under `home/` unless you want to change what Mackup will back up or restore.
-   - Exception: tracked shell bootstrap files under `home/` (`.zshenv`, `.zprofile`, `.zshrc`) are intentionally edited when changing Mackup-restored shell startup behavior. Ignored `home/.zshenv.private.zsh` is generated locally from `home/.zshenv.private.tpl.zsh` when 1Password is available.
-
-3. **`generated/` is generated output**
-   - Shell completions and functions are regenerated by `sync`.
+3. **Treat `generated/` as generated files**
+   - `sync` regenerates shell completions and functions.
    - `generated/plugins/` contains third-party ZSH plugins (git-ignored, cloned by `init`).
-   - `generated/docs/<hostname>/` stores host-specific snapshots.
+   - `generated/docs/<hostname>/` contains host inventory files.
 
 4. **Secrets never enter Git**
    - Use `*.private.*` files that are ignored, or template files like `*.tpl.*`.
@@ -153,39 +150,38 @@ These are the invariants that keep the repo understandable over time:
 
 ### Top-level
 
-| Path                        | Meaning                                                                                                   | Role                        |
+| Path                        | Meaning                                                                                                   | Kind                        |
 | --------------------------- | --------------------------------------------------------------------------------------------------------- | --------------------------- |
-| `.mise/tasks/`              | Simple task entrypoint scripts                                                                            | Source                      |
-| `.mise/scripts/`            | Shared helpers and bash implementations for TOML-defined tasks                                             | Source                      |
-| `modules/`                  | Hand-edited source for reusable scripts, templates, shell fragments, Mackup config, and launchd config     | Source                      |
-| `home/`                     | Mackup snapshot of selected files under `$HOME`                                                           | Snapshot                    |
-| `generated/`                | Generated output; `docs/` is tracked, while `bin/`, `completions/`, `functions/`, and `plugins/` are not   | Generated output            |
-| `AGENTS.md`                 | Operating contract for agents working in this dotfiles repo                                               | Source                      |
-| `pyproject.toml`, `uv.lock` | Python project environment: direct dependency constraints in `pyproject.toml`, resolved versions in `uv.lock` | Source / lockfile           |
+| `.mise/config.toml`          | Mise task definitions that call `modules/bin/dotfiles-*` commands                                          | Source file                 |
+| `modules/`                  | Source files for scripts, templates, shell fragments, Mackup config, and launchd config                    | Source files                |
+| `home/`                     | Mackup backup tree for selected files under `$HOME`                                                       | Backup data                 |
+| `generated/`                | Generated files; `docs/` is tracked, while `bin/`, `completions/`, `functions`, and `plugins/` are not     | Generated files             |
+| `AGENTS.md`                 | Instructions for agents working in this repo                                                              | Source file                 |
+| `pyproject.toml`, `uv.lock` | Python dependency inputs and resolved versions                                                            | Source file / lockfile      |
 
 ### `modules/`
 
 Common patterns used in this repo:
 
-- `modules/bin/` — personal CLI entrypoints / wrappers (e.g., python scripts and short commands)
+- `modules/bin/` — shell commands and Python commands
 - `modules/zsh/` — zsh modular config fragments + templates (private env template included)
 - `modules/mackup/` — Mackup configuration (`.mackup.cfg` + per-app cfg fragments)
 - `modules/surfingkeys/` — browser automation config (Surfingkeys)
 
 ### `home/`
 
-`home/` mirrors real paths under `$HOME`, including:
+`home/` stores Mackup backups for paths under `$HOME`, including:
 
 - dotfiles: `.zshrc`, `.gitconfig`, etc.
 - XDG configs: `.config/*`
 - macOS app support paths: `Library/Application Support/*`, `Library/Preferences/*`
 
-Because this directory is a Mackup snapshot, it may contain:
+Because this directory is Mackup data, it may contain:
 
 - files created/updated by apps
-- timestamps / backups (which should typically be excluded/ignored)
-- tracked shell bootstrap files (`.zshenv`, `.zprofile`, `.zshrc`) that define Mackup-restored shell startup behavior
-- ignored local secret materializations such as `.zshenv.private.zsh`, generated from tracked templates before Mackup restore
+- timestamps and app backups
+- tracked shell startup files (`.zshenv`, `.zprofile`, `.zshrc`) that define restored shell behavior
+- ignored local secret files such as `.zshenv.private.zsh`
 
 If you see noise such as `.DS_Store` or auto-backups inside `home/`, prefer to ignore/exclude them to keep diffs meaningful.
 
@@ -193,26 +189,26 @@ If you see noise such as `.DS_Store` or auto-backups inside `home/`, prefer to i
 
 ### 1) Day-to-day edits
 
-- Prefer editing **`modules/`** (source), except tracked shell bootstrap files under `home/` when changing Mackup-restored shell startup behavior
-- Apply changes to your machine via your own linking mechanism
-- `sync` regenerates shell completions/functions, refreshes third-party plugin clones, runs Skillshare sync for skills/extras, and writes host snapshots under `generated/docs/<hostname>/`
+- Prefer editing `modules/`, except tracked shell startup files under `home/`
+- Apply changes with the relevant command
+- `sync` regenerates shell completions/functions, refreshes third-party plugin clones, runs Skillshare sync for skills/extras, and writes host inventory files under `generated/docs/<hostname>/`
 - `up` updates Homebrew-managed packages, mise tools, and selected developer CLIs
-- Refresh `home/` via `backup` task when you want to record the current machine state into the Mackup snapshot
+- Run `backup` when you want Mackup to copy current user config into `home/`
 
 Typical loop:
 
 ```bash
-# edit source modules
+# edit source files
 $EDITOR modules/...
 
 # apply/link to live system
 mise run sync
 
-# snapshot changes into home/ via Mackup
+# copy current user config into home/ through Mackup
 mise run backup
 ```
 
-### 2) New machine bootstrap
+### 2) New Machine Setup
 
 Typical flow:
 
@@ -224,13 +220,13 @@ mise run sync
 
 Where:
 
-- `init` sets up baseline tooling
-- `restore` optionally generates ignored private materializations such as `home/.zshenv.private.zsh`, pulls the Mackup snapshot into the correct locations, then syncs Skillshare extras such as global harness prompt files
-- `sync` regenerates shell completions/functions, refreshes third-party plugin clones, runs Skillshare sync for skills/extras, and writes host snapshots
+- `init` installs baseline tools and plugin files
+- `restore` generates private files when possible, restores Mackup files, and syncs Skillshare extras
+- `sync` regenerates shell completions/functions, refreshes third-party plugin clones, runs Skillshare sync, and writes host inventory files
 
-### 3) Host snapshots
+### 3) Host Inventory
 
-Host snapshots live under:
+Host inventory files live under:
 
 ```text
 generated/docs/<hostname>/
@@ -242,8 +238,7 @@ Examples:
 - `applications.txt`, `setapp.txt`
 - `gh_extensions.txt`
 
-These are intentionally host-specific and are expected to change over time.
-They are host-specific snapshots (brew/apps/gh extensions, etc.), not config.
+These files are host-specific and change over time. They are inventory, not config.
 Homebrew is tracked as a single `brew bundle dump` output; derived reports such
 as leaves or explicitly requested formulae are not kept.
 
@@ -253,9 +248,9 @@ Standalone Python scripts use PEP 723 metadata and pin their runtime packages in
 
 ## Agents and skills
 
-Global harness prompt files such as `~/.codex/AGENTS.md`, `~/.claude/CLAUDE.md`, and `~/.config/amp/AGENTS.md` live in the Skillshare source repo under `extras/{codex,claude,amp}/`. `skillshare sync extras` distributes them. This repo only stores the Skillshare routing config (`~/.config/skillshare/config.yaml`) through Mackup so restored machines know where to sync from.
+Global harness prompt files such as `~/.codex/AGENTS.md`, `~/.claude/CLAUDE.md`, and `~/.config/amp/AGENTS.md` live in the Skillshare source repo under `extras/{codex,claude,amp}/`. `skillshare sync extras` copies them into tool config directories. This repo stores only the Skillshare config (`~/.config/skillshare/config.yaml`) through Mackup.
 
-Dotfiles keeps only the bootstrap hooks that call Skillshare during `restore` and `sync`. See **`AGENTS.md`** for this repo's operating contract.
+`restore` and `sync` run Skillshare so prompt files match the Skillshare source repo.
 
 ## License
 
