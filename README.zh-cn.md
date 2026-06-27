@@ -10,4 +10,4 @@
 
 当前维护的完整仓库说明在 [README.md](README.md)。
 
-命令入口、Skillshare 边界、Mackup 规则和 host inventory 说明以英文 README 为准，避免双写后漂移。
+命令入口、Skillshare 边界、Mackup 规则和 host inventory 说明以 [README.md](README.md) 为准。

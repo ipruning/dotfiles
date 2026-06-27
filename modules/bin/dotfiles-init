@@ -36,7 +36,7 @@ dotfiles_run_with_timeout "${DOTFILES_INIT_NETWORK_TIMEOUT:-300}" bash -c '
     https://github.com/laperlej/zellij-sessionizer/releases/latest/download/zellij-sessionizer.wasm
 ' || gum log --level warn "Zellij plugin update failed; continuing"
 
-gum log --level info "Cloning ZSH plugins..."
+gum log --level info "Cloning Zsh plugins..."
 mkdir -p generated/plugins
 plugins=(
   "fzf-tab|https://github.com/Aloxaf/fzf-tab"

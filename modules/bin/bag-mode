@@ -206,8 +206,8 @@ while true; do
       # Final-chance snapshot before darkening. With an external display
       # attached, macOS unenumerates the built-in panel the moment the lid
       # closes, so this read is usually too late and returns empty. The
-      # real source of truth is the continuous tracker below, which keeps
-      # LAST_BRIGHTNESS fresh while the lid is open. Skip snapshots that
+      # continuous tracker below keeps LAST_BRIGHTNESS fresh while the lid is
+      # open. Skip snapshots that
       # are empty or ~0 (panel gone, or already darkened by us) so we
       # never overwrite a good restore target with 0.
       cur="$(builtin_brightness)"

@@ -2,10 +2,10 @@
 
 ## Scope
 
-`modules/` stores source files: executable commands, command helpers, shell config fragments,
-Mackup config, LaunchAgent and LaunchDaemon plist files, and templates. Keep
-runtime state and generated local files outside this tree unless the repository
-already marks those paths as generated files.
+`modules/` stores source files: executable commands, command helpers, shell
+config fragments, Mackup config, LaunchAgent and LaunchDaemon plist files, and
+templates. Keep runtime state and generated local files outside this tree
+unless the repository already marks those paths as generated files.
 
 ## `bin/`
 
@@ -15,6 +15,8 @@ already marks those paths as generated files.
   helpers should source `modules/bin/_lib/load.sh`.
 - Domain-specific helper files may source `load.sh` themselves. Commands should
   source the domain helper directly, for example `modules/bin/_lib/mackup.sh`.
+- Files under `modules/bin/_lib/` are sourced helpers, not direct commands.
+  Keep them non-executable.
 - New executable names should use kebab-case. Use `.py` for Python helpers that
   are imported or edited as Python modules; otherwise prefer an executable
   script name without an extension.

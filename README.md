@@ -13,7 +13,7 @@ The repo uses three file roles:
 - **`modules/` contains source files.** Put reusable scripts, templates, shell fragments, Mackup config, launchd config, and app config here.
 - **`home/` contains the Mackup backup tree.** Mackup copies files between this tree and `$HOME`. Do not edit files here, except tracked shell startup files (`.zshenv`, `.zprofile`, `.zshrc`) when changing restored shell behavior. The ignored `home/.zshenv.private.zsh` file is generated from `home/.zshenv.private.tpl.zsh`.
 - **`generated/` contains generated files.** This includes completions, shell functions, plugins, and host inventory files.
-  - `generated/plugins/` contains third-party ZSH plugins (git-ignored).
+  - `generated/plugins/` contains third-party Zsh plugins (git-ignored).
   - `generated/docs/<hostname>/` stores host inventory files for Homebrew, apps, and extensions.
 
 Skillshare manages global harness prompts and AI skills from its own source repo. This repo runs Skillshare during `restore` and `sync`.
@@ -87,7 +87,7 @@ openv-longbridge
 env | rg '^LONGPORT_' | cut -d= -f1
 ```
 
-### Run Commands
+### Run commands
 
 Use `mise run ...` after cloning. Each mise task runs a command in `modules/bin/`.
 After `modules/bin` is on `PATH`, the same commands can be run directly.
@@ -138,7 +138,7 @@ These rules keep file ownership clear:
 
 3. **Treat `generated/` as generated files**
    - `sync` regenerates shell completions and functions.
-   - `generated/plugins/` contains third-party ZSH plugins (git-ignored, cloned by `init`).
+   - `generated/plugins/` contains third-party Zsh plugins (git-ignored, cloned by `init`).
    - `generated/docs/<hostname>/` contains host inventory files.
 
 4. **Secrets never enter Git**
@@ -208,7 +208,7 @@ mise run sync
 mise run backup
 ```
 
-### 2) New Machine Setup
+### 2) New machine setup
 
 Typical flow:
 
@@ -224,7 +224,7 @@ Where:
 - `restore` generates private files when possible, restores Mackup files, and syncs Skillshare extras
 - `sync` regenerates shell completions/functions, refreshes third-party plugin clones, runs Skillshare sync, and writes host inventory files
 
-### 3) Host Inventory
+### 3) Host inventory
 
 Host inventory files live under:
 
