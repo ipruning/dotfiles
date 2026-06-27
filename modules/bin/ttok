@@ -29,8 +29,9 @@ script_dir=${script_path:h}
 repo_root=${script_dir:h:h}
 runtime_base=${XDG_RUNTIME_DIR:-${TMPDIR:-/tmp}}
 runtime_dir="$runtime_base/ttok-runtime-${UID:-$(id -u)}"
-daemon_version="v5"
+daemon_version="v6"
 protocol_magic="TTOK4"
+tiktoken_version="0.13.0"
 daemon_path="$runtime_dir/ttok-daemon-$daemon_version.py"
 socket_path="$runtime_dir/ttok-o200k-base-$daemon_version.sock"
 log_file="$runtime_dir/ttok-daemon-$daemon_version.log"
@@ -49,11 +50,11 @@ fi
 write_daemon() {
   mkdir -p -- "$runtime_dir"
   chmod 700 -- "$runtime_dir" 2>/dev/null || true
-  cat >"$daemon_path" <<'PY'
+  cat >"$daemon_path" <<PY
 #!/usr/bin/env -S uv run --script
 # /// script
 # requires-python = ">=3.13"
-# dependencies = ["tiktoken==0.12.0"]
+# dependencies = ["tiktoken==$tiktoken_version"]
 # ///
 
 from __future__ import annotations
@@ -208,7 +209,17 @@ PY
 python_can_import_tiktoken() {
   local python_bin=$1
   [[ -x "$python_bin" ]] || return 1
-  "$python_bin" -c 'import tiktoken' >/dev/null 2>&1
+  "$python_bin" - "$tiktoken_version" >/dev/null 2>&1 <<'PY'
+import sys
+from importlib.metadata import PackageNotFoundError, version
+
+try:
+    installed = version("tiktoken")
+except PackageNotFoundError:
+    sys.exit(1)
+
+sys.exit(0 if installed == sys.argv[1] else 1)
+PY
 }
 
 start_daemon_process() {

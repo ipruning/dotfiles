@@ -339,7 +339,7 @@ print(json.dumps([len(enc.encode(text, disallowed_special=())) for text in texts
                     "--isolated",
                     "--no-project",
                     "--with",
-                    "tiktoken>=0.12.0",
+                    "tiktoken==0.13.0",
                     "python",
                     "-c",
                     code,
