@@ -1,0 +1,368 @@
+#!/bin/zsh -f
+
+setopt no_unset pipe_fail
+export LC_ALL=C
+
+usage() {
+  cat <<'EOF' >&2
+Count tokens using the official tiktoken o200k_base encoding.
+
+Usage:
+  echo "hello world" | ttok
+  p | ttok                # clipboard text, or copied file paths
+  ttok "hello world"
+  ttok file.txt
+  ttok < file.txt
+EOF
+}
+
+if (( $# == 0 )) && [[ -t 0 ]]; then
+  usage
+  exit 1
+fi
+
+zmodload zsh/net/socket
+zmodload zsh/system
+
+script_path=${0:A}
+script_dir=${script_path:h}
+repo_root=${script_dir:h:h}
+runtime_base=${XDG_RUNTIME_DIR:-${TMPDIR:-/tmp}}
+runtime_dir="$runtime_base/ttok-runtime"
+daemon_version="v4"
+daemon_path="$runtime_dir/ttok-daemon-$daemon_version.py"
+socket_path="$runtime_dir/ttok-o200k-base-$daemon_version.sock"
+log_file="$runtime_dir/ttok-daemon-$daemon_version.log"
+
+input_text=""
+if (( $# == 0 )); then
+  chunk_text=""
+  while sysread -i 0 -s 1048576 chunk_text; do
+    input_text+="$chunk_text"
+  done
+  if [[ -n "$chunk_text" ]]; then
+    input_text+="$chunk_text"
+  fi
+fi
+
+write_daemon() {
+  mkdir -p -- "$runtime_dir"
+  cat >"$daemon_path" <<'PY'
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.13"
+# dependencies = ["tiktoken==0.12.0"]
+# ///
+
+from __future__ import annotations
+
+import select
+import socket
+import sys
+import time
+from pathlib import Path
+from urllib.parse import unquote, urlparse
+
+import tiktoken
+
+TOKENIZER = "o200k_base"
+MAX_CLIPBOARD_PATHS = 100
+IDLE_TIMEOUT_SECONDS = 600
+
+
+def count_tokens(text: str) -> int:
+    return len(ENCODING.encode(text, disallowed_special=()))
+
+
+def count_file(file_path: Path) -> int:
+    return count_tokens(file_path.read_text(errors="replace"))
+
+
+def resolve_path(file_path: Path, base_dir: Path) -> Path:
+    if file_path.is_absolute():
+        return file_path
+    return base_dir / file_path
+
+
+def path_from_clipboard_line(line: str, base_dir: Path) -> Path:
+    if line.startswith("file://"):
+        return Path(unquote(urlparse(line).path))
+    return resolve_path(Path(line).expanduser(), base_dir)
+
+
+def paths_from_clipboard_text(text: str, base_dir: Path) -> list[Path] | None:
+    lines = [line.strip() for line in text.strip().splitlines() if line.strip()]
+    if not lines or len(lines) > MAX_CLIPBOARD_PATHS:
+        return None
+
+    paths = [path_from_clipboard_line(line, base_dir) for line in lines]
+    if all(file_path.is_file() for file_path in paths):
+        return paths
+    return None
+
+
+def count_request(args: list[str], input_bytes: bytes, base_dir: Path) -> int:
+    if args:
+        paths = [resolve_path(Path(arg).expanduser(), base_dir) for arg in args]
+        if all(file_path.is_file() for file_path in paths):
+            return sum(count_file(file_path) for file_path in paths)
+        return count_tokens(" ".join(args))
+
+    text = input_bytes.decode(errors="replace")
+    if paths := paths_from_clipboard_text(text, base_dir):
+        return sum(count_file(file_path) for file_path in paths)
+    return count_tokens(text)
+
+
+def read_field(reader) -> bytes:
+    chunks: list[bytes] = []
+    while True:
+        byte = reader.read(1)
+        if not byte:
+            raise ValueError("truncated request")
+        if byte == b"\0":
+            return b"".join(chunks)
+        chunks.append(byte)
+
+
+def read_exact(reader, size: int) -> bytes:
+    chunks: list[bytes] = []
+    remaining = size
+    while remaining:
+        chunk = reader.read(remaining)
+        if not chunk:
+            raise ValueError("truncated input")
+        chunks.append(chunk)
+        remaining -= len(chunk)
+    return b"".join(chunks)
+
+
+def handle_connection(conn: socket.socket) -> bytes:
+    reader = conn.makefile("rb", buffering=0)
+    magic = read_field(reader)
+    if magic == b"PING":
+        return b"OK\n"
+    if magic != b"TTOK4":
+        raise ValueError("unknown request")
+
+    caller_dir = read_field(reader).decode(errors="surrogateescape")
+    argc = int(read_field(reader))
+    args = [read_field(reader).decode(errors="surrogateescape") for _ in range(argc)]
+    input_len = int(read_field(reader))
+    input_bytes = read_exact(reader, input_len)
+    count = count_request(args, input_bytes, Path(caller_dir))
+    return f"OK\t{count}\n".encode()
+
+
+def serve(socket_name: str) -> None:
+    socket_file = Path(socket_name)
+    socket_file.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        socket_file.unlink()
+    except FileNotFoundError:
+        pass
+
+    server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    server.bind(socket_name)
+    server.listen(16)
+
+    try:
+        last_activity = time.monotonic()
+        while True:
+            idle_left = IDLE_TIMEOUT_SECONDS - (time.monotonic() - last_activity)
+            if idle_left <= 0:
+                return
+            readable, _, _ = select.select([server], [], [], idle_left)
+            if not readable:
+                return
+
+            conn, _ = server.accept()
+            last_activity = time.monotonic()
+            with conn:
+                try:
+                    conn.sendall(handle_connection(conn))
+                except Exception as exc:  # noqa: BLE001 - keep CLI diagnostics parseable.
+                    message = str(exc).replace("\n", " ")
+                    conn.sendall(f"ERR\t{message}\n".encode())
+    finally:
+        server.close()
+        try:
+            socket_file.unlink()
+        except FileNotFoundError:
+            pass
+
+
+ENCODING = tiktoken.get_encoding(TOKENIZER)
+
+
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print("usage: ttok-daemon.py SOCKET_PATH", file=sys.stderr)
+        sys.exit(2)
+    serve(sys.argv[1])
+PY
+}
+
+python_can_import_tiktoken() {
+  local python_bin=$1
+  [[ -x "$python_bin" ]] || return 1
+  "$python_bin" -c 'import tiktoken' >/dev/null 2>&1
+}
+
+start_daemon_process() {
+  write_daemon
+  rm -f -- "$socket_path"
+
+  if python_can_import_tiktoken "$repo_root/.venv/bin/python"; then
+    nohup "$repo_root/.venv/bin/python" "$daemon_path" "$socket_path" >>"$log_file" 2>&1 &
+    return 0
+  fi
+
+  if python_can_import_tiktoken "$(command -v python3 2>/dev/null)"; then
+    nohup python3 "$daemon_path" "$socket_path" >>"$log_file" 2>&1 &
+    return 0
+  fi
+
+  if command -v uv >/dev/null 2>&1; then
+    nohup uv run --script "$daemon_path" "$socket_path" >>"$log_file" 2>&1 &
+    return 0
+  fi
+
+  print -ru2 -- "ttok: need tiktoken in Python or uv to start tokenizer daemon"
+  return 1
+}
+
+read_response() {
+  local response_fd=$1
+  local response_text=""
+  local response_chunk=""
+  while sysread -i "$response_fd" response_chunk; do
+    response_text+="$response_chunk"
+  done
+  if [[ -n "$response_chunk" ]]; then
+    response_text+="$response_chunk"
+  fi
+  print -rn -- "$response_text"
+}
+
+ping_daemon() {
+  local ping_fd
+  local ping_response
+
+  zsocket "$socket_path" 2>/dev/null || return 1
+  ping_fd=$REPLY
+  syswrite -o "$ping_fd" $'PING\0' || {
+    exec {ping_fd}>&-
+    return 1
+  }
+  ping_response="$(read_response "$ping_fd")"
+  exec {ping_fd}>&-
+
+  [[ "$ping_response" == "OK" ]]
+}
+
+wait_for_daemon() {
+  local attempt
+  for attempt in {1..200}; do
+    if ping_daemon; then
+      return 0
+    fi
+    sleep 0.05
+  done
+  return 1
+}
+
+start_daemon() {
+  if [[ -S "$socket_path" ]]; then
+    return 0
+  fi
+
+  mkdir -p -- "$runtime_dir"
+
+  local lock_dir="$runtime_dir/start.lock"
+  if mkdir -- "$lock_dir" 2>/dev/null; then
+    if [[ ! -S "$socket_path" ]]; then
+      start_daemon_process || {
+        rmdir -- "$lock_dir" 2>/dev/null || true
+        return 1
+      }
+    fi
+    rmdir -- "$lock_dir" 2>/dev/null || true
+  fi
+
+  if ! wait_for_daemon; then
+    print -ru2 -- "ttok: tokenizer daemon did not start"
+    if [[ -f "$log_file" ]]; then
+      tail -20 "$log_file" >&2 || true
+    fi
+    return 1
+  fi
+}
+
+send_request() {
+  local caller_dir="$(pwd -P)"
+  local request_fd
+  local arg_text
+
+  zsocket "$socket_path"
+  request_fd=$REPLY
+
+  write_all() {
+    local data_text="$1"
+    local written_count
+    while [[ -n "$data_text" ]]; do
+      syswrite -c written_count -o "$request_fd" -- "$data_text" || return 1
+      if (( written_count <= 0 )); then
+        return 1
+      fi
+      data_text="${data_text[$(( written_count + 1 )),-1]}"
+    done
+  }
+
+  write_all $'TTOK4\0' || return 1
+  write_all "$caller_dir" || return 1
+  write_all $'\0' || return 1
+  write_all "$#" || return 1
+  write_all $'\0' || return 1
+  for arg_text in "$@"; do
+    write_all "$arg_text" || return 1
+    write_all $'\0' || return 1
+  done
+  write_all "${#input_text}" || return 1
+  write_all $'\0' || return 1
+  if (( $# == 0 )); then
+    write_all "$input_text" || return 1
+  fi
+
+  read_response "$request_fd"
+  exec {request_fd}>&-
+}
+
+start_daemon
+
+if ! response="$(send_request "$@")"; then
+  rm -f -- "$socket_path"
+  start_daemon
+  response="$(send_request "$@")" || {
+    print -ru2 -- "ttok: tokenizer daemon request failed"
+    exit 1
+  }
+fi
+
+ok_prefix=$'OK\t'
+err_prefix=$'ERR\t'
+
+case "$response" in
+  "$ok_prefix"*)
+    print -r -- "${response#"$ok_prefix"}"
+    ;;
+  "$err_prefix"*)
+    print -ru2 -- "${response#"$err_prefix"}"
+    exit 1
+    ;;
+  *)
+    print -ru2 -- "ttok: unexpected tokenizer daemon response"
+    print -ru2 -- "$response"
+    exit 1
+    ;;
+esac
