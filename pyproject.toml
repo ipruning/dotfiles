@@ -5,16 +5,17 @@ description = "This is my dotfiles development environment"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
-    "argcomplete>=3.6.3",
-    "autocorrect-py>=2.14.0",
-    "fire>=0.7.1",
-    "loguru>=0.7.3",
-    "pydantic-ai>=1.86.1",
-    "rich>=15.0.0",
-    "ruamel-yaml>=0.19.1",
+    "argcomplete==3.6.3",
+    "autocorrect-py==2.14.0",
+    "fire==0.7.1",
+    "loguru==0.7.3",
+    "pydantic==2.13.4",
+    "pydantic-ai==2.0.0",
+    "rich==15.0.0",
+    "ruamel-yaml==0.19.1",
     "tiktoken==0.13.0",
-    "typer>=0.24.2",
-    "youtube-transcript-api>=1.2.4",
+    "typer==0.26.8",
+    "youtube-transcript-api==1.2.4",
 ]
 
 [tool.tombi.format.rules]

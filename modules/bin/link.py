@@ -1,9 +1,9 @@
 #!/usr/bin/env -S uv run --script
 # /// script
-# requires-python = ">=3.13"
+# requires-python = ">=3.14"
 # dependencies = [
-#     "loguru>=0.7.3",
-#     "rich>=15.0.0",
+#     "loguru==0.7.3",
+#     "rich==15.0.0",
 # ]
 # ///
 

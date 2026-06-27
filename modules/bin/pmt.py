@@ -1,6 +1,6 @@
 #!/usr/bin/env -S uv run --script
 # /// script
-# requires-python = ">=3.13"
+# requires-python = ">=3.14"
 # ///
 
 import logging
@@ -91,10 +91,10 @@ def _get_custom_instructions() -> str | None:
 
     User 的 MacBook 环境是：
 
-    - nushell>=0.108.0
-    - python>=3.13.9
-    - pydantic>=2.12.4
-    - bun>=1.3.2"""  # noqa: E501
+    - Nushell 0.113.1
+    - Python 3.14.4
+    - Pydantic 2.13.4
+    - Bun 1.3.14"""  # noqa: E501
 
     return CUSTOM_INSTRUCTIONS
 

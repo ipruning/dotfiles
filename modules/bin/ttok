@@ -29,7 +29,7 @@ script_dir=${script_path:h}
 repo_root=${script_dir:h:h}
 runtime_base=${XDG_RUNTIME_DIR:-${TMPDIR:-/tmp}}
 runtime_dir="$runtime_base/ttok-runtime-${UID:-$(id -u)}"
-daemon_version="v6"
+daemon_version="v7"
 protocol_magic="TTOK4"
 tiktoken_version="0.13.0"
 daemon_path="$runtime_dir/ttok-daemon-$daemon_version.py"
@@ -53,7 +53,7 @@ write_daemon() {
   cat >"$daemon_path" <<PY
 #!/usr/bin/env -S uv run --script
 # /// script
-# requires-python = ">=3.13"
+# requires-python = ">=3.14"
 # dependencies = ["tiktoken==$tiktoken_version"]
 # ///
 
