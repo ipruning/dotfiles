@@ -27,13 +27,18 @@ zmodload zsh/system
 script_path=${0:A}
 script_dir=${script_path:h}
 repo_root=${script_dir:h:h}
-runtime_base=${XDG_RUNTIME_DIR:-${TMPDIR:-/tmp}}
-runtime_dir="$runtime_base/ttok-runtime-${UID:-$(id -u)}"
+uid=${UID:-$(id -u)}
 daemon_version="v7"
 protocol_magic="TTOK4"
 tiktoken_version="0.13.0"
+socket_name="ttok-o200k-base-$daemon_version.sock"
+runtime_base=${XDG_RUNTIME_DIR:-${TMPDIR:-/tmp}}
+runtime_dir="$runtime_base/ttok-runtime-$uid"
+if (( ${#runtime_dir} + 1 + ${#socket_name} > 100 )); then
+  runtime_dir="/tmp/ttok-runtime-$uid"
+fi
 daemon_path="$runtime_dir/ttok-daemon-$daemon_version.py"
-socket_path="$runtime_dir/ttok-o200k-base-$daemon_version.sock"
+socket_path="$runtime_dir/$socket_name"
 log_file="$runtime_dir/ttok-daemon-$daemon_version.log"
 
 input_text=""
@@ -48,12 +53,11 @@ if (( $# == 0 )); then
 fi
 
 write_daemon() {
-  mkdir -p -- "$runtime_dir"
-  chmod 700 -- "$runtime_dir" 2>/dev/null || true
+  prepare_runtime_dir || return 1
   cat >"$daemon_path" <<PY
 #!/usr/bin/env -S uv run --script
 # /// script
-# requires-python = ">=3.14"
+# requires-python = ">=3.11"
 # dependencies = ["tiktoken==$tiktoken_version"]
 # ///
 
@@ -206,6 +210,26 @@ if __name__ == "__main__":
 PY
 }
 
+prepare_runtime_dir() {
+  if [[ -L "$runtime_dir" ]]; then
+    print -ru2 -- "ttok: runtime directory must not be a symlink: $runtime_dir"
+    return 1
+  fi
+  if [[ -e "$runtime_dir" && ! -d "$runtime_dir" ]]; then
+    print -ru2 -- "ttok: runtime path is not a directory: $runtime_dir"
+    return 1
+  fi
+  mkdir -p -- "$runtime_dir" || return 1
+  if [[ ! -O "$runtime_dir" ]]; then
+    print -ru2 -- "ttok: runtime directory is not owned by this user: $runtime_dir"
+    return 1
+  fi
+  chmod 700 "$runtime_dir" || {
+    print -ru2 -- "ttok: cannot secure runtime directory: $runtime_dir"
+    return 1
+  }
+}
+
 python_can_import_tiktoken() {
   local python_bin=$1
   [[ -x "$python_bin" ]] || return 1
@@ -290,8 +314,7 @@ start_daemon() {
     return 0
   fi
 
-  mkdir -p -- "$runtime_dir"
-  chmod 700 -- "$runtime_dir" 2>/dev/null || true
+  prepare_runtime_dir || return 1
 
   local lock_dir="$runtime_dir/start.lock"
   if mkdir -- "$lock_dir" 2>/dev/null; then
@@ -353,11 +376,11 @@ send_request() {
   exec {request_fd}>&-
 }
 
-start_daemon
+start_daemon || exit 1
 
 if ! response="$(send_request "$@")"; then
   rm -f -- "$socket_path"
-  start_daemon
+  start_daemon || exit 1
   response="$(send_request "$@")" || {
     print -ru2 -- "ttok: token count request failed"
     exit 1

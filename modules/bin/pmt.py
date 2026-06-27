@@ -1,6 +1,6 @@
 #!/usr/bin/env -S uv run --script
 # /// script
-# requires-python = ">=3.14"
+# requires-python = ">=3.11"
 # ///
 
 import logging
@@ -87,14 +87,7 @@ def _get_custom_instructions() -> str | None:
 
     Use only Markdown headings at levels 1 to 3. Use level 1 at most once, as the title. Do not use level 4 headings.
 
-    User 爱阅读「中英文间有适当空格」，「中文标点恰当使用」的文字。比如，请用「我学到了大模型 LLMs 的发展，以及缩放定律。」而非“我学到了大模型 llms 的发展，以及缩放定律.”。
-
-    User 的 MacBook 环境是：
-
-    - Nushell 0.113.1
-    - Python 3.14.4
-    - Pydantic 2.13.4
-    - Bun 1.3.14"""  # noqa: E501
+    User 爱阅读「中英文间有适当空格」，「中文标点恰当使用」的文字。比如，请用「我学到了大模型 LLMs 的发展，以及缩放定律。」而非“我学到了大模型 llms 的发展，以及缩放定律.”。"""  # noqa: E501
 
     return CUSTOM_INSTRUCTIONS
 

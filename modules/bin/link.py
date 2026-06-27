@@ -1,6 +1,6 @@
 #!/usr/bin/env -S uv run --script
 # /// script
-# requires-python = ">=3.14"
+# requires-python = ">=3.11"
 # dependencies = [
 #     "loguru==0.7.3",
 #     "rich==15.0.0",
@@ -39,6 +39,11 @@ PATH_COLOR = "\033[32m"
 UUID_COLOR = "\033[35m"
 CMD_COLOR = "\033[33m"
 RESET = "\033[0m"
+USAGE = """\
+Usage: link.py
+
+Extract URLs, paths, UUIDs, and resume commands from stdin, Zellij, or the frontmost terminal.
+"""
 
 
 # Precompiled helpers
@@ -371,7 +376,15 @@ def fuzzy_select_items(items_dict: dict[str, str]) -> None:
     logger.error(f"No matching item found for selection: '{selected_clean}'")
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> None:
+    argv = sys.argv[1:] if argv is None else argv
+    if argv in (["-h"], ["--help"]):
+        print(USAGE, end="")
+        return
+    if argv:
+        print(f"link.py: unexpected arguments: {' '.join(argv)}", file=sys.stderr)
+        sys.exit(2)
+
     zellij_text = get_zellij_screen()
     stdin_text = "" if sys.stdin.isatty() else sys.stdin.read()
     terminal_text = ""
