@@ -1130,7 +1130,7 @@ def analyze_context(
     table.add_column("desc chars", justify="right")
     table.add_column("desc tokens", justify="right")
     if use_tiktoken:
-        table.add_column("ttok desc", justify="right")
+        table.add_column("o200k desc", justify="right")
     table.add_column("full line", justify="right")
     table.add_column("trunc chars", justify="right")
     table.add_column("included", justify="right")

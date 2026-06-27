@@ -5,7 +5,7 @@ export LC_ALL=C
 
 usage() {
   cat <<'EOF' >&2
-Count tokens using the official tiktoken o200k_base encoding.
+Print the o200k_base token count for text or files.
 
 Usage:
   echo "hello world" | ttok
@@ -29,7 +29,8 @@ script_dir=${script_path:h}
 repo_root=${script_dir:h:h}
 runtime_base=${XDG_RUNTIME_DIR:-${TMPDIR:-/tmp}}
 runtime_dir="$runtime_base/ttok-runtime-${UID:-$(id -u)}"
-daemon_version="v4"
+daemon_version="v5"
+protocol_magic="TTOK4"
 daemon_path="$runtime_dir/ttok-daemon-$daemon_version.py"
 socket_path="$runtime_dir/ttok-o200k-base-$daemon_version.sock"
 log_file="$runtime_dir/ttok-daemon-$daemon_version.log"
@@ -66,9 +67,10 @@ from urllib.parse import unquote, urlparse
 
 import tiktoken
 
-TOKENIZER = "o200k_base"
+ENCODING_NAME = "o200k_base"
 MAX_CLIPBOARD_PATHS = 100
 IDLE_TIMEOUT_SECONDS = 600
+PROTOCOL_MAGIC = b""
 
 
 def count_tokens(text: str) -> int:
@@ -143,7 +145,7 @@ def handle_connection(conn: socket.socket) -> bytes:
     magic = read_field(reader)
     if magic == b"PING":
         return b"OK\n"
-    if magic != b"TTOK4":
+    if magic != PROTOCOL_MAGIC:
         raise ValueError("unknown request")
 
     caller_dir = read_field(reader).decode(errors="surrogateescape")
@@ -191,15 +193,14 @@ def serve(socket_name: str) -> None:
             socket_file.unlink()
         except FileNotFoundError:
             pass
-
-
-ENCODING = tiktoken.get_encoding(TOKENIZER)
+ENCODING = tiktoken.get_encoding(ENCODING_NAME)
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("usage: ttok-daemon.py SOCKET_PATH", file=sys.stderr)
+    if len(sys.argv) != 3:
+        print("ttok: internal daemon needs SOCKET_PATH PROTOCOL_MAGIC", file=sys.stderr)
         sys.exit(2)
+    PROTOCOL_MAGIC = sys.argv[2].encode()
     serve(sys.argv[1])
 PY
 }
@@ -215,21 +216,21 @@ start_daemon_process() {
   rm -f -- "$socket_path"
 
   if python_can_import_tiktoken "$repo_root/.venv/bin/python"; then
-    nohup "$repo_root/.venv/bin/python" "$daemon_path" "$socket_path" >>"$log_file" 2>&1 &
+    nohup "$repo_root/.venv/bin/python" "$daemon_path" "$socket_path" "$protocol_magic" >>"$log_file" 2>&1 &
     return 0
   fi
 
   if python_can_import_tiktoken "$(command -v python3 2>/dev/null)"; then
-    nohup python3 "$daemon_path" "$socket_path" >>"$log_file" 2>&1 &
+    nohup python3 "$daemon_path" "$socket_path" "$protocol_magic" >>"$log_file" 2>&1 &
     return 0
   fi
 
   if command -v uv >/dev/null 2>&1; then
-    nohup uv run --script "$daemon_path" "$socket_path" >>"$log_file" 2>&1 &
+    nohup uv run --script "$daemon_path" "$socket_path" "$protocol_magic" >>"$log_file" 2>&1 &
     return 0
   fi
 
-  print -ru2 -- "ttok: need tiktoken in Python or uv to start tokenizer daemon"
+  print -ru2 -- "ttok: need Python with tiktoken, or uv, to count tokens"
   return 1
 }
 
@@ -293,7 +294,7 @@ start_daemon() {
   fi
 
   if ! wait_for_daemon; then
-    print -ru2 -- "ttok: tokenizer daemon did not start"
+    print -ru2 -- "ttok: token counter did not start"
     if [[ -f "$log_file" ]]; then
       tail -20 "$log_file" >&2 || true
     fi
@@ -321,7 +322,8 @@ send_request() {
     done
   }
 
-  write_all $'TTOK4\0' || return 1
+  write_all "$protocol_magic" || return 1
+  write_all $'\0' || return 1
   write_all "$caller_dir" || return 1
   write_all $'\0' || return 1
   write_all "$#" || return 1
@@ -346,7 +348,7 @@ if ! response="$(send_request "$@")"; then
   rm -f -- "$socket_path"
   start_daemon
   response="$(send_request "$@")" || {
-    print -ru2 -- "ttok: tokenizer daemon request failed"
+    print -ru2 -- "ttok: token count request failed"
     exit 1
   }
 fi
@@ -363,7 +365,7 @@ case "$response" in
     exit 1
     ;;
   *)
-    print -ru2 -- "ttok: unexpected tokenizer daemon response"
+    print -ru2 -- "ttok: unexpected token count response"
     print -ru2 -- "$response"
     exit 1
     ;;
