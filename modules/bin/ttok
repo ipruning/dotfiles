@@ -1,4 +1,4 @@
-#!/bin/zsh -f
+#!/usr/bin/env -S zsh -f
 
 setopt no_unset pipe_fail
 export LC_ALL=C
@@ -28,7 +28,7 @@ script_path=${0:A}
 script_dir=${script_path:h}
 repo_root=${script_dir:h:h}
 runtime_base=${XDG_RUNTIME_DIR:-${TMPDIR:-/tmp}}
-runtime_dir="$runtime_base/ttok-runtime"
+runtime_dir="$runtime_base/ttok-runtime-${UID:-$(id -u)}"
 daemon_version="v4"
 daemon_path="$runtime_dir/ttok-daemon-$daemon_version.py"
 socket_path="$runtime_dir/ttok-o200k-base-$daemon_version.sock"
@@ -47,6 +47,7 @@ fi
 
 write_daemon() {
   mkdir -p -- "$runtime_dir"
+  chmod 700 -- "$runtime_dir" 2>/dev/null || true
   cat >"$daemon_path" <<'PY'
 #!/usr/bin/env -S uv run --script
 # /// script
@@ -278,6 +279,7 @@ start_daemon() {
   fi
 
   mkdir -p -- "$runtime_dir"
+  chmod 700 -- "$runtime_dir" 2>/dev/null || true
 
   local lock_dir="$runtime_dir/start.lock"
   if mkdir -- "$lock_dir" 2>/dev/null; then
