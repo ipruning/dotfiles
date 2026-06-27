@@ -6,8 +6,8 @@ set -euo pipefail
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 repo_root="$(cd -- "$script_dir/../.." && pwd)"
 
-# shellcheck source=modules/bin/_lib/task-lib.sh
-source "$repo_root/modules/bin/_lib/task-lib.sh"
+# shellcheck source=modules/bin/_lib/load.sh
+source "$repo_root/modules/bin/_lib/load.sh"
 
 dotfiles_enter_repo
 dotfiles_require_commands gum git

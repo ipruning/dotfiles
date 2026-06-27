@@ -152,7 +152,7 @@ These rules keep file ownership clear:
 
 | Path                        | Meaning                                                                                                   | Kind                        |
 | --------------------------- | --------------------------------------------------------------------------------------------------------- | --------------------------- |
-| `.mise/config.toml`          | Mise task definitions that call `modules/bin/dotfiles-*` commands                                          | Source file                 |
+| `mise.toml`                  | Mise task definitions that call `modules/bin/dotfiles-*` commands                                          | Source file                 |
 | `modules/`                  | Source files for scripts, templates, shell fragments, Mackup config, and launchd config                    | Source files                |
 | `home/`                     | Mackup backup tree for selected files under `$HOME`                                                       | Backup data                 |
 | `generated/`                | Generated files; `docs/` is tracked, while `bin/`, `completions/`, `functions`, and `plugins/` are not     | Generated files             |

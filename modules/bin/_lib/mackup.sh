@@ -1,14 +1,14 @@
-#!/usr/bin/env bash
+# shellcheck shell=bash
 
-# Shared Mackup helpers for dotfiles commands.
-# Assumes callers have already sourced task-lib.sh and `cd`ed to the repository root.
+# shellcheck source=modules/bin/_lib/load.sh
+source "$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)/load.sh"
 
 dotfiles_prepare_private_zshenv() {
   [ "${DOTFILES_PRIVATE_ZSHENV_READY:-0}" = 1 ] && return 0
 
   if command -v op &>/dev/null; then
     local inject_timeout="${DOTFILES_OP_INJECT_TIMEOUT:-20}"
-    gum log --level info "Injecting ~/.zshenv.private.zsh..."
+    dotfiles_log info "Injecting ~/.zshenv.private.zsh..."
     if dotfiles_run_with_timeout "$inject_timeout" \
       op inject --in-file home/.zshenv.private.tpl.zsh \
                 --out-file home/.zshenv.private.zsh \
@@ -18,17 +18,17 @@ dotfiles_prepare_private_zshenv() {
     fi
 
     if [ -f home/.zshenv.private.zsh ]; then
-      gum log --level warn "1Password injection failed — using existing home/.zshenv.private.zsh"
+      dotfiles_log warn "1Password injection failed — using existing home/.zshenv.private.zsh"
       DOTFILES_PRIVATE_ZSHENV_READY=1
       return 0
     fi
 
-    gum log --level warn "1Password injection failed — private zsh env was not generated"
+    dotfiles_log warn "1Password injection failed — private zsh env was not generated"
   elif [ -f home/.zshenv.private.zsh ]; then
-    gum log --level warn "1Password CLI not found — using existing home/.zshenv.private.zsh"
+    dotfiles_log warn "1Password CLI not found — using existing home/.zshenv.private.zsh"
     DOTFILES_PRIVATE_ZSHENV_READY=1
   else
-    gum log --level warn "1Password CLI not found — private zsh env was not generated"
+    dotfiles_log warn "1Password CLI not found — private zsh env was not generated"
   fi
 }
 
@@ -38,14 +38,14 @@ dotfiles_mackup_restore_safely() {
 
   dotfiles_configure_mackup_symlinks
 
-  gum log --level info "$title"
+  dotfiles_log info "$title"
   dotfiles_run_with_timeout "${DOTFILES_MACKUP_TIMEOUT:-300}" uvx mackup restore "$@"
 }
 
 dotfiles_mackup_backup_force() {
   dotfiles_configure_mackup_symlinks
 
-  gum log --level info "Running mackup backup..."
+  dotfiles_log info "Running mackup backup..."
   dotfiles_run_with_timeout "${DOTFILES_MACKUP_TIMEOUT:-300}" uvx mackup backup --force
 }
 
@@ -83,13 +83,13 @@ dotfiles_ensure_mackup_symlink() {
       return 1
     fi
 
-    gum log --level warn "$link points to $(readlink "$link"); relinking to $target"
+    dotfiles_log warn "$link points to $(readlink "$link"); relinking to $target"
     ln -sfn "$target" "$link"
     return 0
   fi
 
   if [ -e "$link" ]; then
-    gum log --level warn "$link exists and is not a symlink; skipping (move it aside to fix)"
+    dotfiles_log warn "$link exists and is not a symlink; skipping (move it aside to fix)"
     return 2
   fi
 

@@ -5,8 +5,8 @@ set -euo pipefail
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 repo_root="$(cd -- "$script_dir/../.." && pwd)"
 
-# shellcheck source=modules/bin/_lib/task-lib.sh
-source "$repo_root/modules/bin/_lib/task-lib.sh"
+# shellcheck source=modules/bin/_lib/load.sh
+source "$repo_root/modules/bin/_lib/load.sh"
 
 run_update() {
   local title="$1" timeout_seconds="$2" output_mode="$3"

@@ -10,6 +10,11 @@ already marks those paths as generated files.
 ## `bin/`
 
 - Put user-facing commands in `modules/bin/`.
+- Put shared command helpers in `modules/bin/_lib/`.
+- Commands that need common logging, dependency checks, prompts, or timeout
+  helpers should source `modules/bin/_lib/load.sh`.
+- Domain-specific helper files may source `load.sh` themselves. Commands should
+  source the domain helper directly, for example `modules/bin/_lib/mackup.sh`.
 - New executable names should use kebab-case. Use `.py` for Python helpers that
   are imported or edited as Python modules; otherwise prefer an executable
   script name without an extension.

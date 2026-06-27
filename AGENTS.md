@@ -4,7 +4,7 @@
 
 - `modules/` contains source files for configs, scripts, and templates. Common areas include `modules/bin/`, `modules/zsh/`, `modules/mackup/`, `modules/launchagents/`, and `modules/surfingkeys/`.
 - `home/` is the Mackup backup tree. Avoid hand edits unless you are changing what Mackup restores. Tracked shell startup files under `home/` (`.zshenv`, `.zprofile`, `.zshrc`) are the exception. The ignored `home/.zshenv.private.zsh` file is generated from `home/.zshenv.private.tpl.zsh`.
-- `.mise/config.toml` defines mise tasks. Each task calls a `modules/bin/dotfiles-*` command.
+- `mise.toml` defines mise tasks. Each task calls a `modules/bin/dotfiles-*` command.
 - `generated/` contains generated files such as completions, functions, plugins, and host inventory files. Delete these files only when regeneration is available.
   - `generated/plugins/` contains third-party Zsh plugins (git-ignored).
   - `generated/docs/<hostname>/` stores host inventory files for Homebrew, apps, and extensions.
