@@ -1,10 +1,13 @@
 #!/usr/bin/env bash
-#MISE description="Profile zsh startup time"
+# Profile zsh startup time.
 
 set -euo pipefail
 
-# shellcheck source=.mise/scripts/task-lib.sh
-source "$(dirname "${BASH_SOURCE[0]}")/../scripts/task-lib.sh"
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+repo_root="$(cd -- "$script_dir/../.." && pwd)"
+
+# shellcheck source=modules/bin/_lib/task-lib.sh
+source "$repo_root/modules/bin/_lib/task-lib.sh"
 
 dotfiles_enter_repo
 dotfiles_require_commands gum hyperfine uv zsh
@@ -14,7 +17,7 @@ warmup_count="${2:-10}"
 
 [[ "$run_count" =~ ^[0-9]+$ ]]    || { gum log --level error "runs must be an integer (got: $run_count)";       exit 1; }
 [[ "$warmup_count" =~ ^[0-9]+$ ]] || { gum log --level error "warmup must be an integer (got: $warmup_count)"; exit 1; }
-[[ $# -le 2 ]] || { gum log --level error "Usage: mise run zsh-profile [runs] [warmup]"; exit 2; }
+[[ $# -le 2 ]] || { gum log --level error "Usage: dotfiles-zsh-profile [runs] [warmup]"; exit 2; }
 
 trace_file="$(mktemp "${TMPDIR:-/tmp}/zsh_profile.XXXXXX")"
 cleanup() { rm -f "$trace_file"; }

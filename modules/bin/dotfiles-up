@@ -5,8 +5,8 @@ set -euo pipefail
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 repo_root="$(cd -- "$script_dir/../.." && pwd)"
 
-# shellcheck source=.mise/scripts/task-lib.sh
-source "$repo_root/.mise/scripts/task-lib.sh"
+# shellcheck source=modules/bin/_lib/task-lib.sh
+source "$repo_root/modules/bin/_lib/task-lib.sh"
 
 run_update() {
   local title="$1" timeout_seconds="$2" output_mode="$3"
@@ -19,18 +19,18 @@ run_update() {
       dotfiles_log info "${title} done in ${SECONDS}s"
       return 0
     else
-      local status=$?
-      dotfiles_log error "${title} failed after ${SECONDS}s (exit ${status})"
-      return "$status"
+      local exit_status=$?
+      dotfiles_log error "${title} failed after ${SECONDS}s (exit ${exit_status})"
+      return "$exit_status"
     fi
   else
     if dotfiles_run_with_timeout "$timeout_seconds" "$@"; then
       dotfiles_log info "${title} done in ${SECONDS}s"
       return 0
     else
-      local status=$?
-      dotfiles_log error "${title} failed after ${SECONDS}s (exit ${status})"
-      return "$status"
+      local exit_status=$?
+      dotfiles_log error "${title} failed after ${SECONDS}s (exit ${exit_status})"
+      return "$exit_status"
     fi
   fi
 }
@@ -93,11 +93,11 @@ run_if_available_or_warn \
   "${DOTFILES_UP_COMMAND_TIMEOUT:-300}" visible \
   tigris update
 
-# skillshare update moved to mise run sync
+# Skillshare is refreshed by dotfiles-sync.
 run_if_available_or_warn \
   pi "Updating Pi Plugin" \
   "brew install pi-coding-agent" \
   "${DOTFILES_UP_COMMAND_TIMEOUT:-300}" visible \
   pi update --extensions
 
-# backup moved to mise run sync
+# Mackup backup is handled by dotfiles-backup.

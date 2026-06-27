@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Shared Mackup helpers for mise tasks.
+# Shared Mackup helpers for dotfiles commands.
 # Assumes callers have already sourced task-lib.sh and `cd`ed to the repository root.
 
 dotfiles_prepare_private_zshenv() {
@@ -49,26 +49,26 @@ dotfiles_mackup_backup_force() {
   dotfiles_run_with_timeout "${DOTFILES_MACKUP_TIMEOUT:-300}" uvx mackup backup --force
 }
 
-# DOTFILES_MACKUP_SYMLINKS_CHANGED is read by .mise/tasks/init.sh after this
-# library mutates Mackup links.
+# DOTFILES_MACKUP_SYMLINKS_CHANGED is read by modules/bin/dotfiles-init after
+# this helper updates Mackup links.
 # shellcheck disable=SC2034
 dotfiles_configure_mackup_symlinks() {
   DOTFILES_MACKUP_SYMLINKS_CHANGED=0
 
-  local status
+  local exit_status
 
   if dotfiles_ensure_mackup_symlink "$PWD/modules/mackup/.mackup" "$HOME/.mackup"; then
     DOTFILES_MACKUP_SYMLINKS_CHANGED=1
   else
-    status=$?
-    [ "$status" -eq 1 ] || return "$status"
+    exit_status=$?
+    [ "$exit_status" -eq 1 ] || return "$exit_status"
   fi
 
   if dotfiles_ensure_mackup_symlink "$PWD/modules/mackup/.mackup.cfg" "$HOME/.mackup.cfg"; then
     DOTFILES_MACKUP_SYMLINKS_CHANGED=1
   else
-    status=$?
-    [ "$status" -eq 1 ] || return "$status"
+    exit_status=$?
+    [ "$exit_status" -eq 1 ] || return "$exit_status"
   fi
 
   return 0

@@ -1,0 +1,248 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import re
+import subprocess
+import sys
+from dataclasses import asdict, dataclass
+from pathlib import Path
+
+
+PATH_RE = re.compile(
+    r"(?P<path>"
+    r"/Applications/[^\"'<>),;\]]+?\.app(?:/(?:\\ |[^\s\"'<>),;:\]\}])*)?"
+    r"|"
+    r"/Users/[A-Za-z0-9._-]+(?:/(?:\\ |[^\s\"'<>),;:\]\}])*)?"
+    r"|/opt/homebrew(?:/(?:\\ |[^\s\"'<>),;:\]\}])*)?"
+    r"|/usr/local(?:/(?:\\ |[^\s\"'<>),;:\]\}])*)?"
+    r"|(?:~|\$HOME|\$\{HOME\})/(?:\\ |[^\s\"'<>),;:\]\}])+"
+    r")"
+)
+
+SKIP_DIRS = {
+    ".git",
+    ".venv",
+    "__pycache__",
+}
+
+SKIP_PREFIXES = (
+    "generated/",
+    "generated/plugins/",
+    "home/Library/",
+)
+
+SKIP_SUFFIXES = [
+    ".md",
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".gif",
+    ".pdf",
+    ".wasm",
+    ".pyc",
+    ".DS_Store",
+]
+
+FULL_HOME_REQUIRED_FILES = {
+    "modules/launchagents/com.alex.macos-session-health.plist": "launchd plist strings are not shell-expanded; install should generate absolute paths or keep full paths",
+    "home/.config/zellij/config.kdl": "zellij-sessionizer root_dirs are parsed as PathBuf values without home/env expansion",
+}
+
+HOME_PROJECT_PREFIXES = (
+    "~/dotfiles",
+    "$HOME/dotfiles",
+    "${HOME}/dotfiles",
+)
+
+WORKSPACE_PREFIXES = (
+    "~/Developer/",
+    "$HOME/Developer/",
+    "${HOME}/Developer/",
+    "~/work/",
+    "$HOME/work/",
+    "${HOME}/work/",
+)
+
+
+@dataclass
+class Finding:
+    severity: str
+    code: str
+    file: str
+    line: int
+    path: str
+    message: str
+
+
+def repo_root() -> Path:
+    out = subprocess.check_output(["git", "rev-parse", "--show-toplevel"], text=True)
+    return Path(out.strip()).resolve()
+
+
+def is_binary(path: Path) -> bool:
+    try:
+        with path.open("rb") as fh:
+            chunk = fh.read(4096)
+    except OSError:
+        return True
+    return b"\0" in chunk
+
+
+def iter_files(root: Path) -> list[Path]:
+    files: list[Path] = []
+    for path in root.rglob("*"):
+        rel = path.relative_to(root).as_posix()
+        if path.is_dir():
+            continue
+        if any(part in SKIP_DIRS for part in path.relative_to(root).parts):
+            continue
+        if rel.startswith(SKIP_PREFIXES):
+            continue
+        if rel.endswith(tuple(SKIP_SUFFIXES)):
+            continue
+        if is_binary(path):
+            continue
+        files.append(path)
+    return sorted(files)
+
+
+def expand_homeish(raw: str, home: Path) -> Path | None:
+    if raw.startswith("~/"):
+        return home / raw[2:]
+    if raw.startswith("$HOME/"):
+        return home / raw[6:]
+    if raw.startswith("${HOME}/"):
+        return home / raw[8:]
+    if raw.startswith("/Users/"):
+        return Path(raw)
+    return None
+
+
+def exists_for_path(raw: str, home: Path) -> bool | None:
+    raw = raw.replace("\\ ", " ")
+    expanded = expand_homeish(raw, home)
+    if expanded is None:
+        expanded = Path(raw)
+    # App bundle values may be followed by an inner executable path; existence
+    # of the bundle itself is enough for drift detection.
+    if raw.startswith("/Applications/") and ".app/" in raw:
+        bundle = raw[: raw.index(".app/") + len(".app")]
+        return Path(bundle).exists()
+    return expanded.exists()
+
+
+def classify(rel: str, line_no: int, raw: str, text: str, root: Path, home: Path) -> Finding | None:
+    if "http://" in raw or "https://" in raw:
+        return None
+
+    if raw.startswith("/Users/"):
+        reason = FULL_HOME_REQUIRED_FILES.get(rel)
+        if not str(raw).startswith(str(home) + "/") and str(raw) != str(home):
+            return Finding("ERROR", "home_mismatch", rel, line_no, raw, f"absolute home path does not match current HOME={home}")
+        if reason:
+            ok = exists_for_path(raw, home)
+            severity = "WARN" if ok is False else "INFO"
+            message = reason
+            if ok is False:
+                message += "; path does not exist on this machine"
+            return Finding(severity, "full_home_path_required", rel, line_no, raw, message)
+        return Finding("ERROR", "absolute_home_path", rel, line_no, raw, "absolute /Users path should be replaced with supported ~/ or $HOME form, or added to an explicit full-path allowlist")
+
+    if raw.startswith(HOME_PROJECT_PREFIXES):
+        expected = home / "dotfiles"
+        if root != expected.resolve():
+            return Finding("ERROR", "dotfiles_root_mismatch", rel, line_no, raw, f"path assumes repo at {expected}, actual repo is {root}")
+        return Finding("INFO", "dotfiles_home_path", rel, line_no, raw, "path is portable by user but assumes repo lives at ~/dotfiles")
+
+    if raw.startswith(WORKSPACE_PREFIXES):
+        ok = exists_for_path(raw, home)
+        severity = "WARN" if ok is False else "INFO"
+        message = "path is home-relative but binds this config to a personal workspace layout"
+        if ok is False:
+            message += "; path does not exist on this machine"
+        return Finding(severity, "workspace_home_path", rel, line_no, raw, message)
+
+    if raw.startswith("/opt/homebrew") or raw.startswith("/usr/local"):
+        ok = exists_for_path(raw, home)
+        severity = "WARN" if ok is False else "INFO"
+        message = "full toolchain path is machine/architecture-specific"
+        if ok is False:
+            message += "; path does not exist on this machine"
+        return Finding(severity, "toolchain_full_path", rel, line_no, raw, message)
+
+    if raw.startswith("/Applications/"):
+        if "\\" in raw or raw.endswith("$"):
+            return Finding("INFO", "application_path_pattern", rel, line_no, raw, "application path pattern used for process matching, not direct filesystem lookup")
+        ok = exists_for_path(raw, home)
+        severity = "WARN" if ok is False else "INFO"
+        message = "macOS app bundle path is machine-specific but usually stable under /Applications"
+        if ok is False:
+            message += "; app bundle does not exist on this machine"
+        return Finding(severity, "application_path", rel, line_no, raw, message)
+
+    return Finding("INFO", "home_path", rel, line_no, raw, "home-relative path")
+
+
+def collect(root: Path) -> list[Finding]:
+    home = Path.home().resolve()
+    findings: list[Finding] = []
+    for path in iter_files(root):
+        rel = path.relative_to(root).as_posix()
+        if rel == "modules/bin/dotfiles-doctor":
+            continue
+        try:
+            lines = path.read_text(errors="replace").splitlines()
+        except OSError:
+            continue
+        for line_no, line in enumerate(lines, start=1):
+            for match in PATH_RE.finditer(line):
+                raw = match.group("path").rstrip(".,:")
+                finding = classify(rel, line_no, raw, line, root, home)
+                if finding is not None:
+                    findings.append(finding)
+    return findings
+
+
+def print_human(findings: list[Finding], include_info: bool) -> None:
+    visible = [f for f in findings if include_info or f.severity != "INFO"]
+    if not visible:
+        print("No hardcoded path findings.")
+    for f in visible:
+        print(f"{f.severity:5} {f.code:24} {f.file}:{f.line}")
+        print(f"      {f.path}")
+        print(f"      {f.message}")
+
+    counts = {level: sum(1 for f in findings if f.severity == level) for level in ("ERROR", "WARN", "INFO")}
+    print(f"\nSummary: {counts['ERROR']} error(s), {counts['WARN']} warning(s), {counts['INFO']} info item(s)")
+
+
+def main(argv: list[str]) -> int:
+    parser = argparse.ArgumentParser(description="Check hardcoded paths in this dotfiles repository.")
+    parser.add_argument("--json", action="store_true", help="Emit machine-readable findings.")
+    parser.add_argument("--include-info", action="store_true", help="Show INFO findings in human output.")
+    parser.add_argument("--include-docs", action="store_true", help="Also scan Markdown documentation files.")
+    parser.add_argument("--strict", action="store_true", help="Exit non-zero when warnings are present.")
+    args = parser.parse_args(argv)
+
+    root = repo_root()
+    if args.include_docs and ".md" in SKIP_SUFFIXES:
+        SKIP_SUFFIXES.remove(".md")
+    findings = collect(root)
+
+    if args.json:
+        print(json.dumps([asdict(f) for f in findings], indent=2, sort_keys=True))
+    else:
+        print_human(findings, args.include_info)
+
+    has_error = any(f.severity == "ERROR" for f in findings)
+    has_warn = any(f.severity == "WARN" for f in findings)
+    if has_error or (args.strict and has_warn):
+        return 1
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main(sys.argv[1:]))

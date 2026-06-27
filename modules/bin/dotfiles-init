@@ -1,16 +1,19 @@
 #!/usr/bin/env bash
-#MISE description="Initialize dotfiles"
+# Set up tools, plugins, and Mackup links.
 
 set -euo pipefail
 
-# shellcheck source=.mise/scripts/task-lib.sh
-source "$(dirname "${BASH_SOURCE[0]}")/../scripts/task-lib.sh"
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+repo_root="$(cd -- "$script_dir/../.." && pwd)"
+
+# shellcheck source=modules/bin/_lib/task-lib.sh
+source "$repo_root/modules/bin/_lib/task-lib.sh"
 
 dotfiles_enter_repo
 dotfiles_require_commands gum git curl mise uvx
 
-# shellcheck source=.mise/scripts/mackup-lib.sh
-source "$(dirname "${BASH_SOURCE[0]}")/../scripts/mackup-lib.sh"
+# shellcheck source=modules/bin/_lib/mackup-lib.sh
+source "$repo_root/modules/bin/_lib/mackup-lib.sh"
 
 # -- Mackup --------------------------------------------------------------------
 
@@ -22,12 +25,11 @@ else
   gum log --level info "Mackup already configured"
 fi
 
-# -- Core init ----------------------------------------------------------------
+# -- Tool setup ---------------------------------------------------------------
 
 gum log --level info "Installing mise tools..."
 dotfiles_run_with_timeout "${DOTFILES_INIT_NETWORK_TIMEOUT:-300}" mise install \
   || gum log --level warn "mise install failed; continuing"
-find .mise/tasks/ -type f -name '*.sh' -exec chmod +x {} \;
 
 dotfiles_run_with_timeout "${DOTFILES_INIT_NETWORK_TIMEOUT:-300}" bash -c '
   mkdir -p home/.config/zellij/plugins/
@@ -59,8 +61,8 @@ done
 # -- Secrets & sync ------------------------------------------------------------
 
 dotfiles_prepare_private_zshenv
-gum log --level info "Syncing generated assets and Skillshare..."
-dotfiles_run_with_timeout "${DOTFILES_SYNC_TIMEOUT:-300}" mise run sync \
+gum log --level info "Refreshing generated files, Skillshare, and host inventory..."
+dotfiles_run_with_timeout "${DOTFILES_SYNC_TIMEOUT:-300}" modules/bin/dotfiles-sync \
   || gum log --level warn "sync failed; continuing"
 
 # -- Optional CLIs -------------------------------------------------------------

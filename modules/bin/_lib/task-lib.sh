@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
-# Shared helpers for dotfiles mise tasks.
-# Keep this file small: it is sourced by interactive and non-interactive tasks.
+# Shared helpers for dotfiles commands.
 
 dotfiles_enter_repo() {
   cd "$(git rev-parse --show-toplevel)" || return

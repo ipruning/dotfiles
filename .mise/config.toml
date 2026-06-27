@@ -1,10 +1,30 @@
 [env]
 _.python.venv = { path = ".venv" }
 
+[tasks.backup]
+description = "Copy current configs into home/"
+run = 'modules/bin/dotfiles-backup "$@"'
+
+[tasks.doctor]
+description = "Check hardcoded paths in dotfiles"
+run = 'modules/bin/dotfiles-doctor "$@"'
+
+[tasks.init]
+description = "Set up tools, plugins, and Mackup links"
+run = 'modules/bin/dotfiles-init "$@"'
+
 [tasks.restore]
-description = "Restore your dotfiles"
-run = 'bash .mise/scripts/restore.sh "$@"'
+description = "Restore files from home/ with Mackup"
+run = 'modules/bin/dotfiles-restore "$@"'
 
 [tasks.sync]
-description = "Sync plugins, completions, functions, Skillshare, and host snapshots"
-run = 'bash .mise/scripts/sync.sh "$@"'
+description = "Sync plugins, completions, functions, Skillshare, and host inventory"
+run = 'modules/bin/dotfiles-sync "$@"'
+
+[tasks.up]
+description = "Update Homebrew, mise tools, and developer CLIs"
+run = 'modules/bin/dotfiles-up "$@"'
+
+[tasks.zsh-profile]
+description = "Profile zsh startup time"
+run = 'modules/bin/dotfiles-zsh-profile "$@"'

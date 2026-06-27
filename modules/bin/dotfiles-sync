@@ -1,10 +1,13 @@
 #!/usr/bin/env bash
-#MISE description="Sync plugins, completions, functions, Skillshare, and host snapshots"
+# Refresh generated files, Skillshare, and host inventory.
 
 set -euo pipefail
 
-# shellcheck source=.mise/scripts/task-lib.sh
-source "$(dirname "${BASH_SOURCE[0]}")/task-lib.sh"
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+repo_root="$(cd -- "$script_dir/../.." && pwd)"
+
+# shellcheck source=modules/bin/_lib/task-lib.sh
+source "$repo_root/modules/bin/_lib/task-lib.sh"
 
 dotfiles_enter_repo
 dotfiles_require_commands gum git
@@ -12,8 +15,8 @@ dotfiles_require_commands gum git
 completions_dir="generated/completions"
 functions_dir="generated/functions"
 
-sync_vendor_plugins() {
-  gum log --level info "Syncing vendor plugins (git pull)..."
+sync_zsh_plugins() {
+  gum log --level info "Refreshing third-party Zsh plugins..."
 
   if [ ! -d generated/plugins ]; then
     gum log --level warn "generated/plugins not found; skipping"
@@ -67,7 +70,7 @@ sync_shell_completions() {
 
   if command -v try-rs &>/dev/null; then
     cat >"$completions_dir/_try-rs" <<'TRYEOF'
-# try-rs shell wrapper (cd into selected experiment)
+# try-rs shell function (cd into selected experiment)
 try-rs() {
   local arg
   for arg in "$@"; do
@@ -201,21 +204,21 @@ sync_list_apps() {
     | LC_ALL=en_US.UTF-8 sort
 }
 
-sync_host_snapshots() {
-  gum log --level info "Writing host snapshots..."
+sync_host_inventory() {
+  gum log --level info "Writing host inventory..."
 
   local docs_dir
   docs_dir="$(sync_host_docs_dir)"
   mkdir -p "$docs_dir"
 
   if command -v brew &>/dev/null; then
-    dotfiles_run_visible "Writing Homebrew bundle..." "${DOTFILES_HOST_SNAPSHOT_TIMEOUT:-120}" \
+    dotfiles_run_visible "Writing Homebrew bundle..." "${DOTFILES_HOST_INVENTORY_TIMEOUT:-120}" \
       brew bundle dump --file="$docs_dir/brew_dump.txt" --force \
       || gum log --level warn "brew bundle dump failed"
   fi
 
   if command -v gh &>/dev/null; then
-    dotfiles_run_with_timeout "${DOTFILES_HOST_SNAPSHOT_TIMEOUT:-120}" \
+    dotfiles_run_with_timeout "${DOTFILES_HOST_INVENTORY_TIMEOUT:-120}" \
       gh extension list | awk '{print $3}' | LC_ALL=en_US.UTF-8 sort >"$docs_dir/gh_extensions.txt" \
       || gum log --level warn "gh extension list failed"
   fi
@@ -231,13 +234,13 @@ sync_host_snapshots() {
   fi
 }
 
-sync_vendor_plugins
+sync_zsh_plugins
 sync_shell_completions
 sync_shell_functions
 sync_bat_cache
 gum log --level info "Clearing zsh completion dump cache..."
 rm -f ~/.zcompdump*
 sync_skillshare
-sync_host_snapshots
+sync_host_inventory
 
 gum log --level info "Sync done ✓"

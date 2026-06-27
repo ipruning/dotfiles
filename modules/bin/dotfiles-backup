@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# Copy current user config into home/ with Mackup.
+
+set -euo pipefail
+
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+repo_root="$(cd -- "$script_dir/../.." && pwd)"
+
+# shellcheck source=modules/bin/_lib/task-lib.sh
+source "$repo_root/modules/bin/_lib/task-lib.sh"
+
+dotfiles_enter_repo
+dotfiles_require_commands gum uvx
+
+# shellcheck source=modules/bin/_lib/mackup-lib.sh
+source "$repo_root/modules/bin/_lib/mackup-lib.sh"
+
+if dotfiles_confirm_force "dotfiles-backup [--force]" \
+  "Copy current user config into home/ with Mackup now?" "$@"; then
+  dotfiles_mackup_backup_force
+else
+  exit_status=$?
+  [ "$exit_status" -eq 1 ] || exit "$exit_status"
+  gum log --level info "Cancelled."
+fi
