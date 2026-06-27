@@ -74,12 +74,12 @@ alt-shift-j = ["move down", "mode main"]
 alt-shift-k = ["move up", "mode main"]
 alt-shift-l = ["move right", "mode main"]
 
-alt-b = "exec-and-forget ~/dotfiles/modules/bin/newwin chrome"
+alt-b = "exec-and-forget ${HOME}/dotfiles/modules/bin/newwin chrome"
 alt-c = "exec-and-forget open -a /Applications/Codex.app"
-alt-g = "exec-and-forget ~/dotfiles/modules/bin/newwin ghostty"
+alt-g = "exec-and-forget ${HOME}/dotfiles/modules/bin/newwin ghostty"
 alt-p = 'exec-and-forget open -a /Applications/Repo\ Prompt.app'
 alt-r = 'exec-and-forget open -a /Applications/Roam\ Research.app'
-alt-z = "exec-and-forget ~/dotfiles/modules/bin/newwin zed"
+alt-z = "exec-and-forget ${HOME}/dotfiles/modules/bin/newwin zed"
 
 cmd-m = []
 cmd-h = []

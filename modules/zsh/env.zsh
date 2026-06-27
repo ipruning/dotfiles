@@ -229,18 +229,13 @@ bindkey "^E" end-of-line
 bindkey "^F" forward-char
 
 # 👇 Editor
-if [[ "$TERM_PROGRAM" == "vscode" ]]; then
-  export EDITOR="/usr/local/bin/cursor --wait"
+if [[ "$TERM_PROGRAM" == "vscode" && -n ${commands[cursor]:-} ]]; then
+  export EDITOR="${commands[cursor]} --wait"
   export VISUAL="$EDITOR"
 fi
 
-if [[ "$TERM_PROGRAM" == "zed" ]]; then
-  export EDITOR="/opt/homebrew/bin/zed --wait"
-  export VISUAL="$EDITOR"
-fi
-
-if [[ "$TERM_PROGRAM" == "ghostty" ]]; then
-  export EDITOR="/opt/homebrew/bin/zed --wait"
+if [[ ( "$TERM_PROGRAM" == "zed" || "$TERM_PROGRAM" == "ghostty" ) && -n ${commands[zed]:-} ]]; then
+  export EDITOR="${commands[zed]} --wait"
   export VISUAL="$EDITOR"
 fi
 
@@ -432,8 +427,8 @@ if [[ -f "$PLUGINS_DIR"/fast-syntax-highlighting/fast-syntax-highlighting.plugin
 fi
 
 # 👇 mysql
-if command -v brew >/dev/null 2>&1; then
-  export PKG_CONFIG_PATH="/opt/homebrew/opt/mysql-client/lib/pkgconfig:$PKG_CONFIG_PATH"
+if [[ -n ${HOMEBREW_PREFIX:-} && -d "$HOMEBREW_PREFIX/opt/mysql-client/lib/pkgconfig" ]]; then
+  export PKG_CONFIG_PATH="$HOMEBREW_PREFIX/opt/mysql-client/lib/pkgconfig:$PKG_CONFIG_PATH"
 fi
 
 # 👇 try-rs

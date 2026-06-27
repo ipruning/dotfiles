@@ -1,23 +1,24 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/runkids/skillshare/main/schemas/config.schema.json
-source: /Users/alex/Developer/ipruning/skills
-extras_source: /Users/alex/Developer/ipruning/skills/extras
+source: ~/Developer/ipruning/skills
+extras_source: ~/Developer/ipruning/skills/extras
 mode: merge
+preserve_tilde_on_save: true
 targets:
   universal:
     skills:
-      path: /Users/alex/.agents/skills
+      path: ~/.agents/skills
 extras:
 - name: amp
   targets:
-  - path: /Users/alex/.config/amp
+  - path: ~/.config/amp
     mode: copy
 - name: codex
   targets:
-  - path: /Users/alex/.codex
+  - path: ~/.codex
     mode: copy
 - name: claude
   targets:
-  - path: /Users/alex/.claude
+  - path: ~/.claude
     mode: copy
 ignore:
 - "**/.DS_Store"

@@ -1,7 +1,7 @@
 [
   {
     "label": "zed-image-paste",
-    "command": "~/dotfiles/modules/bin/zed-image-paste",
+    "command": "$HOME/dotfiles/modules/bin/zed-image-paste",
     "env": {
       "IMG_SAVE_PATH": "assets",
     },
