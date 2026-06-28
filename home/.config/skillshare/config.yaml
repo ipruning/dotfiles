@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/runkids/skillshare/main/schemas/config.schema.json
-source: ~/Developer/ipruning/skills
-extras_source: ~/Developer/ipruning/skills/extras
+source: /Users/alex/Developer/ipruning/skills
+extras_source: /Users/alex/Developer/ipruning/skills/extras
 mode: merge
 preserve_tilde_on_save: true
 targets:
