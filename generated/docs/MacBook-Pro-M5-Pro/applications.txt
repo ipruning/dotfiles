@@ -11,6 +11,8 @@ Codex
 CodexBar
 Compressor Creator Studio
 Contexts
+CrossOver
+CrystalFetch
 Cursor
 DEVONthink
 Eagle
@@ -74,6 +76,7 @@ TestFlight
 Things3
 Typeless
 uBlock Origin Lite
+UTM
 Visual Studio Code
 Warp
 WeChat

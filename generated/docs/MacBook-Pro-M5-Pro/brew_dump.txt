@@ -147,7 +147,7 @@ brew "typst"
 brew "uv"
 # Modern watch command
 brew "viddy"
-# Best command-line tool to install and switch between multiple versions of Xcode
+# Command-line tool to install and switch between multiple versions of Xcode
 brew "xcodes"
 # Friendly and fast tool for sending HTTP requests
 brew "xh"
@@ -256,3 +256,4 @@ go "cmd/gofmt"
 go "golang.org/x/tools/gopls"
 cargo "mdbook-mermaid"
 uv "harness"
+npm "codex-sync"
