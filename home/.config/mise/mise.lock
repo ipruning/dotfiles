@@ -79,18 +79,18 @@ url = "https://github.com/earendil-works/pi/releases/download/v0.80.2/pi-darwin-
 url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/456004077"
 
 [[tools."github:larksuite/cli"]]
-version = "1.0.59"
+version = "1.0.60"
 backend = "github:larksuite/cli"
 
 [tools."github:larksuite/cli"."platforms.linux-x64"]
-checksum = "sha256:e43ac8185eea32ce0f9ec338756d8b9a6a2b17d748aa46473a0aa74958bf8a1a"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.59/lark-cli-1.0.59-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/458638181"
+checksum = "sha256:006a4508d4a1b2b2c474e43b2f44e443f8d46d314ac548994c2a9a79e3266382"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.60/lark-cli-1.0.60-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/461211716"
 
 [tools."github:larksuite/cli"."platforms.macos-arm64"]
-checksum = "sha256:981c87ed1e5f75c80564b6176cfae6da2ce122292c10bd867f7715ca9333c42d"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.59/lark-cli-1.0.59-darwin-arm64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/458638182"
+checksum = "sha256:3c9ae7a6f98a13e4f429add6f845f25b4099e9275e56fe0b82b587bad8d633f6"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.60/lark-cli-1.0.60-darwin-arm64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/461211720"
 
 [[tools."github:schpet/linear-cli"]]
 version = "2.0.0"
@@ -164,7 +164,7 @@ checksum = "sha256:3ca8fb4630b07c419cbdd51f754e31363cfcfb83b3a5354d9e895c90be2cc
 url = "https://dl.google.com/go/go1.26.4.windows-amd64.zip"
 
 [[tools."go:github.com/xdevplatform/xurl"]]
-version = "1.1.1"
+version = "1.2.2"
 backend = "go:github.com/xdevplatform/xurl"
 
 [[tools.node]]
