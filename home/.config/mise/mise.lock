@@ -65,32 +65,32 @@ version = "2.12.0"
 backend = "gem:kamal"
 
 [[tools."github:earendil-works/pi"]]
-version = "0.80.2"
+version = "0.80.3"
 backend = "github:earendil-works/pi"
 
 [tools."github:earendil-works/pi"."platforms.linux-x64"]
-checksum = "sha256:2e68772bbeaacd73488751098193875389636b80589100609a29921ded71c984"
-url = "https://github.com/earendil-works/pi/releases/download/v0.80.2/pi-linux-x64.tar.gz"
-url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/456004076"
+checksum = "sha256:e74a34ac2505556164144d8e39a64d6d5276f092166dad914319edc30c48abee"
+url = "https://github.com/earendil-works/pi/releases/download/v0.80.3/pi-linux-x64.tar.gz"
+url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/462498373"
 
 [tools."github:earendil-works/pi"."platforms.macos-arm64"]
-checksum = "sha256:c7d125bbdebd863fa76d92274458ba0eb405e5cde39db34db1f49f767ed9f1dd"
-url = "https://github.com/earendil-works/pi/releases/download/v0.80.2/pi-darwin-arm64.tar.gz"
-url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/456004077"
+checksum = "sha256:072789f5f5571198bd2d856f1ac4bbc980eecce1d02e7d0acf896e2387e3ee8f"
+url = "https://github.com/earendil-works/pi/releases/download/v0.80.3/pi-darwin-arm64.tar.gz"
+url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/462498374"
 
 [[tools."github:larksuite/cli"]]
-version = "1.0.60"
+version = "1.0.61"
 backend = "github:larksuite/cli"
 
 [tools."github:larksuite/cli"."platforms.linux-x64"]
-checksum = "sha256:006a4508d4a1b2b2c474e43b2f44e443f8d46d314ac548994c2a9a79e3266382"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.60/lark-cli-1.0.60-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/461211716"
+checksum = "sha256:f8f2005353165399ea0a5ef3e2cf80f1410efe16333b5e01fc01d051ab70978e"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.61/lark-cli-1.0.61-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/462272299"
 
 [tools."github:larksuite/cli"."platforms.macos-arm64"]
-checksum = "sha256:3c9ae7a6f98a13e4f429add6f845f25b4099e9275e56fe0b82b587bad8d633f6"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.60/lark-cli-1.0.60-darwin-arm64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/461211720"
+checksum = "sha256:9b7c041548b0b78646d21ff7b37e7b73d2f5f72c79f1102584b86f9d5a8e1848"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.61/lark-cli-1.0.61-darwin-arm64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/462272322"
 
 [[tools."github:schpet/linear-cli"]]
 version = "2.0.0"
@@ -276,17 +276,17 @@ version = "stable"
 backend = "core:rust"
 
 [[tools.uv]]
-version = "0.11.25"
+version = "0.11.26"
 backend = "aqua:astral-sh/uv"
 
 [tools.uv."platforms.linux-x64"]
-checksum = "sha256:7195cfcc1785d0c559d4682ad9109f26664b8db4d828d42d66078ef454061891"
-url = "https://github.com/astral-sh/uv/releases/download/0.11.25/uv-x86_64-unknown-linux-musl.tar.gz"
+checksum = "sha256:62bf1a53501adf4083224b69b33737450ac516935f5a5e483e9dfaf2665084de"
+url = "https://github.com/astral-sh/uv/releases/download/0.11.26/uv-x86_64-unknown-linux-musl.tar.gz"
 provenance = "github-attestations"
 
 [tools.uv."platforms.macos-arm64"]
-checksum = "sha256:5fc334bb25d19806262efd1f6e7d380155c7e817d89bf426df4ba7ae873c9471"
-url = "https://github.com/astral-sh/uv/releases/download/0.11.25/uv-aarch64-apple-darwin.tar.gz"
+checksum = "sha256:8f7fbf1708399b921857bce71e1d60f0d3ccf52a30caebc1c1a2f175dce13ab6"
+url = "https://github.com/astral-sh/uv/releases/download/0.11.26/uv-aarch64-apple-darwin.tar.gz"
 provenance = "github-attestations"
 
 [[tools.yarn]]
