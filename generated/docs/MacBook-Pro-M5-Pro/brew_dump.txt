@@ -59,6 +59,8 @@ brew "gnupg"
 brew "govulncheck"
 # Tool for glamorous shell scripts
 brew "gum"
+# Agent multiplexer that lives in your terminal
+brew "herdr"
 # Improved top (interactive process viewer)
 brew "htop"
 # Command-line benchmarking tool
