@@ -49,16 +49,16 @@ checksum = "sha256:538f9c846355d9e847b2671bc00c47da4229a0befb24df3282b739770f3b4
 url = "https://github.com/oven-sh/bun/releases/download/bun-v1.3.14/bun-windows-x64-baseline.zip"
 
 [[tools.deno]]
-version = "2.9.0"
+version = "2.9.1"
 backend = "core:deno"
 
 [tools.deno."platforms.linux-x64"]
-checksum = "sha256:96c9c73fc05ea57603bc28d8071d41e861bd40bcf2a9f849dd5969ed1a2c8498"
-url = "https://dl.deno.land/release/v2.9.0/deno-x86_64-unknown-linux-gnu.zip"
+checksum = "sha256:710c54d63477d1100844ef4818f19507ce0dbf40510903b1d883f19e394446a2"
+url = "https://dl.deno.land/release/v2.9.1/deno-x86_64-unknown-linux-gnu.zip"
 
 [tools.deno."platforms.macos-arm64"]
-checksum = "sha256:2d11cf0505d4600a4492de8d07456a7a5e7eedebf68bdcbcb9092f520fcde0f1"
-url = "https://dl.deno.land/release/v2.9.0/deno-aarch64-apple-darwin.zip"
+checksum = "sha256:ee3473502118eab301eca93aa6b31d6b0b6c1602d0f59e4cb89d4a262b12f6e7"
+url = "https://dl.deno.land/release/v2.9.1/deno-aarch64-apple-darwin.zip"
 
 [[tools."gem:kamal"]]
 version = "2.12.0"
@@ -79,18 +79,18 @@ url = "https://github.com/earendil-works/pi/releases/download/v0.80.3/pi-darwin-
 url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/462498374"
 
 [[tools."github:larksuite/cli"]]
-version = "1.0.61"
+version = "1.0.63"
 backend = "github:larksuite/cli"
 
 [tools."github:larksuite/cli"."platforms.linux-x64"]
-checksum = "sha256:f8f2005353165399ea0a5ef3e2cf80f1410efe16333b5e01fc01d051ab70978e"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.61/lark-cli-1.0.61-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/462272299"
+checksum = "sha256:d0cdc77649f51ff436d235383131f0fa71e35b04fc2964811d7228964c56d095"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.63/lark-cli-1.0.63-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/463345565"
 
 [tools."github:larksuite/cli"."platforms.macos-arm64"]
-checksum = "sha256:9b7c041548b0b78646d21ff7b37e7b73d2f5f72c79f1102584b86f9d5a8e1848"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.61/lark-cli-1.0.61-darwin-arm64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/462272322"
+checksum = "sha256:cf30e294d259644263b1efe73f0d699439eeae2d78ef38580d2ba065611fc8a9"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.63/lark-cli-1.0.63-darwin-arm64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/463345568"
 
 [[tools."github:schpet/linear-cli"]]
 version = "2.0.0"
