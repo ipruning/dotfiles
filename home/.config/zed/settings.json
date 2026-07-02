@@ -45,6 +45,9 @@
     "enabled": true,
   },
   "languages": {
+    "Markdown": {
+      "soft_wrap": "prefer_line",
+    },
     "Python": {
       "format_on_save": "on",
       "formatter": [
