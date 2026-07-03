@@ -4,7 +4,7 @@ font-family = MonoLisaCode
 font-family = Maple Mono NF CN
 
 font-size = 12
-font-style = Medium
+font-style = Regular
 
 confirm-close-surface = false
 cursor-style = block

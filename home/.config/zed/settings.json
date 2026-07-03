@@ -25,7 +25,7 @@
   "buffer_font_fallbacks": ["Maple Mono NF CN"],
   "buffer_font_family": "MonoLisaCode",
   "buffer_font_size": 11.0,
-  "buffer_font_weight": 500,
+  "buffer_font_weight": 400,
   "buffer_line_height": {
     "custom": 1.5,
   },
@@ -88,7 +88,7 @@
     },
     "font_family": "MonoLisaCode",
     "font_size": 11.0,
-    "font_weight": 500,
+    "font_weight": 400,
     "line_height": {
       "custom": 1.5,
     },
