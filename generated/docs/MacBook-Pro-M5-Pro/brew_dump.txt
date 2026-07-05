@@ -8,10 +8,8 @@ tap "nikitabobko/tap", trusted: true
 tap "openai/tools", trusted: true
 tap "parallel-web/tap"
 tap "psviderski/tap", trusted: true
-tap "rjyo/moshi", trusted: true
 tap "simonbs/brrr-cli", "https://github.com/simonbs/brrr-cli.git", trusted: true
 tap "steipete/tap", trusted: true
-tap "teamookla/speedtest", trusted: true
 # Static analysis and lint tool, for (ba)sh scripts
 brew "shellcheck"
 # Static checker for GitHub Actions workflow files
@@ -176,8 +174,6 @@ brew "psviderski/tap/uncloud"
 brew "simonbs/brrr-cli/brrr"
 # Command-line ElevenLabs TTS with mac-style flags
 brew "steipete/tap/sag", trusted: true
-# Ookla Speedtest
-brew "teamookla/speedtest/speedtest", trusted: true
 # Command-line helper for the 1Password password manager
 cask "1password-cli@beta"
 # Password manager
