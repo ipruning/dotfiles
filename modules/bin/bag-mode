@@ -3,46 +3,74 @@
 # bag-mode — keep MacBook running with the lid closed (e.g. in a bag)
 #
 # Startup:
-#   - capture built-in display brightness as INITIAL_BRIGHTNESS
-#   - capture current lowpowermode as INITIAL_LPM
+#   - resolve the brightness restore target: the panel's current value if
+#     readable and > 0.01, else the value persisted by a previous run in
+#     $STATEFILE (survives a run that died while the screen was dark),
+#     else 1.0
+#   - capture the battery-side low power mode key and value
 #   - sudo pmset -a disablesleep 1   (clamshell sleep disabled)
 #
-# While running (polled every $INTERVAL seconds):
+# While running (polled every $INTERVAL seconds with the lid open,
+# $CLOSED_INTERVAL seconds with it closed):
 #   - lid closed  → snapshot built-in brightness into LAST_BRIGHTNESS, then
-#                   brightness 0 + battery-side lowpowermode 1
-#   - lid open    → brightness LAST_BRIGHTNESS + battery-side lowpowermode INITIAL_LPM
+#                   brightness 0 + battery-side low power mode 1
+#   - lid open    → brightness LAST_BRIGHTNESS + battery-side low power
+#                   mode restored to its startup value
+#   - battery at or below $BATTERY_MIN % while discharging → clean exit
+#     (restores everything, re-enables sleep) instead of riding the battery
+#     down to a hard shutdown
 #
 # When no external display is attached and the lid is closed, macOS
 # unenumerates the built-in panel from CGDisplay; `brightness -l` will not
 # list it and the brightness step is logged as "skipped". The panel is
 # powered off anyway, so this is harmless — pmset/disablesleep still apply.
 #
-# Only the battery-side (`pmset -b`) lowpowermode is touched; the AC-side is
-# left alone. macOS automatically applies the correct setting based on the
-# current power source, so plugging/unplugging while the lid is closed is
-# handled by the kernel and needs no polling here.
+# Only the battery-side (`pmset -b`) low power mode is touched; the AC-side
+# is left alone. macOS automatically applies the correct setting based on
+# the current power source, so plugging/unplugging while the lid is closed
+# is handled by the kernel and needs no polling here.
 #
-# Periodic logging:
-#   - battery line every $BATTERY_EVERY seconds
+# Failure policy: this runs unattended, so transient command failures
+# (ioreg, brightness, pmset) are logged and tolerated, never fatal — dying
+# would re-enable sleep exactly when the machine is in the bag. All sudo
+# calls after startup use -n, so a lost credential fails visibly in the log
+# instead of hanging on a password prompt nobody can answer with the lid
+# closed.
 #
 # Output goes to stdout. Redirect or pipe if you want a file:
 #   bag-mode | tee /tmp/bag-mode.log
 #   bag-mode > /tmp/bag-mode.log
 #
 # Ctrl+C / SIGTERM:
-#   - restore brightness, lowpowermode, disablesleep
+#   - restore brightness, low power mode, disablesleep. If the panel is not
+#     enumerated at exit (lid closed), the restore target is kept in
+#     $STATEFILE and applied automatically by the next run.
 #
-# kill -9 will not run cleanup. Recover manually:
+# kill -9 will not run cleanup (the lock and $STATEFILE take care of
+# themselves; pmset does not). Recover manually:
 #   sudo pmset -a disablesleep 0
 #   sudo pmset -b lowpowermode 0
 #   /usr/local/bin/brightness 1.0
 # (omit `-m`: with an external display attached, `-m` targets the external
 # panel which usually does not respond, leaving the built-in still dark.)
 
-set -euo pipefail
+set -uo pipefail
+
+LOCKFILE="${LOCKFILE:-${TMPDIR:-/tmp}/bag-mode.lock}"
+STATEFILE="${STATEFILE:-${TMPDIR:-/tmp}/bag-mode.brightness}"
+
+# Single instance: re-exec under a kernel flock held for the life of the
+# process. The lock is released by the kernel when the process dies —
+# kill -9 included — so there is no stale-lock state and no reclaim logic.
+# A second start fails with "already locked" (exit 75).
+if [[ "${_BAG_MODE_LOCKED:-}" != 1 ]]; then
+  exec /usr/bin/env _BAG_MODE_LOCKED=1 /usr/bin/lockf -k -t 0 "$LOCKFILE" "$0" "$@"
+fi
 
 INTERVAL="${INTERVAL:-0.5}"
+CLOSED_INTERVAL="${CLOSED_INTERVAL:-2}"
 BATTERY_EVERY="${BATTERY_EVERY:-60}"
+BATTERY_MIN="${BATTERY_MIN:-10}"
 BRIGHTNESS_BIN="${BRIGHTNESS_BIN:-/usr/local/bin/brightness}"
 
 if [[ ! -x "$BRIGHTNESS_BIN" ]]; then
@@ -50,37 +78,18 @@ if [[ ! -x "$BRIGHTNESS_BIN" ]]; then
   exit 1
 fi
 
-# Single-instance lock. `mkdir` is atomic; if another bag-mode is alive we
-# bail out, otherwise we treat the lock as stale and take it over.
-LOCKDIR="${LOCKDIR:-${TMPDIR:-/tmp}/bag-mode.lock}"
-LOCKDIR="${LOCKDIR%/}"
-# Refuse to operate on a path we'd be embarrassed to `rm -rf`. The lock dir
-# must end in /bag-mode.lock so cleanup can safely remove it.
-if [[ "$LOCKDIR" != */bag-mode.lock ]]; then
-  echo "refusing LOCKDIR=$LOCKDIR (must end with /bag-mode.lock)" >&2
-  exit 1
-fi
-if ! mkdir "$LOCKDIR" 2>/dev/null; then
-  existing_pid="$(cat "$LOCKDIR/pid" 2>/dev/null || true)"
-  if [[ -n "$existing_pid" ]] && kill -0 "$existing_pid" 2>/dev/null; then
-    echo "bag-mode already running (pid=$existing_pid, lock=$LOCKDIR)" >&2
-    exit 1
-  fi
-  echo "stale lock at $LOCKDIR (pid=${existing_pid:-?}); reclaiming" >&2
-  rm -rf "$LOCKDIR"
-  mkdir "$LOCKDIR"
-fi
-echo $$ > "$LOCKDIR/pid"
-
 log() {
   printf '[%s] %s\n' "$(date '+%F %T')" "$*"
 }
 
+# Prints closed/open. Returns 1 (prints nothing) if ioreg itself fails, so
+# the caller can keep the previous state instead of misreading a transient
+# failure as "open".
 lid_state() {
   # Avoid `ioreg | grep -q` because grep -q exits early, sending SIGPIPE to
   # ioreg, and `set -o pipefail` then reports the pipeline as failed.
   local out
-  out="$(/usr/sbin/ioreg -r -k AppleClamshellState -d 4)"
+  out="$(/usr/sbin/ioreg -r -k AppleClamshellState -d 4 2>/dev/null)" || return 1
   if [[ "$out" == *'"AppleClamshellState" = Yes'* ]]; then
     echo closed
   else
@@ -127,76 +136,120 @@ displays_oneline() {
   "$BRIGHTNESS_BIN" -l 2>&1 | tr '\n' '|' | sed 's/|$//'
 }
 
+# True if $1 is a usable brightness restore target (numeric, > 0.01 — the
+# panel reads 0 when we darkened it ourselves, and empty when unenumerated;
+# neither must ever become the value we restore to). The numeric check also
+# guards against a corrupt $STATEFILE, which awk would string-compare.
+usable_brightness() {
+  [[ "${1:-}" =~ ^[0-9]+(\.[0-9]+)?$ ]] && awk -v v="$1" 'BEGIN { exit !(v > 0.01) }'
+}
+
+# Update LAST_BRIGHTNESS and persist it, so a run that dies while the
+# screen is dark leaves the restore target on disk for the next run.
+remember_brightness() {
+  LAST_BRIGHTNESS="$1"
+  printf '%s\n' "$1" > "$STATEFILE" 2>/dev/null || true
+}
+
+# Returns non-zero when the built-in panel is not enumerated, so cleanup
+# knows the restore did not land.
 set_brightness() {
   local value="$1" rc=0 out id
   id="$(builtin_display_id)"
   if [[ -z "$id" ]]; then
     log "brightness $value skipped (no built-in display found); displays: $(displays_oneline)"
-    return
+    return 1
   fi
   out="$("$BRIGHTNESS_BIN" -d "$id" "$value" 2>&1)" || rc=$?
   log "brightness $value display=$id rc=$rc${out:+ ($out)}"
+  return "$rc"
 }
 
 set_lowpowermode() {
   local value="$1" rc=0 out
-  out="$(sudo /usr/bin/pmset -b lowpowermode "$value" 2>&1)" || rc=$?
-  log "pmset -b lowpowermode $value rc=$rc${out:+ ($out)}"
+  out="$(sudo -n /usr/bin/pmset -b "$LPM_KEY" "$value" 2>&1)" || rc=$?
+  log "pmset -b $LPM_KEY $value rc=$rc${out:+ ($out)}"
 }
 
 set_disablesleep() {
   local value="$1" rc=0 out
-  out="$(sudo /usr/bin/pmset -a disablesleep "$value" 2>&1)" || rc=$?
+  out="$(sudo -n /usr/bin/pmset -a disablesleep "$value" 2>&1)" || rc=$?
   log "pmset disablesleep $value rc=$rc${out:+ ($out)}"
 }
 
-# Capture the built-in panel's current brightness so we can restore it on
-# exit. Also seeds LAST_BRIGHTNESS, the rolling "value to restore" that gets
-# refreshed every time the lid closes (so opening restores whatever the user
-# had before closing, not what was set at script startup).
-INITIAL_BRIGHTNESS="$(builtin_brightness)"
-INITIAL_BRIGHTNESS="${INITIAL_BRIGHTNESS:-1.0}"
-LAST_BRIGHTNESS="$INITIAL_BRIGHTNESS"
+# Seed LAST_BRIGHTNESS, the rolling "value to restore": prefer the live
+# panel reading, fall back to what a previous run persisted (covers
+# starting up in front of a screen a dead run left dark — the first
+# open-transition below restores it), else 1.0.
+cur="$(builtin_brightness)"
+saved="$(cat "$STATEFILE" 2>/dev/null || true)"
+if usable_brightness "$cur"; then
+  brightness_source="panel"
+  remember_brightness "$cur"
+elif usable_brightness "$saved"; then
+  brightness_source="statefile"
+  remember_brightness "$saved"
+else
+  brightness_source="default"
+  remember_brightness "1.0"
+fi
 
-# Capture battery-side lowpowermode (empty / missing = 0).
-# `pmset -g custom` lists both sources; field is `lowpowermode` on newer macOS
-# and `powermode` on some versions, so match both.
-INITIAL_LPM="$(/usr/bin/pmset -g custom | awk '
+# Battery-side low power mode. The key is `lowpowermode` on newer macOS and
+# `powermode` on some versions; capture the key together with its value so
+# the restore writes back exactly what was read.
+read -r LPM_KEY INITIAL_LPM < <(/usr/bin/pmset -g custom | awk '
   /^Battery Power:/ { f = 1; next }
   /^AC Power:/      { f = 0 }
-  f && /(low)?powermode/ { print $2; exit }
-')"
+  f && $1 ~ /^(low)?powermode$/ { print $1, $2; exit }
+')
+LPM_KEY="${LPM_KEY:-lowpowermode}"
 INITIAL_LPM="${INITIAL_LPM:-0}"
 
-# Sudo bootstrap + keep cache warm in background.
+# Sudo bootstrap + keep the credential warm in background. Every later sudo
+# call is non-interactive (-n): if the credential is lost anyway, pmset
+# fails and is logged rather than blocking the loop on a password prompt.
 if ! sudo -n true 2>/dev/null; then
-  sudo -v
+  if ! sudo -v; then
+    echo "sudo authentication failed" >&2
+    exit 1
+  fi
 fi
-( while true; do sudo -n true 2>/dev/null || exit; sleep 60; done ) &
+(
+  while sudo -n true 2>/dev/null; do sleep 60; done
+  log "sudo credential lost; pmset calls will fail until bag-mode is restarted"
+) &
 SUDO_REFRESH_PID=$!
 
 cleanup() {
   trap '' INT TERM EXIT
-  log "cleanup: brightness=${LAST_BRIGHTNESS:-?} lowpowermode=${INITIAL_LPM:-?} disablesleep=0"
-  set_brightness "${LAST_BRIGHTNESS:-1.0}"
-  [[ -n "${INITIAL_LPM:-}" ]] && set_lowpowermode "$INITIAL_LPM"
+  log "cleanup: brightness=${LAST_BRIGHTNESS:-?} ${LPM_KEY}=${INITIAL_LPM:-?} disablesleep=0"
+  if set_brightness "${LAST_BRIGHTNESS:-1.0}"; then
+    rm -f "$STATEFILE"
+  else
+    log "brightness not restored (panel not enumerated); kept $STATEFILE for the next run"
+  fi
+  set_lowpowermode "$INITIAL_LPM"
   set_disablesleep 0
-  [[ -n "${SUDO_REFRESH_PID:-}" ]] && kill "$SUDO_REFRESH_PID" 2>/dev/null || true
-  rm -rf "$LOCKDIR"
+  kill "$SUDO_REFRESH_PID" 2>/dev/null
   log "stopped"
 }
 trap 'cleanup; exit 0' INT TERM
 trap cleanup EXIT
 
-log "started; initial_brightness=$INITIAL_BRIGHTNESS initial_lpm=$INITIAL_LPM interval=${INTERVAL}s battery_every=${BATTERY_EVERY}s"
+log "started; brightness=$LAST_BRIGHTNESS (from $brightness_source) ${LPM_KEY}=$INITIAL_LPM interval=${INTERVAL}s/${CLOSED_INTERVAL}s battery_every=${BATTERY_EVERY}s battery_min=${BATTERY_MIN}%"
 
 set_disablesleep 1
 
 last_state=""
 last_battery=0
 last_tracked=""
+interval="$INTERVAL"
 while true; do
-  state="$(lid_state)"
+  if ! state="$(lid_state)"; then
+    log "ioreg failed; keeping lid=${last_state:-unknown}"
+    sleep "$interval"
+    continue
+  fi
   now="$(date +%s)"
 
   if [[ "$state" != "$last_state" ]]; then
@@ -206,28 +259,30 @@ while true; do
       # Final-chance snapshot before darkening. With an external display
       # attached, macOS unenumerates the built-in panel the moment the lid
       # closes, so this read is usually too late and returns empty. The
-      # continuous tracker below keeps LAST_BRIGHTNESS fresh while the lid is
-      # open. Skip snapshots that
-      # are empty or ~0 (panel gone, or already darkened by us) so we
-      # never overwrite a good restore target with 0.
+      # continuous tracker below keeps LAST_BRIGHTNESS fresh while the lid
+      # is open.
       cur="$(builtin_brightness)"
-      if [[ -n "$cur" ]] && awk -v v="$cur" 'BEGIN { exit !(v > 0.01) }'; then
-        LAST_BRIGHTNESS="$cur"
+      if usable_brightness "$cur"; then
+        remember_brightness "$cur"
         log "snapshot brightness=$LAST_BRIGHTNESS"
       else
         log "snapshot skipped (cur='${cur:-<empty>}'); keeping LAST_BRIGHTNESS=$LAST_BRIGHTNESS"
       fi
       set_brightness 0
       set_lowpowermode 1
-      # Don't let the post-restore tracker run until the lid opens again.
+      # Don't let the post-restore tracker run until the lid opens again,
+      # and back off the poll rate — the lid needs no 0.5 s reaction time
+      # and forking ioreg+brightness twice a second costs battery.
       last_tracked=""
+      interval="$CLOSED_INTERVAL"
     else
-      log "restoring brightness=$LAST_BRIGHTNESS lpm=$INITIAL_LPM"
+      log "restoring brightness=$LAST_BRIGHTNESS ${LPM_KEY}=$INITIAL_LPM"
       set_brightness "$LAST_BRIGHTNESS"
       set_lowpowermode "$INITIAL_LPM"
       # Seed the tracker with the value we just restored so the very next
       # poll doesn't treat it as a "user change".
       last_tracked="$LAST_BRIGHTNESS"
+      interval="$INTERVAL"
     fi
     last_state="$state"
   fi
@@ -240,19 +295,23 @@ while true; do
   # readable.
   if [[ "$state" == "open" ]]; then
     cur="$(builtin_brightness)"
-    if [[ -n "$cur" ]] \
-       && [[ "$cur" != "$last_tracked" ]] \
-       && awk -v v="$cur" 'BEGIN { exit !(v > 0.01) }'; then
-      LAST_BRIGHTNESS="$cur"
+    if [[ "$cur" != "$last_tracked" ]] && usable_brightness "$cur"; then
+      remember_brightness "$cur"
       last_tracked="$cur"
       log "tracked brightness=$LAST_BRIGHTNESS"
     fi
   fi
 
   if (( now - last_battery >= BATTERY_EVERY )); then
-    log "battery $(battery_status)"
+    bstat="$(battery_status)"
+    log "battery ${bstat:-unreadable}"
     last_battery=$now
+    pct="${bstat%%\%*}"
+    if [[ "$bstat" == *discharging* && "$pct" =~ ^[0-9]+$ ]] && (( pct <= BATTERY_MIN )); then
+      log "battery ${pct}% <= battery_min ${BATTERY_MIN}%; exiting so the machine can sleep"
+      break
+    fi
   fi
 
-  sleep "$INTERVAL"
+  sleep "$interval"
 done
