@@ -7,6 +7,7 @@ BetterDisplay
 brrr
 calibre
 Capture One
+Claude
 Codex
 CodexBar
 Compressor Creator Studio
@@ -43,6 +44,9 @@ Logic Pro Creator Studio
 Longbridge
 MagicPath
 MainStage Creator Studio
+Microsoft Excel
+Microsoft PowerPoint
+Microsoft Word
 Mos
 Motion Creator Studio
 MyCard
