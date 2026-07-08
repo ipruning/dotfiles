@@ -101,8 +101,8 @@ aiOpenAIModelName = gpt-5-mini
 aiModelProvider = openai
 
 [alias]
-# log-graph = "!sh -c 'git log --graph --decorate --all --date-order --date=format:\"%Y-%m-%d %H:%M:%S\" --pretty=format:\"%C(cyan)%h%Creset %C(black bold)%ad%Creset%C(auto)%d %s\" -n 42'"
-# log-graphstat = "!sh -c 'git log --pretty=format:\"%C(auto)%h%d%n%s%n%C(auto)%C(blue)%an <%ae>%C(reset), %C(auto)%C(dim)%ad%n\" --graph --stat'"
+log-graph = "!sh -c 'git log --graph --decorate --all --date-order --date=format:\"%Y-%m-%d %H:%M:%S\" --pretty=format:\"%C(cyan)%h%Creset %C(black bold)%ad%Creset%C(auto)%d %s\" -n 42'"
+log-graphstat = "!sh -c 'git log --pretty=format:\"%C(auto)%h%d%n%s%n%C(auto)%C(blue)%an <%ae>%C(reset), %C(auto)%C(dim)%ad%n\" --graph --stat'"
 
 # branch-recent = "!sh -c 'git branch --sort=-committerdate'"
 # branch-verbose = "!sh -c '\
