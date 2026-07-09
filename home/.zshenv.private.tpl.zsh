@@ -1,4 +1,5 @@
 export BRRR_SECRET="op://Private/brrr/BRRR_SECRET"
 export ELEVENLABS_API_KEY="op://Private/uxgejvcwody773xhc5xzuwfak4/ELEVENLABS_API_KEY"
+export HCLOUD_TOKEN="op://ipruning/Hetzner/HCLOUD_TOKEN"
 export MISE_GITHUB_TOKEN="op://jihuanshe/GitHub/MISE_GITHUB_TOKEN"
 export OPENAI_API_KEY="op://jihuanshe/sqzzwzf6o2nb2m42abjultivt4/OPENAI_API_KEY"
