@@ -2,8 +2,6 @@
 1Password
 1Password for Safari
 AeroSpace
-AltTab
-BetterDisplay
 brrr
 calibre
 Capture One
@@ -12,16 +10,14 @@ Codex
 CodexBar
 Compressor Creator Studio
 Contexts
-CrossOver
 CrystalFetch
 Cursor
 DEVONthink
+Discord
 Eagle
 ESTKme
-Factory
 Final Cut Pro Creator Studio
 GarageBand
-Gemini
 Ghostty
 Google Chrome
 Google Docs
@@ -42,7 +38,6 @@ LinearMouse
 LM Studio
 Logic Pro Creator Studio
 Longbridge
-MagicPath
 MainStage Creator Studio
 Microsoft Excel
 Microsoft PowerPoint
@@ -50,17 +45,10 @@ Microsoft Word
 Mos
 Motion Creator Studio
 MyCard
-Numbers
-Numbers Creator Studio
-Open Design
 OrbStack
-Pages
-Pages Creator Studio
-Pencil
 Pixelmator Pro Creator Studio
 qBittorrent
 QQ
-Quark
 Raycast Beta
 Rectangle
 Repo Prompt
@@ -69,7 +57,6 @@ Roam Research
 Safari
 Setapp
 Slack
-Superconductor
 Surfingkeys
 Surge
 T3 Code (Alpha)
