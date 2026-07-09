@@ -37,9 +37,15 @@
 # instead of hanging on a password prompt nobody can answer with the lid
 # closed.
 #
-# Output goes to stdout. Redirect or pipe if you want a file:
-#   bag-mode | tee /tmp/bag-mode.log
-#   bag-mode > /tmp/bag-mode.log
+# Default output goes to stdout. `bag-mode start` runs the same loop in tmux
+# and appends to ~/Library/Logs/bag-mode/bag-mode.log. Runtime state lives in
+# ~/Library/Application Support/bag-mode/ so `bag-mode status` and
+# `bag-mode stop` can observe the foreground or tmux-backed instance.
+#
+#   bag-mode                      # foreground
+#   bag-mode start                # tmux background session
+#   bag-mode status               # pid/lid/battery/log path
+#   bag-mode stop                 # SIGTERM + normal cleanup
 #
 # Ctrl+C / SIGTERM:
 #   - restore brightness, low power mode, disablesleep. If the panel is not
@@ -56,30 +62,270 @@
 
 set -uo pipefail
 
-LOCKFILE="${LOCKFILE:-${TMPDIR:-/tmp}/bag-mode.lock}"
-STATEFILE="${STATEFILE:-${TMPDIR:-/tmp}/bag-mode.brightness}"
-
-# Single instance: re-exec under a kernel flock held for the life of the
-# process. The lock is released by the kernel when the process dies —
-# kill -9 included — so there is no stale-lock state and no reclaim logic.
-# A second start fails with "already locked" (exit 75).
-if [[ "${_BAG_MODE_LOCKED:-}" != 1 ]]; then
-  exec /usr/bin/env _BAG_MODE_LOCKED=1 /usr/bin/lockf -k -t 0 "$LOCKFILE" "$0" "$@"
+BAG_MODE_RUN_USER="${BAG_MODE_RUN_USER:-${SUDO_USER:-${USER:-$(id -un)}}}"
+BAG_MODE_RUN_HOME="${BAG_MODE_RUN_HOME:-$HOME}"
+if [[ "$BAG_MODE_RUN_USER" != root && ( -z "$BAG_MODE_RUN_HOME" || "$BAG_MODE_RUN_HOME" == /var/root || "$BAG_MODE_RUN_HOME" == /root ) ]]; then
+  BAG_MODE_RUN_HOME="$(/usr/bin/dscl . -read "/Users/$BAG_MODE_RUN_USER" NFSHomeDirectory 2>/dev/null | awk '{ print $2; exit }')"
 fi
+BAG_MODE_RUN_HOME="${BAG_MODE_RUN_HOME:-$HOME}"
+ROOT_RUN_PATH="${ROOT_RUN_PATH:-/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin:/usr/local/bin}"
+ROOT_RUNTIME_DIR="${ROOT_RUNTIME_DIR:-/Library/Application Support/bag-mode}"
+ROOT_RUNNER="${ROOT_RUNNER:-$ROOT_RUNTIME_DIR/bag-mode-run-$BAG_MODE_RUN_USER}"
+TMUX_BIN="${TMUX_BIN:-}"
+if [[ -z "$TMUX_BIN" ]]; then
+  for candidate_bin in /opt/homebrew/bin/tmux /usr/local/bin/tmux /usr/bin/tmux; do
+    if [[ -x "$candidate_bin" ]]; then
+      TMUX_BIN="$candidate_bin"
+      break
+    fi
+  done
+  TMUX_BIN="${TMUX_BIN:-$(command -v tmux 2>/dev/null || true)}"
+fi
+
+APP_SUPPORT_DIR="${BAG_MODE_STATE_DIR:-$BAG_MODE_RUN_HOME/Library/Application Support/bag-mode}"
+LOG_DIR="${BAG_MODE_LOG_DIR:-$BAG_MODE_RUN_HOME/Library/Logs/bag-mode}"
+LOCKFILE="${LOCKFILE:-$APP_SUPPORT_DIR/bag-mode.lock}"
+STATEFILE="${STATEFILE:-$APP_SUPPORT_DIR/brightness}"
+RUNTIME_STATEFILE="${RUNTIME_STATEFILE:-$APP_SUPPORT_DIR/state}"
+LOGFILE="${LOGFILE:-$LOG_DIR/bag-mode.log}"
+TMUX_SESSION="${TMUX_SESSION:-bag-mode}"
 
 INTERVAL="${INTERVAL:-0.5}"
 CLOSED_INTERVAL="${CLOSED_INTERVAL:-2}"
 BATTERY_EVERY="${BATTERY_EVERY:-60}"
 BATTERY_MIN="${BATTERY_MIN:-10}"
+BATTERY_NOTIFY_THRESHOLDS="${BATTERY_NOTIFY_THRESHOLDS:-30 20}"
 BRIGHTNESS_BIN="${BRIGHTNESS_BIN:-/usr/local/bin/brightness}"
 
-if [[ ! -x "$BRIGHTNESS_BIN" ]]; then
-  echo "brightness binary not found: $BRIGHTNESS_BIN" >&2
-  exit 1
-fi
+BAG_MODE_NOTIFY="${BAG_MODE_NOTIFY:-0}"
+BAG_MODE_START_NOTIFY="${BAG_MODE_START_NOTIFY:-1}"
+BAG_MODE_LOG_TO_FILE="${BAG_MODE_LOG_TO_FILE:-0}"
+BRRR_HELPER="${BRRR_HELPER:-$BAG_MODE_RUN_HOME/.agents/skills/skills-stable__brrr-now/scripts/brrr-send.sh}"
+BRRR_THREAD_ID="${BRRR_THREAD_ID:-bag-mode}"
+BRRR_TIMEOUT="${BRRR_TIMEOUT:-10}"
+
+append_log_line() {
+  local line="$1"
+  if (( EUID == 0 )) && [[ "$BAG_MODE_RUN_USER" != root ]]; then
+    printf '%s\n' "$line" | /usr/bin/sudo -u "$BAG_MODE_RUN_USER" /usr/bin/tee -a "$LOGFILE" >/dev/null 2>/dev/null || true
+  else
+    printf '%s\n' "$line" >>"$LOGFILE" 2>/dev/null || true
+  fi
+}
+
+write_text_file() {
+  local file_path="$1"
+  if (( EUID == 0 )) && [[ "$BAG_MODE_RUN_USER" != root ]]; then
+    /usr/bin/sudo -u "$BAG_MODE_RUN_USER" /bin/sh -c 'cat > "$1"' sh "$file_path"
+  else
+    cat >"$file_path"
+  fi
+}
+
+remove_file() {
+  local file_path="$1"
+  if (( EUID == 0 )) && [[ "$BAG_MODE_RUN_USER" != root ]]; then
+    /usr/bin/sudo -u "$BAG_MODE_RUN_USER" /bin/rm -f "$file_path"
+  else
+    rm -f "$file_path"
+  fi
+}
 
 log() {
-  printf '[%s] %s\n' "$(date '+%F %T')" "$*"
+  local line
+  line="[$(date '+%F %T')] $*"
+  printf '%s\n' "$line"
+  if [[ "$BAG_MODE_LOG_TO_FILE" == 1 ]]; then
+    append_log_line "$line"
+  fi
+}
+
+chown_if_root_user() {
+  if (( EUID == 0 )) && [[ "$BAG_MODE_RUN_USER" != root ]]; then
+    chown "$BAG_MODE_RUN_USER" "$@" 2>/dev/null || true
+  fi
+}
+
+prepare_dirs() {
+  local existing_files=() file_path
+  mkdir -p "$APP_SUPPORT_DIR" "$LOG_DIR"
+  chown_if_root_user "$APP_SUPPORT_DIR" "$LOG_DIR"
+  for file_path in "$LOGFILE" "$LOCKFILE" "$STATEFILE" "$RUNTIME_STATEFILE"; do
+    if [[ -e "$file_path" ]]; then
+      existing_files+=("$file_path")
+    fi
+  done
+  if (( ${#existing_files[@]} > 0 )); then
+    chown_if_root_user "${existing_files[@]}"
+  fi
+}
+
+script_path() {
+  local script_dir script_name
+  script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+  script_name="$(basename "${BASH_SOURCE[0]}")"
+  printf '%s/%s\n' "$script_dir" "$script_name"
+}
+
+usage() {
+  cat <<'EOF' >&2
+Keep this Mac awake with the lid closed, with safe foreground/background controls.
+
+Usage:
+  bag-mode                 Run in the foreground
+  bag-mode run             Run in the foreground
+  bag-mode start           Start in a root-owned tmux session and write Library logs
+  bag-mode stop            Stop the running instance and restore pmset/brightness
+  bag-mode status          Show running state, battery, lid, and log path
+  bag-mode logs [-f] [N]   Show the last N log lines; default N=80
+  bag-mode attach          Attach to the tmux session
+
+Environment:
+  BAG_MODE_START_NOTIFY=0  Disable brrr notifications for `bag-mode start`
+  BAG_MODE_NOTIFY=1        Enable brrr notifications for foreground `run`
+  BRRR_HELPER=PATH         brrr sender helper path
+EOF
+}
+
+bag_mode_running() {
+  ! /usr/bin/lockf -t 0 "$LOCKFILE" /usr/bin/true 2>/dev/null
+}
+
+runtime_pid() {
+  awk '$1 == "pid" { print $2; exit }' "$RUNTIME_STATEFILE" 2>/dev/null
+}
+
+pid_owner() {
+  ps -o user= -p "$1" 2>/dev/null | awk '{ print $1; exit }'
+}
+
+pid_is_alive() {
+  ps -p "$1" -o pid= >/dev/null 2>&1
+}
+
+pid_matches_bag_mode() {
+  local pid="$1" parent_pid command_text parent_command script_file
+  script_file="$(script_path)"
+  parent_pid="$(ps -o ppid= -p "$pid" 2>/dev/null | awk '{ print $1; exit }')"
+  command_text="$(ps -o command= -p "$pid" 2>/dev/null)"
+  parent_command="$(ps -o command= -p "$parent_pid" 2>/dev/null)"
+
+  [[ -n "$parent_pid" ]] || return 1
+  [[ "$command_text" == *"$script_file"* || "$command_text" == *"$ROOT_RUNNER"* ]] || return 1
+  [[ "$parent_command" == *'/usr/bin/lockf'* ]] || return 1
+  [[ "$parent_command" == *"$LOCKFILE"* ]] || return 1
+  [[ "$parent_command" == *"$script_file"* || "$parent_command" == *"$ROOT_RUNNER"* ]] || return 1
+}
+
+tmux_has_session() {
+  [[ -x "$TMUX_BIN" ]] && "$TMUX_BIN" has-session -t "$TMUX_SESSION" 2>/dev/null
+}
+
+root_tmux() {
+  [[ -x "$TMUX_BIN" ]] || return 1
+  sudo /usr/bin/env TERM=xterm-256color "$TMUX_BIN" "$@"
+}
+
+root_tmux_noninteractive() {
+  [[ -x "$TMUX_BIN" ]] || return 1
+  sudo -n /usr/bin/env TERM=xterm-256color "$TMUX_BIN" "$@"
+}
+
+root_tmux_has_session() {
+  root_tmux_noninteractive has-session -t "$TMUX_SESSION" 2>/dev/null
+}
+
+terminate_pid() {
+  local pid="$1"
+  if kill -TERM "$pid" 2>/dev/null; then
+    return 0
+  fi
+  if (( EUID != 0 )); then
+    if ! sudo -n true 2>/dev/null; then
+      sudo -v || return 1
+    fi
+    sudo kill -TERM "$pid"
+    return $?
+  fi
+  return 1
+}
+
+write_runtime_state() {
+  local event_name="${1:-update}"
+  {
+    printf 'pid %s\n' "$$"
+    printf 'updated_at %s\n' "$(date '+%F %T')"
+    printf 'started_at %s\n' "${STARTED_AT:-unknown}"
+    printf 'event %s\n' "$event_name"
+    printf 'lid %s\n' "${CURRENT_LID:-unknown}"
+    printf 'battery %s\n' "${CURRENT_BATTERY:-unknown}"
+    printf 'brightness %s\n' "${LAST_BRIGHTNESS:-unknown}"
+    printf 'low_power_key %s\n' "${LPM_KEY:-unknown}"
+    printf 'initial_low_power %s\n' "${INITIAL_LPM:-unknown}"
+    printf 'log %s\n' "$LOGFILE"
+  } | write_text_file "$RUNTIME_STATEFILE" 2>/dev/null || true
+}
+
+notify_brrr() {
+  local level="$1" title="$2" message="$3" rc=0 out
+  local -a notify_cmd
+  [[ "${BAG_MODE_NOTIFY:-0}" == 1 ]] || return 0
+  if [[ ! -f "$BRRR_HELPER" ]]; then
+    log "brrr skipped (helper not found: $BRRR_HELPER)"
+    return 0
+  fi
+
+  notify_cmd=(/bin/bash "$BRRR_HELPER" --title "$title" --message "$message" --thread-id "$BRRR_THREAD_ID")
+  if [[ -n "$level" ]]; then
+    notify_cmd+=(--interruption-level "$level")
+  fi
+  if (( EUID == 0 )) && [[ "$BAG_MODE_RUN_USER" != root ]]; then
+    out="$(/usr/bin/sudo -u "$BAG_MODE_RUN_USER" /usr/bin/env HOME="$BAG_MODE_RUN_HOME" USER="$BAG_MODE_RUN_USER" LOGNAME="$BAG_MODE_RUN_USER" BRRR_TIMEOUT="$BRRR_TIMEOUT" "${notify_cmd[@]}" 2>&1)" || rc=$?
+  else
+    out="$(BRRR_TIMEOUT="$BRRR_TIMEOUT" "${notify_cmd[@]}" 2>&1)" || rc=$?
+  fi
+  log "brrr \"$title\" rc=$rc${out:+ ($out)}"
+}
+
+format_brightness() {
+  local value="${1:-}"
+  if usable_brightness "$value"; then
+    awk -v value="$value" 'BEGIN { printf "%.0f%%", value * 100 }'
+  else
+    printf 'unknown'
+  fi
+}
+
+notification_context() {
+  printf 'lid=%s; battery=%s; brightness=%s' \
+    "${CURRENT_LID:-unknown}" \
+    "${CURRENT_BATTERY:-unreadable}" \
+    "$(format_brightness "${LAST_BRIGHTNESS:-}")"
+}
+
+notify_bag_mode() {
+  local level="$1" event_name="$2" detail="${3:-}" message context
+  context="$(notification_context)"
+  if [[ -n "$detail" ]]; then
+    message="$detail; $context"
+  else
+    message="$context"
+  fi
+  notify_brrr "$level" "bag-mode: $event_name" "$message"
+}
+
+maybe_notify_battery_threshold() {
+  local pct="$1" bstat="$2" threshold
+  [[ "${CURRENT_LID:-}" == closed ]] || return 0
+  [[ "$bstat" == *discharging* ]] || return 0
+  for threshold in $BATTERY_NOTIFY_THRESHOLDS; do
+    [[ "$threshold" =~ ^[0-9]+$ ]] || continue
+    if (( pct <= threshold )) && [[ "$NOTIFIED_BATTERY_THRESHOLDS" != *" $threshold "* ]]; then
+      NOTIFIED_BATTERY_THRESHOLDS+="$threshold "
+      notify_bag_mode time-sensitive "battery ${pct}%" "crossed_threshold=${threshold}%"
+      break
+    fi
+  done
 }
 
 # Prints closed/open. Returns 1 (prints nothing) if ioreg itself fails, so
@@ -115,15 +361,23 @@ battery_status() {
 # External displays can be hot-plugged after startup and the index assigned
 # to the built-in panel may shift (e.g. external becomes main → index 0,
 # built-in → index 1), so a value captured once at startup goes stale.
+brightness_command() {
+  if (( EUID == 0 )) && [[ "$BAG_MODE_RUN_USER" != root ]]; then
+    /usr/bin/sudo -u "$BAG_MODE_RUN_USER" /usr/bin/env HOME="$BAG_MODE_RUN_HOME" USER="$BAG_MODE_RUN_USER" LOGNAME="$BAG_MODE_RUN_USER" "$BRIGHTNESS_BIN" "$@"
+  else
+    "$BRIGHTNESS_BIN" "$@"
+  fi
+}
+
 builtin_display_id() {
-  "$BRIGHTNESS_BIN" -l 2>/dev/null | awk '
+  brightness_command -l 2>/dev/null | awk '
     /built-in/ { gsub(":", "", $2); print $2; exit }
   '
 }
 
 # Read the built-in panel's current brightness (empty string if not found).
 builtin_brightness() {
-  "$BRIGHTNESS_BIN" -l 2>/dev/null | awk '
+  brightness_command -l 2>/dev/null | awk '
     /built-in/ { gsub(":", "", $2); id = $2; next }
     id != "" && $0 ~ ("^display " id ": brightness") { print $NF; exit }
   '
@@ -133,7 +387,15 @@ builtin_brightness() {
 # Useful when the built-in panel disappears from the list (e.g. lid closed
 # with no external display attached → macOS unenumerates it).
 displays_oneline() {
-  "$BRIGHTNESS_BIN" -l 2>&1 | tr '\n' '|' | sed 's/|$//'
+  brightness_command -l 2>&1 | tr '\n' '|' | sed 's/|$//'
+}
+
+pmset_command() {
+  if (( EUID == 0 )); then
+    /usr/bin/pmset "$@"
+  else
+    sudo -n /usr/bin/pmset "$@"
+  fi
 }
 
 # True if $1 is a usable brightness restore target (numeric, > 0.01 — the
@@ -148,7 +410,7 @@ usable_brightness() {
 # screen is dark leaves the restore target on disk for the next run.
 remember_brightness() {
   LAST_BRIGHTNESS="$1"
-  printf '%s\n' "$1" > "$STATEFILE" 2>/dev/null || true
+  printf '%s\n' "$1" | write_text_file "$STATEFILE" 2>/dev/null || true
 }
 
 # Returns non-zero when the built-in panel is not enumerated, so cleanup
@@ -160,22 +422,292 @@ set_brightness() {
     log "brightness $value skipped (no built-in display found); displays: $(displays_oneline)"
     return 1
   fi
-  out="$("$BRIGHTNESS_BIN" -d "$id" "$value" 2>&1)" || rc=$?
+  out="$(brightness_command -d "$id" "$value" 2>&1)" || rc=$?
   log "brightness $value display=$id rc=$rc${out:+ ($out)}"
   return "$rc"
 }
 
 set_lowpowermode() {
   local value="$1" rc=0 out
-  out="$(sudo -n /usr/bin/pmset -b "$LPM_KEY" "$value" 2>&1)" || rc=$?
+  out="$(pmset_command -b "$LPM_KEY" "$value" 2>&1)" || rc=$?
   log "pmset -b $LPM_KEY $value rc=$rc${out:+ ($out)}"
+  if (( rc != 0 )); then
+    notify_bag_mode time-sensitive "pmset failed" "command=pmset -b $LPM_KEY $value; rc=$rc${out:+; output=$out}"
+  fi
 }
 
 set_disablesleep() {
   local value="$1" rc=0 out
-  out="$(sudo -n /usr/bin/pmset -a disablesleep "$value" 2>&1)" || rc=$?
+  out="$(pmset_command -a disablesleep "$value" 2>&1)" || rc=$?
   log "pmset disablesleep $value rc=$rc${out:+ ($out)}"
+  if (( rc != 0 )); then
+    notify_bag_mode time-sensitive "pmset failed" "command=pmset -a disablesleep $value; rc=$rc${out:+; output=$out}"
+  fi
 }
+
+start_mode() {
+  local script_file shell_cmd attempt
+  prepare_dirs
+  if bag_mode_running; then
+    echo "bag-mode already running"
+    show_status
+    return 0
+  fi
+  if [[ ! -x "$TMUX_BIN" ]]; then
+    echo "tmux not found; install tmux or run 'bag-mode run' in the foreground" >&2
+    return 1
+  fi
+  if ! sudo -v; then
+    echo "sudo authentication failed" >&2
+    return 1
+  fi
+
+  script_file="$(script_path)"
+  : >>"$LOCKFILE"
+  chown_if_root_user "$LOCKFILE"
+  if ! sudo /bin/mkdir -p "$ROOT_RUNTIME_DIR"; then
+    echo "failed to create root runtime dir: $ROOT_RUNTIME_DIR" >&2
+    return 1
+  fi
+  if ! sudo /usr/bin/install -m 0755 -o root -g wheel "$script_file" "$ROOT_RUNNER"; then
+    echo "failed to install root runner: $ROOT_RUNNER" >&2
+    return 1
+  fi
+  append_log_line "[$(date '+%F %T')] start requested; launching root tmux session=$TMUX_SESSION runner=$ROOT_RUNNER"
+  printf -v shell_cmd 'exec /usr/bin/env HOME=%q USER=%q LOGNAME=%q PATH=%q BAG_MODE_RUN_USER=%q BAG_MODE_RUN_HOME=%q BAG_MODE_STATE_DIR=%q BAG_MODE_LOG_DIR=%q LOCKFILE=%q STATEFILE=%q RUNTIME_STATEFILE=%q LOGFILE=%q TMUX_SESSION=%q TMUX_BIN=%q INTERVAL=%q CLOSED_INTERVAL=%q BATTERY_EVERY=%q BATTERY_MIN=%q BATTERY_NOTIFY_THRESHOLDS=%q BRIGHTNESS_BIN=%q BAG_MODE_BACKGROUND=1 BAG_MODE_NOTIFY=%q BAG_MODE_START_NOTIFY=%q BAG_MODE_LOG_TO_FILE=1 BRRR_TIMEOUT=%q BRRR_HELPER=%q BRRR_THREAD_ID=%q ROOT_RUN_PATH=%q ROOT_RUNTIME_DIR=%q ROOT_RUNNER=%q %q run' \
+    "$BAG_MODE_RUN_HOME" "$BAG_MODE_RUN_USER" "$BAG_MODE_RUN_USER" "$ROOT_RUN_PATH" \
+    "$BAG_MODE_RUN_USER" "$BAG_MODE_RUN_HOME" "$APP_SUPPORT_DIR" "$LOG_DIR" \
+    "$LOCKFILE" "$STATEFILE" "$RUNTIME_STATEFILE" "$LOGFILE" "$TMUX_SESSION" "$TMUX_BIN" \
+    "$INTERVAL" "$CLOSED_INTERVAL" "$BATTERY_EVERY" "$BATTERY_MIN" "$BATTERY_NOTIFY_THRESHOLDS" "$BRIGHTNESS_BIN" \
+    "$BAG_MODE_START_NOTIFY" "$BAG_MODE_START_NOTIFY" "$BRRR_TIMEOUT" "$BRRR_HELPER" "$BRRR_THREAD_ID" "$ROOT_RUN_PATH" \
+    "$ROOT_RUNTIME_DIR" "$ROOT_RUNNER" "$ROOT_RUNNER"
+
+  if root_tmux_has_session; then
+    if ! root_tmux new-window -t "$TMUX_SESSION" -n bag-mode "$shell_cmd"; then
+      echo "failed to create root tmux window in session '$TMUX_SESSION'" >&2
+      return 1
+    fi
+  else
+    if ! root_tmux new-session -d -s "$TMUX_SESSION" -n bag-mode "$shell_cmd"; then
+      echo "failed to create root tmux session '$TMUX_SESSION'" >&2
+      return 1
+    fi
+  fi
+
+  for (( attempt = 0; attempt < 20; attempt++ )); do
+    if bag_mode_running; then
+      echo "bag-mode started in tmux session '$TMUX_SESSION'"
+      echo "log: $LOGFILE"
+      echo "attach: bag-mode attach"
+      return 0
+    fi
+    sleep 0.1
+  done
+
+  echo "bag-mode tmux command started, but no running lock was observed" >&2
+  echo "log: $LOGFILE" >&2
+  tail -n 20 "$LOGFILE" >&2 2>/dev/null || true
+  return 1
+}
+
+stop_mode() {
+  local pid attempt
+  prepare_dirs
+  pid="$(runtime_pid)"
+  if ! bag_mode_running; then
+    echo "bag-mode is not running"
+    return 0
+  fi
+  if [[ -z "$pid" ]] || ! pid_is_alive "$pid"; then
+    echo "bag-mode lock is held, but no live pid was found in $RUNTIME_STATEFILE" >&2
+    echo "log: $LOGFILE" >&2
+    return 1
+  fi
+  if ! pid_matches_bag_mode "$pid"; then
+    echo "refusing to stop pid $pid because it does not match bag-mode's lock holder" >&2
+    echo "state: $RUNTIME_STATEFILE" >&2
+    echo "log: $LOGFILE" >&2
+    return 1
+  fi
+
+  if ! terminate_pid "$pid"; then
+    echo "failed to send SIGTERM to bag-mode pid $pid" >&2
+    return 1
+  fi
+  for (( attempt = 0; attempt < 30; attempt++ )); do
+    if ! bag_mode_running; then
+      echo "bag-mode stopped"
+      echo "log: $LOGFILE"
+      return 0
+    fi
+    sleep 0.2
+  done
+
+  echo "bag-mode did not stop after SIGTERM; inspect $LOGFILE" >&2
+  return 1
+}
+
+show_status() {
+  local pid live_lid live_battery owner running=0
+  prepare_dirs
+  pid="$(runtime_pid)"
+  owner=""
+  if bag_mode_running; then
+    running=1
+    echo "bag-mode: running"
+  else
+    echo "bag-mode: not running"
+  fi
+  if (( running )) && [[ -n "$pid" ]] && pid_is_alive "$pid"; then
+    owner="$(pid_owner "$pid")"
+    echo "pid: $pid"
+    if [[ -n "$owner" ]]; then
+      echo "owner: $owner"
+    fi
+  fi
+  if tmux_has_session; then
+    echo "tmux: $TMUX_SESSION"
+  elif root_tmux_has_session; then
+    echo "tmux: $TMUX_SESSION (root)"
+  elif (( running )) && [[ "$owner" == root ]]; then
+    echo "tmux: $TMUX_SESSION (root; sudo required to inspect)"
+  else
+    echo "tmux: not attached"
+  fi
+  if live_lid="$(lid_state)"; then
+    echo "lid_now: $live_lid"
+  else
+    echo "lid_now: unreadable"
+  fi
+  live_battery="$(battery_status)"
+  echo "battery_now: ${live_battery:-unreadable}"
+  echo "load: $(uptime | sed 's/^.*load averages: /load averages: /')"
+  echo "log: $LOGFILE"
+  echo "state: $RUNTIME_STATEFILE"
+  if [[ -s "$RUNTIME_STATEFILE" ]]; then
+    echo "last_recorded:"
+    awk '
+      $1 == "brightness" {
+        if ($2 ~ /^[0-9]+(\.[0-9]+)?$/) {
+          printf "  brightness %d%%\n", int(($2 * 100) + 0.5)
+        } else {
+          print "  " $0
+        }
+        next
+      }
+      { print "  " $0 }
+    ' "$RUNTIME_STATEFILE"
+  fi
+}
+
+show_logs() {
+  local follow=0 lines=80 arg
+  prepare_dirs
+  while [[ $# -gt 0 ]]; do
+    arg="$1"
+    case "$arg" in
+      -f|--follow)
+        follow=1
+        ;;
+      -n)
+        shift
+        if [[ $# -eq 0 || "${1:-}" == *[!0-9]* ]]; then
+          echo "usage: bag-mode logs [-f] [N]" >&2
+          return 2
+        fi
+        lines="$1"
+        ;;
+      ''|*[!0-9]*)
+        echo "usage: bag-mode logs [-f] [N]" >&2
+        return 2
+        ;;
+      *)
+        lines="$arg"
+        ;;
+    esac
+    shift
+  done
+  if [[ ! -f "$LOGFILE" ]]; then
+    echo "bag-mode log does not exist yet: $LOGFILE" >&2
+    return 1
+  fi
+  if (( follow )); then
+    tail -n "$lines" -f "$LOGFILE"
+  else
+    tail -n "$lines" "$LOGFILE"
+  fi
+}
+
+attach_mode() {
+  prepare_dirs
+  if tmux_has_session; then
+    tmux attach -t "$TMUX_SESSION"
+    return $?
+  fi
+  if ! root_tmux has-session -t "$TMUX_SESSION" 2>/dev/null; then
+    echo "tmux session not found: $TMUX_SESSION" >&2
+    return 1
+  fi
+  root_tmux attach -t "$TMUX_SESSION"
+}
+
+subcommand="${1:-run}"
+case "$subcommand" in
+  run)
+    if [[ $# -gt 0 ]]; then
+      shift
+    fi
+    ;;
+  start)
+    shift
+    start_mode "$@"
+    exit $?
+    ;;
+  stop)
+    shift
+    stop_mode "$@"
+    exit $?
+    ;;
+  status)
+    shift
+    show_status "$@"
+    exit $?
+    ;;
+  logs)
+    shift
+    show_logs "$@"
+    exit $?
+    ;;
+  attach)
+    shift
+    attach_mode "$@"
+    exit $?
+    ;;
+  help|-h|--help)
+    usage
+    exit 0
+    ;;
+  *)
+    echo "unknown bag-mode command: $subcommand" >&2
+    usage
+    exit 2
+    ;;
+esac
+
+prepare_dirs
+
+if [[ ! -x "$BRIGHTNESS_BIN" ]]; then
+  log "brightness binary not found: $BRIGHTNESS_BIN"
+  exit 1
+fi
+
+# Single instance: re-exec under a kernel flock held for the life of the
+# process. The lock is released by the kernel when the process dies —
+# kill -9 included — so there is no stale-lock state and no reclaim logic.
+# A second run fails with "already locked" (exit 75).
+if [[ "${_BAG_MODE_LOCKED:-}" != 1 ]]; then
+  exec /usr/bin/env _BAG_MODE_LOCKED=1 /usr/bin/lockf -k -t 0 "$LOCKFILE" "$0" "$@"
+fi
 
 # Seed LAST_BRIGHTNESS, the rolling "value to restore": prefer the live
 # panel reading, fall back to what a previous run persisted (covers
@@ -204,45 +736,67 @@ read -r LPM_KEY INITIAL_LPM < <(/usr/bin/pmset -g custom | awk '
 ')
 LPM_KEY="${LPM_KEY:-lowpowermode}"
 INITIAL_LPM="${INITIAL_LPM:-0}"
+STARTED_AT="$(date '+%F %T')"
+CURRENT_LID="unknown"
+CURRENT_BATTERY="unknown"
+NOTIFIED_BATTERY_THRESHOLDS=" "
 
 # Sudo bootstrap + keep the credential warm in background. Every later sudo
 # call is non-interactive (-n): if the credential is lost anyway, pmset
 # fails and is logged rather than blocking the loop on a password prompt.
-if ! sudo -n true 2>/dev/null; then
-  if ! sudo -v; then
-    echo "sudo authentication failed" >&2
-    exit 1
+SUDO_REFRESH_PID=""
+if (( EUID != 0 )); then
+  if ! sudo -n true 2>/dev/null; then
+    if [[ "${BAG_MODE_BACKGROUND:-0}" == 1 ]]; then
+      echo "sudo credential is not available to the background job; use 'bag-mode start' to launch the root tmux job, or use 'bag-mode run' in the foreground" >&2
+      exit 1
+    fi
+    if ! sudo -v; then
+      echo "sudo authentication failed" >&2
+      exit 1
+    fi
   fi
+  (
+    while sudo -n true 2>/dev/null; do sleep 60; done
+    log "sudo credential lost; pmset calls will fail until bag-mode is restarted"
+    notify_bag_mode time-sensitive "sudo expired" "pmset changes will fail until bag-mode is restarted"
+  ) &
+  SUDO_REFRESH_PID=$!
 fi
-(
-  while sudo -n true 2>/dev/null; do sleep 60; done
-  log "sudo credential lost; pmset calls will fail until bag-mode is restarted"
-) &
-SUDO_REFRESH_PID=$!
 
 cleanup() {
-  trap '' INT TERM EXIT
+  trap '' INT TERM HUP EXIT
   log "cleanup: brightness=${LAST_BRIGHTNESS:-?} ${LPM_KEY}=${INITIAL_LPM:-?} disablesleep=0"
   if set_brightness "${LAST_BRIGHTNESS:-1.0}"; then
-    rm -f "$STATEFILE"
+    remove_file "$STATEFILE" 2>/dev/null || true
   else
     log "brightness not restored (panel not enumerated); kept $STATEFILE for the next run"
+    notify_bag_mode time-sensitive "brightness not restored" "built_in_display=unavailable; restore_target=$(format_brightness "${LAST_BRIGHTNESS:-1.0}")"
   fi
   set_lowpowermode "$INITIAL_LPM"
   set_disablesleep 0
-  kill "$SUDO_REFRESH_PID" 2>/dev/null
+  if [[ -n "$SUDO_REFRESH_PID" ]]; then
+    kill "$SUDO_REFRESH_PID" 2>/dev/null
+  fi
+  CURRENT_BATTERY="$(battery_status)"
+  write_runtime_state "stopped"
   log "stopped"
 }
-trap 'cleanup; exit 0' INT TERM
+trap 'cleanup; exit 0' INT TERM HUP
 trap cleanup EXIT
 
 log "started; brightness=$LAST_BRIGHTNESS (from $brightness_source) ${LPM_KEY}=$INITIAL_LPM interval=${INTERVAL}s/${CLOSED_INTERVAL}s battery_every=${BATTERY_EVERY}s battery_min=${BATTERY_MIN}%"
 
 set_disablesleep 1
+CURRENT_LID="$(lid_state 2>/dev/null || echo unknown)"
+CURRENT_BATTERY="$(battery_status)"
+write_runtime_state "started"
+notify_bag_mode passive "armed" "log=$LOGFILE"
 
 last_state=""
 last_battery=0
 last_tracked=""
+seen_lid_state=0
 interval="$INTERVAL"
 while true; do
   if ! state="$(lid_state)"; then
@@ -250,6 +804,7 @@ while true; do
     sleep "$interval"
     continue
   fi
+  CURRENT_LID="$state"
   now="$(date +%s)"
 
   if [[ "$state" != "$last_state" ]]; then
@@ -275,6 +830,15 @@ while true; do
       # and forking ioreg+brightness twice a second costs battery.
       last_tracked=""
       interval="$CLOSED_INTERVAL"
+      CURRENT_BATTERY="$(battery_status)"
+      write_runtime_state "lid_closed"
+      if (( seen_lid_state )); then
+        if [[ "$CURRENT_BATTERY" == *discharging* ]]; then
+          notify_bag_mode time-sensitive "lid closed" "mac_awake=true"
+        else
+          notify_bag_mode passive "lid closed" "mac_awake=true"
+        fi
+      fi
     else
       log "restoring brightness=$LAST_BRIGHTNESS ${LPM_KEY}=$INITIAL_LPM"
       set_brightness "$LAST_BRIGHTNESS"
@@ -283,8 +847,14 @@ while true; do
       # poll doesn't treat it as a "user change".
       last_tracked="$LAST_BRIGHTNESS"
       interval="$INTERVAL"
+      CURRENT_BATTERY="$(battery_status)"
+      write_runtime_state "lid_open"
+      if (( seen_lid_state )); then
+        notify_bag_mode passive "lid open" "restored=true"
+      fi
     fi
     last_state="$state"
+    seen_lid_state=1
   fi
 
   # Continuously track user brightness adjustments while the lid is open.
@@ -299,17 +869,24 @@ while true; do
       remember_brightness "$cur"
       last_tracked="$cur"
       log "tracked brightness=$LAST_BRIGHTNESS"
+      write_runtime_state "brightness"
     fi
   fi
 
   if (( now - last_battery >= BATTERY_EVERY )); then
     bstat="$(battery_status)"
+    CURRENT_BATTERY="$bstat"
     log "battery ${bstat:-unreadable}"
+    write_runtime_state "battery"
     last_battery=$now
     pct="${bstat%%\%*}"
     if [[ "$bstat" == *discharging* && "$pct" =~ ^[0-9]+$ ]] && (( pct <= BATTERY_MIN )); then
+      notify_bag_mode time-sensitive "exiting at ${pct}%" "battery_min=${BATTERY_MIN}%; allowing_sleep=true"
       log "battery ${pct}% <= battery_min ${BATTERY_MIN}%; exiting so the machine can sleep"
       break
+    fi
+    if [[ "$bstat" == *discharging* && "$pct" =~ ^[0-9]+$ ]]; then
+      maybe_notify_battery_threshold "$pct" "$bstat"
     fi
   fi
 
