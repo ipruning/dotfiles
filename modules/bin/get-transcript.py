@@ -7,7 +7,7 @@
 Extract transcript from a YouTube video.
 
 Usage:
-    get-transcript.py <video_id_or_url> [--timestamps]
+    get-transcript.py <video_id_or_url> [--timestamps] [--language LANGUAGE]
 """
 
 import argparse
@@ -15,6 +15,9 @@ import re
 import sys
 
 from youtube_transcript_api import YouTubeTranscriptApi
+
+
+DEFAULT_LANGUAGES = ("en", "zh", "zh-Hans", "zh-Hant")
 
 
 def extract_video_id(url_or_id: str) -> str:
@@ -40,10 +43,28 @@ def format_timestamp(seconds: float) -> str:
     return f"{minutes:02d}:{secs:02d}"
 
 
-def get_transcript(video_id: str, with_timestamps: bool = False) -> str:
+def parse_language_codes(language_args: list[str] | None) -> tuple[str, ...]:
+    """Return language codes from repeated or comma-separated CLI arguments."""
+    if not language_args:
+        return DEFAULT_LANGUAGES
+
+    codes = tuple(
+        code.strip()
+        for arg in language_args
+        for code in arg.split(",")
+        if code.strip()
+    )
+    if not codes:
+        raise ValueError("At least one non-empty language code is required")
+    return codes
+
+
+def get_transcript(
+    video_id: str, languages: tuple[str, ...], with_timestamps: bool = False
+) -> str:
     """Fetch and format transcript for a YouTube video."""
     api = YouTubeTranscriptApi()
-    transcript = api.fetch(video_id)
+    transcript = api.fetch(video_id, languages=languages)
 
     if with_timestamps:
         lines = [
@@ -62,11 +83,25 @@ def main():
     parser.add_argument(
         "--timestamps", "-t", action="store_true", help="Include timestamps in output"
     )
+    parser.add_argument(
+        "--language",
+        "-l",
+        action="append",
+        dest="languages",
+        metavar="LANGUAGE",
+        help=(
+            "Transcript language code to try. Repeat or pass comma-separated codes. "
+            f"Default: {', '.join(DEFAULT_LANGUAGES)}"
+        ),
+    )
     args = parser.parse_args()
 
     try:
         video_id = extract_video_id(args.video)
-        transcript = get_transcript(video_id, with_timestamps=args.timestamps)
+        languages = parse_language_codes(args.languages)
+        transcript = get_transcript(
+            video_id, languages=languages, with_timestamps=args.timestamps
+        )
         print(transcript)
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
