@@ -65,18 +65,18 @@ version = "2.12.0"
 backend = "gem:kamal"
 
 [[tools."github:earendil-works/pi"]]
-version = "0.80.3"
+version = "0.80.5"
 backend = "github:earendil-works/pi"
 
 [tools."github:earendil-works/pi"."platforms.linux-x64"]
-checksum = "sha256:e74a34ac2505556164144d8e39a64d6d5276f092166dad914319edc30c48abee"
-url = "https://github.com/earendil-works/pi/releases/download/v0.80.3/pi-linux-x64.tar.gz"
-url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/462498373"
+checksum = "sha256:f10d1e243a8ee365feac8a8efd3257489b3be1a66f0303439e715b04636c5004"
+url = "https://github.com/earendil-works/pi/releases/download/v0.80.5/pi-linux-x64.tar.gz"
+url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/471652665"
 
 [tools."github:earendil-works/pi"."platforms.macos-arm64"]
-checksum = "sha256:072789f5f5571198bd2d856f1ac4bbc980eecce1d02e7d0acf896e2387e3ee8f"
-url = "https://github.com/earendil-works/pi/releases/download/v0.80.3/pi-darwin-arm64.tar.gz"
-url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/462498374"
+checksum = "sha256:bf61c649c473515a5f0b68fbc77da40da1e64d006625cea2d926ef3cf11d3ef1"
+url = "https://github.com/earendil-works/pi/releases/download/v0.80.5/pi-darwin-arm64.tar.gz"
+url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/471652662"
 
 [[tools."github:larksuite/cli"]]
 version = "1.0.68"
