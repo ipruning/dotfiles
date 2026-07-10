@@ -65,18 +65,18 @@ version = "2.12.0"
 backend = "gem:kamal"
 
 [[tools."github:earendil-works/pi"]]
-version = "0.80.5"
+version = "0.80.6"
 backend = "github:earendil-works/pi"
 
 [tools."github:earendil-works/pi"."platforms.linux-x64"]
-checksum = "sha256:f10d1e243a8ee365feac8a8efd3257489b3be1a66f0303439e715b04636c5004"
-url = "https://github.com/earendil-works/pi/releases/download/v0.80.5/pi-linux-x64.tar.gz"
-url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/471652665"
+checksum = "sha256:f7c383b3dbf336b97174249ef40baed86e295416af77a81ff5288ac17cb71839"
+url = "https://github.com/earendil-works/pi/releases/download/v0.80.6/pi-linux-x64.tar.gz"
+url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/471853081"
 
 [tools."github:earendil-works/pi"."platforms.macos-arm64"]
-checksum = "sha256:bf61c649c473515a5f0b68fbc77da40da1e64d006625cea2d926ef3cf11d3ef1"
-url = "https://github.com/earendil-works/pi/releases/download/v0.80.5/pi-darwin-arm64.tar.gz"
-url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/471652662"
+checksum = "sha256:f9cd7ed20e50e234d6f1f2634b2e372ed073dc31070381f975bdb6d1a8bdd1c9"
+url = "https://github.com/earendil-works/pi/releases/download/v0.80.6/pi-darwin-arm64.tar.gz"
+url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/471853082"
 
 [[tools."github:larksuite/cli"]]
 version = "1.0.68"
@@ -148,31 +148,31 @@ version = "1.2.2"
 backend = "go:github.com/xdevplatform/xurl"
 
 [[tools.node]]
-version = "26.4.0"
+version = "26.5.0"
 backend = "core:node"
 
 [tools.node."platforms.linux-x64"]
-checksum = "sha256:f221dab30d0e9d544332f06fbee2c62186c97d864d5cac8482dba34f1e38b8dc"
-url = "https://nodejs.org/dist/v26.4.0/node-v26.4.0-linux-x64.tar.gz"
+checksum = "sha256:22b5f47ad6ae78837e4c2b846019965ce1a06ba143de176102294a1bf44fc677"
+url = "https://nodejs.org/dist/v26.5.0/node-v26.5.0-linux-x64.tar.gz"
 
 [tools.node."platforms.macos-arm64"]
-checksum = "sha256:4f4fbcacf6b1ff1a95deedba7bd7b2d79efecaa53a8ecb0530546dc9063fefbc"
-url = "https://nodejs.org/dist/v26.4.0/node-v26.4.0-darwin-arm64.tar.gz"
+checksum = "sha256:ee920559aaa2391569cff4d737e3b83963430e3a14dedd91bfe0ff53171b5af9"
+url = "https://nodejs.org/dist/v26.5.0/node-v26.5.0-darwin-arm64.tar.gz"
 
 [[tools.pnpm]]
-version = "11.10.0"
+version = "11.11.0"
 backend = "aqua:pnpm/pnpm"
 
 [tools.pnpm."platforms.linux-x64"]
-checksum = "sha256:cf22c9f1ba90f67c9a5cfb1cbe9c2087cf4c3a5c409dad738c1f8a38b8137666"
-url = "https://github.com/pnpm/pnpm/releases/download/v11.10.0/pnpm-linux-x64.tar.gz"
-url_api = "https://api.github.com/repos/pnpm/pnpm/releases/assets/466571518"
+checksum = "sha256:df4699e897012ab14df2cc6eaa942910e830eb7fcaa420a2a1421a9461fd9108"
+url = "https://github.com/pnpm/pnpm/releases/download/v11.11.0/pnpm-linux-x64.tar.gz"
+url_api = "https://api.github.com/repos/pnpm/pnpm/releases/assets/471734818"
 provenance = "github-attestations"
 
 [tools.pnpm."platforms.macos-arm64"]
-checksum = "sha256:d0d8a55b47dbe07a80d13fec7ee5af9bdca36187e61f9562d72d81dd637178c4"
-url = "https://github.com/pnpm/pnpm/releases/download/v11.10.0/pnpm-darwin-arm64.tar.gz"
-url_api = "https://api.github.com/repos/pnpm/pnpm/releases/assets/466571520"
+checksum = "sha256:ad46ad16c2376c2b78354ac488c1b166e076aa59bfcbcfd567d55957d755a690"
+url = "https://github.com/pnpm/pnpm/releases/download/v11.11.0/pnpm-darwin-arm64.tar.gz"
+url_api = "https://api.github.com/repos/pnpm/pnpm/releases/assets/471734814"
 provenance = "github-attestations"
 
 [[tools.python]]
