@@ -144,6 +144,7 @@ exe-dev-switch() {
 Host exe.dev *.exe.xyz
   IdentitiesOnly yes
   IdentityFile $pub
+  ConnectTimeout 10
 EOF
 
   chmod 600 "$tmp"
