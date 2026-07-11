@@ -35,7 +35,7 @@ DEFAULT_DB = (
     / "health.sqlite3"
 )
 DEFAULT_APP = "/Applications/Visual Studio Code.app"
-CODEX_APP = Path("/Applications/Codex.app")
+CODEX_APP = Path("/Applications/ChatGPT.app")
 CODEX_CONFIG = Path.home() / ".codex" / "config.toml"
 CODEX_CHROME_NATIVE_HOSTS = Path.home() / ".codex" / "chrome-native-hosts-v2.json"
 CODEX_CHROME_EXTENSION_ID = "hehggadaopoacecdllhhajmbjkdcmajg"
@@ -424,9 +424,17 @@ def candidate_code_sign_clone_paths() -> list[Path]:
 
 
 def codex_process_role(command: str) -> str:
-    if command.startswith("/Applications/Codex.app/Contents/MacOS/Codex"):
+    if command.startswith(
+        (
+            "/Applications/ChatGPT.app/Contents/MacOS/ChatGPT",
+            "/Applications/Codex.app/Contents/MacOS/Codex",
+        )
+    ):
         return "codex_main"
-    if "/Applications/Codex.app/Contents/Resources/codex app-server" in command:
+    if any(
+        f"/Applications/{app_name}.app/Contents/Resources/codex app-server" in command
+        for app_name in ("ChatGPT", "Codex")
+    ):
         return "codex_app_server"
     if "/Codex (Service).app/Contents/MacOS/Codex (Service)" in command:
         return "codex_service"
@@ -434,7 +442,10 @@ def codex_process_role(command: str) -> str:
         return "codex_renderer"
     if "/browser_crashpad_handler" in command and "Codex" in command:
         return "codex_crashpad"
-    if "/Applications/Codex.app/Contents/Resources/cua_node/bin/node_repl" in command:
+    if any(
+        f"/Applications/{app_name}.app/Contents/Resources/cua_node/bin/node_repl" in command
+        for app_name in ("ChatGPT", "Codex")
+    ):
         return "codex_node_repl"
     if "SkyComputerUseClient" in command and " mcp" in command:
         return "codex_sky_computer_use"
@@ -543,7 +554,7 @@ def render_recovery_markdown(report: dict[str, Any]) -> str:
 def recover_syspolicyd(args: argparse.Namespace) -> int:
     before = syspolicyd_status(args.command_timeout)
     commands = [
-        "pkill -TERM -f '^/Applications/Codex\\.app/Contents/MacOS/Codex$'",
+        "pkill -TERM -f '^/Applications/ChatGPT\\.app/Contents/MacOS/ChatGPT$'",
         "sleep 5",
         "old=\"$(pgrep -x syspolicyd)\"",
         "sudo kill -TERM \"$old\"",
@@ -1731,7 +1742,7 @@ def collect_spawn_check(store: Store, snapshot_id: str, timeout: float) -> bool:
         ("true", ["/usr/bin/true"]),
         ("bash_colon", ["/bin/bash", "-c", ":"]),
         ("zsh_colon", ["/bin/zsh", "-c", ":"]),
-        ("python_import_sqlite", [sys.executable, "-c", "import sqlite3"]),
+        ("python_import_sqlite", ["/usr/bin/python3", "-c", "import sqlite3"]),
     ]
     ok = True
     for name, command in checks:

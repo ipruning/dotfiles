@@ -15,7 +15,7 @@
     <string>--fd-warn</string>
     <string>512</string>
     <string>--codex-app</string>
-    <string>/Applications/Codex.app</string>
+    <string>/Applications/ChatGPT.app</string>
     <string>--codex-config</string>
     <string>/Users/alex/.codex/config.toml</string>
     <string>--codex-chrome-native-hosts</string>
@@ -93,7 +93,7 @@
     <string>--app</string>
     <string>/Applications/Visual Studio Code.app</string>
     <string>--app</string>
-    <string>/Applications/Codex.app</string>
+    <string>/Applications/ChatGPT.app</string>
     <string>watch</string>
     <string>--interval</string>
     <string>60</string>
