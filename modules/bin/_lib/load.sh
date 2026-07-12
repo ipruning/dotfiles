@@ -11,9 +11,3 @@ DOTFILES_LIB_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 source "$DOTFILES_LIB_DIR/core.sh"
 # shellcheck source=modules/bin/_lib/log.sh
 source "$DOTFILES_LIB_DIR/log.sh"
-# shellcheck source=modules/bin/_lib/process.sh
-source "$DOTFILES_LIB_DIR/process.sh"
-# shellcheck source=modules/bin/_lib/prompt.sh
-source "$DOTFILES_LIB_DIR/prompt.sh"
-# shellcheck source=modules/bin/_lib/generated.sh
-source "$DOTFILES_LIB_DIR/generated.sh"

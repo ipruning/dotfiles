@@ -1,47 +1,46 @@
 # Agent Guidelines
 
-This file is for agents working in this repo. Human-facing repository
-documentation lives in `README.md`.
+This file governs work in this repository. Human-facing behavior and command
+semantics live in `README.md`.
 
-## Source
+## Source ownership
 
-- `README.md` is the human-facing guide for layout, command names, Mackup
-  behavior, Skillshare ownership, and host inventory rules.
-- `mise.toml` defines tasks. Each task calls a `modules/bin/dotfiles-*`
-  command; do not duplicate command behavior outside those commands.
-- `modules/AGENTS.md` adds rules for files under `modules/`.
+- `mise.toml` is the task interface. Keep it as a thin adapter to modules under
+  `scripts/`.
+- `scripts/` owns the read-only drift, host-health, and repository-lint
+  behavior. Tests exercise the public `inspect_*` interfaces.
+- `reference/` is comparison data, not an automatically applied backup.
+- `mackup/` owns the application-to-path mapping consumed by the pinned Mackup
+  fork.
+- `modules/` owns independent commands and self-installing tools. It inherits
+  `modules/AGENTS.md`.
+- `generated/` is optional runtime state. Do not track host inventories or
+  claim that it represents current host truth.
 
-## Working Rules
+## Working rules
 
-- Prefer editing source files in `modules/`.
-- Treat `home/` as Mackup data. Edit tracked shell startup files there only
-  when changing restored shell startup behavior.
-- Treat `generated/` as generated files. Delete or edit files there only when a
-  regeneration path exists.
-- Never commit secrets. Use ignored `*.private.*` files or tracked templates.
+- Use `mise tasks` to discover commands and the relevant `mise run <task>`
+  entrypoint for verification.
+- Keep `diff`, `check`, and `lint` read-only. A repair or installation belongs
+  in an explicit user-directed operation, not inside an inspection.
+- Keep stdout machine-readable when `--json` is selected and send operational
+  failures to stderr.
+- Compare reference and live configuration by location and metadata. Do not
+  expose configuration contents in drift reports.
+- Never commit secrets. Track templates; keep materialized `*private*` files
+  ignored.
+- Run `mise run verify` after changing Python tasks, mappings, or repository
+  layout.
 
-## Commands
+## Skillshare boundary
 
-- Use `mise tasks` to list repo commands.
-- Use the relevant `mise run <task>` entrypoint when one exists.
-- For direct script checks, run the `modules/bin/dotfiles-*` command or helper
-  being changed.
-- `mise run doctor [--strict] [--json]` checks hardcoded paths without mutating
-  files.
-
-## Skillshare Boundary
-
-- Read the `README.md` Agents and skills section before changing Skillshare
-  config.
-- Do not edit global harness prompt files in this repo.
-- When changing where Skillshare installs prompt files, update the Skillshare
-  source repo and this repo's Skillshare config together, then verify from this
-  repo with `skillshare extras list --json` and
-  `skillshare sync --all --dry-run --json`.
+Global harness prompts and skills are owned by the Skillshare source repo.
+This repository may inspect the configured source and store its reference
+configuration, but it must not synchronize or rewrite global harness files.
 
 ## Commits
 
 - Follow Conventional Commits with a scope, for example
-  `chore(mise): update tasks`.
+  `feat(inspect): add host capability checks`.
 - Keep commits focused on one logical change.
-- Include commands run when summarizing work.
+- Include commands actually run when summarizing work.

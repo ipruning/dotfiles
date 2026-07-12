@@ -1,4 +1,0 @@
-dlvhdr/gh-dash
-gennaro-tedesco/gh-f
-HaywardMorihara/gh-tidy
-seachicken/gh-poi

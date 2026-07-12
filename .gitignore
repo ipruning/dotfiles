@@ -14,7 +14,7 @@ generated/functions/*
 generated/plugins/*
 !**/.gitkeep
 
-home/.config/karabiner/automatic_backups/
-home/.config/zellij/plugins/
+reference/.config/karabiner/automatic_backups/
+reference/.config/zellij/plugins/
 
 !*tpl*

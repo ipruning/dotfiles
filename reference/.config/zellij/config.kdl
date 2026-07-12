@@ -20,7 +20,7 @@ keybinds clear-defaults=true {
         bind "Ctrl D" { HalfPageScrollDown; }
 
         bind "Ctrl j" {
-            LaunchOrFocusPlugin "file:~/dotfiles/home/.config/zellij/plugins/zellij-sessionizer.wasm" {
+            LaunchOrFocusPlugin "file:~/dotfiles/reference/.config/zellij/plugins/zellij-sessionizer.wasm" {
                 floating true
                 move_to_focused_tab true
                 cwd "/"

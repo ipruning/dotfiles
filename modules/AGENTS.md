@@ -1,52 +1,33 @@
 # Module Guidelines
 
-## Scope
+`modules/` contains independent user commands, shell fragments, templates, and
+self-installing maintenance tools. Repository inspection logic belongs in
+`scripts/`, not here.
 
-`modules/` stores source files: executable commands, self-installing tools,
-command helpers, shell config fragments, Mackup config, and templates. Keep
-runtime state and generated local files outside this tree
-unless the repository already marks those paths as generated files.
-
-## `bin/`
+## User commands
 
 - Put user-facing commands in `modules/bin/`.
-- Put shared command helpers in `modules/bin/_lib/`.
-- Commands that need common logging, dependency checks, prompts, or timeout
-  helpers should source `modules/bin/_lib/load.sh`.
-- Domain-specific helper files may source `load.sh` themselves. Commands should
-  source the domain helper directly, for example `modules/bin/_lib/mackup.sh`.
-- Files under `modules/bin/_lib/` are sourced helpers, not direct commands.
-  Keep them non-executable.
-- New executable names should use kebab-case. Use `.py` for Python helpers that
-  are imported or edited as Python modules; otherwise prefer an executable
-  script name without an extension.
-- Scripts intended to be invoked directly must be executable and include a
-  working shebang.
-- Use the repository toolchain: run configured tools through `mise exec --`, and
-  use `uv run --script` with PEP 723 metadata for standalone Python scripts.
-- CLIs that agents or scripts call should keep stdout parseable and send
-  diagnostics to stderr. Prefer `--format json` when another program will read
-  the output. On failures, exit non-zero and print the command, setting, or
-  file path needed to fix the failure.
-- Long-running monitors should store state under `~/Library/Application Support`
-  and logs under `~/Library/Logs`. Do not write runtime state into the
-  repository.
+- Keep command-specific helpers beside their owner. Shared shell helpers under
+  `modules/bin/_lib/` must have at least two real callers.
+- New executable names use kebab-case. Imported Python helpers use `.py`;
+  directly invoked commands use a working shebang and executable mode.
+- Agent-facing output stays parseable. Send diagnostics to stderr and provide a
+  JSON format when another program consumes the result.
+- Runtime state and logs live outside the repository.
 
 ## Self-installing modules
 
-- A substantial standalone tool may live in `modules/<tool>/` when its
-  executable owns the command interface, installation, removal, and generated
-  launchd configuration. Keep module-specific tests and runbooks beside it.
-- Do not expose a self-installing module through `modules/bin/`; its installed
-  path is the command interface. Run the module source directly only for its
-  first installation or an upgrade.
-- Generate host-specific plist files during installation. Do not keep another
-  plist source file when the executable is already the sole owner of its
-  lifecycle.
+A substantial standalone tool may live in `modules/<tool>/` when its executable
+owns the command interface, installation, removal, and generated system
+configuration. Keep its tests and runbook beside it. Do not add a second wrapper
+under `modules/bin/`.
+
+Generate host-specific launchd files during installation rather than tracking a
+second plist source. Verify lifecycle changes through the module's public CLI,
+including its dry-run installation, tests, installed status, and uninstall
+path.
 
 ## Verification
 
-- Run a changed command through its public CLI interface.
-- For self-installing lifecycle changes, run the module test when present,
-  validate `install --dry-run`, perform the installation, and verify installed
-  `status`.
+Run an ordinary command through its public interface. Repository-wide Python
+inspection changes use the tasks documented in the root `AGENTS.md`.
