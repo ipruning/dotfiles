@@ -277,14 +277,14 @@ After changing the collector:
 
 ```zsh
 mise exec -- uv run python -m py_compile modules/macos-session-health/macos-session-health
-modules/bin/macos-session-health --version
-modules/bin/macos-session-health incident --hours 1 --limit 3 --format json \
+modules/macos-session-health/macos-session-health --version
+modules/macos-session-health/macos-session-health incident --hours 1 --limit 3 --format json \
   | python3 -m json.tool >/dev/null
-modules/bin/macos-session-health recover --format json \
+modules/macos-session-health/macos-session-health recover --format json \
   | python3 -m json.tool >/dev/null
 git diff --check
-modules/bin/macos-session-health install
-modules/bin/macos-session-health status --format json | python3 -m json.tool
+modules/macos-session-health/macos-session-health install
+macos-session-health status --format json | python3 -m json.tool
 ```
 
 `uninstall` stops the LaunchAgent and removes its plist and `~/.local/bin`

@@ -124,9 +124,8 @@ modules/bin/dotfiles-zsh-profile
 
 ### Standalone bag-mode
 
-`modules/bag-mode/bag-mode` is a self-installing, single-file macOS utility,
-exposed in the repository as `modules/bin/bag-mode`. It keeps
-a MacBook awake with its lid closed, restores its captured settings when
+`modules/bag-mode/bag-mode` is a self-installing, single-file macOS utility. It
+keeps a MacBook awake with its lid closed, restores its captured settings when
 stopped, and uses a LaunchDaemon to supervise one privileged controller.
 
 Copy that one file to another Mac, then run:
@@ -196,8 +195,8 @@ setting. It generates and installs its LaunchDaemon instead of keeping a bare
 plist in the repository:
 
 ```bash
-macos-maxfiles install --dry-run
-macos-maxfiles install
+modules/macos-maxfiles/macos-maxfiles install --dry-run
+modules/macos-maxfiles/macos-maxfiles install
 macos-maxfiles status --json
 ```
 
@@ -243,8 +242,8 @@ These rules keep file ownership clear:
 Common patterns used in this repo:
 
 - `modules/bin/` — shell commands and Python commands
-- `modules/<tool>/` — substantial self-installing tools exposed through a
-  relative symlink in `modules/bin/`
+- `modules/<tool>/` — substantial self-installing tools whose installed path is
+  their command interface
 - `modules/zsh/` — zsh modular config fragments + templates (private env template included)
 - `modules/mackup/` — Mackup configuration (`.mackup.cfg` + per-app cfg fragments)
 - `modules/surfingkeys/` — browser automation config (Surfingkeys)

@@ -37,8 +37,9 @@ unless the repository already marks those paths as generated files.
 - A substantial standalone tool may live in `modules/<tool>/` when one
   executable owns its command interface, installation, removal, generated
   launchd configuration, and runbook.
-- Keep `modules/bin/<tool>` as a relative symlink to that executable so the
-  repository still has one command discovery path.
+- Do not expose a self-installing module through `modules/bin/`; its installed
+  path is the command interface. Run the module source directly only for its
+  first installation or an upgrade.
 - Generate host-specific plist files during installation. Do not keep another
   plist source file when the executable is already the sole owner of its
   lifecycle.
