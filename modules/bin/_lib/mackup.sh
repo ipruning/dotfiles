@@ -3,6 +3,8 @@
 # shellcheck source=modules/bin/_lib/load.sh
 source "$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)/load.sh"
 
+readonly DOTFILES_MACKUP_SOURCE='git+https://github.com/ipruning/mackup@680f16339402dd82e6e2c1be4f4af41484cc7bc1'
+
 dotfiles_prepare_private_zshenv() {
   [ "${DOTFILES_PRIVATE_ZSHENV_READY:-0}" = 1 ] && return 0
 
@@ -32,21 +34,28 @@ dotfiles_prepare_private_zshenv() {
   fi
 }
 
-dotfiles_mackup_restore_safely() {
-  local title="$1"
-  shift
+dotfiles_mackup() {
+  dotfiles_run_with_timeout "${DOTFILES_MACKUP_TIMEOUT:-300}" \
+    uvx --isolated --from "$DOTFILES_MACKUP_SOURCE" mackup "$@"
+}
 
-  dotfiles_configure_mackup_symlinks
+dotfiles_mackup_restore_plan() {
+  dotfiles_mackup --dry-run restore
+}
 
-  dotfiles_log info "$title"
-  dotfiles_run_with_timeout "${DOTFILES_MACKUP_TIMEOUT:-300}" uvx mackup restore "$@"
+dotfiles_mackup_restore_plan_json() {
+  dotfiles_mackup --dry-run --json restore
+}
+
+dotfiles_mackup_restore_force() {
+  dotfiles_mackup --force restore
 }
 
 dotfiles_mackup_backup_force() {
   dotfiles_configure_mackup_symlinks
 
   dotfiles_log info "Running mackup backup..."
-  dotfiles_run_with_timeout "${DOTFILES_MACKUP_TIMEOUT:-300}" uvx mackup backup --force
+  dotfiles_mackup --force backup
 }
 
 # DOTFILES_MACKUP_SYMLINKS_CHANGED is read by modules/bin/dotfiles-init after

@@ -10,25 +10,82 @@ repo_root="$(cd -- "$script_dir/../.." && pwd)"
 source "$repo_root/modules/bin/_lib/mackup.sh"
 
 dotfiles_enter_repo
-dotfiles_require_commands gum uvx
+dotfiles_require_commands uvx
+
+mode=interactive
+json=0
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --dry-run)
+      [[ "$mode" == interactive ]] || {
+        printf 'Usage: dotfiles-restore [--dry-run [--json] | --force]\n' >&2
+        exit 2
+      }
+      mode=preview
+      ;;
+    --json)
+      json=1
+      ;;
+    --force)
+      [[ "$mode" == interactive ]] || {
+        printf 'Usage: dotfiles-restore [--dry-run [--json] | --force]\n' >&2
+        exit 2
+      }
+      mode=force
+      ;;
+    *)
+      printf 'Usage: dotfiles-restore [--dry-run [--json] | --force]\n' >&2
+      exit 2
+      ;;
+  esac
+  shift
+done
+
+if (( json )) && [[ "$mode" != preview ]]; then
+  printf 'Usage: dotfiles-restore [--dry-run [--json] | --force]\n' >&2
+  exit 2
+fi
+
+if (( json )); then
+  dotfiles_prepare_private_zshenv >&2
+  dotfiles_configure_mackup_symlinks >&2
+else
+  dotfiles_prepare_private_zshenv
+  dotfiles_configure_mackup_symlinks
+fi
+
+if [[ "$mode" == preview ]]; then
+  if (( json )); then
+    dotfiles_mackup_restore_plan_json
+  else
+    dotfiles_mackup_restore_plan
+  fi
+  exit 0
+fi
+
+dotfiles_log info "Mackup restore plan:"
+dotfiles_mackup_restore_plan
 
 run_restore() {
-  dotfiles_prepare_private_zshenv
-  dotfiles_mackup_restore_safely "Running mackup restore..." --force
+  dotfiles_log info "Applying mackup restore..."
+  dotfiles_mackup_restore_force
 
   # Agent prompt files are Skillshare extras, not Mackup-managed.
   # Keep prompt files in sync with the configured Skillshare source.
   if command -v skillshare &>/dev/null; then
     dotfiles_run_with_timeout "${DOTFILES_SKILLSHARE_TIMEOUT:-120}" skillshare sync extras --force \
-      || gum log --level warn "skillshare extras sync failed"
+      || dotfiles_log warn "skillshare extras sync failed"
   fi
 }
 
-if dotfiles_confirm_force "dotfiles-restore [--force]" \
-  "Restore dotfiles from Mackup now?" "$@"; then
+if [[ "$mode" == force ]]; then
+  run_restore
+elif command -v gum &>/dev/null && gum confirm "Apply this Mackup restore plan?" \
+  --prompt.foreground="15" \
+  --selected.foreground="0" --selected.background="2" \
+  --unselected.foreground="250" --unselected.background="238"; then
   run_restore
 else
-  exit_status=$?
-  [ "$exit_status" -eq 1 ] || exit "$exit_status"
-  gum log --level info "Cancelled."
+  dotfiles_log info "Cancelled. Re-run with --force to apply non-interactively."
 fi

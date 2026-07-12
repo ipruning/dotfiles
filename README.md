@@ -44,6 +44,17 @@ Mackup data and materializes private configuration when its authorized inputs
 are available. `sync` rebuilds generated shell assets, refreshes managed
 plugins, runs Skillshare, and records host inventory.
 
+`restore` prints the Mackup filesystem plan before asking to apply it. For an
+inspection-only run, including machine-readable output for an agent, use:
+
+```bash
+mise run restore -- --dry-run
+mise run restore -- --dry-run --json
+```
+
+Mackup runs directly from the immutable Git commit pinned in
+`modules/bin/_lib/mackup.sh`; it is not installed as a persistent command.
+
 ## Editing and applying changes
 
 - Change maintained commands and shell fragments under `modules/`, then run the

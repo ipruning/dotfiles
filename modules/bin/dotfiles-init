@@ -17,7 +17,9 @@ dotfiles_require_commands gum git curl mise uvx
 dotfiles_configure_mackup_symlinks
 if [ "${DOTFILES_MACKUP_SYMLINKS_CHANGED:-0}" = 1 ]; then
   dotfiles_prepare_private_zshenv
-  dotfiles_mackup_restore_safely "Restoring Mackup..."
+  gum log --level info "Mackup configured; previewing the pending restore..."
+  dotfiles_mackup_restore_plan
+  gum log --level info "Run 'mise run restore' to review and apply this plan."
 else
   gum log --level info "Mackup already configured"
 fi
