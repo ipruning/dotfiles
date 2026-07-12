@@ -3,17 +3,19 @@
 from __future__ import annotations
 
 import argparse
+import configparser
 import json
 import os
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 from typing import Protocol, cast
 
 from .models import Drift, DriftKind, DriftReport, FileKind
 
 MACKUP_SOURCE = (
-    "git+https://github.com/ipruning/mackup@08288e96477a585c63ca72a5a7c1ab0955d17e6e"
+    "git+https://github.com/ipruning/mackup@faa5cb8cd0f5fea83711b4fc75a4996d4b8a7497"
 )
 
 
@@ -43,31 +45,45 @@ class SubprocessMackupRunner:
         home: Path,
         application: str | None,
     ) -> dict[str, object]:
-        command = [
-            "uvx",
-            "--isolated",
-            "--from",
-            MACKUP_SOURCE,
-            "mackup",
-            "--config-file",
-            str(repo_root / "mackup/mackup.cfg"),
-            "--applications-dir",
-            str(repo_root / "mackup/applications"),
-            "--json",
-            "diff",
-        ]
-        if application:
-            command.append(application)
-        environment = os.environ.copy()
-        environment["HOME"] = str(home)
-        completed = subprocess.run(
-            command,
-            cwd=repo_root,
-            env=environment,
-            check=False,
-            capture_output=True,
-            text=True,
-        )
+        source_config = repo_root / "mackup/mackup.cfg"
+        config = configparser.ConfigParser(allow_no_value=True, interpolation=None)
+        try:
+            if not config.read(source_config) or not config.has_section("storage"):
+                raise MackupCommandError(f"Invalid Mackup config: {source_config}")
+            config.set("storage", "path", str(repo_root))
+            with tempfile.TemporaryDirectory(prefix="dotfiles-mackup-") as temp_dir:
+                runtime_config = Path(temp_dir) / "mackup.cfg"
+                with runtime_config.open("w") as config_file:
+                    config.write(config_file)
+                command = [
+                    "uvx",
+                    "--isolated",
+                    "--from",
+                    MACKUP_SOURCE,
+                    "mackup",
+                    "--config-file",
+                    str(runtime_config),
+                    "--applications-dir",
+                    str(repo_root / "mackup/applications"),
+                    "--json",
+                    "diff",
+                ]
+                if application:
+                    command.append(application)
+                environment = os.environ.copy()
+                environment["HOME"] = str(home)
+                completed = subprocess.run(
+                    command,
+                    cwd=repo_root,
+                    env=environment,
+                    check=False,
+                    capture_output=True,
+                    text=True,
+                )
+        except (configparser.Error, OSError) as error:
+            raise MackupCommandError(
+                f"Unable to prepare Mackup config {source_config}: {error}",
+            ) from error
         if completed.returncode != 0 and not completed.stdout:
             detail = completed.stderr.strip() or "Mackup produced no report"
             raise MackupCommandError(f"{' '.join(command)}: {detail}")
