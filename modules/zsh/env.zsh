@@ -364,6 +364,10 @@ fi
 # 👇 OrbStack
 if [[ -f "$HOME/.orbstack/shell/init.zsh" ]]; then
   source "$HOME/.orbstack/shell/init.zsh"
+  # OrbStack appends with scalar PATH/fpath assignments, so reassign the tied
+  # unique arrays once to collapse entries inherited from the parent process.
+  path=("${path[@]}")
+  fpath=("${fpath[@]}")
 fi
 
 # 👇 zoxide
