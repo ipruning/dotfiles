@@ -1,894 +1,2019 @@
-#!/usr/bin/env bash
-#
-# bag-mode — keep MacBook running with the lid closed (e.g. in a bag)
-#
-# Startup:
-#   - resolve the brightness restore target: the panel's current value if
-#     readable and > 0.01, else the value persisted by a previous run in
-#     $STATEFILE (survives a run that died while the screen was dark),
-#     else 1.0
-#   - capture the battery-side low power mode key and value
-#   - sudo pmset -a disablesleep 1   (clamshell sleep disabled)
-#
-# While running (polled every $INTERVAL seconds with the lid open,
-# $CLOSED_INTERVAL seconds with it closed):
-#   - lid closed  → snapshot built-in brightness into LAST_BRIGHTNESS, then
-#                   brightness 0 + battery-side low power mode 1
-#   - lid open    → brightness LAST_BRIGHTNESS + battery-side low power
-#                   mode restored to its startup value
-#   - battery at or below $BATTERY_MIN % while discharging → clean exit
-#     (restores everything, re-enables sleep) instead of riding the battery
-#     down to a hard shutdown
-#
-# When no external display is attached and the lid is closed, macOS
-# unenumerates the built-in panel from CGDisplay; `brightness -l` will not
-# list it and the brightness step is logged as "skipped". The panel is
-# powered off anyway, so this is harmless — pmset/disablesleep still apply.
-#
-# Only the battery-side (`pmset -b`) low power mode is touched; the AC-side
-# is left alone. macOS automatically applies the correct setting based on
-# the current power source, so plugging/unplugging while the lid is closed
-# is handled by the kernel and needs no polling here.
-#
-# Failure policy: this runs unattended, so transient command failures
-# (ioreg, brightness, pmset) are logged and tolerated, never fatal — dying
-# would re-enable sleep exactly when the machine is in the bag. All sudo
-# calls after startup use -n, so a lost credential fails visibly in the log
-# instead of hanging on a password prompt nobody can answer with the lid
-# closed.
-#
-# Default output goes to stdout. `bag-mode start` runs the same loop in tmux
-# and appends to ~/Library/Logs/bag-mode/bag-mode.log. Runtime state lives in
-# ~/Library/Application Support/bag-mode/ so `bag-mode status` and
-# `bag-mode stop` can observe the foreground or tmux-backed instance.
-#
-#   bag-mode                      # foreground
-#   bag-mode start                # tmux background session
-#   bag-mode status               # pid/lid/battery/log path
-#   bag-mode stop                 # SIGTERM + normal cleanup
-#
-# Ctrl+C / SIGTERM:
-#   - restore brightness, low power mode, disablesleep. If the panel is not
-#     enumerated at exit (lid closed), the restore target is kept in
-#     $STATEFILE and applied automatically by the next run.
-#
-# kill -9 will not run cleanup (the lock and $STATEFILE take care of
-# themselves; pmset does not). Recover manually:
-#   sudo pmset -a disablesleep 0
-#   sudo pmset -b lowpowermode 0
-#   /usr/local/bin/brightness 1.0
-# (omit `-m`: with an external display attached, `-m` targets the external
-# panel which usually does not respond, leaving the built-in still dark.)
+#!/bin/bash
+# Keep a MacBook awake with its lid closed, with launchd supervision and
+# rollback-safe restoration of captured settings. This file is both the
+# user-facing CLI and the installed controller executable.
 
 set -uo pipefail
 
-BAG_MODE_RUN_USER="${BAG_MODE_RUN_USER:-${SUDO_USER:-${USER:-$(id -un)}}}"
-BAG_MODE_RUN_HOME="${BAG_MODE_RUN_HOME:-$HOME}"
-if [[ "$BAG_MODE_RUN_USER" != root && ( -z "$BAG_MODE_RUN_HOME" || "$BAG_MODE_RUN_HOME" == /var/root || "$BAG_MODE_RUN_HOME" == /root ) ]]; then
-  BAG_MODE_RUN_HOME="$(/usr/bin/dscl . -read "/Users/$BAG_MODE_RUN_USER" NFSHomeDirectory 2>/dev/null | awk '{ print $2; exit }')"
+VERSION="2.3.4"
+EXIT_USAGE=2
+EXIT_BRIGHTNESS_PENDING=69
+EXIT_START_FAILED=70
+EXIT_CRASH_LOOP=75
+EXIT_RECOVERY_CONFLICT=76
+EXIT_PREFLIGHT_FAILED=78
+LABEL="dev.bag-mode.daemon"
+SELF_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)/$(basename "${BASH_SOURCE[0]}")"
+
+if [[ -n "${BAG_MODE_TEST_ROOT:-}" ]]; then
+  INSTALL_BIN="$BAG_MODE_TEST_ROOT/usr/local/bin/bag-mode"
+  CONTROLLER_BIN="$BAG_MODE_TEST_ROOT/Library/PrivilegedHelperTools/dev.bag-mode.controller"
+  PLIST_FILE="$BAG_MODE_TEST_ROOT/Library/LaunchDaemons/$LABEL.plist"
+  ROOT_DIR="$BAG_MODE_TEST_ROOT/Library/Application Support/bag-mode"
+  ROOT_LOG_DIR="$BAG_MODE_TEST_ROOT/Library/Logs/bag-mode"
+else
+  INSTALL_BIN="${BAG_MODE_INSTALL_BIN:-/usr/local/bin/bag-mode}"
+  CONTROLLER_BIN="${BAG_MODE_CONTROLLER_BIN:-/Library/PrivilegedHelperTools/dev.bag-mode.controller}"
+  PLIST_FILE="${BAG_MODE_PLIST_FILE:-/Library/LaunchDaemons/$LABEL.plist}"
+  ROOT_DIR="${BAG_MODE_ROOT_DIR:-/Library/Application Support/bag-mode}"
+  ROOT_LOG_DIR="${BAG_MODE_ROOT_LOG_DIR:-/Library/Logs/bag-mode}"
 fi
-BAG_MODE_RUN_HOME="${BAG_MODE_RUN_HOME:-$HOME}"
-ROOT_RUN_PATH="${ROOT_RUN_PATH:-/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin:/usr/local/bin}"
-ROOT_RUNTIME_DIR="${ROOT_RUNTIME_DIR:-/Library/Application Support/bag-mode}"
-ROOT_RUNNER="${ROOT_RUNNER:-$ROOT_RUNTIME_DIR/bag-mode-run-$BAG_MODE_RUN_USER}"
-TMUX_BIN="${TMUX_BIN:-}"
-if [[ -z "$TMUX_BIN" ]]; then
-  for candidate_bin in /opt/homebrew/bin/tmux /usr/local/bin/tmux /usr/bin/tmux; do
-    if [[ -x "$candidate_bin" ]]; then
-      TMUX_BIN="$candidate_bin"
-      break
-    fi
-  done
-  TMUX_BIN="${TMUX_BIN:-$(command -v tmux 2>/dev/null || true)}"
-fi
 
-APP_SUPPORT_DIR="${BAG_MODE_STATE_DIR:-$BAG_MODE_RUN_HOME/Library/Application Support/bag-mode}"
-LOG_DIR="${BAG_MODE_LOG_DIR:-$BAG_MODE_RUN_HOME/Library/Logs/bag-mode}"
-LOCKFILE="${LOCKFILE:-$APP_SUPPORT_DIR/bag-mode.lock}"
-STATEFILE="${STATEFILE:-$APP_SUPPORT_DIR/brightness}"
-RUNTIME_STATEFILE="${RUNTIME_STATEFILE:-$APP_SUPPORT_DIR/state}"
-LOGFILE="${LOGFILE:-$LOG_DIR/bag-mode.log}"
-TMUX_SESSION="${TMUX_SESSION:-bag-mode}"
+CONFIG_FILE="$ROOT_DIR/config"
+OWNER_FILE="$ROOT_DIR/service"
+ROOT_STATUS_FILE="$ROOT_DIR/state"
+RECOVERY_SNAPSHOT_FILE="$ROOT_DIR/recovery-snapshot"
+RECOVERY_RECORD_FILE="$ROOT_DIR/recovery-record"
+RESTART_FILE="$ROOT_DIR/restarts"
+ENABLED_FILE="$ROOT_DIR/enabled"
+BRIGHTNESS_PENDING_FILE="$ROOT_DIR/brightness-pending"
+CONTROLLER_RESERVATION_DIR="$ROOT_DIR/controller-reservation"
+CONTROLLER_RESERVATION_FILE="$CONTROLLER_RESERVATION_DIR/owner"
+CONTROLLER_STDOUT="$ROOT_LOG_DIR/controller.out.log"
+CONTROLLER_STDERR="$ROOT_LOG_DIR/controller.err.log"
 
-INTERVAL="${INTERVAL:-0.5}"
-CLOSED_INTERVAL="${CLOSED_INTERVAL:-2}"
-BATTERY_EVERY="${BATTERY_EVERY:-60}"
-BATTERY_MIN="${BATTERY_MIN:-10}"
-BATTERY_NOTIFY_THRESHOLDS="${BATTERY_NOTIFY_THRESHOLDS:-30 20}"
-BRIGHTNESS_BIN="${BRIGHTNESS_BIN:-/usr/local/bin/brightness}"
+PMSET_BIN="${BAG_MODE_PMSET_BIN:-/usr/bin/pmset}"
+IOREG_BIN="${BAG_MODE_IOREG_BIN:-/usr/sbin/ioreg}"
+LAUNCHCTL_BIN="${BAG_MODE_LAUNCHCTL_BIN:-/bin/launchctl}"
+SUDO_BIN="${BAG_MODE_SUDO_BIN:-/usr/bin/sudo}"
+DSCL_BIN="${BAG_MODE_DSCL_BIN:-/usr/bin/dscl}"
 
-BAG_MODE_NOTIFY="${BAG_MODE_NOTIFY:-0}"
-BAG_MODE_START_NOTIFY="${BAG_MODE_START_NOTIFY:-1}"
-BAG_MODE_LOG_TO_FILE="${BAG_MODE_LOG_TO_FILE:-0}"
-BRRR_HELPER="${BRRR_HELPER:-$BAG_MODE_RUN_HOME/.agents/skills/skills-stable__brrr-now/scripts/brrr-send.sh}"
-BRRR_THREAD_ID="${BRRR_THREAD_ID:-bag-mode}"
-BRRR_TIMEOUT="${BRRR_TIMEOUT:-10}"
-
-append_log_line() {
-  local line="$1"
-  if (( EUID == 0 )) && [[ "$BAG_MODE_RUN_USER" != root ]]; then
-    printf '%s\n' "$line" | /usr/bin/sudo -u "$BAG_MODE_RUN_USER" /usr/bin/tee -a "$LOGFILE" >/dev/null 2>/dev/null || true
-  else
-    printf '%s\n' "$line" >>"$LOGFILE" 2>/dev/null || true
-  fi
-}
-
-write_text_file() {
-  local file_path="$1"
-  if (( EUID == 0 )) && [[ "$BAG_MODE_RUN_USER" != root ]]; then
-    /usr/bin/sudo -u "$BAG_MODE_RUN_USER" /bin/sh -c 'cat > "$1"' sh "$file_path"
-  else
-    cat >"$file_path"
-  fi
-}
-
-remove_file() {
-  local file_path="$1"
-  if (( EUID == 0 )) && [[ "$BAG_MODE_RUN_USER" != root ]]; then
-    /usr/bin/sudo -u "$BAG_MODE_RUN_USER" /bin/rm -f "$file_path"
-  else
-    rm -f "$file_path"
-  fi
-}
-
-log() {
-  local line
-  line="[$(date '+%F %T')] $*"
-  printf '%s\n' "$line"
-  if [[ "$BAG_MODE_LOG_TO_FILE" == 1 ]]; then
-    append_log_line "$line"
-  fi
-}
-
-chown_if_root_user() {
-  if (( EUID == 0 )) && [[ "$BAG_MODE_RUN_USER" != root ]]; then
-    chown "$BAG_MODE_RUN_USER" "$@" 2>/dev/null || true
-  fi
-}
-
-prepare_dirs() {
-  local existing_files=() file_path
-  mkdir -p "$APP_SUPPORT_DIR" "$LOG_DIR"
-  chown_if_root_user "$APP_SUPPORT_DIR" "$LOG_DIR"
-  for file_path in "$LOGFILE" "$LOCKFILE" "$STATEFILE" "$RUNTIME_STATEFILE"; do
-    if [[ -e "$file_path" ]]; then
-      existing_files+=("$file_path")
-    fi
-  done
-  if (( ${#existing_files[@]} > 0 )); then
-    chown_if_root_user "${existing_files[@]}"
-  fi
-}
-
-script_path() {
-  local script_dir script_name
-  script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
-  script_name="$(basename "${BASH_SOURCE[0]}")"
-  printf '%s/%s\n' "$script_dir" "$script_name"
-}
+DEFAULT_INTERVAL="${BAG_MODE_INTERVAL:-0.5}"
+DEFAULT_CLOSED_INTERVAL="${BAG_MODE_CLOSED_INTERVAL:-2}"
+DEFAULT_BATTERY_EVERY="${BAG_MODE_BATTERY_EVERY:-60}"
+DEFAULT_BATTERY_MIN="${BAG_MODE_BATTERY_MIN:-10}"
+DEFAULT_BATTERY_THRESHOLDS="${BAG_MODE_BATTERY_THRESHOLDS:-30 20}"
+RESTART_WINDOW="${BAG_MODE_RESTART_WINDOW:-60}"
+MAX_RESTARTS="${BAG_MODE_MAX_RESTARTS:-3}"
+STOP_WAIT_ATTEMPTS="${BAG_MODE_STOP_WAIT_ATTEMPTS:-75}"
+STOP_WAIT_INTERVAL="${BAG_MODE_STOP_WAIT_INTERVAL:-0.2}"
+START_WAIT_ATTEMPTS="${BAG_MODE_START_WAIT_ATTEMPTS:-50}"
+START_WAIT_INTERVAL="${BAG_MODE_START_WAIT_INTERVAL:-0.1}"
 
 usage() {
-  cat <<'EOF' >&2
-Keep this Mac awake with the lid closed, with safe foreground/background controls.
+  cat <<'EOF'
+Keep a MacBook awake with its lid closed.
 
-Usage:
-  bag-mode                 Run in the foreground
-  bag-mode run             Run in the foreground
-  bag-mode start           Start in a root-owned tmux session and write Library logs
-  bag-mode stop            Stop the running instance and restore pmset/brightness
-  bag-mode status          Show running state, battery, lid, and log path
-  bag-mode logs [-f] [N]   Show the last N log lines; default N=80
-  bag-mode attach          Attach to the tmux session
+Usage: bag-mode COMMAND [OPTIONS]
 
-Environment:
-  BAG_MODE_START_NOTIFY=0  Disable brrr notifications for `bag-mode start`
-  BAG_MODE_NOTIFY=1        Enable brrr notifications for foreground `run`
-  BRRR_HELPER=PATH         brrr sender helper path
+Setup:
+  install        Install or upgrade the CLI and LaunchDaemon
+  doctor         Check dependencies and installation state
+
+Service:
+  start          Enable and start the service
+  stop           Stop the controller and restore captured settings
+  status         Show the current service state
+  logs           Show the controller log
+
+Maintenance:
+  recover        Complete an interrupted or pending restoration
+  uninstall      Remove installed system files
+  notifier       Configure optional notifications
+  run            Run in the foreground for debugging
+
+Run `bag-mode help COMMAND` or `bag-mode COMMAND --help` for details.
+
+Exit status:
+  0   Success
+  1   Operational failure
+  2   Invalid command or option
+  69  Power settings restored; brightness still pending
 EOF
 }
 
-bag_mode_running() {
-  ! /usr/bin/lockf -t 0 "$LOCKFILE" /usr/bin/true 2>/dev/null
+command_help() {
+  case "$1" in
+    install)
+      printf 'Usage: bag-mode install [--dry-run]\n\nInstall the user CLI at:\n  %s\n\nInstall the privileged controller at:\n  %s\n\nInstall and bootstrap this LaunchDaemon plist:\n  %s\n\n' "$INSTALL_BIN" "$CONTROLLER_BIN" "$PLIST_FILE"
+      cat <<'EOF'
+Required dependency:
+  brightness    Install with: brew install brightness
+
+Recommended installation flow:
+  1. bag-mode doctor --strict --json
+  2. bag-mode install --dry-run
+  3. bag-mode install
+  4. bag-mode start
+  5. bag-mode status --json
+  6. bag-mode doctor --strict --json
+
+--dry-run validates dependencies and the generated plist without changing the
+system. Installation requires sudo. In a non-interactive shell, preauthorize
+sudo in an interactive terminal with `sudo -v`, then retry the exact command.
+
+Successful verification requires installed, launchd_loaded, and enabled to be
+true, phase to be running, controller.alive to be true, recovery_required and
+brightness_pending to be false, and strict doctor to return ok=true with
+problems=0.
+EOF
+      ;;
+    doctor)
+      printf 'Usage: bag-mode doctor [--strict] [--json]\n\nCheck dependencies and installation state.\n\n  --strict  Exit non-zero when a required capability is missing.\n  --json    Write one JSON object to stdout.\n'
+      ;;
+    status)
+      cat <<'EOF'
+Usage: bag-mode status [--json]
+
+Show installation, lifecycle, recovery, controller, and current Mac state.
+
+Lifecycle phases:
+  stopped            No controller is requested or running
+  starting           The service is enabled but no controller is ready yet
+  running            A verified controller owns the current session
+  recovery_required  The controller exited before restoring captured settings
+
+Brightness pending is independent of lifecycle recovery: power settings are
+already restored, but the built-in display must return before brightness can
+be applied.
+
+  --json    Write one JSON object to stdout.
+EOF
+      ;;
+    start) printf 'Usage: bag-mode start\n\nEnable the service and start its controller.\n' ;;
+    stop) printf 'Usage: bag-mode stop\n\nDisable the service, stop its controller, and restore the captured settings.\nIf the built-in display is unavailable, power settings are restored and\nbrightness remains pending until the lid opens and bag-mode recover succeeds.\n' ;;
+    logs) printf 'Usage: bag-mode logs [-f] [N]\n\nShow the last N controller log lines; default N is 80.\n' ;;
+    recover) printf 'Usage: bag-mode recover\n\nRestore captured settings after an interrupted controller session, or apply a\npending brightness target after opening the lid.\n' ;;
+    uninstall) printf 'Usage: bag-mode uninstall --yes\n\nStop the service, restore captured settings, and remove installed system files.\n' ;;
+    run) printf 'Usage: bag-mode run\n\nRun one controller in the foreground with root authorization. Intended for\ndebugging; the service must be disabled first.\n' ;;
+    notifier)
+      cat <<'EOF'
+Usage:
+  bag-mode notifier set PATH
+  bag-mode notifier install-brrr [PATH]
+  bag-mode notifier test
+  bag-mode notifier off
+
+The generic notifier contract is:
+  notifier --event NAME --level LEVEL --title TEXT --message TEXT
+
+install-brrr copies the sender into stable user Application Support storage.
+The controller does not depend on the original Skill or Skillshare path afterward.
+EOF
+      ;;
+    help) usage ;;
+    version) printf 'Usage: bag-mode version\n\nShow the installed CLI version.\n' ;;
+    '') usage ;;
+    *) usage_error "unknown command: $1" ;;
+  esac
 }
 
-runtime_pid() {
-  awk '$1 == "pid" { print $2; exit }' "$RUNTIME_STATEFILE" 2>/dev/null
+die() {
+  printf 'bag-mode: %s\n' "$*" >&2
+  exit 1
 }
 
-pid_owner() {
-  ps -o user= -p "$1" 2>/dev/null | awk '{ print $1; exit }'
+usage_error() {
+  printf 'bag-mode: %s\n' "$*" >&2
+  exit "$EXIT_USAGE"
 }
 
-pid_is_alive() {
-  ps -p "$1" -o pid= >/dev/null 2>&1
+require_no_args() {
+  (( $# == 0 )) || usage_error "unexpected argument: $1"
 }
 
-pid_matches_bag_mode() {
-  local pid="$1" parent_pid command_text parent_command script_file
-  script_file="$(script_path)"
-  parent_pid="$(ps -o ppid= -p "$pid" 2>/dev/null | awk '{ print $1; exit }')"
-  command_text="$(ps -o command= -p "$pid" 2>/dev/null)"
-  parent_command="$(ps -o command= -p "$parent_pid" 2>/dev/null)"
-
-  [[ -n "$parent_pid" ]] || return 1
-  [[ "$command_text" == *"$script_file"* || "$command_text" == *"$ROOT_RUNNER"* ]] || return 1
-  [[ "$parent_command" == *'/usr/bin/lockf'* ]] || return 1
-  [[ "$parent_command" == *"$LOCKFILE"* ]] || return 1
-  [[ "$parent_command" == *"$script_file"* || "$parent_command" == *"$ROOT_RUNNER"* ]] || return 1
-}
-
-tmux_has_session() {
-  [[ -x "$TMUX_BIN" ]] && "$TMUX_BIN" has-session -t "$TMUX_SESSION" 2>/dev/null
-}
-
-root_tmux() {
-  [[ -x "$TMUX_BIN" ]] || return 1
-  sudo /usr/bin/env TERM=xterm-256color "$TMUX_BIN" "$@"
-}
-
-root_tmux_noninteractive() {
-  [[ -x "$TMUX_BIN" ]] || return 1
-  sudo -n /usr/bin/env TERM=xterm-256color "$TMUX_BIN" "$@"
-}
-
-root_tmux_has_session() {
-  root_tmux_noninteractive has-session -t "$TMUX_SESSION" 2>/dev/null
-}
-
-terminate_pid() {
-  local pid="$1"
-  if kill -TERM "$pid" 2>/dev/null; then
+authorize_root() {
+  if [[ "${BAG_MODE_TESTING:-0}" == 1 || $EUID -eq 0 ]]; then
     return 0
   fi
-  if (( EUID != 0 )); then
-    if ! sudo -n true 2>/dev/null; then
-      sudo -v || return 1
-    fi
-    sudo kill -TERM "$pid"
-    return $?
+  if [[ -t 0 && -t 1 ]]; then
+    "$SUDO_BIN" -v || die "sudo authorization failed"
+  elif ! "$SUDO_BIN" -n true 2>/dev/null; then
+    die "sudo authorization required; ask the user to run 'sudo -v' in an interactive terminal, then retry"
   fi
-  return 1
 }
 
-write_runtime_state() {
-  local event_name="${1:-update}"
-  {
-    printf 'pid %s\n' "$$"
-    printf 'updated_at %s\n' "$(date '+%F %T')"
-    printf 'started_at %s\n' "${STARTED_AT:-unknown}"
-    printf 'event %s\n' "$event_name"
-    printf 'lid %s\n' "${CURRENT_LID:-unknown}"
-    printf 'battery %s\n' "${CURRENT_BATTERY:-unknown}"
-    printf 'brightness %s\n' "${LAST_BRIGHTNESS:-unknown}"
-    printf 'low_power_key %s\n' "${LPM_KEY:-unknown}"
-    printf 'initial_low_power %s\n' "${INITIAL_LPM:-unknown}"
-    printf 'log %s\n' "$LOGFILE"
-  } | write_text_file "$RUNTIME_STATEFILE" 2>/dev/null || true
-}
-
-notify_brrr() {
-  local level="$1" title="$2" message="$3" rc=0 out
-  local -a notify_cmd
-  [[ "${BAG_MODE_NOTIFY:-0}" == 1 ]] || return 0
-  if [[ ! -f "$BRRR_HELPER" ]]; then
-    log "brrr skipped (helper not found: $BRRR_HELPER)"
-    return 0
-  fi
-
-  notify_cmd=(/bin/bash "$BRRR_HELPER" --title "$title" --message "$message" --thread-id "$BRRR_THREAD_ID")
-  if [[ -n "$level" ]]; then
-    notify_cmd+=(--interruption-level "$level")
-  fi
-  if (( EUID == 0 )) && [[ "$BAG_MODE_RUN_USER" != root ]]; then
-    out="$(/usr/bin/sudo -u "$BAG_MODE_RUN_USER" /usr/bin/env HOME="$BAG_MODE_RUN_HOME" USER="$BAG_MODE_RUN_USER" LOGNAME="$BAG_MODE_RUN_USER" BRRR_TIMEOUT="$BRRR_TIMEOUT" "${notify_cmd[@]}" 2>&1)" || rc=$?
-  else
-    out="$(BRRR_TIMEOUT="$BRRR_TIMEOUT" "${notify_cmd[@]}" 2>&1)" || rc=$?
-  fi
-  log "brrr \"$title\" rc=$rc${out:+ ($out)}"
-}
-
-format_brightness() {
+json_string() {
   local value="${1:-}"
-  if usable_brightness "$value"; then
-    awk -v value="$value" 'BEGIN { printf "%.0f%%", value * 100 }'
-  else
-    printf 'unknown'
+  value="${value//\\/\\\\}"
+  value="${value//\"/\\\"}"
+  value="${value//$'\n'/\\n}"
+  value="${value//$'\r'/\\r}"
+  value="${value//$'\t'/\\t}"
+  printf '"%s"' "$value"
+}
+
+json_bool() {
+  [[ "$1" == yes || "$1" == true || "$1" == 1 ]] && printf true || printf false
+}
+
+now_text() {
+  date '+%F %T'
+}
+
+now_epoch() {
+  date '+%s'
+}
+
+valid_scalar() {
+  [[ "$1" != *$'\n'* && "$1" != *$'\t'* && "$1" != *$'\r'* ]]
+}
+
+config_get() {
+  local key="$1" file_path="$2"
+  awk -F '\t' -v key="$key" '$1 == key { sub(/^[^\t]*\t/, ""); print; exit }' "$file_path" 2>/dev/null
+}
+
+write_root_kv_mode() {
+  local file_path="$1" file_mode="$2"
+  shift 2
+  local tmp_file="$file_path.tmp.$$" key value
+  umask 077
+  : >"$tmp_file" || return 1
+  while (( $# >= 2 )); do
+    key="$1"
+    value="$2"
+    shift 2
+    valid_scalar "$value" || { rm -f "$tmp_file"; return 1; }
+    printf '%s\t%s\n' "$key" "$value" >>"$tmp_file" || { rm -f "$tmp_file"; return 1; }
+  done
+  (( $# == 0 )) || { rm -f "$tmp_file"; return 1; }
+  chmod "$file_mode" "$tmp_file" || { rm -f "$tmp_file"; return 1; }
+  mv -f "$tmp_file" "$file_path" || { rm -f "$tmp_file"; return 1; }
+}
+
+write_root_kv() {
+  write_root_kv_mode "$1" 0600 "${@:2}"
+}
+
+write_public_root_kv() {
+  write_root_kv_mode "$1" 0644 "${@:2}"
+}
+
+claim_controller_reservation() {
+  local session_id="$1" controller_mode="$2"
+  mkdir "$CONTROLLER_RESERVATION_DIR" 2>/dev/null || return 1
+  if ! write_root_kv "$CONTROLLER_RESERVATION_FILE" \
+    session_id "$session_id" controller_mode "$controller_mode" pid "" executable ""; then
+    rm -f "$CONTROLLER_RESERVATION_FILE" 2>/dev/null || true
+    rmdir "$CONTROLLER_RESERVATION_DIR" 2>/dev/null || true
+    return 1
   fi
 }
 
-notification_context() {
-  printf 'lid=%s; battery=%s; brightness=%s' \
-    "${CURRENT_LID:-unknown}" \
-    "${CURRENT_BATTERY:-unreadable}" \
-    "$(format_brightness "${LAST_BRIGHTNESS:-}")"
-}
-
-notify_bag_mode() {
-  local level="$1" event_name="$2" detail="${3:-}" message context
-  context="$(notification_context)"
-  if [[ -n "$detail" ]]; then
-    message="$detail; $context"
-  else
-    message="$context"
+controller_reservation_matches() {
+  local session_id="$1" controller_mode="${2:-}" process_id="${3:-}"
+  [[ -r "$CONTROLLER_RESERVATION_FILE" ]] || return 1
+  [[ "$(config_get session_id "$CONTROLLER_RESERVATION_FILE")" == "$session_id" ]] || return 1
+  if [[ -n "$controller_mode" ]]; then
+    [[ "$(config_get controller_mode "$CONTROLLER_RESERVATION_FILE")" == "$controller_mode" ]] || return 1
   fi
-  notify_brrr "$level" "bag-mode: $event_name" "$message"
+  if [[ -n "$process_id" ]]; then
+    [[ "$(config_get pid "$CONTROLLER_RESERVATION_FILE")" == "$process_id" ]] || return 1
+  fi
 }
 
-maybe_notify_battery_threshold() {
-  local pct="$1" bstat="$2" threshold
-  [[ "${CURRENT_LID:-}" == closed ]] || return 0
-  [[ "$bstat" == *discharging* ]] || return 0
-  for threshold in $BATTERY_NOTIFY_THRESHOLDS; do
-    [[ "$threshold" =~ ^[0-9]+$ ]] || continue
-    if (( pct <= threshold )) && [[ "$NOTIFIED_BATTERY_THRESHOLDS" != *" $threshold "* ]]; then
-      NOTIFIED_BATTERY_THRESHOLDS+="$threshold "
-      notify_bag_mode time-sensitive "battery ${pct}%" "crossed_threshold=${threshold}%"
-      break
+activate_controller_reservation() {
+  local session_id="$1" controller_mode="$2"
+  controller_reservation_matches "$session_id" "$controller_mode" || return 1
+  write_root_kv "$CONTROLLER_RESERVATION_FILE" \
+    session_id "$session_id" controller_mode "$controller_mode" pid "$$" executable "$SELF_PATH"
+}
+
+release_controller_reservation() {
+  local session_id="$1"
+  [[ -e "$CONTROLLER_RESERVATION_DIR" ]] || return 0
+  [[ -n "$session_id" ]] || return 1
+  controller_reservation_matches "$session_id" || return 1
+  rm -f "$CONTROLLER_RESERVATION_FILE" || return 1
+  rmdir "$CONTROLLER_RESERVATION_DIR"
+}
+
+discard_controller_reservation() {
+  rm -rf -- "$CONTROLLER_RESERVATION_DIR"
+}
+
+resolve_user() {
+  local user_name
+  user_name="${BAG_MODE_RUN_USER:-${SUDO_USER:-$(id -un)}}"
+  if [[ "$user_name" == root ]]; then
+    user_name="$(stat -f '%Su' /dev/console 2>/dev/null || true)"
+  fi
+  [[ -n "$user_name" && "$user_name" != root && "$user_name" != loginwindow ]] || return 1
+  printf '%s\n' "$user_name"
+}
+
+resolve_home() {
+  local user_name="$1" home_dir
+  if [[ "${BAG_MODE_TESTING:-0}" == 1 && -n "${BAG_MODE_TEST_HOME:-}" ]]; then
+    printf '%s\n' "$BAG_MODE_TEST_HOME"
+    return
+  fi
+  home_dir="$($DSCL_BIN . -read "/Users/$user_name" NFSHomeDirectory 2>/dev/null | awk '{ print $2; exit }')"
+  [[ -n "$home_dir" ]] || return 1
+  printf '%s\n' "$home_dir"
+}
+
+resolve_group() {
+  id -gn "$1" 2>/dev/null
+}
+
+resolve_brightness() {
+  local candidate_bin
+  if [[ -n "${BAG_MODE_BRIGHTNESS_BIN:-}" && -x "$BAG_MODE_BRIGHTNESS_BIN" ]]; then
+    printf '%s\n' "$BAG_MODE_BRIGHTNESS_BIN"
+    return
+  fi
+  for candidate_bin in /opt/homebrew/bin/brightness /usr/local/bin/brightness; do
+    if [[ -x "$candidate_bin" ]]; then
+      printf '%s\n' "$candidate_bin"
+      return
     fi
   done
+  candidate_bin="$(command -v brightness 2>/dev/null || true)"
+  [[ -x "$candidate_bin" ]] && printf '%s\n' "$candidate_bin"
 }
 
-# Prints closed/open. Returns 1 (prints nothing) if ioreg itself fails, so
-# the caller can keep the previous state instead of misreading a transient
-# failure as "open".
-lid_state() {
-  # Avoid `ioreg | grep -q` because grep -q exits early, sending SIGPIPE to
-  # ioreg, and `set -o pipefail` then reports the pipeline as failed.
-  local out
-  out="$(/usr/sbin/ioreg -r -k AppleClamshellState -d 4 2>/dev/null)" || return 1
-  if [[ "$out" == *'"AppleClamshellState" = Yes'* ]]; then
-    echo closed
+require_macos() {
+  [[ "${BAG_MODE_TESTING:-0}" == 1 || "$(uname -s)" == Darwin ]] || die "macOS is required"
+}
+
+require_root() {
+  [[ "${BAG_MODE_TESTING:-0}" == 1 || $EUID -eq 0 ]] || die "this internal operation must run as root"
+}
+
+run_root() {
+  if [[ "${BAG_MODE_TESTING:-0}" == 1 ]]; then
+    "$@"
   else
-    echo open
+    "$SUDO_BIN" "$@"
   fi
 }
 
-# e.g. "75%; discharging; 4:23 remaining" or "100%; charged"
-battery_status() {
-  /usr/bin/pmset -g batt | awk -F'\t' '/InternalBattery/ {
-    n = split($2, a, "; ")
-    out = a[1]
-    for (i = 2; i <= n; i++) {
-      sub(/ present:.*/, "", a[i])
-      out = out "; " a[i]
+install_root_file() {
+  local mode="$1" source_file="$2" destination="$3"
+  if [[ "${BAG_MODE_TESTING:-0}" == 1 ]]; then
+    /usr/bin/install -m "$mode" "$source_file" "$destination"
+  else
+    "$SUDO_BIN" /usr/bin/install -m "$mode" -o root -g wheel "$source_file" "$destination"
+  fi
+}
+
+install_root_copy() {
+  local source_file="$1" destination="$2" install_dir install_tmp
+  install_dir="$(dirname "$destination")"
+  install_tmp="$(run_root /usr/bin/mktemp "$install_dir/.bag-mode.XXXXXX")" || return 1
+  if ! install_root_file 0755 "$source_file" "$install_tmp"; then
+    run_root /bin/rm -f "$install_tmp" 2>/dev/null || true
+    return 1
+  fi
+  if ! run_root /bin/mv -f "$install_tmp" "$destination"; then
+    run_root /bin/rm -f "$install_tmp" 2>/dev/null || true
+    return 1
+  fi
+}
+
+prepare_controller_directory() {
+  local controller_dir
+  controller_dir="$(dirname "$CONTROLLER_BIN")"
+  run_root /bin/mkdir -p "$controller_dir" || return 1
+  if [[ "${BAG_MODE_TESTING:-0}" != 1 ]]; then
+    run_root /usr/sbin/chown root:wheel "$controller_dir" || return 1
+  fi
+  run_root /bin/chmod 0755 "$controller_dir"
+}
+
+run_as_user() {
+  if [[ "${BAG_MODE_TESTING:-0}" == 1 || $EUID -ne 0 ]]; then
+    HOME="$RUN_HOME" USER="$RUN_USER" LOGNAME="$RUN_USER" "$@"
+  else
+    "$SUDO_BIN" -u "$RUN_USER" /usr/bin/env \
+      HOME="$RUN_HOME" USER="$RUN_USER" LOGNAME="$RUN_USER" "$@"
+  fi
+}
+
+user_support_dir() {
+  printf '%s/Library/Application Support/bag-mode\n' "$1"
+}
+
+# TODO(cleanup): trigger=date:2026-10-01; action=remove the legacy lock probe and install blocker
+legacy_controller_running() {
+  ps -axo command= -ww 2>/dev/null | awk '
+    BEGIN { lock_command = "/usr/bin/" "lockf"; lock_name = "bag-mode" ".lock" }
+    index($0, lock_command) && index($0, lock_name) { found = 1 }
+    END { exit !found }
+  '
+}
+
+user_log_dir() {
+  printf '%s/Library/Logs/bag-mode\n' "$1"
+}
+
+prepare_user_dirs() {
+  USER_SUPPORT_DIR="$(user_support_dir "$RUN_HOME")"
+  USER_LOG_DIR="$(user_log_dir "$RUN_HOME")"
+  USER_STATUS_FILE="$USER_SUPPORT_DIR/state"
+  USER_BRIGHTNESS_FILE="$USER_SUPPORT_DIR/brightness"
+  USER_LOG_FILE="$USER_LOG_DIR/bag-mode.log"
+  run_as_user /bin/mkdir -p "$USER_SUPPORT_DIR" "$USER_LOG_DIR"
+}
+
+write_user_file() {
+  local destination="$1" mode="$2"
+  # The target-user shell expands its positional arguments and temporary path.
+  # shellcheck disable=SC2016
+  run_as_user /bin/bash -c '
+    set -uo pipefail
+    destination=$1
+    mode=$2
+    parent=${destination%/*}
+    tmp_file="$(/usr/bin/mktemp "$parent/.bag-mode.XXXXXX")" || exit 1
+    trap '\''/bin/rm -f "$tmp_file"'\'' EXIT
+    /bin/cat >"$tmp_file" || exit 1
+    /bin/chmod "$mode" "$tmp_file" || exit 1
+    /bin/mv -f "$tmp_file" "$destination" || exit 1
+    trap - EXIT
+  ' bag-mode-write "$destination" "$mode"
+}
+
+log_line() {
+  local line
+  line="[$(now_text)] $*"
+  printf '%s\n' "$line"
+  if [[ -n "${USER_LOG_FILE:-}" ]]; then
+    if (( EUID == 0 )) && [[ "${BAG_MODE_TESTING:-0}" != 1 ]]; then
+      printf '%s\n' "$line" | "$SUDO_BIN" -u "$RUN_USER" /usr/bin/tee -a "$USER_LOG_FILE" >/dev/null 2>&1 || true
+    else
+      printf '%s\n' "$line" >>"$USER_LOG_FILE" 2>/dev/null || true
+    fi
+  fi
+}
+
+write_status_snapshot() {
+  local last_event="$1" updated_at
+  updated_at="$(now_text)"
+  write_public_root_kv "$ROOT_STATUS_FILE" \
+    last_event "$last_event" pid "$$" session_id "$SESSION_ID" \
+    controller_mode "${CONTROLLER_MODE:-launchd}" executable "$SELF_PATH" \
+    updated_at "$updated_at" started_at "$STARTED_AT" \
+    lid "${CURRENT_LID:-unknown}" battery "${CURRENT_BATTERY:-unknown}" \
+    brightness_target "${BRIGHTNESS_TARGET:-unknown}" \
+    captured_sleep_disabled "${CAPTURED_SLEEP_DISABLED:-unknown}" \
+    log_file "$USER_LOG_FILE" || return 1
+  {
+    printf 'last_event\t%s\n' "$last_event"
+    printf 'pid\t%s\n' "$$"
+    printf 'session_id\t%s\n' "$SESSION_ID"
+    printf 'controller_mode\t%s\n' "${CONTROLLER_MODE:-launchd}"
+    printf 'executable\t%s\n' "$SELF_PATH"
+    printf 'updated_at\t%s\n' "$updated_at"
+    printf 'started_at\t%s\n' "$STARTED_AT"
+    printf 'lid\t%s\n' "${CURRENT_LID:-unknown}"
+    printf 'battery\t%s\n' "${CURRENT_BATTERY:-unknown}"
+    printf 'brightness_target\t%s\n' "${BRIGHTNESS_TARGET:-unknown}"
+    printf 'captured_sleep_disabled\t%s\n' "${CAPTURED_SLEEP_DISABLED:-unknown}"
+    printf 'log_file\t%s\n' "$USER_LOG_FILE"
+  } | write_user_file "$USER_STATUS_FILE" 0644
+}
+
+load_controller_config() {
+  CONTROLLER_CONFIG_ERROR=""
+  if [[ ! -r "$CONFIG_FILE" ]]; then
+    CONTROLLER_CONFIG_ERROR="missing controller config: $CONFIG_FILE"
+    return 1
+  fi
+  RUN_USER="$(config_get run_user "$CONFIG_FILE")"
+  RUN_HOME="$(config_get run_home "$CONFIG_FILE")"
+  RUN_GROUP="$(config_get run_group "$CONFIG_FILE")"
+  BRIGHTNESS_BIN="$(config_get brightness_bin "$CONFIG_FILE")"
+  NOTIFIER="$(config_get notifier "$CONFIG_FILE")"
+  SESSION_ID="$(config_get session_id "$CONFIG_FILE")"
+  INTERVAL="$(config_get interval "$CONFIG_FILE")"
+  CLOSED_INTERVAL="$(config_get closed_interval "$CONFIG_FILE")"
+  BATTERY_EVERY="$(config_get battery_every "$CONFIG_FILE")"
+  BATTERY_MIN="$(config_get battery_min "$CONFIG_FILE")"
+  BATTERY_THRESHOLDS="$(config_get battery_thresholds "$CONFIG_FILE")"
+  if [[ -z "$RUN_USER" || -z "$RUN_HOME" || -z "$RUN_GROUP" || -z "$SESSION_ID" ]]; then
+    CONTROLLER_CONFIG_ERROR="controller config is incomplete: $CONFIG_FILE"
+    return 1
+  fi
+  if [[ ! -x "$BRIGHTNESS_BIN" ]]; then
+    CONTROLLER_CONFIG_ERROR="brightness binary is not executable: $BRIGHTNESS_BIN"
+    return 1
+  fi
+  INTERVAL="${INTERVAL:-$DEFAULT_INTERVAL}"
+  CLOSED_INTERVAL="${CLOSED_INTERVAL:-$DEFAULT_CLOSED_INTERVAL}"
+  BATTERY_EVERY="${BATTERY_EVERY:-$DEFAULT_BATTERY_EVERY}"
+  BATTERY_MIN="${BATTERY_MIN:-$DEFAULT_BATTERY_MIN}"
+  BATTERY_THRESHOLDS="${BATTERY_THRESHOLDS:-$DEFAULT_BATTERY_THRESHOLDS}"
+  if ! prepare_user_dirs; then
+    CONTROLLER_CONFIG_ERROR="could not prepare user support directories for $RUN_USER"
+    return 1
+  fi
+}
+
+load_fallback_recovery_context() {
+  local recovery_session
+  recovery_session="$(config_get session_id "$RECOVERY_RECORD_FILE")"
+  [[ -n "$recovery_session" ]] || return 1
+  RUN_USER="$(resolve_user 2>/dev/null || true)"
+  [[ -n "$RUN_USER" ]] || return 1
+  RUN_HOME="$(resolve_home "$RUN_USER" 2>/dev/null || true)"
+  [[ -n "$RUN_HOME" ]] || return 1
+  RUN_GROUP="$(resolve_group "$RUN_USER" 2>/dev/null || true)"
+  [[ -n "$RUN_GROUP" ]] || return 1
+  BRIGHTNESS_BIN="$(resolve_brightness)"
+  [[ -x "$BRIGHTNESS_BIN" ]] || return 1
+  NOTIFIER=""
+  SESSION_ID="$recovery_session"
+  INTERVAL="$DEFAULT_INTERVAL"
+  CLOSED_INTERVAL="$DEFAULT_CLOSED_INTERVAL"
+  BATTERY_EVERY="$DEFAULT_BATTERY_EVERY"
+  BATTERY_MIN="$DEFAULT_BATTERY_MIN"
+  BATTERY_THRESHOLDS="$DEFAULT_BATTERY_THRESHOLDS"
+  prepare_user_dirs
+}
+
+restore_power_from_snapshot() {
+  local low_power_key captured_low_power captured_sleep_disabled restore_failed=0
+  [[ -r "$RECOVERY_SNAPSHOT_FILE" ]] || return 1
+  low_power_key="$(config_get low_power_key "$RECOVERY_SNAPSHOT_FILE")"
+  captured_low_power="$(config_get captured_low_power "$RECOVERY_SNAPSHOT_FILE")"
+  captured_sleep_disabled="$(config_get captured_sleep_disabled "$RECOVERY_SNAPSHOT_FILE")"
+  [[ -n "$low_power_key" && "$captured_low_power" =~ ^[0-9]+$ ]] || return 1
+  [[ "$captured_sleep_disabled" == 0 || "$captured_sleep_disabled" == 1 ]] || return 1
+  "$PMSET_BIN" -b "$low_power_key" "$captured_low_power" >/dev/null 2>&1 || restore_failed=1
+  "$PMSET_BIN" -a disablesleep "$captured_sleep_disabled" >/dev/null 2>&1 || restore_failed=1
+  return "$restore_failed"
+}
+
+preflight_failure() {
+  local reason="$1" fallback_ready=0
+  rm -f "$ENABLED_FILE" 2>/dev/null || true
+  release_controller_reservation "${SESSION_ID:-}" 2>/dev/null || true
+  printf 'bag-mode: %s; service disabled\n' "$reason" >&2
+  [[ -e "$RECOVERY_RECORD_FILE" ]] || exit "$EXIT_PREFLIGHT_FAILED"
+
+  STARTED_AT="$(now_text)"
+  CURRENT_LID=unknown
+  CURRENT_BATTERY=unknown
+  if load_fallback_recovery_context; then
+    fallback_ready=1
+    CURRENT_LID="$(lid_state 2>/dev/null || printf unknown)"
+    CURRENT_BATTERY="$(battery_status)"
+    if restore_recovery_snapshot; then
+      rm -f "$RECOVERY_RECORD_FILE" "$RESTART_FILE" 2>/dev/null || true
+      write_status_snapshot startup_failed || true
+      log_line "startup failed; captured settings restored; reason=$reason"
+      exit "$EXIT_PREFLIGHT_FAILED"
+    fi
+  fi
+
+  restore_power_from_snapshot || true
+  if (( fallback_ready )); then
+    write_status_snapshot recovery_failed || true
+    log_line "startup failed; partial restoration attempted; recovery remains required; reason=$reason"
+  fi
+  exit "$EXIT_PREFLIGHT_FAILED"
+}
+
+notify_sync() {
+  local event_name="$1" level="$2" title="$3" message="$4" exit_code=0 output output_dir output_file timeout
+  local -a notifier_command
+  if [[ -n "${USER_SUPPORT_DIR:-}" && -x "$USER_SUPPORT_DIR/notifier" ]]; then
+    NOTIFIER="$USER_SUPPORT_DIR/notifier"
+  fi
+  [[ -n "${NOTIFIER:-}" && -x "$NOTIFIER" ]] || return 0
+  timeout="${BAG_MODE_NOTIFY_TIMEOUT:-5}"
+  [[ "$timeout" =~ ^[1-9][0-9]*$ ]] || timeout=5
+  if [[ "${BAG_MODE_TESTING:-0}" == 1 || $EUID -ne 0 ]]; then
+    notifier_command=(/usr/bin/env HOME="$RUN_HOME" USER="$RUN_USER" LOGNAME="$RUN_USER" BAG_MODE_NOTIFY_TIMEOUT="$timeout" "$NOTIFIER")
+  else
+    notifier_command=("$SUDO_BIN" -u "$RUN_USER" /usr/bin/env HOME="$RUN_HOME" USER="$RUN_USER" LOGNAME="$RUN_USER" BAG_MODE_NOTIFY_TIMEOUT="$timeout" "$NOTIFIER")
+  fi
+  output_dir="$ROOT_DIR"
+  (( EUID == 0 )) || output_dir="$USER_SUPPORT_DIR"
+  output_file="$(mktemp "$output_dir/notifier-output.XXXXXX")" || return 1
+  # Perl owns the timeout and kills the notifier's process group. The file
+  # redirection prevents detached descendants from holding a shell capture open.
+  # shellcheck disable=SC2016
+  /usr/bin/perl -e '
+    $timeout = shift @ARGV;
+    $child = fork();
+    exit 125 unless defined $child;
+    if ($child == 0) {
+      setpgrp(0, 0);
+      exec @ARGV;
+      exit 127;
     }
-    print out
-    exit
+    $timed_out = 0;
+    $SIG{ALRM} = sub {
+      $timed_out = 1;
+      kill "TERM", -$child;
+      select undef, undef, undef, 0.2;
+      kill "KILL", -$child;
+    };
+    alarm $timeout;
+    while (waitpid($child, 0) == -1) {
+      next if $!{EINTR};
+      exit 125;
+    }
+    alarm 0;
+    exit 124 if $timed_out;
+    exit 128 + ($? & 127) if $? & 127;
+    exit $? >> 8;
+  ' "$timeout" "${notifier_command[@]}" \
+    --event "$event_name" --level "$level" --title "$title" --message "$message" >"$output_file" 2>&1 || exit_code=$?
+  output="$(tail -c 4096 "$output_file" 2>/dev/null || true)"
+  rm -f "$output_file"
+  log_line "notifier event=$event_name rc=$exit_code${output:+ ($output)}"
+  return "$exit_code"
+}
+
+launchd_pid() {
+  "$LAUNCHCTL_BIN" print "system/$LABEL" 2>/dev/null | awk '$1 == "pid" && $2 == "=" && $3 ~ /^[0-9]+$/ { print $3; exit }'
+}
+
+launchdaemon_is_loaded() {
+  "$LAUNCHCTL_BIN" print "system/$LABEL" >/dev/null 2>&1
+}
+
+unload_launchdaemon() {
+  launchdaemon_is_loaded || return 0
+  if [[ -f "$PLIST_FILE" ]]; then
+    run_root "$LAUNCHCTL_BIN" bootout system "$PLIST_FILE" >/dev/null 2>&1 || true
+  fi
+  if launchdaemon_is_loaded; then
+    run_root "$LAUNCHCTL_BIN" bootout "system/$LABEL" >/dev/null 2>&1 || true
+  fi
+  ! launchdaemon_is_loaded
+}
+
+launchd_controller_pid_is_current() {
+  local recorded_pid="$1" current_pid
+  [[ "$recorded_pid" =~ ^[0-9]+$ ]] || return 1
+  current_pid="$(launchd_pid)"
+  [[ "$current_pid" == "$recorded_pid" ]] || return 1
+  ps -p "$recorded_pid" -o pid= >/dev/null 2>&1
+}
+
+foreground_pid_is_current() {
+  local recorded_pid="$1" executable="$2" command_text
+  [[ "$recorded_pid" =~ ^[0-9]+$ && -n "$executable" ]] || return 1
+  command_text="$(ps -ww -p "$recorded_pid" -o command= 2>/dev/null)"
+  [[ "$command_text" == *"$executable _controller"* ]]
+}
+
+controller_pid_is_current() {
+  local controller_mode="$1" process_id="$2" executable="$3"
+  case "$controller_mode" in
+    foreground) foreground_pid_is_current "$process_id" "$executable" ;;
+    launchd) launchd_controller_pid_is_current "$process_id" ;;
+    *) return 1 ;;
+  esac
+}
+
+signal_controller() {
+  local signal_name="$1" controller_mode="$2" process_id="$3" executable="$4"
+  controller_pid_is_current "$controller_mode" "$process_id" "$executable" || return 1
+  if [[ "$controller_mode" == foreground ]]; then
+    kill -"$signal_name" "$process_id"
+  else
+    "$LAUNCHCTL_BIN" kill "SIG$signal_name" "system/$LABEL" >/dev/null 2>&1
+  fi
+}
+
+notify_async() {
+  notify_sync "$@" &
+}
+
+lid_state() {
+  local output
+  output="$($IOREG_BIN -r -k AppleClamshellState -d 4 2>/dev/null)" || return 1
+  if [[ "$output" == *'"AppleClamshellState" = Yes'* ]]; then
+    printf 'closed\n'
+  else
+    printf 'open\n'
+  fi
+}
+
+battery_status() {
+  "$PMSET_BIN" -g batt 2>/dev/null | awk -F '\t' '/InternalBattery/ {
+    n = split($2, a, "; "); out = a[1]
+    for (i = 2; i <= n; i++) { sub(/ present:.*/, "", a[i]); out = out "; " a[i] }
+    print out; exit
   }'
 }
 
-# Resolve the built-in display index from `brightness -l` on every call.
-# External displays can be hot-plugged after startup and the index assigned
-# to the built-in panel may shift (e.g. external becomes main → index 0,
-# built-in → index 1), so a value captured once at startup goes stale.
 brightness_command() {
-  if (( EUID == 0 )) && [[ "$BAG_MODE_RUN_USER" != root ]]; then
-    /usr/bin/sudo -u "$BAG_MODE_RUN_USER" /usr/bin/env HOME="$BAG_MODE_RUN_HOME" USER="$BAG_MODE_RUN_USER" LOGNAME="$BAG_MODE_RUN_USER" "$BRIGHTNESS_BIN" "$@"
-  else
-    "$BRIGHTNESS_BIN" "$@"
-  fi
+  run_as_user "$BRIGHTNESS_BIN" "$@"
 }
 
 builtin_display_id() {
   brightness_command -l 2>/dev/null | awk '
-    /built-in/ { gsub(":", "", $2); print $2; exit }
+    id == "" && /built-in/ { gsub(":", "", $2); id = $2 }
+    END { if (id != "") print id }
   '
 }
 
-# Read the built-in panel's current brightness (empty string if not found).
 builtin_brightness() {
   brightness_command -l 2>/dev/null | awk '
     /built-in/ { gsub(":", "", $2); id = $2; next }
-    id != "" && $0 ~ ("^display " id ": brightness") { print $NF; exit }
+    id != "" && $0 ~ ("^display " id ": brightness") { value = $NF }
+    END { if (value != "") print value }
   '
 }
 
-# Flatten `brightness -l` (incl. stderr) onto one line for diagnostic logs.
-# Useful when the built-in panel disappears from the list (e.g. lid closed
-# with no external display attached → macOS unenumerates it).
-displays_oneline() {
-  brightness_command -l 2>&1 | tr '\n' '|' | sed 's/|$//'
-}
-
-pmset_command() {
-  if (( EUID == 0 )); then
-    /usr/bin/pmset "$@"
-  else
-    sudo -n /usr/bin/pmset "$@"
-  fi
-}
-
-# True if $1 is a usable brightness restore target (numeric, > 0.01 — the
-# panel reads 0 when we darkened it ourselves, and empty when unenumerated;
-# neither must ever become the value we restore to). The numeric check also
-# guards against a corrupt $STATEFILE, which awk would string-compare.
 usable_brightness() {
-  [[ "${1:-}" =~ ^[0-9]+(\.[0-9]+)?$ ]] && awk -v v="$1" 'BEGIN { exit !(v > 0.01) }'
+  [[ "${1:-}" =~ ^[0-9]+(\.[0-9]+)?$ ]] && awk -v value="$1" 'BEGIN { exit !(value > 0.01 && value <= 1.0) }'
 }
 
-# Update LAST_BRIGHTNESS and persist it, so a run that dies while the
-# screen is dark leaves the restore target on disk for the next run.
 remember_brightness() {
-  LAST_BRIGHTNESS="$1"
-  printf '%s\n' "$1" | write_text_file "$STATEFILE" 2>/dev/null || true
+  local value="$1"
+  BRIGHTNESS_TARGET="$value"
+  printf '%s\n' "$value" | write_user_file "$USER_BRIGHTNESS_FILE" 0644 2>/dev/null || true
 }
 
-# Returns non-zero when the built-in panel is not enumerated, so cleanup
-# knows the restore did not land.
 set_brightness() {
-  local value="$1" rc=0 out id
-  id="$(builtin_display_id)"
-  if [[ -z "$id" ]]; then
-    log "brightness $value skipped (no built-in display found); displays: $(displays_oneline)"
+  local value="$1" display_id exit_code=0 output
+  if ! display_id="$(builtin_display_id)"; then
+    log_line "brightness $value failed: display query error"
     return 1
   fi
-  out="$(brightness_command -d "$id" "$value" 2>&1)" || rc=$?
-  log "brightness $value display=$id rc=$rc${out:+ ($out)}"
-  return "$rc"
-}
-
-set_lowpowermode() {
-  local value="$1" rc=0 out
-  out="$(pmset_command -b "$LPM_KEY" "$value" 2>&1)" || rc=$?
-  log "pmset -b $LPM_KEY $value rc=$rc${out:+ ($out)}"
-  if (( rc != 0 )); then
-    notify_bag_mode time-sensitive "pmset failed" "command=pmset -b $LPM_KEY $value; rc=$rc${out:+; output=$out}"
+  if [[ -z "$display_id" ]]; then
+    log_line "brightness $value skipped: built-in display unavailable"
+    return "$EXIT_BRIGHTNESS_PENDING"
   fi
+  output="$(brightness_command -d "$display_id" "$value" 2>&1)" || exit_code=$?
+  log_line "brightness $value display=$display_id rc=$exit_code${output:+ ($output)}"
+  return "$exit_code"
 }
 
-set_disablesleep() {
-  local value="$1" rc=0 out
-  out="$(pmset_command -a disablesleep "$value" 2>&1)" || rc=$?
-  log "pmset disablesleep $value rc=$rc${out:+ ($out)}"
-  if (( rc != 0 )); then
-    notify_bag_mode time-sensitive "pmset failed" "command=pmset -a disablesleep $value; rc=$rc${out:+; output=$out}"
+sleep_disabled_value() {
+  "$PMSET_BIN" -g 2>/dev/null | awk '$1 == "SleepDisabled" { print $2; exit }'
+}
+
+low_power_pair() {
+  "$PMSET_BIN" -g custom 2>/dev/null | awk '
+    /^Battery Power:/ { in_battery = 1; next }
+    /^AC Power:/ { in_battery = 0 }
+    in_battery && $1 ~ /^(low)?powermode$/ { print $1, $2; exit }
+  '
+}
+
+set_sleep_disabled() {
+  local value="$1" exit_code=0 output
+  output="$($PMSET_BIN -a disablesleep "$value" 2>&1)" || exit_code=$?
+  log_line "pmset disablesleep $value rc=$exit_code${output:+ ($output)}"
+  return "$exit_code"
+}
+
+set_low_power() {
+  local key="$1" value="$2" exit_code=0 output
+  output="$($PMSET_BIN -b "$key" "$value" 2>&1)" || exit_code=$?
+  log_line "pmset -b $key $value rc=$exit_code${output:+ ($output)}"
+  return "$exit_code"
+}
+
+capture_recovery_snapshot() {
+  local live_brightness saved_brightness pending_user pending_home pending_target brightness_result
+  local low_power_key low_power_value captured_sleep_disabled
+  if [[ -e "$BRIGHTNESS_PENDING_FILE" ]]; then
+    pending_user="$(config_get run_user "$BRIGHTNESS_PENDING_FILE")"
+    pending_home="$(config_get run_home "$BRIGHTNESS_PENDING_FILE")"
+    pending_target="$(config_get brightness_target "$BRIGHTNESS_PENDING_FILE")"
+    [[ "$pending_user" == "$RUN_USER" && "$pending_home" == "$RUN_HOME" ]] || return 1
+    usable_brightness "$pending_target" || return 1
+    set_brightness "$pending_target"
+    brightness_result=$?
+    case "$brightness_result" in
+      0)
+        rm -f "$BRIGHTNESS_PENDING_FILE" "$USER_BRIGHTNESS_FILE" || return 1
+        remember_brightness "$pending_target"
+        ;;
+      "$EXIT_BRIGHTNESS_PENDING") remember_brightness "$pending_target" ;;
+      *) return 1 ;;
+    esac
+  else
+    live_brightness="$(builtin_brightness)"
+    saved_brightness="$(sed -n '1p' "$USER_BRIGHTNESS_FILE" 2>/dev/null || true)"
+    if usable_brightness "$live_brightness"; then
+      remember_brightness "$live_brightness"
+    elif usable_brightness "$saved_brightness"; then
+      remember_brightness "$saved_brightness"
+    else
+      remember_brightness 1.0
+    fi
+  fi
+  read -r low_power_key low_power_value < <(low_power_pair)
+  low_power_key="${low_power_key:-lowpowermode}"
+  low_power_value="${low_power_value:-0}"
+  captured_sleep_disabled="$(sleep_disabled_value)"
+  [[ "$captured_sleep_disabled" == 0 || "$captured_sleep_disabled" == 1 ]] || return 1
+  write_root_kv "$RECOVERY_SNAPSHOT_FILE" \
+    session_id "$SESSION_ID" \
+    captured_brightness "$BRIGHTNESS_TARGET" \
+    low_power_key "$low_power_key" \
+    captured_low_power "$low_power_value" \
+    captured_sleep_disabled "$captured_sleep_disabled" \
+    captured_at "$(now_text)"
+}
+
+load_recovery_snapshot() {
+  [[ -r "$RECOVERY_SNAPSHOT_FILE" ]] || return 1
+  [[ "$(config_get session_id "$RECOVERY_SNAPSHOT_FILE")" == "$SESSION_ID" ]] || return 1
+  CAPTURED_BRIGHTNESS="$(config_get captured_brightness "$RECOVERY_SNAPSHOT_FILE")"
+  LOW_POWER_KEY="$(config_get low_power_key "$RECOVERY_SNAPSHOT_FILE")"
+  CAPTURED_LOW_POWER="$(config_get captured_low_power "$RECOVERY_SNAPSHOT_FILE")"
+  CAPTURED_SLEEP_DISABLED="$(config_get captured_sleep_disabled "$RECOVERY_SNAPSHOT_FILE")"
+  usable_brightness "$CAPTURED_BRIGHTNESS" || return 1
+  [[ -n "$LOW_POWER_KEY" && "$CAPTURED_LOW_POWER" =~ ^[0-9]+$ ]] || return 1
+  [[ "$CAPTURED_SLEEP_DISABLED" == 0 || "$CAPTURED_SLEEP_DISABLED" == 1 ]] || return 1
+  BRIGHTNESS_TARGET="$(sed -n '1p' "$USER_BRIGHTNESS_FILE" 2>/dev/null || true)"
+  usable_brightness "$BRIGHTNESS_TARGET" || BRIGHTNESS_TARGET="$CAPTURED_BRIGHTNESS"
+}
+
+clear_matching_brightness_pending() {
+  [[ -e "$BRIGHTNESS_PENDING_FILE" ]] || return 0
+  [[ "$(config_get run_user "$BRIGHTNESS_PENDING_FILE")" == "$RUN_USER" ]] || return 0
+  [[ "$(config_get run_home "$BRIGHTNESS_PENDING_FILE")" == "$RUN_HOME" ]] || return 0
+  [[ "$(config_get brightness_target "$BRIGHTNESS_PENDING_FILE")" == "$BRIGHTNESS_TARGET" ]] || return 0
+  rm -f "$BRIGHTNESS_PENDING_FILE"
+}
+
+restore_recovery_snapshot() {
+  local restore_failed=0 brightness_restored=0 brightness_result
+  load_recovery_snapshot || return 1
+  set_brightness "$BRIGHTNESS_TARGET"
+  brightness_result=$?
+  case "$brightness_result" in
+    0) brightness_restored=1 ;;
+    "$EXIT_BRIGHTNESS_PENDING")
+      if write_root_kv "$BRIGHTNESS_PENDING_FILE" \
+        session_id "$SESSION_ID" run_user "$RUN_USER" run_home "$RUN_HOME" \
+        brightness_bin "$BRIGHTNESS_BIN" brightness_target "$BRIGHTNESS_TARGET" pending_since "$(now_text)"; then
+        log_line "brightness pending until the built-in display returns: target=$BRIGHTNESS_TARGET"
+      else
+        restore_failed=1
+      fi
+      ;;
+    *) restore_failed=1 ;;
+  esac
+  set_low_power "$LOW_POWER_KEY" "$CAPTURED_LOW_POWER" || restore_failed=1
+  set_sleep_disabled "$CAPTURED_SLEEP_DISABLED" || restore_failed=1
+  if (( restore_failed == 0 && brightness_restored )); then
+    clear_matching_brightness_pending || restore_failed=1
+    if (( restore_failed == 0 )); then
+      rm -f "$USER_BRIGHTNESS_FILE" 2>/dev/null || restore_failed=1
+    fi
+  fi
+  return "$restore_failed"
+}
+
+restore_pending_brightness() {
+  local pending_session pending_user pending_home pending_brightness_bin pending_brightness_target brightness_result
+  [[ -e "$BRIGHTNESS_PENDING_FILE" ]] || return 0
+  pending_session="$(config_get session_id "$BRIGHTNESS_PENDING_FILE")"
+  pending_user="$(config_get run_user "$BRIGHTNESS_PENDING_FILE")"
+  pending_home="$(config_get run_home "$BRIGHTNESS_PENDING_FILE")"
+  pending_brightness_bin="$(config_get brightness_bin "$BRIGHTNESS_PENDING_FILE")"
+  pending_brightness_target="$(config_get brightness_target "$BRIGHTNESS_PENDING_FILE")"
+  [[ -n "$pending_session" && -n "$pending_user" && -n "$pending_home" && -x "$pending_brightness_bin" ]] || return 1
+  usable_brightness "$pending_brightness_target" || return 1
+  RUN_USER="$pending_user"
+  RUN_HOME="$pending_home"
+  BRIGHTNESS_BIN="$pending_brightness_bin"
+  SESSION_ID="$pending_session"
+  BRIGHTNESS_TARGET="$pending_brightness_target"
+  STARTED_AT="$(now_text)"
+  CURRENT_LID="$(lid_state 2>/dev/null || printf unknown)"
+  CURRENT_BATTERY="$(battery_status)"
+  prepare_user_dirs || return 1
+  set_brightness "$pending_brightness_target"
+  brightness_result=$?
+  case "$brightness_result" in
+    0)
+      rm -f "$BRIGHTNESS_PENDING_FILE" "$USER_BRIGHTNESS_FILE" 2>/dev/null || true
+      return 0
+      ;;
+    "$EXIT_BRIGHTNESS_PENDING") return "$EXIT_BRIGHTNESS_PENDING" ;;
+    *) return 1 ;;
+  esac
+}
+
+record_restart_after_crash() {
+  local current_epoch window_start count saved_session
+  current_epoch="$(now_epoch)"
+  saved_session="$(config_get session_id "$RESTART_FILE")"
+  window_start="$(config_get window_start "$RESTART_FILE")"
+  count="$(config_get count "$RESTART_FILE")"
+  if [[ "$saved_session" != "$SESSION_ID" || ! "$window_start" =~ ^[0-9]+$ || $(( current_epoch - window_start )) -gt $RESTART_WINDOW ]]; then
+    window_start="$current_epoch"
+    count=1
+  else
+    count=$(( ${count:-0} + 1 ))
+  fi
+  write_root_kv "$RESTART_FILE" session_id "$SESSION_ID" window_start "$window_start" count "$count"
+  printf '%s\n' "$count"
+}
+
+write_recovery_record() {
+  write_root_kv "$RECOVERY_RECORD_FILE" session_id "$SESSION_ID" pid "$$" \
+    controller_mode "${CONTROLLER_MODE:-launchd}" executable "$SELF_PATH" started_at "$STARTED_AT"
+}
+
+clean_shutdown() {
+  local reason="$1"
+  [[ "${CLEANING_UP:-0}" == 0 ]] || return 0
+  CLEANING_UP=1
+  trap '' TERM INT HUP
+  log_line "stopping reason=$reason; restoring captured settings"
+  CURRENT_BATTERY="$(battery_status)"
+  if restore_recovery_snapshot; then
+    rm -f "$RECOVERY_RECORD_FILE" "$RESTART_FILE" 2>/dev/null || true
+    if [[ -e "$BRIGHTNESS_PENDING_FILE" ]]; then
+      write_status_snapshot brightness_pending || true
+      notify_sync brightness_pending time-sensitive "bag-mode brightness recovery pending" "reason=$reason; open_lid=true; command=bag-mode recover" || true
+      log_line "power settings restored; brightness recovery pending; open the lid and run bag-mode recover"
+    elif [[ "$reason" == startup_failed ]]; then
+      write_status_snapshot startup_failed || true
+      log_line "startup failed; captured settings restored"
+    else
+      write_status_snapshot stopped || true
+      notify_sync stopped passive "bag-mode stopped" "reason=$reason; battery=${CURRENT_BATTERY:-unreadable}" || true
+      log_line "stopped"
+    fi
+    return 0
+  fi
+  write_status_snapshot recovery_failed || true
+  notify_sync recovery_failed time-sensitive "bag-mode could not restore captured settings" "reason=$reason; recovery_required=true" || true
+  log_line "restoration failed; recovery remains required"
+  return 1
+}
+
+signal_shutdown() {
+  clean_shutdown signal
+  exit $?
+}
+
+controller_main() {
+  local restarting_after_crash=0 fresh_session=0 restart_count=0 previous_lid="" last_battery=0 last_observed_brightness="" interval lid current_epoch battery_text percentage
+  require_root
+  load_controller_config || preflight_failure "$CONTROLLER_CONFIG_ERROR"
+  if [[ "${BAG_MODE_FOREGROUND:-0}" == 1 ]]; then
+    CONTROLLER_MODE=foreground
+  else
+    CONTROLLER_MODE=launchd
+  fi
+  STARTED_AT="$(now_text)"
+  CURRENT_LID=unknown
+  CURRENT_BATTERY=unknown
+  CLEANING_UP=0
+  NOTIFIED_THRESHOLDS=" "
+
+  if [[ -e "$RECOVERY_RECORD_FILE" ]]; then
+    if [[ ! -r "$RECOVERY_RECORD_FILE" || "$(config_get session_id "$RECOVERY_RECORD_FILE")" != "$SESSION_ID" ]]; then
+      rm -f "$ENABLED_FILE" 2>/dev/null || true
+      release_controller_reservation "$SESSION_ID" 2>/dev/null || true
+      write_status_snapshot recovery_conflict || true
+      log_line "recovery belongs to another controller session; explicit recovery required"
+      notify_sync recovery_conflict time-sensitive "bag-mode recovery required" "recovery_conflict=true; command=bag-mode recover" || true
+      exit "$EXIT_RECOVERY_CONFLICT"
+    fi
+    if [[ -e "$CONTROLLER_RESERVATION_DIR" ]]; then
+      if ! release_controller_reservation "$SESSION_ID"; then
+        rm -f "$ENABLED_FILE" 2>/dev/null || true
+        write_status_snapshot recovery_conflict || true
+        log_line "controller reservation belongs to another session; explicit recovery required"
+        exit "$EXIT_RECOVERY_CONFLICT"
+      fi
+    fi
+    restarting_after_crash=1
+    restart_count="$(record_restart_after_crash)"
+    load_recovery_snapshot || preflight_failure "interrupted session has no valid recovery snapshot"
+    if (( restart_count >= MAX_RESTARTS )); then
+      log_line "crash loop detected count=$restart_count window=${RESTART_WINDOW}s"
+      rm -f "$ENABLED_FILE" 2>/dev/null || true
+      if restore_recovery_snapshot; then
+        rm -f "$RECOVERY_RECORD_FILE" "$RESTART_FILE" 2>/dev/null || true
+      else
+        log_line "crash-loop restoration failed; recovery remains required"
+      fi
+      write_status_snapshot crash_loop || true
+      notify_sync crash_loop time-sensitive "bag-mode stopped after repeated crashes" "restart_count=$restart_count; window=${RESTART_WINDOW}s; recovery_required=$([[ -e "$RECOVERY_RECORD_FILE" ]] && printf true || printf false)" || true
+      exit "$EXIT_CRASH_LOOP"
+    fi
+  else
+    if ! controller_reservation_matches "$SESSION_ID" "$CONTROLLER_MODE"; then
+      if [[ "$CONTROLLER_MODE" == launchd && -e "$ENABLED_FILE" && ! -e "$CONTROLLER_RESERVATION_DIR" ]]; then
+        claim_controller_reservation "$SESSION_ID" launchd \
+          || preflight_failure "another controller is starting"
+      else
+        preflight_failure "controller reservation is missing or belongs to another session"
+      fi
+    fi
+    activate_controller_reservation "$SESSION_ID" "$CONTROLLER_MODE" \
+      || preflight_failure "controller reservation is missing or belongs to another session"
+    fresh_session=1
+    rm -f "$RESTART_FILE" 2>/dev/null || true
+    capture_recovery_snapshot || preflight_failure "could not capture settings for recovery"
+    load_recovery_snapshot || preflight_failure "recovery snapshot is invalid"
+  fi
+
+  if (( fresh_session )); then
+    controller_reservation_matches "$SESSION_ID" "$CONTROLLER_MODE" "$$" \
+      || preflight_failure "controller reservation was withdrawn before startup completed"
+  fi
+  write_recovery_record || preflight_failure "could not write recovery record"
+  if (( fresh_session )) && ! release_controller_reservation "$SESSION_ID"; then
+    rm -f "$ENABLED_FILE" 2>/dev/null || true
+    clean_shutdown startup_failed || true
+    exit "$EXIT_START_FAILED"
+  fi
+  trap signal_shutdown TERM INT HUP
+
+  if ! set_sleep_disabled 1; then
+    rm -f "$ENABLED_FILE" 2>/dev/null || true
+    write_status_snapshot startup_failed || true
+    notify_sync power_setting_failed time-sensitive "bag-mode could not disable sleep" "setting=sleep_disabled; value=1; service_enabled=false" || true
+    clean_shutdown startup_failed || true
+    exit "$EXIT_START_FAILED"
+  fi
+  CURRENT_LID="$(lid_state 2>/dev/null || printf unknown)"
+  CURRENT_BATTERY="$(battery_status)"
+  if (( restarting_after_crash )); then
+    write_status_snapshot restarted || true
+  else
+    write_status_snapshot started || true
+  fi
+  log_line "started session=$SESSION_ID restart_count=$restart_count brightness_target=$BRIGHTNESS_TARGET captured_sleep_disabled=$CAPTURED_SLEEP_DISABLED"
+  if (( restarting_after_crash )); then
+    notify_async restarted time-sensitive "bag-mode restarted after a crash" "restart_count=$restart_count; lid=$CURRENT_LID; battery=$CURRENT_BATTERY"
+  else
+    notify_async started passive "bag-mode started" "lid=$CURRENT_LID; battery=$CURRENT_BATTERY"
+  fi
+
+  interval="$INTERVAL"
+  while [[ -e "$ENABLED_FILE" || "${BAG_MODE_FOREGROUND:-0}" == 1 ]]; do
+    if ! lid="$(lid_state)"; then
+      log_line "ioreg failed; keeping lid=${previous_lid:-unknown}"
+      sleep "$interval"
+      continue
+    fi
+    CURRENT_LID="$lid"
+    current_epoch="$(now_epoch)"
+
+    if [[ "$lid" != "$previous_lid" ]]; then
+      log_line "lid=$lid"
+      if [[ "$lid" == closed ]]; then
+        live_brightness="$(builtin_brightness)"
+        usable_brightness "$live_brightness" && remember_brightness "$live_brightness"
+        set_brightness 0 || true
+        set_low_power "$LOW_POWER_KEY" 1 || notify_async power_setting_failed time-sensitive "bag-mode power setting failed" "setting=$LOW_POWER_KEY; value=1"
+        interval="$CLOSED_INTERVAL"
+        last_observed_brightness=""
+        CURRENT_BATTERY="$(battery_status)"
+        write_status_snapshot lid_closed || true
+        notify_async lid_closed time-sensitive "bag-mode lid closed" "staying_awake=true; battery=$CURRENT_BATTERY"
+      else
+        if set_brightness "$BRIGHTNESS_TARGET"; then
+          clear_matching_brightness_pending || log_line "could not clear matching pending brightness record"
+        fi
+        set_low_power "$LOW_POWER_KEY" "$CAPTURED_LOW_POWER" || true
+        interval="$INTERVAL"
+        last_observed_brightness="$BRIGHTNESS_TARGET"
+        CURRENT_BATTERY="$(battery_status)"
+        write_status_snapshot lid_open || true
+        [[ -n "$previous_lid" ]] && notify_async lid_open passive "bag-mode lid open" "brightness_restored=true; battery=$CURRENT_BATTERY"
+      fi
+      previous_lid="$lid"
+    fi
+
+    if [[ "$lid" == open ]]; then
+      live_brightness="$(builtin_brightness)"
+      if [[ "$live_brightness" != "$last_observed_brightness" ]] && usable_brightness "$live_brightness"; then
+        remember_brightness "$live_brightness"
+        last_observed_brightness="$live_brightness"
+      fi
+    fi
+
+    if (( current_epoch - last_battery >= BATTERY_EVERY )); then
+      battery_text="$(battery_status)"
+      CURRENT_BATTERY="$battery_text"
+      write_status_snapshot heartbeat || true
+      last_battery="$current_epoch"
+      percentage="${battery_text%%\%*}"
+      if [[ "$battery_text" == *discharging* && "$percentage" =~ ^[0-9]+$ ]]; then
+        if (( percentage <= BATTERY_MIN )); then
+          log_line "battery ${percentage}% <= minimum ${BATTERY_MIN}%; stopping"
+          rm -f "$ENABLED_FILE" 2>/dev/null || true
+          if clean_shutdown battery_min; then
+            notify_sync battery_min time-sensitive "bag-mode stopped at ${percentage}%" "battery_min=${BATTERY_MIN}%" || true
+            exit 0
+          fi
+          exit 1
+        fi
+        if [[ "$lid" == closed ]]; then
+          for threshold in $BATTERY_THRESHOLDS; do
+            if [[ "$threshold" =~ ^[0-9]+$ ]] && (( percentage <= threshold )) && [[ "$NOTIFIED_THRESHOLDS" != *" $threshold "* ]]; then
+              NOTIFIED_THRESHOLDS+="$threshold "
+              notify_async battery_threshold time-sensitive "bag-mode battery ${percentage}%" "crossed_threshold=${threshold}%"
+              break
+            fi
+          done
+        fi
+      fi
+    fi
+    sleep "$interval"
+  done
+
+  clean_shutdown disabled
+}
+
+write_plist() {
+  local output_file="$1"
+  cat >"$output_file" <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>$LABEL</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>$CONTROLLER_BIN</string>
+    <string>_controller</string>
+  </array>
+  <key>KeepAlive</key>
+  <dict>
+    <key>PathState</key>
+    <dict>
+      <key>$ENABLED_FILE</key>
+      <true/>
+    </dict>
+  </dict>
+  <key>ProcessType</key>
+  <string>Background</string>
+  <key>ThrottleInterval</key>
+  <integer>10</integer>
+  <key>ExitTimeOut</key>
+  <integer>15</integer>
+  <key>StandardOutPath</key>
+  <string>$CONTROLLER_STDOUT</string>
+  <key>StandardErrorPath</key>
+  <string>$CONTROLLER_STDERR</string>
+</dict>
+</plist>
+EOF
+}
+
+install_mode() {
+  local source_file plist_tmp dry_run=0 legacy_running=0
+  while (( $# > 0 )); do
+    case "$1" in
+      --dry-run) dry_run=1 ;;
+      *) usage_error "usage: bag-mode install [--dry-run]" ;;
+    esac
+    shift
+  done
+  require_macos
+  source_file="$SELF_PATH"
+  /bin/bash -n "$source_file" || die "source file failed bash syntax validation"
+  [[ -n "$(resolve_brightness)" ]] || die "brightness is required; install it with: brew install brightness"
+  legacy_controller_running && legacy_running=1
+  plist_tmp="$(mktemp -t bag-mode.plist)" || die "could not create temporary plist"
+  write_plist "$plist_tmp"
+  plutil -lint "$plist_tmp" >/dev/null || die "generated LaunchDaemon plist is invalid"
+  if (( dry_run )); then
+    rm -f "$plist_tmp"
+    printf 'dry_run: true\n'
+    printf 'install_cli: %s\n' "$INSTALL_BIN"
+    printf 'install_controller: %s\n' "$CONTROLLER_BIN"
+    printf 'install_plist: %s\n' "$PLIST_FILE"
+    printf 'launchd_label: %s\n' "$LABEL"
+    if (( legacy_running )); then
+      printf 'ready: false\n'
+      printf 'blocker: legacy controller is running; stop it with the legacy CLI\n'
+      return 1
+    fi
+    if [[ -e "$ENABLED_FILE" ]]; then
+      printf 'ready: false\n'
+      printf 'blocker: service is enabled; run bag-mode stop\n'
+      return 1
+    fi
+    if [[ -e "$RECOVERY_RECORD_FILE" ]]; then
+      printf 'ready: false\n'
+      printf 'blocker: controller is running or recovery is required; run bag-mode status\n'
+      return 1
+    fi
+    if [[ -e "$CONTROLLER_RESERVATION_DIR" ]]; then
+      printf 'ready: false\n'
+      printf 'blocker: a controller is starting; run bag-mode stop\n'
+      return 1
+    fi
+    printf 'ready: true\n'
+    return 0
+  fi
+  if (( legacy_running )); then
+    rm -f "$plist_tmp"
+    die "legacy controller is running; stop it with the legacy CLI before installing"
+  fi
+  if [[ -e "$ENABLED_FILE" ]]; then
+    rm -f "$plist_tmp"
+    die "bag-mode is enabled; run 'bag-mode stop' before installing or upgrading"
+  fi
+  if [[ -e "$RECOVERY_RECORD_FILE" ]]; then
+    rm -f "$plist_tmp"
+    die "a controller is running or recovery is required; run 'bag-mode status'"
+  fi
+  if [[ -e "$CONTROLLER_RESERVATION_DIR" ]]; then
+    rm -f "$plist_tmp"
+    die "a controller is starting; run 'bag-mode stop' before installing or upgrading"
+  fi
+  authorize_root
+  run_root /bin/mkdir -p "$(dirname "$INSTALL_BIN")" "$(dirname "$PLIST_FILE")" "$ROOT_DIR" "$ROOT_LOG_DIR" || die "could not create install directories"
+  prepare_controller_directory || die "could not secure controller directory: $(dirname "$CONTROLLER_BIN")"
+  run_root /bin/chmod 0755 "$ROOT_DIR" || die "could not make service metadata readable"
+  install_root_copy "$source_file" "$CONTROLLER_BIN" || die "could not install $CONTROLLER_BIN"
+  install_root_copy "$source_file" "$INSTALL_BIN" || die "could not install $INSTALL_BIN"
+  install_root_file 0644 "$plist_tmp" "$PLIST_FILE" || die "could not install $PLIST_FILE"
+  rm -f "$plist_tmp"
+  unload_launchdaemon || die "could not unload the existing LaunchDaemon; installed files were kept"
+  run_root "$LAUNCHCTL_BIN" bootstrap system "$PLIST_FILE" || die "could not bootstrap LaunchDaemon"
+  printf 'installed_cli: %s\n' "$INSTALL_BIN"
+  printf 'installed_controller: %s\n' "$CONTROLLER_BIN"
+  printf 'launchd_label: %s\n' "$LABEL"
+  printf 'next: bag-mode start\n'
+}
+
+internal_service_start() {
+  local run_user="$1" run_home="$2" run_group="$3" brightness_bin="$4" notifier="$5" session_id="$6"
+  require_root
+  mkdir -p "$ROOT_DIR" "$ROOT_LOG_DIR"
+  chmod 0755 "$ROOT_DIR"
+  if ! valid_scalar "$run_user" || ! valid_scalar "$run_home" || ! valid_scalar "$run_group" || ! valid_scalar "$brightness_bin" || ! valid_scalar "$notifier"; then
+    die "invalid configuration value"
+  fi
+  [[ ! -e "$ENABLED_FILE" ]] || die "service is already enabled"
+  claim_controller_reservation "$session_id" launchd \
+    || die "another controller is starting; run bag-mode status"
+  if [[ -e "$ENABLED_FILE" ]]; then
+    release_controller_reservation "$session_id" 2>/dev/null || true
+    die "service is already enabled"
+  fi
+  if [[ -e "$RECOVERY_RECORD_FILE" ]]; then
+    release_controller_reservation "$session_id" 2>/dev/null || true
+    die "a controller is running or recovery is required; run bag-mode status"
+  fi
+  write_root_kv "$CONFIG_FILE" \
+    run_user "$run_user" run_home "$run_home" run_group "$run_group" \
+    brightness_bin "$brightness_bin" notifier "$notifier" session_id "$session_id" \
+    interval "$DEFAULT_INTERVAL" closed_interval "$DEFAULT_CLOSED_INTERVAL" \
+    battery_every "$DEFAULT_BATTERY_EVERY" battery_min "$DEFAULT_BATTERY_MIN" \
+    battery_thresholds "$DEFAULT_BATTERY_THRESHOLDS" || {
+      release_controller_reservation "$session_id" 2>/dev/null || true
+      die "could not write controller config"
+    }
+  write_public_root_kv "$OWNER_FILE" run_user "$run_user" run_home "$run_home" \
+    || {
+      release_controller_reservation "$session_id" 2>/dev/null || true
+      die "could not write service owner metadata"
+    }
+  rm -f "$RESTART_FILE"
+  if ! : >"$ENABLED_FILE" || ! chmod 0644 "$ENABLED_FILE"; then
+    rm -f "$ENABLED_FILE"
+    release_controller_reservation "$session_id" 2>/dev/null || true
+    die "could not enable service"
+  fi
+  if ! "$LAUNCHCTL_BIN" kickstart -k "system/$LABEL" >/dev/null 2>&1; then
+    rm -f "$ENABLED_FILE"
+    release_controller_reservation "$session_id" 2>/dev/null || true
+    die "launchd kickstart failed; service remains disabled"
   fi
 }
 
 start_mode() {
-  local script_file shell_cmd attempt
-  prepare_dirs
-  if bag_mode_running; then
-    echo "bag-mode already running"
-    show_status
-    return 0
-  fi
-  if [[ ! -x "$TMUX_BIN" ]]; then
-    echo "tmux not found; install tmux or run 'bag-mode run' in the foreground" >&2
-    return 1
-  fi
-  if ! sudo -v; then
-    echo "sudo authentication failed" >&2
-    return 1
-  fi
-
-  script_file="$(script_path)"
-  : >>"$LOCKFILE"
-  chown_if_root_user "$LOCKFILE"
-  if ! sudo /bin/mkdir -p "$ROOT_RUNTIME_DIR"; then
-    echo "failed to create root runtime dir: $ROOT_RUNTIME_DIR" >&2
-    return 1
-  fi
-  if ! sudo /usr/bin/install -m 0755 -o root -g wheel "$script_file" "$ROOT_RUNNER"; then
-    echo "failed to install root runner: $ROOT_RUNNER" >&2
-    return 1
-  fi
-  append_log_line "[$(date '+%F %T')] start requested; launching root tmux session=$TMUX_SESSION runner=$ROOT_RUNNER"
-  printf -v shell_cmd 'exec /usr/bin/env HOME=%q USER=%q LOGNAME=%q PATH=%q BAG_MODE_RUN_USER=%q BAG_MODE_RUN_HOME=%q BAG_MODE_STATE_DIR=%q BAG_MODE_LOG_DIR=%q LOCKFILE=%q STATEFILE=%q RUNTIME_STATEFILE=%q LOGFILE=%q TMUX_SESSION=%q TMUX_BIN=%q INTERVAL=%q CLOSED_INTERVAL=%q BATTERY_EVERY=%q BATTERY_MIN=%q BATTERY_NOTIFY_THRESHOLDS=%q BRIGHTNESS_BIN=%q BAG_MODE_BACKGROUND=1 BAG_MODE_NOTIFY=%q BAG_MODE_START_NOTIFY=%q BAG_MODE_LOG_TO_FILE=1 BRRR_TIMEOUT=%q BRRR_HELPER=%q BRRR_THREAD_ID=%q ROOT_RUN_PATH=%q ROOT_RUNTIME_DIR=%q ROOT_RUNNER=%q %q run' \
-    "$BAG_MODE_RUN_HOME" "$BAG_MODE_RUN_USER" "$BAG_MODE_RUN_USER" "$ROOT_RUN_PATH" \
-    "$BAG_MODE_RUN_USER" "$BAG_MODE_RUN_HOME" "$APP_SUPPORT_DIR" "$LOG_DIR" \
-    "$LOCKFILE" "$STATEFILE" "$RUNTIME_STATEFILE" "$LOGFILE" "$TMUX_SESSION" "$TMUX_BIN" \
-    "$INTERVAL" "$CLOSED_INTERVAL" "$BATTERY_EVERY" "$BATTERY_MIN" "$BATTERY_NOTIFY_THRESHOLDS" "$BRIGHTNESS_BIN" \
-    "$BAG_MODE_START_NOTIFY" "$BAG_MODE_START_NOTIFY" "$BRRR_TIMEOUT" "$BRRR_HELPER" "$BRRR_THREAD_ID" "$ROOT_RUN_PATH" \
-    "$ROOT_RUNTIME_DIR" "$ROOT_RUNNER" "$ROOT_RUNNER"
-
-  if root_tmux_has_session; then
-    if ! root_tmux new-window -t "$TMUX_SESSION" -n bag-mode "$shell_cmd"; then
-      echo "failed to create root tmux window in session '$TMUX_SESSION'" >&2
-      return 1
+  local run_user run_home run_group brightness_bin notifier session_id attempt recorded_session recorded_pid controller_version
+  local owner_user owner_home owner_matches=0
+  require_macos
+  [[ -x "$INSTALL_BIN" && -x "$CONTROLLER_BIN" && -f "$PLIST_FILE" ]] || die "not installed; run: bag-mode install"
+  controller_version="$($CONTROLLER_BIN version 2>/dev/null || true)"
+  [[ "$controller_version" == "bag-mode $VERSION" ]] || die "installed controller version differs from this CLI; run: bag-mode install"
+  run_user="$(resolve_user)" || die "could not resolve the invoking user"
+  run_home="$(resolve_home "$run_user")" || die "could not resolve home for $run_user"
+  run_group="$(resolve_group "$run_user")" || die "could not resolve group for $run_user"
+  brightness_bin="$(resolve_brightness)"
+  [[ -n "$brightness_bin" ]] || die "brightness is required; install it with: brew install brightness"
+  authorize_root
+  if [[ -e "$ENABLED_FILE" ]]; then
+    owner_user="$(config_get run_user "$OWNER_FILE")"
+    owner_home="$(config_get run_home "$OWNER_FILE")"
+    if [[ -z "$owner_user" || -z "$owner_home" ]]; then
+      die "service is enabled but owner metadata is unavailable; service not modified"
     fi
-  else
-    if ! root_tmux new-session -d -s "$TMUX_SESSION" -n bag-mode "$shell_cmd"; then
-      echo "failed to create root tmux session '$TMUX_SESSION'" >&2
-      return 1
+    if [[ "$owner_user" == "$run_user" && "$owner_home" == "$run_home" ]]; then
+      owner_matches=1
     fi
+    if ! run_root "$LAUNCHCTL_BIN" kickstart "system/$LABEL" >/dev/null 2>&1; then
+      if (( owner_matches )); then
+        run_root /bin/rm -f "$ENABLED_FILE"
+        run_root "$CONTROLLER_BIN" _release-reservation >/dev/null 2>&1 || true
+        die "launchd kickstart failed; service disabled"
+      fi
+      die "launchd kickstart failed for service owned by $owner_user; service not modified"
+    fi
+    for (( attempt = 0; attempt < START_WAIT_ATTEMPTS; attempt++ )); do
+      recorded_pid="$(config_get pid "$ROOT_STATUS_FILE")"
+      if launchd_controller_pid_is_current "$recorded_pid"; then
+        printf 'bag-mode is already running\n'
+        (( owner_matches )) || printf 'owner: %s\n' "$owner_user"
+        return 0
+      fi
+      sleep "$START_WAIT_INTERVAL"
+    done
+    if (( owner_matches )); then
+      run_root /bin/rm -f "$ENABLED_FILE"
+      run_root "$CONTROLLER_BIN" _release-reservation >/dev/null 2>&1 || true
+      die "bag-mode did not become ready; service disabled; run: bag-mode status"
+    fi
+    die "service owned by $owner_user did not become ready; service not modified"
   fi
-
-  for (( attempt = 0; attempt < 20; attempt++ )); do
-    if bag_mode_running; then
-      echo "bag-mode started in tmux session '$TMUX_SESSION'"
-      echo "log: $LOGFILE"
-      echo "attach: bag-mode attach"
+  [[ ! -e "$RECOVERY_RECORD_FILE" ]] || die "a controller is running or recovery is required; run: bag-mode status"
+  notifier="$(user_support_dir "$run_home")/notifier"
+  [[ -x "$notifier" ]] || notifier=""
+  session_id="$(now_epoch)-$$"
+  if ! run_root "$CONTROLLER_BIN" _service-start "$run_user" "$run_home" "$run_group" "$brightness_bin" "$notifier" "$session_id"; then
+    run_root /bin/rm -f "$ENABLED_FILE"
+    run_root "$CONTROLLER_BIN" _release-reservation "$session_id" >/dev/null 2>&1 || true
+    die "launchd start failed; service disabled"
+  fi
+  for (( attempt = 0; attempt < START_WAIT_ATTEMPTS; attempt++ )); do
+    recorded_session="$(config_get session_id "$ROOT_STATUS_FILE")"
+    recorded_pid="$(config_get pid "$ROOT_STATUS_FILE")"
+    if [[ "$recorded_session" == "$session_id" ]] && launchd_controller_pid_is_current "$recorded_pid"; then
+      printf 'bag-mode started\n'
+      printf 'log: %s/Library/Logs/bag-mode/bag-mode.log\n' "$run_home"
       return 0
     fi
-    sleep 0.1
+    sleep "$START_WAIT_INTERVAL"
   done
+  run_root /bin/rm -f "$ENABLED_FILE"
+  run_root "$CONTROLLER_BIN" _release-reservation "$session_id" >/dev/null 2>&1 || true
+  die "controller did not become ready; service disabled; inspect $CONTROLLER_STDERR"
+}
 
-  echo "bag-mode tmux command started, but no running lock was observed" >&2
-  echo "log: $LOGFILE" >&2
-  tail -n 20 "$LOGFILE" >&2 2>/dev/null || true
-  return 1
+internal_service_stop() {
+  local recover_if_needed="${1:-0}" attempt recovery_session recovery_mode recovery_pid recovery_executable recovery_result
+  local reservation_session reservation_mode reservation_pid reservation_executable
+  require_root
+  rm -f "$ENABLED_FILE"
+  if [[ -e "$CONTROLLER_RESERVATION_DIR" && ! -e "$RECOVERY_RECORD_FILE" ]]; then
+    reservation_session="$(config_get session_id "$CONTROLLER_RESERVATION_FILE")"
+    reservation_mode="$(config_get controller_mode "$CONTROLLER_RESERVATION_FILE")"
+    reservation_pid="$(config_get pid "$CONTROLLER_RESERVATION_FILE")"
+    reservation_executable="$(config_get executable "$CONTROLLER_RESERVATION_FILE")"
+    if controller_pid_is_current "$reservation_mode" "$reservation_pid" "$reservation_executable"; then
+      signal_controller TERM "$reservation_mode" "$reservation_pid" "$reservation_executable" \
+        || die "could not signal starting controller; run bag-mode stop again"
+    else
+      if ! release_controller_reservation "$reservation_session"; then
+        discard_controller_reservation || die "could not clear invalid controller reservation"
+      fi
+    fi
+  fi
+  recovery_mode="$(config_get controller_mode "$RECOVERY_RECORD_FILE")"
+  recovery_mode="${recovery_mode:-launchd}"
+  recovery_pid="$(config_get pid "$RECOVERY_RECORD_FILE")"
+  recovery_executable="$(config_get executable "$RECOVERY_RECORD_FILE")"
+  if [[ "$recovery_mode" == foreground && "$recovery_pid" =~ ^[0-9]+$ ]] && ps -p "$recovery_pid" -o pid= >/dev/null 2>&1; then
+    foreground_pid_is_current "$recovery_pid" "$recovery_executable" \
+      || die "refusing to signal foreground controller pid $recovery_pid because its identity does not match; recovery remains required"
+    kill -TERM "$recovery_pid" || die "could not signal foreground controller pid $recovery_pid; recovery remains required"
+  else
+    "$LAUNCHCTL_BIN" kill SIGTERM "system/$LABEL" >/dev/null 2>&1 || true
+  fi
+  for (( attempt = 0; attempt < STOP_WAIT_ATTEMPTS; attempt++ )); do
+    if [[ ! -e "$RECOVERY_RECORD_FILE" ]]; then
+      if [[ -e "$CONTROLLER_RESERVATION_DIR" ]]; then
+        reservation_session="$(config_get session_id "$CONTROLLER_RESERVATION_FILE")"
+        reservation_mode="$(config_get controller_mode "$CONTROLLER_RESERVATION_FILE")"
+        reservation_pid="$(config_get pid "$CONTROLLER_RESERVATION_FILE")"
+        reservation_executable="$(config_get executable "$CONTROLLER_RESERVATION_FILE")"
+        if controller_pid_is_current "$reservation_mode" "$reservation_pid" "$reservation_executable"; then
+          sleep "$STOP_WAIT_INTERVAL"
+          continue
+        fi
+        if ! release_controller_reservation "$reservation_session"; then
+          discard_controller_reservation || die "could not clear invalid controller reservation"
+        fi
+      fi
+      if [[ "$recover_if_needed" == 1 && -e "$BRIGHTNESS_PENDING_FILE" ]]; then
+        restore_pending_brightness
+        recovery_result=$?
+        case "$recovery_result" in
+          0) write_status_snapshot recovered || true ;;
+          "$EXIT_BRIGHTNESS_PENDING") write_status_snapshot brightness_pending || true ;;
+          *) write_status_snapshot recovery_failed || true ;;
+        esac
+        return "$recovery_result"
+      fi
+      return 0
+    fi
+    sleep "$STOP_WAIT_INTERVAL"
+  done
+  if [[ -e "$CONTROLLER_RESERVATION_DIR" && ! -e "$RECOVERY_RECORD_FILE" ]]; then
+    reservation_session="$(config_get session_id "$CONTROLLER_RESERVATION_FILE")"
+    reservation_mode="$(config_get controller_mode "$CONTROLLER_RESERVATION_FILE")"
+    reservation_pid="$(config_get pid "$CONTROLLER_RESERVATION_FILE")"
+    reservation_executable="$(config_get executable "$CONTROLLER_RESERVATION_FILE")"
+    signal_controller KILL "$reservation_mode" "$reservation_pid" "$reservation_executable" 2>/dev/null || true
+    release_controller_reservation "$reservation_session" \
+      || die "could not clear controller reservation"
+  fi
+  if [[ "$recovery_mode" == foreground && "$recovery_pid" =~ ^[0-9]+$ ]] && ps -p "$recovery_pid" -o pid= >/dev/null 2>&1; then
+    foreground_pid_is_current "$recovery_pid" "$recovery_executable" \
+      || die "foreground controller pid $recovery_pid changed identity before forced stop; recovery remains required"
+    kill -KILL "$recovery_pid" || die "could not force-stop foreground controller pid $recovery_pid; recovery remains required"
+  else
+    "$LAUNCHCTL_BIN" kill SIGKILL "system/$LABEL" >/dev/null 2>&1 || true
+  fi
+  if [[ "$recover_if_needed" == 1 && -e "$RECOVERY_RECORD_FILE" ]]; then
+    recovery_session="$(config_get session_id "$RECOVERY_RECORD_FILE")"
+    [[ -n "$recovery_session" ]] || die "recovery record is invalid; recovery remains required"
+    if ! load_controller_config; then
+      load_fallback_recovery_context || {
+        restore_power_from_snapshot || true
+        die "$CONTROLLER_CONFIG_ERROR; full restoration is unavailable; recovery remains required"
+      }
+    fi
+    SESSION_ID="$recovery_session"
+    STARTED_AT="$(now_text)"
+    CURRENT_LID="$(lid_state 2>/dev/null || printf unknown)"
+    CURRENT_BATTERY="$(battery_status)"
+    if restore_recovery_snapshot; then
+      rm -f "$RECOVERY_RECORD_FILE" "$RESTART_FILE"
+      if [[ -e "$BRIGHTNESS_PENDING_FILE" ]]; then
+        write_status_snapshot brightness_pending || true
+        return "$EXIT_BRIGHTNESS_PENDING"
+      fi
+      write_status_snapshot recovered || true
+    else
+      write_status_snapshot recovery_failed || true
+      die "restoration failed; recovery remains required; run bag-mode recover again"
+    fi
+  fi
 }
 
 stop_mode() {
-  local pid attempt
-  prepare_dirs
-  pid="$(runtime_pid)"
-  if ! bag_mode_running; then
-    echo "bag-mode is not running"
-    return 0
+  local exit_code=0
+  if [[ ! -e "$ENABLED_FILE" && ! -e "$RECOVERY_RECORD_FILE" && ! -e "$BRIGHTNESS_PENDING_FILE" && ! -e "$CONTROLLER_RESERVATION_DIR" ]]; then
+    printf 'bag-mode is already stopped\n'
+    return
   fi
-  if [[ -z "$pid" ]] || ! pid_is_alive "$pid"; then
-    echo "bag-mode lock is held, but no live pid was found in $RUNTIME_STATEFILE" >&2
-    echo "log: $LOGFILE" >&2
-    return 1
+  authorize_root
+  [[ -x "$CONTROLLER_BIN" ]] || die "installed controller is missing; run bag-mode install"
+  run_root "$CONTROLLER_BIN" _service-stop 1 || exit_code=$?
+  if [[ "$exit_code" == "$EXIT_BRIGHTNESS_PENDING" ]]; then
+    printf 'bag-mode stopped; power settings restored; brightness pending: open the lid and run bag-mode recover\n' >&2
+    return "$exit_code"
   fi
-  if ! pid_matches_bag_mode "$pid"; then
-    echo "refusing to stop pid $pid because it does not match bag-mode's lock holder" >&2
-    echo "state: $RUNTIME_STATEFILE" >&2
-    echo "log: $LOGFILE" >&2
-    return 1
-  fi
-
-  if ! terminate_pid "$pid"; then
-    echo "failed to send SIGTERM to bag-mode pid $pid" >&2
-    return 1
-  fi
-  for (( attempt = 0; attempt < 30; attempt++ )); do
-    if ! bag_mode_running; then
-      echo "bag-mode stopped"
-      echo "log: $LOGFILE"
-      return 0
-    fi
-    sleep 0.2
-  done
-
-  echo "bag-mode did not stop after SIGTERM; inspect $LOGFILE" >&2
-  return 1
+  (( exit_code == 0 )) || return "$exit_code"
+  printf 'bag-mode stopped; captured settings restored\n'
 }
 
-show_status() {
-  local pid live_lid live_battery owner running=0
-  prepare_dirs
-  pid="$(runtime_pid)"
-  owner=""
-  if bag_mode_running; then
-    running=1
-    echo "bag-mode: running"
-  else
-    echo "bag-mode: not running"
+recover_mode() {
+  local exit_code=0
+  authorize_root
+  [[ -x "$CONTROLLER_BIN" ]] || die "installed controller is missing; run bag-mode install"
+  run_root "$CONTROLLER_BIN" _service-stop 1 || exit_code=$?
+  if [[ "$exit_code" == "$EXIT_BRIGHTNESS_PENDING" ]]; then
+    printf 'bag-mode brightness recovery is pending: open the lid and run bag-mode recover again\n' >&2
+    return "$exit_code"
   fi
-  if (( running )) && [[ -n "$pid" ]] && pid_is_alive "$pid"; then
-    owner="$(pid_owner "$pid")"
-    echo "pid: $pid"
-    if [[ -n "$owner" ]]; then
-      echo "owner: $owner"
-    fi
-  fi
-  if tmux_has_session; then
-    echo "tmux: $TMUX_SESSION"
-  elif root_tmux_has_session; then
-    echo "tmux: $TMUX_SESSION (root)"
-  elif (( running )) && [[ "$owner" == root ]]; then
-    echo "tmux: $TMUX_SESSION (root; sudo required to inspect)"
-  else
-    echo "tmux: not attached"
-  fi
-  if live_lid="$(lid_state)"; then
-    echo "lid_now: $live_lid"
-  else
-    echo "lid_now: unreadable"
-  fi
-  live_battery="$(battery_status)"
-  echo "battery_now: ${live_battery:-unreadable}"
-  echo "load: $(uptime | sed 's/^.*load averages: /load averages: /')"
-  echo "log: $LOGFILE"
-  echo "state: $RUNTIME_STATEFILE"
-  if [[ -s "$RUNTIME_STATEFILE" ]]; then
-    echo "last_recorded:"
-    awk '
-      $1 == "brightness" {
-        if ($2 ~ /^[0-9]+(\.[0-9]+)?$/) {
-          printf "  brightness %d%%\n", int(($2 * 100) + 0.5)
-        } else {
-          print "  " $0
-        }
-        next
-      }
-      { print "  " $0 }
-    ' "$RUNTIME_STATEFILE"
-  fi
+  (( exit_code == 0 )) || return "$exit_code"
+  printf 'bag-mode recovery completed; captured settings restored\n'
 }
 
-show_logs() {
-  local follow=0 lines=80 arg
-  prepare_dirs
-  while [[ $# -gt 0 ]]; do
-    arg="$1"
-    case "$arg" in
-      -f|--follow)
-        follow=1
-        ;;
-      -n)
-        shift
-        if [[ $# -eq 0 || "${1:-}" == *[!0-9]* ]]; then
-          echo "usage: bag-mode logs [-f] [N]" >&2
-          return 2
-        fi
-        lines="$1"
-        ;;
-      ''|*[!0-9]*)
-        echo "usage: bag-mode logs [-f] [N]" >&2
-        return 2
-        ;;
-      *)
-        lines="$arg"
-        ;;
+status_mode() {
+  local output_json=0 run_user run_home status_file phase=stopped process_id controller_alive=no controller_mode controller_executable
+  local enabled=no loaded=no installed=no recovery_recorded=no recovery_required=no brightness_pending=no lid_now battery_now sleep_now
+  local last_event last_session last_updated last_started last_lid last_battery last_brightness_target last_captured_sleep_disabled last_log_file
+  while (( $# > 0 )); do
+    case "$1" in
+      --json) output_json=1 ;;
+      *) usage_error "usage: bag-mode status [--json]" ;;
     esac
     shift
   done
-  if [[ ! -f "$LOGFILE" ]]; then
-    echo "bag-mode log does not exist yet: $LOGFILE" >&2
-    return 1
+  run_user="$(config_get run_user "$OWNER_FILE")"
+  run_home="$(config_get run_home "$OWNER_FILE")"
+  if [[ -z "$run_home" ]]; then
+    run_user="$(config_get run_user "$CONFIG_FILE")"
+    run_home="$(config_get run_home "$CONFIG_FILE")"
   fi
-  if (( follow )); then
-    tail -n "$lines" -f "$LOGFILE"
+  if [[ -z "$run_home" ]]; then
+    run_user="$(resolve_user 2>/dev/null || true)"
+    [[ -n "$run_user" ]] && run_home="$(resolve_home "$run_user" 2>/dev/null || true)"
+  fi
+  if [[ -r "$ROOT_STATUS_FILE" ]]; then
+    status_file="$ROOT_STATUS_FILE"
   else
-    tail -n "$lines" "$LOGFILE"
+    status_file="${run_home:+$(user_support_dir "$run_home")/state}"
   fi
-}
-
-attach_mode() {
-  prepare_dirs
-  if tmux_has_session; then
-    tmux attach -t "$TMUX_SESSION"
-    return $?
+  [[ -e "$ENABLED_FILE" ]] && enabled=yes
+  [[ -e "$RECOVERY_RECORD_FILE" ]] && recovery_recorded=yes
+  [[ -e "$BRIGHTNESS_PENDING_FILE" ]] && brightness_pending=yes
+  "$LAUNCHCTL_BIN" print "system/$LABEL" >/dev/null 2>&1 && loaded=yes
+  process_id="$(config_get pid "$status_file")"
+  controller_mode="$(config_get controller_mode "$status_file")"
+  controller_executable="$(config_get executable "$status_file")"
+  if [[ "$controller_mode" == foreground ]] && foreground_pid_is_current "$process_id" "$controller_executable"; then
+    controller_alive=yes
+  elif [[ "$controller_mode" != foreground ]] && launchd_controller_pid_is_current "$process_id"; then
+    controller_alive=yes
   fi
-  if ! root_tmux has-session -t "$TMUX_SESSION" 2>/dev/null; then
-    echo "tmux session not found: $TMUX_SESSION" >&2
-    return 1
+  if [[ "$controller_alive" == yes ]]; then
+    phase=running
+  elif [[ "$recovery_recorded" == yes ]]; then
+    phase=recovery_required
+    recovery_required=yes
+  elif [[ "$enabled" == yes ]]; then
+    phase=starting
   fi
-  root_tmux attach -t "$TMUX_SESSION"
-}
-
-subcommand="${1:-run}"
-case "$subcommand" in
-  run)
-    if [[ $# -gt 0 ]]; then
-      shift
-    fi
-    ;;
-  start)
-    shift
-    start_mode "$@"
-    exit $?
-    ;;
-  stop)
-    shift
-    stop_mode "$@"
-    exit $?
-    ;;
-  status)
-    shift
-    show_status "$@"
-    exit $?
-    ;;
-  logs)
-    shift
-    show_logs "$@"
-    exit $?
-    ;;
-  attach)
-    shift
-    attach_mode "$@"
-    exit $?
-    ;;
-  help|-h|--help)
-    usage
-    exit 0
-    ;;
-  *)
-    echo "unknown bag-mode command: $subcommand" >&2
-    usage
-    exit 2
-    ;;
-esac
-
-prepare_dirs
-
-if [[ ! -x "$BRIGHTNESS_BIN" ]]; then
-  log "brightness binary not found: $BRIGHTNESS_BIN"
-  exit 1
-fi
-
-# Single instance: re-exec under a kernel flock held for the life of the
-# process. The lock is released by the kernel when the process dies —
-# kill -9 included — so there is no stale-lock state and no reclaim logic.
-# A second run fails with "already locked" (exit 75).
-if [[ "${_BAG_MODE_LOCKED:-}" != 1 ]]; then
-  exec /usr/bin/env _BAG_MODE_LOCKED=1 /usr/bin/lockf -k -t 0 "$LOCKFILE" "$0" "$@"
-fi
-
-# Seed LAST_BRIGHTNESS, the rolling "value to restore": prefer the live
-# panel reading, fall back to what a previous run persisted (covers
-# starting up in front of a screen a dead run left dark — the first
-# open-transition below restores it), else 1.0.
-cur="$(builtin_brightness)"
-saved="$(cat "$STATEFILE" 2>/dev/null || true)"
-if usable_brightness "$cur"; then
-  brightness_source="panel"
-  remember_brightness "$cur"
-elif usable_brightness "$saved"; then
-  brightness_source="statefile"
-  remember_brightness "$saved"
-else
-  brightness_source="default"
-  remember_brightness "1.0"
-fi
-
-# Battery-side low power mode. The key is `lowpowermode` on newer macOS and
-# `powermode` on some versions; capture the key together with its value so
-# the restore writes back exactly what was read.
-read -r LPM_KEY INITIAL_LPM < <(/usr/bin/pmset -g custom | awk '
-  /^Battery Power:/ { f = 1; next }
-  /^AC Power:/      { f = 0 }
-  f && $1 ~ /^(low)?powermode$/ { print $1, $2; exit }
-')
-LPM_KEY="${LPM_KEY:-lowpowermode}"
-INITIAL_LPM="${INITIAL_LPM:-0}"
-STARTED_AT="$(date '+%F %T')"
-CURRENT_LID="unknown"
-CURRENT_BATTERY="unknown"
-NOTIFIED_BATTERY_THRESHOLDS=" "
-
-# Sudo bootstrap + keep the credential warm in background. Every later sudo
-# call is non-interactive (-n): if the credential is lost anyway, pmset
-# fails and is logged rather than blocking the loop on a password prompt.
-SUDO_REFRESH_PID=""
-if (( EUID != 0 )); then
-  if ! sudo -n true 2>/dev/null; then
-    if [[ "${BAG_MODE_BACKGROUND:-0}" == 1 ]]; then
-      echo "sudo credential is not available to the background job; use 'bag-mode start' to launch the root tmux job, or use 'bag-mode run' in the foreground" >&2
-      exit 1
-    fi
-    if ! sudo -v; then
-      echo "sudo authentication failed" >&2
-      exit 1
-    fi
-  fi
-  (
-    while sudo -n true 2>/dev/null; do sleep 60; done
-    log "sudo credential lost; pmset calls will fail until bag-mode is restarted"
-    notify_bag_mode time-sensitive "sudo expired" "pmset changes will fail until bag-mode is restarted"
-  ) &
-  SUDO_REFRESH_PID=$!
-fi
-
-cleanup() {
-  trap '' INT TERM HUP EXIT
-  log "cleanup: brightness=${LAST_BRIGHTNESS:-?} ${LPM_KEY}=${INITIAL_LPM:-?} disablesleep=0"
-  if set_brightness "${LAST_BRIGHTNESS:-1.0}"; then
-    remove_file "$STATEFILE" 2>/dev/null || true
-  else
-    log "brightness not restored (panel not enumerated); kept $STATEFILE for the next run"
-    notify_bag_mode time-sensitive "brightness not restored" "built_in_display=unavailable; restore_target=$(format_brightness "${LAST_BRIGHTNESS:-1.0}")"
-  fi
-  set_lowpowermode "$INITIAL_LPM"
-  set_disablesleep 0
-  if [[ -n "$SUDO_REFRESH_PID" ]]; then
-    kill "$SUDO_REFRESH_PID" 2>/dev/null
-  fi
-  CURRENT_BATTERY="$(battery_status)"
-  write_runtime_state "stopped"
-  log "stopped"
-}
-trap 'cleanup; exit 0' INT TERM HUP
-trap cleanup EXIT
-
-log "started; brightness=$LAST_BRIGHTNESS (from $brightness_source) ${LPM_KEY}=$INITIAL_LPM interval=${INTERVAL}s/${CLOSED_INTERVAL}s battery_every=${BATTERY_EVERY}s battery_min=${BATTERY_MIN}%"
-
-set_disablesleep 1
-CURRENT_LID="$(lid_state 2>/dev/null || echo unknown)"
-CURRENT_BATTERY="$(battery_status)"
-write_runtime_state "started"
-notify_bag_mode passive "armed" "log=$LOGFILE"
-
-last_state=""
-last_battery=0
-last_tracked=""
-seen_lid_state=0
-interval="$INTERVAL"
-while true; do
-  if ! state="$(lid_state)"; then
-    log "ioreg failed; keeping lid=${last_state:-unknown}"
-    sleep "$interval"
-    continue
-  fi
-  CURRENT_LID="$state"
-  now="$(date +%s)"
-
-  if [[ "$state" != "$last_state" ]]; then
-    log "lid=$state"
-    log "displays: $(displays_oneline)"
-    if [[ "$state" == "closed" ]]; then
-      # Final-chance snapshot before darkening. With an external display
-      # attached, macOS unenumerates the built-in panel the moment the lid
-      # closes, so this read is usually too late and returns empty. The
-      # continuous tracker below keeps LAST_BRIGHTNESS fresh while the lid
-      # is open.
-      cur="$(builtin_brightness)"
-      if usable_brightness "$cur"; then
-        remember_brightness "$cur"
-        log "snapshot brightness=$LAST_BRIGHTNESS"
-      else
-        log "snapshot skipped (cur='${cur:-<empty>}'); keeping LAST_BRIGHTNESS=$LAST_BRIGHTNESS"
-      fi
-      set_brightness 0
-      set_lowpowermode 1
-      # Don't let the post-restore tracker run until the lid opens again,
-      # and back off the poll rate — the lid needs no 0.5 s reaction time
-      # and forking ioreg+brightness twice a second costs battery.
-      last_tracked=""
-      interval="$CLOSED_INTERVAL"
-      CURRENT_BATTERY="$(battery_status)"
-      write_runtime_state "lid_closed"
-      if (( seen_lid_state )); then
-        if [[ "$CURRENT_BATTERY" == *discharging* ]]; then
-          notify_bag_mode time-sensitive "lid closed" "mac_awake=true"
-        else
-          notify_bag_mode passive "lid closed" "mac_awake=true"
-        fi
-      fi
+  [[ -x "$INSTALL_BIN" && -x "$CONTROLLER_BIN" && -f "$PLIST_FILE" ]] && installed=yes
+  lid_now="$(lid_state 2>/dev/null || printf unreadable)"
+  battery_now="$(battery_status)"
+  sleep_now="$(sleep_disabled_value)"
+  last_event="$(config_get last_event "$status_file")"
+  last_session="$(config_get session_id "$status_file")"
+  last_updated="$(config_get updated_at "$status_file")"
+  last_started="$(config_get started_at "$status_file")"
+  last_lid="$(config_get lid "$status_file")"
+  last_battery="$(config_get battery "$status_file")"
+  last_brightness_target="$(config_get brightness_target "$status_file")"
+  last_captured_sleep_disabled="$(config_get captured_sleep_disabled "$status_file")"
+  last_log_file="$(config_get log_file "$status_file")"
+  if (( output_json )); then
+    printf '{'
+    printf '"installed":%s,' "$(json_bool "$installed")"
+    printf '"launchd_loaded":%s,' "$(json_bool "$loaded")"
+    printf '"enabled":%s,' "$(json_bool "$enabled")"
+    printf '"phase":%s,' "$(json_string "${phase:-unknown}")"
+    printf '"recovery_required":%s,' "$(json_bool "$recovery_required")"
+    printf '"brightness_pending":%s,' "$(json_bool "$brightness_pending")"
+    printf '"controller":{"mode":%s,' "$(json_string "${controller_mode:-unknown}")"
+    if [[ "$process_id" =~ ^[0-9]+$ ]]; then
+      printf '"pid":%s,' "$process_id"
     else
-      log "restoring brightness=$LAST_BRIGHTNESS ${LPM_KEY}=$INITIAL_LPM"
-      set_brightness "$LAST_BRIGHTNESS"
-      set_lowpowermode "$INITIAL_LPM"
-      # Seed the tracker with the value we just restored so the very next
-      # poll doesn't treat it as a "user change".
-      last_tracked="$LAST_BRIGHTNESS"
-      interval="$INTERVAL"
-      CURRENT_BATTERY="$(battery_status)"
-      write_runtime_state "lid_open"
-      if (( seen_lid_state )); then
-        notify_bag_mode passive "lid open" "restored=true"
-      fi
+      printf '"pid":null,'
     fi
-    last_state="$state"
-    seen_lid_state=1
+    printf '"alive":%s},' "$(json_bool "$controller_alive")"
+    printf '"owner":%s,' "$(json_string "$run_user")"
+    printf '"current":{"lid":%s,' "$(json_string "$lid_now")"
+    printf '"battery":%s,' "$(json_string "$battery_now")"
+    if [[ "$sleep_now" =~ ^[0-9]+$ ]]; then
+      printf '"sleep_disabled":%s},' "$sleep_now"
+    else
+      printf '"sleep_disabled":null},'
+    fi
+    printf '"last_update":{'
+    printf '"event":%s,' "$(json_string "$last_event")"
+    printf '"session_id":%s,' "$(json_string "$last_session")"
+    printf '"at":%s,' "$(json_string "$last_updated")"
+    printf '"started_at":%s,' "$(json_string "$last_started")"
+    printf '"lid":%s,' "$(json_string "$last_lid")"
+    printf '"battery":%s,' "$(json_string "$last_battery")"
+    printf '"brightness_target":%s,' "$(json_string "$last_brightness_target")"
+    printf '"captured_sleep_disabled":%s,' "$(json_string "$last_captured_sleep_disabled")"
+    printf '"log_file":%s' "$(json_string "$last_log_file")"
+    printf '}}\n'
+    return 0
   fi
+  printf 'installed: %s\n' "$installed"
+  printf 'launchd_loaded: %s\n' "$loaded"
+  printf 'enabled: %s\n' "$enabled"
+  printf 'phase: %s\n' "${phase:-unknown}"
+  printf 'recovery_required: %s\n' "$recovery_required"
+  printf 'brightness_pending: %s\n' "$brightness_pending"
+  printf 'controller:\n'
+  printf '  mode: %s\n' "${controller_mode:-unknown}"
+  printf '  pid: %s\n' "${process_id:-unknown}"
+  printf '  alive: %s\n' "$controller_alive"
+  [[ -n "$run_user" ]] && printf 'owner: %s\n' "$run_user"
+  printf 'current:\n'
+  printf '  lid: %s\n' "$lid_now"
+  printf '  battery: %s\n' "$battery_now"
+  printf '  sleep_disabled: %s\n' "$sleep_now"
+  printf 'last_update:\n'
+  printf '  event: %s\n' "${last_event:-unknown}"
+  printf '  session_id: %s\n' "${last_session:-unknown}"
+  printf '  at: %s\n' "${last_updated:-unknown}"
+  printf '  started_at: %s\n' "${last_started:-unknown}"
+  printf '  lid: %s\n' "${last_lid:-unknown}"
+  printf '  battery: %s\n' "${last_battery:-unknown}"
+  printf '  brightness_target: %s\n' "${last_brightness_target:-unknown}"
+  printf '  captured_sleep_disabled: %s\n' "${last_captured_sleep_disabled:-unknown}"
+  printf '  log_file: %s\n' "${last_log_file:-unknown}"
+}
 
-  # Continuously track user brightness adjustments while the lid is open.
-  # Without this, `LAST_BRIGHTNESS` only updates on the close-transition,
-  # which is too late when an external display is attached: macOS has
-  # already unenumerated the built-in panel by then and the snapshot read
-  # returns empty. Polling here captures the value while it's still
-  # readable.
-  if [[ "$state" == "open" ]]; then
-    cur="$(builtin_brightness)"
-    if [[ "$cur" != "$last_tracked" ]] && usable_brightness "$cur"; then
-      remember_brightness "$cur"
-      last_tracked="$cur"
-      log "tracked brightness=$LAST_BRIGHTNESS"
-      write_runtime_state "brightness"
+doctor_mode() {
+  local strict=0 output_json=0 problems=0 brightness_bin sleep_value loaded=no run_user run_home notifier installed_version controller_version
+  local macos_ok=no pmset_ok=no ioreg_ok=no launchctl_ok=no brightness_ok=no sleep_supported=no installed_binary=no installed_controller=no installed_plist=no version_matches=unknown controller_version_matches=unknown ok=no
+  while (( $# > 0 )); do
+    case "$1" in
+      --strict) strict=1 ;;
+      --json) output_json=1 ;;
+      *) usage_error "usage: bag-mode doctor [--strict] [--json]" ;;
+    esac
+    shift
+  done
+  if [[ "${BAG_MODE_TESTING:-0}" == 1 || "$(uname -s)" == Darwin ]]; then
+    macos_ok=yes
+  else
+    problems=$((problems + 1))
+  fi
+  [[ -x "$PMSET_BIN" ]] && pmset_ok=yes || problems=$((problems + 1))
+  [[ -x "$IOREG_BIN" ]] && ioreg_ok=yes || problems=$((problems + 1))
+  [[ -x "$LAUNCHCTL_BIN" ]] && launchctl_ok=yes || problems=$((problems + 1))
+  brightness_bin="$(resolve_brightness)"
+  if [[ -n "$brightness_bin" ]]; then
+    brightness_ok=yes
+  else
+    problems=$((problems + 1))
+  fi
+  sleep_value="$(sleep_disabled_value)"
+  if [[ "$sleep_value" == 0 || "$sleep_value" == 1 ]]; then
+    sleep_supported=yes
+  else
+    problems=$((problems + 1))
+  fi
+  "$LAUNCHCTL_BIN" print "system/$LABEL" >/dev/null 2>&1 && loaded=yes
+  [[ -x "$INSTALL_BIN" ]] && installed_binary=yes
+  [[ -x "$CONTROLLER_BIN" ]] && installed_controller=yes
+  installed_version="$($INSTALL_BIN version 2>/dev/null || true)"
+  controller_version="$($CONTROLLER_BIN version 2>/dev/null || true)"
+  if [[ "$installed_binary" == yes ]]; then
+    if [[ "$installed_version" == "bag-mode $VERSION" ]]; then
+      version_matches=yes
+    else
+      version_matches=no
+      problems=$((problems + 1))
     fi
   fi
-
-  if (( now - last_battery >= BATTERY_EVERY )); then
-    bstat="$(battery_status)"
-    CURRENT_BATTERY="$bstat"
-    log "battery ${bstat:-unreadable}"
-    write_runtime_state "battery"
-    last_battery=$now
-    pct="${bstat%%\%*}"
-    if [[ "$bstat" == *discharging* && "$pct" =~ ^[0-9]+$ ]] && (( pct <= BATTERY_MIN )); then
-      notify_bag_mode time-sensitive "exiting at ${pct}%" "battery_min=${BATTERY_MIN}%; allowing_sleep=true"
-      log "battery ${pct}% <= battery_min ${BATTERY_MIN}%; exiting so the machine can sleep"
-      break
-    fi
-    if [[ "$bstat" == *discharging* && "$pct" =~ ^[0-9]+$ ]]; then
-      maybe_notify_battery_threshold "$pct" "$bstat"
+  if [[ "$installed_controller" == yes ]]; then
+    if [[ "$controller_version" == "bag-mode $VERSION" ]]; then
+      controller_version_matches=yes
+    else
+      controller_version_matches=no
+      problems=$((problems + 1))
     fi
   fi
+  [[ -f "$PLIST_FILE" ]] && installed_plist=yes
+  if [[ "$installed_binary" == yes || "$installed_controller" == yes || "$installed_plist" == yes || "$loaded" == yes || -e "$ENABLED_FILE" ]]; then
+    [[ "$installed_binary" == yes ]] || problems=$((problems + 1))
+    [[ "$installed_controller" == yes ]] || problems=$((problems + 1))
+    [[ "$installed_plist" == yes ]] || problems=$((problems + 1))
+    [[ "$loaded" == yes ]] || problems=$((problems + 1))
+  fi
+  run_user="$(resolve_user 2>/dev/null || true)"
+  run_home="$(resolve_home "$run_user" 2>/dev/null || true)"
+  notifier="${run_home:+$(user_support_dir "$run_home")/notifier}"
+  (( problems == 0 )) && ok=yes
+  if (( output_json )); then
+    printf '{'
+    printf '"ok":%s,' "$(json_bool "$ok")"
+    printf '"problems":%s,' "$problems"
+    printf '"platform":{"macos":%s},' "$(json_bool "$macos_ok")"
+    printf '"dependencies":{'
+    printf '"pmset":{"ok":%s,"path":%s},' "$(json_bool "$pmset_ok")" "$(json_string "$PMSET_BIN")"
+    printf '"ioreg":{"ok":%s,"path":%s},' "$(json_bool "$ioreg_ok")" "$(json_string "$IOREG_BIN")"
+    printf '"launchctl":{"ok":%s,"path":%s},' "$(json_bool "$launchctl_ok")" "$(json_string "$LAUNCHCTL_BIN")"
+    printf '"brightness":{"ok":%s,"path":%s}' "$(json_bool "$brightness_ok")" "$(json_string "$brightness_bin")"
+    printf '},'
+    printf '"power":{"sleep_disabled_supported":%s,' "$(json_bool "$sleep_supported")"
+    if [[ "$sleep_value" =~ ^[0-9]+$ ]]; then
+      printf '"sleep_disabled":%s},' "$sleep_value"
+    else
+      printf '"sleep_disabled":null},'
+    fi
+    printf '"installation":{"binary":%s,"version":%s,"version_matches":' \
+      "$(json_bool "$installed_binary")" "$(json_string "${installed_version:-missing}")"
+    if [[ "$version_matches" == unknown ]]; then
+      printf 'null,'
+    else
+      printf '%s,' "$(json_bool "$version_matches")"
+    fi
+    printf '"controller":%s,"controller_version":%s,"controller_version_matches":' \
+      "$(json_bool "$installed_controller")" "$(json_string "${controller_version:-missing}")"
+    if [[ "$controller_version_matches" == unknown ]]; then
+      printf 'null,'
+    else
+      printf '%s,' "$(json_bool "$controller_version_matches")"
+    fi
+    printf '"plist":%s,"launchd_loaded":%s},' "$(json_bool "$installed_plist")" "$(json_bool "$loaded")"
+    if [[ -n "$notifier" && -x "$notifier" ]]; then
+      printf '"notifier":{"enabled":true,"path":%s}' "$(json_string "$notifier")"
+    else
+      printf '"notifier":{"enabled":false,"path":null}'
+    fi
+    printf '}\n'
+  else
+    printf 'macos: %s\n' "$([[ "$macos_ok" == yes ]] && printf ok || printf missing)"
+    printf 'dependency:pmset: %s\n' "$([[ "$pmset_ok" == yes ]] && printf ok || printf missing)"
+    printf 'dependency:ioreg: %s\n' "$([[ "$ioreg_ok" == yes ]] && printf ok || printf missing)"
+    printf 'dependency:launchctl: %s\n' "$([[ "$launchctl_ok" == yes ]] && printf ok || printf missing)"
+    if [[ "$brightness_ok" == yes ]]; then
+      printf 'dependency:brightness: %s\n' "$brightness_bin"
+    else
+      printf 'dependency:brightness: missing; install with: brew install brightness\n'
+    fi
+    if [[ "$sleep_supported" == yes ]]; then
+      printf 'power:sleep_disabled: supported; current=%s\n' "$sleep_value"
+    else
+      printf 'power:sleep_disabled: unreadable\n'
+    fi
+    printf 'installed_binary: %s\n' "$([[ "$installed_binary" == yes ]] && printf ok || printf missing)"
+    printf 'installed_version: %s\n' "${installed_version:-missing}"
+    if [[ "$version_matches" == unknown ]]; then
+      printf 'installed_version_matches: not_applicable\n'
+    else
+      printf 'installed_version_matches: %s\n' "$version_matches"
+    fi
+    printf 'installed_controller: %s\n' "$([[ "$installed_controller" == yes ]] && printf ok || printf missing)"
+    printf 'installed_controller_version: %s\n' "${controller_version:-missing}"
+    if [[ "$controller_version_matches" == unknown ]]; then
+      printf 'installed_controller_version_matches: not_applicable\n'
+    else
+      printf 'installed_controller_version_matches: %s\n' "$controller_version_matches"
+    fi
+    printf 'installed_plist: %s\n' "$([[ "$installed_plist" == yes ]] && printf ok || printf missing)"
+    printf 'launchd_loaded: %s\n' "$loaded"
+    if [[ -n "$notifier" && -x "$notifier" ]]; then
+      printf 'notifier: %s\n' "$notifier"
+    else
+      printf 'notifier: disabled\n'
+    fi
+    printf 'problems: %s\n' "$problems"
+  fi
+  (( strict == 0 || problems == 0 ))
+}
 
-  sleep "$interval"
+logs_mode() {
+  local run_user run_home log_file follow=0 lines=80 arg
+  run_user="$(config_get run_user "$OWNER_FILE")"
+  run_home="$(config_get run_home "$OWNER_FILE")"
+  run_user="${run_user:-$(config_get run_user "$CONFIG_FILE")}"
+  run_user="${run_user:-$(resolve_user 2>/dev/null || true)}"
+  run_home="${run_home:-$(config_get run_home "$CONFIG_FILE")}"
+  run_home="${run_home:-$(resolve_home "$run_user" 2>/dev/null || true)}"
+  [[ -n "$run_home" ]] || die "could not resolve log owner"
+  log_file="$(user_log_dir "$run_home")/bag-mode.log"
+  while (( $# > 0 )); do
+    arg="$1"
+    shift
+    case "$arg" in
+      -f|--follow) follow=1 ;;
+      ''|*[!0-9]*) usage_error "usage: bag-mode logs [-f] [N]" ;;
+      *) lines="$arg" ;;
+    esac
+  done
+  [[ -f "$log_file" ]] || die "log does not exist: $log_file"
+  if (( follow )); then
+    tail -n "$lines" -f "$log_file"
+  else
+    tail -n "$lines" "$log_file"
+  fi
+}
+
+uninstall_mode() {
+  local exit_code=0
+  [[ "${1:-}" == --yes && $# -eq 1 ]] || usage_error "usage: bag-mode uninstall --yes"
+  authorize_root
+  if [[ -e "$ENABLED_FILE" || -e "$RECOVERY_RECORD_FILE" || -e "$BRIGHTNESS_PENDING_FILE" || -e "$CONTROLLER_RESERVATION_DIR" ]]; then
+    [[ -x "$CONTROLLER_BIN" ]] || die "uninstall aborted because the installed controller is missing; run bag-mode install"
+    run_root "$CONTROLLER_BIN" _service-stop 1 || exit_code=$?
+    if [[ "$exit_code" == "$EXIT_BRIGHTNESS_PENDING" ]]; then
+      die "uninstall aborted because brightness recovery is pending; open the lid and run bag-mode recover"
+    fi
+    (( exit_code == 0 )) || die "uninstall aborted because captured settings could not be restored"
+  fi
+  unload_launchdaemon || die "uninstall aborted because the LaunchDaemon is still loaded; system files were kept"
+  run_root /bin/rm -f "$PLIST_FILE" "$INSTALL_BIN" "$CONTROLLER_BIN"
+  run_root /bin/rm -rf "$ROOT_DIR" "$ROOT_LOG_DIR"
+  printf 'bag-mode system files removed\n'
+  printf 'user logs and notifier configuration were kept\n'
+}
+
+find_brrr_sender() {
+  local run_home="$1" candidate_bin skill_source
+  for candidate_bin in \
+    "$run_home"/.agents/skills/*brrr-now*/scripts/brrr-send.sh \
+    "$run_home"/.claude/skills/*brrr-now*/scripts/brrr-send.sh \
+    "$run_home"/.codex/skills/*brrr-now*/scripts/brrr-send.sh; do
+    [[ -f "$candidate_bin" ]] && { printf '%s\n' "$candidate_bin"; return; }
+  done
+  if [[ -r "$run_home/.config/skillshare/config.yaml" ]]; then
+    skill_source="$(awk -F ': ' '$1 == "source" { print $2; exit }' "$run_home/.config/skillshare/config.yaml")"
+    skill_source="${skill_source/#\~/$run_home}"
+    candidate_bin="$skill_source/skills-stable/brrr-now/scripts/brrr-send.sh"
+    [[ -f "$candidate_bin" ]] && printf '%s\n' "$candidate_bin"
+  fi
+}
+
+notifier_set() {
+  local source_file="$1" run_user run_home support_dir destination
+  [[ -f "$source_file" ]] || die "notifier not found: $source_file"
+  run_user="$(resolve_user)" || die "could not resolve user"
+  run_home="$(resolve_home "$run_user")" || die "could not resolve home"
+  support_dir="$(user_support_dir "$run_home")"
+  destination="$support_dir/notifier"
+  mkdir -p "$support_dir" || die "could not create notifier directory: $support_dir"
+  /usr/bin/install -m 0755 "$source_file" "$destination" \
+    || die "could not install notifier: $destination"
+  printf 'notifier installed: %s\n' "$destination"
+}
+
+notifier_install_brrr() {
+  local sender="${1:-}" run_user run_home support_dir sender_copy wrapper wrapper_tmp
+  run_user="$(resolve_user)" || die "could not resolve user"
+  run_home="$(resolve_home "$run_user")" || die "could not resolve home"
+  [[ -n "$sender" ]] || sender="$(find_brrr_sender "$run_home")"
+  [[ -f "$sender" ]] || die "brrr sender not found; pass its path explicitly"
+  support_dir="$(user_support_dir "$run_home")"
+  sender_copy="$support_dir/notifiers/brrr-send"
+  wrapper="$support_dir/notifier"
+  mkdir -p "$support_dir/notifiers" || die "could not create notifier directory: $support_dir/notifiers"
+  /usr/bin/install -m 0700 "$sender" "$sender_copy" \
+    || die "could not install brrr sender: $sender_copy"
+  wrapper_tmp="$(mktemp "$support_dir/.notifier.XXXXXX")" \
+    || die "could not create temporary notifier in $support_dir"
+  if ! cat >"$wrapper_tmp" <<'WRAPPER'
+#!/bin/bash
+set -uo pipefail
+event_name=unknown
+level=active
+title=
+message=
+while (( $# > 0 )); do
+  case "$1" in
+    --event) event_name="$2"; shift 2 ;;
+    --level) level="$2"; shift 2 ;;
+    --title) title="$2"; shift 2 ;;
+    --message) message="$2"; shift 2 ;;
+    *) echo "unknown notifier argument: $1" >&2; exit 2 ;;
+  esac
 done
+sender="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/notifiers/brrr-send"
+args=(--title "$title" --message "$message" --thread-id bag-mode)
+[[ -n "$level" ]] && args+=(--interruption-level "$level")
+BRRR_TIMEOUT="${BAG_MODE_NOTIFY_TIMEOUT:-5}" /bin/bash "$sender" "${args[@]}"
+WRAPPER
+  then
+    rm -f "$wrapper_tmp"
+    die "could not write notifier: $wrapper"
+  fi
+  if ! chmod 0700 "$wrapper_tmp" || ! mv -f "$wrapper_tmp" "$wrapper"; then
+    rm -f "$wrapper_tmp"
+    die "could not install notifier: $wrapper"
+  fi
+  printf 'brrr notifier installed: %s\n' "$wrapper"
+  printf 'runtime sender copy: %s\n' "$sender_copy"
+}
+
+notifier_test() {
+  RUN_USER="$(resolve_user)" || die "could not resolve user"
+  RUN_HOME="$(resolve_home "$RUN_USER")" || die "could not resolve home"
+  RUN_GROUP="$(resolve_group "$RUN_USER")" || die "could not resolve group"
+  NOTIFIER="$(user_support_dir "$RUN_HOME")/notifier"
+  [[ -x "$NOTIFIER" ]] || die "notifier is disabled"
+  prepare_user_dirs || die "could not prepare notifier support directory"
+  notify_sync test active "bag-mode notifier test" "host=$(hostname); time=$(now_text)" || die "notifier test failed"
+  printf 'notifier test accepted\n'
+}
+
+notifier_off() {
+  local run_user run_home support_dir
+  run_user="$(resolve_user)" || die "could not resolve user"
+  run_home="$(resolve_home "$run_user")" || die "could not resolve home"
+  support_dir="$(user_support_dir "$run_home")"
+  rm -f "$support_dir/notifier" || die "could not disable notifier: $support_dir/notifier"
+  printf 'notifier disabled\n'
+}
+
+foreground_mode() {
+  local run_user run_home run_group brightness_bin notifier session_id controller_executable exit_code=0
+  require_macos
+  run_user="$(resolve_user)" || die "could not resolve user"
+  run_home="$(resolve_home "$run_user")" || die "could not resolve home"
+  run_group="$(resolve_group "$run_user")" || die "could not resolve group"
+  brightness_bin="$(resolve_brightness)"
+  [[ -n "$brightness_bin" ]] || die "brightness is required; install it with: brew install brightness"
+  [[ -x "$CONTROLLER_BIN" ]] || die "installed controller is missing; run bag-mode install"
+  controller_executable="$(cd "$(dirname "$CONTROLLER_BIN")" && pwd -P)/$(basename "$CONTROLLER_BIN")"
+  authorize_root
+  notifier="$(user_support_dir "$run_home")/notifier"
+  [[ -x "$notifier" ]] || notifier=""
+  session_id="foreground-$(now_epoch)-$$"
+  run_root /bin/mkdir -p "$ROOT_DIR" "$ROOT_LOG_DIR"
+  run_root "$controller_executable" _foreground-config "$run_user" "$run_home" "$run_group" "$brightness_bin" "$notifier" "$session_id" || return $?
+  if [[ "${BAG_MODE_TESTING:-0}" == 1 ]]; then
+    BAG_MODE_FOREGROUND=1 "$controller_executable" _controller || exit_code=$?
+  else
+    "$SUDO_BIN" /usr/bin/env BAG_MODE_FOREGROUND=1 "$controller_executable" _controller || exit_code=$?
+  fi
+  run_root "$controller_executable" _release-reservation "$session_id" >/dev/null 2>&1 || true
+  return "$exit_code"
+}
+
+internal_foreground_config() {
+  local run_user="$1" run_home="$2" run_group="$3" brightness_bin="$4" notifier="$5" session_id="$6"
+  require_root
+  mkdir -p "$ROOT_DIR" "$ROOT_LOG_DIR"
+  chmod 0755 "$ROOT_DIR"
+  [[ ! -e "$ENABLED_FILE" ]] || die "service is enabled; run bag-mode stop before starting a foreground controller"
+  claim_controller_reservation "$session_id" foreground \
+    || die "another controller is starting; run bag-mode status"
+  if [[ -e "$ENABLED_FILE" ]]; then
+    release_controller_reservation "$session_id" 2>/dev/null || true
+    die "service is enabled; run bag-mode stop before starting a foreground controller"
+  fi
+  if [[ -e "$RECOVERY_RECORD_FILE" ]]; then
+    release_controller_reservation "$session_id" 2>/dev/null || true
+    die "a controller is running or recovery is required; run bag-mode status"
+  fi
+  write_root_kv "$CONFIG_FILE" \
+    run_user "$run_user" run_home "$run_home" run_group "$run_group" \
+    brightness_bin "$brightness_bin" notifier "$notifier" session_id "$session_id" \
+    interval "$DEFAULT_INTERVAL" closed_interval "$DEFAULT_CLOSED_INTERVAL" \
+    battery_every "$DEFAULT_BATTERY_EVERY" battery_min "$DEFAULT_BATTERY_MIN" \
+    battery_thresholds "$DEFAULT_BATTERY_THRESHOLDS" || {
+      release_controller_reservation "$session_id" 2>/dev/null || true
+      die "could not write controller config"
+    }
+  write_public_root_kv "$OWNER_FILE" run_user "$run_user" run_home "$run_home" \
+    || {
+      release_controller_reservation "$session_id" 2>/dev/null || true
+      die "could not write service owner metadata"
+    }
+  rm -f "$RESTART_FILE"
+}
+
+internal_release_reservation() {
+  local session_id="${1:-}"
+  [[ $# -le 1 ]] || usage_error "usage: bag-mode _release-reservation [SESSION_ID]"
+  require_root
+  [[ -e "$CONTROLLER_RESERVATION_DIR" ]] || return 0
+  if [[ -z "$session_id" ]]; then
+    session_id="$(config_get session_id "$CONTROLLER_RESERVATION_FILE")"
+    if [[ -z "$session_id" ]]; then
+      discard_controller_reservation
+      return
+    fi
+  fi
+  release_controller_reservation "$session_id"
+}
+
+subcommand="${1:-help}"
+shift 2>/dev/null || true
+if [[ "${1:-}" == -h || "${1:-}" == --help ]]; then
+  command_help "$subcommand"
+  exit 0
+fi
+case "$subcommand" in
+  install) install_mode "$@" ;;
+  doctor) doctor_mode "$@" ;;
+  start) require_no_args "$@"; start_mode ;;
+  stop) require_no_args "$@"; stop_mode ;;
+  status) status_mode "$@" ;;
+  logs) logs_mode "$@" ;;
+  recover) require_no_args "$@"; recover_mode ;;
+  uninstall) uninstall_mode "$@" ;;
+  run) require_no_args "$@"; foreground_mode ;;
+  _controller) controller_main "$@" ;;
+  notifier)
+    notifier_action="${1:-}"
+    shift 2>/dev/null || true
+    if [[ "${1:-}" == -h || "${1:-}" == --help || "$notifier_action" == -h || "$notifier_action" == --help ]]; then
+      command_help notifier
+      exit 0
+    fi
+    case "$notifier_action" in
+      set) [[ $# -eq 1 ]] || usage_error "usage: bag-mode notifier set PATH"; notifier_set "$1" ;;
+      install-brrr) [[ $# -le 1 ]] || usage_error "usage: bag-mode notifier install-brrr [PATH]"; notifier_install_brrr "${1:-}" ;;
+      test) require_no_args "$@"; notifier_test ;;
+      off) require_no_args "$@"; notifier_off ;;
+      *) usage_error "usage: bag-mode notifier set|install-brrr|test|off" ;;
+    esac
+    ;;
+  _service-start) internal_service_start "$@" ;;
+  _foreground-config) internal_foreground_config "$@" ;;
+  _release-reservation) internal_release_reservation "$@" ;;
+  _service-stop) internal_service_stop "$@" ;;
+  version|--version|-V) require_no_args "$@"; printf 'bag-mode %s\n' "$VERSION" ;;
+  help)
+    (( $# <= 1 )) || usage_error "usage: bag-mode help [COMMAND]"
+    command_help "${1:-}"
+    ;;
+  --help|-h) require_no_args "$@"; usage ;;
+  *) usage >&2; usage_error "unknown command: $subcommand" ;;
+esac

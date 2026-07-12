@@ -122,6 +122,72 @@ modules/bin/dotfiles-doctor
 modules/bin/dotfiles-zsh-profile
 ```
 
+### Standalone bag-mode
+
+`modules/bin/bag-mode` is a self-installing, single-file macOS utility. It keeps
+a MacBook awake with its lid closed, restores its captured settings when
+stopped, and uses a LaunchDaemon to supervise one privileged controller.
+
+Copy that one file to another Mac, then run:
+
+```bash
+brew install brightness
+chmod +x bag-mode
+./bag-mode install
+bag-mode start
+bag-mode status
+```
+
+Humans and AI agents start from the same progressively disclosed help:
+
+```bash
+./bag-mode --help
+./bag-mode install --help
+```
+
+The install help contains the dependency, sudo handoff, safe installation
+order, and machine-verifiable success criteria. Automation can consume
+`bag-mode doctor --strict --json` and `bag-mode status --json`; unsupported
+options fail with exit code `2` instead of being ignored.
+
+Installation keeps the user CLI at `/usr/local/bin/bag-mode`, but the
+LaunchDaemon executes a separate root-owned controller from
+`/Library/PrivilegedHelperTools`. A writable PATH directory therefore cannot
+replace the executable that launchd runs as root.
+
+`status` keeps independent facts independent:
+
+- `enabled` is the request to keep the controller running.
+- `phase` is `stopped`, `starting`, `running`, or `recovery_required`.
+- `recovery_required` means the controller exited before captured settings
+  were restored.
+- `brightness_pending` means power settings are already restored, but the
+  built-in display is unavailable.
+
+Stop and restore the settings captured at startup:
+
+```bash
+bag-mode stop
+```
+
+When macOS hides the built-in panel while the lid is closed, `stop` restores
+the power settings and records `brightness_pending=true` instead of discarding
+the brightness target. Open the lid and run `bag-mode recover`; starting
+bag-mode again with the lid open also applies the pending target. `stop` and
+`recover` return exit code `69` while brightness remains pending.
+
+Notifications are optional. A generic notifier implements the contract shown
+by `bag-mode help notifier`. To install a brrr sender without retaining a
+dependency on its Skill directory:
+
+```bash
+bag-mode notifier install-brrr /path/to/brrr-send.sh
+bag-mode notifier test
+```
+
+The sender is copied into the user's Application Support directory. The
+controller does not read Skillshare directories at runtime.
+
 ## Repository Rules
 
 These rules keep file ownership clear:

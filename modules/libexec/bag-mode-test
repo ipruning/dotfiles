@@ -1,0 +1,855 @@
+#!/bin/bash
+
+set -euo pipefail
+
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+bag_mode="$script_dir/../bin/bag-mode"
+readme="$script_dir/../../README.md"
+test_root="$(mktemp -d -t bag-mode-test)"
+test_home="$test_root/home"
+fake_bin="$test_root/fake-bin"
+fake_state="$test_root/fake-state"
+control_dir="$test_root/Library/Application Support/bag-mode"
+owner_file="$control_dir/service"
+root_status_file="$control_dir/state"
+brightness_pending_file="$control_dir/brightness-pending"
+controller_reservation_dir="$control_dir/controller-reservation"
+controller_reservation_file="$controller_reservation_dir/owner"
+user_support_dir="$test_home/Library/Application Support/bag-mode"
+controller_pid=""
+foreground_pid=""
+rejected_run_pid=""
+legacy_lock_pid=""
+
+cleanup() {
+  if [[ -n "$controller_pid" ]]; then
+    kill -KILL "$controller_pid" 2>/dev/null || true
+  fi
+  if [[ -n "$foreground_pid" ]]; then
+    kill -KILL "$foreground_pid" 2>/dev/null || true
+  fi
+  if [[ -n "$rejected_run_pid" ]]; then
+    kill -KILL "$rejected_run_pid" 2>/dev/null || true
+  fi
+  if [[ -n "$legacy_lock_pid" ]]; then
+    kill -KILL "$legacy_lock_pid" 2>/dev/null || true
+  fi
+  if [[ "${BAG_MODE_TEST_KEEP:-0}" == 1 ]]; then
+    printf 'test artifacts kept: %s\n' "$test_root" >&2
+  else
+    rm -rf "$test_root"
+  fi
+}
+trap cleanup EXIT
+
+fail() {
+  echo "FAIL: $*" >&2
+  exit 1
+}
+
+wait_for() {
+  local description="$1" command_text="$2" attempt
+  for (( attempt = 0; attempt < 100; attempt++ )); do
+    if /bin/bash -c "$command_text"; then
+      return 0
+    fi
+    sleep 0.05
+  done
+  fail "timed out waiting for $description"
+}
+
+mkdir -p "$test_home" "$fake_bin" "$fake_state" "$control_dir" "$user_support_dir"
+printf 'open\n' >"$fake_state/lid"
+printf '0.700000\n' >"$fake_state/brightness"
+printf '0\n' >"$fake_state/sleep-disabled"
+printf '55\n' >"$fake_state/battery"
+: >"$fake_state/calls"
+
+cat >"$fake_bin/ioreg" <<'EOF'
+#!/bin/bash
+if [[ "$(sed -n '1p' "$BAG_MODE_FAKE_STATE/lid")" == closed ]]; then
+  echo '"AppleClamshellState" = Yes'
+else
+  echo '"AppleClamshellState" = No'
+fi
+EOF
+
+cat >"$fake_bin/brightness" <<'EOF'
+#!/bin/bash
+case "${1:-}" in
+  -l)
+    while [[ -e "$BAG_MODE_FAKE_STATE/block-brightness-query" ]]; do
+      /bin/sleep 0.05
+    done
+    if [[ -e "$BAG_MODE_FAKE_STATE/display-unavailable" ]]; then
+      echo 'display 1: external, active, awake, online, ID 0x2'
+      exit 0
+    fi
+    echo 'display 0: main, active, awake, online, built-in, ID 0x1'
+    printf 'display 0: brightness %s\n' "$(sed -n '1p' "$BAG_MODE_FAKE_STATE/brightness")"
+    ;;
+  -d)
+    if [[ -e "$BAG_MODE_FAKE_STATE/fail-brightness" ]]; then
+      echo 'injected brightness restore failure' >&2
+      exit 7
+    fi
+    printf '%s\n' "$3" >"$BAG_MODE_FAKE_STATE/brightness"
+    printf 'brightness %s\n' "$3" >>"$BAG_MODE_FAKE_STATE/calls"
+    ;;
+  *)
+    exit 2
+    ;;
+esac
+EOF
+
+cat >"$fake_bin/pmset" <<'EOF'
+#!/bin/bash
+case "$*" in
+  '-g batt')
+    percentage="$(sed -n '1p' "$BAG_MODE_FAKE_STATE/battery")"
+    printf "Now drawing from 'Battery Power'\n -InternalBattery-0 (id=1)\t%s%%; discharging; 2:00 remaining; present: true\n" "$percentage"
+    ;;
+  '-g custom')
+    printf 'Battery Power:\n powermode            0\nAC Power:\n powermode            2\n'
+    ;;
+  '-g')
+    printf 'System-wide power settings:\n SleepDisabled\t\t%s\n' "$(sed -n '1p' "$BAG_MODE_FAKE_STATE/sleep-disabled")"
+    ;;
+  '-a disablesleep 0'|'-a disablesleep 1')
+    if [[ "$3" == 1 && -e "$BAG_MODE_FAKE_STATE/fail-start" ]]; then
+      echo 'injected disablesleep startup failure' >&2
+      exit 8
+    fi
+    if [[ "$3" == 0 && -e "$BAG_MODE_FAKE_STATE/fail-restore" ]]; then
+      echo 'injected disablesleep restore failure' >&2
+      exit 9
+    fi
+    printf '%s\n' "$3" >"$BAG_MODE_FAKE_STATE/sleep-disabled"
+    printf 'pmset disablesleep %s\n' "$3" >>"$BAG_MODE_FAKE_STATE/calls"
+    ;;
+  '-b powermode 0'|'-b powermode 1')
+    printf 'pmset powermode %s\n' "$3" >>"$BAG_MODE_FAKE_STATE/calls"
+    ;;
+  *)
+    echo "unexpected pmset args: $*" >&2
+    exit 2
+    ;;
+esac
+EOF
+
+cat >"$fake_bin/launchctl" <<'EOF'
+#!/bin/bash
+if [[ "${1:-}" == kickstart && -e "$BAG_MODE_FAKE_STATE/fail-kickstart" ]]; then
+  echo 'injected launchctl kickstart failure' >&2
+  exit 9
+fi
+if [[ "${1:-}" == bootout ]]; then
+  if [[ -e "$BAG_MODE_FAKE_STATE/fail-bootout" ]]; then
+    echo 'injected launchctl bootout failure' >&2
+    exit 9
+  fi
+  if [[ "${2:-}" == system && ! -f "${3:-}" ]]; then
+    exit 3
+  fi
+  : >"$BAG_MODE_FAKE_STATE/launchd-unloaded"
+  exit 0
+fi
+if [[ "${1:-}" == bootstrap ]]; then
+  rm -f "$BAG_MODE_FAKE_STATE/launchd-unloaded"
+  exit 0
+fi
+if [[ "${1:-}" == print ]]; then
+  if [[ -e "$BAG_MODE_FAKE_STATE/launchd-unloaded" ]]; then
+    exit 3
+  fi
+  printf 'state = running\n'
+  if [[ -s "$BAG_MODE_FAKE_STATE/launchd-pid" ]]; then
+    printf 'pid = %s\n' "$(sed -n '1p' "$BAG_MODE_FAKE_STATE/launchd-pid")"
+  fi
+fi
+exit 0
+EOF
+
+chmod +x "$fake_bin/ioreg" "$fake_bin/brightness" "$fake_bin/pmset" "$fake_bin/launchctl"
+
+cat >"$fake_bin/brrr-send.sh" <<'EOF'
+#!/bin/bash
+printf '%s\n' "$*" >"$BAG_MODE_FAKE_STATE/notifier-call"
+EOF
+chmod +x "$fake_bin/brrr-send.sh"
+
+test_env=(
+  BAG_MODE_TESTING=1
+  BAG_MODE_TEST_ROOT="$test_root"
+  BAG_MODE_TEST_HOME="$test_home"
+  BAG_MODE_RUN_USER="$(id -un)"
+  BAG_MODE_BRIGHTNESS_BIN="$fake_bin/brightness"
+  BAG_MODE_PMSET_BIN="$fake_bin/pmset"
+  BAG_MODE_IOREG_BIN="$fake_bin/ioreg"
+  BAG_MODE_LAUNCHCTL_BIN="$fake_bin/launchctl"
+  BAG_MODE_FAKE_STATE="$fake_state"
+  BAG_MODE_INTERVAL=0.05
+  BAG_MODE_CLOSED_INTERVAL=0.05
+  BAG_MODE_BATTERY_EVERY=1
+  BAG_MODE_STOP_WAIT_ATTEMPTS=1
+  BAG_MODE_STOP_WAIT_INTERVAL=0.01
+  BAG_MODE_START_WAIT_ATTEMPTS=1
+  BAG_MODE_START_WAIT_INTERVAL=0.01
+  BAG_MODE_NOTIFY_TIMEOUT=1
+)
+
+: >"$fake_state/launchd-unloaded"
+env "${test_env[@]}" CI=1 "$bag_mode" doctor --strict --json >"$test_root/preinstall-doctor.json"
+env "${test_env[@]}" CI=1 "$bag_mode" status --json >"$test_root/preinstall-status.json"
+rm -f "$fake_state/launchd-unloaded"
+mise exec -- jq -e 'select(.ok == true and .installation.binary == false and .installation.version_matches == null and .installation.controller == false and .installation.controller_version_matches == null and .installation.plist == false and .installation.launchd_loaded == false)' "$test_root/preinstall-doctor.json" >/dev/null \
+  || fail 'preinstall doctor did not distinguish absent installation from a version mismatch'
+mise exec -- jq -e 'select(.installed == false and .launchd_loaded == false and .enabled == false and .phase == "stopped" and .recovery_required == false and .brightness_pending == false and .controller.alive == false)' "$test_root/preinstall-status.json" >/dev/null \
+  || fail 'preinstall status did not report a clean stopped lifecycle'
+
+env "${test_env[@]}" CI=1 "$bag_mode" install --dry-run >"$test_root/install-dry-run.txt"
+rg -q '^ready: true$' "$test_root/install-dry-run.txt" || fail 'install dry-run did not report readiness'
+env "${test_env[@]}" "$bag_mode" install >/dev/null
+runtime_bin="$test_root/usr/local/bin/bag-mode"
+runtime_controller="$test_root/Library/PrivilegedHelperTools/dev.bag-mode.controller"
+runtime_plist="$test_root/Library/LaunchDaemons/dev.bag-mode.daemon.plist"
+[[ -x "$runtime_bin" && -x "$runtime_controller" ]] || fail 'install did not create the CLI and privileged controller copies'
+plutil -lint "$runtime_plist" >/dev/null || fail 'install generated an invalid plist'
+plutil -extract ProgramArguments.0 raw "$runtime_plist" | rg -Fxq "$runtime_controller" \
+  || fail 'LaunchDaemon did not use the root-only controller path'
+env "${test_env[@]}" "$runtime_bin" install >"$test_root/idempotent-install.out"
+rg -q '^installed_controller: ' "$test_root/idempotent-install.out" || fail 'installed executable could not reinstall itself'
+
+legacy_other_home="$test_root/legacy-other-home"
+legacy_lock_file="$legacy_other_home/Library/Application Support/bag-mode/bag-mode.lock"
+mkdir -p "$(dirname "$legacy_lock_file")"
+: >"$legacy_lock_file"
+/usr/bin/lockf -k "$legacy_lock_file" /bin/sleep 30 &
+legacy_lock_pid=$!
+wait_for 'legacy controller lock' "! /usr/bin/lockf -t 0 '$legacy_lock_file' /usr/bin/true 2>/dev/null"
+exit_code=0
+env "${test_env[@]}" CI=1 "$runtime_bin" install --dry-run >"$test_root/legacy-install-dry-run.out" 2>"$test_root/legacy-install-dry-run.err" || exit_code=$?
+[[ "$exit_code" == 1 ]] || fail "install dry-run accepted another user's legacy controller"
+rg -q '^blocker: legacy controller is running; stop it with the legacy CLI$' "$test_root/legacy-install-dry-run.out" \
+  || fail 'install dry-run did not identify the legacy controller blocker'
+exit_code=0
+env "${test_env[@]}" "$runtime_bin" install >"$test_root/legacy-install.out" 2>"$test_root/legacy-install.err" || exit_code=$?
+[[ "$exit_code" == 1 ]] || fail "install accepted another user's legacy controller"
+rg -q 'legacy controller is running' "$test_root/legacy-install.err" || fail 'blocked legacy install did not explain the conflict'
+kill -TERM "$legacy_lock_pid"
+wait "$legacy_lock_pid" 2>/dev/null || true
+legacy_lock_pid=""
+
+rm -f "$runtime_bin"
+ln -s "$bag_mode" "$runtime_bin"
+env "${test_env[@]}" "$runtime_bin" install >"$test_root/symlink-install.out"
+[[ -f "$runtime_bin" && ! -L "$runtime_bin" ]] || fail 'install left a symlink as the privileged controller executable'
+[[ "$(stat -f '%Lp' "$runtime_bin")" == 755 ]] || fail 'installed controller executable remained group- or user-writable'
+[[ -f "$runtime_controller" && ! -L "$runtime_controller" && "$(stat -f '%Lp' "$runtime_controller")" == 755 ]] \
+  || fail 'root-only controller copy was missing or had an unsafe mode'
+: >"$fake_state/fail-kickstart"
+exit_code=0
+env "${test_env[@]}" "$runtime_bin" start >"$test_root/kickstart-failed.out" 2>"$test_root/kickstart-failed.err" || exit_code=$?
+rm -f "$fake_state/fail-kickstart"
+[[ "$exit_code" == 1 ]] || fail 'kickstart failure returned success'
+[[ ! -e "$control_dir/enabled" ]] || fail 'kickstart failure left the service enabled'
+rg -q 'service disabled' "$test_root/kickstart-failed.err" || fail 'kickstart failure did not explain rollback'
+exit_code=0
+env "${test_env[@]}" "$runtime_bin" start >"$test_root/readiness-failed.out" 2>"$test_root/readiness-failed.err" || exit_code=$?
+[[ "$exit_code" == 1 ]] || fail 'readiness timeout returned success'
+[[ ! -e "$control_dir/enabled" ]] || fail 'readiness timeout left the service enabled'
+rg -q 'service disabled' "$test_root/readiness-failed.err" || fail 'readiness timeout did not explain rollback'
+: >"$control_dir/enabled"
+mkdir "$controller_reservation_dir"
+{
+  printf 'session_id\tstale-enabled-reservation\n'
+  printf 'controller_mode\tlaunchd\n'
+  printf 'pid\t\n'
+  printf 'executable\t\n'
+} >"$controller_reservation_file"
+chmod 000 "$control_dir/config"
+{
+  printf 'last_event\tstarted\n'
+  printf 'pid\t%s\n' "$$"
+} >"$user_support_dir/state"
+printf '%s\n' "$PPID" >"$fake_state/launchd-pid"
+exit_code=0
+env "${test_env[@]}" "$runtime_bin" start >"$test_root/stale-enabled.out" 2>"$test_root/stale-enabled.err" || exit_code=$?
+[[ "$exit_code" == 1 ]] || fail 'stale enabled marker returned success'
+[[ ! -e "$control_dir/enabled" ]] || fail 'idempotent readiness timeout kept a stale enabled marker'
+[[ ! -e "$controller_reservation_dir" ]] || fail 'idempotent readiness timeout kept a root-owned controller reservation'
+chmod 0600 "$control_dir/config"
+rm -f "$user_support_dir/state" "$fake_state/launchd-pid"
+env "${test_env[@]}" CI=1 "$runtime_bin" install --dry-run >"$test_root/post-start-failure-install.txt"
+rg -q '^ready: true$' "$test_root/post-start-failure-install.txt" || fail 'failed start left state that blocked installation'
+if rg -q 'tmux|BRRR_HELPER' "$runtime_bin" "$runtime_controller" "$runtime_plist" || rg -q '\.agents/skills|skillshare' "$runtime_plist"; then
+  fail 'installed controller retained a tmux or Skillshare runtime dependency'
+fi
+env "${test_env[@]}" CI=1 "$runtime_bin" >"$test_root/top-help.txt"
+rg -q '^Usage: bag-mode COMMAND \[OPTIONS\]$' "$test_root/top-help.txt" || fail 'no-argument invocation did not show the command map'
+rg -q '^Exit status:$' "$test_root/top-help.txt" || fail 'top-level help did not disclose the exit-code contract'
+env "${test_env[@]}" CI=1 "$runtime_bin" status --help >"$test_root/status-help.txt"
+for lifecycle_phase in stopped starting running recovery_required; do
+  rg -q "^[[:space:]]*$lifecycle_phase" "$test_root/status-help.txt" || fail "status help omitted lifecycle phase $lifecycle_phase"
+done
+rg -q '^Brightness pending is independent of lifecycle recovery:' "$test_root/status-help.txt" || fail 'status help conflated pending brightness with lifecycle recovery'
+if rg -ni '\b(dirty|unclean)\b' "$runtime_bin" "$readme"; then
+  fail 'CLI or README retained rejected recovery terminology'
+fi
+exit_code=0
+env "${test_env[@]}" CI=1 "$runtime_bin" agent-guide >"$test_root/agent-guide.out" 2>"$test_root/agent-guide.err" || exit_code=$?
+[[ "$exit_code" == 2 ]] || fail 'removed agent-guide command did not return the usage status'
+exit_code=0
+env "${test_env[@]}" CI=1 "$runtime_bin" nonsense >"$test_root/direct-bogus.out" 2>"$test_root/direct-bogus.err" || exit_code=$?
+[[ "$exit_code" == 2 ]] || fail 'unknown top-level command did not return the usage status'
+rg -q '^bag-mode: unknown command: nonsense$' "$test_root/direct-bogus.err" || fail 'unknown top-level command did not identify the typo'
+env "${test_env[@]}" CI=1 "$runtime_bin" install --help >"$test_root/install-help.txt"
+rg -q '^Usage: bag-mode install \[--dry-run\]$' "$test_root/install-help.txt" || fail 'install help was not scoped or safe'
+rg -q '^Recommended installation flow:$' "$test_root/install-help.txt" || fail 'install help did not disclose the installation workflow'
+exit_code=0
+env "${test_env[@]}" CI=1 "$runtime_bin" help nonsense >"$test_root/help-bogus.out" 2>"$test_root/help-bogus.err" || exit_code=$?
+[[ "$exit_code" == 2 ]] || fail 'help for an unknown command returned success'
+mv "$runtime_plist" "$runtime_plist.missing"
+exit_code=0
+env "${test_env[@]}" CI=1 "$runtime_bin" doctor --strict --json >"$test_root/doctor-missing-plist.json" || exit_code=$?
+[[ "$exit_code" == 1 ]] || fail 'strict doctor accepted an installed service with a missing plist'
+mise exec -- jq -e 'select(.ok == false and .installation.plist == false and .problems >= 1)' "$test_root/doctor-missing-plist.json" >/dev/null \
+  || fail 'strict doctor did not describe the missing plist failure'
+mv "$runtime_plist.missing" "$runtime_plist"
+mv "$runtime_controller" "$runtime_controller.missing"
+exit_code=0
+env "${test_env[@]}" CI=1 "$runtime_bin" doctor --strict --json >"$test_root/doctor-missing-controller.json" || exit_code=$?
+[[ "$exit_code" == 1 ]] || fail 'strict doctor accepted an installation with no privileged controller'
+mise exec -- jq -e 'select(.ok == false and .installation.binary == true and .installation.controller == false and .problems >= 1)' "$test_root/doctor-missing-controller.json" >/dev/null \
+  || fail 'strict doctor did not describe the missing controller failure'
+mv "$runtime_controller.missing" "$runtime_controller"
+: >"$fake_state/launchd-unloaded"
+exit_code=0
+env "${test_env[@]}" CI=1 "$runtime_bin" doctor --strict --json >"$test_root/doctor-unloaded.json" || exit_code=$?
+rm -f "$fake_state/launchd-unloaded"
+[[ "$exit_code" == 1 ]] || fail 'strict doctor accepted an installed but unloaded service'
+mise exec -- jq -e 'select(.ok == false and .installation.binary == true and .installation.controller == true and .installation.plist == true and .installation.launchd_loaded == false and .problems >= 1)' "$test_root/doctor-unloaded.json" >/dev/null \
+  || fail 'strict doctor did not describe the unloaded service failure'
+env "${test_env[@]}" CI=1 "$runtime_bin" doctor --strict --json >"$test_root/doctor.json"
+mise exec -- jq -e . "$test_root/doctor.json" >/dev/null || fail 'doctor JSON was invalid'
+rg -q '"ok":true' "$test_root/doctor.json" || fail 'strict doctor JSON did not report success'
+exit_code=0
+env "${test_env[@]}" CI=1 "$runtime_bin" doctor --bogus >"$test_root/bogus.out" 2>"$test_root/bogus.err" || exit_code=$?
+[[ "$exit_code" == 2 ]] || fail "unknown doctor option exited $exit_code instead of 2"
+exit_code=0
+env "${test_env[@]}" CI=1 "$runtime_bin" uninstall >"$test_root/uninstall.out" 2>"$test_root/uninstall.err" || exit_code=$?
+[[ "$exit_code" == 2 && -x "$runtime_bin" ]] || fail 'uninstall did not require explicit --yes'
+exit_code=0
+env "${test_env[@]}" CI=1 "$runtime_bin" logs --bogus >"$test_root/logs-bogus.out" 2>"$test_root/logs-bogus.err" || exit_code=$?
+[[ "$exit_code" == 2 ]] || fail "unknown logs option exited $exit_code instead of 2"
+
+env "${test_env[@]}" "$runtime_bin" notifier install-brrr "$fake_bin/brrr-send.sh" >/dev/null
+rm -f "$fake_bin/brrr-send.sh"
+env "${test_env[@]}" "$user_support_dir/notifier" \
+  --event test --level passive --title 'test title' --message 'test message'
+rg -q -- '--title test title --message test message --thread-id bag-mode --interruption-level passive' "$fake_state/notifier-call" \
+  || fail 'installed brrr adapter did not preserve the generic notifier contract'
+env "${test_env[@]}" "$runtime_bin" notifier test >"$test_root/notifier-test.out"
+rg -q '^notifier test accepted$' "$test_root/notifier-test.out" || fail 'CLI notifier test did not use the bounded notifier path'
+rm -f "$user_support_dir/notifier"
+
+notifier_source="$fake_bin/notifier-source"
+cat >"$notifier_source" <<'EOF'
+#!/bin/bash
+exit 0
+EOF
+chmod +x "$notifier_source"
+blocked_home="$test_root/blocked-home"
+mkdir -p "$blocked_home/Library/Application Support"
+: >"$blocked_home/Library/Application Support/bag-mode"
+for notifier_action in set install-brrr; do
+  exit_code=0
+  if [[ "$notifier_action" == set ]]; then
+    env "${test_env[@]}" BAG_MODE_TEST_HOME="$blocked_home" "$runtime_bin" notifier set "$notifier_source" \
+      >"$test_root/notifier-set-failed.out" 2>"$test_root/notifier-set-failed.err" || exit_code=$?
+  else
+    env "${test_env[@]}" BAG_MODE_TEST_HOME="$blocked_home" "$runtime_bin" notifier install-brrr "$notifier_source" \
+      >"$test_root/notifier-brrr-failed.out" 2>"$test_root/notifier-brrr-failed.err" || exit_code=$?
+  fi
+  [[ "$exit_code" == 1 ]] || fail "notifier $notifier_action filesystem failure returned success"
+done
+mkdir "$user_support_dir/notifier"
+exit_code=0
+env "${test_env[@]}" "$runtime_bin" notifier off >"$test_root/notifier-off-failed.out" 2>"$test_root/notifier-off-failed.err" || exit_code=$?
+[[ "$exit_code" == 1 ]] || fail 'notifier off filesystem failure returned success'
+[[ ! -s "$test_root/notifier-off-failed.out" ]] || fail 'failed notifier off reported success'
+rmdir "$user_support_dir/notifier"
+
+write_config() {
+  local session_id="$1" notifier="${2:-}" create_reservation="${3:-yes}"
+  mkdir -p "$control_dir"
+  {
+    printf 'run_user\t%s\n' "$(id -un)"
+    printf 'run_home\t%s\n' "$test_home"
+    printf 'run_group\t%s\n' "$(id -gn)"
+    printf 'brightness_bin\t%s\n' "$fake_bin/brightness"
+    printf 'notifier\t%s\n' "$notifier"
+    printf 'session_id\t%s\n' "$session_id"
+    printf 'interval\t0.05\n'
+    printf 'closed_interval\t0.05\n'
+    printf 'battery_every\t1\n'
+    printf 'battery_min\t10\n'
+    printf 'battery_thresholds\t30 20\n'
+  } >"$control_dir/config"
+  {
+    printf 'run_user\t%s\n' "$(id -un)"
+    printf 'run_home\t%s\n' "$test_home"
+  } >"$owner_file"
+  chmod 0644 "$owner_file"
+  if [[ "$create_reservation" == yes ]]; then
+    mkdir "$controller_reservation_dir"
+    {
+      printf 'session_id\t%s\n' "$session_id"
+      printf 'controller_mode\tlaunchd\n'
+      printf 'pid\t\n'
+      printf 'executable\t\n'
+    } >"$controller_reservation_file"
+  fi
+  : >"$control_dir/enabled"
+}
+
+write_config enabled-race
+cp "$control_dir/config" "$test_root/config-before-enabled-run"
+env "${test_env[@]}" CI=1 "$runtime_bin" status --json >"$test_root/starting-status.json"
+mise exec -- jq -e 'select(.installed == true and .enabled == true and .phase == "starting" and .recovery_required == false and .controller.alive == false)' "$test_root/starting-status.json" >/dev/null \
+  || fail 'status did not distinguish an enabled service waiting for its controller'
+exit_code=0
+env "${test_env[@]}" CI=1 "$runtime_bin" install --dry-run >"$test_root/enabled-install-dry-run.out" 2>"$test_root/enabled-install-dry-run.err" || exit_code=$?
+[[ "$exit_code" == 1 ]] || fail 'install dry-run accepted an enabled service'
+rg -q '^ready: false$' "$test_root/enabled-install-dry-run.out" || fail 'blocked install dry-run did not report readiness'
+rg -q '^blocker: service is enabled; run bag-mode stop$' "$test_root/enabled-install-dry-run.out" || fail 'blocked install dry-run did not provide the canonical stop action'
+[[ ! -s "$test_root/enabled-install-dry-run.err" ]] || fail 'install dry-run mixed structured readiness data with diagnostics'
+env "${test_env[@]}" "$runtime_bin" run >"$test_root/enabled-foreground.out" 2>"$test_root/enabled-foreground.err" &
+rejected_run_pid=$!
+for (( attempt = 0; attempt < 20; attempt++ )); do
+  ps -p "$rejected_run_pid" -o pid= >/dev/null 2>&1 || break
+  sleep 0.05
+done
+if ps -p "$rejected_run_pid" -o pid= >/dev/null 2>&1; then
+  fail 'foreground run continued while the LaunchDaemon service was enabled'
+fi
+exit_code=0
+wait "$rejected_run_pid" || exit_code=$?
+rejected_run_pid=""
+[[ "$exit_code" == 1 ]] || fail "enabled-service foreground run exited $exit_code instead of 1"
+cmp -s "$test_root/config-before-enabled-run" "$control_dir/config" || fail 'rejected foreground run overwrote the enabled service configuration'
+[[ ! -e "$control_dir/recovery-record" ]] || fail 'rejected foreground run created a competing recovery record'
+rg -q 'service is enabled' "$test_root/enabled-foreground.err" || fail 'rejected foreground run did not explain the enabled-service conflict'
+rm -f "$control_dir/enabled" "$control_dir/config" "$owner_file" "$controller_reservation_file"
+rmdir "$controller_reservation_dir"
+
+: >"$fake_state/block-brightness-query"
+env "${test_env[@]}" "$runtime_bin" run >"$test_root/concurrent-first.out" 2>"$test_root/concurrent-first.err" &
+controller_pid=$!
+wait_for 'first foreground reservation' "[[ -s '$controller_reservation_file' ]] && [[ -n \"\$(awk -F '\\t' '\$1 == \"pid\" { print \$2; exit }' '$controller_reservation_file')\" ]]"
+foreground_pid="$(awk -F '\t' '$1 == "pid" { print $2; exit }' "$controller_reservation_file")"
+cp "$control_dir/config" "$test_root/config-before-concurrent-run"
+exit_code=0
+env "${test_env[@]}" "$runtime_bin" run >"$test_root/concurrent-second.out" 2>"$test_root/concurrent-second.err" || exit_code=$?
+[[ "$exit_code" == 1 ]] || fail 'a second foreground controller acquired the active reservation'
+cmp -s "$test_root/config-before-concurrent-run" "$control_dir/config" || fail 'rejected concurrent controller overwrote shared config'
+rg -q 'another controller is starting' "$test_root/concurrent-second.err" || fail 'concurrent controller rejection did not explain reservation ownership'
+rm -f "$fake_state/block-brightness-query"
+wait_for 'reserved foreground controller ready' "[[ -f '$control_dir/recovery-record' ]] && [[ \"\$(sed -n '1p' '$fake_state/sleep-disabled')\" == 1 ]]"
+env "${test_env[@]}" BAG_MODE_STOP_WAIT_ATTEMPTS=100 "$runtime_bin" stop >/dev/null
+wait "$controller_pid"
+controller_pid=""
+foreground_pid=""
+[[ ! -e "$controller_reservation_dir" && ! -e "$control_dir/recovery-record" ]] || fail 'foreground controller left ownership state after stop'
+
+write_config clean-session "" no
+env "${test_env[@]}" "$runtime_controller" _controller >"$test_root/clean.out" 2>"$test_root/clean.err" &
+controller_pid=$!
+printf '%s\n' "$controller_pid" >"$fake_state/launchd-pid"
+wait_for 'controller ready' "[[ -f '$control_dir/recovery-record' && -f '$root_status_file' ]] && rg -q '^session_id[[:space:]]+clean-session$' '$control_dir/recovery-record' && [[ \"\$(sed -n '1p' '$fake_state/sleep-disabled')\" == 1 ]]"
+[[ ! -e "$controller_reservation_dir" ]] || fail 'launchd controller did not consume its reboot reservation'
+[[ -r "$owner_file" && -r "$root_status_file" ]] || fail 'controller did not publish service owner and runtime state'
+[[ "$(stat -f '%Lp' "$owner_file")" == 644 && "$(stat -f '%Lp' "$root_status_file")" == 644 ]] || fail 'published service metadata or status was not mode 0644'
+chmod 000 "$control_dir/recovery-record"
+env "${test_env[@]}" CI=1 "$runtime_bin" status --json >"$test_root/root-only-recovery-status.json"
+mise exec -- jq -e 'select(.phase == "running" and .recovery_required == false and .controller.alive == true)' "$test_root/root-only-recovery-status.json" >/dev/null \
+  || fail 'status required read access to the root-only recovery record'
+chmod 0600 "$control_dir/recovery-record"
+cp "$control_dir/recovery-record" "$test_root/recovery-record-before-rejected-run"
+env "${test_env[@]}" "$runtime_bin" run >"$test_root/rejected-foreground.out" 2>"$test_root/rejected-foreground.err" &
+rejected_run_pid=$!
+for (( attempt = 0; attempt < 20; attempt++ )); do
+  ps -p "$rejected_run_pid" -o pid= >/dev/null 2>&1 || break
+  sleep 0.05
+done
+if ps -p "$rejected_run_pid" -o pid= >/dev/null 2>&1; then
+  fail 'foreground run continued after its configuration was rejected'
+fi
+exit_code=0
+wait "$rejected_run_pid" || exit_code=$?
+rejected_run_pid=""
+[[ "$exit_code" == 1 ]] || fail "rejected foreground run exited $exit_code instead of 1"
+cmp -s "$test_root/recovery-record-before-rejected-run" "$control_dir/recovery-record" || fail 'rejected foreground run replaced the current recovery record'
+ps -p "$controller_pid" -o pid= >/dev/null 2>&1 || fail 'rejected foreground run interfered with the running controller'
+rg -q 'service is enabled' "$test_root/rejected-foreground.err" || fail 'rejected foreground run did not explain the enabled-service conflict'
+chmod 000 "$control_dir/config"
+env "${test_env[@]}" "$runtime_bin" start >"$test_root/idempotent-start.out"
+rg -q '^bag-mode is already running$' "$test_root/idempotent-start.out" || fail 'idempotent start required user access to root config'
+other_home="$test_root/other-home"
+mkdir -p "$other_home/Library/Application Support/bag-mode"
+{
+  printf 'last_event\trecovery_failed\n'
+  printf 'pid\t%s\n' "$$"
+} >"$other_home/Library/Application Support/bag-mode/state"
+env "${test_env[@]}" BAG_MODE_TEST_HOME="$other_home" CI=1 "$runtime_bin" status --json >"$test_root/other-user-status.json"
+mise exec -- jq -e 'select(.phase == "running" and .recovery_required == false and .controller.alive == true)' "$test_root/other-user-status.json" >/dev/null \
+  || fail 'status used the invoking account state instead of the service owner state'
+env "${test_env[@]}" BAG_MODE_TEST_HOME="$other_home" "$runtime_bin" start >"$test_root/other-user-start.out"
+[[ -e "$control_dir/enabled" ]] || fail 'another account disabled a healthy service'
+printf '%s\n' "$$" >"$fake_state/launchd-pid"
+env "${test_env[@]}" CI=1 "$runtime_bin" status --json >"$test_root/stale-pid-status.json"
+mise exec -- jq -e 'select(.phase == "recovery_required" and .recovery_required == true and .controller.alive == false)' "$test_root/stale-pid-status.json" >/dev/null \
+  || fail 'status accepted a live PID that did not belong to the launchd controller'
+exit_code=0
+env "${test_env[@]}" BAG_MODE_TEST_HOME="$other_home" "$runtime_bin" start >"$test_root/other-user-unhealthy.out" 2>"$test_root/other-user-unhealthy.err" || exit_code=$?
+[[ "$exit_code" == 1 && -e "$control_dir/enabled" ]] || fail 'another account disabled an unhealthy service it did not own'
+rg -q 'service not modified' "$test_root/other-user-unhealthy.err" || fail 'foreign-owner start failure did not explain ownership protection'
+printf '%s\n' "$controller_pid" >"$fake_state/launchd-pid"
+chmod 0600 "$control_dir/config"
+printf 'status victim unchanged\n' >"$test_root/status-victim"
+ln -s "$test_root/status-victim" "$user_support_dir/state.tmp.$controller_pid"
+sleep 1.2
+rg -q '^status victim unchanged$' "$test_root/status-victim" || fail 'root status update followed a user-controlled temporary symlink'
+printf 'brightness victim unchanged\n' >"$test_root/brightness-victim"
+ln -s "$test_root/brightness-victim" "$user_support_dir/brightness.tmp.$controller_pid"
+printf '0.750000\n' >"$fake_state/brightness"
+wait_for 'updated brightness persistence' "[[ \"\$(sed -n '1p' '$user_support_dir/brightness')\" == 0.750000 ]]"
+rg -q '^brightness victim unchanged$' "$test_root/brightness-victim" || fail 'root brightness update followed a user-controlled temporary symlink'
+printf '0.700000\n' >"$fake_state/brightness"
+wait_for 'reset brightness persistence' "[[ \"\$(sed -n '1p' '$user_support_dir/brightness')\" == 0.700000 ]]"
+late_notifier="$fake_bin/late-notifier"
+cat >"$late_notifier" <<'EOF'
+#!/bin/bash
+printf '%s\n' "$*" >>"$BAG_MODE_FAKE_STATE/late-notifier-call"
+EOF
+chmod +x "$late_notifier"
+env "${test_env[@]}" "$runtime_bin" notifier set "$late_notifier" >/dev/null
+env "${test_env[@]}" CI=1 "$runtime_bin" status --json >"$test_root/status.json"
+mise exec -- jq -e 'select(.phase == "running" and .recovery_required == false and .brightness_pending == false and .controller.mode == "launchd" and .controller.alive == true and .current.sleep_disabled == 1)' "$test_root/status.json" >/dev/null \
+  || fail 'status JSON did not expose the healthy running state'
+mise exec -- jq -e 'select((has("pid_alive") | not) and (has("pid") | not) and (has("state") | not) and (.last_update | has("event")))' "$test_root/status.json" >/dev/null \
+  || fail 'status JSON retained the old mixed lifecycle schema'
+[[ "$(sed -n '1p' "$fake_state/sleep-disabled")" == 1 ]] || fail 'controller did not disable sleep'
+
+printf 'closed\n' >"$fake_state/lid"
+wait_for 'closed-lid brightness' "[[ \"\$(sed -n '1p' '$fake_state/brightness')\" == 0 ]]"
+wait_for 'closed-lid low power mode' "rg -q '^pmset powermode 1$' '$fake_state/calls'"
+
+printf 'open\n' >"$fake_state/lid"
+wait_for 'open-lid brightness restore' "[[ \"\$(sed -n '1p' '$fake_state/brightness')\" == 0.700000 ]]"
+rm -f "$control_dir/enabled"
+kill -TERM "$controller_pid"
+wait "$controller_pid"
+controller_pid=""
+rg -q -- '--event stopped' "$fake_state/late-notifier-call" || fail 'notifier installed after startup did not receive controller events'
+rm -f "$user_support_dir/notifier"
+
+[[ "$(sed -n '1p' "$fake_state/sleep-disabled")" == 0 ]] || fail 'clean stop did not restore SleepDisabled'
+rg -q '^last_event[[:space:]]+stopped$' "$user_support_dir/state" || fail 'clean stop was not recorded'
+[[ ! -e "$control_dir/recovery-record" ]] || fail 'clean stop left a recovery record'
+
+rm -f "$control_dir/recovery-snapshot" "$control_dir/restarts" "$user_support_dir/brightness"
+printf '0.720000\n' >"$fake_state/brightness"
+printf '0\n' >"$fake_state/sleep-disabled"
+printf '55\n' >"$fake_state/battery"
+printf 'open\n' >"$fake_state/lid"
+: >"$fake_state/calls"
+write_config closed-stop
+env "${test_env[@]}" "$runtime_controller" _controller >"$test_root/closed-stop.out" 2>"$test_root/closed-stop.err" &
+controller_pid=$!
+wait_for 'closed-stop controller ready' "[[ -f '$control_dir/recovery-record' && -f '$root_status_file' ]] && rg -q '^session_id[[:space:]]+closed-stop$' '$control_dir/recovery-record' && [[ \"\$(sed -n '1p' '$fake_state/sleep-disabled')\" == 1 ]]"
+: >"$fake_state/display-unavailable"
+printf 'closed\n' >"$fake_state/lid"
+wait_for 'closed-stop low power mode' "rg -q '^pmset powermode 1$' '$fake_state/calls'"
+rm -f "$control_dir/enabled"
+kill -TERM "$controller_pid"
+wait "$controller_pid"
+controller_pid=""
+[[ ! -e "$control_dir/recovery-record" ]] || fail 'closed-panel stop left a recovery record'
+[[ -e "$brightness_pending_file" ]] || fail 'closed-panel stop lost the pending brightness recovery obligation'
+[[ "$(sed -n '1p' "$fake_state/sleep-disabled")" == 0 ]] || fail 'closed-panel stop did not restore SleepDisabled'
+[[ "$(sed -n '1p' "$user_support_dir/brightness")" == 0.720000 ]] || fail 'closed-panel stop discarded the pending brightness target'
+rg -q '^last_event[[:space:]]+brightness_pending$' "$user_support_dir/state" || fail 'closed-panel stop did not expose pending brightness'
+env "${test_env[@]}" CI=1 "$runtime_bin" status --json >"$test_root/brightness-pending-status.json"
+mise exec -- jq -e 'select(.phase == "stopped" and .recovery_required == false and .brightness_pending == true and .controller.alive == false)' "$test_root/brightness-pending-status.json" >/dev/null \
+  || fail 'status mixed pending brightness into lifecycle recovery'
+exit_code=0
+env "${test_env[@]}" "$runtime_bin" recover >"$test_root/closed-recover.out" 2>"$test_root/closed-recover.err" || exit_code=$?
+[[ "$exit_code" == 69 && -e "$brightness_pending_file" ]] || fail 'closed-lid recovery did not preserve the pending brightness target'
+rg -q 'open the lid' "$test_root/closed-recover.err" || fail 'closed-lid recovery did not provide an actionable retry'
+cp "$brightness_pending_file" "$test_root/pending-before-restart"
+rm -f "$fake_state/display-unavailable"
+printf 'open\n' >"$fake_state/lid"
+printf '0.250000\n' >"$fake_state/brightness"
+write_config pending-restart
+env "${test_env[@]}" "$runtime_controller" _controller >"$test_root/pending-restart.out" 2>"$test_root/pending-restart.err" &
+controller_pid=$!
+printf '%s\n' "$controller_pid" >"$fake_state/launchd-pid"
+wait_for 'pending brightness adopted by next controller' "[[ -f '$control_dir/recovery-record' && ! -e '$brightness_pending_file' ]] && [[ \"\$(sed -n '1p' '$fake_state/brightness')\" == 0.720000 && \"\$(sed -n '1p' '$fake_state/sleep-disabled')\" == 1 ]]"
+rm -f "$control_dir/enabled"
+kill -TERM "$controller_pid"
+wait "$controller_pid"
+controller_pid=""
+cp "$test_root/pending-before-restart" "$brightness_pending_file"
+printf '0.720000\n' >"$user_support_dir/brightness"
+env "${test_env[@]}" "$runtime_bin" recover >"$test_root/open-recover.out"
+[[ ! -e "$brightness_pending_file" && ! -e "$user_support_dir/brightness" ]] || fail 'open-lid recovery did not clear pending brightness state'
+[[ "$(sed -n '1p' "$fake_state/brightness")" == 0.720000 ]] || fail 'open-lid recovery did not apply the pending brightness target'
+rg -q '^last_event[[:space:]]+recovered$' "$user_support_dir/state" || fail 'open-lid recovery did not record completion'
+env "${test_env[@]}" CI=1 "$runtime_bin" status --json >"$test_root/recovered-status.json"
+mise exec -- jq -e 'select(.phase == "stopped" and .recovery_required == false and .brightness_pending == false and .last_update.event == "recovered")' "$test_root/recovered-status.json" >/dev/null \
+  || fail 'status did not return to a clean stopped state after recovery'
+
+rm -f "$control_dir/recovery-snapshot" "$control_dir/restarts" "$user_support_dir/brightness"
+printf '0.800000\n' >"$fake_state/brightness"
+printf '0\n' >"$fake_state/sleep-disabled"
+write_config crash-session
+env "${test_env[@]}" BAG_MODE_MAX_RESTARTS=1 "$runtime_controller" _controller >"$test_root/crash.out" 2>"$test_root/crash.err" &
+controller_pid=$!
+wait_for 'crash test controller ready' "[[ -f '$control_dir/recovery-record' && -f '$root_status_file' ]] && rg -q '^session_id[[:space:]]+crash-session$' '$control_dir/recovery-record' && [[ \"\$(sed -n '1p' '$fake_state/sleep-disabled')\" == 1 ]]"
+kill -KILL "$controller_pid"
+wait "$controller_pid" 2>/dev/null || true
+controller_pid=""
+[[ -e "$control_dir/recovery-record" ]] || fail 'SIGKILL did not preserve the recovery record'
+mkdir "$controller_reservation_dir"
+{
+  printf 'session_id\tcrash-session\n'
+  printf 'controller_mode\tlaunchd\n'
+  printf 'pid\t999999\n'
+  printf 'executable\t%s\n' "$runtime_controller"
+} >"$controller_reservation_file"
+
+exit_code=0
+env "${test_env[@]}" BAG_MODE_MAX_RESTARTS=1 "$runtime_controller" _controller >"$test_root/restart.out" 2>"$test_root/restart.err" || exit_code=$?
+[[ "$exit_code" == 75 ]] || fail "crash loop exit was $exit_code, expected 75"
+[[ ! -e "$controller_reservation_dir" ]] || fail 'crash restart left its matching controller reservation behind'
+[[ ! -e "$control_dir/enabled" ]] || fail 'crash loop did not disable the service'
+[[ "$(sed -n '1p' "$fake_state/sleep-disabled")" == 0 ]] || fail 'crash loop did not restore SleepDisabled'
+rg -q '^last_event[[:space:]]+crash_loop$' "$user_support_dir/state" || fail 'crash loop event was not recorded'
+
+rm -f "$control_dir/recovery-snapshot" "$control_dir/restarts" "$control_dir/recovery-record" "$user_support_dir/brightness"
+printf '0.900000\n' >"$fake_state/brightness"
+printf '0\n' >"$fake_state/sleep-disabled"
+write_config recovery-session
+env "${test_env[@]}" "$runtime_controller" _controller >"$test_root/recovery.out" 2>"$test_root/recovery.err" &
+controller_pid=$!
+wait_for 'recovery test controller ready' "[[ -f '$control_dir/recovery-record' && -f '$root_status_file' ]] && rg -q '^session_id[[:space:]]+recovery-session$' '$control_dir/recovery-record' && [[ \"\$(sed -n '1p' '$fake_state/sleep-disabled')\" == 1 ]]"
+kill -KILL "$controller_pid"
+wait "$controller_pid" 2>/dev/null || true
+controller_pid=""
+rm -f "$control_dir/enabled"
+[[ -e "$control_dir/recovery-record" ]] || fail 'recovery test did not preserve the recovery record'
+
+exit_code=0
+env "${test_env[@]}" "$runtime_bin" start >"$test_root/recovery-required-start.out" 2>"$test_root/recovery-required-start.err" || exit_code=$?
+[[ "$exit_code" == 1 ]] || fail 'start overwrote a recovery record'
+rg -q 'recovery is required' "$test_root/recovery-required-start.err" || fail 'start failure did not explain required recovery'
+
+: >"$fake_state/fail-restore"
+exit_code=0
+env "${test_env[@]}" "$runtime_bin" recover >"$test_root/recover-failed.out" 2>"$test_root/recover-failed.err" || exit_code=$?
+[[ "$exit_code" == 1 ]] || fail 'failed recovery returned success'
+[[ -e "$control_dir/recovery-record" ]] || fail 'failed recovery deleted the recovery record'
+[[ "$(sed -n '1p' "$user_support_dir/brightness")" == 0.900000 ]] || fail 'partial recovery deleted the rolling brightness target'
+rg -q '^last_event[[:space:]]+recovery_failed$' "$user_support_dir/state" || fail 'failed recovery did not record its event'
+
+rm -f "$fake_state/fail-restore"
+printf '0.850000\n' >"$user_support_dir/brightness"
+env "${test_env[@]}" "$runtime_bin" recover >/dev/null
+[[ ! -e "$control_dir/recovery-record" ]] || fail 'successful recovery kept the recovery record'
+[[ "$(sed -n '1p' "$fake_state/brightness")" == 0.850000 ]] || fail 'recovery lost the rolling brightness target after a partial failure'
+rg -q '^last_event[[:space:]]+recovered$' "$user_support_dir/state" || fail 'successful recovery did not record completion'
+
+rm -f "$control_dir/recovery-snapshot" "$control_dir/restarts" "$user_support_dir/brightness"
+printf '0.650000\n' >"$fake_state/brightness"
+printf '0\n' >"$fake_state/sleep-disabled"
+write_config startup-failure
+: >"$fake_state/fail-start"
+exit_code=0
+env "${test_env[@]}" "$runtime_controller" _controller >"$test_root/startup-failure.out" 2>"$test_root/startup-failure.err" || exit_code=$?
+rm -f "$fake_state/fail-start"
+[[ "$exit_code" == 70 ]] || fail "pmset startup failure exited $exit_code instead of 70"
+[[ ! -e "$control_dir/enabled" ]] || fail 'startup failure left the service enabled'
+[[ ! -e "$control_dir/recovery-record" ]] || fail 'startup failure kept a recovery record after successful rollback'
+[[ "$(sed -n '1p' "$fake_state/sleep-disabled")" == 0 ]] || fail 'startup failure did not preserve SleepDisabled'
+rg -q '^last_event[[:space:]]+startup_failed$' "$user_support_dir/state" || fail 'startup failure did not record its event'
+
+{
+  printf 'session_id\tstartup-failure\n'
+  printf 'pid\t999999\n'
+  printf 'started_at\ttest\n'
+} >"$control_dir/recovery-record"
+write_config conflicting-session
+exit_code=0
+env "${test_env[@]}" "$runtime_controller" _controller >"$test_root/conflict.out" 2>"$test_root/conflict.err" || exit_code=$?
+[[ "$exit_code" == 76 ]] || fail "recovery conflict exited $exit_code instead of 76"
+[[ -e "$control_dir/recovery-record" ]] || fail 'recovery conflict overwrote the recovery record'
+[[ ! -e "$control_dir/enabled" ]] || fail 'recovery conflict left the service enabled'
+env "${test_env[@]}" "$runtime_bin" recover >/dev/null
+[[ ! -e "$control_dir/recovery-record" ]] || fail 'conflicted session could not be recovered from its recovery record'
+
+{
+  printf 'session_id\tstartup-failure\n'
+  printf 'pid\t999999\n'
+  printf 'started_at\ttest\n'
+} >"$control_dir/recovery-record"
+: >"$fake_state/fail-brightness"
+exit_code=0
+env "${test_env[@]}" "$runtime_bin" uninstall --yes >"$test_root/uninstall-failed.out" 2>"$test_root/uninstall-failed.err" || exit_code=$?
+[[ "$exit_code" == 1 ]] || fail 'uninstall ignored a failed restoration'
+[[ -x "$runtime_bin" && -e "$control_dir/recovery-record" ]] || fail 'failed uninstall deleted recovery material'
+rm -f "$fake_state/fail-brightness"
+env "${test_env[@]}" "$runtime_bin" recover >/dev/null
+
+rm -f "$control_dir/recovery-snapshot" "$control_dir/restarts" "$control_dir/recovery-record" "$user_support_dir/brightness"
+printf '0.600000\n' >"$fake_state/brightness"
+printf '0\n' >"$fake_state/sleep-disabled"
+write_config preflight-session
+env "${test_env[@]}" "$runtime_controller" _controller >"$test_root/preflight-running.out" 2>"$test_root/preflight-running.err" &
+controller_pid=$!
+wait_for 'preflight test controller ready' "[[ -f '$control_dir/recovery-record' && -f '$root_status_file' ]] && rg -q '^session_id[[:space:]]+preflight-session$' '$control_dir/recovery-record' && [[ \"\$(sed -n '1p' '$fake_state/sleep-disabled')\" == 1 ]]"
+kill -KILL "$controller_pid"
+wait "$controller_pid" 2>/dev/null || true
+controller_pid=""
+[[ -e "$control_dir/recovery-record" && "$(sed -n '1p' "$fake_state/sleep-disabled")" == 1 ]] || fail 'preflight fixture did not leave a recovery record'
+rm -f "$control_dir/config"
+exit_code=0
+env "${test_env[@]}" "$runtime_controller" _controller >"$test_root/preflight-failed.out" 2>"$test_root/preflight-failed.err" || exit_code=$?
+[[ "$exit_code" == 78 ]] || fail "missing-config preflight exited $exit_code instead of 78"
+[[ ! -e "$control_dir/enabled" ]] || fail 'preflight failure left launchd KeepAlive enabled'
+[[ ! -e "$control_dir/recovery-record" ]] || fail 'preflight failure did not clear the recovery record after successful fallback restoration'
+[[ "$(sed -n '1p' "$fake_state/sleep-disabled")" == 0 ]] || fail 'preflight fallback did not restore SleepDisabled'
+rg -q '^last_event[[:space:]]+startup_failed$' "$user_support_dir/state" || fail 'preflight failure did not record its event'
+
+rm -f "$control_dir/recovery-snapshot" "$control_dir/restarts" "$control_dir/recovery-record" "$user_support_dir/brightness"
+printf '0.550000\n' >"$fake_state/brightness"
+printf '0\n' >"$fake_state/sleep-disabled"
+printf '55\n' >"$fake_state/battery"
+write_config invalid-session
+env "${test_env[@]}" "$runtime_controller" _controller >"$test_root/invalid-session-running.out" 2>"$test_root/invalid-session-running.err" &
+controller_pid=$!
+wait_for 'invalid-session fixture ready' "[[ -f '$control_dir/recovery-record' && -f '$root_status_file' ]] && rg -q '^session_id[[:space:]]+invalid-session$' '$control_dir/recovery-record' && [[ \"\$(sed -n '1p' '$fake_state/sleep-disabled')\" == 1 ]]"
+kill -KILL "$controller_pid"
+wait "$controller_pid" 2>/dev/null || true
+controller_pid=""
+: >"$control_dir/recovery-snapshot"
+exit_code=0
+env "${test_env[@]}" "$runtime_controller" _controller >"$test_root/invalid-session-failed.out" 2>"$test_root/invalid-session-failed.err" || exit_code=$?
+[[ "$exit_code" == 78 ]] || fail "invalid recovery session exited $exit_code instead of 78"
+[[ ! -e "$control_dir/enabled" ]] || fail 'invalid recovery session left launchd KeepAlive enabled'
+[[ -e "$control_dir/recovery-record" ]] || fail 'invalid recovery snapshot discarded the recovery record'
+rg -q '^last_event[[:space:]]+recovery_failed$' "$user_support_dir/state" || fail 'invalid recovery snapshot did not record its failure'
+
+rm -f "$control_dir/recovery-snapshot" "$control_dir/restarts" "$control_dir/recovery-record" "$user_support_dir/brightness"
+printf '0.500000\n' >"$fake_state/brightness"
+printf '0\n' >"$fake_state/sleep-disabled"
+printf '55\n' >"$fake_state/battery"
+printf 'open\n' >"$fake_state/lid"
+: >"$fake_state/calls"
+hanging_notifier="$user_support_dir/hanging-notifier"
+cat >"$hanging_notifier" <<'EOF'
+#!/bin/bash
+trap '' TERM
+/bin/sleep 30
+EOF
+chmod +x "$hanging_notifier"
+write_config notifier-timeout "$hanging_notifier"
+env "${test_env[@]}" "$runtime_controller" _controller >"$test_root/notifier-timeout.out" 2>"$test_root/notifier-timeout.err" &
+controller_pid=$!
+wait_for 'notifier timeout fixture altered sleep' "[[ \"\$(sed -n '1p' '$fake_state/sleep-disabled')\" == 1 ]] && rg -q '^session_id[[:space:]]+notifier-timeout$' '$user_support_dir/state'"
+: >"$fake_state/display-unavailable"
+printf 'closed\n' >"$fake_state/lid"
+wait_for 'closed unavailable display low power mode' "rg -q '^pmset powermode 1$' '$fake_state/calls'"
+printf '5\n' >"$fake_state/battery"
+wait_for 'battery minimum restored sleep despite hanging notifier' "[[ \"\$(sed -n '1p' '$fake_state/sleep-disabled')\" == 0 ]]"
+wait "$controller_pid"
+controller_pid=""
+[[ ! -e "$control_dir/enabled" && ! -e "$control_dir/recovery-record" ]] || fail 'battery minimum did not complete clean shutdown with a hanging notifier'
+[[ -e "$brightness_pending_file" ]] || fail 'battery minimum discarded pending brightness recovery'
+rg -q '^last_event[[:space:]]+brightness_pending$' "$user_support_dir/state" || fail 'battery minimum did not expose pending brightness'
+[[ "$(sed -n '1p' "$user_support_dir/brightness")" == 0.500000 ]] || fail 'closed-panel shutdown discarded the pending brightness target'
+rg -q 'brightness pending until the built-in display returns' "$test_home/Library/Logs/bag-mode/bag-mode.log" || fail 'closed-panel shutdown did not record pending brightness'
+rg -q 'notifier event=.* rc=124' "$test_home/Library/Logs/bag-mode/bag-mode.log" || fail 'hanging notifier was not terminated by the CLI timeout'
+if fd --max-depth 1 --type f '^notifier-output\.' "$control_dir" | rg -q .; then
+  fail 'notifier timeout left a root-owned output file'
+fi
+rm -f "$fake_state/display-unavailable"
+printf 'open\n' >"$fake_state/lid"
+env "${test_env[@]}" "$runtime_bin" recover >"$test_root/notifier-open-recover.out"
+[[ ! -e "$brightness_pending_file" ]] || fail 'recovery after battery shutdown left pending brightness state'
+
+rm -f "$control_dir/enabled" "$control_dir/recovery-record" "$control_dir/recovery-snapshot" "$control_dir/restarts" "$root_status_file" "$user_support_dir/brightness"
+printf '0.610000\n' >"$fake_state/brightness"
+printf '0\n' >"$fake_state/sleep-disabled"
+printf '55\n' >"$fake_state/battery"
+{
+  printf 'session_id\tidentity-guard\n'
+  printf 'pid\t%s\n' "$$"
+  printf 'controller_mode\tforeground\n'
+  printf 'executable\t/not/bag-mode\n'
+} >"$control_dir/recovery-record"
+exit_code=0
+env "${test_env[@]}" "$runtime_bin" stop >"$test_root/foreground-identity.out" 2>"$test_root/foreground-identity.err" || exit_code=$?
+[[ "$exit_code" == 1 && -e "$control_dir/recovery-record" ]] || fail 'foreground identity mismatch did not preserve the recovery record'
+ps -p "$$" -o pid= >/dev/null 2>&1 || fail 'foreground identity mismatch signaled an unrelated process'
+rm -f "$control_dir/recovery-record"
+env "${test_env[@]}" "$runtime_bin" run >"$test_root/foreground-stop.out" 2>"$test_root/foreground-stop.err" &
+controller_pid=$!
+wait_for 'foreground stop fixture ready' "[[ -f '$control_dir/recovery-record' && -f '$root_status_file' ]] && rg -q '^controller_mode[[:space:]]+foreground$' '$control_dir/recovery-record' && [[ \"\$(sed -n '1p' '$fake_state/sleep-disabled')\" == 1 ]]"
+foreground_pid="$(awk -F '\t' '$1 == "pid" { print $2; exit }' "$root_status_file")"
+env "${test_env[@]}" CI=1 "$runtime_bin" status --json >"$test_root/foreground-status.json"
+mise exec -- jq -e 'select(.phase == "running" and .recovery_required == false and .controller.alive == true and .controller.mode == "foreground")' "$test_root/foreground-status.json" >/dev/null \
+  || fail 'status did not recognize the foreground controller'
+env "${test_env[@]}" BAG_MODE_STOP_WAIT_ATTEMPTS=100 "$runtime_bin" stop >"$test_root/foreground-stop-command.out"
+wait "$controller_pid"
+controller_pid=""
+foreground_pid=""
+[[ ! -e "$control_dir/recovery-record" ]] || fail 'stop reported success while a foreground recovery record remained'
+rg -q '^last_event[[:space:]]+stopped$' "$root_status_file" || fail 'foreground stop did not record completion'
+
+env "${test_env[@]}" "$runtime_bin" run >"$test_root/foreground-recover.out" 2>"$test_root/foreground-recover.err" &
+controller_pid=$!
+wait_for 'foreground recover fixture ready' "[[ -f '$control_dir/recovery-record' && -f '$root_status_file' ]] && rg -q '^controller_mode[[:space:]]+foreground$' '$control_dir/recovery-record' && [[ \"\$(sed -n '1p' '$fake_state/sleep-disabled')\" == 1 ]]"
+foreground_pid="$(awk -F '\t' '$1 == "pid" { print $2; exit }' "$root_status_file")"
+env "${test_env[@]}" BAG_MODE_STOP_WAIT_ATTEMPTS=100 "$runtime_bin" recover >"$test_root/foreground-recover-command.out"
+wait "$controller_pid"
+controller_pid=""
+foreground_pid=""
+[[ ! -e "$control_dir/recovery-record" ]] || fail 'recover reported success while a foreground recovery record remained'
+
+env "${test_env[@]}" "$runtime_bin" run >"$test_root/foreground-uninstall.out" 2>"$test_root/foreground-uninstall.err" &
+controller_pid=$!
+wait_for 'foreground uninstall fixture ready' "[[ -f '$control_dir/recovery-record' && -f '$root_status_file' ]] && rg -q '^controller_mode[[:space:]]+foreground$' '$control_dir/recovery-record' && [[ \"\$(sed -n '1p' '$fake_state/sleep-disabled')\" == 1 ]]"
+foreground_pid="$(awk -F '\t' '$1 == "pid" { print $2; exit }' "$root_status_file")"
+: >"$fake_state/fail-bootout"
+exit_code=0
+env "${test_env[@]}" BAG_MODE_STOP_WAIT_ATTEMPTS=100 "$runtime_bin" uninstall --yes >"$test_root/foreground-uninstall-failed.out" 2>"$test_root/foreground-uninstall-failed.err" || exit_code=$?
+wait "$controller_pid"
+controller_pid=""
+foreground_pid=""
+[[ "$exit_code" == 1 ]] || fail 'uninstall ignored a LaunchDaemon bootout failure'
+[[ -x "$runtime_bin" && -x "$runtime_controller" && -f "$runtime_plist" && -d "$control_dir" ]] \
+  || fail 'failed LaunchDaemon unload deleted installed system files'
+env "${test_env[@]}" "$fake_bin/launchctl" print system/dev.bag-mode.daemon >/dev/null \
+  || fail 'failed bootout fixture unexpectedly unloaded the LaunchDaemon'
+rg -q 'LaunchDaemon is still loaded' "$test_root/foreground-uninstall-failed.err" \
+  || fail 'failed uninstall did not explain that the LaunchDaemon remained loaded'
+rm -f "$fake_state/fail-bootout" "$runtime_plist"
+env "${test_env[@]}" "$runtime_bin" uninstall --yes >"$test_root/foreground-uninstall-command.out"
+if env "${test_env[@]}" "$fake_bin/launchctl" print system/dev.bag-mode.daemon >/dev/null 2>&1; then
+  fail 'uninstall reported success while the LaunchDaemon remained loaded'
+fi
+[[ ! -e "$runtime_bin" && ! -e "$runtime_controller" && ! -e "$control_dir" ]] || fail 'uninstall left executable or recovery state behind'
+[[ "$(sed -n '1p' "$fake_state/sleep-disabled")" == 0 ]] || fail 'foreground uninstall did not restore SleepDisabled'
+
+echo 'bag-mode tests passed'
