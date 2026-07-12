@@ -6,9 +6,11 @@ import argparse
 import configparser
 import json
 import re
+import subprocess
 from pathlib import Path
 
 from .models import Finding, LintReport, Severity
+from .render import finding_document, render_findings
 
 PATH_RE = re.compile(
     r"(?P<path>"
@@ -154,20 +156,23 @@ def _classify_path(
             value=raw,
         )
     if raw.startswith(("/Users/", "/home/", "/root/")):
+        if relative in FULL_HOME_REQUIRED_FILES:
+            matches_home = raw == str(home) or raw.startswith(f"{home}/")
+            return _finding(
+                Severity.OK
+                if matches_home and _path_exists(raw, home)
+                else Severity.WARN,
+                "path.full_home_required",
+                FULL_HOME_REQUIRED_FILES[relative],
+                source,
+                line=line,
+                value=raw,
+            )
         if not (raw == str(home) or raw.startswith(f"{home}/")):
             return _finding(
                 Severity.ERROR,
                 "path.absolute_home",
                 f"absolute user path does not match HOME={home}",
-                source,
-                line=line,
-                value=raw,
-            )
-        if relative in FULL_HOME_REQUIRED_FILES:
-            return _finding(
-                Severity.OK,
-                "path.full_home_required",
-                FULL_HOME_REQUIRED_FILES[relative],
                 source,
                 line=line,
                 value=raw,
@@ -299,6 +304,16 @@ def _mackup_findings(repo_root: Path) -> list[Finding]:
         if config.has_section("applications_to_sync")
         else []
     )
+    tracked_paths = set(_tracked_paths(repo_root))
+
+    def reference_exists(candidate: Path) -> bool:
+        if not tracked_paths:
+            return candidate.exists()
+        return any(
+            tracked == candidate or candidate in tracked.parents
+            for tracked in tracked_paths
+        )
+
     findings: list[Finding] = []
     for application in applications:
         app_path = repo_root / "mackup/applications" / f"{application}.cfg"
@@ -325,7 +340,19 @@ def _mackup_findings(repo_root: Path) -> list[Finding]:
                 repo_root / "reference/.config" / item
                 for item in app_config.options("xdg_configuration_files")
             )
-        if not any(candidate.exists() for candidate in candidates):
+        missing_candidates = [
+            candidate for candidate in candidates if not reference_exists(candidate)
+        ]
+        for candidate in missing_candidates:
+            findings.append(
+                _finding(
+                    Severity.ERROR,
+                    "mackup.reference_missing",
+                    f"selected application {application} maps missing reference data",
+                    candidate,
+                ),
+            )
+        if candidates and len(missing_candidates) == len(candidates):
             findings.append(
                 _finding(
                     Severity.ERROR,
@@ -343,6 +370,99 @@ def _mackup_findings(repo_root: Path) -> list[Finding]:
                 config_path,
             ),
         )
+    return findings
+
+
+def _tracked_paths(repo_root: Path) -> list[Path]:
+    completed = subprocess.run(
+        ["git", "-C", str(repo_root), "ls-files", "-z"],
+        check=False,
+        capture_output=True,
+    )
+    if completed.returncode != 0:
+        return []
+    return [repo_root / item.decode() for item in completed.stdout.split(b"\0") if item]
+
+
+def _tracked_file_findings(repo_root: Path) -> list[Finding]:
+    findings: list[Finding] = []
+    for file_path in _tracked_paths(repo_root):
+        relative = file_path.relative_to(repo_root).as_posix()
+        basename = file_path.name.lower()
+        if (
+            "private" in basename
+            and ".tpl." not in basename
+            and ".template." not in basename
+        ):
+            findings.append(
+                _finding(
+                    Severity.ERROR,
+                    "repository.private_tracked",
+                    "materialized private file must not be tracked",
+                    file_path,
+                ),
+            )
+        if relative.startswith("generated/") and file_path.name != ".gitkeep":
+            findings.append(
+                _finding(
+                    Severity.ERROR,
+                    "repository.generated_tracked",
+                    "generated file has no repository regeneration task",
+                    file_path,
+                ),
+            )
+    return findings
+
+
+LEGACY_REFERENCES = (
+    "~/dotfiles/home/",
+    "$HOME/dotfiles/home/",
+    "${HOME}/dotfiles/home/",
+    "modules/mackup/",
+    "modules/bin/dotfiles-backup",
+    "modules/bin/dotfiles-doctor",
+    "modules/bin/dotfiles-init",
+    "modules/bin/dotfiles-restore",
+    "modules/bin/dotfiles-sync",
+    "modules/bin/dotfiles-up",
+    "mise run backup",
+    "mise run doctor",
+    "mise run init",
+    "mise run restore",
+    "mise run sync",
+    "mise run up",
+)
+
+
+def _legacy_reference_findings(repo_root: Path) -> list[Finding]:
+    findings: list[Finding] = []
+    for file_path in _tracked_paths(repo_root):
+        relative = file_path.relative_to(repo_root)
+        if (
+            file_path == Path(__file__).resolve()
+            or "tests" in relative.parts
+            or not file_path.is_file()
+        ):
+            continue
+        if _is_binary(file_path):
+            continue
+        try:
+            lines = file_path.read_text(errors="replace").splitlines()
+        except OSError:
+            continue
+        for line_number, line in enumerate(lines, start=1):
+            for legacy in LEGACY_REFERENCES:
+                if legacy in line:
+                    findings.append(
+                        _finding(
+                            Severity.ERROR,
+                            "repository.legacy_reference",
+                            "removed dotfiles workflow is still referenced",
+                            file_path,
+                            line=line_number,
+                            value=legacy,
+                        ),
+                    )
     return findings
 
 
@@ -364,25 +484,9 @@ def inspect_repository(repo_root: Path, home: Path) -> LintReport:
     findings = _path_findings(repo_root, home)
     findings.extend(_mackup_findings(repo_root))
     findings.extend(_symlink_findings(repo_root))
+    findings.extend(_tracked_file_findings(repo_root))
+    findings.extend(_legacy_reference_findings(repo_root))
     return LintReport(schema_version=1, findings=tuple(findings))
-
-
-def _document(report: LintReport) -> dict[str, object]:
-    return {
-        "schema_version": report.schema_version,
-        "ok": report.ok,
-        "findings": [
-            {
-                "check": finding.check,
-                "severity": finding.severity.value,
-                "code": finding.code,
-                "message": finding.message,
-                "path": str(finding.path) if finding.path else None,
-                "action": finding.action,
-            }
-            for finding in report.findings
-        ],
-    }
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -394,28 +498,9 @@ def main(argv: list[str] | None = None) -> int:
     repo_root = Path(__file__).resolve().parents[1]
     report = inspect_repository(repo_root, Path.home())
     if args.as_json:
-        print(json.dumps(_document(report), indent=2, sort_keys=True))
+        print(json.dumps(finding_document(report), indent=2, sort_keys=True))
     else:
-        visible = [
-            finding
-            for finding in report.findings
-            if args.include_info or finding.severity is not Severity.OK
-        ]
-        if not visible:
-            print("No repository findings.")
-        for finding in visible:
-            print(f"{finding.severity.value.upper():7} {finding.code}")
-            print(f"        {finding.message}")
-        counts = {
-            severity.value: sum(
-                finding.severity is severity for finding in report.findings
-            )
-            for severity in Severity
-        }
-        print(
-            "Summary: "
-            + ", ".join(f"{count} {name}" for name, count in counts.items()),
-        )
+        render_findings(report, include_ok=args.include_info)
     return 0 if report.is_ok(strict=args.strict) else 1
 
 

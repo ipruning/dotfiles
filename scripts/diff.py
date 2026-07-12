@@ -10,7 +10,7 @@ import sys
 from pathlib import Path
 from typing import Protocol, cast
 
-from .models import Drift, DriftKind, DriftReport
+from .models import Drift, DriftKind, DriftReport, FileKind
 
 MACKUP_SOURCE = (
     "git+https://github.com/ipruning/mackup@d3fa03a7f1cb3cea7f6e2f14a345c9e02ee921df"
@@ -82,6 +82,17 @@ class SubprocessMackupRunner:
         return document
 
 
+def _file_kind(value: object, field: str) -> FileKind | None:
+    if value is None:
+        return None
+    if not isinstance(value, str):
+        raise DriftProtocolError(f"{field} must be a string or null")
+    try:
+        return FileKind(value)
+    except ValueError as error:
+        raise DriftProtocolError(f"{field} has unknown file kind {value}") from error
+
+
 def _string_or_none(value: object, field: str) -> str | None:
     if value is None or isinstance(value, str):
         return value
@@ -143,11 +154,11 @@ def _parse_document(document: dict[str, object]) -> DriftReport:
                 reference_path=Path(reference_path),
                 live_path=Path(live_path),
                 kind=kind,
-                reference_kind=_string_or_none(
+                reference_kind=_file_kind(
                     typed_change.get("reference_kind"),
                     "reference_kind",
                 ),
-                live_kind=_string_or_none(
+                live_kind=_file_kind(
                     typed_change.get("live_kind"),
                     "live_kind",
                 ),
@@ -183,8 +194,10 @@ def _as_json(report: DriftReport) -> dict[str, object]:
                 "reference_path": str(change.reference_path),
                 "live_path": str(change.live_path),
                 "kind": change.kind.value,
-                "reference_kind": change.reference_kind,
-                "live_kind": change.live_kind,
+                "reference_kind": (
+                    change.reference_kind.value if change.reference_kind else None
+                ),
+                "live_kind": change.live_kind.value if change.live_kind else None,
                 "error": change.error,
             }
             for change in report.changes

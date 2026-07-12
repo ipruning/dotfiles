@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import cast
 
 import pytest
 
@@ -69,3 +70,24 @@ class InvalidSchemaRunner:
 def test_inspect_drift_rejects_unknown_schema(tmp_path: Path) -> None:
     with pytest.raises(DriftProtocolError, match="schema_version"):
         inspect_drift(tmp_path, tmp_path, runner=InvalidSchemaRunner())
+
+
+class InvalidFileKindRunner(StubMackupRunner):
+    def inspect(
+        self,
+        repo_root: Path,
+        home: Path,
+        application: str | None,
+    ) -> dict[str, object]:
+        document = super().inspect(repo_root, home, "git")
+        changes = document["changes"]
+        assert isinstance(changes, list)
+        change = cast("dict[str, object]", changes[0])
+        assert isinstance(change, dict)
+        change["live_kind"] = "socket"
+        return document
+
+
+def test_inspect_drift_rejects_unknown_file_kind(tmp_path: Path) -> None:
+    with pytest.raises(DriftProtocolError, match="unknown file kind"):
+        inspect_drift(tmp_path, tmp_path, runner=InvalidFileKindRunner())

@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import argparse
 import json
+import platform
 import shutil
 import stat
+import subprocess
 from collections.abc import Callable
 from pathlib import Path
 
@@ -13,6 +15,7 @@ from ruamel.yaml import YAML
 from ruamel.yaml.error import YAMLError
 
 from .models import CheckReport, Finding, Severity
+from .render import finding_document, render_findings
 
 ExecutableFinder = Callable[[str], str | None]
 
@@ -59,9 +62,20 @@ def _private_git_findings(home: Path) -> list[Finding]:
     include_present = False
     if gitconfig.is_file():
         try:
-            include_present = "~/.private.gitconfig" in gitconfig.read_text(
-                errors="replace",
+            completed = subprocess.run(
+                [
+                    "git",
+                    "config",
+                    "--file",
+                    str(gitconfig),
+                    "--get-all",
+                    "include.path",
+                ],
+                check=False,
+                capture_output=True,
+                text=True,
             )
+            include_present = "~/.private.gitconfig" in completed.stdout.splitlines()
         except OSError:
             include_present = False
     findings = [
@@ -194,6 +208,7 @@ def inspect_host(
     home: Path,
     *,
     executable_finder: ExecutableFinder = shutil.which,
+    system_name: str | None = None,
 ) -> CheckReport:
     """Return explicit required and optional capabilities for this host."""
     findings = [
@@ -202,7 +217,7 @@ def inspect_host(
             required=True,
             executable_finder=executable_finder,
         )
-        for command in ("python", "uv", "mise")
+        for command in ("git", "python", "uv", "mise")
     ]
     findings.extend(_private_git_findings(home))
     findings.append(
@@ -247,25 +262,25 @@ def inspect_host(
                 f"Zellij plugin {plugin_name}",
             ),
         )
+    active_system = system_name or platform.system()
+    if active_system == "Darwin":
+        findings.append(
+            _check_executable(
+                "launchctl",
+                required=False,
+                executable_finder=executable_finder,
+            ),
+        )
+    else:
+        findings.append(
+            _finding(
+                "macos.launchctl",
+                Severity.SKIPPED,
+                "macos.launchctl_skipped",
+                f"launchctl is not applicable on {active_system}",
+            ),
+        )
     return CheckReport(schema_version=1, findings=tuple(findings))
-
-
-def _document(report: CheckReport) -> dict[str, object]:
-    return {
-        "schema_version": report.schema_version,
-        "ok": report.ok,
-        "findings": [
-            {
-                "check": finding.check,
-                "severity": finding.severity.value,
-                "code": finding.code,
-                "message": finding.message,
-                "path": str(finding.path) if finding.path else None,
-                "action": finding.action,
-            }
-            for finding in report.findings
-        ],
-    }
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -276,23 +291,9 @@ def main(argv: list[str] | None = None) -> int:
     repo_root = Path(__file__).resolve().parents[1]
     report = inspect_host(repo_root, Path.home())
     if args.as_json:
-        print(json.dumps(_document(report), indent=2, sort_keys=True))
+        print(json.dumps(finding_document(report), indent=2, sort_keys=True))
     else:
-        for finding in report.findings:
-            print(f"{finding.severity.value.upper():7} {finding.code}")
-            print(f"        {finding.message}")
-            if finding.path:
-                print(f"        {finding.path}")
-        counts = {
-            severity.value: sum(
-                finding.severity is severity for finding in report.findings
-            )
-            for severity in Severity
-        }
-        print(
-            "Summary: "
-            + ", ".join(f"{count} {name}" for name, count in counts.items()),
-        )
+        render_findings(report, include_ok=True)
     return 0 if report.is_ok(strict=args.strict) else 1
 
 

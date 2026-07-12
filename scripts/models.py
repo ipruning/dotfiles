@@ -22,6 +22,13 @@ class Severity(StrEnum):
     SKIPPED = "skipped"
 
 
+class FileKind(StrEnum):
+    FILE = "file"
+    DIRECTORY = "directory"
+    LINK = "link"
+    UNSUPPORTED = "unsupported"
+
+
 @dataclass(frozen=True)
 class Finding:
     check: str
@@ -33,7 +40,7 @@ class Finding:
 
 
 @dataclass(frozen=True)
-class CheckReport:
+class FindingReport:
     schema_version: int
     findings: tuple[Finding, ...]
 
@@ -49,19 +56,13 @@ class CheckReport:
 
 
 @dataclass(frozen=True)
-class LintReport:
-    schema_version: int
-    findings: tuple[Finding, ...]
+class CheckReport(FindingReport):
+    pass
 
-    @property
-    def ok(self) -> bool:
-        return self.is_ok()
 
-    def is_ok(self, *, strict: bool = False) -> bool:
-        failing = {Severity.ERROR}
-        if strict:
-            failing.add(Severity.WARN)
-        return all(finding.severity not in failing for finding in self.findings)
+@dataclass(frozen=True)
+class LintReport(FindingReport):
+    pass
 
 
 @dataclass(frozen=True)
@@ -70,8 +71,8 @@ class Drift:
     reference_path: Path
     live_path: Path
     kind: DriftKind
-    reference_kind: str | None
-    live_kind: str | None
+    reference_kind: FileKind | None
+    live_kind: FileKind | None
     error: str | None = None
 
 

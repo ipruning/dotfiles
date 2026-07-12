@@ -27,7 +27,7 @@ Python and uv versions; uv provides the locked project dependencies.
 ```bash
 git clone <your-repo-url> ~/dotfiles
 cd ~/dotfiles
-mise install
+mise install python uv
 mise tasks
 ```
 
