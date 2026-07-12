@@ -34,9 +34,9 @@ unless the repository already marks those paths as generated files.
 
 ## Self-installing modules
 
-- A substantial standalone tool may live in `modules/<tool>/` when one
-  executable owns its command interface, installation, removal, generated
-  launchd configuration, and runbook.
+- A substantial standalone tool may live in `modules/<tool>/` when its
+  executable owns the command interface, installation, removal, and generated
+  launchd configuration. Keep module-specific tests and runbooks beside it.
 - Do not expose a self-installing module through `modules/bin/`; its installed
   path is the command interface. Run the module source directly only for its
   first installation or an upgrade.
@@ -46,8 +46,7 @@ unless the repository already marks those paths as generated files.
 
 ## Verification
 
-- For script changes, run the relevant CLI directly with representative inputs.
-- For self-installing module lifecycle changes, run its test when present,
-  validate the dry run, and verify installed `status` after installation.
-- Keep verification output focused: report the command, exit status, and the
-  behavior that proves the change.
+- Run a changed command through its public CLI interface.
+- For self-installing lifecycle changes, run the module test when present,
+  validate `install --dry-run`, perform the installation, and verify installed
+  `status`.
