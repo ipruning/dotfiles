@@ -112,3 +112,40 @@ def test_inspect_repository_warns_when_checkout_is_not_home_dotfiles(
     assert relocated_finding.severity is Severity.WARN
     assert relocated.ok is True
     assert relocated.is_ok(strict=True) is False
+
+
+def test_inspect_repository_allows_only_declared_optional_reference_candidates(
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    (repo_root / "reference").mkdir(parents=True)
+    (repo_root / "reference/.required").write_text("configured\n")
+    (repo_root / "mackup/applications").mkdir(parents=True)
+    mapping = repo_root / "mackup/applications/example.cfg"
+    mapping.write_text(
+        "[application]\nname = example\n"
+        "[configuration_files]\n.required\n.optional\n"
+        "[dotfiles_optional_reference_files]\n.optional\n",
+    )
+    (repo_root / "mackup/mackup.cfg").write_text(
+        "[storage]\nengine = file_system\npath = dotfiles\n"
+        "directory = reference\n[applications_to_sync]\nexample\n",
+    )
+
+    declared = inspect_repository(repo_root, home)
+    assert declared.ok is True
+    assert "mackup.reference_missing" not in {
+        finding.code for finding in declared.findings
+    }
+
+    mapping.write_text(
+        "[application]\nname = example\n"
+        "[configuration_files]\n.required\n.optional\n"
+        "[dotfiles_optional_reference_files]\n.not-mapped\n",
+    )
+    invalid = inspect_repository(repo_root, home)
+    codes = {finding.code for finding in invalid.findings}
+
+    assert "mackup.reference_missing" in codes
+    assert "mackup.optional_reference_unmapped" in codes

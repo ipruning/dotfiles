@@ -49,6 +49,7 @@ FULL_HOME_REQUIRED_FILES = {
         "zellij-sessionizer paths do not expand home variables"
     ),
 }
+OPTIONAL_REFERENCE_SECTION = "dotfiles_optional_reference_files"
 OPTIONAL_PATHS = {
     ("reference/.zshenv", "/usr/local/sbin"),
     ("reference/.zshrc", "/usr/local/Homebrew"),
@@ -340,10 +341,32 @@ def _mackup_findings(repo_root: Path) -> list[Finding]:
                 repo_root / "reference/.config" / item
                 for item in app_config.options("xdg_configuration_files")
             )
+        optional_candidates = (
+            {
+                repo_root / "reference" / item
+                for item in app_config.options(OPTIONAL_REFERENCE_SECTION)
+            }
+            if app_config.has_section(OPTIONAL_REFERENCE_SECTION)
+            else set()
+        )
+        candidate_set = set(candidates)
+        for candidate in sorted(optional_candidates - candidate_set):
+            findings.append(
+                _finding(
+                    Severity.ERROR,
+                    "mackup.optional_reference_unmapped",
+                    f"selected application {application} marks an unmapped candidate optional",
+                    candidate,
+                ),
+            )
         missing_candidates = [
             candidate for candidate in candidates if not reference_exists(candidate)
         ]
-        for candidate in missing_candidates:
+        for candidate in (
+            candidate
+            for candidate in missing_candidates
+            if candidate not in optional_candidates
+        ):
             findings.append(
                 _finding(
                     Severity.ERROR,
