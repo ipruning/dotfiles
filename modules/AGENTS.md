@@ -2,9 +2,9 @@
 
 ## Scope
 
-`modules/` stores source files: executable commands, command helpers, shell
-config fragments, Mackup config, LaunchAgent and LaunchDaemon plist files, and
-templates. Keep runtime state and generated local files outside this tree
+`modules/` stores source files: executable commands, self-installing tools,
+command helpers, shell config fragments, Mackup config, LaunchDaemon plist
+files, and templates. Keep runtime state and generated local files outside this tree
 unless the repository already marks those paths as generated files.
 
 ## `bin/`
@@ -32,12 +32,6 @@ unless the repository already marks those paths as generated files.
   and logs under `~/Library/Logs`. Do not write runtime state into the
   repository.
 
-## `libexec/`
-
-- Put implementation files behind user-facing commands in `modules/libexec/`.
-- Keep direct user commands in `modules/bin/`; `modules/libexec/` files may rely
-  on those commands for runtime selection, environment setup, and stable argv.
-
 ## Self-installing modules
 
 - A substantial standalone tool may live in `modules/<tool>/` when one
@@ -48,23 +42,6 @@ unless the repository already marks those paths as generated files.
 - Generate host-specific plist files during installation. Do not keep another
   plist source file when the executable is already the sole owner of its
   lifecycle.
-
-## `launchagents/`
-
-- Put source plist files for macOS user LaunchAgents in `modules/launchagents/`.
-- Install these plist files to `~/Library/LaunchAgents/` at runtime.
-- Use this directory only for user-session jobs that run under the logged-in
-  user. Do not add LaunchDaemon or system-domain jobs here.
-- Validate plist changes with `plutil -lint`.
-- After changing `ProgramArguments` or environment, use
-  `launchctl bootout gui/$UID ~/Library/LaunchAgents/<file>.plist` and then
-  `launchctl bootstrap gui/$UID ~/Library/LaunchAgents/<file>.plist` so launchd
-  rereads the plist. `launchctl kickstart` alone restarts the existing job
-  definition and may not pick up plist edits.
-- Inspect loaded jobs with `launchctl print gui/$UID/<label>`.
-- By default, avoid LaunchAgents that run frequent probes or print repeated
-  logs. Disable or rate-limit probes that repeatedly wake, restart, or query
-  unstable macOS services.
 
 ## `launchdaemons/`
 
@@ -82,14 +59,14 @@ unless the repository already marks those paths as generated files.
   launchd rereads the plist.
 - Inspect loaded jobs with `sudo launchctl print system/<label>`.
 - Keep LaunchDaemons narrow and quiet. Prefer one-shot setup jobs for system
-  limits and privileged helpers; keep long-running user-facing monitors in
-  `launchagents/` unless they require root.
+  limits and privileged helpers. A self-installing tool that owns a generated
+  LaunchDaemon plist keeps that plist inside its implementation instead.
 
 ## Verification
 
 - For script changes, run the relevant CLI directly with representative inputs.
-- For LaunchAgent changes, validate the source plist and inspect the loaded job
-  with `launchctl print gui/$UID/<label>`.
+- For self-installing module lifecycle changes, run its own test and verify its
+  installed `status` after installation.
 - For LaunchDaemon changes, validate the source plist, install it with
   `root:wheel` ownership and `0644` mode, then inspect the loaded job with
   `sudo launchctl print system/<label>`.

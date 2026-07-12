@@ -124,7 +124,8 @@ modules/bin/dotfiles-zsh-profile
 
 ### Standalone bag-mode
 
-`modules/bin/bag-mode` is a self-installing, single-file macOS utility. It keeps
+`modules/bag-mode/bag-mode` is a self-installing, single-file macOS utility,
+exposed in the repository as `modules/bin/bag-mode`. It keeps
 a MacBook awake with its lid closed, restores its captured settings when
 stopped, and uses a LaunchDaemon to supervise one privileged controller.
 

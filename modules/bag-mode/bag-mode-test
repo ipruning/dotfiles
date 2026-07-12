@@ -3,7 +3,7 @@
 set -euo pipefail
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
-bag_mode="$script_dir/../bin/bag-mode"
+bag_mode="$script_dir/bag-mode"
 readme="$script_dir/../../README.md"
 test_root="$(mktemp -d -t bag-mode-test)"
 test_home="$test_root/home"
