@@ -37,7 +37,6 @@ rebase = true
 colorMoved = default
 algorithm = histogram
 indentHeuristic = true
-compactionHeuristic = true
 
 # [delta]
 # navigate = true
@@ -86,8 +85,8 @@ smudge = git-lfs smudge -- %f
 process = git-lfs filter-process
 
 [gc]
-reflogExpire = 200
-reflogExpireUnreachable = 90
+reflogExpire = 200.days.ago
+reflogExpireUnreachable = 90.days.ago
 
 [protocol]
 version = 2 # https://blog.github.com/changelog/2018-11-08-git-protocol-v2-support/
@@ -113,13 +112,15 @@ log-graphstat = "!sh -c 'git log --pretty=format:\"%C(auto)%h%d%n%s%n%C(auto)%C(
 # %(color:red)%(contents:subject)%(color:reset)\" \
 # refs/heads --sort=-committerdate' -"
 
-diff = "!sh -c 'git diff -w'"
+# Git aliases cannot override the built-in `git diff` command.
+# diff = "!sh -c 'git diff -w'"
 diff-conflicts = "!sh -c 'git diff --name-only --diff-filter=U'"
 diff-unmerged = "!sh -c 'git diff --name-only -z --diff-filter=U | xargs -0 -n1 ${EDITOR:-vi}' -"
 
-ddiff = -c diff.external=difft diff
-dlog = -c diff.external=difft log --ext-diff
-dshow = -c diff.external=difft show --ext-diff
+# Requires the currently uninstalled `difft` executable.
+# ddiff = -c diff.external=difft diff
+# dlog = -c diff.external=difft log --ext-diff
+# dshow = -c diff.external=difft show --ext-diff
 
 blame = "!sh -c 'git blame -w -C -C -C'"
 
