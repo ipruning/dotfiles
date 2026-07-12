@@ -13,7 +13,7 @@ from typing import Protocol, cast
 from .models import Drift, DriftKind, DriftReport, FileKind
 
 MACKUP_SOURCE = (
-    "git+https://github.com/ipruning/mackup@78d8dff630763de1f65b2a92843bf8b95c996e6f"
+    "git+https://github.com/ipruning/mackup@8fcbd25a079832bfbedac5c41491452eb1742e79"
 )
 
 
