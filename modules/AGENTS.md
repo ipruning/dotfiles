@@ -3,8 +3,8 @@
 ## Scope
 
 `modules/` stores source files: executable commands, self-installing tools,
-command helpers, shell config fragments, Mackup config, LaunchDaemon plist
-files, and templates. Keep runtime state and generated local files outside this tree
+command helpers, shell config fragments, Mackup config, and templates. Keep
+runtime state and generated local files outside this tree
 unless the repository already marks those paths as generated files.
 
 ## `bin/`
@@ -43,32 +43,10 @@ unless the repository already marks those paths as generated files.
   plist source file when the executable is already the sole owner of its
   lifecycle.
 
-## `launchdaemons/`
-
-- Put source plist files for macOS system LaunchDaemons in
-  `modules/launchdaemons/`.
-- Install these plist files to `/Library/LaunchDaemons/` at runtime.
-- Use this directory only for root-owned system-domain jobs. Do not add
-  logged-in user-session jobs here.
-- Validate plist changes with `plutil -lint`.
-- Installed LaunchDaemon plist files must be owned by `root:wheel` and have
-  mode `0644`.
-- After changing a loaded LaunchDaemon, use
-  `sudo launchctl bootout system /Library/LaunchDaemons/<file>.plist` and then
-  `sudo launchctl bootstrap system /Library/LaunchDaemons/<file>.plist` so
-  launchd rereads the plist.
-- Inspect loaded jobs with `sudo launchctl print system/<label>`.
-- Keep LaunchDaemons narrow and quiet. Prefer one-shot setup jobs for system
-  limits and privileged helpers. A self-installing tool that owns a generated
-  LaunchDaemon plist keeps that plist inside its implementation instead.
-
 ## Verification
 
 - For script changes, run the relevant CLI directly with representative inputs.
-- For self-installing module lifecycle changes, run its own test and verify its
-  installed `status` after installation.
-- For LaunchDaemon changes, validate the source plist, install it with
-  `root:wheel` ownership and `0644` mode, then inspect the loaded job with
-  `sudo launchctl print system/<label>`.
+- For self-installing module lifecycle changes, run its test when present,
+  validate the dry run, and verify installed `status` after installation.
 - Keep verification output focused: report the command, exit status, and the
   behavior that proves the change.

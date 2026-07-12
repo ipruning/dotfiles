@@ -300,12 +300,7 @@ healthy system.
 After changing the maxfiles LaunchDaemon:
 
 ```zsh
-plutil -lint modules/launchdaemons/com.alex.limit.maxfiles.plist
-sudo install -o root -g wheel -m 644 \
-  modules/launchdaemons/com.alex.limit.maxfiles.plist \
-  /Library/LaunchDaemons/com.alex.limit.maxfiles.plist
-sudo launchctl bootout system /Library/LaunchDaemons/com.alex.limit.maxfiles.plist 2>/dev/null || true
-sudo launchctl bootstrap system /Library/LaunchDaemons/com.alex.limit.maxfiles.plist
-sudo launchctl print system/com.alex.limit.maxfiles
-launchctl limit maxfiles
+macos-maxfiles install --dry-run
+macos-maxfiles install
+macos-maxfiles status --json
 ```

@@ -189,6 +189,18 @@ bag-mode notifier test
 The sender is copied into the user's Application Support directory. The
 controller does not read Skillshare directories at runtime.
 
+### Standalone macos-maxfiles
+
+`modules/macos-maxfiles/macos-maxfiles` owns the machine-wide launchd maxfiles
+setting. It generates and installs its LaunchDaemon instead of keeping a bare
+plist in the repository:
+
+```bash
+macos-maxfiles install --dry-run
+macos-maxfiles install
+macos-maxfiles status --json
+```
+
 ## Repository Rules
 
 These rules keep file ownership clear:

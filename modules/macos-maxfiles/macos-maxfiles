@@ -1,0 +1,174 @@
+#!/bin/bash
+
+set -uo pipefail
+
+VERSION="1.0.0"
+LABEL="com.alex.limit.maxfiles"
+PLIST_FILE="/Library/LaunchDaemons/$LABEL.plist"
+LAUNCHCTL_BIN="/bin/launchctl"
+SUDO_BIN="/usr/bin/sudo"
+SOFT_LIMIT="8192"
+HARD_LIMIT="65536"
+PLIST_TMP=""
+
+cleanup() {
+  [[ -z "$PLIST_TMP" ]] || rm -f "$PLIST_TMP"
+}
+trap cleanup EXIT
+
+usage() {
+  cat <<'EOF'
+Manage the machine-wide macOS launchd maxfiles limit.
+
+Usage: macos-maxfiles COMMAND
+
+Commands:
+  install [--dry-run]  Install and load the LaunchDaemon
+  status [--json]      Show installation and effective limits
+  uninstall --yes      Remove the LaunchDaemon; current limits last until reboot
+  version              Show the CLI version
+EOF
+}
+
+die() {
+  printf 'macos-maxfiles: %s\n' "$*" >&2
+  exit 1
+}
+
+usage_error() {
+  printf 'macos-maxfiles: %s\n' "$*" >&2
+  exit 2
+}
+
+authorize_root() {
+  if (( EUID == 0 )); then
+    return
+  fi
+  if [[ -t 0 && -t 1 ]]; then
+    "$SUDO_BIN" -v || die "sudo authorization failed"
+  elif ! "$SUDO_BIN" -n true 2>/dev/null; then
+    die "sudo authorization required; run 'sudo -v' in an interactive terminal, then retry"
+  fi
+}
+
+run_root() {
+  if (( EUID == 0 )); then
+    "$@"
+  else
+    "$SUDO_BIN" "$@"
+  fi
+}
+
+write_plist() {
+  local destination="$1"
+  cat >"$destination" <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>$LABEL</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>$LAUNCHCTL_BIN</string>
+    <string>limit</string>
+    <string>maxfiles</string>
+    <string>$SOFT_LIMIT</string>
+    <string>$HARD_LIMIT</string>
+  </array>
+
+  <key>RunAtLoad</key>
+  <true/>
+</dict>
+</plist>
+EOF
+}
+
+loaded() {
+  "$LAUNCHCTL_BIN" print "system/$LABEL" >/dev/null 2>&1
+}
+
+unload() {
+  local deadline
+  loaded || return 0
+  run_root "$LAUNCHCTL_BIN" bootout "system/$LABEL" >/dev/null || return 1
+  deadline=$((SECONDS + 3))
+  while loaded; do
+    (( SECONDS < deadline )) || return 1
+    sleep 0.1
+  done
+}
+
+install_mode() {
+  local dry_run=0
+  [[ "${1:-}" == --dry-run ]] && { dry_run=1; shift; }
+  (( $# == 0 )) || usage_error "usage: macos-maxfiles install [--dry-run]"
+  [[ "$(uname -s)" == Darwin ]] || die "install is supported only on macOS"
+
+  PLIST_TMP="$(mktemp -t macos-maxfiles.plist.XXXXXX)" || die "could not create temporary plist"
+  write_plist "$PLIST_TMP"
+  /usr/bin/plutil -lint "$PLIST_TMP" >/dev/null || die "generated plist is invalid"
+
+  if (( dry_run == 1 )); then
+    printf 'ready="true" plist="%s" soft_limit="%s" hard_limit="%s"\n' \
+      "$PLIST_FILE" "$SOFT_LIMIT" "$HARD_LIMIT"
+    return
+  fi
+
+  authorize_root
+  unload || die "could not unload system/$LABEL"
+  run_root /usr/bin/install -o root -g wheel -m 0644 "$PLIST_TMP" "$PLIST_FILE" \
+    || die "could not install $PLIST_FILE"
+  run_root "$LAUNCHCTL_BIN" bootstrap system "$PLIST_FILE" >/dev/null \
+    || die "could not bootstrap system/$LABEL"
+  loaded || die "LaunchDaemon did not load: system/$LABEL"
+  printf 'installed="true" loaded="true" plist="%s"\n' "$PLIST_FILE"
+}
+
+status_mode() {
+  local output_json=0 installed=false is_loaded=false limits soft hard owner mode
+  [[ "${1:-}" == --json ]] && { output_json=1; shift; }
+  (( $# == 0 )) || usage_error "usage: macos-maxfiles status [--json]"
+
+  [[ -f "$PLIST_FILE" ]] && installed=true
+  loaded && is_loaded=true
+  limits="$("$LAUNCHCTL_BIN" limit maxfiles 2>/dev/null || true)"
+  read -r soft hard < <(awk '$1 == "maxfiles" { print $2, $3 }' <<<"$limits")
+  owner="$(stat -f '%Su:%Sg' "$PLIST_FILE" 2>/dev/null || true)"
+  mode="$(stat -f '%Lp' "$PLIST_FILE" 2>/dev/null || true)"
+
+  if (( output_json == 1 )); then
+    printf '{"installed":%s,"loaded":%s,"soft_limit":"%s","hard_limit":"%s","owner":"%s","mode":"%s","plist":"%s"}\n' \
+      "$installed" "$is_loaded" "${soft:-}" "${hard:-}" "$owner" "$mode" "$PLIST_FILE"
+  else
+    printf 'installed="%s" loaded="%s" soft_limit="%s" hard_limit="%s" owner="%s" mode="%s" plist="%s"\n' \
+      "$installed" "$is_loaded" "${soft:-}" "${hard:-}" "$owner" "$mode" "$PLIST_FILE"
+  fi
+  [[ "$installed" == true && "$is_loaded" == true ]]
+}
+
+uninstall_mode() {
+  [[ "${1:-}" == --yes && $# == 1 ]] || usage_error "usage: macos-maxfiles uninstall --yes"
+  authorize_root
+  unload || die "could not unload system/$LABEL; installed file was kept"
+  run_root /bin/rm -f "$PLIST_FILE" || die "could not remove $PLIST_FILE"
+  printf 'installed="false" loaded="false" effective_until_reboot="true"\n'
+}
+
+main() {
+  local command="${1:-}"
+  [[ $# -gt 0 ]] && shift
+  case "$command" in
+    install) install_mode "$@" ;;
+    status) status_mode "$@" ;;
+    uninstall) uninstall_mode "$@" ;;
+    version) (( $# == 0 )) || usage_error "usage: macos-maxfiles version"; printf 'macos-maxfiles %s\n' "$VERSION" ;;
+    help|-h|--help) (( $# == 0 )) || usage_error "usage: macos-maxfiles help"; usage ;;
+    '') usage; exit 2 ;;
+    *) usage_error "unknown command: $command" ;;
+  esac
+}
+
+main "$@"
