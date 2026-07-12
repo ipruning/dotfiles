@@ -2,9 +2,12 @@ tap "boldsoftware/tap", trusted: true
 tap "charmbracelet/tap", trusted: true
 tap "cirruslabs/cli", trusted: true
 tap "entireio/tap", trusted: true
+tap "kitlangton/tap"
 tap "longbridge/tap", trusted: true
+tap "lycorp-jp/tap"
 tap "modem-dev/tap"
 tap "nikitabobko/tap", trusted: true
+tap "nkzw-tech/tap"
 tap "openai/tools", trusted: true
 tap "parallel-web/tap"
 tap "psviderski/tap", trusted: true
@@ -32,6 +35,8 @@ brew "broot"
 brew "btop"
 # Vector graphics library with cross-device output support
 brew "cairo"
+# Create and run Linux containers using lightweight virtual machines
+brew "container"
 # GNU File, Shell, and Text utilities
 brew "coreutils"
 # Embeddable SQL OLAP Database Management System
@@ -58,6 +63,8 @@ brew "gnupg"
 brew "govulncheck"
 # Tool for glamorous shell scripts
 brew "gum"
+# Command-line interface for Hetzner Cloud
+brew "hcloud"
 # Agent multiplexer that lives in your terminal
 brew "herdr"
 # Improved top (interactive process viewer)
@@ -166,6 +173,10 @@ brew "charmbracelet/tap/crush"
 brew "cirruslabs/cli/sshpass"
 # Run macOS and Linux VMs on Apple Hardware
 brew "cirruslabs/cli/tart", trusted: true
+# Terminal UI for GitHub pull requests
+brew "kitlangton/tap/ghui", trusted: true
+# Give AI agents eyes and hands on iOS Simulator and Android devices
+brew "lycorp-jp/tap/sim-use", trusted: true
 # Desktop-inspired terminal diff viewer for agent-authored changesets
 brew "modem-dev/tap/hunk", trusted: true
 # Uncloud CLI
@@ -182,6 +193,8 @@ cask "1password@beta"
 cask "nikitabobko/tap/aerospace"
 # Display management tool
 cask "betterdisplay"
+# Visual diff tool for Git changes
+cask "nkzw-tech/tap/codiff", trusted: true
 # Write, edit, and chat about your code with AI
 cask "cursor"
 cask "font-maple-mono-nf-cn"
@@ -211,6 +224,8 @@ cask "rectangle"
 cask "boldsoftware/tap/shelley"
 # Rime input method engine
 cask "squirrel-app"
+# Menu bar manager
+cask "thaw"
 # Open-source code editor
 cask "visual-studio-code"
 # Install and switch between multiple versions of Xcode
@@ -256,4 +271,3 @@ go "cmd/go"
 go "cmd/gofmt"
 cargo "mdbook-mermaid"
 uv "harness", source: "file:///Users/alex/Developer/tries/browser-harness"
-npm "codex-sync"

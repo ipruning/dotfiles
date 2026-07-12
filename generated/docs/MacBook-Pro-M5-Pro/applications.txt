@@ -5,9 +5,10 @@ AeroSpace
 brrr
 calibre
 Capture One
+ChatGPT
 Claude
-Codex
 CodexBar
+Codiff
 Compressor Creator Studio
 Contexts
 CrystalFetch
@@ -55,6 +56,7 @@ Repo Prompt
 RepoPrompt CE
 Roam Research
 Safari
+SenPlayer
 Setapp
 Slack
 Surfingkeys
@@ -64,6 +66,7 @@ Tailscale
 Tampermonkey
 Telegram
 TestFlight
+Thaw
 Things3
 Typeless
 uBlock Origin Lite
