@@ -1,5 +1,7 @@
+#!/usr/bin/env -S uv run --script
 # /// script
 # requires-python = ">=3.11"
+# dependencies = []
 # ///
 
 from __future__ import annotations
@@ -12,6 +14,7 @@ import hashlib
 import json
 import os
 import platform
+import plistlib
 import re
 import resource
 import shlex
@@ -26,7 +29,11 @@ from pathlib import Path
 from typing import Any
 
 
-VERSION = "0.5.0"
+VERSION = "0.6.0"
+LABEL = "com.alex.macos-session-health"
+USER_BIN = Path.home() / ".local" / "bin" / "macos-session-health"
+LAUNCH_AGENT = Path.home() / "Library" / "LaunchAgents" / f"{LABEL}.plist"
+LOG_DIR = Path.home() / "Library" / "Logs" / "macos-session-health"
 DEFAULT_DB = (
     Path.home()
     / "Library"
@@ -38,6 +45,14 @@ DEFAULT_APP = "/Applications/Visual Studio Code.app"
 CODEX_APP = Path("/Applications/ChatGPT.app")
 CODEX_CONFIG = Path.home() / ".codex" / "config.toml"
 CODEX_CHROME_NATIVE_HOSTS = Path.home() / ".codex" / "chrome-native-hosts-v2.json"
+DEFAULT_BRRR_HELPER = (
+    Path.home()
+    / ".agents"
+    / "skills"
+    / "skills-stable__brrr-now"
+    / "scripts"
+    / "brrr-send.sh"
+)
 CODEX_CHROME_EXTENSION_ID = "hehggadaopoacecdllhhajmbjkdcmajg"
 CODEX_BUNDLED_COMPUTER_USE = (
     CODEX_APP
@@ -127,6 +142,147 @@ def print_records(records: list[dict[str, Any]], output_format: str) -> None:
         return
     for record in records:
         print(" ".join(f"{key}={logfmt_quote(value)}" for key, value in record.items()))
+
+
+def launchd_target() -> str:
+    return f"gui/{os.getuid()}/{LABEL}"
+
+
+def launchd_job() -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        ["launchctl", "print", launchd_target()],
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+
+def bootout_launch_agent() -> None:
+    if launchd_job().returncode != 0:
+        return
+    result = subprocess.run(
+        ["launchctl", "bootout", launchd_target()],
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        detail = result.stderr.strip() or result.stdout.strip() or "launchctl bootout failed"
+        raise CliError(detail)
+    deadline = time.monotonic() + 3
+    while launchd_job().returncode == 0:
+        if time.monotonic() >= deadline:
+            raise CliError(f"LaunchAgent is still loaded: {launchd_target()}")
+        time.sleep(0.1)
+
+
+def launch_agent_payload() -> dict[str, Any]:
+    launch_path = ":".join(
+        [
+            str(Path.home() / ".local" / "share" / "mise" / "shims"),
+            str(Path.home() / ".local" / "bin"),
+            "/opt/homebrew/bin",
+            "/usr/local/bin",
+            "/usr/bin",
+            "/bin",
+            "/usr/sbin",
+            "/sbin",
+        ]
+    )
+    return {
+        "Label": LABEL,
+        "ProgramArguments": [
+            str(USER_BIN),
+            "--quiet",
+            "watch",
+            "--interval",
+            "60",
+        ],
+        "RunAtLoad": True,
+        "KeepAlive": True,
+        "StandardOutPath": str(LOG_DIR / "agent.out.log"),
+        "StandardErrorPath": str(LOG_DIR / "agent.err.log"),
+        "EnvironmentVariables": {
+            "PATH": launch_path,
+            "PYTHONUNBUFFERED": "1",
+        },
+    }
+
+
+def install_launch_agent() -> int:
+    if sys.platform != "darwin":
+        raise CliError("install is supported only on macOS")
+
+    source = Path(__file__).resolve()
+    USER_BIN.parent.mkdir(parents=True, exist_ok=True)
+    LAUNCH_AGENT.parent.mkdir(parents=True, exist_ok=True)
+    LOG_DIR.mkdir(parents=True, exist_ok=True)
+    DEFAULT_DB.parent.mkdir(parents=True, exist_ok=True)
+
+    if USER_BIN.exists() or USER_BIN.is_symlink():
+        if not USER_BIN.is_symlink() or USER_BIN.resolve() != source:
+            raise CliError(f"refusing to replace unmanaged executable: {USER_BIN}")
+    else:
+        temporary_link = USER_BIN.with_name(f".{USER_BIN.name}.{os.getpid()}.tmp")
+        temporary_link.unlink(missing_ok=True)
+        temporary_link.symlink_to(source)
+        os.replace(temporary_link, USER_BIN)
+
+    bootout_launch_agent()
+    temporary_plist = LAUNCH_AGENT.with_name(f".{LAUNCH_AGENT.name}.{os.getpid()}.tmp")
+    temporary_plist.write_bytes(plistlib.dumps(launch_agent_payload(), fmt=plistlib.FMT_XML))
+    temporary_plist.chmod(0o644)
+    os.replace(temporary_plist, LAUNCH_AGENT)
+
+    result = subprocess.run(
+        ["launchctl", "bootstrap", f"gui/{os.getuid()}", str(LAUNCH_AGENT)],
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        detail = result.stderr.strip() or result.stdout.strip() or "launchctl bootstrap failed"
+        raise CliError(detail)
+    if launchd_job().returncode != 0:
+        raise CliError(f"LaunchAgent did not load: {launchd_target()}")
+
+    print_records(
+        [{"installed": True, "loaded": True, "executable": USER_BIN, "plist": LAUNCH_AGENT}],
+        "logfmt",
+    )
+    return 0
+
+
+def uninstall_launch_agent() -> int:
+    if sys.platform != "darwin":
+        raise CliError("uninstall is supported only on macOS")
+    if USER_BIN.exists() and not USER_BIN.is_symlink():
+        raise CliError(f"refusing to remove unmanaged executable: {USER_BIN}")
+
+    bootout_launch_agent()
+    LAUNCH_AGENT.unlink(missing_ok=True)
+    if USER_BIN.is_symlink():
+        USER_BIN.unlink()
+
+    print_records(
+        [{"installed": False, "loaded": False, "state_preserved": DEFAULT_DB.parent}],
+        "logfmt",
+    )
+    return 0
+
+
+def launch_agent_status(output_format: str) -> int:
+    job = launchd_job()
+    pid_match = re.search(r"^\s*pid = (\d+)$", job.stdout, re.MULTILINE)
+    record = {
+        "installed": USER_BIN.is_symlink() and USER_BIN.exists(),
+        "loaded": job.returncode == 0,
+        "pid": int(pid_match.group(1)) if pid_match else None,
+        "executable": str(USER_BIN),
+        "plist": str(LAUNCH_AGENT),
+    }
+    print_records([record], output_format)
+    return 0 if record["installed"] and record["loaded"] else 1
 
 
 def open_read_db(db_path: Path) -> sqlite3.Connection:
@@ -2822,7 +2978,7 @@ def render_incident_markdown(report: dict[str, Any]) -> str:
         f"- generated_at: `{report['generated_at']}`",
         f"- db: `{report['db']}`",
         f"- window_hours: `{report['window_hours']}`",
-        "- runbook: `modules/bin/macos-session-health.md`",
+        "- runbook: `modules/macos-session-health/README.md`",
         "",
         "## Collector Run Summary",
         "",
@@ -3316,15 +3472,15 @@ def build_parser() -> argparse.ArgumentParser:
   macos-session-health recover
   macos-session-health events --format json
 
-See modules/bin/macos-session-health.md for the syspolicyd incident runbook.
+Run `macos-session-health install` to install or refresh the user LaunchAgent.
 """,
     )
     parser.add_argument("--version", action="version", version=f"%(prog)s {VERSION}")
     parser.add_argument("--db", type=Path, default=DEFAULT_DB, help=f"SQLite path. Default: {DEFAULT_DB}")
     parser.add_argument("--no-db", action="store_true", help="Only emit stdout; do not write SQLite.")
     parser.add_argument("--quiet", action="store_true", help="Write SQLite without stdout logfmt output.")
-    parser.add_argument("--top", type=int, default=int(os.getenv("MACOS_SESSION_HEALTH_TOP", "25")))
-    parser.add_argument("--fd-warn", type=int, default=int(os.getenv("MACOS_SESSION_HEALTH_FD_WARN", "1024")))
+    parser.add_argument("--top", type=int, default=int(os.getenv("MACOS_SESSION_HEALTH_TOP", "40")))
+    parser.add_argument("--fd-warn", type=int, default=int(os.getenv("MACOS_SESSION_HEALTH_FD_WARN", "512")))
     parser.add_argument(
         "--codex-app",
         type=Path,
@@ -3458,7 +3614,7 @@ See modules/bin/macos-session-health.md for the syspolicyd incident runbook.
     )
     parser.add_argument("--app", action="append", default=[], help="App bundle to include in bundle and optional signing probes. Repeatable.")
     parser.add_argument("--command-timeout", type=float, default=5)
-    parser.add_argument("--lsof-timeout", type=float, default=float(os.getenv("MACOS_SESSION_HEALTH_LSOF_TIMEOUT", "8")))
+    parser.add_argument("--lsof-timeout", type=float, default=float(os.getenv("MACOS_SESSION_HEALTH_LSOF_TIMEOUT", "5")))
     parser.add_argument(
         "--fd-top-interval-minutes",
         type=int,
@@ -3468,7 +3624,7 @@ See modules/bin/macos-session-health.md for the syspolicyd incident runbook.
     parser.add_argument(
         "--app-assess-timeout",
         type=float,
-        default=float(os.getenv("MACOS_SESSION_HEALTH_APP_ASSESS_TIMEOUT", "8")),
+        default=float(os.getenv("MACOS_SESSION_HEALTH_APP_ASSESS_TIMEOUT", "5")),
     )
     parser.add_argument(
         "--spawn-check-timeout",
@@ -3490,8 +3646,8 @@ See modules/bin/macos-session-health.md for the syspolicyd incident runbook.
         help="Run codesign app verification at most this often. Set 0 to disable.",
     )
     parser.add_argument("--collect-log-excerpt", action=argparse.BooleanOptionalAction, default=True)
-    parser.add_argument("--log-timeout", type=float, default=6)
-    parser.add_argument("--log-lines", type=int, default=80)
+    parser.add_argument("--log-timeout", type=float, default=5)
+    parser.add_argument("--log-lines", type=int, default=120)
     parser.add_argument(
         "--passive-log-interval-minutes",
         type=int,
@@ -3531,7 +3687,7 @@ See modules/bin/macos-session-health.md for the syspolicyd incident runbook.
     parser.add_argument(
         "--brrr-helper",
         type=Path,
-        default=os.getenv("MACOS_SESSION_HEALTH_BRRR_HELPER"),
+        default=Path(os.getenv("MACOS_SESSION_HEALTH_BRRR_HELPER", str(DEFAULT_BRRR_HELPER))),
         help="Optional brrr sender helper path. Sends notifications only for allow-listed health signals.",
     )
     parser.add_argument(
@@ -3572,6 +3728,10 @@ See modules/bin/macos-session-health.md for the syspolicyd incident runbook.
     )
 
     subparsers = parser.add_subparsers(dest="command")
+    subparsers.add_parser("install", help="Install or refresh the user LaunchAgent.")
+    subparsers.add_parser("uninstall", help="Unload the LaunchAgent and remove installed files.")
+    status_parser = subparsers.add_parser("status", help="Show installation and LaunchAgent state.")
+    status_parser.add_argument("--format", choices=["logfmt", "json"], default="logfmt")
     subparsers.add_parser(
         "snapshot",
         help="Collect one snapshot.",
@@ -3651,7 +3811,18 @@ def main() -> int:
     args = parser.parse_args()
     args.command = args.command or "snapshot"
     if not args.app:
-        args.app = [DEFAULT_APP]
+        args.app = [DEFAULT_APP, str(CODEX_APP)]
+
+    try:
+        if args.command == "install":
+            return install_launch_agent()
+        if args.command == "uninstall":
+            return uninstall_launch_agent()
+        if args.command == "status":
+            return launch_agent_status(args.format)
+    except CliError as exc:
+        print_error(str(exc))
+        return 1
 
     if args.command == "query":
         if args.no_db:

@@ -230,6 +230,8 @@ These rules keep file ownership clear:
 Common patterns used in this repo:
 
 - `modules/bin/` — shell commands and Python commands
+- `modules/<tool>/` — substantial self-installing tools exposed through a
+  relative symlink in `modules/bin/`
 - `modules/zsh/` — zsh modular config fragments + templates (private env template included)
 - `modules/mackup/` — Mackup configuration (`.mackup.cfg` + per-app cfg fragments)
 - `modules/surfingkeys/` — browser automation config (Surfingkeys)

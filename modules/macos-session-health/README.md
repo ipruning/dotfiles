@@ -1,6 +1,9 @@
 # macos-session-health Runbook
 
-The LaunchAgent runs `macos-session-health`. The collector writes events to
+`macos-session-health` is a single-file CLI. It collects health data and owns
+installation, removal, status reporting, and LaunchAgent generation. The
+LaunchAgent runs the stable `~/.local/bin/macos-session-health` symlink; the
+symlink points to this module's executable. The collector writes events to
 SQLite and sends brrr notifications for a small allow-list of health signals.
 SQLite data lives in `~/Library/Application Support/macos-session-health/health.sqlite3`;
 logs live in `~/Library/Logs/macos-session-health/`.
@@ -270,22 +273,25 @@ notifications. They do not execute recovery.
 
 ## Maintenance
 
-After changing the collector or plist:
+After changing the collector:
 
 ```zsh
-mise exec -- uv run python -m py_compile modules/libexec/macos-session-health.py
+mise exec -- uv run python -m py_compile modules/macos-session-health/macos-session-health
 modules/bin/macos-session-health --version
 modules/bin/macos-session-health incident --hours 1 --limit 3 --format json \
   | python3 -m json.tool >/dev/null
 modules/bin/macos-session-health recover --format json \
   | python3 -m json.tool >/dev/null
-plutil -lint modules/launchagents/com.alex.macos-session-health.plist
 git diff --check
-install -m 644 modules/launchagents/com.alex.macos-session-health.plist \
-  "$HOME/Library/LaunchAgents/com.alex.macos-session-health.plist"
-launchctl bootout gui/$UID "$HOME/Library/LaunchAgents/com.alex.macos-session-health.plist" 2>/dev/null || true
-launchctl bootstrap gui/$UID "$HOME/Library/LaunchAgents/com.alex.macos-session-health.plist"
-launchctl print gui/$UID/com.alex.macos-session-health
+modules/bin/macos-session-health install
+modules/bin/macos-session-health status --format json | python3 -m json.tool
+```
+
+`uninstall` stops the LaunchAgent and removes its plist and `~/.local/bin`
+symlink. It preserves SQLite state and logs:
+
+```zsh
+macos-session-health uninstall
 ```
 
 Keep `spctl` and `codesign` probes disabled unless deliberately testing a

@@ -38,6 +38,17 @@ unless the repository already marks those paths as generated files.
 - Keep direct user commands in `modules/bin/`; `modules/libexec/` files may rely
   on those commands for runtime selection, environment setup, and stable argv.
 
+## Self-installing modules
+
+- A substantial standalone tool may live in `modules/<tool>/` when one
+  executable owns its command interface, installation, removal, generated
+  launchd configuration, and runbook.
+- Keep `modules/bin/<tool>` as a relative symlink to that executable so the
+  repository still has one command discovery path.
+- Generate host-specific plist files during installation. Do not keep another
+  plist source file when the executable is already the sole owner of its
+  lifecycle.
+
 ## `launchagents/`
 
 - Put source plist files for macOS user LaunchAgents in `modules/launchagents/`.
