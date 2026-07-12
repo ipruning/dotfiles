@@ -65,6 +65,20 @@ WORKSPACE_PREFIXES = (
     "${HOME}/work/",
 )
 
+OPTIONAL_PATHS = {
+    ("home/.zshenv", "/usr/local/sbin"): "Intel Homebrew fallback guarded by a directory check",
+    ("home/.zshrc", "/usr/local/Homebrew"): "Intel Homebrew fallback guarded by a directory check",
+    ("home/.zshrc", "/usr/local/Cellar"): "Intel Homebrew metadata used only when Intel Homebrew exists",
+    ("home/.zshrc", "/usr/local/share/zsh/site-functions"): "Intel Homebrew completion fallback guarded by a directory check",
+    ("home/.zshrc", "/usr/local/share/info"): "Intel Homebrew info path used only when Intel Homebrew exists",
+    ("modules/bag-mode/bag-mode", "/opt/homebrew/bin/brightness"): "Apple Silicon candidate in a cross-architecture executable resolver",
+    ("modules/bin/dotfiles-sync", "$HOME/work/tries"): "portable completion fallback used only when try-rs has no configured paths",
+    ("modules/macos-session-health/macos-session-health", "/Applications/Codex.app/Contents/MacOS/Codex"): "legacy app process name retained for compatibility detection",
+    ("modules/macos-session-health/macos-session-health", "/Applications/{app_name}.app/Contents/Resources/codex"): "app-name pattern used for process classification",
+    ("modules/macos-session-health/macos-session-health", "/Applications/{app_name}.app/Contents/Resources/cua_node/bin/node_repl"): "app-name pattern used for process classification",
+    ("modules/zsh/env.zsh", "/usr/local/bin/op"): "1Password beta candidate guarded by executable and capability checks",
+}
+
 
 @dataclass
 class Finding:
@@ -138,6 +152,10 @@ def exists_for_path(raw: str, home: Path) -> bool | None:
 def classify(rel: str, line_no: int, raw: str, text: str, root: Path, home: Path) -> Finding | None:
     if "http://" in raw or "https://" in raw:
         return None
+
+    optional_reason = OPTIONAL_PATHS.get((rel, raw))
+    if optional_reason:
+        return Finding("INFO", "optional_compatibility_path", rel, line_no, raw, optional_reason)
 
     if raw.startswith("/Users/"):
         reason = FULL_HOME_REQUIRED_FILES.get(rel)

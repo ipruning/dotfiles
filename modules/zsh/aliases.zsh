@@ -30,8 +30,6 @@ if [[ $OSTYPE == darwin* ]]; then
 
   alias js="jump-to-session"
 
-  alias keyboardmaestro='/Applications/Keyboard Maestro.app/Contents/MacOS/keyboardmaestro'
-
   alias surge="/Applications/Surge.app/Contents/Applications/surge-cli"
 fi
 
