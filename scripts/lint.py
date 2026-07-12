@@ -187,7 +187,7 @@ def _classify_path(
         )
     if raw.startswith(("~/dotfiles", "$HOME/dotfiles", "${HOME}/dotfiles")):
         expected = (home / "dotfiles").resolve()
-        severity = Severity.OK if repo_root.resolve() == expected else Severity.ERROR
+        severity = Severity.OK if repo_root.resolve() == expected else Severity.WARN
         return _finding(
             severity,
             "path.dotfiles_root",

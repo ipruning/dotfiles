@@ -77,3 +77,38 @@ def test_inspect_repository_rejects_tracked_private_generated_and_legacy_files(
     assert "repository.private_tracked" in codes
     assert "repository.generated_tracked" in codes
     assert "repository.legacy_reference" in codes
+
+
+def test_inspect_repository_warns_when_checkout_is_not_home_dotfiles(
+    tmp_path: Path,
+) -> None:
+    home = tmp_path / "home"
+    repo_root = home / "dotfiles"
+    (repo_root / "reference").mkdir(parents=True)
+    (repo_root / "mackup/applications").mkdir(parents=True)
+    (repo_root / "mackup/mackup.cfg").write_text(
+        "[storage]\nengine = file_system\npath = dotfiles\n"
+        "directory = reference\n[applications_to_sync]\n",
+    )
+    (repo_root / "tool.sh").write_text("plugin=~/dotfiles/generated/plugin.wasm\n")
+
+    installed = inspect_repository(repo_root, home)
+    installed_finding = next(
+        finding
+        for finding in installed.findings
+        if finding.code == "path.dotfiles_root"
+    )
+    assert installed_finding.severity is Severity.OK
+
+    checkout = tmp_path / "checkout"
+    repo_root.rename(checkout)
+    relocated = inspect_repository(checkout, home)
+    relocated_finding = next(
+        finding
+        for finding in relocated.findings
+        if finding.code == "path.dotfiles_root"
+    )
+
+    assert relocated_finding.severity is Severity.WARN
+    assert relocated.ok is True
+    assert relocated.is_ok(strict=True) is False
