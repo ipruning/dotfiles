@@ -4,6 +4,8 @@
 "github:larksuite/cli" = "latest"
 "github:schpet/linear-cli" = "latest"
 "go:github.com/xdevplatform/xurl" = "latest"
+"npm:@loongphy/codext" = "0.144.1-a8c9398"
+aube = "latest"
 bun = "latest"
 deno = "latest"
 go = "latest"
@@ -20,10 +22,10 @@ zig = "latest"
 lockfile_platforms = ["macos-arm64", "linux-x64"]
 minimum_release_age = "0s"
 trusted_config_paths = [
-    "~/Desktop",
-    "~/Developer",
-    "~/Documents",
-    "~/Downloads",
+  "~/Desktop",
+  "~/Developer",
+  "~/Documents",
+  "~/Downloads",
 ]
 
 [settings.ruby]
@@ -31,12 +33,12 @@ compile = false
 
 [env]
 _.path = [
-    "~/dotfiles/generated/bin",
-    "~/dotfiles/modules/bin",
-    "/opt/homebrew/opt/postgresql@18/bin",
-    "~/.bun/bin",
-    "~/.local/bin",
-    "~/.modular/bin",
-    "~/.opencode/bin",
-    "~/.raindrop/bin",
+  "~/dotfiles/generated/bin",
+  "~/dotfiles/modules/bin",
+  "/opt/homebrew/opt/postgresql@18/bin",
+  "~/.bun/bin",
+  "~/.local/bin",
+  "~/.modular/bin",
+  "~/.opencode/bin",
+  "~/.raindrop/bin",
 ]
