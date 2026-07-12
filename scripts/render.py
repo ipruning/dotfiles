@@ -5,10 +5,14 @@ from __future__ import annotations
 from .models import FindingReport, Severity
 
 
-def finding_document(report: FindingReport) -> dict[str, object]:
+def finding_document(
+    report: FindingReport,
+    *,
+    strict: bool = False,
+) -> dict[str, object]:
     return {
         "schema_version": report.schema_version,
-        "ok": report.ok,
+        "ok": report.is_ok(strict=strict),
         "findings": [
             {
                 "check": finding.check,

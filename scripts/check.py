@@ -258,7 +258,7 @@ def inspect_host(
         findings.append(
             _file_capability(
                 f"zellij.{plugin_name}",
-                repo_root / "reference/.config/zellij/plugins" / plugin_name,
+                repo_root / "generated/plugins" / plugin_name,
                 f"Zellij plugin {plugin_name}",
             ),
         )
@@ -291,7 +291,13 @@ def main(argv: list[str] | None = None) -> int:
     repo_root = Path(__file__).resolve().parents[1]
     report = inspect_host(repo_root, Path.home())
     if args.as_json:
-        print(json.dumps(finding_document(report), indent=2, sort_keys=True))
+        print(
+            json.dumps(
+                finding_document(report, strict=args.strict),
+                indent=2,
+                sort_keys=True,
+            ),
+        )
     else:
         render_findings(report, include_ok=True)
     return 0 if report.is_ok(strict=args.strict) else 1

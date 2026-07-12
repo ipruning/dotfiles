@@ -25,8 +25,7 @@ def test_inspect_host_reports_capabilities_and_their_invalid_transition(
     private_gitconfig.chmod(0o600)
     for directory in ("plugins", "completions", "functions"):
         (repo_root / "generated" / directory).mkdir(parents=True)
-    zellij_plugins = repo_root / "reference/.config/zellij/plugins"
-    zellij_plugins.mkdir(parents=True)
+    zellij_plugins = repo_root / "generated/plugins"
     for plugin_name in ("zellij-sessionizer.wasm", "zjstatus.wasm"):
         (zellij_plugins / plugin_name).write_bytes(b"wasm")
 
