@@ -25,7 +25,9 @@ def test_inspect_host_reports_capabilities_and_their_invalid_transition(
         "[include]\n  path = ~/.private.gitconfig\n",
     )
     private_gitconfig = home / ".private.gitconfig"
-    private_gitconfig.write_text("[user]\n  email = test@example.com\n")
+    private_gitconfig.write_text(
+        "[user]\n  name = Test User\n  email = test@example.com\n"
+    )
     private_gitconfig.chmod(0o600)
     for directory in ("plugins", "completions", "functions"):
         (repo_root / "generated" / directory).mkdir(parents=True)
@@ -348,6 +350,52 @@ def test_linux_lite_check_requires_only_git_and_mise_and_reports_legacy_path(
         finding for finding in clean.findings if finding.check == "shell.repo_commands"
     )
     assert clean_finding.severity is Severity.OK
+
+
+def test_private_git_identity_requires_name_and_email_and_detects_transition(
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "repo"
+    home = tmp_path / "home"
+    home.mkdir()
+    (home / ".gitconfig").write_text("[include]\n  path = ~/.private.gitconfig\n")
+    private_config = home / ".private.gitconfig"
+    private_config.write_text(
+        "[user]\n  name = Test User\n  email = test@example.com\n"
+    )
+    private_config.chmod(0o600)
+
+    healthy = inspect_host(
+        repo_root,
+        home,
+        executable_finder=lambda command: (
+            f"/tools/{command}" if command in {"git", "mise"} else None
+        ),
+        system_name="Linux",
+    )
+    healthy_identity = next(
+        finding
+        for finding in healthy.findings
+        if finding.check == "git.private_identity"
+    )
+    assert healthy_identity.severity is Severity.OK
+
+    private_config.write_text("[user]\n  email = test@example.com\n")
+    degraded = inspect_host(
+        repo_root,
+        home,
+        executable_finder=lambda command: (
+            f"/tools/{command}" if command in {"git", "mise"} else None
+        ),
+        system_name="Linux",
+    )
+    degraded_identity = next(
+        finding
+        for finding in degraded.findings
+        if finding.check == "git.private_identity"
+    )
+    assert degraded_identity.severity is Severity.WARN
+    assert degraded_identity.code == "git.private_identity_missing"
 
 
 def test_inspect_host_reports_invalid_skillshare_yaml(tmp_path: Path) -> None:

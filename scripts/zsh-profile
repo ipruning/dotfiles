@@ -18,7 +18,7 @@ log_message() {
 cd "$repo_root"
 
 missing_commands=()
-for required_command in gum hyperfine uv zsh; do
+for required_command in hyperfine uv zsh; do
   command -v "$required_command" >/dev/null 2>&1 \
     || missing_commands+=("$required_command")
 done
@@ -38,14 +38,14 @@ trace_file="$(mktemp "${TMPDIR:-/tmp}/zsh_profile.XXXXXX")"
 cleanup() { rm -f "$trace_file"; }
 trap cleanup EXIT
 
-gum log --level info "Benchmarking zsh startup ($run_count runs, $warmup_count warmup)..."
+log_message info "Benchmarking zsh startup ($run_count runs, $warmup_count warmup)..."
 hyperfine "zsh -i -c exit" --warmup "$warmup_count" --runs "$run_count"
 
-gum log --level info "Generating trace profile (interactive shell)..."
+log_message info "Generating trace profile (interactive shell)..."
 ZSH_TRACE_STARTUP=1 ZSH_TRACE_FILE="$trace_file" zsh -i -c exit 2>&1
 
 if [[ ! -f "$trace_file" ]]; then
-  gum log --level error "No trace file found at $trace_file. Ensure ~/.zshrc has the ZSH_TRACE_STARTUP hook."
+  log_message error "No trace file found at $trace_file. Ensure ~/.zshrc has the ZSH_TRACE_STARTUP hook."
   exit 1
 fi
 

@@ -137,6 +137,43 @@ def _private_git_findings(home: Path) -> list[Finding]:
             "Remove group and world write permission." if writable_by_others else None,
         ),
     )
+    identity_ready = True
+    for key in ("user.name", "user.email"):
+        try:
+            completed = subprocess.run(
+                ["git", "config", "--file", str(private_config), "--get", key],
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+        except OSError:
+            identity_ready = False
+            break
+        if completed.returncode != 0 or not completed.stdout.strip():
+            identity_ready = False
+            break
+    findings.append(
+        _finding(
+            "git.private_identity",
+            Severity.OK if identity_ready else Severity.WARN,
+            (
+                "git.private_identity_ready"
+                if identity_ready
+                else "git.private_identity_missing"
+            ),
+            (
+                "The private Git configuration defines user.name and user.email"
+                if identity_ready
+                else "The private Git configuration does not define both user.name and user.email"
+            ),
+            private_config,
+            (
+                None
+                if identity_ready
+                else "Add this host's user.name and user.email to ~/.private.gitconfig."
+            ),
+        ),
+    )
     return findings
 
 

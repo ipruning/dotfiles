@@ -39,7 +39,7 @@ from ruamel.yaml.error import YAMLError
 app = typer.Typer(help="Skillshare source switcher.", no_args_is_help=True)
 console = Console()
 error_console = Console(stderr=True)
-SS_VERSION = "skillshare-source 0.2.0"
+SKILLSHARE_SOURCE_VERSION = "skillshare-source 0.2.0"
 
 
 def _config_path() -> Path:
@@ -69,7 +69,7 @@ class PathMode(StrEnum):
 
 def _version_callback(value: bool) -> None:
     if value:
-        console.print(SS_VERSION)
+        console.print(SKILLSHARE_SOURCE_VERSION)
         raise typer.Exit()
 
 

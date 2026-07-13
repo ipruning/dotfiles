@@ -135,8 +135,8 @@ have different capabilities. `--strict` treats warnings as failures.
 
 When Skillshare is present, `check` also runs `skillshare doctor --json`. It
 does not treat the executable, YAML file, and source directory alone as proof
-that synchronization is healthy. Generated shell directories containing only
-their tracked `.gitkeep` are likewise reported as empty, not ready.
+that synchronization is healthy. Missing or empty generated shell directories
+are likewise reported as not ready.
 
 `mise run lint` inspects repository paths, Mackup mappings, and dangling
 symlinks. `mise run verify` adds Python formatting, type checking, and behavior
@@ -231,25 +231,10 @@ skillshare diff --json
 skillshare sync extras --dry-run --force --json
 ```
 
-On a new Linux machine, the complete public setup is:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/runkids/skillshare/main/install.sh | sh
-mkdir -p ~/Developer/ipruning ~/.config/skillshare
-git clone https://github.com/ipruning/skills.git ~/Developer/ipruning/skills
-test -e ~/.config/skillshare/config.yaml || \
-  cp ~/dotfiles/reference/.config/skillshare/config.yaml \
-    ~/.config/skillshare/config.yaml
-skillshare sync --json
-skillshare doctor --json
-```
-
-The `test` guard prevents an existing host-specific configuration from being
-overwritten. Private tracked repositories require that machine's authorized
-GitHub access. Current Skillshare versions may return exit status 0 while
-`install --json` contains a non-empty `failed` array; `mise run check` catches
-the resulting doctor warning, and automation must inspect that array rather
-than trusting the process status alone.
+Installing Skillshare, choosing a source repository, and synchronizing skills
+are separate operator decisions. Linux Lite reports the missing capability and
+stops there; use the Skillshare source repository's current instructions if the
+host should gain that capability.
 
 ## License
 
