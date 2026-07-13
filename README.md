@@ -94,18 +94,29 @@ mise run diff -- --profile full
 
 The command runs the immutable Mackup commit pinned in `scripts/diff.py` and
 loads application definitions directly from `mackup/applications/`. It does not
-install `~/.mackup` links and cannot back up, restore, or apply files.
+install `~/.mackup` links or change either side.
+
+Restore is deliberately application-scoped. It defaults to the same read-only
+plan; `--apply` first moves each changed live path into
+`~/.local/state/dotfiles/restore-backups/`, then links the live path to its
+reference. There is no implicit restore-all operation.
+
+```bash
+mise run restore -- git
+mise run restore -- git --json
+mise run restore -- git --apply
+```
 
 When a live configuration should become the reference, copy or edit that
-specific file deliberately and rerun `diff`. When the reference should become
-live, edit that live file deliberately. Git protects repository changes; it
-does not roll back `$HOME` or system state.
+specific reference file deliberately and rerun `diff`. Git protects repository
+changes; restore backups protect the replaced live paths.
 
 ## Host health
 
 `mise run check` reports required runtimes and optional capabilities separately.
 Current checks cover the mise/uv/Python bootstrap, private Git configuration,
-Skillshare, Television, and optional generated shell directories.
+Skillshare, Television, generated shell directories, their required runtime
+files, and generated binaries without a repository owner.
 
 ```bash
 mise run check
@@ -150,9 +161,40 @@ or write live configuration back into `reference/`. Inspect the resulting host
 state separately:
 
 ```bash
+mise run runtime -- --dry-run
 mise run check
 mise run diff
 ```
+
+## Generated runtime
+
+Shell runtime is maintained separately from tool updates and configuration
+restore. Preview the owned operations, then apply them explicitly:
+
+```bash
+mise run runtime -- --dry-run
+mise run runtime -- --dry-run --json
+mise run runtime
+```
+
+The runtime task generates Zsh initialization and completion files for commands
+already on `PATH`, removes stale completion files in its fixed ownership set,
+clones or fast-forwards the three Zsh plugins consumed by `modules/zsh/env.zsh`,
+downloads checksum-pinned Zellij WASM files, rebuilds the bat cache, and removes
+Zsh completion dumps. `--offline` limits an apply to local generation and cache
+maintenance. It never runs Skillshare or writes host inventory.
+
+The two source-built binaries are an explicit, slower sub-operation:
+
+```bash
+mise run runtime -- --build --dry-run
+mise run runtime -- --build
+```
+
+This clones or fast-forwards `ipruning/atuin` and `craftzdog/op-cache` under the
+ignored `generated/sources/`, builds them with Cargo, and atomically installs the
+artifacts into `generated/bin/`. Any other binary placed there must name its own
+owner; `mise run check` reports unknown binaries.
 
 ## Standalone tools
 

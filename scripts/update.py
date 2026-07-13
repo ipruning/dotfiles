@@ -15,7 +15,11 @@ from pathlib import Path
 
 ExecutableFinder = Callable[[str], str | None]
 StepCallback = Callable[["UpdateStep"], None]
-NEXT_COMMANDS = ("mise run check", "mise run diff")
+NEXT_COMMANDS = (
+    "mise run runtime -- --dry-run",
+    "mise run check",
+    "mise run diff",
+)
 
 
 class UpdateStatus(StrEnum):

@@ -1,12 +1,15 @@
 import json
+import hashlib
 from pathlib import Path
 
+import scripts.check as check_module
 from scripts.check import inspect_host
 from scripts.models import Severity
 
 
 def test_inspect_host_reports_capabilities_and_their_invalid_transition(
     tmp_path: Path,
+    monkeypatch,
 ) -> None:
     repo_root = tmp_path / "repo"
     home = tmp_path / "home"
@@ -29,7 +32,34 @@ def test_inspect_host_reports_capabilities_and_their_invalid_transition(
         (repo_root / "generated" / directory / "generated.txt").write_text(
             "generated\n",
         )
+    runtime_files = (
+        "generated/functions/_mise.zsh",
+        "generated/functions/_starship.zsh",
+        "generated/functions/_atuin.zsh",
+        "generated/completions/_codex",
+        "generated/plugins/fzf-tab/fzf-tab.plugin.zsh",
+        "generated/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh",
+        "generated/plugins/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh",
+    )
+    for relative_path in runtime_files:
+        runtime_path = repo_root / relative_path
+        runtime_path.parent.mkdir(parents=True, exist_ok=True)
+        runtime_path.write_text("runtime\n")
+    for binary_name in ("atuin", "op-cache"):
+        binary_path = repo_root / "generated/bin" / binary_name
+        binary_path.parent.mkdir(parents=True, exist_ok=True)
+        binary_path.write_bytes(b"binary")
+        binary_path.chmod(0o755)
     zellij_plugins = repo_root / "generated/plugins"
+    wasm_digest = hashlib.sha256(b"wasm").hexdigest()
+    monkeypatch.setattr(
+        check_module,
+        "WASM_SPECS",
+        (
+            ("zellij-sessionizer", "https://example.invalid/one", wasm_digest),
+            ("zjstatus", "https://example.invalid/two", wasm_digest),
+        ),
+    )
     for plugin_name in ("zellij-sessionizer.wasm", "zjstatus.wasm"):
         (zellij_plugins / plugin_name).write_bytes(b"wasm")
 
@@ -41,7 +71,22 @@ def test_inspect_host_reports_capabilities_and_their_invalid_transition(
     )
     skillshare.chmod(0o755)
 
-    def finder(command: str) -> str:
+    available = {
+        "git",
+        "python",
+        "uv",
+        "mise",
+        "skillshare",
+        "tv",
+        "launchctl",
+        "starship",
+        "atuin",
+        "codex",
+    }
+
+    def finder(command: str) -> str | None:
+        if command not in available:
+            return None
         return str(skillshare) if command == "skillshare" else f"/tools/{command}"
 
     healthy = inspect_host(
@@ -56,6 +101,7 @@ def test_inspect_host_reports_capabilities_and_their_invalid_transition(
 
     private_gitconfig.unlink()
     source.rmdir()
+    (repo_root / "generated/functions/_mise.zsh").unlink()
     degraded = inspect_host(
         repo_root,
         home,
@@ -67,6 +113,7 @@ def test_inspect_host_reports_capabilities_and_their_invalid_transition(
     assert degraded.ok is True
     assert findings["git.private_file_missing"].severity is Severity.WARN
     assert findings["skillshare.source_missing"].severity is Severity.WARN
+    assert findings["runtime.function.mise_missing"].severity is Severity.WARN
     assert degraded.is_ok(strict=True) is False
 
     (home / ".gitconfig").write_text(
@@ -80,6 +127,36 @@ def test_inspect_host_reports_capabilities_and_their_invalid_transition(
     )
     findings = {finding.code: finding for finding in commented.findings}
     assert findings["git.private_include_missing"].severity is Severity.WARN
+
+
+def test_inspect_host_rejects_wasm_with_wrong_checksum(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    repo_root = tmp_path / "repo"
+    home = tmp_path / "home"
+    target = repo_root / "generated/plugins/example.wasm"
+    target.parent.mkdir(parents=True)
+    target.write_bytes(b"corrupt")
+    expected = hashlib.sha256(b"expected").hexdigest()
+    monkeypatch.setattr(
+        check_module,
+        "WASM_SPECS",
+        (("example", "https://example.invalid/example", expected),),
+    )
+
+    report = inspect_host(
+        repo_root,
+        home,
+        executable_finder=lambda _command: None,
+        system_name="Darwin",
+        profile="full",
+    )
+    findings = {finding.code: finding for finding in report.findings}
+
+    finding = findings["zellij.example.wasm_checksum_mismatch"]
+    assert finding.severity is Severity.WARN
+    assert finding.path == target
 
 
 def test_inspect_host_reports_empty_generated_state_and_skillshare_doctor_errors(
@@ -198,3 +275,78 @@ def test_inspect_host_reports_invalid_skillshare_yaml(tmp_path: Path) -> None:
     assert findings["skillshare.config_invalid"].severity is Severity.WARN
     assert findings["shell.bash_missing"].severity is Severity.WARN
     assert "macos.launchctl_skipped" not in findings
+
+
+def test_inspect_host_reports_generated_binaries_without_an_owner(
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "repo"
+    home = tmp_path / "home"
+    generated_bin = repo_root / "generated/bin"
+    generated_bin.mkdir(parents=True)
+    (generated_bin / ".gitkeep").touch()
+    custom_binary = generated_bin / "custom-tool"
+    custom_binary.write_bytes(b"binary")
+
+    report = inspect_host(
+        repo_root,
+        home,
+        executable_finder=lambda _command: None,
+        system_name="Darwin",
+        profile="full",
+    )
+    findings = {finding.code: finding for finding in report.findings}
+
+    finding = findings["runtime.binary.custom-tool_unowned"]
+    assert finding.severity is Severity.WARN
+    assert finding.path == custom_binary
+    assert finding.action is not None
+    assert "build or install owner" in finding.action
+
+
+def test_inspect_host_reports_stale_owned_completion_when_tool_is_missing(
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "repo"
+    home = tmp_path / "home"
+    stale = repo_root / "generated/completions/_bootdev"
+    stale.parent.mkdir(parents=True)
+    stale.write_text("stale\n")
+
+    report = inspect_host(
+        repo_root,
+        home,
+        executable_finder=lambda _command: None,
+        system_name="Darwin",
+        profile="full",
+    )
+    findings = {finding.code: finding for finding in report.findings}
+
+    finding = findings["runtime.completion.bootdev_stale"]
+    assert finding.severity is Severity.WARN
+    assert finding.path == stale
+
+
+def test_inspect_host_rejects_empty_or_non_executable_owned_binary(
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "repo"
+    home = tmp_path / "home"
+    generated_bin = repo_root / "generated/bin"
+    generated_bin.mkdir(parents=True)
+    (generated_bin / "atuin").touch()
+    op_cache = generated_bin / "op-cache"
+    op_cache.write_text("binary\n")
+    op_cache.chmod(0o644)
+
+    report = inspect_host(
+        repo_root,
+        home,
+        executable_finder=lambda _command: None,
+        system_name="Darwin",
+        profile="full",
+    )
+    findings = {finding.code: finding for finding in report.findings}
+
+    assert findings["runtime.binary.atuin_invalid"].severity is Severity.WARN
+    assert findings["runtime.binary.op-cache_invalid"].severity is Severity.WARN

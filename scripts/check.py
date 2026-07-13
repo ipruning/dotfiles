@@ -18,6 +18,14 @@ from ruamel.yaml.error import YAMLError
 from .models import CheckReport, Finding, Severity
 from .profiles import HostProfile, resolve_profile
 from .render import finding_document, render_findings
+from .runtime import (
+    COMPLETION_SPECS,
+    FUNCTION_SPECS,
+    LOCAL_BINARY_SPECS,
+    PLUGIN_SPECS,
+    WASM_SPECS,
+    file_sha256,
+)
 
 ExecutableFinder = Callable[[str], str | None]
 
@@ -277,7 +285,12 @@ def _skillshare_doctor_finding(executable: Path, home: Path) -> Finding:
     )
 
 
-def _file_capability(check: str, file_path: Path, label: str) -> Finding:
+def _file_capability(
+    check: str,
+    file_path: Path,
+    label: str,
+    missing_action: str | None = None,
+) -> Finding:
     exists = file_path.is_file()
     return _finding(
         check,
@@ -285,6 +298,56 @@ def _file_capability(check: str, file_path: Path, label: str) -> Finding:
         f"{check}_{'ready' if exists else 'missing'}",
         f"{label} {'exists' if exists else 'is missing'}",
         file_path,
+        None if exists else missing_action,
+    )
+
+
+def _owned_generated_capability(
+    check: str,
+    file_path: Path,
+    label: str,
+    *,
+    tool_available: bool,
+) -> Finding | None:
+    action = "Run mise run runtime -- --dry-run, then mise run runtime."
+    if tool_available:
+        return _file_capability(check, file_path, label, action)
+    if file_path.exists() or file_path.is_symlink():
+        return _finding(
+            check,
+            Severity.WARN,
+            f"{check}_stale",
+            f"{label} is stale because its generator is not available",
+            file_path,
+            action,
+        )
+    return None
+
+
+def _binary_capability(check: str, file_path: Path, label: str) -> Finding:
+    try:
+        ready = (
+            file_path.is_file()
+            and file_path.stat().st_size > 0
+            and os.access(file_path, os.X_OK)
+        )
+    except OSError:
+        ready = False
+    if ready:
+        return _finding(
+            check,
+            Severity.OK,
+            f"{check}_ready",
+            f"{label} is present and executable",
+            file_path,
+        )
+    return _finding(
+        check,
+        Severity.WARN,
+        f"{check}_invalid",
+        f"{label} is missing, empty, or not executable",
+        file_path,
+        "Run mise run runtime -- --build --dry-run, then mise run runtime -- --build.",
     )
 
 
@@ -385,14 +448,92 @@ def inspect_host(
                 repo_root / "generated" / directory, directory
             ),
         )
-    for plugin_name in ("zellij-sessionizer.wasm", "zjstatus.wasm"):
+    for tool, _command, filename in FUNCTION_SPECS:
+        finding = _owned_generated_capability(
+            f"runtime.function.{tool}",
+            repo_root / "generated/functions" / filename,
+            f"Generated {tool} Zsh initialization",
+            tool_available=executable_finder(tool) is not None,
+        )
+        if finding:
+            findings.append(finding)
+    for name, tool, _command, filename, _environment in COMPLETION_SPECS:
+        finding = _owned_generated_capability(
+            f"runtime.completion.{name}",
+            repo_root / "generated/completions" / filename,
+            f"Generated {name} completion",
+            tool_available=executable_finder(tool) is not None,
+        )
+        if finding:
+            findings.append(finding)
+    for name, _source, entrypoint in PLUGIN_SPECS:
         findings.append(
             _file_capability(
-                f"zellij.{plugin_name}",
-                repo_root / "generated/plugins" / plugin_name,
-                f"Zellij plugin {plugin_name}",
+                f"runtime.plugin.{name}",
+                repo_root / "generated/plugins" / name / entrypoint,
+                f"Zsh plugin {name}",
+                "Run mise run runtime -- --dry-run, then mise run runtime.",
             ),
         )
+    for name, _source, sha256 in WASM_SPECS:
+        plugin_name = f"{name}.wasm"
+        plugin_path = repo_root / "generated/plugins" / plugin_name
+        actual_sha256 = file_sha256(plugin_path)
+        if actual_sha256 == sha256:
+            findings.append(
+                _finding(
+                    f"zellij.{plugin_name}",
+                    Severity.OK,
+                    f"zellij.{plugin_name}_ready",
+                    f"Zellij plugin {plugin_name} matches its pinned checksum",
+                    plugin_path,
+                ),
+            )
+        else:
+            code = "missing" if actual_sha256 is None else "checksum_mismatch"
+            message = (
+                f"Zellij plugin {plugin_name} is missing"
+                if actual_sha256 is None
+                else f"Zellij plugin {plugin_name} does not match its pinned checksum"
+            )
+            findings.append(
+                _finding(
+                    f"zellij.{plugin_name}",
+                    Severity.WARN,
+                    f"zellij.{plugin_name}_{code}",
+                    message,
+                    plugin_path,
+                    "Run mise run runtime -- --dry-run, then mise run runtime.",
+                ),
+            )
+    generated_bin = repo_root / "generated/bin"
+    owned_binaries = {name for name, _source, _command, _artifact in LOCAL_BINARY_SPECS}
+    for binary_name in sorted(owned_binaries):
+        findings.append(
+            _binary_capability(
+                f"runtime.binary.{binary_name}",
+                generated_bin / binary_name,
+                f"Generated binary {binary_name}",
+            ),
+        )
+    if generated_bin.is_dir():
+        for file_path in sorted(generated_bin.iterdir()):
+            if (
+                file_path.name in owned_binaries
+                or file_path.name == ".gitkeep"
+                or not (file_path.is_file() or file_path.is_symlink())
+            ):
+                continue
+            findings.append(
+                _finding(
+                    f"runtime.binary.{file_path.name}",
+                    Severity.WARN,
+                    f"runtime.binary.{file_path.name}_unowned",
+                    f"Generated binary {file_path.name} has no repository owner",
+                    file_path,
+                    "Define its build or install owner before treating it as reproducible.",
+                ),
+            )
     if active_system == "Darwin":
         findings.append(
             _check_executable(

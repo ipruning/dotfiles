@@ -11,6 +11,10 @@ _.python.venv = { path = ".venv" }
 description = "Report configuration drift without changing files"
 run = 'uv run --locked python -m scripts.diff "$@"'
 
+[tasks.restore]
+description = "Preview or apply one reference application"
+run = 'uv run --locked python -m scripts.restore "$@"'
+
 [tasks.check]
 description = "Inspect this host's required and optional capabilities"
 run = 'uv run --locked python -m scripts.check "$@"'
@@ -22,6 +26,14 @@ run = 'uv run --locked python -m scripts.setup "$@"'
 [tasks.update]
 description = "Update installed host tools without synchronizing configuration"
 run = 'uv run --locked python -m scripts.update "$@"'
+
+[tasks.runtime]
+description = "Refresh generated shell runtime and owned plugins"
+run = 'uv run --locked python -m scripts.runtime "$@"'
+
+[tasks.zsh-profile]
+description = "Profile Zsh startup time"
+run = 'modules/bin/dotfiles-zsh-profile "$@"'
 
 [tasks.lint]
 description = "Inspect repository paths, mappings, and symlinks"

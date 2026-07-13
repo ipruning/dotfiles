@@ -7,9 +7,11 @@ semantics live in `README.md`.
 
 - `mise.toml` is the task interface. Keep it as a thin adapter to modules under
   `scripts/`.
-- `scripts/` owns the read-only drift, host-health, and repository-lint
-  behavior. Tests exercise the public `inspect_*` interfaces.
-- `reference/` is comparison data, not an automatically applied backup.
+- `scripts/` owns inspection plus explicit host update, runtime refresh, and
+  application-scoped restore behavior. Tests exercise public CLI and
+  `inspect_*` interfaces.
+- `reference/` is comparison data and the source for explicit scoped restore;
+  it is never applied automatically.
 - `mackup/` owns the application-to-path mapping consumed by the pinned Mackup
   fork.
 - `modules/` owns independent commands and self-installing tools. It inherits

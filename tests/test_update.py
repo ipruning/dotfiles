@@ -90,7 +90,11 @@ def test_update_dry_run_reports_exact_plan_without_running_tools(
         ("mise.shims", "planned", ["mise", "reshim"]),
         ("amp", "planned", ["amp", "update"]),
     ]
-    assert document["next"] == ["mise run check", "mise run diff"]
+    assert document["next"] == [
+        "mise run runtime -- --dry-run",
+        "mise run check",
+        "mise run diff",
+    ]
     assert not log_path.exists()
 
 
@@ -127,7 +131,9 @@ def test_update_human_output_announces_commands_before_summary(tmp_path: Path) -
     assert completed.returncode == 0
     assert completed.stdout.splitlines()[0] == "RUN brew.metadata: brew update"
     assert "OK   brew.metadata" in completed.stdout
-    assert "Next:\n  mise run check\n  mise run diff\n" in completed.stdout
+    assert (
+        "Next:\n  mise run runtime -- --dry-run\n  mise run check\n  mise run diff\n"
+    ) in completed.stdout
 
 
 def test_update_failure_is_contextual_and_does_not_hide_later_results(

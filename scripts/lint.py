@@ -478,7 +478,6 @@ LEGACY_REFERENCES = (
     "mise run backup",
     "mise run doctor",
     "mise run init",
-    "mise run restore",
     "mise run sync",
     "mise run up",
 )

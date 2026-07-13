@@ -437,8 +437,8 @@ fi
 
 # 👇 try-rs
 unset TRY_PATH TRY_CONFIG_DIR
-if [[ -f "$GENERATED_COMPLETIONS_DIR/_try-rs" ]]; then
-  source "$GENERATED_COMPLETIONS_DIR/_try-rs"
+if command -v try-rs >/dev/null 2>&1; then
+  source "$HOME/dotfiles/modules/zsh/try-rs.zsh"
 fi
 
 # 👇 mise (will cost 40ms)
