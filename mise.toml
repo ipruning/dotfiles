@@ -15,6 +15,10 @@ run = 'uv run --locked python -m scripts.diff "$@"'
 description = "Inspect this host's required and optional capabilities"
 run = 'uv run --locked python -m scripts.check "$@"'
 
+[tasks.setup]
+description = "Apply an explicit host profile"
+run = 'uv run --locked python -m scripts.setup "$@"'
+
 [tasks.lint]
 description = "Inspect repository paths, mappings, and symlinks"
 run = 'uv run --locked python -m scripts.lint "$@"'

@@ -6,6 +6,7 @@ from typing import cast
 import pytest
 
 from scripts.diff import DriftProtocolError, inspect_drift
+from scripts.profiles import HostProfile
 
 
 class StubMackupRunner:
@@ -34,6 +35,43 @@ class StubMackupRunner:
         }
 
 
+class MultiApplicationRunner:
+    def inspect(
+        self,
+        repo_root: Path,
+        home: Path,
+        application: str | None,
+    ) -> dict[str, object]:
+        assert application is None
+        return {
+            "schema_version": 1,
+            "operation": "diff",
+            "changes": [
+                {
+                    "application": "git",
+                    "reference_path": str(repo_root / "reference/.gitconfig"),
+                    "live_path": str(home / ".gitconfig"),
+                    "kind": "modified",
+                    "reference_kind": "file",
+                    "live_kind": "file",
+                    "error": None,
+                },
+                {
+                    "application": "aerospace",
+                    "reference_path": str(
+                        repo_root / "reference/.config/aerospace/aerospace.toml",
+                    ),
+                    "live_path": str(home / ".config/aerospace/aerospace.toml"),
+                    "kind": "only-reference",
+                    "reference_kind": "file",
+                    "live_kind": None,
+                    "error": None,
+                },
+            ],
+            "summary": {"modified": 1, "only-reference": 1},
+        }
+
+
 def test_inspect_drift_returns_typed_location_only_report(tmp_path: Path) -> None:
     repo_root = tmp_path / "repo"
     home = tmp_path / "home"
@@ -52,6 +90,30 @@ def test_inspect_drift_returns_typed_location_only_report(tmp_path: Path) -> Non
     assert report.changes[0].kind.value == "modified"
     assert report.changes[0].live_path == home / ".gitconfig"
     assert report.ok is True
+
+
+def test_linux_lite_profile_excludes_macos_drift_by_default(tmp_path: Path) -> None:
+    report = inspect_drift(
+        tmp_path / "repo",
+        tmp_path / "home",
+        profile="auto",
+        system_name="Linux",
+        runner=MultiApplicationRunner(),
+    )
+
+    assert report.profile is HostProfile.LINUX_LITE
+    assert [change.application for change in report.changes] == ["git"]
+    assert report.summary == {"modified": 1}
+
+    full = inspect_drift(
+        tmp_path / "repo",
+        tmp_path / "home",
+        profile="full",
+        system_name="Linux",
+        runner=MultiApplicationRunner(),
+    )
+    assert full.profile is HostProfile.FULL
+    assert [change.application for change in full.changes] == ["git", "aerospace"]
 
 
 class InvalidSchemaRunner:

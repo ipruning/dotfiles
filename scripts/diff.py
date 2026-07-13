@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Protocol, cast
 
 from .models import Drift, DriftKind, DriftReport, FileKind
+from .profiles import HostProfile, profile_applications, resolve_profile
 
 MACKUP_SOURCE = (
     "git+https://github.com/ipruning/mackup@faa5cb8cd0f5fea83711b4fc75a4996d4b8a7497"
@@ -186,6 +187,7 @@ def _parse_document(document: dict[str, object]) -> DriftReport:
         operation="diff",
         changes=tuple(changes),
         summary=summary,
+        profile=HostProfile.FULL,
     )
 
 
@@ -193,17 +195,39 @@ def inspect_drift(
     repo_root: Path,
     home: Path,
     application: str | None = None,
+    profile: str | HostProfile = HostProfile.AUTO,
+    system_name: str | None = None,
     runner: MackupRunner | None = None,
 ) -> DriftReport:
     """Return typed, location-only drift from the pinned Mackup fork."""
     active_runner = runner or SubprocessMackupRunner()
-    return _parse_document(active_runner.inspect(repo_root, home, application))
+    report = _parse_document(active_runner.inspect(repo_root, home, application))
+    active_profile = resolve_profile(profile, system_name)
+    selected_applications = profile_applications(active_profile)
+    changes = report.changes
+    if application is None and selected_applications is not None:
+        changes = tuple(
+            change for change in changes if change.application in selected_applications
+        )
+    summary = {
+        kind.value: sum(change.kind is kind for change in changes)
+        for kind in DriftKind
+        if any(change.kind is kind for change in changes)
+    }
+    return DriftReport(
+        schema_version=report.schema_version,
+        operation=report.operation,
+        changes=changes,
+        summary=summary,
+        profile=active_profile,
+    )
 
 
 def _as_json(report: DriftReport) -> dict[str, object]:
     return {
         "schema_version": report.schema_version,
         "operation": report.operation,
+        "profile": report.profile.value,
         "changes": [
             {
                 "application": change.application,
@@ -228,16 +252,27 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("application", nargs="?")
     parser.add_argument("--json", action="store_true", dest="as_json")
+    parser.add_argument(
+        "--profile",
+        choices=[profile.value for profile in HostProfile],
+        default=HostProfile.AUTO.value,
+    )
     args = parser.parse_args(argv)
     repo_root = Path(__file__).resolve().parents[1]
     try:
-        report = inspect_drift(repo_root, Path.home(), args.application)
+        report = inspect_drift(
+            repo_root,
+            Path.home(),
+            args.application,
+            profile=args.profile,
+        )
     except (DriftProtocolError, MackupCommandError) as error:
         print(f"ERROR diff_failed {error}", file=sys.stderr)
         return 1
     if args.as_json:
         print(json.dumps(_as_json(report), indent=2, sort_keys=True))
     else:
+        print(f"Profile: {report.profile.value}")
         for change in report.changes:
             print(f"{change.kind.value.upper()} {change.live_path}")
             print(f"  reference: {change.reference_path}")

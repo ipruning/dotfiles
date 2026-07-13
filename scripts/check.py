@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import platform
 import shutil
 import stat
@@ -15,6 +16,7 @@ from ruamel.yaml import YAML
 from ruamel.yaml.error import YAMLError
 
 from .models import CheckReport, Finding, Severity
+from .profiles import HostProfile, resolve_profile
 from .render import finding_document, render_findings
 
 ExecutableFinder = Callable[[str], str | None]
@@ -148,6 +150,7 @@ def _skillshare_findings(home: Path) -> list[Finding]:
                 "skillshare.config_missing",
                 "Skillshare configuration is missing",
                 config_path,
+                "Create a host-specific Skillshare config; do not copy harness extras blindly.",
             ),
         ]
     try:
@@ -163,6 +166,7 @@ def _skillshare_findings(home: Path) -> list[Finding]:
                 "skillshare.config_invalid",
                 f"Skillshare configuration cannot identify sources.skills: {error}",
                 config_path,
+                "Repair sources.skills in the host-specific Skillshare config.",
             ),
         ]
     source = _expand_home(source_value, home)
@@ -188,8 +192,89 @@ def _skillshare_findings(home: Path) -> list[Finding]:
                 else "Skillshare source directory is missing"
             ),
             source,
+            None
+            if source.is_dir()
+            else "Clone or restore the configured skills source.",
         ),
     ]
+
+
+def _skillshare_doctor_finding(executable: Path, home: Path) -> Finding:
+    environment = os.environ.copy()
+    environment["HOME"] = str(home)
+    try:
+        completed = subprocess.run(
+            [str(executable), "doctor", "--json"],
+            cwd=home,
+            env=environment,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+    except OSError as error:
+        return _finding(
+            "skillshare.doctor",
+            Severity.WARN,
+            "skillshare.doctor_unavailable",
+            f"Skillshare doctor could not run: {error}",
+            action="Run skillshare doctor --json and resolve reported errors.",
+        )
+    try:
+        document = json.loads(completed.stdout)
+        summary = document["summary"]
+        warnings = summary["warnings"]
+        errors = summary["errors"]
+        if not isinstance(warnings, int) or not isinstance(errors, int):
+            raise TypeError("summary counts must be integers")
+        raw_checks = document.get("checks")
+        if isinstance(raw_checks, list):
+            ignored_warnings = {"theme"}
+            actionable_warnings = 0
+            reported_errors = 0
+            for raw_check in raw_checks:
+                if not isinstance(raw_check, dict):
+                    raise TypeError("checks must contain objects")
+                name = raw_check.get("name")
+                check_status = raw_check.get("status")
+                if not isinstance(name, str) or not isinstance(check_status, str):
+                    raise TypeError("check name and status must be strings")
+                if check_status == "error":
+                    reported_errors += 1
+                elif check_status == "warning" and name not in ignored_warnings:
+                    actionable_warnings += 1
+            warnings = actionable_warnings
+            errors = reported_errors
+    except (json.JSONDecodeError, KeyError, TypeError) as error:
+        return _finding(
+            "skillshare.doctor",
+            Severity.WARN,
+            "skillshare.doctor_invalid",
+            f"Skillshare doctor returned invalid JSON: {error}",
+            action="Run skillshare doctor --json and inspect its output.",
+        )
+    if errors or completed.returncode != 0:
+        return _finding(
+            "skillshare.doctor",
+            Severity.WARN,
+            "skillshare.doctor_failed",
+            f"Skillshare doctor reports {errors} error(s) and "
+            f"{warnings} actionable warning(s)",
+            action="Resolve doctor errors before treating Skillshare as ready.",
+        )
+    if warnings:
+        return _finding(
+            "skillshare.doctor",
+            Severity.WARN,
+            "skillshare.doctor_warnings",
+            f"Skillshare doctor reports {warnings} actionable warning(s)",
+            action="Review Skillshare warnings, including failed tracked repositories.",
+        )
+    return _finding(
+        "skillshare.doctor",
+        Severity.OK,
+        "skillshare.doctor_ready",
+        "Skillshare doctor reports no errors or warnings",
+    )
 
 
 def _file_capability(check: str, file_path: Path, label: str) -> Finding:
@@ -203,14 +288,62 @@ def _file_capability(check: str, file_path: Path, label: str) -> Finding:
     )
 
 
+def _generated_directory_finding(directory_path: Path, label: str) -> Finding:
+    if not directory_path.is_dir():
+        return _finding(
+            f"shell.{label}",
+            Severity.WARN,
+            f"shell.{label}_missing",
+            f"Generated shell {label} directory is missing",
+            directory_path,
+            "Run the generator that owns this shell runtime state.",
+        )
+    populated = any(
+        child.name != ".gitkeep"
+        for child in directory_path.rglob("*")
+        if child.is_file() or child.is_symlink()
+    )
+    return _finding(
+        f"shell.{label}",
+        Severity.OK if populated else Severity.WARN,
+        f"shell.{label}_{'ready' if populated else 'empty'}",
+        f"Generated shell {label} directory "
+        f"{'contains runtime data' if populated else 'contains no runtime data'}",
+        directory_path,
+        None if populated else "Generate this shell runtime state if the host uses it.",
+    )
+
+
+def _bash_integration_finding(repo_root: Path, home: Path) -> Finding:
+    bashrc = home / ".bashrc"
+    module_path = repo_root / "modules/bash/init.bash"
+    try:
+        configured = bashrc.is_file() and str(module_path) in bashrc.read_text()
+    except OSError:
+        configured = False
+    return _finding(
+        "shell.bash",
+        Severity.OK if configured else Severity.WARN,
+        "shell.bash_ready" if configured else "shell.bash_missing",
+        "Bash loads the Linux Lite module"
+        if configured
+        else "Bash does not load the Linux Lite module",
+        bashrc,
+        None if configured else "Run mise run setup -- --profile linux-lite.",
+    )
+
+
 def inspect_host(
     repo_root: Path,
     home: Path,
     *,
     executable_finder: ExecutableFinder = shutil.which,
     system_name: str | None = None,
+    profile: str | HostProfile = HostProfile.AUTO,
 ) -> CheckReport:
     """Return explicit required and optional capabilities for this host."""
+    active_system = system_name or platform.system()
+    active_profile = resolve_profile(profile, active_system)
     findings = [
         _check_executable(
             command,
@@ -220,14 +353,18 @@ def inspect_host(
         for command in ("git", "python", "uv", "mise")
     ]
     findings.extend(_private_git_findings(home))
-    findings.append(
-        _check_executable(
-            "skillshare",
-            required=False,
-            executable_finder=executable_finder,
-        ),
+    skillshare_finding = _check_executable(
+        "skillshare",
+        required=False,
+        executable_finder=executable_finder,
     )
+    findings.append(skillshare_finding)
     findings.extend(_skillshare_findings(home))
+    if skillshare_finding.path and (home / ".config/skillshare/config.yaml").is_file():
+        findings.append(_skillshare_doctor_finding(skillshare_finding.path, home))
+    if active_profile is HostProfile.LINUX_LITE:
+        findings.append(_bash_integration_finding(repo_root, home))
+        return CheckReport(schema_version=1, findings=tuple(findings))
     findings.append(
         _check_executable(
             "tv",
@@ -243,15 +380,9 @@ def inspect_host(
         ),
     )
     for directory in ("plugins", "completions", "functions"):
-        directory_path = repo_root / "generated" / directory
         findings.append(
-            _finding(
-                f"shell.{directory}",
-                Severity.OK if directory_path.is_dir() else Severity.WARN,
-                f"shell.{directory}_{'ready' if directory_path.is_dir() else 'missing'}",
-                f"Generated shell {directory} directory "
-                f"{'exists' if directory_path.is_dir() else 'is missing'}",
-                directory_path,
+            _generated_directory_finding(
+                repo_root / "generated" / directory, directory
             ),
         )
     for plugin_name in ("zellij-sessionizer.wasm", "zjstatus.wasm"):
@@ -262,7 +393,6 @@ def inspect_host(
                 f"Zellij plugin {plugin_name}",
             ),
         )
-    active_system = system_name or platform.system()
     if active_system == "Darwin":
         findings.append(
             _check_executable(
@@ -287,9 +417,14 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Inspect this host's capabilities.")
     parser.add_argument("--json", action="store_true", dest="as_json")
     parser.add_argument("--strict", action="store_true")
+    parser.add_argument(
+        "--profile",
+        choices=[profile.value for profile in HostProfile],
+        default=HostProfile.AUTO.value,
+    )
     args = parser.parse_args(argv)
     repo_root = Path(__file__).resolve().parents[1]
-    report = inspect_host(repo_root, Path.home())
+    report = inspect_host(repo_root, Path.home(), profile=args.profile)
     if args.as_json:
         print(
             json.dumps(

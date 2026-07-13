@@ -6,6 +6,8 @@ from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
 
+from .profiles import HostProfile
+
 
 class DriftKind(StrEnum):
     MODIFIED = "modified"
@@ -82,6 +84,7 @@ class DriftReport:
     operation: str
     changes: tuple[Drift, ...]
     summary: dict[str, int]
+    profile: HostProfile = HostProfile.FULL
 
     @property
     def ok(self) -> bool:

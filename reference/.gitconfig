@@ -10,6 +10,9 @@ quotePath = false
 [init]
 defaultBranch = main
 
+[include]
+path = ~/.private.gitconfig
+
 [commit]
 verbose = true
 template = ~/.gitcommit

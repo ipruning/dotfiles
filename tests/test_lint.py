@@ -149,3 +149,30 @@ def test_inspect_repository_allows_only_declared_optional_reference_candidates(
 
     assert "mackup.reference_missing" in codes
     assert "mackup.optional_reference_unmapped" in codes
+
+
+def test_linux_repository_lint_skips_macos_only_paths(tmp_path: Path) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    (repo_root / "reference").mkdir(parents=True)
+    (repo_root / "mackup/applications").mkdir(parents=True)
+    (repo_root / "mackup/mackup.cfg").write_text(
+        "[storage]\nengine = file_system\npath = dotfiles\n"
+        "directory = reference\n[applications_to_sync]\n",
+    )
+    (repo_root / "tool.sh").write_text(
+        "app=/Applications/ChatGPT.app\n"
+        "brew=/opt/homebrew/bin/brew\n"
+        "portable=/usr/local/bin/example\n",
+    )
+
+    report = inspect_repository(repo_root, home, system_name="Linux")
+    path_findings = [
+        finding for finding in report.findings if finding.code.startswith("path.")
+    ]
+
+    assert all(finding.severity is not Severity.WARN for finding in path_findings)
+    assert {finding.code for finding in path_findings} == {
+        "path.platform_skipped",
+        "path.toolchain",
+    }

@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import configparser
 import json
+import platform
 import re
 import subprocess
 from pathlib import Path
@@ -51,6 +52,10 @@ FULL_HOME_REQUIRED_FILES = {
 }
 OPTIONAL_REFERENCE_SECTION = "dotfiles_optional_reference_files"
 OPTIONAL_PATHS = {
+    (
+        "reference/.config/skillshare/config.yaml",
+        "~/Developer/ipruning/skills",
+    ),
     ("reference/.zshenv", "/usr/local/sbin"),
     ("reference/.zshrc", "/usr/local/Homebrew"),
     ("reference/.zshrc", "/usr/local/Cellar"),
@@ -146,7 +151,20 @@ def _classify_path(
     source: Path,
     line: int,
     raw: str,
+    system_name: str,
 ) -> Finding:
+    if system_name == "Linux" and (
+        raw.startswith(("/Applications/", "/opt/homebrew"))
+        or (raw.startswith("/Users/") and relative.startswith("reference/"))
+    ):
+        return _finding(
+            Severity.SKIPPED,
+            "path.platform_skipped",
+            "macOS-only path is not evaluated on Linux",
+            source,
+            line=line,
+            value=raw,
+        )
     if (relative, raw) in OPTIONAL_PATHS:
         return _finding(
             Severity.OK,
@@ -217,7 +235,11 @@ def _classify_path(
         )
     if raw.startswith(("/opt/homebrew", "/usr/local")):
         return _finding(
-            Severity.OK if _path_exists(raw, home) else Severity.WARN,
+            (
+                Severity.OK
+                if system_name == "Linux" or _path_exists(raw, home)
+                else Severity.WARN
+            ),
             "path.toolchain",
             "machine or architecture-specific toolchain path",
             source,
@@ -252,7 +274,11 @@ def _classify_path(
     )
 
 
-def _path_findings(repo_root: Path, home: Path) -> list[Finding]:
+def _path_findings(
+    repo_root: Path,
+    home: Path,
+    system_name: str,
+) -> list[Finding]:
     findings: list[Finding] = []
     for file_path in _iter_text_files(repo_root):
         relative = file_path.relative_to(repo_root).as_posix()
@@ -273,6 +299,7 @@ def _path_findings(repo_root: Path, home: Path) -> list[Finding]:
                         file_path,
                         line_number,
                         raw,
+                        system_name,
                     ),
                 )
     return findings
@@ -502,9 +529,14 @@ def _symlink_findings(repo_root: Path) -> list[Finding]:
     ]
 
 
-def inspect_repository(repo_root: Path, home: Path) -> LintReport:
+def inspect_repository(
+    repo_root: Path,
+    home: Path,
+    *,
+    system_name: str | None = None,
+) -> LintReport:
     """Return repository path, mapping, and symlink invariants."""
-    findings = _path_findings(repo_root, home)
+    findings = _path_findings(repo_root, home, system_name or platform.system())
     findings.extend(_mackup_findings(repo_root))
     findings.extend(_symlink_findings(repo_root))
     findings.extend(_tracked_file_findings(repo_root))

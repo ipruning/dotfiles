@@ -1,7 +1,6 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/runkids/skillshare/main/schemas/config.schema.json
 sources:
   skills: ~/Developer/ipruning/skills
-  extras: ~/Developer/ipruning/skills/extras
 mode: merge
 targets:
   claude:
@@ -10,19 +9,6 @@ targets:
   universal:
     skills:
       path: ~/.agents/skills
-extras:
-- name: amp
-  targets:
-  - path: ~/.config/amp
-    mode: copy
-- name: codex
-  targets:
-  - path: ~/.codex
-    mode: copy
-- name: claude
-  targets:
-  - path: ~/.claude
-    mode: copy
 ignore:
 - '**/.DS_Store'
 - '**/.git/**'

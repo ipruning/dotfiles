@@ -38,7 +38,7 @@ def render_findings(report: FindingReport, *, include_ok: bool) -> None:
     visible = [
         finding
         for finding in report.findings
-        if include_ok or finding.severity is not Severity.OK
+        if include_ok or finding.severity in {Severity.WARN, Severity.ERROR}
     ]
     if not visible:
         print("No findings.")
