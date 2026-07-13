@@ -72,6 +72,24 @@ def test_linux_lite_setup_rejects_non_file_git_config_before_writing_bash(
     assert bashrc.read_text() == "# unchanged\n"
 
 
+def test_linux_lite_setup_preserves_bash_when_git_update_fails(
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    (repo_root / "modules/bash").mkdir(parents=True)
+    (repo_root / "modules/bash/init.bash").write_text("export READY=1\n")
+    home.mkdir()
+    bashrc = home / ".bashrc"
+    bashrc.write_text("# unchanged\n")
+    (home / ".gitconfig").write_text("[broken\n")
+
+    with pytest.raises(SetupError):
+        configure_linux_lite(repo_root, home)
+
+    assert bashrc.read_text() == "# unchanged\n"
+
+
 def test_linux_lite_loader_runs_before_noninteractive_bash_return(
     tmp_path: Path,
 ) -> None:

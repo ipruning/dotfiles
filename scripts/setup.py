@@ -95,8 +95,6 @@ def configure_linux_lite(
 
     if not dry_run:
         home.mkdir(parents=True, exist_ok=True)
-        if bash_changed:
-            bashrc.write_text(desired_bashrc)
         if git_include_changed:
             completed = subprocess.run(
                 [
@@ -116,6 +114,8 @@ def configure_linux_lite(
                 raise SetupError(
                     completed.stderr.strip() or "Git include update failed",
                 )
+        if bash_changed:
+            bashrc.write_text(desired_bashrc)
     return SetupReport(
         profile=HostProfile.LINUX_LITE,
         changed=bool(actions),
