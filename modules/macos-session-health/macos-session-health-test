@@ -1,0 +1,121 @@
+#!/bin/bash
+set -euo pipefail
+
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+health_cli="$script_dir/macos-session-health"
+test_root="$(mktemp -d -t macos-session-health-test)"
+test_home="$test_root/home"
+fake_bin="$test_root/bin"
+
+cleanup() {
+  rm -rf "$test_root"
+}
+trap cleanup EXIT
+
+fail() {
+  echo "FAIL: $*" >&2
+  exit 1
+}
+
+mkdir -p "$test_home" "$fake_bin"
+mkdir -p "$test_home/.config/brrr"
+printf "BRRR_SECRET='test-secret'\n" >"$test_home/.config/brrr/env"
+chmod 0600 "$test_home/.config/brrr/env"
+python_bin="$(mise which python)"
+tool_path="$fake_bin:$(dirname "$python_bin"):/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+cat >"$fake_bin/launchctl" <<'EOF'
+#!/bin/bash
+case "${1:-}" in
+  bootstrap)
+    if [[ -f "${FAKE_BOOTSTRAP_FAIL_ONCE:-}" ]]; then
+      rm -f "$FAKE_BOOTSTRAP_FAIL_ONCE"
+      echo 'injected bootstrap failure' >&2
+      exit 9
+    fi
+    : >"$FAKE_LAUNCHCTL_STATE"
+    exit 0
+    ;;
+  bootout) rm -f "$FAKE_LAUNCHCTL_STATE"; exit 0 ;;
+  print)
+    [[ -f "$FAKE_LAUNCHCTL_STATE" ]] || exit 3
+    printf 'state = running\npid = 4242\nruns = 1\n'
+    exit 0
+    ;;
+esac
+exit 0
+EOF
+chmod +x "$fake_bin/launchctl"
+
+test_env=(
+  HOME="$test_home"
+  PATH="$tool_path"
+  BRRR_SECRET=test-secret
+  FAKE_LAUNCHCTL_STATE="$test_root/launchd-loaded"
+  FAKE_BOOTSTRAP_FAIL_ONCE="$test_root/bootstrap-fail-once"
+)
+
+blocked_home="$test_root/blocked-home"
+mkdir -p "$blocked_home/.local/bin"
+printf '#!/bin/sh\nexit 0\n' >"$test_root/unmanaged-command"
+ln -s "$test_root/unmanaged-command" "$blocked_home/.local/bin/macos-session-health"
+exit_code=0
+env "${test_env[@]}" HOME="$blocked_home" "$python_bin" "$health_cli" install --dry-run \
+  >"$test_root/unmanaged.out" 2>"$test_root/unmanaged.err" || exit_code=$?
+[[ "$exit_code" == 1 && -L "$blocked_home/.local/bin/macos-session-health" ]] \
+  || fail 'install dry-run accepted or replaced an unmanaged symlink'
+exit_code=0
+env "${test_env[@]}" HOME="$blocked_home" "$python_bin" "$health_cli" uninstall \
+  >"$test_root/unmanaged-uninstall.out" 2>"$test_root/unmanaged-uninstall.err" || exit_code=$?
+[[ "$exit_code" == 1 && -L "$blocked_home/.local/bin/macos-session-health" ]] \
+  || fail 'uninstall removed an unmanaged symlink'
+
+bad_python_home="$test_root/bad-python-home"
+bad_python="$bad_python_home/.local/share/mise/installs/python/latest/bin/python3"
+mkdir -p "$(dirname "$bad_python")"
+printf '#!/bin/sh\nexit 9\n' >"$bad_python"
+chmod +x "$bad_python"
+exit_code=0
+env "${test_env[@]}" HOME="$bad_python_home" "$python_bin" "$health_cli" install --dry-run \
+  >"$test_root/bad-python.out" 2>"$test_root/bad-python.err" || exit_code=$?
+[[ "$exit_code" == 1 && ! -e "$bad_python_home/.local/bin/macos-session-health" ]] \
+  || fail 'install dry-run accepted a broken mise Python runtime'
+
+env "${test_env[@]}" "$python_bin" "$health_cli" install --dry-run >"$test_root/install-dry-run.out"
+rg -q 'ready="True"' "$test_root/install-dry-run.out" || fail 'install dry-run did not report readiness'
+[[ ! -e "$test_home/.local/bin/macos-session-health" ]] || fail 'install dry-run changed the executable path'
+
+env "${test_env[@]}" "$python_bin" "$health_cli" install >"$test_root/install.out"
+installed_cli="$test_home/.local/bin/macos-session-health"
+runtime_cli="$test_home/Library/Application Support/macos-session-health/macos-session-health"
+plist="$test_home/Library/LaunchAgents/com.alex.macos-session-health.plist"
+[[ -x "$installed_cli" && ! -L "$installed_cli" && -x "$runtime_cli" && -f "$plist" ]] \
+  || fail 'install did not create its command, runtime, and LaunchAgent'
+plutil -lint "$plist" >/dev/null || fail 'install generated an invalid LaunchAgent'
+if rg -q 'skillshare|\.agents/skills|brrr-helper' "$plist" "$runtime_cli"; then
+  fail 'installed runtime depends on a Skillshare path'
+fi
+
+env "${test_env[@]}" "$installed_cli" status --format json >"$test_root/status.json"
+jq -e --arg source "$test_home/.config/brrr/env" \
+  '.[0] | select(.installed == true and .loaded == true and .pid == 4242 and .notification_backend == "builtin" and .notification_configured == true and .notification_credential_source == $source)' \
+  "$test_root/status.json" >/dev/null || fail 'status did not expose the self-contained notification backend'
+
+before_hashes="$(shasum -a 256 "$installed_cli" "$runtime_cli" "$plist")"
+: >"$test_root/bootstrap-fail-once"
+exit_code=0
+env "${test_env[@]}" "$python_bin" "$health_cli" install \
+  >"$test_root/install-failed.out" 2>"$test_root/install-failed.err" || exit_code=$?
+[[ "$exit_code" == 1 ]] || fail 'failed upgrade returned success'
+[[ "$before_hashes" == "$(shasum -a 256 "$installed_cli" "$runtime_cli" "$plist")" ]] \
+  || fail 'failed upgrade did not restore managed files'
+[[ -f "$test_root/launchd-loaded" ]] || fail 'failed upgrade did not restore the previous LaunchAgent'
+
+env "${test_env[@]}" "$installed_cli" notify-test --dry-run >"$test_root/notify.json"
+jq -e 'select(.exit == 0 and .auth_mode == "bearer" and .payload.thread_id == "macos-session-health")' \
+  "$test_root/notify.json" >/dev/null || fail 'built-in notification dry-run failed'
+
+env "${test_env[@]}" "$installed_cli" uninstall >"$test_root/uninstall.out"
+[[ ! -e "$installed_cli" && ! -e "$runtime_cli" && ! -e "$plist" ]] \
+  || fail 'uninstall left installed lifecycle files'
+
+echo 'macos-session-health tests passed'

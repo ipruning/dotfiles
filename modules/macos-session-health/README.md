@@ -7,16 +7,20 @@ logs under `~/Library/Logs/macos-session-health/`.
 
 ## Lifecycle
 
-The single-file CLI owns its `~/.local/bin/macos-session-health` symlink and
-generated LaunchAgent.
+The single-file CLI owns a small wrapper at `~/.local/bin/macos-session-health`,
+a runtime copy under its Application Support directory, and its generated
+LaunchAgent. It requires Python 3.11 or newer. Installation records the stable
+mise `python/latest` path when available, so the daemon and CLI do not depend on
+mise shims or a long-lived uv script environment.
 
 ```zsh
+modules/macos-session-health/macos-session-health install --dry-run
 modules/macos-session-health/macos-session-health install
 macos-session-health status --format json
 ```
 
-`uninstall` removes the command symlink and LaunchAgent but preserves SQLite
-state and logs:
+`uninstall` removes the command wrapper, runtime copy, and LaunchAgent but
+preserves SQLite state and logs:
 
 ```zsh
 macos-session-health uninstall
@@ -86,8 +90,18 @@ If macOS rejects direct signal delivery, reboot is the remaining clean recovery.
 ## Notifications
 
 Notifications are passive alerts for a narrow set of launch-impacting health
-signals. They are cooldown-limited, recorded in SQLite, and never execute
-recovery. Use the incident report to see both emitted and suppressed decisions.
+signals. The single-file CLI contains its own brrr client; it does not execute a
+Skillshare-managed sender. Delivery uses the exe.dev brrr proxy or
+`BRRR_SECRET` from the environment, `BRRR_ENV_FILE`, `~/.config/brrr/env`, or
+`~/.config/notify/brrr.env`. Notifications are cooldown-limited, recorded in
+SQLite, and never execute recovery. Use the incident report to see both emitted
+and suppressed decisions.
+
+Validate the payload and local credential lookup without sending:
+
+```zsh
+macos-session-health notify-test --dry-run
+```
 
 ## Maintenance
 
@@ -96,6 +110,7 @@ outputs before reinstalling it:
 
 ```zsh
 modules/macos-session-health/macos-session-health --version
+modules/macos-session-health/macos-session-health-test
 modules/macos-session-health/macos-session-health incident --hours 1 --limit 3 --format json
 modules/macos-session-health/macos-session-health recover --format json
 git diff --check
