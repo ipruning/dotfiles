@@ -201,7 +201,7 @@ def test_inspect_host_reports_empty_generated_state_and_skillshare_doctor_errors
     assert findings["shell.functions_empty"].severity is Severity.WARN
 
 
-def test_skillshare_doctor_ignores_terminal_theme_warning(tmp_path: Path) -> None:
+def test_skillshare_doctor_ignores_non_health_warnings(tmp_path: Path) -> None:
     repo_root = tmp_path / "repo"
     home = tmp_path / "home"
     source = home / "skills"
@@ -213,10 +213,15 @@ def test_skillshare_doctor_ignores_terminal_theme_warning(tmp_path: Path) -> Non
     document = {
         "checks": [
             {"name": "theme", "status": "warning"},
-            {"name": "skills_validity", "status": "warning"},
+            {"name": "git_status", "status": "warning"},
+            {
+                "name": "skills_validity",
+                "status": "warning",
+                "details": ["extras"],
+            },
             {"name": "tracked_repos", "status": "warning"},
         ],
-        "summary": {"warnings": 3, "errors": 0},
+        "summary": {"warnings": 4, "errors": 0},
     }
     tool_path.write_text(
         f"#!/bin/sh\nprintf '%s\\n' '{json.dumps(document)}'\n",
@@ -236,7 +241,47 @@ def test_skillshare_doctor_ignores_terminal_theme_warning(tmp_path: Path) -> Non
     )
 
     assert finding.code == "skillshare.doctor_warnings"
-    assert finding.message == "Skillshare doctor reports 2 actionable warning(s)"
+    assert finding.message == "Skillshare doctor reports 1 actionable warning(s)"
+
+
+def test_skillshare_doctor_keeps_real_skill_validity_warning(tmp_path: Path) -> None:
+    repo_root = tmp_path / "repo"
+    home = tmp_path / "home"
+    source = home / "skills"
+    source.mkdir(parents=True)
+    config_path = home / ".config/skillshare/config.yaml"
+    config_path.parent.mkdir(parents=True)
+    config_path.write_text("sources:\n  skills: ~/skills\n")
+    tool_path = tmp_path / "skillshare"
+    document = {
+        "checks": [
+            {
+                "name": "skills_validity",
+                "status": "warning",
+                "details": ["broken-skill"],
+            },
+        ],
+        "summary": {"warnings": 1, "errors": 0},
+    }
+    tool_path.write_text(
+        f"#!/bin/sh\nprintf '%s\\n' '{json.dumps(document)}'\n",
+    )
+    tool_path.chmod(0o755)
+
+    report = inspect_host(
+        repo_root,
+        home,
+        executable_finder=lambda command: (
+            str(tool_path) if command == "skillshare" else f"/tools/{command}"
+        ),
+        system_name="Linux",
+    )
+    finding = next(
+        finding for finding in report.findings if finding.check == "skillshare.doctor"
+    )
+
+    assert finding.code == "skillshare.doctor_warnings"
+    assert finding.message == "Skillshare doctor reports 1 actionable warning(s)"
 
 
 def test_linux_lite_check_omits_macos_and_optional_desktop_capabilities(

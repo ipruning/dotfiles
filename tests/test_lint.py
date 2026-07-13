@@ -183,3 +183,38 @@ def test_linux_repository_lint_skips_macos_only_paths(tmp_path: Path) -> None:
         "path.platform_skipped",
         "path.toolchain",
     }
+
+
+def test_inspect_repository_rejects_pruning_skillshare_extra_modes(
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    (repo_root / "reference/.config/skillshare").mkdir(parents=True)
+    (repo_root / "reference/.config/skillshare/config.yaml").write_text(
+        "extras:\n- name: codex\n  targets:\n  - path: ~/.codex\n    mode: merge\n",
+    )
+    (repo_root / "mackup/applications").mkdir(parents=True)
+    (repo_root / "mackup/mackup.cfg").write_text(
+        "[storage]\nengine = file_system\npath = dotfiles\n"
+        "directory = reference\n[applications_to_sync]\n",
+    )
+
+    unsafe = inspect_repository(repo_root, home)
+    unsafe_finding = next(
+        finding
+        for finding in unsafe.findings
+        if finding.code == "skillshare.extra_mode_unsafe"
+    )
+    assert unsafe_finding.severity is Severity.ERROR
+
+    (repo_root / "reference/.config/skillshare/config.yaml").write_text(
+        "extras:\n- name: codex\n  targets:\n  - path: ~/.codex\n    mode: copy\n",
+    )
+    safe = inspect_repository(repo_root, home)
+    safe_finding = next(
+        finding
+        for finding in safe.findings
+        if finding.code == "skillshare.extra_modes_safe"
+    )
+    assert safe_finding.severity is Severity.OK

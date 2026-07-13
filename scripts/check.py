@@ -236,7 +236,7 @@ def _skillshare_doctor_finding(executable: Path, home: Path) -> Finding:
             raise TypeError("summary counts must be integers")
         raw_checks = document.get("checks")
         if isinstance(raw_checks, list):
-            ignored_warnings = {"theme"}
+            ignored_warnings = {"git_status", "theme"}
             actionable_warnings = 0
             reported_errors = 0
             for raw_check in raw_checks:
@@ -246,9 +246,17 @@ def _skillshare_doctor_finding(executable: Path, home: Path) -> Finding:
                 check_status = raw_check.get("status")
                 if not isinstance(name, str) or not isinstance(check_status, str):
                     raise TypeError("check name and status must be strings")
+                details = raw_check.get("details")
+                known_resource_warning = name == "skills_validity" and details == [
+                    "extras"
+                ]
                 if check_status == "error":
                     reported_errors += 1
-                elif check_status == "warning" and name not in ignored_warnings:
+                elif (
+                    check_status == "warning"
+                    and name not in ignored_warnings
+                    and not known_resource_warning
+                ):
                     actionable_warnings += 1
             warnings = actionable_warnings
             errors = reported_errors

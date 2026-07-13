@@ -10,6 +10,8 @@ import re
 import subprocess
 from pathlib import Path
 
+from ruamel.yaml import YAML
+
 from .models import Finding, LintReport, Severity
 from .render import finding_document, render_findings
 
@@ -534,6 +536,75 @@ def _symlink_findings(repo_root: Path) -> list[Finding]:
     ]
 
 
+def _skillshare_config_findings(repo_root: Path) -> list[Finding]:
+    config_path = repo_root / "reference/.config/skillshare/config.yaml"
+    if not config_path.is_file():
+        return []
+    try:
+        document = YAML(typ="safe").load(config_path)
+    except Exception as error:
+        return [
+            _finding(
+                Severity.ERROR,
+                "skillshare.config_invalid",
+                f"Skillshare config is not valid YAML: {error}",
+                config_path,
+            ),
+        ]
+    if not isinstance(document, dict):
+        return [
+            _finding(
+                Severity.ERROR,
+                "skillshare.config_invalid",
+                "Skillshare config must be a mapping",
+                config_path,
+            ),
+        ]
+
+    findings: list[Finding] = []
+    extras = document.get("extras", [])
+    if not isinstance(extras, list):
+        return [
+            _finding(
+                Severity.ERROR,
+                "skillshare.config_invalid",
+                "Skillshare extras must be a list",
+                config_path,
+            ),
+        ]
+    for extra in extras:
+        if not isinstance(extra, dict):
+            continue
+        name = extra.get("name", "<unnamed>")
+        targets = extra.get("targets", [])
+        if not isinstance(targets, list):
+            continue
+        for target in targets:
+            if not isinstance(target, dict):
+                continue
+            target_path = target.get("path", "<missing>")
+            if target.get("mode") != "copy":
+                findings.append(
+                    _finding(
+                        Severity.ERROR,
+                        "skillshare.extra_mode_unsafe",
+                        f"extra {name} must use copy mode because its target contains runtime state",
+                        config_path,
+                        value=str(target_path),
+                    ),
+                )
+    if not findings:
+        findings.append(
+            _finding(
+                Severity.OK,
+                "skillshare.extra_modes_safe",
+                "all extras targets use non-pruning copy mode",
+                config_path,
+            ),
+        )
+    return findings
+
+
 def inspect_repository(
     repo_root: Path,
     home: Path,
@@ -546,6 +617,7 @@ def inspect_repository(
     findings.extend(_symlink_findings(repo_root))
     findings.extend(_tracked_file_findings(repo_root))
     findings.extend(_legacy_reference_findings(repo_root))
+    findings.extend(_skillshare_config_findings(repo_root))
     return LintReport(schema_version=1, findings=tuple(findings))
 
 
