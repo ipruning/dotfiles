@@ -46,7 +46,7 @@ SKIP_SUFFIXES = {
     ".pyc",
     ".DS_Store",
 }
-SKIP_PREFIXES = ("generated/", "reference/Library/")
+SKIP_PREFIXES = ("generated/",)
 FULL_HOME_REQUIRED_FILES = {
     "reference/.config/zellij/config.kdl": (
         "zellij-sessionizer paths do not expand home variables"
@@ -439,6 +439,8 @@ def _tracked_paths(repo_root: Path) -> list[Path]:
 def _tracked_file_findings(repo_root: Path) -> list[Finding]:
     findings: list[Finding] = []
     for file_path in _tracked_paths(repo_root):
+        if not file_path.exists():
+            continue
         relative = file_path.relative_to(repo_root).as_posix()
         basename = file_path.name.lower()
         if (
@@ -454,7 +456,7 @@ def _tracked_file_findings(repo_root: Path) -> list[Finding]:
                     file_path,
                 ),
             )
-        if relative.startswith("generated/") and file_path.name != ".gitkeep":
+        if relative.startswith("generated/"):
             findings.append(
                 _finding(
                     Severity.ERROR,
@@ -477,6 +479,11 @@ LEGACY_REFERENCES = (
     "modules/bin/dotfiles-restore",
     "modules/bin/dotfiles-sync",
     "modules/bin/dotfiles-up",
+    "modules/bin/dotfiles-zsh-profile",
+    "modules/bin/ss",
+    "modules/bin/_lib/core.sh",
+    "modules/bin/_lib/load.sh",
+    "modules/bin/_lib/log.sh",
     "mise run backup",
     "mise run doctor",
     "mise run init",

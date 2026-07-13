@@ -13,7 +13,6 @@ generated/completions/*
 generated/functions/*
 generated/plugins/*
 generated/sources/*
-!**/.gitkeep
 
 reference/.config/karabiner/automatic_backups/
 

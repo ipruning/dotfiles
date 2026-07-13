@@ -63,11 +63,15 @@ def test_inspect_repository_rejects_tracked_private_generated_and_legacy_files(
     )
     private_file = repo_root / "reference/.machine.private.zsh"
     private_file.write_text("TOKEN=secret\n")
-    generated_file = repo_root / "generated/stale.txt"
+    generated_file = repo_root / "generated/.gitkeep"
     generated_file.parent.mkdir()
     generated_file.write_text("stale\n")
     legacy_file = repo_root / "notes.txt"
-    legacy_file.write_text("run mise run sync\nrun mise run update -- --dry-run\n")
+    legacy_file.write_text(
+        "run mise run sync\n"
+        "run mise run update -- --dry-run\n"
+        "run modules/bin/ss status\n"
+    )
     subprocess.run(["git", "init", "-q", str(repo_root)], check=True)
     subprocess.run(["git", "-C", str(repo_root), "add", "."], check=True)
 
@@ -82,7 +86,7 @@ def test_inspect_repository_rejects_tracked_private_generated_and_legacy_files(
         for finding in report.findings
         if finding.code == "repository.legacy_reference"
     ]
-    assert len(legacy_findings) == 1
+    assert len(legacy_findings) == 2
     assert "mise run sync" in legacy_findings[0].message
 
 
@@ -183,6 +187,29 @@ def test_linux_repository_lint_skips_macos_only_paths(tmp_path: Path) -> None:
         "path.platform_skipped",
         "path.toolchain",
     }
+
+
+def test_inspect_repository_checks_paths_under_reference_library(
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    settings = repo_root / "reference/Library/Application Support/App/settings.json"
+    settings.parent.mkdir(parents=True)
+    settings.write_text('{"tool": "/Users/someone/private/tool"}\n')
+    (repo_root / "mackup/applications").mkdir(parents=True)
+    (repo_root / "mackup/mackup.cfg").write_text(
+        "[storage]\nengine = file_system\npath = dotfiles\n"
+        "directory = reference\n[applications_to_sync]\n",
+    )
+
+    report = inspect_repository(repo_root, home, system_name="Darwin")
+    finding = next(
+        finding for finding in report.findings if finding.code == "path.absolute_home"
+    )
+
+    assert finding.severity is Severity.ERROR
+    assert finding.path == settings
 
 
 def test_inspect_repository_rejects_pruning_skillshare_extra_modes(
