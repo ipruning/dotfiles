@@ -114,6 +114,64 @@ env "${test_env[@]}" "$installed_cli" notify-test --dry-run >"$test_root/notify.
 jq -e 'select(.exit == 0 and .auth_mode == "bearer" and .payload.thread_id == "macos-session-health")' \
   "$test_root/notify.json" >/dev/null || fail 'built-in notification dry-run failed'
 
+query_db="$test_root/query.sqlite3"
+"$python_bin" - "$query_db" <<'PY'
+import json
+import sqlite3
+import sys
+
+with sqlite3.connect(sys.argv[1]) as conn:
+    conn.executescript(
+        """
+        CREATE TABLE snapshots (
+          id TEXT PRIMARY KEY, started_at TEXT NOT NULL, ended_at TEXT,
+          hostname TEXT NOT NULL, username TEXT NOT NULL, pid INTEGER NOT NULL,
+          mode TEXT NOT NULL, app_paths_json TEXT NOT NULL, status TEXT
+        );
+        CREATE TABLE events (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          snapshot_id TEXT NOT NULL REFERENCES snapshots(id) ON DELETE CASCADE,
+          ts TEXT NOT NULL, event TEXT NOT NULL, severity TEXT, data_json TEXT NOT NULL
+        );
+        """
+    )
+    conn.execute(
+        "INSERT INTO snapshots VALUES ('snapshot-1','2026-01-01T00:00:00Z','2026-01-01T00:00:01Z','host','user',1,'snapshot','[]','ok')"
+    )
+    conn.execute(
+        "INSERT INTO events (snapshot_id,ts,event,data_json) VALUES (?,?,?,?)",
+        (
+            "snapshot-1",
+            "2026-01-01T00:00:00Z",
+            "command_process_count",
+            json.dumps({"rows": [{"comm": "alpha", "count": 3}, {"comm": "beta", "count": 2}]}),
+        ),
+    )
+PY
+env "${test_env[@]}" "$installed_cli" --db "$query_db" query \
+  --event command_process_count --limit 10 --format json >"$test_root/query.json"
+jq -e 'select(length == 2 and .[0].rows == null and .[0].comm == "alpha" and .[1].comm == "beta")' \
+  "$test_root/query.json" >/dev/null || fail 'query did not preserve the flat process-inventory contract'
+env "${test_env[@]}" "$installed_cli" --db "$query_db" compact --format json >"$test_root/custom-compact.json"
+jq -e --arg database "$query_db" \
+  '.[0] | select(.database == $database and .service_restarted == false)' \
+  "$test_root/custom-compact.json" >/dev/null \
+  || fail 'compact ignored the selected database'
+
+health_db="$test_home/Library/Application Support/macos-session-health/health.sqlite3"
+"$python_bin" - "$health_db" <<'PY'
+import sqlite3
+import sys
+
+with sqlite3.connect(sys.argv[1]) as conn:
+    conn.execute("CREATE TABLE sample (value TEXT)")
+    conn.executemany("INSERT INTO sample VALUES (?)", [("x" * 1000,)] * 100)
+    conn.execute("DELETE FROM sample")
+PY
+env "${test_env[@]}" "$installed_cli" compact --format json >"$test_root/compact.json"
+jq -e '.[0] | select(.compacted == true and .service_restarted == true and .after_bytes <= .before_bytes)' \
+  "$test_root/compact.json" >/dev/null || fail 'database compaction did not preserve the service lifecycle'
+
 env "${test_env[@]}" "$installed_cli" uninstall >"$test_root/uninstall.out"
 [[ ! -e "$installed_cli" && ! -e "$runtime_cli" && ! -e "$plist" ]] \
   || fail 'uninstall left installed lifecycle files'

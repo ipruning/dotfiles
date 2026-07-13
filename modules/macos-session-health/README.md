@@ -103,6 +103,21 @@ Validate the payload and local credential lookup without sending:
 macos-session-health notify-test --dry-run
 ```
 
+Process inventories run every five minutes and are stored as one aggregate
+event per inventory instead of one row per process. Core resource and spawn
+signals remain sampled every minute. The 14-day snapshot retention still
+applies to both formats; existing detailed rows age out normally.
+
+After a storage-format upgrade, reclaim unused SQLite pages without losing
+history. The command stops and restarts only this LaunchAgent around `VACUUM`:
+
+```zsh
+macos-session-health compact --format json
+```
+
+Pass global `--db PATH` before `compact` to compact an offline database without
+stopping the installed LaunchAgent.
+
 ## Maintenance
 
 After changing the collector, validate its command interface and read-only

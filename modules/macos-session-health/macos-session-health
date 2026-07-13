@@ -546,7 +546,13 @@ def run_command(
             check=False,
         )
         duration_ms = (time.monotonic() - started) * 1000
-        return completed.returncode, completed.stdout, completed.stderr, False, duration_ms
+        return (
+            completed.returncode,
+            completed.stdout,
+            completed.stderr,
+            False,
+            duration_ms,
+        )
     except subprocess.TimeoutExpired as exc:
         duration_ms = (time.monotonic() - started) * 1000
         stdout = exc.stdout or ""
@@ -587,6 +593,7 @@ class Store:
             db_path.parent.mkdir(parents=True, exist_ok=True)
             self.conn = sqlite3.connect(db_path)
             self.conn.execute("PRAGMA journal_mode=WAL")
+            self.conn.execute("PRAGMA synchronous=NORMAL")
             self.conn.execute("PRAGMA busy_timeout=5000")
             self.conn.execute("PRAGMA foreign_keys=ON")
             self._init_schema()
@@ -618,13 +625,13 @@ class Store:
 
             CREATE INDEX IF NOT EXISTS idx_events_snapshot ON events(snapshot_id);
             CREATE INDEX IF NOT EXISTS idx_events_event_ts ON events(event, ts);
-            CREATE INDEX IF NOT EXISTS idx_events_severity_ts ON events(severity, ts);
-
             CREATE TABLE IF NOT EXISTS state (
               key TEXT PRIMARY KEY,
               value TEXT NOT NULL,
               updated_at TEXT NOT NULL
             );
+
+            DROP INDEX IF EXISTS idx_events_severity_ts;
             """
         )
         self.conn.commit()
@@ -665,16 +672,21 @@ class Store:
         if self.conn is None or retention_days is None or retention_days <= 0:
             return 0
         cutoff = (
-            dt.datetime.now(dt.timezone.utc) - dt.timedelta(days=retention_days)
-        ).isoformat(timespec="seconds").replace("+00:00", "Z")
-        cursor = self.conn.execute("DELETE FROM snapshots WHERE started_at < ?", (cutoff,))
-        self.conn.commit()
+            (dt.datetime.now(dt.timezone.utc) - dt.timedelta(days=retention_days))
+            .isoformat(timespec="seconds")
+            .replace("+00:00", "Z")
+        )
+        cursor = self.conn.execute(
+            "DELETE FROM snapshots WHERE started_at < ?", (cutoff,)
+        )
         return cursor.rowcount
 
     def get_state(self, key: str) -> str | None:
         if self.conn is None:
             return None
-        row = self.conn.execute("SELECT value FROM state WHERE key = ?", (key,)).fetchone()
+        row = self.conn.execute(
+            "SELECT value FROM state WHERE key = ?", (key,)
+        ).fetchone()
         return None if row is None else str(row[0])
 
     def set_state(self, key: str, value: str) -> None:
@@ -688,9 +700,10 @@ class Store:
             """,
             (key, value, utc_now()),
         )
-        self.conn.commit()
 
-    def emit(self, snapshot_id: str, event: str, severity: str | None = None, **data: Any) -> None:
+    def emit(
+        self, snapshot_id: str, event: str, severity: str | None = None, **data: Any
+    ) -> None:
         ts = utc_now()
         if event == "health_signal":
             signal = {"severity": severity}
@@ -710,9 +723,14 @@ class Store:
                 INSERT INTO events (snapshot_id, ts, event, severity, data_json)
                 VALUES (?, ?, ?, ?, ?)
                 """,
-                (snapshot_id, ts, event, severity, json.dumps(data, ensure_ascii=False)),
+                (
+                    snapshot_id,
+                    ts,
+                    event,
+                    severity,
+                    json.dumps(data, ensure_ascii=False),
+                ),
             )
-            self.conn.commit()
 
     def close(self) -> None:
         if self.conn is not None:
@@ -750,7 +768,16 @@ def parse_launchctl_print(output: str) -> dict[str, str]:
         if " = " not in stripped:
             continue
         key, value = stripped.split(" = ", 1)
-        if key in {"active count", "path", "type", "state", "program", "runs", "pid", "last exit code"}:
+        if key in {
+            "active count",
+            "path",
+            "type",
+            "state",
+            "program",
+            "runs",
+            "pid",
+            "last exit code",
+        }:
             parsed[key.replace(" ", "_")] = value
     return parsed
 
@@ -788,7 +815,9 @@ def trusted_codex_project_roots(config: dict[str, Any]) -> list[str]:
     for project_path, project_config in projects.items():
         if not isinstance(project_path, str):
             continue
-        if isinstance(project_config, dict) and project_config.get("trust_level") not in (None, "trusted"):
+        if isinstance(project_config, dict) and project_config.get(
+            "trust_level"
+        ) not in (None, "trusted"):
             continue
         roots.append(project_path)
     return sorted(set(roots))
@@ -800,7 +829,11 @@ def candidate_code_sign_clone_paths() -> list[Path]:
 
     tmpdir = os.getenv("TMPDIR")
     if tmpdir:
-        candidate = Path(tmpdir).expanduser().resolve().parent / "X" / "com.openai.codex.code_sign_clone"
+        candidate = (
+            Path(tmpdir).expanduser().resolve().parent
+            / "X"
+            / "com.openai.codex.code_sign_clone"
+        )
         paths.append(candidate)
 
     for raw_path in glob.glob("/var/folders/*/*/X/com.openai.codex.code_sign_clone"):
@@ -836,13 +869,17 @@ def codex_process_role(command: str) -> str:
     if "/browser_crashpad_handler" in command and "Codex" in command:
         return "codex_crashpad"
     if any(
-        f"/Applications/{app_name}.app/Contents/Resources/cua_node/bin/node_repl" in command
+        f"/Applications/{app_name}.app/Contents/Resources/cua_node/bin/node_repl"
+        in command
         for app_name in ("ChatGPT", "Codex")
     ):
         return "codex_node_repl"
     if "SkyComputerUseClient" in command and " mcp" in command:
         return "codex_sky_computer_use"
-    if "extension-host" in command and f"chrome-extension://{CODEX_CHROME_EXTENSION_ID}/" in command:
+    if (
+        "extension-host" in command
+        and f"chrome-extension://{CODEX_CHROME_EXTENSION_ID}/" in command
+    ):
         return "codex_chrome_extension_host"
     return ""
 
@@ -949,8 +986,8 @@ def recover_syspolicyd(args: argparse.Namespace) -> int:
     commands = [
         "pkill -TERM -f '^/Applications/ChatGPT\\.app/Contents/MacOS/ChatGPT$'",
         "sleep 5",
-        "old=\"$(pgrep -x syspolicyd)\"",
-        "sudo kill -TERM \"$old\"",
+        'old="$(pgrep -x syspolicyd)"',
+        'sudo kill -TERM "$old"',
         "sleep 5",
         "pgrep -x syspolicyd | xargs ps -o pid,ppid,stat,%cpu,rss,etime,comm= -p",
     ]
@@ -1080,7 +1117,13 @@ def collect_process_resource(
         return None
     pid_text = str(pid)
     code, out, err, timed_out, duration_ms = run_command(
-        ["ps", "-p", pid_text, "-o", "pid=,ppid=,user=,stat=,%cpu=,%mem=,rss=,etime=,comm="],
+        [
+            "ps",
+            "-p",
+            pid_text,
+            "-o",
+            "pid=,ppid=,user=,stat=,%cpu=,%mem=,rss=,etime=,comm=",
+        ],
         timeout=timeout,
     )
     if code != 0 or timed_out or not out.strip():
@@ -1195,12 +1238,16 @@ def collect_process_resource_delta(
     if previous_raw:
         try:
             previous = json.loads(previous_raw)
-            previous_ts = dt.datetime.fromisoformat(str(previous["ts"]).replace("Z", "+00:00"))
+            previous_ts = dt.datetime.fromisoformat(
+                str(previous["ts"]).replace("Z", "+00:00")
+            )
             previous_pid = str(previous.get("pid") or "")
             previous_rss = float(previous.get("rss_mb"))
             elapsed_seconds = max((now - previous_ts).total_seconds(), 1)
             rss_delta_mb = round(rss_mb - previous_rss, 1)
-            rss_growth_mb_per_minute = round((rss_mb - previous_rss) / elapsed_seconds * 60, 1)
+            rss_growth_mb_per_minute = round(
+                (rss_mb - previous_rss) / elapsed_seconds * 60, 1
+            )
             same_pid = previous_pid == pid
             store.emit(
                 snapshot_id,
@@ -1290,7 +1337,8 @@ def collect_process_lsof(
             exit=code,
             timeout=timed_out,
             duration_ms=round(duration_ms, 1),
-            error=err.strip() or "lsof returned no rows; this is expected for many root-owned system daemons",
+            error=err.strip()
+            or "lsof returned no rows; this is expected for many root-owned system daemons",
         )
         return
 
@@ -1339,7 +1387,9 @@ def collect_process_lsof(
             value=fd_count,
         )
 
-    for path, count in sorted(path_counts.items(), key=lambda item: item[1], reverse=True)[:top_n]:
+    for path, count in sorted(
+        path_counts.items(), key=lambda item: item[1], reverse=True
+    )[:top_n]:
         store.emit(
             snapshot_id,
             "process_lsof_path_count",
@@ -1463,8 +1513,12 @@ def collect_codex_config_snapshot(
     app_version = ""
     app_build = ""
     if info_plist.exists():
-        app_version = read_plist_value(info_plist, "CFBundleShortVersionString", args.command_timeout)
-        app_build = read_plist_value(info_plist, "CFBundleVersion", args.command_timeout)
+        app_version = read_plist_value(
+            info_plist, "CFBundleShortVersionString", args.command_timeout
+        )
+        app_build = read_plist_value(
+            info_plist, "CFBundleVersion", args.command_timeout
+        )
 
     data: dict[str, Any] = {}
     parse_error = ""
@@ -1476,7 +1530,9 @@ def collect_codex_config_snapshot(
 
     notify = data.get("notify") if isinstance(data, dict) else None
     notify_items = notify if isinstance(notify, list) else []
-    notify_uses_sky, notify_sky_kind, notify_sky_path = notify_sky_path_kind(notify_items)
+    notify_uses_sky, notify_sky_kind, notify_sky_path = notify_sky_path_kind(
+        notify_items
+    )
 
     computer_use_enabled = plugin_enabled(data, "computer-use@openai-bundled")
     chrome_enabled = plugin_enabled(data, "chrome@openai-bundled")
@@ -1489,7 +1545,9 @@ def collect_codex_config_snapshot(
         try:
             native_hosts_text = native_hosts_path.read_text(encoding="utf-8")
             json.loads(native_hosts_text)
-            native_host_extension_present = CODEX_CHROME_EXTENSION_ID in native_hosts_text
+            native_host_extension_present = (
+                CODEX_CHROME_EXTENSION_ID in native_hosts_text
+            )
         except (OSError, json.JSONDecodeError) as exc:
             native_host_parse_error = f"{type(exc).__name__}: {exc}"
 
@@ -1506,16 +1564,19 @@ def collect_codex_config_snapshot(
         "notify_uses_sky_computer_use": notify_uses_sky,
         "notify_sky_path_kind": notify_sky_kind,
         "notify_sky_path": notify_sky_path,
-        "plugin_computer_use_enabled": computer_use_enabled if computer_use_enabled is not None else "",
+        "plugin_computer_use_enabled": computer_use_enabled
+        if computer_use_enabled is not None
+        else "",
         "plugin_chrome_enabled": chrome_enabled if chrome_enabled is not None else "",
         "trusted_project_count": trusted_project_count,
         "chrome_native_hosts_path": str(native_hosts_path),
         "chrome_native_hosts_exists": native_hosts_path.exists(),
-        "chrome_native_hosts_parse_ok": native_hosts_path.exists() and not native_host_parse_error,
+        "chrome_native_hosts_parse_ok": native_hosts_path.exists()
+        and not native_host_parse_error,
         "chrome_native_hosts_error": native_host_parse_error,
         "chrome_native_extension_id_present": native_host_extension_present,
     }
-    store.emit(snapshot_id, "codex_config_snapshot", **snapshot)
+    store.emit(snapshot_id, "codex_config_snapshot", None, **snapshot)
 
     if parse_error:
         store.emit(
@@ -1581,7 +1642,14 @@ def collect_codex_trusted_project_roots(
         }
         if root_exists and git_exists:
             code, out, err, timed_out, duration_ms = run_command(
-                ["git", "-C", str(project_root), "rev-parse", "--git-dir", "--is-inside-work-tree"],
+                [
+                    "git",
+                    "-C",
+                    str(project_root),
+                    "rev-parse",
+                    "--git-dir",
+                    "--is-inside-work-tree",
+                ],
                 timeout=args.codex_trusted_root_check_timeout,
             )
             record.update(
@@ -1672,7 +1740,7 @@ def collect_codex_process_summary(
         "sky_computer_use_count": count("codex_sky_computer_use"),
         "chrome_extension_host_count": count("codex_chrome_extension_host"),
     }
-    store.emit(snapshot_id, "codex_process_summary", **process_summary)
+    store.emit(snapshot_id, "codex_process_summary", None, **process_summary)
 
     computer_use_enabled = codex_config.get("plugin_computer_use_enabled")
     chrome_enabled = codex_config.get("plugin_chrome_enabled")
@@ -1711,7 +1779,9 @@ def collect_trustd_health(
     snapshot_id: str,
     args: argparse.Namespace,
 ) -> None:
-    code, out, err, timed_out, _duration_ms = run_command(["pgrep", "-x", "trustd"], timeout=args.command_timeout)
+    code, out, err, timed_out, _duration_ms = run_command(
+        ["pgrep", "-x", "trustd"], timeout=args.command_timeout
+    )
     pids = [line.strip() for line in out.splitlines() if line.strip()]
     if timed_out:
         store.emit(
@@ -1818,7 +1888,9 @@ def collect_code_sign_clone_status(
         if previous_raw:
             try:
                 previous = json.loads(previous_raw)
-                previous_ts = dt.datetime.fromisoformat(str(previous["ts"]).replace("Z", "+00:00"))
+                previous_ts = dt.datetime.fromisoformat(
+                    str(previous["ts"]).replace("Z", "+00:00")
+                )
                 previous_size = float(previous.get("size_mb"))
                 now = dt.datetime.now(dt.timezone.utc)
                 elapsed_seconds = max((now - previous_ts).total_seconds(), 1)
@@ -1852,11 +1924,18 @@ def collect_limits(store: Store, snapshot_id: str, timeout: float) -> None:
     maxproc_code, maxproc_out, maxproc_err, maxproc_timeout, maxproc_ms = run_command(
         ["launchctl", "limit", "maxproc"], timeout=timeout
     )
-    maxfiles_code, maxfiles_out, maxfiles_err, maxfiles_timeout, maxfiles_ms = run_command(
-        ["launchctl", "limit", "maxfiles"], timeout=timeout
+    maxfiles_code, maxfiles_out, maxfiles_err, maxfiles_timeout, maxfiles_ms = (
+        run_command(["launchctl", "limit", "maxfiles"], timeout=timeout)
     )
     sysctl_code, sysctl_out, sysctl_err, sysctl_timeout, sysctl_ms = run_command(
-        ["sysctl", "-n", "kern.maxproc", "kern.maxprocperuid", "kern.maxfiles", "kern.maxfilesperproc"],
+        [
+            "sysctl",
+            "-n",
+            "kern.maxproc",
+            "kern.maxprocperuid",
+            "kern.maxfiles",
+            "kern.maxfilesperproc",
+        ],
         timeout=timeout,
     )
 
@@ -1908,7 +1987,9 @@ def collect_limits(store: Store, snapshot_id: str, timeout: float) -> None:
 
 
 def collect_system_context(store: Store, snapshot_id: str, timeout: float) -> None:
-    sw_code, sw_out, sw_err, sw_timeout, sw_ms = run_command(["sw_vers"], timeout=timeout)
+    sw_code, sw_out, sw_err, sw_timeout, sw_ms = run_command(
+        ["sw_vers"], timeout=timeout
+    )
     boot_code, boot_out, boot_err, boot_timeout, boot_ms = run_command(
         ["sysctl", "-n", "kern.boottime"], timeout=timeout
     )
@@ -1939,7 +2020,9 @@ def collect_system_context(store: Store, snapshot_id: str, timeout: float) -> No
     )
 
 
-def collect_process_counts(store: Store, snapshot_id: str, top_n: int, timeout: float) -> None:
+def collect_process_counts(
+    store: Store, snapshot_id: str, top_n: int, timeout: float
+) -> None:
     code, out, err, timed_out, duration_ms = run_command(
         ["ps", "-axo", "user=,ppid=,pid=,stat=,comm="], timeout=timeout
     )
@@ -1997,26 +2080,46 @@ def collect_process_counts(store: Store, snapshot_id: str, top_n: int, timeout: 
             detail="zombie processes exist",
         )
 
-    for user, count in sorted(user_counts.items(), key=lambda item: item[1], reverse=True)[:top_n]:
-        store.emit(snapshot_id, "user_process_count", count=count, user=user)
+    user_rows = [
+        {"count": count, "user": user}
+        for user, count in sorted(
+            user_counts.items(), key=lambda item: item[1], reverse=True
+        )[:top_n]
+    ]
+    store.emit(snapshot_id, "user_process_count", rows=user_rows)
 
-    for comm, count in sorted(command_counts.items(), key=lambda item: item[1], reverse=True)[:top_n]:
-        store.emit(snapshot_id, "command_process_count", count=count, comm=comm)
+    command_rows = [
+        {"count": count, "comm": comm}
+        for comm, count in sorted(
+            command_counts.items(), key=lambda item: item[1], reverse=True
+        )[:top_n]
+    ]
+    store.emit(snapshot_id, "command_process_count", rows=command_rows)
 
-    for ppid, count in sorted(parent_counts.items(), key=lambda item: item[1], reverse=True)[:top_n]:
+    parent_rows: list[dict[str, Any]] = []
+    for ppid, count in sorted(
+        parent_counts.items(), key=lambda item: item[1], reverse=True
+    )[:top_n]:
         parent_comm = ""
         if ppid != "0":
-            parent_code, parent_out, _, _, _ = run_command(["ps", "-p", ppid, "-o", "comm="], timeout=1)
+            parent_code, parent_out, _, _, _ = run_command(
+                ["ps", "-p", ppid, "-o", "comm="], timeout=1
+            )
             if parent_code == 0:
                 parent_comm = parent_out.strip()
-        store.emit(snapshot_id, "parent_process_count", count=count, ppid=ppid, parent_comm=parent_comm)
+        parent_rows.append({"count": count, "ppid": ppid, "parent_comm": parent_comm})
+    store.emit(snapshot_id, "parent_process_count", rows=parent_rows)
 
     for stat, ppid, pid, comm in zombies[:top_n]:
         store.emit(snapshot_id, "zombie", stat=stat, ppid=ppid, pid=pid, comm=comm)
 
 
-def collect_fd_top(store: Store, snapshot_id: str, top_n: int, fd_warn: int, timeout: float) -> None:
-    code, out, err, timed_out, duration_ms = run_command(["lsof", "-nP"], timeout=timeout)
+def collect_fd_top(
+    store: Store, snapshot_id: str, top_n: int, fd_warn: int, timeout: float
+) -> None:
+    code, out, err, timed_out, duration_ms = run_command(
+        ["lsof", "-nP"], timeout=timeout
+    )
     if code != 0 or timed_out:
         store.emit(
             snapshot_id,
@@ -2042,19 +2145,23 @@ def collect_fd_top(store: Store, snapshot_id: str, top_n: int, fd_warn: int, tim
         current_count, current_command = counts.get(pid, (0, command))
         counts[pid] = (current_count + 1, current_command)
 
-    for pid, (count, short_comm) in sorted(counts.items(), key=lambda item: item[1][0], reverse=True)[:top_n]:
+    fd_rows: list[dict[str, Any]] = []
+    for pid, (count, short_comm) in sorted(
+        counts.items(), key=lambda item: item[1][0], reverse=True
+    )[:top_n]:
         comm = short_comm
-        ps_code, ps_out, _, _, _ = run_command(["ps", "-p", pid, "-o", "comm="], timeout=1)
+        ps_code, ps_out, _, _, _ = run_command(
+            ["ps", "-p", pid, "-o", "comm="], timeout=1
+        )
         if ps_code == 0 and ps_out.strip():
             comm = ps_out.strip()
-        store.emit(
-            snapshot_id,
-            "fd_top",
-            count=count,
-            pid=pid,
-            short_comm=short_comm,
-            comm=comm,
-            lsof_duration_ms=round(duration_ms, 1),
+        fd_rows.append(
+            {
+                "count": count,
+                "pid": pid,
+                "short_comm": short_comm,
+                "comm": comm,
+            }
         )
         if count >= fd_warn:
             store.emit(
@@ -2066,6 +2173,12 @@ def collect_fd_top(store: Store, snapshot_id: str, top_n: int, fd_warn: int, tim
                 pid=pid,
                 comm=comm,
             )
+    store.emit(
+        snapshot_id,
+        "fd_top",
+        rows=fd_rows,
+        lsof_duration_ms=round(duration_ms, 1),
+    )
 
 
 def collect_cpu_top(store: Store, snapshot_id: str, top_n: int, timeout: float) -> None:
@@ -2108,26 +2221,23 @@ def collect_cpu_top(store: Store, snapshot_id: str, top_n: int, timeout: float) 
             }
         )
 
+    cpu_rows: list[dict[str, Any]] = []
     for row in sorted(rows, key=lambda item: item["cpu_percent"], reverse=True)[:top_n]:
         parent_comm = ""
         ppid = str(row["ppid"])
         if ppid != "0":
-            parent_code, parent_out, _, _, _ = run_command(["ps", "-p", ppid, "-o", "comm="], timeout=1)
+            parent_code, parent_out, _, _, _ = run_command(
+                ["ps", "-p", ppid, "-o", "comm="], timeout=1
+            )
             if parent_code == 0:
                 parent_comm = parent_out.strip()
-        store.emit(
-            snapshot_id,
-            "process_cpu_top",
-            pid=row["pid"],
-            ppid=row["ppid"],
-            parent_comm=parent_comm,
-            stat=row["stat"],
-            cpu_percent=row["cpu_percent"],
-            rss_mb=row["rss_mb"],
-            etime=row["etime"],
-            comm=row["comm"],
-            ps_duration_ms=round(duration_ms, 1),
-        )
+        cpu_rows.append({**row, "parent_comm": parent_comm})
+    store.emit(
+        snapshot_id,
+        "process_cpu_top",
+        rows=cpu_rows,
+        ps_duration_ms=round(duration_ms, 1),
+    )
 
 
 def collect_spawn_check(store: Store, snapshot_id: str, timeout: float) -> bool:
@@ -2179,7 +2289,13 @@ def collect_app_assess(
     for app in app_paths:
         path = Path(app).expanduser()
         if not path.exists():
-            store.emit(snapshot_id, "app_bundle", app=str(path), exit=66, output="app path does not exist")
+            store.emit(
+                snapshot_id,
+                "app_bundle",
+                app=str(path),
+                exit=66,
+                output="app path does not exist",
+            )
             store.emit(
                 snapshot_id,
                 "health_signal",
@@ -2194,7 +2310,13 @@ def collect_app_assess(
 
         info_plist = path / "Contents" / "Info.plist"
         if not info_plist.exists():
-            store.emit(snapshot_id, "app_bundle", app=str(path), exit=65, output="Contents/Info.plist missing")
+            store.emit(
+                snapshot_id,
+                "app_bundle",
+                app=str(path),
+                exit=65,
+                output="Contents/Info.plist missing",
+            )
             store.emit(
                 snapshot_id,
                 "health_signal",
@@ -2208,7 +2330,15 @@ def collect_app_assess(
             continue
 
         exe_code, exe_out, exe_err, exe_timed_out, exe_ms = run_command(
-            ["plutil", "-extract", "CFBundleExecutable", "raw", "-o", "-", str(info_plist)],
+            [
+                "plutil",
+                "-extract",
+                "CFBundleExecutable",
+                "raw",
+                "-o",
+                "-",
+                str(info_plist),
+            ],
             timeout=timeout,
         )
         executable_name = exe_out.strip()
@@ -2260,14 +2390,21 @@ def collect_app_assess(
                     snapshot_id,
                     "health_signal",
                     "error",
-                    signal="app_codesign_resource_failure" if not sign_timed_out else "app_codesign_timeout",
+                    signal="app_codesign_resource_failure"
+                    if not sign_timed_out
+                    else "app_codesign_timeout",
                     value=sign_code,
                     app=str(path),
                     timeout=sign_timed_out,
                     detail=sign_output or "codesign did not finish before timeout",
                 )
         else:
-            store.emit(snapshot_id, "app_codesign_verify_skipped", app=str(path), reason="periodic_probe_interval")
+            store.emit(
+                snapshot_id,
+                "app_codesign_verify_skipped",
+                app=str(path),
+                reason="periodic_probe_interval",
+            )
 
         if run_spctl:
             code, out, err, timed_out, duration_ms = run_command(
@@ -2290,14 +2427,21 @@ def collect_app_assess(
                     snapshot_id,
                     "health_signal",
                     "error",
-                    signal="app_assess_resource_failure" if not timed_out else "app_assess_timeout",
+                    signal="app_assess_resource_failure"
+                    if not timed_out
+                    else "app_assess_timeout",
                     value=code,
                     app=str(path),
                     timeout=timed_out,
                     detail=output or "spctl did not finish before timeout",
                 )
         else:
-            store.emit(snapshot_id, "app_assess_skipped", app=str(path), reason="periodic_probe_interval")
+            store.emit(
+                snapshot_id,
+                "app_assess_skipped",
+                app=str(path),
+                reason="periodic_probe_interval",
+            )
     return ok
 
 
@@ -2313,7 +2457,9 @@ def collect_macos_log_excerpt(
         name = Path(app).stem
         if name:
             app_terms.append(name)
-    app_predicate = " OR ".join(f'eventMessage CONTAINS[c] "{term}"' for term in app_terms)
+    app_predicate = " OR ".join(
+        f'eventMessage CONTAINS[c] "{term}"' for term in app_terms
+    )
     predicate = (
         'process == "launchservicesd" OR process == "lsd" OR '
         'process == "runningboardd" OR eventMessage CONTAINS[c] "LSOpen" OR '
@@ -2323,7 +2469,16 @@ def collect_macos_log_excerpt(
         predicate = f"{predicate} OR {app_predicate}"
 
     code, out, err, timed_out, duration_ms = run_command(
-        ["/usr/bin/log", "show", "--last", "5m", "--style", "compact", "--predicate", predicate],
+        [
+            "/usr/bin/log",
+            "show",
+            "--last",
+            "5m",
+            "--style",
+            "compact",
+            "--predicate",
+            predicate,
+        ],
         timeout=timeout,
     )
     lines = (out + err).splitlines()
@@ -2351,13 +2506,10 @@ def classify_passive_log_line(line: str) -> tuple[str, str] | None:
     lower = line.lower()
     if re.search(r"\slog\[\d+:", lower):
         return None
-    if (
-        "syspolicyd[" in lower
-        and (
-            "unix error exception: 24" in lower
-            or "too many open files" in lower
-            or "failed to generate secstaticcode" in lower
-        )
+    if "syspolicyd[" in lower and (
+        "unix error exception: 24" in lower
+        or "too many open files" in lower
+        or "failed to generate secstaticcode" in lower
     ):
         return "syspolicyd_assessment_failure", "error"
     if (
@@ -2369,12 +2521,15 @@ def classify_passive_log_line(line: str) -> tuple[str, str] | None:
     if (
         ("syspolicyd[" in lower or "trustd[" in lower)
         and "extension-host" in lower
-        and ("codex" in lower or "openai" in lower or CODEX_CHROME_EXTENSION_ID in lower)
+        and (
+            "codex" in lower or "openai" in lower or CODEX_CHROME_EXTENSION_ID in lower
+        )
     ):
         return "codex_extension_host_log_warning", "warning"
-    if (
-        ("syspolicyd[" in lower or "trustd[" in lower)
-        and ("skycomputeruseclient" in lower or "codex computer use" in lower or "com.openai.sky" in lower)
+    if ("syspolicyd[" in lower or "trustd[" in lower) and (
+        "skycomputeruseclient" in lower
+        or "codex computer use" in lower
+        or "com.openai.sky" in lower
     ):
         return "codex_computer_use_log_warning", "warning"
     if "devicecheck" in lower and ("codex" in lower or "openai" in lower):
@@ -2505,7 +2660,10 @@ def collect_passive_log_signals(
     for (category, severity), count in sorted(category_counts.items()):
         signal_severity = severity
         detail = f"matched {count} macOS unified log line(s) in the last {last_minutes} minute(s)"
-        if category == "syspolicyd_assessment_failure" and count < syspolicyd_log_error_count:
+        if (
+            category == "syspolicyd_assessment_failure"
+            and count < syspolicyd_log_error_count
+        ):
             signal_severity = "warning"
             detail = f"{detail}; below error threshold {syspolicyd_log_error_count}"
         if signal_severity == "error":
@@ -2535,15 +2693,21 @@ def signal_fingerprint(signals: list[dict[str, Any]]) -> str:
                 "app": signal.get("app"),
             }
         )
-    encoded = json.dumps(sorted(normalized, key=lambda item: json.dumps(item, sort_keys=True)), sort_keys=True)
+    encoded = json.dumps(
+        sorted(normalized, key=lambda item: json.dumps(item, sort_keys=True)),
+        sort_keys=True,
+    )
     return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
 
 
-def strongest_signal(signals: list[dict[str, Any]], signal_name: str, *, role: str = "") -> dict[str, Any] | None:
+def strongest_signal(
+    signals: list[dict[str, Any]], signal_name: str, *, role: str = ""
+) -> dict[str, Any] | None:
     matches = [
         signal
         for signal in signals
-        if signal.get("signal") == signal_name and (not role or signal.get("role") == role)
+        if signal.get("signal") == signal_name
+        and (not role or signal.get("role") == role)
     ]
     if not matches:
         return None
@@ -2557,9 +2721,15 @@ def build_brrr_incident(
     syspolicyd_assessment_failure_notify_count: int,
 ) -> dict[str, Any] | None:
     spawn_failed = strongest_signal(signals, "spawn_failed")
-    syspolicyd_assessment_failure = strongest_signal(signals, "syspolicyd_assessment_failure")
-    syspolicyd_rss_error = strongest_signal(signals, "process_rss_error", role="syspolicyd")
-    syspolicyd_rss_growth = strongest_signal(signals, "process_rss_growth_high", role="syspolicyd")
+    syspolicyd_assessment_failure = strongest_signal(
+        signals, "syspolicyd_assessment_failure"
+    )
+    syspolicyd_rss_error = strongest_signal(
+        signals, "process_rss_error", role="syspolicyd"
+    )
+    syspolicyd_rss_growth = strongest_signal(
+        signals, "process_rss_growth_high", role="syspolicyd"
+    )
     code_sign_clone_growth = strongest_signal(signals, "code_sign_clone_growth_high")
     collector_exception = strongest_signal(signals, "collector_exception")
 
@@ -2575,7 +2745,9 @@ def build_brrr_incident(
     ):
         count = syspolicyd_assessment_failure.get("value", "")
         title = "Gatekeeper 正在大量失败"
-        summary = f"最近日志里有 {count} 条 syspolicyd assessment 失败，app 启动可能受影响。"
+        summary = (
+            f"最近日志里有 {count} 条 syspolicyd assessment 失败，app 启动可能受影响。"
+        )
         primary = syspolicyd_assessment_failure
         kind = "syspolicyd_assessment_failure"
     elif syspolicyd_rss_error:
@@ -2587,7 +2759,9 @@ def build_brrr_incident(
     elif syspolicyd_rss_growth:
         growth = syspolicyd_rss_growth.get("value", "")
         title = "syspolicyd 正在快速涨 RSS"
-        summary = f"syspolicyd RSS 增速约 {growth} MiB/min，可能正在进入 Gatekeeper 风暴。"
+        summary = (
+            f"syspolicyd RSS 增速约 {growth} MiB/min，可能正在进入 Gatekeeper 风暴。"
+        )
         primary = syspolicyd_rss_growth
         kind = "syspolicyd_rss_growth"
     elif code_sign_clone_growth:
@@ -2606,15 +2780,23 @@ def build_brrr_incident(
 
     context: list[str] = []
     if syspolicyd_assessment_failure and syspolicyd_assessment_failure is not primary:
-        context.append(f"syspolicyd_assessment_failure={syspolicyd_assessment_failure.get('value', '')}")
+        context.append(
+            f"syspolicyd_assessment_failure={syspolicyd_assessment_failure.get('value', '')}"
+        )
     if syspolicyd_rss_error and syspolicyd_rss_error is not primary:
         context.append(f"syspolicyd_rss_mb={syspolicyd_rss_error.get('value', '')}")
     if syspolicyd_rss_growth and syspolicyd_rss_growth is not primary:
-        context.append(f"syspolicyd_rss_growth_mb_per_min={syspolicyd_rss_growth.get('value', '')}")
+        context.append(
+            f"syspolicyd_rss_growth_mb_per_min={syspolicyd_rss_growth.get('value', '')}"
+        )
     if code_sign_clone_growth and code_sign_clone_growth is not primary:
-        context.append(f"code_sign_clone_growth_mb_per_min={code_sign_clone_growth.get('value', '')}")
+        context.append(
+            f"code_sign_clone_growth_mb_per_min={code_sign_clone_growth.get('value', '')}"
+        )
     if spawn_failed and spawn_failed is not primary:
-        context.append(f"spawn_failed={spawn_failed.get('name', '') or spawn_failed.get('value', '')}")
+        context.append(
+            f"spawn_failed={spawn_failed.get('name', '') or spawn_failed.get('value', '')}"
+        )
 
     message_lines = [
         summary,
@@ -2963,8 +3145,15 @@ def snapshot(args: argparse.Namespace, store: Store, mode: str) -> str:
             )
         collect_system_context(store, snapshot_id, args.command_timeout)
         collect_limits(store, snapshot_id, args.command_timeout)
-        collect_process_counts(store, snapshot_id, args.top, args.command_timeout)
-        collect_cpu_top(store, snapshot_id, args.top, args.command_timeout)
+        run_process_top = should_run_periodic_probe(
+            store,
+            snapshot_id,
+            "process_top",
+            args.process_top_interval_minutes,
+        )
+        if run_process_top:
+            collect_process_counts(store, snapshot_id, args.top, args.command_timeout)
+            collect_cpu_top(store, snapshot_id, args.top, args.command_timeout)
         run_fd_top = should_run_periodic_probe(
             store,
             snapshot_id,
@@ -2972,7 +3161,9 @@ def snapshot(args: argparse.Namespace, store: Store, mode: str) -> str:
             args.fd_top_interval_minutes,
         )
         if run_fd_top:
-            collect_fd_top(store, snapshot_id, args.top, args.fd_warn, args.lsof_timeout)
+            collect_fd_top(
+                store, snapshot_id, args.top, args.fd_warn, args.lsof_timeout
+            )
         codex_config = collect_codex_config_snapshot(store, snapshot_id, args)
         run_trusted_root_check = should_run_periodic_probe(
             store,
@@ -3045,14 +3236,19 @@ def snapshot(args: argparse.Namespace, store: Store, mode: str) -> str:
             run_spctl=run_spctl,
         )
         signal_unhealthy = any(
-            signal_meets_min_severity(signal, "error") for signal in store.current_signals
+            signal_meets_min_severity(signal, "error")
+            for signal in store.current_signals
         )
         if signal_unhealthy or not spawn_ok or not app_ok or not passive_log_ok:
             status = "unhealthy"
-            if (not spawn_ok or not app_ok) and args.collect_log_excerpt and should_collect_log_excerpt(
-                store,
-                snapshot_id,
-                args.log_excerpt_cooldown_minutes,
+            if (
+                (not spawn_ok or not app_ok)
+                and args.collect_log_excerpt
+                and should_collect_log_excerpt(
+                    store,
+                    snapshot_id,
+                    args.log_excerpt_cooldown_minutes,
+                )
             ):
                 collect_macos_log_excerpt(
                     store,
@@ -3082,7 +3278,9 @@ def snapshot(args: argparse.Namespace, store: Store, mode: str) -> str:
 
 def fetch_event_names(conn: sqlite3.Connection) -> set[str]:
     try:
-        rows = conn.execute("SELECT DISTINCT event FROM events ORDER BY event").fetchall()
+        rows = conn.execute(
+            "SELECT DISTINCT event FROM events ORDER BY event"
+        ).fetchall()
     except sqlite3.Error as exc:
         raise CliError("unable to read events") from exc
     return {str(row[0]) for row in rows}
@@ -3134,9 +3332,9 @@ def query(
             "snapshot_id": row["snapshot_id"],
         }
         record.update(data)
-        records.append(record)
+        records.extend(expand_aggregate_event(record))
     conn.close()
-    print_records(records, output_format)
+    print_records(records[:limit], output_format)
     return 0
 
 
@@ -3165,10 +3363,27 @@ def event_identity(event: str, data: dict[str, Any]) -> str:
     return json.dumps(data, sort_keys=True, ensure_ascii=False)
 
 
-def trend(db_path: Path, hours: float, limit: int, event: str, output_format: str) -> int:
+def expand_aggregate_event(data: dict[str, Any]) -> list[dict[str, Any]]:
+    # TODO(cleanup): trigger=fact:all retained process inventory events contain rows; action=remove legacy single-row event expansion
+    rows = data.get("rows")
+    if not isinstance(rows, list):
+        return [data]
+    common = {key: value for key, value in data.items() if key != "rows"}
+    expanded = []
+    for row in rows:
+        if isinstance(row, dict):
+            expanded.append({**common, **row})
+    return expanded
+
+
+def trend(
+    db_path: Path, hours: float, limit: int, event: str, output_format: str
+) -> int:
     cutoff = (
-        dt.datetime.now(dt.timezone.utc) - dt.timedelta(hours=hours)
-    ).isoformat(timespec="seconds").replace("+00:00", "Z")
+        (dt.datetime.now(dt.timezone.utc) - dt.timedelta(hours=hours))
+        .isoformat(timespec="seconds")
+        .replace("+00:00", "Z")
+    )
     conn = open_read_db(db_path)
     try:
         rows = conn.execute(
@@ -3188,15 +3403,18 @@ def trend(db_path: Path, hours: float, limit: int, event: str, output_format: st
     series: dict[str, list[tuple[str, int, str, str]]] = {}
     for row in rows:
         data = json.loads(row["data_json"])
-        raw_count = data.get("count")
-        try:
-            count = int(raw_count)
-        except (TypeError, ValueError):
-            continue
-        key = event_identity(event, data)
-        series.setdefault(key, []).append(
-            (row["ts"], count, row["status"] or "", row["snapshot_id"])
-        )
+        for sample in expand_aggregate_event(data):
+            raw_count = sample.get("count")
+            if raw_count is None:
+                continue
+            try:
+                count = int(raw_count)
+            except (TypeError, ValueError):
+                continue
+            key = event_identity(event, sample)
+            series.setdefault(key, []).append(
+                (row["ts"], count, row["status"] or "", row["snapshot_id"])
+            )
 
     ranked = []
     for key, samples in series.items():
@@ -3222,7 +3440,9 @@ def trend(db_path: Path, hours: float, limit: int, event: str, output_format: st
             }
         )
 
-    ranked.sort(key=lambda item: (item["delta"], item["max"], item["last"]), reverse=True)
+    ranked.sort(
+        key=lambda item: (item["delta"], item["max"], item["last"]), reverse=True
+    )
     records = []
     for item in ranked[:limit]:
         record = {"event": event}
@@ -3297,6 +3517,14 @@ def load_latest_events(
     return records
 
 
+def expand_loaded_events(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    expanded: list[dict[str, Any]] = []
+    for record in records:
+        rows = expand_aggregate_event(record)
+        expanded.extend(rows)
+    return expanded
+
+
 def latest_snapshot_id_for_event(records: list[dict[str, Any]]) -> str:
     return records[0]["snapshot_id"] if records else ""
 
@@ -3344,7 +3572,9 @@ def render_incident_markdown(report: dict[str, Any]) -> str:
     for record in report["recent_health_signals"]:
         lines.append(
             f"- `{record['ts']}` `{record.get('severity', '')}` "
-            + compact_record(record, ["signal", "value", "role", "pid", "app", "detail"])
+            + compact_record(
+                record, ["signal", "value", "role", "pid", "app", "detail"]
+            )
         )
     if not report["recent_health_signals"]:
         lines.append("No recent health signals.")
@@ -3432,7 +3662,10 @@ def render_incident_markdown(report: dict[str, Any]) -> str:
     for record in report["code_sign_clone_delta"]:
         lines.append(
             f"- code_sign_clone_delta `{record['ts']}` "
-            + compact_record(record, ["size_mb", "previous_size_mb", "delta_mb", "growth_mb_per_minute"])
+            + compact_record(
+                record,
+                ["size_mb", "previous_size_mb", "delta_mb", "growth_mb_per_minute"],
+            )
         )
 
     if report["trusted_root_records"]:
@@ -3515,7 +3748,9 @@ def render_incident_markdown(report: dict[str, Any]) -> str:
     for record in report["latest_cpu_top"]:
         lines.append(
             f"- `{record['ts']}` "
-            + compact_record(record, ["cpu_percent", "pid", "ppid", "rss_mb", "comm", "parent_comm"])
+            + compact_record(
+                record, ["cpu_percent", "pid", "ppid", "rss_mb", "comm", "parent_comm"]
+            )
         )
     if not report["latest_cpu_top"]:
         lines.append("No CPU top samples.")
@@ -3542,8 +3777,10 @@ def render_incident_markdown(report: dict[str, Any]) -> str:
 
 def incident_report(db_path: Path, hours: float, limit: int, output_format: str) -> int:
     cutoff = (
-        dt.datetime.now(dt.timezone.utc) - dt.timedelta(hours=hours)
-    ).isoformat(timespec="seconds").replace("+00:00", "Z")
+        (dt.datetime.now(dt.timezone.utc) - dt.timedelta(hours=hours))
+        .isoformat(timespec="seconds")
+        .replace("+00:00", "Z")
+    )
     conn = open_read_db(db_path)
     try:
         summary_row = conn.execute(
@@ -3624,25 +3861,37 @@ def incident_report(db_path: Path, hours: float, limit: int, output_format: str)
             conn, cutoff=cutoff, event="health_signal", limit=max(limit * 8, 80)
         )
         brrr_events = [
-            *load_recent_events(conn, cutoff=cutoff, event="brrr_notification", limit=limit),
-            *load_recent_events(conn, cutoff=cutoff, event="brrr_notification_skipped", limit=limit),
+            *load_recent_events(
+                conn, cutoff=cutoff, event="brrr_notification", limit=limit
+            ),
+            *load_recent_events(
+                conn, cutoff=cutoff, event="brrr_notification_skipped", limit=limit
+            ),
         ]
         brrr_events.sort(key=lambda item: item["ts"], reverse=True)
         brrr_events = brrr_events[:limit]
         latest_sample_limit = max(limit * 8, 100)
-        latest_cpu_records = load_latest_events(conn, event="process_cpu_top", limit=latest_sample_limit)
+        latest_cpu_records = expand_loaded_events(
+            load_latest_events(conn, event="process_cpu_top", limit=latest_sample_limit)
+        )
         latest_cpu_snapshot = latest_snapshot_id_for_event(latest_cpu_records)
         latest_cpu_top = [
-            record for record in latest_cpu_records if record["snapshot_id"] == latest_cpu_snapshot
+            record
+            for record in latest_cpu_records
+            if record["snapshot_id"] == latest_cpu_snapshot
         ][:limit]
         latest_cpu_top.sort(
             key=lambda item: parse_float(str(item.get("cpu_percent") or "")) or 0,
             reverse=True,
         )
-        latest_fd_records = load_latest_events(conn, event="fd_top", limit=latest_sample_limit)
+        latest_fd_records = expand_loaded_events(
+            load_latest_events(conn, event="fd_top", limit=latest_sample_limit)
+        )
         latest_fd_snapshot = latest_snapshot_id_for_event(latest_fd_records)
         latest_fd_top = [
-            record for record in latest_fd_records if record["snapshot_id"] == latest_fd_snapshot
+            record
+            for record in latest_fd_records
+            if record["snapshot_id"] == latest_fd_snapshot
         ][:limit]
         latest_fd_top.sort(
             key=lambda item: parse_int(str(item.get("count") or "")) or 0,
@@ -3662,7 +3911,9 @@ def incident_report(db_path: Path, hours: float, limit: int, output_format: str)
                 "count": int(row["count"] or 0),
                 "first_ts": row["first_ts"] or "",
                 "last_ts": row["last_ts"] or "",
-                "max_value": round(float(row["max_value"]), 1) if row["max_value"] is not None else "",
+                "max_value": round(float(row["max_value"]), 1)
+                if row["max_value"] is not None
+                else "",
             }
         )
 
@@ -3684,9 +3935,12 @@ def incident_report(db_path: Path, hours: float, limit: int, output_format: str)
     ]
     findings = []
     if syspolicyd_assessment_failure_rows:
-        total_assessment_failures = sum(int(row["count"] or 0) for row in syspolicyd_assessment_failure_rows)
+        total_assessment_failures = sum(
+            int(row["count"] or 0) for row in syspolicyd_assessment_failure_rows
+        )
         max_assessment_failures = max(
-            parse_float(str(row["max_value"] or "")) or 0 for row in syspolicyd_assessment_failure_rows
+            parse_float(str(row["max_value"] or "")) or 0
+            for row in syspolicyd_assessment_failure_rows
         )
         findings.append(
             f"- Window contains `{total_assessment_failures}` syspolicyd assessment failure signal(s); "
@@ -3700,9 +3954,13 @@ def incident_report(db_path: Path, hours: float, limit: int, output_format: str)
         findings.append(
             f"- Window contains `{total_rss_error}` RSS error signal(s); max_value=`{round(max_rss_error, 1)}` MiB."
         )
-    latest_codex_config = latest_codex_config_records[0] if latest_codex_config_records else {}
+    latest_codex_config = (
+        latest_codex_config_records[0] if latest_codex_config_records else {}
+    )
     latest_codex_process_summary = (
-        latest_codex_process_summary_records[0] if latest_codex_process_summary_records else {}
+        latest_codex_process_summary_records[0]
+        if latest_codex_process_summary_records
+        else {}
     )
     codex_diagnostic_signal_prefixes = (
         "codex_",
@@ -3717,11 +3975,25 @@ def incident_report(db_path: Path, hours: float, limit: int, output_format: str)
     ][:limit]
 
     if latest_codex_process_summary:
-        sky_count = parse_int(str(latest_codex_process_summary.get("sky_computer_use_count") or "0")) or 0
-        chrome_host_count = parse_int(
-            str(latest_codex_process_summary.get("chrome_extension_host_count") or "0")
-        ) or 0
-        node_repl_count = parse_int(str(latest_codex_process_summary.get("node_repl_count") or "0")) or 0
+        sky_count = (
+            parse_int(
+                str(latest_codex_process_summary.get("sky_computer_use_count") or "0")
+            )
+            or 0
+        )
+        chrome_host_count = (
+            parse_int(
+                str(
+                    latest_codex_process_summary.get("chrome_extension_host_count")
+                    or "0"
+                )
+            )
+            or 0
+        )
+        node_repl_count = (
+            parse_int(str(latest_codex_process_summary.get("node_repl_count") or "0"))
+            or 0
+        )
         if sky_count:
             findings.append(
                 f"- Latest Codex process snapshot: SkyComputerUseClient count=`{sky_count}`."
@@ -3735,16 +4007,16 @@ def incident_report(db_path: Path, hours: float, limit: int, output_format: str)
                 f"- Latest Codex process snapshot: node_repl child count=`{node_repl_count}`."
             )
     if latest_codex_config:
-        if latest_codex_config.get("plugin_computer_use_enabled") is False and latest_codex_config.get(
-            "notify_uses_sky_computer_use"
-        ):
+        if latest_codex_config.get(
+            "plugin_computer_use_enabled"
+        ) is False and latest_codex_config.get("notify_uses_sky_computer_use"):
             path_kind = latest_codex_config.get("notify_sky_path_kind") or "unknown"
             findings.append(
                 f"- Codex config disables the bundled computer-use plugin, but notify still points to SkyComputerUseClient; path_kind=`{path_kind}`."
             )
-        if latest_codex_config.get("plugin_chrome_enabled") is False and latest_codex_config.get(
-            "chrome_native_extension_id_present"
-        ):
+        if latest_codex_config.get(
+            "plugin_chrome_enabled"
+        ) is False and latest_codex_config.get("chrome_native_extension_id_present"):
             findings.append(
                 "- Codex config disables the bundled chrome plugin, but the Chrome native-host registry still references the Codex extension."
             )
@@ -3815,11 +4087,36 @@ Run `macos-session-health install` to install or refresh the user LaunchAgent.
 """,
     )
     parser.add_argument("--version", action="version", version=f"%(prog)s {VERSION}")
-    parser.add_argument("--db", type=Path, default=DEFAULT_DB, help=f"SQLite path. Default: {DEFAULT_DB}")
-    parser.add_argument("--no-db", action="store_true", help="Only emit stdout; do not write SQLite.")
-    parser.add_argument("--quiet", action="store_true", help="Write SQLite without stdout logfmt output.")
-    parser.add_argument("--top", type=int, default=int(os.getenv("MACOS_SESSION_HEALTH_TOP", "40")))
-    parser.add_argument("--fd-warn", type=int, default=int(os.getenv("MACOS_SESSION_HEALTH_FD_WARN", "512")))
+    parser.add_argument(
+        "--db",
+        type=Path,
+        default=DEFAULT_DB,
+        help=f"SQLite path. Default: {DEFAULT_DB}",
+    )
+    parser.add_argument(
+        "--no-db", action="store_true", help="Only emit stdout; do not write SQLite."
+    )
+    parser.add_argument(
+        "--quiet",
+        action="store_true",
+        help="Write SQLite without stdout logfmt output.",
+    )
+    parser.add_argument(
+        "--top", type=int, default=int(os.getenv("MACOS_SESSION_HEALTH_TOP", "15"))
+    )
+    parser.add_argument(
+        "--process-top-interval-minutes",
+        type=int,
+        default=int(
+            os.getenv("MACOS_SESSION_HEALTH_PROCESS_TOP_INTERVAL_MINUTES", "5")
+        ),
+        help="Collect process-count and CPU top inventories at most this often. Set 0 to disable.",
+    )
+    parser.add_argument(
+        "--fd-warn",
+        type=int,
+        default=int(os.getenv("MACOS_SESSION_HEALTH_FD_WARN", "512")),
+    )
     parser.add_argument(
         "--codex-app",
         type=Path,
@@ -3864,7 +4161,9 @@ Run `macos-session-health install` to install or refresh the user LaunchAgent.
     parser.add_argument(
         "--syspolicyd-lsof-interval-minutes",
         type=int,
-        default=int(os.getenv("MACOS_SESSION_HEALTH_SYSPOLICYD_LSOF_INTERVAL_MINUTES", "5")),
+        default=int(
+            os.getenv("MACOS_SESSION_HEALTH_SYSPOLICYD_LSOF_INTERVAL_MINUTES", "5")
+        ),
         help="Run syspolicyd lsof sampling at most this often. Set 0 to disable.",
     )
     parser.add_argument(
@@ -3882,19 +4181,27 @@ Run `macos-session-health install` to install or refresh the user LaunchAgent.
     parser.add_argument(
         "--syspolicyd-rss-error-mb",
         type=float,
-        default=float(os.getenv("MACOS_SESSION_HEALTH_SYSPOLICYD_RSS_ERROR_MB", "2048")),
+        default=float(
+            os.getenv("MACOS_SESSION_HEALTH_SYSPOLICYD_RSS_ERROR_MB", "2048")
+        ),
         help="Error when syspolicyd RSS reaches this many MiB.",
     )
     parser.add_argument(
         "--syspolicyd-rss-growth-warn-mb-per-minute",
         type=float,
-        default=float(os.getenv("MACOS_SESSION_HEALTH_SYSPOLICYD_RSS_GROWTH_WARN_MB_PER_MINUTE", "128")),
+        default=float(
+            os.getenv(
+                "MACOS_SESSION_HEALTH_SYSPOLICYD_RSS_GROWTH_WARN_MB_PER_MINUTE", "128"
+            )
+        ),
         help="Warn when syspolicyd RSS grows this many MiB per minute between snapshots.",
     )
     parser.add_argument(
         "--syspolicyd-log-error-count",
         type=int,
-        default=int(os.getenv("MACOS_SESSION_HEALTH_SYSPOLICYD_LOG_ERROR_COUNT", "100")),
+        default=int(
+            os.getenv("MACOS_SESSION_HEALTH_SYSPOLICYD_LOG_ERROR_COUNT", "100")
+        ),
         help="Treat syspolicyd assessment-failure log scans below this match count as warning-only.",
     )
     parser.add_argument(
@@ -3918,19 +4225,29 @@ Run `macos-session-health install` to install or refresh the user LaunchAgent.
     parser.add_argument(
         "--trustd-rss-growth-warn-mb-per-minute",
         type=float,
-        default=float(os.getenv("MACOS_SESSION_HEALTH_TRUSTD_RSS_GROWTH_WARN_MB_PER_MINUTE", "128")),
+        default=float(
+            os.getenv(
+                "MACOS_SESSION_HEALTH_TRUSTD_RSS_GROWTH_WARN_MB_PER_MINUTE", "128"
+            )
+        ),
         help="Warn when the largest trustd RSS grows this many MiB per minute.",
     )
     parser.add_argument(
         "--code-sign-clone-warn-mb",
         type=float,
-        default=float(os.getenv("MACOS_SESSION_HEALTH_CODE_SIGN_CLONE_WARN_MB", "1024")),
+        default=float(
+            os.getenv("MACOS_SESSION_HEALTH_CODE_SIGN_CLONE_WARN_MB", "1024")
+        ),
         help="Warn when Codex code_sign_clone reaches this many MiB.",
     )
     parser.add_argument(
         "--code-sign-clone-growth-warn-mb-per-minute",
         type=float,
-        default=float(os.getenv("MACOS_SESSION_HEALTH_CODE_SIGN_CLONE_GROWTH_WARN_MB_PER_MINUTE", "512")),
+        default=float(
+            os.getenv(
+                "MACOS_SESSION_HEALTH_CODE_SIGN_CLONE_GROWTH_WARN_MB_PER_MINUTE", "512"
+            )
+        ),
         help="Warn when Codex code_sign_clone grows this many MiB per minute.",
     )
     parser.add_argument(
@@ -3942,18 +4259,33 @@ Run `macos-session-health install` to install or refresh the user LaunchAgent.
     parser.add_argument(
         "--codex-trusted-root-check-interval-minutes",
         type=int,
-        default=int(os.getenv("MACOS_SESSION_HEALTH_CODEX_TRUSTED_ROOT_CHECK_INTERVAL_MINUTES", "60")),
+        default=int(
+            os.getenv(
+                "MACOS_SESSION_HEALTH_CODEX_TRUSTED_ROOT_CHECK_INTERVAL_MINUTES", "60"
+            )
+        ),
         help="Check Codex trusted project roots for missing roots or invalid direct .git dirs at most this often. Set 0 to disable.",
     )
     parser.add_argument(
         "--codex-trusted-root-check-timeout",
         type=float,
-        default=float(os.getenv("MACOS_SESSION_HEALTH_CODEX_TRUSTED_ROOT_CHECK_TIMEOUT", "3")),
+        default=float(
+            os.getenv("MACOS_SESSION_HEALTH_CODEX_TRUSTED_ROOT_CHECK_TIMEOUT", "3")
+        ),
         help="Timeout for each Codex trusted-root git validation command.",
     )
-    parser.add_argument("--app", action="append", default=[], help="App bundle to include in bundle and optional signing probes. Repeatable.")
+    parser.add_argument(
+        "--app",
+        action="append",
+        default=[],
+        help="App bundle to include in bundle and optional signing probes. Repeatable.",
+    )
     parser.add_argument("--command-timeout", type=float, default=5)
-    parser.add_argument("--lsof-timeout", type=float, default=float(os.getenv("MACOS_SESSION_HEALTH_LSOF_TIMEOUT", "5")))
+    parser.add_argument(
+        "--lsof-timeout",
+        type=float,
+        default=float(os.getenv("MACOS_SESSION_HEALTH_LSOF_TIMEOUT", "5")),
+    )
     parser.add_argument(
         "--fd-top-interval-minutes",
         type=int,
@@ -3984,31 +4316,37 @@ Run `macos-session-health install` to install or refresh the user LaunchAgent.
         default=int(os.getenv("MACOS_SESSION_HEALTH_CODESIGN_INTERVAL_MINUTES", "0")),
         help="Run codesign app verification at most this often. Set 0 to disable.",
     )
-    parser.add_argument("--collect-log-excerpt", action=argparse.BooleanOptionalAction, default=True)
-    parser.add_argument("--log-timeout", type=float, default=5)
+    parser.add_argument(
+        "--collect-log-excerpt", action=argparse.BooleanOptionalAction, default=True
+    )
+    parser.add_argument("--log-timeout", type=float, default=8)
     parser.add_argument("--log-lines", type=int, default=120)
     parser.add_argument(
         "--passive-log-interval-minutes",
         type=int,
-        default=int(os.getenv("MACOS_SESSION_HEALTH_PASSIVE_LOG_INTERVAL_MINUTES", "5")),
+        default=int(
+            os.getenv("MACOS_SESSION_HEALTH_PASSIVE_LOG_INTERVAL_MINUTES", "5")
+        ),
         help="Run targeted passive unified-log scan at most this often. Set 0 to disable.",
     )
     parser.add_argument(
         "--passive-log-last-minutes",
         type=int,
-        default=int(os.getenv("MACOS_SESSION_HEALTH_PASSIVE_LOG_LAST_MINUTES", "6")),
+        default=int(os.getenv("MACOS_SESSION_HEALTH_PASSIVE_LOG_LAST_MINUTES", "5")),
         help="Look back this many minutes during each targeted passive unified-log scan.",
     )
     parser.add_argument(
         "--passive-log-lines",
         type=int,
-        default=int(os.getenv("MACOS_SESSION_HEALTH_PASSIVE_LOG_LINES", "80")),
+        default=int(os.getenv("MACOS_SESSION_HEALTH_PASSIVE_LOG_LINES", "40")),
         help="Store at most this many matched passive unified-log lines per scan.",
     )
     parser.add_argument(
         "--codex-passive-log-interval-minutes",
         type=int,
-        default=int(os.getenv("MACOS_SESSION_HEALTH_CODEX_PASSIVE_LOG_INTERVAL_MINUTES", "30")),
+        default=int(
+            os.getenv("MACOS_SESSION_HEALTH_CODEX_PASSIVE_LOG_INTERVAL_MINUTES", "30")
+        ),
         help="Run wider Codex-related passive unified-log scan at most this often. Set 0 to disable.",
     )
     parser.add_argument(
@@ -4033,13 +4371,17 @@ Run `macos-session-health install` to install or refresh the user LaunchAgent.
         "--brrr-syspolicyd-assessment-failure-count",
         type=int,
         default=int(
-            os.getenv("MACOS_SESSION_HEALTH_BRRR_SYSPOLICYD_ASSESSMENT_FAILURE_COUNT", "1000")
+            os.getenv(
+                "MACOS_SESSION_HEALTH_BRRR_SYSPOLICYD_ASSESSMENT_FAILURE_COUNT", "1000"
+            )
         ),
         help="Send syspolicyd_assessment_failure notifications only at or above this match count.",
     )
     parser.add_argument(
         "--brrr-thread-id",
-        default=os.getenv("MACOS_SESSION_HEALTH_BRRR_THREAD_ID", "macos-session-health"),
+        default=os.getenv(
+            "MACOS_SESSION_HEALTH_BRRR_THREAD_ID", "macos-session-health"
+        ),
         help="brrr thread_id for grouped notifications.",
     )
     parser.add_argument(
@@ -4097,18 +4439,32 @@ Run `macos-session-health install` to install or refresh the user LaunchAgent.
     )
 
     watch = subparsers.add_parser("watch", help="Collect snapshots forever.")
-    watch.add_argument("--interval", type=float, default=float(os.getenv("MACOS_SESSION_HEALTH_INTERVAL", "60")))
+    watch.add_argument(
+        "--interval",
+        type=float,
+        default=float(os.getenv("MACOS_SESSION_HEALTH_INTERVAL", "60")),
+    )
 
     query_parser = subparsers.add_parser("query", help="Print recent SQLite events.")
     query_parser.add_argument("--limit", type=int, default=50)
-    query_parser.add_argument("--event", help="Event name to filter. Use `events` to list known names.")
-    query_parser.add_argument("--signals", action="store_true", help="Show only health-signal events (`event=health_signal`).")
+    query_parser.add_argument(
+        "--event", help="Event name to filter. Use `events` to list known names."
+    )
+    query_parser.add_argument(
+        "--signals",
+        action="store_true",
+        help="Show only health-signal events (`event=health_signal`).",
+    )
     query_parser.add_argument("--format", choices=["logfmt", "json"], default="logfmt")
 
-    events_parser = subparsers.add_parser("events", help="List event names present in SQLite.")
+    events_parser = subparsers.add_parser(
+        "events", help="List event names present in SQLite."
+    )
     events_parser.add_argument("--format", choices=["logfmt", "json"], default="logfmt")
 
-    trend_parser = subparsers.add_parser("trend", help="Show growth trends from recent SQLite samples.")
+    trend_parser = subparsers.add_parser(
+        "trend", help="Show growth trends from recent SQLite samples."
+    )
     trend_parser.add_argument("--hours", type=float, default=6)
     trend_parser.add_argument("--limit", type=int, default=20)
     trend_parser.add_argument(
@@ -4131,13 +4487,17 @@ Run `macos-session-health install` to install or refresh the user LaunchAgent.
     )
     incident_parser.add_argument("--hours", type=float, default=6)
     incident_parser.add_argument("--limit", type=int, default=20)
-    incident_parser.add_argument("--format", choices=["markdown", "json"], default="markdown")
+    incident_parser.add_argument(
+        "--format", choices=["markdown", "json"], default="markdown"
+    )
 
     recover_parser = subparsers.add_parser(
         "recover",
         help="Print or execute the guarded syspolicyd recovery plan.",
     )
-    recover_parser.add_argument("--format", choices=["markdown", "json"], default="markdown")
+    recover_parser.add_argument(
+        "--format", choices=["markdown", "json"], default="markdown"
+    )
     recover_parser.add_argument(
         "--execute",
         action="store_true",
