@@ -26,7 +26,7 @@ from pathlib import Path, PurePosixPath
 from typing import Annotated
 
 if platform.system() == "Windows":
-    print("ss: Windows is not supported", file=sys.stderr)
+    print("skillshare-source: Windows is not supported", file=sys.stderr)
     sys.exit(1)
 
 import typer
@@ -39,7 +39,7 @@ from ruamel.yaml.error import YAMLError
 app = typer.Typer(help="Skillshare source switcher.", no_args_is_help=True)
 console = Console()
 error_console = Console(stderr=True)
-SS_VERSION = "ss 0.2.0"
+SS_VERSION = "skillshare-source 0.2.0"
 
 
 def _config_path() -> Path:
@@ -690,7 +690,10 @@ def list_sources(
         )
         return
     if not sources:
-        console.print("[dim]No sources registered. Use [bold]ss add <name> <path>[/bold] to add one.[/dim]")
+        console.print(
+            "[dim]No sources registered. Use "
+            "[bold]skillshare-source add <name> <path>[/bold] to add one.[/dim]"
+        )
         return
     for name, path in sources.items():
         active = path == current
@@ -797,7 +800,7 @@ def exec_cmd(
 ):
     """Run a command with a temporary source, then restore.
 
-    Example: ss exec <source-name> -- skillshare install foo --track
+    Example: skillshare-source exec <source-name> -- skillshare install foo --track
     """
     sources = _load_sources()
     if name not in sources:

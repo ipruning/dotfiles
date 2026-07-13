@@ -33,7 +33,7 @@ run = 'uv run --locked python -m scripts.runtime "$@"'
 
 [tasks.zsh-profile]
 description = "Profile Zsh startup time"
-run = 'modules/bin/dotfiles-zsh-profile "$@"'
+run = 'scripts/zsh-profile "$@"'
 
 [tasks.lint]
 description = "Inspect repository paths, mappings, and symlinks"

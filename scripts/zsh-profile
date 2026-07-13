@@ -4,20 +4,35 @@
 set -euo pipefail
 
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-repo_root="$(cd -- "$script_dir/../.." && pwd)"
+repo_root="$(cd -- "$script_dir/.." && pwd)"
 
-# shellcheck source=modules/bin/_lib/load.sh
-source "$repo_root/modules/bin/_lib/load.sh"
+log_message() {
+  local level="$1" message="$2"
+  if command -v gum >/dev/null 2>&1; then
+    gum log --level "$level" "$message"
+  else
+    printf '%s: %s\n' "$level" "$message" >&2
+  fi
+}
 
-dotfiles_enter_repo
-dotfiles_require_commands gum hyperfine uv zsh
+cd "$repo_root"
+
+missing_commands=()
+for required_command in gum hyperfine uv zsh; do
+  command -v "$required_command" >/dev/null 2>&1 \
+    || missing_commands+=("$required_command")
+done
+if (( ${#missing_commands[@]} > 0 )); then
+  log_message error "Missing required command(s): ${missing_commands[*]}"
+  exit 127
+fi
 
 run_count="${1:-50}"
 warmup_count="${2:-10}"
 
-[[ "$run_count" =~ ^[0-9]+$ ]]    || { gum log --level error "runs must be an integer (got: $run_count)";       exit 1; }
-[[ "$warmup_count" =~ ^[0-9]+$ ]] || { gum log --level error "warmup must be an integer (got: $warmup_count)"; exit 1; }
-[[ $# -le 2 ]] || { gum log --level error "Usage: dotfiles-zsh-profile [runs] [warmup]"; exit 2; }
+[[ "$run_count" =~ ^[0-9]+$ ]]    || { log_message error "runs must be an integer (got: $run_count)";       exit 1; }
+[[ "$warmup_count" =~ ^[0-9]+$ ]] || { log_message error "warmup must be an integer (got: $warmup_count)"; exit 1; }
+[[ $# -le 2 ]] || { log_message error "Usage: mise run zsh-profile -- [runs] [warmup]"; exit 2; }
 
 trace_file="$(mktemp "${TMPDIR:-/tmp}/zsh_profile.XXXXXX")"
 cleanup() { rm -f "$trace_file"; }
