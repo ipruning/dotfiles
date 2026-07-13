@@ -58,6 +58,10 @@ OPTIONAL_PATHS = {
         "reference/.config/skillshare/config.yaml",
         "~/Developer/ipruning/skills",
     ),
+    (
+        "reference/.config/skillshare/config.yaml",
+        "~/Developer/ipruning/skills/extras",
+    ),
     ("reference/.zshenv", "/usr/local/sbin"),
     ("reference/.zshrc", "/usr/local/Homebrew"),
     ("reference/.zshrc", "/usr/local/Cellar"),

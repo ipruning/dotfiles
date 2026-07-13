@@ -212,6 +212,40 @@ def test_inspect_repository_checks_paths_under_reference_library(
     assert finding.path == settings
 
 
+def test_linux_lint_treats_skillshare_source_paths_as_optional(
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    config = repo_root / "reference/.config/skillshare/config.yaml"
+    config.parent.mkdir(parents=True)
+    config.write_text(
+        "sources:\n"
+        "  skills: ~/Developer/ipruning/skills\n"
+        "  extras: ~/Developer/ipruning/skills/extras\n"
+        "extras: []\n"
+    )
+    (repo_root / "mackup/applications").mkdir(parents=True)
+    (repo_root / "mackup/mackup.cfg").write_text(
+        "[storage]\nengine = file_system\npath = dotfiles\n"
+        "directory = reference\n[applications_to_sync]\n",
+    )
+
+    report = inspect_repository(repo_root, home, system_name="Linux")
+    source_findings = [
+        finding
+        for finding in report.findings
+        if finding.path == config and finding.code.startswith("path.")
+    ]
+
+    assert len(source_findings) == 2
+    assert all(
+        finding.code == "path.optional_compatibility"
+        and finding.severity is Severity.OK
+        for finding in source_findings
+    )
+
+
 def test_inspect_repository_rejects_pruning_skillshare_extra_modes(
     tmp_path: Path,
 ) -> None:
