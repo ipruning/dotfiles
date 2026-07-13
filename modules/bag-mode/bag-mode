@@ -934,20 +934,20 @@ clean_shutdown() {
     rm -f "$RECOVERY_RECORD_FILE" "$RESTART_FILE" 2>/dev/null || true
     if [[ -e "$BRIGHTNESS_PENDING_FILE" ]]; then
       write_status_snapshot brightness_pending || true
-      notify_sync brightness_pending time-sensitive "bag-mode brightness recovery pending" "reason=$reason; open_lid=true; command=bag-mode recover" || true
+      notify_sync brightness_pending time-sensitive "bag-mode brightness recovery pending" "The lid is closed, so display brightness could not be restored after $reason. Open the lid and run \`bag-mode recover\`." || true
       log_line "power settings restored; brightness recovery pending; open the lid and run bag-mode recover"
     elif [[ "$reason" == startup_failed ]]; then
       write_status_snapshot startup_failed || true
       log_line "startup failed; captured settings restored"
     else
       write_status_snapshot stopped || true
-      notify_sync stopped passive "bag-mode stopped" "reason=$reason; battery=${CURRENT_BATTERY:-unreadable}" || true
+      notify_sync stopped passive "bag-mode stopped safely" "Bag mode stopped after $reason and restored the captured settings. Current battery: ${CURRENT_BATTERY:-unreadable}. No action needed." || true
       log_line "stopped"
     fi
     return 0
   fi
   write_status_snapshot recovery_failed || true
-  notify_sync recovery_failed time-sensitive "bag-mode could not restore captured settings" "reason=$reason; recovery_required=true" || true
+  notify_sync recovery_failed time-sensitive "bag-mode settings recovery failed" "Captured power or brightness settings could not be restored after $reason. Run \`bag-mode recover\` now." || true
   log_line "restoration failed; recovery remains required"
   return 1
 }
@@ -978,7 +978,7 @@ controller_main() {
       release_controller_reservation "$SESSION_ID" 2>/dev/null || true
       write_status_snapshot recovery_conflict || true
       log_line "recovery belongs to another controller session; explicit recovery required"
-      notify_sync recovery_conflict time-sensitive "bag-mode recovery required" "recovery_conflict=true; command=bag-mode recover" || true
+      notify_sync recovery_conflict time-sensitive "bag-mode recovery requires attention" "An interrupted controller session owns the captured settings. Run \`bag-mode recover\` before starting bag mode again." || true
       exit "$EXIT_RECOVERY_CONFLICT"
     fi
     if [[ -e "$CONTROLLER_RESERVATION_DIR" ]]; then
@@ -1001,7 +1001,7 @@ controller_main() {
         log_line "crash-loop restoration failed; recovery remains required"
       fi
       write_status_snapshot crash_loop || true
-      notify_sync crash_loop time-sensitive "bag-mode stopped after repeated crashes" "restart_count=$restart_count; window=${RESTART_WINDOW}s; recovery_required=$([[ -e "$RECOVERY_RECORD_FILE" ]] && printf true || printf false)" || true
+      notify_sync crash_loop time-sensitive "bag-mode stopped after repeated crashes" "The controller crashed $restart_count times within ${RESTART_WINDOW} seconds and has been disabled. Inspect \`bag-mode logs\` before restarting; run \`bag-mode recover\` if settings remain unrestored." || true
       exit "$EXIT_CRASH_LOOP"
     fi
   else
@@ -1036,7 +1036,7 @@ controller_main() {
   if ! set_sleep_disabled 1; then
     rm -f "$ENABLED_FILE" 2>/dev/null || true
     write_status_snapshot startup_failed || true
-    notify_sync power_setting_failed time-sensitive "bag-mode could not disable sleep" "setting=sleep_disabled; value=1; service_enabled=false" || true
+    notify_sync power_setting_failed time-sensitive "bag-mode could not keep the Mac awake" "The required sleep setting could not be applied, so bag mode was not started. Inspect \`bag-mode logs\` before retrying." || true
     clean_shutdown startup_failed || true
     exit "$EXIT_START_FAILED"
   fi
@@ -1049,9 +1049,9 @@ controller_main() {
   fi
   log_line "started session=$SESSION_ID restart_count=$restart_count brightness_target=$BRIGHTNESS_TARGET captured_sleep_disabled=$CAPTURED_SLEEP_DISABLED"
   if (( restarting_after_crash )); then
-    notify_async restarted time-sensitive "bag-mode restarted after a crash" "restart_count=$restart_count; lid=$CURRENT_LID; battery=$CURRENT_BATTERY"
+    notify_async restarted time-sensitive "bag-mode restarted after a crash" "The controller is running again after crash $restart_count in the current window. Lid: $CURRENT_LID. Battery: $CURRENT_BATTERY. Inspect \`bag-mode logs\` if it repeats."
   else
-    notify_async started passive "bag-mode started" "lid=$CURRENT_LID; battery=$CURRENT_BATTERY"
+    notify_async started passive "bag-mode started" "Bag mode is active. Lid: $CURRENT_LID. Battery: $CURRENT_BATTERY. No action needed."
   fi
 
   interval="$INTERVAL"
@@ -1070,12 +1070,12 @@ controller_main() {
         live_brightness="$(builtin_brightness)"
         usable_brightness "$live_brightness" && remember_brightness "$live_brightness"
         set_brightness 0 || true
-        set_low_power "$LOW_POWER_KEY" 1 || notify_async power_setting_failed time-sensitive "bag-mode power setting failed" "setting=$LOW_POWER_KEY; value=1"
+        set_low_power "$LOW_POWER_KEY" 1 || notify_async power_setting_failed time-sensitive "bag-mode power setting failed" "The $LOW_POWER_KEY setting could not be enabled while the lid is closed. Inspect \`bag-mode logs\`."
         interval="$CLOSED_INTERVAL"
         last_observed_brightness=""
         CURRENT_BATTERY="$(battery_status)"
         write_status_snapshot lid_closed || true
-        notify_async lid_closed time-sensitive "bag-mode lid closed" "staying_awake=true; battery=$CURRENT_BATTERY"
+        notify_async lid_closed time-sensitive "bag-mode lid closed" "The Mac will stay awake with the lid closed. Battery: $CURRENT_BATTERY. No action needed."
       else
         if set_brightness "$BRIGHTNESS_TARGET"; then
           clear_matching_brightness_pending || log_line "could not clear matching pending brightness record"
@@ -1085,7 +1085,7 @@ controller_main() {
         last_observed_brightness="$BRIGHTNESS_TARGET"
         CURRENT_BATTERY="$(battery_status)"
         write_status_snapshot lid_open || true
-        [[ -n "$previous_lid" ]] && notify_async lid_open passive "bag-mode lid open" "brightness_restored=true; battery=$CURRENT_BATTERY"
+        [[ -n "$previous_lid" ]] && notify_async lid_open passive "bag-mode lid open" "Display brightness and captured power settings were restored. Battery: $CURRENT_BATTERY. No action needed."
       fi
       previous_lid="$lid"
     fi
@@ -1109,7 +1109,7 @@ controller_main() {
           log_line "battery ${percentage}% <= minimum ${BATTERY_MIN}%; stopping"
           rm -f "$ENABLED_FILE" 2>/dev/null || true
           if clean_shutdown battery_min; then
-            notify_sync battery_min time-sensitive "bag-mode stopped at ${percentage}%" "battery_min=${BATTERY_MIN}%" || true
+            notify_sync battery_min time-sensitive "bag-mode stopped at ${percentage}% battery" "Battery reached the configured ${BATTERY_MIN}% minimum. Captured settings were restored; connect power before starting bag mode again." || true
             exit 0
           fi
           exit 1
@@ -1118,7 +1118,7 @@ controller_main() {
           for threshold in $BATTERY_THRESHOLDS; do
             if [[ "$threshold" =~ ^[0-9]+$ ]] && (( percentage <= threshold )) && [[ "$NOTIFIED_THRESHOLDS" != *" $threshold "* ]]; then
               NOTIFIED_THRESHOLDS+="$threshold "
-              notify_async battery_threshold time-sensitive "bag-mode battery ${percentage}%" "crossed_threshold=${threshold}%"
+              notify_async battery_threshold time-sensitive "bag-mode battery reached ${percentage}%" "Battery crossed the configured ${threshold}% warning threshold while the lid is closed. Connect power if bag mode should continue."
               break
             fi
           done
@@ -1812,8 +1812,12 @@ set -euo pipefail
 
 message=
 title=
+subtitle=
 thread_id=
 open_url=
+image_url=
+expiration_date=
+filter_criteria=
 sound=
 interruption_level=
 volume=
@@ -1823,8 +1827,12 @@ while (( $# > 0 )); do
   case "$1" in
     --message) message="${2:?missing value for --message}"; shift 2 ;;
     --title) title="${2:?missing value for --title}"; shift 2 ;;
+    --subtitle) subtitle="${2:?missing value for --subtitle}"; shift 2 ;;
     --thread-id) thread_id="${2:?missing value for --thread-id}"; shift 2 ;;
     --open-url) open_url="${2:?missing value for --open-url}"; shift 2 ;;
+    --image-url) image_url="${2:?missing value for --image-url}"; shift 2 ;;
+    --expiration-date) expiration_date="${2:?missing value for --expiration-date}"; shift 2 ;;
+    --filter-criteria) filter_criteria="${2:?missing value for --filter-criteria}"; shift 2 ;;
     --sound) sound="${2:?missing value for --sound}"; shift 2 ;;
     --interruption-level) interruption_level="${2:?missing value for --interruption-level}"; shift 2 ;;
     --volume) volume="${2:?missing value for --volume}"; shift 2 ;;
@@ -1850,12 +1858,12 @@ fi
 
 endpoint=
 auth_mode=
-if [[ -f /exe.dev/shelley.json ]]; then
-  endpoint=https://brrr.int.exe.xyz/v1/send
-  auth_mode=exe.dev-proxy
-elif [[ -n "${BRRR_SECRET:-}" ]]; then
+if [[ -n "${BRRR_SECRET:-}" ]]; then
   endpoint=https://api.brrr.now/v1/send
   auth_mode=bearer
+elif [[ -f /exe.dev/shelley.json ]]; then
+  endpoint=https://brrr.int.exe.xyz/v1/send
+  auth_mode=exe.dev-proxy
 elif (( dry_run )); then
   auth_mode=unconfigured
 else
@@ -1867,13 +1875,35 @@ python_bin=/usr/bin/python3
 [[ -x "$python_bin" ]] || python_bin="$(command -v python3 || true)"
 [[ -n "$python_bin" ]] || { echo 'python3 is required' >&2; exit 4; }
 payload="$(
-  "$python_bin" - "$message" "$title" "$thread_id" "$open_url" "$sound" "$interruption_level" "$volume" <<'PY'
+  "$python_bin" - "$message" "$title" "$subtitle" "$thread_id" "$open_url" "$image_url" "$expiration_date" "$filter_criteria" "$sound" "$interruption_level" "$volume" <<'PY'
 import json
 import sys
+from datetime import datetime
 
-names = ["message", "title", "thread_id", "open_url", "sound", "interruption_level", "volume"]
+names = [
+    "message",
+    "title",
+    "subtitle",
+    "thread_id",
+    "open_url",
+    "image_url",
+    "expiration_date",
+    "filter_criteria",
+    "sound",
+    "interruption_level",
+    "volume",
+]
 values = dict(zip(names, sys.argv[1:]))
 payload = {key: value for key, value in values.items() if value and key != "volume"}
+expiration_date = values["expiration_date"]
+if expiration_date:
+    normalized = expiration_date[:-1] + "+00:00" if expiration_date.endswith("Z") else expiration_date
+    try:
+        parsed = datetime.fromisoformat(normalized)
+    except ValueError:
+        raise SystemExit("expiration date must be ISO 8601 with a timezone")
+    if "T" not in expiration_date or parsed.tzinfo is None:
+        raise SystemExit("expiration date must be ISO 8601 with a timezone")
 level = values["interruption_level"]
 if level and level not in {"passive", "active", "time-sensitive", "critical"}:
     raise SystemExit("invalid interruption level")
@@ -1884,7 +1914,7 @@ if values["volume"]:
     if not 0 <= volume <= 1:
         raise SystemExit("volume must be between 0 and 1")
     payload["volume"] = volume
-print(json.dumps(payload, separators=(",", ":")))
+print(json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
 PY
 )"
 
@@ -1952,7 +1982,8 @@ while (( $# > 0 )); do
   esac
 done
 sender="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/notifiers/brrr-send"
-args=(--title "$title" --message "$message" --thread-id bag-mode)
+host="$(hostname -f 2>/dev/null || hostname)"
+args=(--title "$host: $title" --subtitle "bag-mode · macOS power safety" --message "$message" --thread-id bag-mode)
 [[ -n "$level" ]] && args+=(--interruption-level "$level")
 BRRR_TIMEOUT="${BAG_MODE_NOTIFY_TIMEOUT:-5}" /bin/bash "$sender" "${args[@]}"
 WRAPPER

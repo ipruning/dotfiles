@@ -345,17 +345,32 @@ env "${test_env[@]}" CI=1 "$runtime_bin" logs --bogus >"$test_root/logs-bogus.ou
 
 env "${test_env[@]}" "$runtime_bin" notifier install-brrr >"$test_root/notifier-builtin-install.out"
 BRRR_SECRET=test-secret /bin/bash "$user_support_dir/notifiers/brrr-send" \
-  --title 'dry run' --message 'built in' --thread-id bag-mode --dry-run \
+  --title 'dry run' --subtitle 'bag-mode · test host' --message 'built in' \
+  --thread-id bag-mode --expiration-date '2026-07-13T18:00:00Z' --dry-run \
   >"$test_root/notifier-builtin-dry-run.out"
 rg -q '^auth_mode=bearer$' "$test_root/notifier-builtin-dry-run.out" \
   || fail 'built-in brrr sender did not validate its configured delivery path'
 rg -q '"thread_id":"bag-mode"' "$test_root/notifier-builtin-dry-run.out" \
   || fail 'built-in brrr sender did not preserve the notification payload'
+rg -q '"subtitle":"bag-mode · test host"' "$test_root/notifier-builtin-dry-run.out" \
+  || fail 'built-in brrr sender did not preserve the notification subtitle'
+rg -q '"expiration_date":"2026-07-13T18:00:00Z"' "$test_root/notifier-builtin-dry-run.out" \
+  || fail 'built-in brrr sender did not preserve the expiration date'
+proxy_marker="$test_root/shelley.json"
+proxy_sender="$test_root/brrr-send-proxy-test"
+sed "s#/exe.dev/shelley.json#$proxy_marker#g" "$user_support_dir/notifiers/brrr-send" >"$proxy_sender"
+chmod +x "$proxy_sender"
+: >"$proxy_marker"
+BRRR_SECRET=test-secret /bin/bash "$proxy_sender" \
+  --title 'auth precedence' --message 'explicit bearer' --dry-run \
+  >"$test_root/notifier-builtin-proxy-dry-run.out"
+rg -q '^auth_mode=bearer$' "$test_root/notifier-builtin-proxy-dry-run.out" \
+  || fail 'explicit brrr secret did not take precedence over the exe.dev proxy'
 env "${test_env[@]}" "$runtime_bin" notifier install-brrr "$fake_bin/brrr-send.sh" >/dev/null
 rm -f "$fake_bin/brrr-send.sh"
 env "${test_env[@]}" "$user_support_dir/notifier" \
   --event test --level passive --title 'test title' --message 'test message'
-rg -q -- '--title test title --message test message --thread-id bag-mode --interruption-level passive' "$fake_state/notifier-call" \
+rg -q -- '--title .*: test title --subtitle bag-mode · macOS power safety --message test message --thread-id bag-mode --interruption-level passive' "$fake_state/notifier-call" \
   || fail 'installed brrr adapter did not preserve the generic notifier contract'
 env "${test_env[@]}" "$runtime_bin" notifier test >"$test_root/notifier-test.out"
 rg -q '^notifier test accepted$' "$test_root/notifier-test.out" || fail 'CLI notifier test did not use the bounded notifier path'

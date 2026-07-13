@@ -91,11 +91,17 @@ If macOS rejects direct signal delivery, reboot is the remaining clean recovery.
 
 Notifications are passive alerts for a narrow set of launch-impacting health
 signals. The single-file CLI contains its own brrr client; it does not execute a
-Skillshare-managed sender. Delivery uses the exe.dev brrr proxy or
-`BRRR_SECRET` from the environment, `BRRR_ENV_FILE`, `~/.config/brrr/env`, or
-`~/.config/notify/brrr.env`. Notifications are cooldown-limited, recorded in
-SQLite, and never execute recovery. Use the incident report to see both emitted
-and suppressed decisions.
+Skillshare-managed sender. An explicit `BRRR_SECRET` from the environment,
+`BRRR_ENV_FILE`, `~/.config/brrr/env`, or `~/.config/notify/brrr.env` takes
+precedence over the exe.dev brrr proxy. Notifications identify the host and
+summarize impact and action without embedding snapshot IDs or raw signal fields.
+
+The SQLite state machine sends an onset, a changed incident, and one recovery.
+It suppresses an unchanged incident regardless of sample count, and records
+cooldown or incident-state changes only after successful delivery. Failed onset
+and recovery deliveries remain eligible for the next run. Notifications never
+execute recovery actions. Use the incident report to see both emitted and
+suppressed decisions.
 
 Validate the payload and local credential lookup without sending:
 

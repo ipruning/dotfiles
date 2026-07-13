@@ -23,6 +23,7 @@ printf "BRRR_SECRET='test-secret'\n" >"$test_home/.config/brrr/env"
 chmod 0600 "$test_home/.config/brrr/env"
 python_bin="$(mise which python)"
 tool_path="$fake_bin:$(dirname "$python_bin"):/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+"$python_bin" "$script_dir/macos-session-health-notification-test.py"
 cat >"$fake_bin/launchctl" <<'EOF'
 #!/bin/bash
 case "${1:-}" in

@@ -508,8 +508,9 @@ def compact_database(db_path: Path, output_format: str) -> int:
 
 def test_brrr_notification(args: argparse.Namespace) -> int:
     payload = {
-        "title": "macos-session-health notification test",
-        "message": f"host={socket.gethostname()}; time={utc_now()}",
+        "title": f"{socket.gethostname()}: notification delivery test",
+        "subtitle": "macOS session health",
+        "message": "Notification delivery is configured. No action needed.",
         "thread_id": args.brrr_thread_id,
         "interruption_level": args.brrr_interruption_level,
     }
@@ -589,6 +590,7 @@ class Store:
         self.emit_stdout = emit_stdout
         self.conn: sqlite3.Connection | None = None
         self.current_signals: list[dict[str, Any]] = []
+        self.current_brrr_observations: set[str] = set()
         if db_path is not None:
             db_path.parent.mkdir(parents=True, exist_ok=True)
             self.conn = sqlite3.connect(db_path)
@@ -657,6 +659,7 @@ class Store:
             )
             self.conn.commit()
         self.current_signals = []
+        self.current_brrr_observations = set()
         return snapshot_id
 
     def finish_snapshot(self, snapshot_id: str, status: str) -> None:
@@ -700,6 +703,14 @@ class Store:
             """,
             (key, value, utc_now()),
         )
+
+    def delete_state(self, *keys: str) -> None:
+        if self.conn is None or not keys:
+            return
+        self.conn.executemany("DELETE FROM state WHERE key = ?", ((key,) for key in keys))
+
+    def observe_brrr_incident(self, incident_kind: str) -> None:
+        self.current_brrr_observations.add(incident_kind)
 
     def emit(
         self, snapshot_id: str, event: str, severity: str | None = None, **data: Any
@@ -1287,20 +1298,29 @@ def collect_process_resource_delta(
                     value=rss_growth_mb_per_minute,
                     detail="process RSS is growing quickly",
                 )
+            if (
+                same_pid
+                and rss_growth_warn_mb_per_minute is not None
+                and role == "syspolicyd"
+            ):
+                store.observe_brrr_incident("syspolicyd_rss_growth")
         except (KeyError, TypeError, ValueError, json.JSONDecodeError):
             pass
 
-    if rss_error_mb is not None and rss_mb >= rss_error_mb:
-        store.emit(
-            snapshot_id,
-            "health_signal",
-            "error",
-            signal="process_rss_error",
-            role=role,
-            pid=pid,
-            value=rss_mb,
-            detail="process RSS exceeded error threshold",
-        )
+    if rss_error_mb is not None:
+        if role == "syspolicyd":
+            store.observe_brrr_incident("syspolicyd_rss_error")
+        if rss_mb >= rss_error_mb:
+            store.emit(
+                snapshot_id,
+                "health_signal",
+                "error",
+                signal="process_rss_error",
+                role=role,
+                pid=pid,
+                value=rss_mb,
+                detail="process RSS exceeded error threshold",
+            )
 
     store.set_state(state_key, json.dumps(current_state, sort_keys=True))
 
@@ -1830,13 +1850,16 @@ def collect_code_sign_clone_status(
     snapshot_id: str,
     args: argparse.Namespace,
 ) -> None:
-    for path in candidate_code_sign_clone_paths():
+    paths = list(candidate_code_sign_clone_paths())
+    growth_observed = bool(paths)
+    for path in paths:
         exists = path.exists()
         status: dict[str, Any] = {
             "path": str(path),
             "exists": exists,
         }
         if not exists:
+            growth_observed = False
             store.emit(snapshot_id, "code_sign_clone_status", **status)
             continue
 
@@ -1858,6 +1881,7 @@ def collect_code_sign_clone_status(
         store.emit(snapshot_id, "code_sign_clone_status", **status)
 
         if timed_out:
+            growth_observed = False
             store.emit(
                 snapshot_id,
                 "health_signal",
@@ -1869,6 +1893,7 @@ def collect_code_sign_clone_status(
             continue
 
         if not isinstance(size_mb, float):
+            growth_observed = False
             continue
         if size_mb >= args.code_sign_clone_warn_mb:
             store.emit(
@@ -1881,6 +1906,7 @@ def collect_code_sign_clone_status(
             )
 
         if store.conn is None:
+            growth_observed = False
             continue
         state_key = f"last_code_sign_clone_status:{path}"
         previous_raw = store.get_state(state_key)
@@ -1916,8 +1942,12 @@ def collect_code_sign_clone_status(
                         detail="Codex code_sign_clone is growing quickly",
                     )
             except (KeyError, TypeError, ValueError, json.JSONDecodeError):
-                pass
+                growth_observed = False
+        else:
+            growth_observed = False
         store.set_state(state_key, json.dumps(current, sort_keys=True))
+    if growth_observed:
+        store.observe_brrr_incident("code_sign_clone_growth")
 
 
 def collect_limits(store: Store, snapshot_id: str, timeout: float) -> None:
@@ -2273,6 +2303,7 @@ def collect_spawn_check(store: Store, snapshot_id: str, timeout: float) -> bool:
                 timeout=timed_out,
                 detail=err.strip() or out.strip() or "spawn check failed",
             )
+    store.observe_brrr_incident("spawn_failed")
     return ok
 
 
@@ -2676,6 +2707,8 @@ def collect_passive_log_signals(
             value=count,
             detail=detail,
         )
+    if code == 0 and not timed_out:
+        store.observe_brrr_incident("syspolicyd_assessment_failure")
     return ok
 
 
@@ -2716,8 +2749,8 @@ def strongest_signal(
 
 def build_brrr_incident(
     signals: list[dict[str, Any]],
-    snapshot_id: str,
-    status: str,
+    _snapshot_id: str,
+    _status: str,
     syspolicyd_assessment_failure_notify_count: int,
 ) -> dict[str, Any] | None:
     spawn_failed = strongest_signal(signals, "spawn_failed")
@@ -2735,7 +2768,7 @@ def build_brrr_incident(
 
     if spawn_failed:
         title = "macOS 无法正常启动进程"
-        summary = "简单 spawn 检查失败，新的 app 或 shell 命令可能会打不开。"
+        summary = "简单 spawn 检查失败，新的 app 或 shell 命令可能无法启动。"
         primary = spawn_failed
         kind = "spawn_failed"
     elif (
@@ -2781,39 +2814,34 @@ def build_brrr_incident(
     context: list[str] = []
     if syspolicyd_assessment_failure and syspolicyd_assessment_failure is not primary:
         context.append(
-            f"syspolicyd_assessment_failure={syspolicyd_assessment_failure.get('value', '')}"
+            f"同时观察到 {syspolicyd_assessment_failure.get('value', '')} 条 Gatekeeper 评估失败"
         )
     if syspolicyd_rss_error and syspolicyd_rss_error is not primary:
-        context.append(f"syspolicyd_rss_mb={syspolicyd_rss_error.get('value', '')}")
+        context.append(
+            f"syspolicyd RSS 约 {syspolicyd_rss_error.get('value', '')} MiB"
+        )
     if syspolicyd_rss_growth and syspolicyd_rss_growth is not primary:
         context.append(
-            f"syspolicyd_rss_growth_mb_per_min={syspolicyd_rss_growth.get('value', '')}"
+            f"syspolicyd RSS 每分钟增长约 {syspolicyd_rss_growth.get('value', '')} MiB"
         )
     if code_sign_clone_growth and code_sign_clone_growth is not primary:
         context.append(
-            f"code_sign_clone_growth_mb_per_min={code_sign_clone_growth.get('value', '')}"
+            f"Codex code_sign_clone 每分钟增长约 {code_sign_clone_growth.get('value', '')} MiB"
         )
     if spawn_failed and spawn_failed is not primary:
-        context.append(
-            f"spawn_failed={spawn_failed.get('name', '') or spawn_failed.get('value', '')}"
-        )
+        context.append("新的 app 或 shell 命令已经无法正常启动")
 
-    message_lines = [
-        summary,
-        f"状态：{status}。",
-    ]
+    message_lines = [summary]
     if context:
-        message_lines.append("同时看到：" + "，".join(context) + "。")
-    message_lines.extend(
-        [
-            "建议：先看 `macos-session-health incident --hours 6 --format markdown`。",
-            f"snapshot={snapshot_id}",
-        ]
+        message_lines.append("；".join(context) + "。")
+    message_lines.append(
+        "运行 `macos-session-health incident --hours 6 --format markdown` 查看诊断后再处理。"
     )
     return {
         "kind": kind,
-        "title": title,
-        "message": "\n".join(message_lines),
+        "title": f"{socket.gethostname()}: {title}",
+        "subtitle": "macOS session health",
+        "message": " ".join(message_lines),
         "primary_signal": primary.get("signal", ""),
         "primary_value": primary.get("value", ""),
     }
@@ -2846,15 +2874,6 @@ def read_brrr_secret_from_file(env_file: Path) -> str:
 
 
 def brrr_configuration(*, include_environment: bool = True) -> dict[str, Any]:
-    if Path("/exe.dev/shelley.json").is_file():
-        return {
-            "configured": True,
-            "auth_mode": "exe.dev-proxy",
-            "endpoint": "https://brrr.int.exe.xyz/v1/send",
-            "credential_source": "exe.dev-proxy",
-            "secret": "",
-        }
-
     secret = os.getenv("BRRR_SECRET", "") if include_environment else ""
     source = "environment" if secret else ""
     candidates = list(BRRR_ENV_FILES)
@@ -2868,12 +2887,29 @@ def brrr_configuration(*, include_environment: bool = True) -> dict[str, Any]:
                 source = str(env_file)
                 break
 
+    if secret:
+        return {
+            "configured": True,
+            "auth_mode": "bearer",
+            "endpoint": "https://api.brrr.now/v1/send",
+            "credential_source": source,
+            "secret": secret,
+        }
+    if Path("/exe.dev/shelley.json").is_file():
+        return {
+            "configured": True,
+            "auth_mode": "exe.dev-proxy",
+            "endpoint": "https://brrr.int.exe.xyz/v1/send",
+            "credential_source": "exe.dev-proxy",
+            "secret": "",
+        }
+
     return {
-        "configured": bool(secret),
-        "auth_mode": "bearer" if secret else "unconfigured",
-        "endpoint": "https://api.brrr.now/v1/send" if secret else "",
-        "credential_source": source,
-        "secret": secret,
+        "configured": False,
+        "auth_mode": "unconfigured",
+        "endpoint": "",
+        "credential_source": "",
+        "secret": "",
     }
 
 
@@ -2951,15 +2987,14 @@ def deliver_brrr(
     }
 
 
-def should_send_brrr_notification(
+def brrr_cooldown_elapsed(
     store: Store,
-    snapshot_id: str,
     cooldown_minutes: int,
 ) -> bool:
     if store.conn is None:
         return True
 
-    last_sent_at = store.get_state("last_brrr_notification_sent_at")
+    last_sent_at = store.get_state("last_brrr_recovery_sent_at")
     now = dt.datetime.now(dt.timezone.utc)
     cooldown_elapsed = True
 
@@ -2970,18 +3005,47 @@ def should_send_brrr_notification(
         except ValueError:
             cooldown_elapsed = True
 
-    if not cooldown_elapsed:
-        store.emit(
-            snapshot_id,
-            "brrr_notification_skipped",
-            reason="cooldown_active",
-            cooldown_minutes=cooldown_minutes,
-            last_sent_at=last_sent_at or "",
-        )
-        return False
+    return cooldown_elapsed
 
-    store.set_state("last_brrr_notification_sent_at", utc_now())
-    return True
+
+def record_brrr_delivery(
+    store: Store,
+    snapshot_id: str,
+    args: argparse.Namespace,
+    status: str,
+    delivery: dict[str, Any],
+    *,
+    notification_kind: str,
+    incident_kind: str,
+    title: str,
+    primary_signal: Any = "",
+    primary_value: Any = "",
+) -> bool:
+    sent = delivery["exit"] == 0 and not delivery.get("timeout", False)
+    store.emit(
+        snapshot_id,
+        "brrr_notification",
+        None if sent else "warning",
+        exit=delivery["exit"],
+        timeout=delivery.get("timeout", False),
+        duration_ms=delivery.get("duration_ms", 0),
+        backend="builtin",
+        auth_mode=delivery["auth_mode"],
+        credential_source=delivery["credential_source"],
+        status=status,
+        notification_kind=notification_kind,
+        title=title,
+        incident_kind=incident_kind,
+        primary_signal=primary_signal,
+        primary_value=primary_value,
+        thread_id=args.brrr_thread_id,
+        interruption_level=args.brrr_interruption_level,
+        sent=sent,
+        http_status=delivery.get("http_status", ""),
+        attempts=delivery.get("attempts", 0),
+        error=delivery.get("error", ""),
+    )
+    return sent
 
 
 def maybe_send_brrr_notification(
@@ -2996,18 +3060,68 @@ def maybe_send_brrr_notification(
         status,
         args.brrr_syspolicyd_assessment_failure_count,
     )
+    active_kind = store.get_state("active_brrr_incident_kind")
     if incident is None:
+        if not active_kind:
+            return
+        if active_kind not in store.current_brrr_observations:
+            store.emit(
+                snapshot_id,
+                "brrr_notification_skipped",
+                reason="incident_unobserved",
+                incident_kind=active_kind,
+            )
+            return
+        title = f"{socket.gethostname()}: 此前启动异常已恢复"
+        payload = {
+            "title": title,
+            "subtitle": "macOS session health",
+            "message": "此前报告的启动异常已不再出现。当前无需针对该异常操作。",
+            "thread_id": args.brrr_thread_id,
+            "interruption_level": args.brrr_interruption_level,
+        }
+        if args.brrr_open_url:
+            payload["open_url"] = args.brrr_open_url
+        delivery = deliver_brrr(payload, args.brrr_timeout)
+        if record_brrr_delivery(
+            store,
+            snapshot_id,
+            args,
+            status,
+            delivery,
+            notification_kind="recovery",
+            incident_kind=active_kind,
+            title=title,
+        ):
+            store.delete_state("active_brrr_incident_kind")
+            store.set_state("last_brrr_recovery_sent_at", utc_now())
         return
 
-    if not should_send_brrr_notification(
-        store,
-        snapshot_id,
-        args.brrr_notify_cooldown_minutes,
+    incident_kind = str(incident["kind"])
+    if active_kind == incident_kind:
+        store.emit(
+            snapshot_id,
+            "brrr_notification_skipped",
+            reason="incident_unchanged",
+            incident_kind=incident_kind,
+        )
+        return
+    if not active_kind and not brrr_cooldown_elapsed(
+        store, args.brrr_notify_cooldown_minutes
     ):
+        store.emit(
+            snapshot_id,
+            "brrr_notification_skipped",
+            reason="cooldown_active",
+            cooldown_minutes=args.brrr_notify_cooldown_minutes,
+            last_sent_at=store.get_state("last_brrr_recovery_sent_at") or "",
+            incident_kind=incident_kind,
+        )
         return
 
     payload = {
         "title": str(incident["title"]),
+        "subtitle": str(incident["subtitle"]),
         "message": str(incident["message"]),
         "thread_id": args.brrr_thread_id,
         "interruption_level": args.brrr_interruption_level,
@@ -3015,29 +3129,19 @@ def maybe_send_brrr_notification(
     if args.brrr_open_url:
         payload["open_url"] = args.brrr_open_url
     delivery = deliver_brrr(payload, args.brrr_timeout)
-    sent = delivery["exit"] == 0 and not delivery.get("timeout", False)
-    store.emit(
+    if record_brrr_delivery(
+        store,
         snapshot_id,
-        "brrr_notification",
-        None if sent else "warning",
-        exit=delivery["exit"],
-        timeout=delivery.get("timeout", False),
-        duration_ms=delivery.get("duration_ms", 0),
-        backend="builtin",
-        auth_mode=delivery["auth_mode"],
-        credential_source=delivery["credential_source"],
-        status=status,
-        title=incident["title"],
-        incident_kind=incident["kind"],
+        args,
+        status,
+        delivery,
+        notification_kind="onset" if not active_kind else "change",
+        incident_kind=incident_kind,
+        title=str(incident["title"]),
         primary_signal=incident["primary_signal"],
         primary_value=incident["primary_value"],
-        thread_id=args.brrr_thread_id,
-        interruption_level=args.brrr_interruption_level,
-        sent=sent,
-        http_status=delivery.get("http_status", ""),
-        attempts=delivery.get("attempts", 0),
-        error=delivery.get("error", ""),
-    )
+    ):
+        store.set_state("active_brrr_incident_kind", incident_kind)
 
 
 def should_collect_log_excerpt(
@@ -3257,22 +3361,56 @@ def snapshot(args: argparse.Namespace, store: Store, mode: str) -> str:
                     args.log_timeout,
                     args.log_lines,
                 )
+        store.observe_brrr_incident("collector_exception")
         maybe_send_brrr_notification(store, snapshot_id, args, status)
         store.emit(snapshot_id, "snapshot_end", sid=snapshot_id, status=status)
     except Exception as exc:
         status = "error"
-        store.emit(
-            snapshot_id,
-            "health_signal",
-            "critical",
-            signal="collector_exception",
-            value=type(exc).__name__,
-            detail=str(exc),
-        )
-        store.emit(snapshot_id, "snapshot_end", sid=snapshot_id, status=status)
+        try:
+            store.emit(
+                snapshot_id,
+                "health_signal",
+                "critical",
+                signal="collector_exception",
+                value=type(exc).__name__,
+                detail=str(exc),
+            )
+        except Exception:
+            pass
+        try:
+            maybe_send_brrr_notification(store, snapshot_id, args, status)
+        except Exception as notification_exc:
+            try:
+                store.emit(
+                    snapshot_id,
+                    "brrr_notification",
+                    "warning",
+                    exit=1,
+                    sent=False,
+                    notification_kind="onset",
+                    incident_kind="collector_exception",
+                    error=f"{type(notification_exc).__name__}: {notification_exc}",
+                )
+            except Exception:
+                pass
+        try:
+            store.emit(
+                snapshot_id,
+                "snapshot_end",
+                sid=snapshot_id,
+                status=status,
+            )
+        except Exception:
+            pass
         raise
     finally:
-        store.finish_snapshot(snapshot_id, status)
+        if sys.exc_info()[0] is None:
+            store.finish_snapshot(snapshot_id, status)
+        else:
+            try:
+                store.finish_snapshot(snapshot_id, status)
+            except Exception:
+                pass
     return status
 
 
@@ -4365,7 +4503,7 @@ Run `macos-session-health install` to install or refresh the user LaunchAgent.
         "--brrr-notify-cooldown-minutes",
         type=int,
         default=int(os.getenv("MACOS_SESSION_HEALTH_BRRR_COOLDOWN_MINUTES", "10")),
-        help="Suppress all later brrr notifications for this many minutes after one notification is sent.",
+        help="Suppress a new onset for this many minutes after the previous incident recovered.",
     )
     parser.add_argument(
         "--brrr-syspolicyd-assessment-failure-count",
