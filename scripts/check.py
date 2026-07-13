@@ -66,6 +66,61 @@ def _check_executable(
     )
 
 
+def _git_config_defines_identity(config_path: Path) -> bool:
+    for key in ("user.name", "user.email"):
+        try:
+            completed = subprocess.run(
+                ["git", "config", "--file", str(config_path), "--get", key],
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+        except OSError:
+            return False
+        if completed.returncode != 0 or not completed.stdout.strip():
+            return False
+    return True
+
+
+def _private_git_identity_ready(private_config: Path, home: Path) -> bool:
+    if _git_config_defines_identity(private_config):
+        return True
+    try:
+        completed = subprocess.run(
+            [
+                "git",
+                "config",
+                "--file",
+                str(private_config),
+                "--get-regexp",
+                r"^includeif\..*\.path$",
+            ],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+    except OSError:
+        return False
+    if completed.returncode != 0:
+        return False
+    identity_configs: list[Path] = []
+    for line in completed.stdout.splitlines():
+        fields = line.split(maxsplit=1)
+        if len(fields) != 2 or not fields[1]:
+            return False
+        raw_path = fields[1]
+        if raw_path.startswith("~/"):
+            config_path = home / raw_path[2:]
+        else:
+            config_path = Path(raw_path)
+            if not config_path.is_absolute():
+                config_path = private_config.parent / config_path
+        identity_configs.append(config_path)
+    return bool(identity_configs) and all(
+        _git_config_defines_identity(config_path) for config_path in identity_configs
+    )
+
+
 def _private_git_findings(home: Path) -> list[Finding]:
     gitconfig = home / ".gitconfig"
     private_config = home / ".private.gitconfig"
@@ -137,21 +192,7 @@ def _private_git_findings(home: Path) -> list[Finding]:
             "Remove group and world write permission." if writable_by_others else None,
         ),
     )
-    identity_ready = True
-    for key in ("user.name", "user.email"):
-        try:
-            completed = subprocess.run(
-                ["git", "config", "--file", str(private_config), "--get", key],
-                check=False,
-                capture_output=True,
-                text=True,
-            )
-        except OSError:
-            identity_ready = False
-            break
-        if completed.returncode != 0 or not completed.stdout.strip():
-            identity_ready = False
-            break
+    identity_ready = _private_git_identity_ready(private_config, home)
     findings.append(
         _finding(
             "git.private_identity",
@@ -162,15 +203,15 @@ def _private_git_findings(home: Path) -> list[Finding]:
                 else "git.private_identity_missing"
             ),
             (
-                "The private Git configuration defines user.name and user.email"
+                "The private Git configuration provides complete Git identities"
                 if identity_ready
-                else "The private Git configuration does not define both user.name and user.email"
+                else "The private Git configuration does not provide complete Git identities"
             ),
             private_config,
             (
                 None
                 if identity_ready
-                else "Add this host's user.name and user.email to ~/.private.gitconfig."
+                else "Define user.name and user.email directly or in every conditional identity include."
             ),
         ),
     )

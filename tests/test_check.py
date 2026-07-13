@@ -398,6 +398,55 @@ def test_private_git_identity_requires_name_and_email_and_detects_transition(
     assert degraded_identity.code == "git.private_identity_missing"
 
 
+def test_private_git_identity_accepts_complete_conditional_includes(
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "repo"
+    home = tmp_path / "home"
+    identity_config = home / ".config/git/personal.gitconfig"
+    identity_config.parent.mkdir(parents=True)
+    identity_config.write_text(
+        "[user]\n  name = Test User\n  email = test@example.com\n"
+    )
+    private_config = home / ".private.gitconfig"
+    private_config.write_text(
+        '[includeIf "hasconfig:remote.*.url:https://example.com/**"]\n'
+        "  path = ~/.config/git/personal.gitconfig\n"
+    )
+    private_config.chmod(0o600)
+
+    healthy = inspect_host(
+        repo_root,
+        home,
+        executable_finder=lambda command: (
+            f"/tools/{command}" if command in {"git", "mise"} else None
+        ),
+        system_name="Linux",
+    )
+    healthy_identity = next(
+        finding
+        for finding in healthy.findings
+        if finding.check == "git.private_identity"
+    )
+    assert healthy_identity.severity is Severity.OK
+
+    identity_config.write_text("[user]\n  name = Test User\n")
+    degraded = inspect_host(
+        repo_root,
+        home,
+        executable_finder=lambda command: (
+            f"/tools/{command}" if command in {"git", "mise"} else None
+        ),
+        system_name="Linux",
+    )
+    degraded_identity = next(
+        finding
+        for finding in degraded.findings
+        if finding.check == "git.private_identity"
+    )
+    assert degraded_identity.severity is Severity.WARN
+
+
 def test_inspect_host_reports_invalid_skillshare_yaml(tmp_path: Path) -> None:
     repo_root = tmp_path / "repo"
     home = tmp_path / "home"
