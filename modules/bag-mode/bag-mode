@@ -5,7 +5,7 @@
 
 set -uo pipefail
 
-VERSION="2.3.4"
+VERSION="2.4.0"
 EXIT_USAGE=2
 EXIT_BRIGHTNESS_PENDING=69
 EXIT_START_FAILED=70
@@ -157,7 +157,8 @@ Usage:
 The generic notifier contract is:
   notifier --event NAME --level LEVEL --title TEXT --message TEXT
 
-install-brrr copies the sender into stable user Application Support storage.
+install-brrr uses the built-in sender by default, or copies PATH when provided,
+then stores it in stable user Application Support storage.
 The controller does not depend on the original Skill or Skillshare path afterward.
 EOF
       ;;
@@ -1804,20 +1805,99 @@ uninstall_mode() {
   printf 'user logs and notifier configuration were kept\n'
 }
 
-find_brrr_sender() {
-  local run_home="$1" candidate_bin skill_source
-  for candidate_bin in \
-    "$run_home"/.agents/skills/*brrr-now*/scripts/brrr-send.sh \
-    "$run_home"/.claude/skills/*brrr-now*/scripts/brrr-send.sh \
-    "$run_home"/.codex/skills/*brrr-now*/scripts/brrr-send.sh; do
-    [[ -f "$candidate_bin" ]] && { printf '%s\n' "$candidate_bin"; return; }
+write_builtin_brrr_sender() {
+  cat <<'BRRR_SENDER'
+#!/bin/bash
+set -euo pipefail
+
+message=
+title=
+thread_id=
+open_url=
+sound=
+interruption_level=
+volume=
+dry_run=0
+
+while (( $# > 0 )); do
+  case "$1" in
+    --message) message="${2:?missing value for --message}"; shift 2 ;;
+    --title) title="${2:?missing value for --title}"; shift 2 ;;
+    --thread-id) thread_id="${2:?missing value for --thread-id}"; shift 2 ;;
+    --open-url) open_url="${2:?missing value for --open-url}"; shift 2 ;;
+    --sound) sound="${2:?missing value for --sound}"; shift 2 ;;
+    --interruption-level) interruption_level="${2:?missing value for --interruption-level}"; shift 2 ;;
+    --volume) volume="${2:?missing value for --volume}"; shift 2 ;;
+    --dry-run) dry_run=1; shift ;;
+    *) echo "unknown argument: $1" >&2; exit 2 ;;
+  esac
+done
+
+[[ -n "$message" && -n "$title" ]] || { echo 'missing required --title or --message' >&2; exit 2; }
+
+if [[ -z "${BRRR_SECRET:-}" ]]; then
+  env_files=()
+  [[ -n "${BRRR_ENV_FILE:-}" ]] && env_files+=("$BRRR_ENV_FILE")
+  env_files+=("${HOME:-}/.config/brrr/env" "${HOME:-}/.config/notify/brrr.env")
+  for env_file in "${env_files[@]}"; do
+    if [[ -r "$env_file" ]]; then
+      # shellcheck disable=SC1090
+      source "$env_file"
+      break
+    fi
   done
-  if [[ -r "$run_home/.config/skillshare/config.yaml" ]]; then
-    skill_source="$(awk -F ': ' '$1 == "source" { print $2; exit }' "$run_home/.config/skillshare/config.yaml")"
-    skill_source="${skill_source/#\~/$run_home}"
-    candidate_bin="$skill_source/skills-stable/brrr-now/scripts/brrr-send.sh"
-    [[ -f "$candidate_bin" ]] && printf '%s\n' "$candidate_bin"
-  fi
+fi
+
+endpoint=
+auth_mode=
+if [[ -f /exe.dev/shelley.json ]]; then
+  endpoint=https://brrr.int.exe.xyz/v1/send
+  auth_mode=exe.dev-proxy
+elif [[ -n "${BRRR_SECRET:-}" ]]; then
+  endpoint=https://api.brrr.now/v1/send
+  auth_mode=bearer
+elif (( dry_run )); then
+  auth_mode=unconfigured
+else
+  echo 'brrr is not configured; set BRRR_SECRET or a supported env file' >&2
+  exit 3
+fi
+
+python_bin=/usr/bin/python3
+[[ -x "$python_bin" ]] || python_bin="$(command -v python3 || true)"
+[[ -n "$python_bin" ]] || { echo 'python3 is required' >&2; exit 4; }
+payload="$(
+  "$python_bin" - "$message" "$title" "$thread_id" "$open_url" "$sound" "$interruption_level" "$volume" <<'PY'
+import json
+import sys
+
+names = ["message", "title", "thread_id", "open_url", "sound", "interruption_level", "volume"]
+values = dict(zip(names, sys.argv[1:]))
+payload = {key: value for key, value in values.items() if value and key != "volume"}
+level = values["interruption_level"]
+if level and level not in {"passive", "active", "time-sensitive", "critical"}:
+    raise SystemExit("invalid interruption level")
+if values["volume"]:
+    if level != "critical":
+        raise SystemExit("volume requires critical interruption level")
+    volume = float(values["volume"])
+    if not 0 <= volume <= 1:
+        raise SystemExit("volume must be between 0 and 1")
+    payload["volume"] = volume
+print(json.dumps(payload, separators=(",", ":")))
+PY
+)"
+
+if (( dry_run )); then
+  printf 'auth_mode=%s\n%s\n' "$auth_mode" "$payload"
+  [[ "$auth_mode" != unconfigured ]] || exit 3
+  exit 0
+fi
+
+curl_args=(-fsS --max-time "${BRRR_TIMEOUT:-10}" --retry 2 -X POST)
+[[ "$auth_mode" == bearer ]] && curl_args+=(-H "Authorization: Bearer $BRRR_SECRET")
+/usr/bin/curl "${curl_args[@]}" -H 'Content-Type: application/json' --data-binary "$payload" "$endpoint" >/dev/null
+BRRR_SENDER
 }
 
 notifier_set() {
@@ -1834,17 +1914,25 @@ notifier_set() {
 }
 
 notifier_install_brrr() {
-  local sender="${1:-}" run_user run_home support_dir sender_copy wrapper wrapper_tmp
+  local sender="${1:-}" run_user run_home support_dir sender_copy sender_tmp wrapper wrapper_tmp
   run_user="$(resolve_user)" || die "could not resolve user"
   run_home="$(resolve_home "$run_user")" || die "could not resolve home"
-  [[ -n "$sender" ]] || sender="$(find_brrr_sender "$run_home")"
-  [[ -f "$sender" ]] || die "brrr sender not found; pass its path explicitly"
   support_dir="$(user_support_dir "$run_home")"
   sender_copy="$support_dir/notifiers/brrr-send"
   wrapper="$support_dir/notifier"
   mkdir -p "$support_dir/notifiers" || die "could not create notifier directory: $support_dir/notifiers"
-  /usr/bin/install -m 0700 "$sender" "$sender_copy" \
-    || die "could not install brrr sender: $sender_copy"
+  if [[ -n "$sender" ]]; then
+    [[ -f "$sender" ]] || die "brrr sender not found: $sender"
+    /usr/bin/install -m 0700 "$sender" "$sender_copy" \
+      || die "could not install brrr sender: $sender_copy"
+  else
+    sender_tmp="$(mktemp "$support_dir/notifiers/.brrr-send.XXXXXX")" \
+      || die "could not create temporary brrr sender"
+    if ! write_builtin_brrr_sender >"$sender_tmp" || ! chmod 0700 "$sender_tmp" || ! mv -f "$sender_tmp" "$sender_copy"; then
+      rm -f "$sender_tmp"
+      die "could not install built-in brrr sender: $sender_copy"
+    fi
+  fi
   wrapper_tmp="$(mktemp "$support_dir/.notifier.XXXXXX")" \
     || die "could not create temporary notifier in $support_dir"
   if ! cat >"$wrapper_tmp" <<'WRAPPER'

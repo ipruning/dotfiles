@@ -343,6 +343,14 @@ exit_code=0
 env "${test_env[@]}" CI=1 "$runtime_bin" logs --bogus >"$test_root/logs-bogus.out" 2>"$test_root/logs-bogus.err" || exit_code=$?
 [[ "$exit_code" == 2 ]] || fail "unknown logs option exited $exit_code instead of 2"
 
+env "${test_env[@]}" "$runtime_bin" notifier install-brrr >"$test_root/notifier-builtin-install.out"
+BRRR_SECRET=test-secret /bin/bash "$user_support_dir/notifiers/brrr-send" \
+  --title 'dry run' --message 'built in' --thread-id bag-mode --dry-run \
+  >"$test_root/notifier-builtin-dry-run.out"
+rg -q '^auth_mode=bearer$' "$test_root/notifier-builtin-dry-run.out" \
+  || fail 'built-in brrr sender did not validate its configured delivery path'
+rg -q '"thread_id":"bag-mode"' "$test_root/notifier-builtin-dry-run.out" \
+  || fail 'built-in brrr sender did not preserve the notification payload'
 env "${test_env[@]}" "$runtime_bin" notifier install-brrr "$fake_bin/brrr-send.sh" >/dev/null
 rm -f "$fake_bin/brrr-send.sh"
 env "${test_env[@]}" "$user_support_dir/notifier" \
