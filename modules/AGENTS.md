@@ -31,3 +31,18 @@ path.
 
 Run an ordinary command through its public interface. Repository-wide Python
 inspection changes use the tasks documented in the root `AGENTS.md`.
+
+## Structural search cookbook
+
+Use these read-only investigation commands for Python structure:
+
+```sh
+ast-grep run -p 'subprocess.$FUNC($$$ARGS)' -l python modules
+ast-grep run -p 'subprocess.$FUNC($$$BEFORE, shell=True, $$$AFTER)' -l python modules
+ast-grep run -p 'YAML($$$INIT).load($$$ARGS)' -l python modules
+```
+
+These are discovery commands, not lint gates. To enforce subprocess shell
+policy, prefer Ruff's Bandit S602 rule. Keep text and cross-format configuration
+checks in the existing domain checks; do not add `sgconfig.yml` or a persistent
+ast-grep gate.
