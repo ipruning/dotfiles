@@ -125,6 +125,35 @@ their tracked `.gitkeep` are likewise reported as empty, not ready.
 symlinks. `mise run verify` adds Python formatting, type checking, and behavior
 tests.
 
+## Host updates
+
+Updating installed tools is an explicit mutation, separate from configuration
+inspection. Preview the exact commands first:
+
+```bash
+mise run update -- --dry-run
+mise run update -- --dry-run --json
+mise run update
+```
+
+The task discovers supported updaters on `PATH`, reports missing tools as
+skipped, applies available updates in a stable order, and continues independent
+steps after a failure. Any failed step makes the command exit non-zero. Current
+steps cover Homebrew metadata and packages, global mise tools and shims,
+GitHub CLI extensions, tldr pages, Yazi packages, Sprite's update check, Amp,
+Tigris, and Pi extensions. It deliberately does not run `brew cleanup`,
+`brew autoremove`, or `mise prune`; removal and pruning require a separate,
+explicit operation.
+
+`update` does not pull this repository, install missing tools, run Skillshare,
+or write live configuration back into `reference/`. Inspect the resulting host
+state separately:
+
+```bash
+mise run check
+mise run diff
+```
+
 ## Standalone tools
 
 `bag-mode`, `macos-session-health`, and `macos-maxfiles` are self-installing

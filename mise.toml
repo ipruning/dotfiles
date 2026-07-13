@@ -19,6 +19,10 @@ run = 'uv run --locked python -m scripts.check "$@"'
 description = "Apply an explicit host profile"
 run = 'uv run --locked python -m scripts.setup "$@"'
 
+[tasks.update]
+description = "Update installed host tools without synchronizing configuration"
+run = 'uv run --locked python -m scripts.update "$@"'
+
 [tasks.lint]
 description = "Inspect repository paths, mappings, and symlinks"
 run = 'uv run --locked python -m scripts.lint "$@"'

@@ -484,6 +484,12 @@ LEGACY_REFERENCES = (
 )
 
 
+def _contains_legacy_reference(line: str, legacy: str) -> bool:
+    if legacy.startswith("mise run "):
+        return re.search(rf"(?<![\w-]){re.escape(legacy)}(?![\w-])", line) is not None
+    return legacy in line
+
+
 def _legacy_reference_findings(repo_root: Path) -> list[Finding]:
     findings: list[Finding] = []
     for file_path in _tracked_paths(repo_root):
@@ -502,7 +508,7 @@ def _legacy_reference_findings(repo_root: Path) -> list[Finding]:
             continue
         for line_number, line in enumerate(lines, start=1):
             for legacy in LEGACY_REFERENCES:
-                if legacy in line:
+                if _contains_legacy_reference(line, legacy):
                     findings.append(
                         _finding(
                             Severity.ERROR,

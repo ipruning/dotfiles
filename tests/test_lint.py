@@ -67,7 +67,7 @@ def test_inspect_repository_rejects_tracked_private_generated_and_legacy_files(
     generated_file.parent.mkdir()
     generated_file.write_text("stale\n")
     legacy_file = repo_root / "notes.txt"
-    legacy_file.write_text("run mise run restore\n")
+    legacy_file.write_text("run mise run restore\nrun mise run update -- --dry-run\n")
     subprocess.run(["git", "init", "-q", str(repo_root)], check=True)
     subprocess.run(["git", "-C", str(repo_root), "add", "."], check=True)
 
@@ -77,6 +77,13 @@ def test_inspect_repository_rejects_tracked_private_generated_and_legacy_files(
     assert "repository.private_tracked" in codes
     assert "repository.generated_tracked" in codes
     assert "repository.legacy_reference" in codes
+    legacy_findings = [
+        finding
+        for finding in report.findings
+        if finding.code == "repository.legacy_reference"
+    ]
+    assert len(legacy_findings) == 1
+    assert "mise run restore" in legacy_findings[0].message
 
 
 def test_inspect_repository_warns_when_checkout_is_not_home_dotfiles(
