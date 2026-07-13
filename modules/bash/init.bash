@@ -1,7 +1,5 @@
 # Minimal Bash integration for Linux hosts.
 
-_dotfiles_repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
-
 _dotfiles_prepend_path() {
   _dotfiles_candidate="$1"
   if [ -d "$_dotfiles_candidate" ]; then
@@ -12,9 +10,8 @@ _dotfiles_prepend_path() {
   fi
 }
 
-_dotfiles_prepend_path "$_dotfiles_repo_root/generated/bin"
-_dotfiles_prepend_path "$_dotfiles_repo_root/modules/bin"
 _dotfiles_prepend_path "$HOME/.local/bin"
+_dotfiles_prepend_path "$HOME/.local/share/mise/shims"
 export PATH
 
 case $- in
@@ -25,5 +22,5 @@ case $- in
     ;;
 esac
 
-unset _dotfiles_candidate _dotfiles_repo_root
+unset _dotfiles_candidate
 unset -f _dotfiles_prepend_path

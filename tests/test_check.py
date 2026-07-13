@@ -302,6 +302,54 @@ def test_linux_lite_check_omits_macos_and_optional_desktop_capabilities(
     assert "macos.launchctl" not in checks
 
 
+def test_linux_lite_check_requires_only_git_and_mise_and_reports_legacy_path(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    repo_root = tmp_path / "repo"
+    home = tmp_path / "home"
+    legacy_bin = repo_root / "modules/bin"
+    legacy_bin.mkdir(parents=True)
+    monkeypatch.setenv("PATH", f"{legacy_bin}:/usr/bin:/bin")
+
+    report = inspect_host(
+        repo_root,
+        home,
+        executable_finder=lambda command: (
+            f"/tools/{command}" if command in {"git", "mise"} else None
+        ),
+        system_name="Linux",
+    )
+    findings = {finding.check: finding for finding in report.findings}
+
+    executable_checks = {
+        finding.check
+        for finding in report.findings
+        if finding.check.startswith("executable.")
+    }
+    assert executable_checks == {
+        "executable.git",
+        "executable.mise",
+        "executable.skillshare",
+    }
+    assert findings["shell.repo_commands"].severity is Severity.WARN
+    assert findings["shell.repo_commands"].path == legacy_bin
+
+    monkeypatch.setenv("PATH", "/usr/bin:/bin")
+    clean = inspect_host(
+        repo_root,
+        home,
+        executable_finder=lambda command: (
+            f"/tools/{command}" if command in {"git", "mise"} else None
+        ),
+        system_name="Linux",
+    )
+    clean_finding = next(
+        finding for finding in clean.findings if finding.check == "shell.repo_commands"
+    )
+    assert clean_finding.severity is Severity.OK
+
+
 def test_inspect_host_reports_invalid_skillshare_yaml(tmp_path: Path) -> None:
     repo_root = tmp_path / "repo"
     home = tmp_path / "home"

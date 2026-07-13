@@ -1,4 +1,3 @@
-import os
 import subprocess
 from pathlib import Path
 
@@ -102,11 +101,25 @@ def test_linux_lite_loader_runs_before_noninteractive_bash_return(
     assert completed.stdout == "1"
 
 
-def test_bash_module_exposes_repository_commands_without_duplicate_paths() -> None:
+def test_bash_module_exposes_only_user_and_mise_commands_without_duplicates(
+    tmp_path: Path,
+) -> None:
     repo_root = Path(__file__).resolve().parents[1]
     module_path = repo_root / "modules/bash/init.bash"
-    environment = os.environ.copy()
-    environment["PATH"] = "/usr/bin:/bin"
+    home = tmp_path / "home"
+    local_bin = home / ".local/bin"
+    shims = home / ".local/share/mise/shims"
+    system_bin = tmp_path / "system-bin"
+    for directory in (local_bin, shims, system_bin):
+        directory.mkdir(parents=True)
+    for executable in (local_bin / "mise", shims / "uv", system_bin / "ss"):
+        executable.write_text("#!/bin/sh\nexit 0\n")
+        executable.chmod(0o755)
+
+    environment = {
+        "HOME": str(home),
+        "PATH": f"{system_bin}:/usr/bin:/bin",
+    }
 
     completed = subprocess.run(
         [
@@ -114,7 +127,9 @@ def test_bash_module_exposes_repository_commands_without_duplicate_paths() -> No
             "--noprofile",
             "--norc",
             "-c",
-            f'. "{module_path}"; . "{module_path}"; command -v g; printf "%s" "$PATH"',
+            f'. "{module_path}"; . "{module_path}"; '
+            "command -v mise; command -v uv; command -v ss; "
+            'command -v g || printf "g missing\\n"; printf "%s" "$PATH"',
         ],
         env=environment,
         check=False,
@@ -124,5 +139,14 @@ def test_bash_module_exposes_repository_commands_without_duplicate_paths() -> No
 
     assert completed.returncode == 0
     lines = completed.stdout.splitlines()
-    assert lines[0] == str(repo_root / "modules/bin/g")
-    assert lines[1].split(":").count(str(repo_root / "modules/bin")) == 1
+    assert lines[:4] == [
+        str(local_bin / "mise"),
+        str(shims / "uv"),
+        str(system_bin / "ss"),
+        "g missing",
+    ]
+    loaded_path = lines[4].split(":")
+    assert loaded_path.count(str(local_bin)) == 1
+    assert loaded_path.count(str(shims)) == 1
+    assert str(repo_root / "modules/bin") not in loaded_path
+    assert str(repo_root / "generated/bin") not in loaded_path

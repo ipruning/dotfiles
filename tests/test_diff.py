@@ -57,6 +57,35 @@ class MultiApplicationRunner:
                     "error": None,
                 },
                 {
+                    "application": "skillshare",
+                    "reference_path": str(
+                        repo_root / "reference/.config/skillshare/config.yaml"
+                    ),
+                    "live_path": str(home / ".config/skillshare/config.yaml"),
+                    "kind": "only-reference",
+                    "reference_kind": "file",
+                    "live_kind": None,
+                    "error": None,
+                },
+                {
+                    "application": "hushlogin",
+                    "reference_path": str(repo_root / "reference/.hushlogin"),
+                    "live_path": str(home / ".hushlogin"),
+                    "kind": "only-reference",
+                    "reference_kind": "file",
+                    "live_kind": None,
+                    "error": None,
+                },
+                {
+                    "application": "uv",
+                    "reference_path": str(repo_root / "reference/.config/uv/uv.toml"),
+                    "live_path": str(home / ".config/uv/uv.toml"),
+                    "kind": "only-reference",
+                    "reference_kind": "file",
+                    "live_kind": None,
+                    "error": None,
+                },
+                {
                     "application": "aerospace",
                     "reference_path": str(
                         repo_root / "reference/.config/aerospace/aerospace.toml",
@@ -68,7 +97,7 @@ class MultiApplicationRunner:
                     "error": None,
                 },
             ],
-            "summary": {"modified": 1, "only-reference": 1},
+            "summary": {"modified": 1, "only-reference": 4},
         }
 
 
@@ -102,8 +131,11 @@ def test_linux_lite_profile_excludes_macos_drift_by_default(tmp_path: Path) -> N
     )
 
     assert report.profile is HostProfile.LINUX_LITE
-    assert [change.application for change in report.changes] == ["git"]
-    assert report.summary == {"modified": 1}
+    assert [change.application for change in report.changes] == [
+        "git",
+        "skillshare",
+    ]
+    assert report.summary == {"modified": 1, "only-reference": 1}
 
     full = inspect_drift(
         tmp_path / "repo",
@@ -113,7 +145,13 @@ def test_linux_lite_profile_excludes_macos_drift_by_default(tmp_path: Path) -> N
         runner=MultiApplicationRunner(),
     )
     assert full.profile is HostProfile.FULL
-    assert [change.application for change in full.changes] == ["git", "aerospace"]
+    assert [change.application for change in full.changes] == [
+        "git",
+        "skillshare",
+        "hushlogin",
+        "uv",
+        "aerospace",
+    ]
 
 
 class InvalidSchemaRunner:

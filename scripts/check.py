@@ -404,6 +404,42 @@ def _bash_integration_finding(repo_root: Path, home: Path) -> Finding:
     )
 
 
+def _legacy_repo_path_finding(repo_root: Path) -> Finding:
+    legacy_directories = (
+        (repo_root / "modules/bin").resolve(),
+        (repo_root / "generated/bin").resolve(),
+    )
+    active_directories = {
+        Path(entry).expanduser().resolve()
+        for entry in os.environ.get("PATH", "").split(os.pathsep)
+        if entry
+    }
+    exposed = next(
+        (
+            directory
+            for directory in legacy_directories
+            if directory in active_directories
+        ),
+        None,
+    )
+    return _finding(
+        "shell.repo_commands",
+        Severity.WARN if exposed else Severity.OK,
+        ("shell.repo_commands_exposed" if exposed else "shell.repo_commands_isolated"),
+        (
+            "Linux PATH exposes repository commands from a legacy configuration"
+            if exposed
+            else "Linux PATH does not expose repository command directories"
+        ),
+        exposed,
+        (
+            "Remove dotfiles modules/bin and generated/bin from Bash or global mise PATH configuration."
+            if exposed
+            else None
+        ),
+    )
+
+
 def inspect_host(
     repo_root: Path,
     home: Path,
@@ -415,13 +451,18 @@ def inspect_host(
     """Return explicit required and optional capabilities for this host."""
     active_system = system_name or platform.system()
     active_profile = resolve_profile(profile, active_system)
+    required_commands = (
+        ("git", "mise")
+        if active_profile is HostProfile.LINUX_LITE
+        else ("git", "python", "uv", "mise")
+    )
     findings = [
         _check_executable(
             command,
             required=True,
             executable_finder=executable_finder,
         )
-        for command in ("git", "python", "uv", "mise")
+        for command in required_commands
     ]
     findings.extend(_private_git_findings(home))
     skillshare_finding = _check_executable(
@@ -435,6 +476,7 @@ def inspect_host(
         findings.append(_skillshare_doctor_finding(skillshare_finding.path, home))
     if active_profile is HostProfile.LINUX_LITE:
         findings.append(_bash_integration_finding(repo_root, home))
+        findings.append(_legacy_repo_path_finding(repo_root))
         return CheckReport(schema_version=1, findings=tuple(findings))
     findings.append(
         _check_executable(

@@ -71,11 +71,15 @@ exec bash
 It preserves the existing `~/.bashrc`, adds one marked block that loads
 `modules/bash/init.bash`, and adds `~/.private.gitconfig` to Git's includes. It
 does not create an identity, install optional tools, clone private repositories,
-or synchronize Skillshare extras. The Bash module adds `~/.local/bin`,
-`modules/bin`, and `generated/bin` to `PATH`, then activates mise in interactive
-shells. The managed block is placed before Ubuntu's non-interactive early
-return, so direct SSH commands also receive the durable PATH without interactive
-shell initialization.
+or synchronize Skillshare extras. The Bash module adds `~/.local/bin` and mise's
+shim directory to `PATH`, then activates mise in interactive shells. It does not
+expose `modules/bin` or `generated/bin` on Linux. The managed block is placed
+before Ubuntu's non-interactive early return, so direct SSH commands also receive
+the user and mise paths without interactive shell initialization.
+
+The Linux Lite drift profile observes only Git and Skillshare configuration.
+Skillshare remains optional: a missing executable, configuration, or source is a
+warning for a human or AI operator to evaluate, not a setup action.
 
 ## Configuration drift
 
@@ -114,9 +118,11 @@ changes; restore backups protect the replaced live paths.
 ## Host health
 
 `mise run check` reports required runtimes and optional capabilities separately.
-Current checks cover the mise/uv/Python bootstrap, private Git configuration,
-Skillshare, Television, generated shell directories, their required runtime
-files, and generated binaries without a repository owner.
+Linux Lite requires Git and mise, checks private Git configuration and optional
+Skillshare state, and warns when a legacy PATH still exposes repository command
+directories. The macOS and full profiles additionally cover the project
+Python/uv runtime, Television, generated shell directories, their required
+runtime files, and generated binaries without a repository owner.
 
 ```bash
 mise run check
@@ -204,8 +210,9 @@ tests, and generated launchd configuration. Their source and usage remain under
 the corresponding `modules/<tool>/` directory.
 
 Ordinary commands under `modules/bin/` are independent of the dotfiles
-inspection tasks. Shell startup currently expects this repository at
-`~/dotfiles`; `mise run lint` reports when that assumption is false.
+inspection tasks. Linux Lite deliberately does not add them to `PATH`. The macOS
+shell configuration currently expects this repository at `~/dotfiles`; `mise run
+lint` reports when that assumption is false.
 
 ## Skillshare
 
