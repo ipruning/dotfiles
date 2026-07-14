@@ -45,7 +45,6 @@ SKIP_SUFFIXES = {
     ".pdf",
     ".wasm",
     ".pyc",
-    ".DS_Store",
 }
 SKIP_PREFIXES = ("generated/",)
 FULL_HOME_REQUIRED_FILES = {

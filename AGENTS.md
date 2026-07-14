@@ -31,8 +31,8 @@ semantics live in `README.md`.
   expose configuration contents in drift reports.
 - Never commit secrets. Track templates; keep materialized `*private*` files
   ignored.
-- Run `mise run verify` after changing Python tasks, mappings, or repository
-  layout.
+- Run `mise run verify` after changing Python tasks, shell files, mappings, or
+  repository layout.
 
 ## Skillshare boundary
 

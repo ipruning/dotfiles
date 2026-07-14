@@ -39,6 +39,10 @@ run = 'scripts/zsh-profile "$@"'
 description = "Inspect repository paths, mappings, and symlinks"
 run = 'uv run --locked python -m scripts.lint "$@"'
 
+[tasks.shell]
+description = "Check shell files with syntax and ShellCheck gates"
+run = 'uv run --locked python -m scripts.shell "$@"'
+
 [tasks.format]
 description = "Check Python formatting and style"
 run = [
@@ -56,4 +60,4 @@ run = "uv run --locked ty check scripts tests"
 
 [tasks.verify]
 description = "Run all repository verification"
-depends = ["format", "lint", "typecheck", "test"]
+depends = ["format", "lint", "shell", "typecheck", "test"]
