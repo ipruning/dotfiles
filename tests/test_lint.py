@@ -141,6 +141,7 @@ def test_inspect_repository_rejects_tracked_private_generated_and_legacy_files(
         "run mise run sync\n"
         "run mise run update -- --dry-run\n"
         "run modules/bin/ss status\n"
+        "run modules/bin/ssh-helper status\n"
     )
     subprocess.run(["git", "init", "-q", str(repo_root)], check=True)
     subprocess.run(["git", "-C", str(repo_root), "add", "."], check=True)

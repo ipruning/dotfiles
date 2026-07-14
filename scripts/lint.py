@@ -501,7 +501,9 @@ LEGACY_REFERENCES = (
 def _contains_legacy_reference(line: str, legacy: str) -> bool:
     if legacy.startswith("mise run "):
         return re.search(rf"(?<![\w-]){re.escape(legacy)}(?![\w-])", line) is not None
-    return legacy in line
+    if legacy.endswith("/"):
+        return legacy in line
+    return re.search(rf"{re.escape(legacy)}(?![\w-])", line) is not None
 
 
 def _legacy_reference_findings(repo_root: Path) -> list[Finding]:
