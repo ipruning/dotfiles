@@ -447,6 +447,35 @@ def test_private_git_identity_accepts_complete_conditional_includes(
     assert degraded_identity.severity is Severity.WARN
 
 
+def test_bash_integration_recognizes_symlinked_checkout(tmp_path: Path) -> None:
+    checkout = tmp_path / "workspace/dotfiles"
+    (checkout / "modules/bash").mkdir(parents=True)
+    (checkout / "modules/bash/init.bash").write_text("export READY=1\n")
+    repo_link = tmp_path / "dotfiles"
+    repo_link.symlink_to(checkout)
+    home = tmp_path / "home"
+    home.mkdir()
+    module_path = checkout / "modules/bash/init.bash"
+    (home / ".bashrc").write_text(
+        f"# >>> dotfiles linux-lite >>>\n. {module_path}\n# <<< dotfiles linux-lite <<<\n",
+    )
+
+    report = inspect_host(
+        repo_link,
+        home,
+        executable_finder=lambda command: (
+            f"/tools/{command}" if command in {"git", "mise"} else None
+        ),
+        system_name="Linux",
+    )
+    bash_finding = next(
+        finding for finding in report.findings if finding.check == "shell.bash"
+    )
+
+    assert bash_finding.severity is Severity.OK
+    assert bash_finding.code == "shell.bash_ready"
+
+
 def test_private_git_identity_accepts_conditional_include_sections_with_spaces(
     tmp_path: Path,
 ) -> None:

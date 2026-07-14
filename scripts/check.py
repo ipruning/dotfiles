@@ -467,7 +467,7 @@ def _generated_directory_finding(directory_path: Path, label: str) -> Finding:
 
 def _bash_integration_finding(repo_root: Path, home: Path) -> Finding:
     bashrc = home / ".bashrc"
-    module_path = repo_root / "modules/bash/init.bash"
+    module_path = repo_root.resolve() / "modules/bash/init.bash"
     try:
         configured = bashrc.is_file() and str(module_path) in bashrc.read_text()
     except OSError:
