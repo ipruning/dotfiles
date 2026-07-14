@@ -103,6 +103,13 @@ and recovery deliveries remain eligible for the next run. Notifications never
 execute recovery actions. Use the incident report to see both emitted and
 suppressed decisions.
 
+When a push delivery exhausts its retries or brrr is unconfigured, the CLI
+posts the same title and message as a local macOS notification through
+`osascript` as a last resort. `status` additionally reports
+`last_snapshot_at`, `last_snapshot_status`, and
+`consecutive_delivery_failures`, which `mise run check` in the dotfiles
+repository consumes to detect a silently dead agent or a dead push channel.
+
 Validate the payload and local credential lookup without sending:
 
 ```zsh

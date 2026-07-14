@@ -291,6 +291,69 @@ class NotificationStateTest(unittest.TestCase):
         with self.assertRaisesRegex(CollectorFailure, "original collector failure"):
             snapshot(args, self.store, "test")
 
+    def test_native_fallback_fires_when_brrr_is_unconfigured(self) -> None:
+        fallback_calls: list[dict[str, Any]] = []
+        deliver = self.module["deliver_brrr"]
+        deliver.__globals__["brrr_configuration"] = lambda **_: {
+            "configured": False,
+            "auth_mode": "unconfigured",
+            "endpoint": "",
+            "credential_source": "",
+            "secret": "",
+        }
+        deliver.__globals__["deliver_native_notification"] = (
+            lambda payload, timeout: fallback_calls.append(payload) or True
+        )
+
+        delivery = deliver({"title": "t", "message": "m"}, 1)
+
+        self.assertEqual(delivery["exit"], 3)
+        self.assertTrue(delivery["native_fallback"])
+        self.assertEqual(fallback_calls, [{"title": "t", "message": "m"}])
+
+    def test_native_fallback_posts_title_and_message_via_argv(self) -> None:
+        recorded: list[list[str]] = []
+
+        def runner(command: list[str], **_kwargs: Any) -> Any:
+            recorded.append(command)
+            return SimpleNamespace(returncode=0)
+
+        sent = self.module["deliver_native_notification"](
+            {"title": "host: 异常", "message": "详情"}, 1, runner=runner
+        )
+
+        self.assertTrue(sent)
+        self.assertEqual(recorded[0][-2:], ["host: 异常", "详情"])
+
+        def broken_runner(command: list[str], **_kwargs: Any) -> Any:
+            raise OSError("osascript missing")
+
+        self.assertFalse(
+            self.module["deliver_native_notification"](
+                {"title": "t", "message": "m"}, 1, runner=broken_runner
+            )
+        )
+
+    def test_status_health_reports_snapshot_and_delivery_failure_streak(self) -> None:
+        db_path = Path(self.temp_dir.name) / "health.sqlite3"
+        snapshot_id = self.snapshot()
+        self.store.emit(snapshot_id, "brrr_notification", None, sent=True)
+        self.store.emit(snapshot_id, "brrr_notification", "warning", sent=False)
+        self.store.emit(snapshot_id, "brrr_notification", "warning", sent=False)
+        self.store.finish_snapshot(snapshot_id, "unhealthy")
+
+        health = self.module["runtime_status_health"](db_path)
+
+        self.assertTrue(health["last_snapshot_at"])
+        self.assertEqual(health["last_snapshot_status"], "unhealthy")
+        self.assertEqual(health["consecutive_delivery_failures"], 2)
+
+        missing = self.module["runtime_status_health"](
+            Path(self.temp_dir.name) / "absent.sqlite3"
+        )
+        self.assertEqual(missing["consecutive_delivery_failures"], 0)
+        self.assertEqual(missing["last_snapshot_at"], "")
+
     def test_explicit_secret_wins_over_exe_dev_proxy(self) -> None:
         with (
             mock.patch.dict(self.module["os"].environ, {"BRRR_SECRET": "test-secret"}),

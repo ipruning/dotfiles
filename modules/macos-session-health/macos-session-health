@@ -34,7 +34,7 @@ from pathlib import Path
 from typing import Any
 
 
-VERSION = "0.7.0"
+VERSION = "0.8.0"
 LABEL = "com.alex.macos-session-health"
 USER_BIN = Path.home() / ".local" / "bin" / "macos-session-health"
 LAUNCH_AGENT = Path.home() / "Library" / "LaunchAgents" / f"{LABEL}.plist"
@@ -427,6 +427,44 @@ def uninstall_launch_agent() -> int:
     return 0
 
 
+def runtime_status_health(db_path: Path) -> dict[str, Any]:
+    record: dict[str, Any] = {
+        "last_snapshot_at": "",
+        "last_snapshot_status": "",
+        "consecutive_delivery_failures": 0,
+    }
+    if not db_path.is_file():
+        return record
+    try:
+        conn = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
+    except sqlite3.Error:
+        return record
+    conn.row_factory = sqlite3.Row
+    try:
+        row = conn.execute(
+            "SELECT started_at, ended_at, status FROM snapshots"
+            " ORDER BY started_at DESC LIMIT 1"
+        ).fetchone()
+        if row:
+            record["last_snapshot_at"] = row["ended_at"] or row["started_at"]
+            record["last_snapshot_status"] = row["status"] or ""
+        failures = 0
+        for event_row in conn.execute(
+            "SELECT data_json FROM events WHERE event = 'brrr_notification'"
+            " ORDER BY ts DESC, id DESC LIMIT 10"
+        ):
+            data = json.loads(event_row["data_json"])
+            if data.get("sent"):
+                break
+            failures += 1
+        record["consecutive_delivery_failures"] = failures
+    except (sqlite3.Error, json.JSONDecodeError):
+        pass
+    finally:
+        conn.close()
+    return record
+
+
 def launch_agent_status(output_format: str) -> int:
     job = launchd_job()
     pid_match = re.search(r"^\s*pid = (\d+)$", job.stdout, re.MULTILINE)
@@ -442,6 +480,7 @@ def launch_agent_status(output_format: str) -> int:
         "notification_configured": notification["configured"],
         "notification_auth_mode": notification["auth_mode"],
         "notification_credential_source": notification["credential_source"],
+        **runtime_status_health(DEFAULT_DB),
     }
     print_records([record], output_format)
     return 0 if record["installed"] and record["loaded"] else 1
@@ -2893,6 +2932,38 @@ def brrr_configuration(*, include_environment: bool = True) -> dict[str, Any]:
     }
 
 
+def deliver_native_notification(
+    payload: dict[str, Any],
+    timeout: float,
+    *,
+    runner: Any = subprocess.run,
+) -> bool:
+    """Post a local macOS notification; the push channel already failed."""
+    if sys.platform != "darwin":
+        return False
+    try:
+        completed = runner(
+            [
+                "/usr/bin/osascript",
+                "-e",
+                "on run argv",
+                "-e",
+                "display notification (item 2 of argv) with title (item 1 of argv)",
+                "-e",
+                "end run",
+                str(payload.get("title", "")),
+                str(payload.get("message", "")),
+            ],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+    return completed.returncode == 0
+
+
 def deliver_brrr(
     payload: dict[str, Any], timeout: float, *, dry_run: bool = False
 ) -> dict[str, Any]:
@@ -2910,6 +2981,7 @@ def deliver_brrr(
             "exit": 3,
             "timeout": False,
             "error": "brrr is not configured",
+            "native_fallback": deliver_native_notification(payload, timeout),
         }
 
     body = json.dumps(payload, ensure_ascii=False, separators=(",", ":")).encode(
@@ -2964,6 +3036,7 @@ def deliver_brrr(
         "duration_ms": round((time.monotonic() - started) * 1000, 1),
         "attempts": attempts,
         "error": last_error,
+        "native_fallback": deliver_native_notification(payload, timeout),
     }
 
 
@@ -3024,6 +3097,7 @@ def record_brrr_delivery(
         http_status=delivery.get("http_status", ""),
         attempts=delivery.get("attempts", 0),
         error=delivery.get("error", ""),
+        native_fallback=delivery.get("native_fallback", False),
     )
     return sent
 
