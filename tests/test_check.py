@@ -1,5 +1,6 @@
 import json
 import hashlib
+from datetime import UTC, datetime
 from pathlib import Path
 
 import scripts.check as check_module
@@ -72,6 +73,18 @@ def test_inspect_host_reports_capabilities_and_their_invalid_transition(
         '#!/bin/sh\nprintf \'%s\\n\' \'{"summary":{"warnings":0,"errors":0}}\'\n',
     )
     skillshare.chmod(0o755)
+    session_health = _session_health_stub(
+        tmp_path,
+        {
+            "installed": True,
+            "loaded": True,
+            "notification_configured": True,
+            "last_snapshot_at": datetime.now(UTC)
+            .isoformat(timespec="seconds")
+            .replace("+00:00", "Z"),
+            "consecutive_delivery_failures": 0,
+        },
+    )
 
     available = {
         "git",
@@ -84,12 +97,17 @@ def test_inspect_host_reports_capabilities_and_their_invalid_transition(
         "starship",
         "atuin",
         "codex",
+        "macos-session-health",
     }
 
     def finder(command: str) -> str | None:
         if command not in available:
             return None
-        return str(skillshare) if command == "skillshare" else f"/tools/{command}"
+        if command == "skillshare":
+            return str(skillshare)
+        if command == "macos-session-health":
+            return str(session_health)
+        return f"/tools/{command}"
 
     healthy = inspect_host(
         repo_root,
@@ -445,6 +463,103 @@ def test_private_git_identity_accepts_complete_conditional_includes(
         if finding.check == "git.private_identity"
     )
     assert degraded_identity.severity is Severity.WARN
+
+
+def _session_health_stub(tmp_path: Path, record: dict) -> Path:
+    executable = tmp_path / "bin/macos-session-health"
+    executable.parent.mkdir(parents=True, exist_ok=True)
+    executable.write_text(
+        f"#!/bin/sh\nprintf '%s\\n' {json.dumps(json.dumps([record]))}\n",
+    )
+    executable.chmod(0o755)
+    return executable
+
+
+def _session_health_codes(tmp_path: Path, record: dict) -> dict[str, str]:
+    executable = _session_health_stub(tmp_path, record)
+
+    def finder(command: str) -> str | None:
+        if command == "macos-session-health":
+            return str(executable)
+        return (
+            f"/tools/{command}" if command in {"git", "python", "uv", "mise"} else None
+        )
+
+    report = inspect_host(
+        tmp_path / "repo",
+        tmp_path / "home",
+        executable_finder=finder,
+        system_name="Darwin",
+        profile="macos",
+    )
+    return {
+        finding.check: finding.code
+        for finding in report.findings
+        if finding.check.startswith("session_health.")
+    }
+
+
+def test_session_health_probe_reports_healthy_agent(tmp_path: Path) -> None:
+    (tmp_path / "home").mkdir()
+    now = datetime.now(UTC).isoformat(timespec="seconds").replace("+00:00", "Z")
+    codes = _session_health_codes(
+        tmp_path,
+        {
+            "installed": True,
+            "loaded": True,
+            "notification_configured": True,
+            "last_snapshot_at": now,
+            "consecutive_delivery_failures": 0,
+        },
+    )
+
+    assert codes["session_health.agent"] == "session_health.agent_ready"
+    assert codes["session_health.snapshot"] == "session_health.snapshot_recent"
+    assert codes["session_health.notifications"] == "session_health.notifications_ready"
+
+
+def test_session_health_probe_reports_silent_death_modes(tmp_path: Path) -> None:
+    (tmp_path / "home").mkdir()
+    codes = _session_health_codes(
+        tmp_path,
+        {
+            "installed": True,
+            "loaded": False,
+            "notification_configured": True,
+            "last_snapshot_at": "2026-01-01T00:00:00Z",
+            "consecutive_delivery_failures": 5,
+        },
+    )
+
+    assert codes["session_health.agent"] == "session_health.agent_down"
+    assert codes["session_health.snapshot"] == "session_health.snapshot_stale"
+    assert (
+        codes["session_health.notifications"] == "session_health.notifications_failing"
+    )
+
+
+def test_session_health_probe_treats_absent_tool_as_optional_warning(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "home").mkdir()
+    report = inspect_host(
+        tmp_path / "repo",
+        tmp_path / "home",
+        executable_finder=lambda command: (
+            f"/tools/{command}" if command in {"git", "python", "uv", "mise"} else None
+        ),
+        system_name="Darwin",
+        profile="macos",
+    )
+    finding = next(
+        finding
+        for finding in report.findings
+        if finding.check == "session_health.agent"
+    )
+
+    assert finding.severity is Severity.WARN
+    assert finding.code == "session_health.missing"
+    assert report.ok is True
 
 
 def test_bash_integration_recognizes_symlinked_checkout(tmp_path: Path) -> None:

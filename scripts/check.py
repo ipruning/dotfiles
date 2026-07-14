@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import datetime as dt
 import json
 import os
 import platform
@@ -520,6 +521,142 @@ def _legacy_repo_path_finding(repo_root: Path) -> Finding:
     )
 
 
+SESSION_HEALTH_SNAPSHOT_MAX_AGE = dt.timedelta(minutes=30)
+SESSION_HEALTH_FAILURE_STREAK = 3
+
+
+def _session_health_findings(
+    executable_finder: ExecutableFinder,
+    *,
+    now: dt.datetime | None = None,
+) -> list[Finding]:
+    executable = executable_finder("macos-session-health")
+    if executable is None:
+        return [
+            _finding(
+                "session_health.agent",
+                Severity.WARN,
+                "session_health.missing",
+                "macos-session-health is not installed",
+                action=(
+                    "Run modules/macos-session-health/macos-session-health install."
+                ),
+            ),
+        ]
+    try:
+        completed = subprocess.run(
+            [str(executable), "status", "--format", "json"],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+    except (OSError, subprocess.TimeoutExpired) as error:
+        return [
+            _finding(
+                "session_health.agent",
+                Severity.WARN,
+                "session_health.status_unavailable",
+                f"macos-session-health status could not run: {error}",
+                action="Run macos-session-health status and resolve the failure.",
+            ),
+        ]
+    try:
+        records = json.loads(completed.stdout)
+        record = records[0]
+        installed = bool(record["installed"])
+        loaded = bool(record["loaded"])
+        last_snapshot_at = str(record.get("last_snapshot_at") or "")
+        failures = int(record.get("consecutive_delivery_failures") or 0)
+        configured = bool(record.get("notification_configured"))
+    except (json.JSONDecodeError, LookupError, TypeError, ValueError) as error:
+        return [
+            _finding(
+                "session_health.agent",
+                Severity.WARN,
+                "session_health.status_invalid",
+                f"macos-session-health status returned an invalid report: {error}",
+                action="Run macos-session-health status --format json.",
+            ),
+        ]
+
+    agent_ready = installed and loaded
+    findings = [
+        _finding(
+            "session_health.agent",
+            Severity.OK if agent_ready else Severity.WARN,
+            "session_health.agent_ready"
+            if agent_ready
+            else "session_health.agent_down",
+            "session-health launch agent is installed and loaded"
+            if agent_ready
+            else "session-health launch agent is not running",
+            action=(
+                None
+                if agent_ready
+                else "Run modules/macos-session-health/macos-session-health install."
+            ),
+        ),
+    ]
+
+    snapshot_fresh = False
+    if last_snapshot_at:
+        try:
+            last = dt.datetime.fromisoformat(last_snapshot_at.replace("Z", "+00:00"))
+            current = now or dt.datetime.now(dt.timezone.utc)
+            snapshot_fresh = current - last <= SESSION_HEALTH_SNAPSHOT_MAX_AGE
+        except ValueError:
+            snapshot_fresh = False
+    findings.append(
+        _finding(
+            "session_health.snapshot",
+            Severity.OK if snapshot_fresh else Severity.WARN,
+            "session_health.snapshot_recent"
+            if snapshot_fresh
+            else "session_health.snapshot_stale",
+            f"last snapshot: {last_snapshot_at}"
+            if last_snapshot_at
+            else "no snapshot has been recorded",
+            action=(
+                None
+                if snapshot_fresh
+                else "Inspect launchd logs; the agent may have silently stopped."
+            ),
+        ),
+    )
+
+    if not configured:
+        findings.append(
+            _finding(
+                "session_health.notifications",
+                Severity.WARN,
+                "session_health.notifications_unconfigured",
+                "notification delivery is not configured",
+                action="Provide BRRR_SECRET via ~/.config/brrr/env.",
+            ),
+        )
+    elif failures >= SESSION_HEALTH_FAILURE_STREAK:
+        findings.append(
+            _finding(
+                "session_health.notifications",
+                Severity.WARN,
+                "session_health.notifications_failing",
+                f"last {failures} notification deliveries failed",
+                action="Run macos-session-health notify-test --dry-run.",
+            ),
+        )
+    else:
+        findings.append(
+            _finding(
+                "session_health.notifications",
+                Severity.OK,
+                "session_health.notifications_ready",
+                "notification delivery is configured and recently healthy",
+            ),
+        )
+    return findings
+
+
 def inspect_host(
     repo_root: Path,
     home: Path,
@@ -558,6 +695,8 @@ def inspect_host(
         findings.append(_bash_integration_finding(repo_root, home))
         findings.append(_legacy_repo_path_finding(repo_root))
         return CheckReport(schema_version=1, findings=tuple(findings))
+    if active_system == "Darwin":
+        findings.extend(_session_health_findings(executable_finder))
     findings.append(
         _check_executable(
             "tv",
