@@ -2,6 +2,7 @@ min_version = "2026.7.5"
 
 [tools]
 python = "3.14.6"
+shellcheck = "0.11.0"
 uv = "0.11.28"
 
 [env]
