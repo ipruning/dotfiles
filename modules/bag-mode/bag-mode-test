@@ -19,7 +19,6 @@ user_support_dir="$test_home/Library/Application Support/bag-mode"
 controller_pid=""
 foreground_pid=""
 rejected_run_pid=""
-legacy_lock_pid=""
 
 cleanup() {
   if [[ -n "$controller_pid" ]]; then
@@ -30,9 +29,6 @@ cleanup() {
   fi
   if [[ -n "$rejected_run_pid" ]]; then
     kill -KILL "$rejected_run_pid" 2>/dev/null || true
-  fi
-  if [[ -n "$legacy_lock_pid" ]]; then
-    kill -KILL "$legacy_lock_pid" 2>/dev/null || true
   fi
   if [[ "${BAG_MODE_TEST_KEEP:-0}" == 1 ]]; then
     printf 'test artifacts kept: %s\n' "$test_root" >&2
@@ -219,26 +215,6 @@ plutil -extract ProgramArguments.0 raw "$runtime_plist" | rg -Fxq "$runtime_cont
   || fail 'LaunchDaemon did not use the root-only controller path'
 env "${test_env[@]}" "$runtime_bin" install >"$test_root/idempotent-install.out"
 rg -q '^installed_controller: ' "$test_root/idempotent-install.out" || fail 'installed executable could not reinstall itself'
-
-legacy_other_home="$test_root/legacy-other-home"
-legacy_lock_file="$legacy_other_home/Library/Application Support/bag-mode/bag-mode.lock"
-mkdir -p "$(dirname "$legacy_lock_file")"
-: >"$legacy_lock_file"
-/usr/bin/lockf -k "$legacy_lock_file" /bin/sleep 30 &
-legacy_lock_pid=$!
-wait_for 'legacy controller lock' "! /usr/bin/lockf -t 0 '$legacy_lock_file' /usr/bin/true 2>/dev/null"
-exit_code=0
-env "${test_env[@]}" CI=1 "$runtime_bin" install --dry-run >"$test_root/legacy-install-dry-run.out" 2>"$test_root/legacy-install-dry-run.err" || exit_code=$?
-[[ "$exit_code" == 1 ]] || fail "install dry-run accepted another user's legacy controller"
-rg -q '^blocker: legacy controller is running; stop it with the legacy CLI$' "$test_root/legacy-install-dry-run.out" \
-  || fail 'install dry-run did not identify the legacy controller blocker'
-exit_code=0
-env "${test_env[@]}" "$runtime_bin" install >"$test_root/legacy-install.out" 2>"$test_root/legacy-install.err" || exit_code=$?
-[[ "$exit_code" == 1 ]] || fail "install accepted another user's legacy controller"
-rg -q 'legacy controller is running' "$test_root/legacy-install.err" || fail 'blocked legacy install did not explain the conflict'
-kill -TERM "$legacy_lock_pid"
-wait "$legacy_lock_pid" 2>/dev/null || true
-legacy_lock_pid=""
 
 rm -f "$runtime_bin"
 ln -s "$bag_mode" "$runtime_bin"

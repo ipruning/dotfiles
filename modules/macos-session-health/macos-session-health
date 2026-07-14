@@ -258,21 +258,6 @@ def managed_wrapper() -> bool:
     return WRAPPER_MARKER in first_lines
 
 
-def owned_legacy_symlink(source: Path) -> bool:
-    if not USER_BIN.is_symlink():
-        return False
-    target = USER_BIN.resolve(strict=False)
-    if target == source:
-        return True
-    if not target.is_file():
-        return False
-    try:
-        content = target.read_text()
-    except OSError:
-        return False
-    return 'LABEL = "com.alex.macos-session-health"' in content and "def install_launch_agent(" in content
-
-
 def backup_path(file_path: Path) -> dict[str, Any]:
     if file_path.is_symlink():
         return {"kind": "symlink", "target": os.readlink(file_path)}
@@ -341,9 +326,7 @@ def install_launch_agent(*, dry_run: bool = False) -> int:
     source = Path(__file__).resolve()
     python_bin = runtime_python()
     if USER_BIN.exists() or USER_BIN.is_symlink():
-        # TODO(cleanup): trigger=date:2026-10-01; action=remove legacy symlink installation migration
-        old_symlink = owned_legacy_symlink(source)
-        if not old_symlink and not managed_wrapper():
+        if not managed_wrapper():
             raise CliError(f"refusing to replace unmanaged executable: {USER_BIN}")
 
     if dry_run:
@@ -427,16 +410,13 @@ def install_launch_agent(*, dry_run: bool = False) -> int:
 def uninstall_launch_agent() -> int:
     if sys.platform != "darwin":
         raise CliError("uninstall is supported only on macOS")
-    source = Path(__file__).resolve()
     if USER_BIN.exists() or USER_BIN.is_symlink():
-        if not managed_wrapper() and not owned_legacy_symlink(source):
+        if not managed_wrapper():
             raise CliError(f"refusing to remove unmanaged executable: {USER_BIN}")
 
     bootout_launch_agent()
     LAUNCH_AGENT.unlink(missing_ok=True)
-    if USER_BIN.is_symlink():
-        USER_BIN.unlink()
-    elif managed_wrapper():
+    if managed_wrapper():
         USER_BIN.unlink()
     RUNTIME_CLI.unlink(missing_ok=True)
 
@@ -3502,7 +3482,8 @@ def event_identity(event: str, data: dict[str, Any]) -> str:
 
 
 def expand_aggregate_event(data: dict[str, Any]) -> list[dict[str, Any]]:
-    # TODO(cleanup): trigger=fact:all retained process inventory events contain rows; action=remove legacy single-row event expansion
+    # Events without a rows list (health_signal, snapshot_begin, ...) pass
+    # through as single records; this branch is permanent, not migration code.
     rows = data.get("rows")
     if not isinstance(rows, list):
         return [data]
