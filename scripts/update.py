@@ -68,12 +68,15 @@ def _emit_failure(step: UpdateStep, reason: str) -> None:
 def _update_steps(home: Path) -> tuple[UpdateStep, ...]:
     return (
         UpdateStep("brew.metadata", "brew", ("brew", "update"), 900),
-        UpdateStep("brew.packages", "brew", ("brew", "upgrade"), 900),
+        # Package-mutating steps get transaction-scale timeouts: killing brew or
+        # mise mid-upgrade leaves partial kegs, stale locks, or half-written
+        # tool state, which is worse than waiting out a slow upgrade.
+        UpdateStep("brew.packages", "brew", ("brew", "upgrade"), 3600),
         UpdateStep(
             "mise.tools",
             "mise",
             ("mise", "upgrade", "--bump", "-C", str(home)),
-            600,
+            1800,
         ),
         UpdateStep("mise.shims", "mise", ("mise", "reshim"), 120),
         UpdateStep(

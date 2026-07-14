@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from scripts.update import UpdateStatus, execute_updates
+from scripts.update import UpdateStatus, execute_updates, plan_updates
 
 
 def _fake_tool(
@@ -96,6 +96,19 @@ def test_update_dry_run_reports_exact_plan_without_running_tools(
         "mise run diff",
     ]
     assert not log_path.exists()
+
+
+def test_update_gives_package_managers_transaction_scale_timeouts(
+    tmp_path: Path,
+) -> None:
+    report = plan_updates(
+        tmp_path / "home",
+        executable_finder=lambda tool: f"/tools/{tool}",
+    )
+    steps = {result.step.name: result.step for result in report.results}
+
+    assert steps["brew.packages"].timeout_seconds >= 3600
+    assert steps["mise.tools"].timeout_seconds >= 1800
 
 
 def test_update_runs_available_tools_in_order_and_reports_skips(tmp_path: Path) -> None:
