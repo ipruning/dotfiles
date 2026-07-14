@@ -93,6 +93,7 @@ def _private_git_identity_ready(private_config: Path, home: Path) -> bool:
                 "--file",
                 str(private_config),
                 "--get-regexp",
+                "-z",
                 r"^includeif\..*\.path$",
             ],
             check=False,
@@ -104,11 +105,12 @@ def _private_git_identity_ready(private_config: Path, home: Path) -> bool:
     if completed.returncode != 0:
         return False
     identity_configs: list[Path] = []
-    for line in completed.stdout.splitlines():
-        fields = line.split(maxsplit=1)
-        if len(fields) != 2 or not fields[1]:
+    for record in completed.stdout.split("\0"):
+        if not record:
+            continue
+        _, _, raw_path = record.partition("\n")
+        if not raw_path:
             return False
-        raw_path = fields[1]
         if raw_path.startswith("~/"):
             config_path = home / raw_path[2:]
         else:
