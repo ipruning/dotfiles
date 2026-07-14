@@ -52,8 +52,6 @@ _try_rs_get_tries_paths() {
       fi
     fi
   done
-
-  print -r -- "$HOME/work/tries"
 }
 
 _try_rs_complete() {
