@@ -1,7 +1,0 @@
-auto_activate_base: false
-changeps1: false
-channels:
-  - apple
-  - conda-forge
-envs_dirs:
-  - ~/.conda/envs

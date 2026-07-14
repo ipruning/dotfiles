@@ -15,6 +15,10 @@ run = 'uv run --locked python -m scripts.diff "$@"'
 description = "Preview or apply one reference application"
 run = 'uv run --locked python -m scripts.restore "$@"'
 
+[tasks.adopt]
+description = "Preview or adopt one application's live configuration into the reference"
+run = 'uv run --locked python -m scripts.adopt "$@"'
+
 [tasks.check]
 description = "Inspect this host's required and optional capabilities"
 run = 'uv run --locked python -m scripts.check "$@"'

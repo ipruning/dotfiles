@@ -111,9 +111,21 @@ mise run restore -- git --json
 mise run restore -- git --apply
 ```
 
-When a live configuration should become the reference, copy or edit that
-specific reference file deliberately and rerun `diff`. Git protects repository
-changes; restore backups protect the replaced live paths.
+When a live configuration should become the reference, adopt is the mirror of
+restore: it is application-scoped, defaults to the same read-only plan, and
+`--apply` copies the live truth into `reference/` (and removes reference files
+whose live counterpart is gone). It writes only inside the repository, never
+under `$HOME`, and refuses to run while the affected reference paths have
+uncommitted changes, so Git can always revert an adoption.
+
+```bash
+mise run adopt -- mise
+mise run adopt -- mise --json
+mise run adopt -- mise --apply
+```
+
+Git protects repository changes; restore backups protect the replaced live
+paths.
 
 ## Host health
 
@@ -122,7 +134,10 @@ Linux Lite requires Git and mise, checks private Git configuration and optional
 Skillshare state, and warns when a legacy PATH still exposes repository command
 directories. The macOS and full profiles additionally cover the project
 Python/uv runtime, Television, generated shell directories, their required
-runtime files, and generated binaries without a repository owner.
+runtime files, and generated binaries without a repository owner. On macOS,
+`check` also consumes `macos-session-health status --format json` to warn when
+the launch agent is missing or unloaded, the last snapshot is stale, or recent
+notification deliveries keep failing.
 
 ```bash
 mise run check
