@@ -4,9 +4,11 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import shlex
 import subprocess
 import sys
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -57,13 +59,29 @@ def _replace_managed_block(current: str, replacement: str) -> str:
 def _git_include_present(gitconfig: Path) -> bool:
     if not gitconfig.is_file():
         return False
-    completed = subprocess.run(
-        ["git", "config", "--file", str(gitconfig), "--get-all", "include.path"],
-        check=False,
-        capture_output=True,
-        text=True,
-    )
+    try:
+        completed = subprocess.run(
+            ["git", "config", "--file", str(gitconfig), "--get-all", "include.path"],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+    except OSError as error:
+        raise SetupError(f"could not run git: {error}") from error
     return PRIVATE_GITCONFIG in completed.stdout.splitlines()
+
+
+def _write_bashrc(bashrc: Path, content: str) -> None:
+    mode = bashrc.stat().st_mode & 0o777 if bashrc.is_file() else 0o644
+    descriptor, tmp_name = tempfile.mkstemp(dir=str(bashrc.parent), prefix=".bashrc.")
+    try:
+        with os.fdopen(descriptor, "w") as handle:
+            handle.write(content)
+        os.chmod(tmp_name, mode)
+        os.replace(tmp_name, bashrc)
+    except OSError:
+        Path(tmp_name).unlink(missing_ok=True)
+        raise
 
 
 def configure_linux_lite(
@@ -77,6 +95,8 @@ def configure_linux_lite(
     if not module_path.is_file():
         raise SetupError(f"Linux Lite Bash module is missing: {module_path}")
     bashrc = home / ".bashrc"
+    if bashrc.is_symlink():
+        raise SetupError(f"Refusing to write through Bash config symlink: {bashrc}")
     if bashrc.exists() and not bashrc.is_file():
         raise SetupError(f"Refusing to replace non-file Bash config: {bashrc}")
     current_bashrc = bashrc.read_text() if bashrc.is_file() else ""
@@ -96,26 +116,34 @@ def configure_linux_lite(
     if not dry_run:
         home.mkdir(parents=True, exist_ok=True)
         if git_include_changed:
-            completed = subprocess.run(
-                [
-                    "git",
-                    "config",
-                    "--file",
-                    str(gitconfig),
-                    "--add",
-                    "include.path",
-                    PRIVATE_GITCONFIG,
-                ],
-                check=False,
-                capture_output=True,
-                text=True,
-            )
+            try:
+                completed = subprocess.run(
+                    [
+                        "git",
+                        "config",
+                        "--file",
+                        str(gitconfig),
+                        "--add",
+                        "include.path",
+                        PRIVATE_GITCONFIG,
+                    ],
+                    check=False,
+                    capture_output=True,
+                    text=True,
+                )
+            except OSError as error:
+                raise SetupError(f"could not run git: {error}") from error
             if completed.returncode != 0:
                 raise SetupError(
                     completed.stderr.strip() or "Git include update failed",
                 )
         if bash_changed:
-            bashrc.write_text(desired_bashrc)
+            try:
+                _write_bashrc(bashrc, desired_bashrc)
+            except OSError as error:
+                raise SetupError(
+                    f"could not update Bash config {bashrc}: {error}",
+                ) from error
     return SetupReport(
         profile=HostProfile.LINUX_LITE,
         changed=bool(actions),

@@ -54,6 +54,49 @@ def test_linux_lite_setup_rejects_incomplete_managed_block(tmp_path: Path) -> No
     assert bashrc.read_text() == "# >>> dotfiles linux-lite >>>\n"
 
 
+def test_linux_lite_setup_refuses_symlinked_bash_config(tmp_path: Path) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    (repo_root / "modules/bash").mkdir(parents=True)
+    (repo_root / "modules/bash/init.bash").write_text("export READY=1\n")
+    home.mkdir()
+    external_target = tmp_path / "elsewhere/bashrc"
+    external_target.parent.mkdir()
+    external_target.write_text("# external content\n")
+    bashrc = home / ".bashrc"
+    bashrc.symlink_to(external_target)
+
+    with pytest.raises(SetupError, match="symlink"):
+        configure_linux_lite(repo_root, home)
+
+    assert external_target.read_text() == "# external content\n"
+
+    external_target.unlink()
+    with pytest.raises(SetupError, match="symlink"):
+        configure_linux_lite(repo_root, home)
+
+    assert bashrc.is_symlink()
+    assert not external_target.exists()
+
+
+def test_linux_lite_setup_preserves_bash_config_permissions(tmp_path: Path) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    (repo_root / "modules/bash").mkdir(parents=True)
+    (repo_root / "modules/bash/init.bash").write_text("export READY=1\n")
+    home.mkdir()
+    bashrc = home / ".bashrc"
+    bashrc.write_text("# existing host setup\n")
+    bashrc.chmod(0o600)
+    (home / ".gitconfig").write_text("[init]\n\tdefaultBranch = main\n")
+
+    configure_linux_lite(repo_root, home)
+
+    assert bashrc.stat().st_mode & 0o777 == 0o600
+    assert "# existing host setup\n" in bashrc.read_text()
+    assert not list(home.glob(".bashrc.*"))
+
+
 def test_linux_lite_setup_rejects_non_file_git_config_before_writing_bash(
     tmp_path: Path,
 ) -> None:
