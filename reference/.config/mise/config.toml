@@ -5,7 +5,6 @@
 "github:schpet/linear-cli" = "latest"
 "go:github.com/xdevplatform/xurl" = "latest"
 "npm:@loongphy/codext" = "0.144.1-a8c9398"
-ast-grep = "0.44.1"
 aube = "latest"
 bun = "latest"
 deno = "latest"

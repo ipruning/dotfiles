@@ -350,6 +350,20 @@ def _mackup_findings(repo_root: Path) -> list[Finding]:
         )
 
     findings: list[Finding] = []
+    applications_dir = repo_root / "mackup/applications"
+    if applications_dir.is_dir():
+        selected = set(applications)
+        for mapping_path in sorted(applications_dir.glob("*.cfg")):
+            if mapping_path.stem not in selected:
+                findings.append(
+                    _finding(
+                        Severity.ERROR,
+                        "mackup.mapping_unused",
+                        "mapping is not selected in applications_to_sync;"
+                        " adopt the application or delete the mapping",
+                        mapping_path,
+                    ),
+                )
     for application in applications:
         app_path = repo_root / "mackup/applications" / f"{application}.cfg"
         if not app_path.is_file():

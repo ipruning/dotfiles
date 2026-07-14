@@ -352,6 +352,40 @@ def test_inspect_repository_rejects_pruning_skillshare_extra_modes(
     assert safe_finding.severity is Severity.OK
 
 
+def test_inspect_repository_rejects_unselected_mackup_mappings(tmp_path: Path) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    (repo_root / "reference").mkdir(parents=True)
+    (repo_root / "reference/.example").write_text("configured\n")
+    (repo_root / "mackup/applications").mkdir(parents=True)
+    (repo_root / "mackup/applications/example.cfg").write_text(
+        "[application]\nname = example\n[configuration_files]\n.example\n",
+    )
+    (repo_root / "mackup/applications/parked.cfg").write_text(
+        "[application]\nname = parked\n[configuration_files]\n.parked\n",
+    )
+    (repo_root / "mackup/mackup.cfg").write_text(
+        "[storage]\nengine = file_system\npath = dotfiles\n"
+        "directory = reference\n[applications_to_sync]\nexample\n",
+    )
+
+    orphaned = inspect_repository(repo_root, home)
+    orphan_finding = next(
+        finding
+        for finding in orphaned.findings
+        if finding.code == "mackup.mapping_unused"
+    )
+
+    assert orphan_finding.severity is Severity.ERROR
+    assert orphan_finding.path == repo_root / "mackup/applications/parked.cfg"
+    assert orphaned.ok is False
+
+    (repo_root / "mackup/applications/parked.cfg").unlink()
+    clean = inspect_repository(repo_root, home)
+
+    assert "mackup.mapping_unused" not in {finding.code for finding in clean.findings}
+
+
 @pytest.mark.parametrize(
     "extras_yaml",
     [
