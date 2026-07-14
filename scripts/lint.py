@@ -25,6 +25,7 @@ PATH_RE = re.compile(
     r"|(?:~|\$HOME|\$\{HOME\})/(?:\\ |[^\s\"'<>),;:\]\}])+"
     r")",
 )
+URL_RE = re.compile(r"https?://\S+")
 
 SKIP_PARTS = {
     ".git",
@@ -293,9 +294,10 @@ def _path_findings(
         except OSError:
             continue
         for line_number, line in enumerate(lines, start=1):
+            url_spans = [url.span() for url in URL_RE.finditer(line)]
             for match in PATH_RE.finditer(line):
                 raw = match.group("path").rstrip(".,:")
-                if "http://" in raw or "https://" in raw:
+                if any(begin <= match.start("path") < end for begin, end in url_spans):
                     continue
                 findings.append(
                     _classify_path(
@@ -539,10 +541,10 @@ def _symlink_findings(repo_root: Path) -> list[Finding]:
         _finding(
             Severity.ERROR,
             "repository.dangling_symlink",
-            "symlink target does not exist",
+            "tracked symlink target does not exist",
             file_path,
         )
-        for file_path in repo_root.rglob("*")
+        for file_path in _tracked_paths(repo_root)
         if file_path.is_symlink() and not file_path.exists()
     ]
 
@@ -585,13 +587,40 @@ def _skillshare_config_findings(repo_root: Path) -> list[Finding]:
         ]
     for extra in extras:
         if not isinstance(extra, dict):
+            findings.append(
+                _finding(
+                    Severity.ERROR,
+                    "skillshare.config_invalid",
+                    "Skillshare extras entries must be mappings",
+                    config_path,
+                    value=str(extra),
+                ),
+            )
             continue
         name = extra.get("name", "<unnamed>")
         targets = extra.get("targets", [])
         if not isinstance(targets, list):
+            findings.append(
+                _finding(
+                    Severity.ERROR,
+                    "skillshare.config_invalid",
+                    f"extra {name} targets must be a list",
+                    config_path,
+                    value=str(targets),
+                ),
+            )
             continue
         for target in targets:
             if not isinstance(target, dict):
+                findings.append(
+                    _finding(
+                        Severity.ERROR,
+                        "skillshare.config_invalid",
+                        f"extra {name} targets must be mappings",
+                        config_path,
+                        value=str(target),
+                    ),
+                )
                 continue
             target_path = target.get("path", "<missing>")
             if target.get("mode") != "copy":

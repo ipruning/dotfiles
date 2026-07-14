@@ -50,6 +50,76 @@ def test_inspect_repository_checks_paths_and_mapping_state(
     assert degraded.ok is False
 
 
+def test_inspect_repository_ignores_absolute_paths_inside_urls(
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    (repo_root / "reference").mkdir(parents=True)
+    (repo_root / "mackup/applications").mkdir(parents=True)
+    (repo_root / "mackup/mackup.cfg").write_text(
+        "[storage]\nengine = file_system\npath = dotfiles\n"
+        "directory = reference\n[applications_to_sync]\n",
+    )
+    script = repo_root / "tool.sh"
+    script.write_text(
+        "curl https://mirror.example/home/pkg/file.tar\n"
+        "docs=https://example.com/Users/guide\n",
+    )
+
+    clean = inspect_repository(repo_root, home)
+    assert "path.absolute_home" not in {finding.code for finding in clean.findings}
+
+    script.write_text(
+        "helper=/home/someone/private/tool https://example.com/home/pkg\n",
+    )
+    mixed = inspect_repository(repo_root, home)
+    absolute_findings = [
+        finding for finding in mixed.findings if finding.code == "path.absolute_home"
+    ]
+
+    assert len(absolute_findings) == 1
+    assert "/home/someone/private/tool" in absolute_findings[0].message
+
+
+def test_inspect_repository_reports_only_tracked_dangling_symlinks(
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    (repo_root / "reference").mkdir(parents=True)
+    (repo_root / "mackup/applications").mkdir(parents=True)
+    (repo_root / "mackup/mackup.cfg").write_text(
+        "[storage]\nengine = file_system\npath = dotfiles\n"
+        "directory = reference\n[applications_to_sync]\n",
+    )
+    tracked_link = repo_root / "reference/.broken"
+    tracked_link.symlink_to(repo_root / "reference/.target")
+    venv_link = repo_root / ".venv/bin/python"
+    venv_link.parent.mkdir(parents=True)
+    venv_link.symlink_to(tmp_path / "removed-interpreter")
+    (repo_root / ".gitignore").write_text(".venv/\n")
+    subprocess.run(["git", "init", "-q", str(repo_root)], check=True)
+    subprocess.run(["git", "-C", str(repo_root), "add", "."], check=True)
+
+    dangling = inspect_repository(repo_root, home)
+    symlink_findings = [
+        finding
+        for finding in dangling.findings
+        if finding.code == "repository.dangling_symlink"
+    ]
+
+    assert len(symlink_findings) == 1
+    assert symlink_findings[0].path == tracked_link
+
+    (repo_root / "reference/.target").write_text("configured\n")
+    repaired = inspect_repository(repo_root, home)
+
+    assert "repository.dangling_symlink" not in {
+        finding.code for finding in repaired.findings
+    }
+
+
 def test_inspect_repository_rejects_tracked_private_generated_and_legacy_files(
     tmp_path: Path,
 ) -> None:
@@ -279,3 +349,33 @@ def test_inspect_repository_rejects_pruning_skillshare_extra_modes(
         if finding.code == "skillshare.extra_modes_safe"
     )
     assert safe_finding.severity is Severity.OK
+
+
+@pytest.mark.parametrize(
+    "extras_yaml",
+    [
+        "extras:\n- codex\n",
+        "extras:\n- name: codex\n  targets: ~/.codex\n",
+        "extras:\n- name: codex\n  targets:\n  - ~/.codex\n",
+    ],
+)
+def test_inspect_repository_rejects_malformed_skillshare_extras_shapes(
+    tmp_path: Path,
+    extras_yaml: str,
+) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    (repo_root / "reference/.config/skillshare").mkdir(parents=True)
+    (repo_root / "reference/.config/skillshare/config.yaml").write_text(extras_yaml)
+    (repo_root / "mackup/applications").mkdir(parents=True)
+    (repo_root / "mackup/mackup.cfg").write_text(
+        "[storage]\nengine = file_system\npath = dotfiles\n"
+        "directory = reference\n[applications_to_sync]\n",
+    )
+
+    report = inspect_repository(repo_root, home)
+    codes = {finding.code for finding in report.findings}
+
+    assert "skillshare.config_invalid" in codes
+    assert "skillshare.extra_modes_safe" not in codes
+    assert report.ok is False
