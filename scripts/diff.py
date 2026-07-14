@@ -37,6 +37,11 @@ class MackupRunner(Protocol):
     ) -> dict[str, object]: ...
 
 
+class _CaseConfigParser(configparser.ConfigParser):
+    def optionxform(self, optionstr: str) -> str:
+        return optionstr
+
+
 class SubprocessMackupRunner:
     """Run the immutable Mackup fork through uv's isolated tool environment."""
 
@@ -47,7 +52,7 @@ class SubprocessMackupRunner:
         application: str | None,
     ) -> dict[str, object]:
         source_config = repo_root / "mackup/mackup.cfg"
-        config = configparser.ConfigParser(allow_no_value=True, interpolation=None)
+        config = _CaseConfigParser(allow_no_value=True, interpolation=None)
         try:
             if not config.read(source_config) or not config.has_section("storage"):
                 raise MackupCommandError(f"Invalid Mackup config: {source_config}")

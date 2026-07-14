@@ -1,12 +1,38 @@
 import configparser
+import json
 import subprocess
 from pathlib import Path
 from typing import cast
 
 import pytest
 
-from scripts.diff import DriftProtocolError, inspect_drift
+from scripts.diff import (
+    DriftProtocolError,
+    MackupCommandError,
+    SubprocessMackupRunner,
+    inspect_drift,
+    main,
+)
 from scripts.profiles import HostProfile
+
+
+def _drift_document(kind: str, error: str | None = None) -> dict[str, object]:
+    return {
+        "schema_version": 1,
+        "operation": "diff",
+        "changes": [
+            {
+                "application": "git",
+                "reference_path": "reference/.gitconfig",
+                "live_path": "/home/someone/.gitconfig",
+                "kind": kind,
+                "reference_kind": "file",
+                "live_kind": None if kind == "unreadable" else "file",
+                "error": error,
+            },
+        ],
+        "summary": {kind: 1},
+    }
 
 
 class StubMackupRunner:
@@ -193,6 +219,99 @@ class InvalidFileKindRunner(StubMackupRunner):
 def test_inspect_drift_rejects_unknown_file_kind(tmp_path: Path) -> None:
     with pytest.raises(DriftProtocolError, match="unknown file kind"):
         inspect_drift(tmp_path, tmp_path, runner=InvalidFileKindRunner())
+
+
+def test_diff_cli_reports_ordinary_drift_as_success_and_unreadable_as_failure(
+    monkeypatch,
+    capsys,
+) -> None:
+    documents = iter(
+        [
+            _drift_document("modified"),
+            _drift_document("unreadable", error="permission denied"),
+        ],
+    )
+
+    def run(command: list[str], **_kwargs) -> subprocess.CompletedProcess[str]:
+        return subprocess.CompletedProcess(command, 0, json.dumps(next(documents)), "")
+
+    monkeypatch.setattr("scripts.diff.subprocess.run", run)
+
+    assert main(["--profile", "full"]) == 0
+    assert "1 modified" in capsys.readouterr().out
+
+    assert main(["--profile", "full"]) == 1
+    assert "permission denied" in capsys.readouterr().out
+
+
+def test_subprocess_runner_surfaces_mackup_failure_modes(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    repo_root = tmp_path / "repo"
+    home = tmp_path / "home"
+    (repo_root / "mackup/applications").mkdir(parents=True)
+    config_path = repo_root / "mackup/mackup.cfg"
+    config_path.write_text(
+        "[storage]\nengine = file_system\npath = dotfiles\n"
+        "directory = reference\n[applications_to_sync]\n",
+    )
+    responses: dict[str, tuple[int, str, str]] = {}
+
+    def run(command: list[str], **_kwargs) -> subprocess.CompletedProcess[str]:
+        code, stdout, stderr = responses["next"]
+        return subprocess.CompletedProcess(command, code, stdout, stderr)
+
+    monkeypatch.setattr("scripts.diff.subprocess.run", run)
+    runner = SubprocessMackupRunner()
+
+    responses["next"] = (1, "", "mackup exploded")
+    with pytest.raises(MackupCommandError, match="mackup exploded"):
+        runner.inspect(repo_root, home, None)
+
+    responses["next"] = (0, "not json", "")
+    with pytest.raises(MackupCommandError, match="invalid JSON"):
+        runner.inspect(repo_root, home, None)
+
+    responses["next"] = (0, "[]", "")
+    with pytest.raises(MackupCommandError, match="non-object"):
+        runner.inspect(repo_root, home, None)
+
+    config_path.write_text("[applications_to_sync]\n")
+    responses["next"] = (0, "{}", "")
+    with pytest.raises(MackupCommandError, match="Invalid Mackup config"):
+        runner.inspect(repo_root, home, None)
+
+
+def test_subprocess_runner_preserves_application_name_case(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    repo_root = tmp_path / "repo"
+    home = tmp_path / "home"
+    (repo_root / "mackup/applications").mkdir(parents=True)
+    (repo_root / "mackup/mackup.cfg").write_text(
+        "[storage]\nengine = file_system\npath = dotfiles\n"
+        "directory = reference\n[applications_to_sync]\nExample-App\n",
+    )
+    captured: dict[str, str] = {}
+
+    def run(command: list[str], **_kwargs) -> subprocess.CompletedProcess[str]:
+        config_path = Path(command[command.index("--config-file") + 1])
+        captured["runtime_config"] = config_path.read_text()
+        return subprocess.CompletedProcess(
+            command,
+            0,
+            '{"schema_version":1,"operation":"diff","changes":[],"summary":{}}',
+            "",
+        )
+
+    monkeypatch.setattr("scripts.diff.subprocess.run", run)
+
+    SubprocessMackupRunner().inspect(repo_root, home, None)
+
+    assert "Example-App" in captured["runtime_config"]
+    assert "example-app" not in captured["runtime_config"]
 
 
 def test_inspect_drift_uses_current_checkout_as_reference_storage(
