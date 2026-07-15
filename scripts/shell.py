@@ -42,9 +42,15 @@ def classify(relative: str, first_line: str, second_line: str = "") -> str | Non
     if second_line.startswith('""":"'):
         # sh-launcher/Python polyglot: the body is Python, not shell.
         return None
-    if "zsh" in first_line:
+    interpreter_tokens = [
+        token
+        for token in first_line[2:].split()
+        if Path(token).name != "env" and not token.startswith("-") and "=" not in token
+    ]
+    interpreter = Path(interpreter_tokens[0]).name if interpreter_tokens else ""
+    if interpreter == "zsh":
         return "zsh"
-    if "bash" in first_line or first_line.rstrip().endswith("/sh"):
+    if interpreter in {"bash", "sh", "dash", "ash"}:
         return "bash"
     return None
 
@@ -97,7 +103,7 @@ def check_shell_files(
     zsh_files = [item.path for item in files if item.dialect == "zsh"]
     failures: list[str] = []
 
-    bash_bin = _require_tool("bash", executable_finder)
+    bash_bin = _require_tool("bash", executable_finder) if bash_files else ""
     for file_path in bash_files:
         completed = subprocess.run(
             [bash_bin, "-n", str(file_path)],

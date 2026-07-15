@@ -538,6 +538,47 @@ def test_session_health_probe_reports_silent_death_modes(tmp_path: Path) -> None
     )
 
 
+def test_session_health_probe_survives_naive_timestamp_and_failed_status(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "home").mkdir()
+    codes = _session_health_codes(
+        tmp_path,
+        {
+            "installed": True,
+            "loaded": True,
+            "notification_configured": True,
+            "last_snapshot_at": "2026-07-15T10:00:00",
+            "consecutive_delivery_failures": 0,
+        },
+    )
+    assert codes["session_health.snapshot"] == "session_health.snapshot_stale"
+
+    executable = tmp_path / "bin/failing-session-health"
+    executable.parent.mkdir(parents=True, exist_ok=True)
+    executable.write_text('#!/bin/sh\necho "launchctl exploded" >&2\nexit 7\n')
+    executable.chmod(0o755)
+    report = inspect_host(
+        tmp_path / "repo",
+        tmp_path / "home",
+        executable_finder=lambda command: (
+            str(executable)
+            if command == "macos-session-health"
+            else f"/tools/{command}"
+        ),
+        system_name="Darwin",
+        profile="macos",
+    )
+    finding = next(
+        finding
+        for finding in report.findings
+        if finding.check == "session_health.agent"
+    )
+
+    assert finding.code == "session_health.status_unavailable"
+    assert "launchctl exploded" in finding.message
+
+
 def test_session_health_probe_treats_absent_tool_as_optional_warning(
     tmp_path: Path,
 ) -> None:

@@ -562,6 +562,17 @@ def _session_health_findings(
                 action="Run macos-session-health status and resolve the failure.",
             ),
         ]
+    if completed.returncode != 0 and not completed.stdout.strip():
+        detail = completed.stderr.strip() or f"exit {completed.returncode}"
+        return [
+            _finding(
+                "session_health.agent",
+                Severity.WARN,
+                "session_health.status_unavailable",
+                f"macos-session-health status failed: {detail}",
+                action="Run macos-session-health status and resolve the failure.",
+            ),
+        ]
     try:
         records = json.loads(completed.stdout)
         record = records[0]
@@ -606,7 +617,7 @@ def _session_health_findings(
             last = dt.datetime.fromisoformat(last_snapshot_at.replace("Z", "+00:00"))
             current = now or dt.datetime.now(dt.timezone.utc)
             snapshot_fresh = current - last <= SESSION_HEALTH_SNAPSHOT_MAX_AGE
-        except ValueError:
+        except ValueError, TypeError:
             snapshot_fresh = False
     findings.append(
         _finding(

@@ -34,6 +34,9 @@ def test_classify_covers_extensions_shebangs_and_reference_data() -> None:
     assert classify("modules/bin/g", "#!/usr/bin/env bash") == "bash"
     assert classify("modules/bin/ttok", "#!/usr/bin/env -S zsh -f") == "zsh"
     assert classify("modules/bin/watchdog", "#!/bin/sh") == "bash"
+    assert classify("modules/bin/portable", "#!/usr/bin/env sh") == "bash"
+    assert classify("modules/bin/dashy", "#!/bin/dash") == "bash"
+    assert classify("modules/bin/pyenvish", "#!/usr/bin/env -S python3 -u") is None
     assert classify("scripts/diff.py", "#!/usr/bin/env python3") is None
     assert classify("reference/.zshenv.private.tpl.zsh", "") is None
     assert classify("notes.txt", "plain text") is None

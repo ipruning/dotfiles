@@ -480,10 +480,11 @@ def _atomic_install(target: Path, writer: AtomicWriter) -> None:
 def _command_environment(spec: RuntimeSpec, home: Path) -> dict[str, str]:
     environment = os.environ.copy()
     environment["HOME"] = str(home)
-    if spec.tool is not None and spec.target is not None:
-        # Generator subprocesses must resolve self-built tools that exist
+    owned_root = spec.target if spec.target is not None else spec.working_directory
+    if spec.command and owned_root is not None:
+        # Command subprocesses must resolve self-built tools that exist
         # only under the repository's generated/bin sibling directory.
-        owned_bin = spec.target.parent.parent / "bin"
+        owned_bin = owned_root.parent.parent / "bin"
         environment["PATH"] = f"{owned_bin}{os.pathsep}{environment.get('PATH', '')}"
     environment.update(dict(spec.environment))
     if spec.name == "function.mise":
