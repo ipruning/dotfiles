@@ -1,4 +1,4 @@
-"""Shared result models for read-only repository tasks."""
+"""Shared result models for repository inspection tasks."""
 
 from __future__ import annotations
 

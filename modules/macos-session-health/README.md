@@ -105,9 +105,9 @@ suppressed decisions.
 
 When a push delivery exhausts its retries or brrr is unconfigured, the CLI
 posts the same title and message as a local macOS notification through
-`osascript` as a last resort. `status` additionally reports
+`osascript` as a last resort, at most once every four hours. `status` additionally reports
 `last_snapshot_at`, `last_snapshot_status`, and
-`consecutive_delivery_failures`, which `mise run check` in the dotfiles
+`consecutive_delivery_failures` (counting the last 24 hours), which `mise run check` in the dotfiles
 repository consumes to detect a silently dead agent or a dead push channel.
 
 Validate the payload and local credential lookup without sending:

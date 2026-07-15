@@ -12,7 +12,7 @@ from scripts.adopt import (
 )
 from scripts.models import Drift, DriftKind, FileKind
 
-from tests.conftest import REPO_ROOT, run_scripts_module  # noqa: E402
+from tests.conftest import REPO_ROOT, run_scripts_module
 
 
 def _tracked_repo(tmp_path: Path) -> tuple[Path, Path]:

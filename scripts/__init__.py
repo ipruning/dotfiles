@@ -1,1 +1,1 @@
-"""Read-only maintenance tasks for this repository."""
+"""Repository maintenance tasks: read-only inspection and explicit mutations."""

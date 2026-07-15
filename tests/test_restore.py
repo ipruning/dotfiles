@@ -9,9 +9,7 @@ from scripts.restore import (
     apply_restore,
     plan_restore,
 )
-
-
-from tests.conftest import REPO_ROOT, run_scripts_module  # noqa: E402
+from tests.conftest import REPO_ROOT, run_scripts_module
 
 
 def test_restore_defaults_to_a_read_only_application_plan(tmp_path: Path) -> None:
