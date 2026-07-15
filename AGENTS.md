@@ -37,6 +37,26 @@ semantics live in `README.md`.
   results as `changes`; `execute_*` operations run external commands and
   serialize theirs as `steps`.
 
+## Dependency policy
+
+Three tiers, in decreasing strictness:
+
+1. Hard floor: Git and mise bootstrap the repository; mise pins every tool the
+   repository itself needs (Python, uv, ShellCheck). Nothing else is required.
+2. Optional host capabilities (atuin, starship, zsh, tv, gum, brightness, ...):
+   guard every use (`command -v`, `[[ -d ]]`, `[[ -r ]]`), degrade gracefully
+   when absent, and report the gap as a `check` warning with an install hint.
+   Installation belongs to the host's package manager, never to this
+   repository.
+3. Self-built binaries under `generated/bin` are additive enhancements and must
+   never be load-bearing; hosts without them use upstream tools or lose the
+   feature.
+
+Adjudication when adding a dependency: if a tool participates in `mise run
+verify`, it must be pinnable through mise (the ShellCheck precedent); if it is
+not pinnable (the zsh precedent), the gate must skip its scope loudly instead
+of failing. Do not add cross-platform installers for optional tools.
+
 ## Skillshare boundary
 
 Global harness prompts and skills are owned by the Skillshare source repo.
