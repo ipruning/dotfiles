@@ -163,6 +163,31 @@ def test_adopt_apply_copies_live_truth_and_removes_dead_reference(
     assert (home / ".gitconfig").read_text() == "[user]\n  name = New\n"
 
 
+def test_adopt_preserves_live_symlinks_instead_of_materializing_targets(
+    tmp_path: Path,
+) -> None:
+    repo_root, home = _tracked_repo(tmp_path)
+    (repo_root / "reference/.seed").write_text("seed\n")
+    _commit_all(repo_root)
+    secret_target = tmp_path / "outside-secret"
+    secret_target.write_text("outside content\n")
+    (home / ".linked").symlink_to(secret_target)
+
+    plan = _plan(
+        AdoptResult(
+            _drift(repo_root, home, ".linked", DriftKind.ONLY_LIVE),
+            action="copy",
+            status=AdoptStatus.PLANNED,
+        ),
+    )
+    applied = apply_adopt(repo_root, home, plan)
+
+    assert applied.ok is True
+    adopted = repo_root / "reference/.linked"
+    assert adopted.is_symlink()
+    assert os.readlink(adopted) == str(secret_target)
+
+
 def test_adopt_apply_refuses_uncommitted_reference_changes(tmp_path: Path) -> None:
     repo_root, home = _tracked_repo(tmp_path)
     (repo_root / "reference/.gitconfig").write_text("[user]\n  name = Old\n")
@@ -214,6 +239,50 @@ def test_adopt_apply_copies_directories_and_confines_paths(tmp_path: Path) -> No
     assert applied.ok is True
     assert (repo_root / "reference/.config/templates/b.txt").read_text() == "new\n"
     assert not (repo_root / "reference/.config/templates/a.txt").exists()
+
+    dotdot = _plan(
+        AdoptResult(
+            Drift(
+                application="example",
+                reference_path=repo_root / "reference/.config/..",
+                live_path=home / ".config",
+                kind=DriftKind.ONLY_REFERENCE,
+                reference_kind=FileKind.DIRECTORY,
+                live_kind=None,
+            ),
+            action="remove",
+            status=AdoptStatus.PLANNED,
+        ),
+    )
+    swallowed = apply_adopt(repo_root, home, dotdot)
+
+    assert swallowed.ok is False
+    assert "traverses" in (swallowed.results[0].error or "")
+    assert (repo_root / "reference/.config/templates/b.txt").exists()
+
+    link_escape_target = tmp_path / "outside-tree"
+    link_escape_target.mkdir()
+    (repo_root / "reference/.linkdir").symlink_to(link_escape_target)
+    (home / ".linkdir").mkdir()
+    (home / ".linkdir/new.txt").write_text("payload\n")
+    through_link = _plan(
+        AdoptResult(
+            Drift(
+                application="example",
+                reference_path=repo_root / "reference/.linkdir/deeper/new.txt",
+                live_path=home / ".linkdir/new.txt",
+                kind=DriftKind.ONLY_LIVE,
+                reference_kind=None,
+                live_kind=FileKind.FILE,
+            ),
+            action="copy",
+            status=AdoptStatus.PLANNED,
+        ),
+    )
+    blocked = apply_adopt(repo_root, home, through_link)
+
+    assert blocked.ok is False
+    assert not (link_escape_target / "deeper").exists()
 
     escape = _plan(
         AdoptResult(

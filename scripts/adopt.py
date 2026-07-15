@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -81,9 +82,12 @@ def plan_adopt(repo_root: Path, home: Path, application: str) -> AdoptReport:
 
 def _relative_path(path: Path, root: Path, label: str) -> Path:
     try:
-        return path.absolute().relative_to(root.absolute())
+        relative = path.absolute().relative_to(root.absolute())
     except ValueError as error:
         raise AdoptError(f"{label} is outside {root}: {path}") from error
+    if ".." in relative.parts:
+        raise AdoptError(f"{label} traverses outside {root}: {path}")
+    return relative
 
 
 def _dirty_reference_paths(repo_root: Path, plan: AdoptReport) -> list[str]:
@@ -118,17 +122,43 @@ def _dirty_reference_paths(repo_root: Path, plan: AdoptReport) -> list[str]:
         raise AdoptError(
             completed.stderr.strip() or "unable to inspect reference worktree state",
         )
-    return [entry[3:] for entry in completed.stdout.split("\0") if entry]
+    entries = [entry for entry in completed.stdout.split("\0") if entry]
+    dirty: list[str] = []
+    skip_next = False
+    for entry in entries:
+        if skip_next:
+            # Rename/copy records emit the origin path as a bare second
+            # entry that carries no status prefix.
+            skip_next = False
+            dirty.append(entry)
+            continue
+        dirty.append(entry[3:])
+        skip_next = entry[0] in "RC"
+    return dirty
+
+
+def _validate_reference_parent(reference_path: Path, reference_root: Path) -> None:
+    """Confine the nearest existing ancestor before mkdir can follow symlinks."""
+    existing = reference_path.parent
+    while not (existing.exists() or existing.is_symlink()):
+        if existing == existing.parent:
+            raise AdoptError(
+                f"reference parent has no existing ancestor: {reference_path}"
+            )
+        existing = existing.parent
+    _relative_path(existing.resolve(), reference_root.resolve(), "reference parent")
 
 
 def _copy_live_into_reference(live_path: Path, reference_path: Path) -> None:
-    if live_path.is_dir():
+    if live_path.is_dir() and not live_path.is_symlink():
         with tempfile.TemporaryDirectory(
             dir=reference_path.parent,
             prefix=".adopt-",
         ) as staging:
             staged = Path(staging) / reference_path.name
-            shutil.copytree(live_path, staged)
+            # symlinks=True mirrors the live tree instead of materializing
+            # link targets (possibly outside $HOME) into tracked data.
+            shutil.copytree(live_path, staged, symlinks=True)
             if reference_path.is_dir() and not reference_path.is_symlink():
                 shutil.rmtree(reference_path)
             elif reference_path.exists() or reference_path.is_symlink():
@@ -143,7 +173,11 @@ def _copy_live_into_reference(live_path: Path, reference_path: Path) -> None:
     descriptor.close()
     staged_file = Path(descriptor.name)
     try:
-        shutil.copy2(live_path, staged_file)
+        if live_path.is_symlink():
+            staged_file.unlink()
+            staged_file.symlink_to(os.readlink(live_path))
+        else:
+            shutil.copy2(live_path, staged_file)
         if reference_path.is_dir() and not reference_path.is_symlink():
             shutil.rmtree(reference_path)
         staged_file.replace(reference_path)
@@ -198,8 +232,9 @@ def apply_adopt(repo_root: Path, home: Path, plan: AdoptReport) -> AdoptReport:
         try:
             _relative_path(drift.reference_path, reference_root, "reference path")
             _relative_path(drift.live_path, home, "live path")
+            _validate_reference_parent(drift.reference_path, reference_root)
             if planned.action == "copy":
-                if not drift.live_path.exists():
+                if not (drift.live_path.exists() or drift.live_path.is_symlink()):
                     raise AdoptError(f"live path does not exist: {drift.live_path}")
                 drift.reference_path.parent.mkdir(parents=True, exist_ok=True)
             _relative_path(
