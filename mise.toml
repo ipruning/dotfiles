@@ -59,10 +59,21 @@ run = [
 description = "Run behavior tests"
 run = "uv run --locked pytest"
 
+[tasks.test-modules]
+description = "Run standalone module test suites (macOS only)"
+run = """
+if [ "$(uname)" != Darwin ]; then
+  echo "skipped: module suites are macOS-only"
+  exit 0
+fi
+./modules/macos-session-health/macos-session-health-test
+./modules/bag-mode/bag-mode-test
+"""
+
 [tasks.typecheck]
 description = "Check Python types"
 run = "uv run --locked ty check scripts tests"
 
 [tasks.verify]
 description = "Run all repository verification"
-depends = ["format", "lint", "shell", "typecheck", "test"]
+depends = ["format", "lint", "shell", "typecheck", "test", "test-modules"]
