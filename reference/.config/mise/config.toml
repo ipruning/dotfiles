@@ -2,9 +2,10 @@
 "gem:kamal" = "latest"
 "github:earendil-works/pi" = "latest"
 "github:larksuite/cli" = "latest"
+"github:lycorp-jp/sim-use" = "latest"
 "github:schpet/linear-cli" = "latest"
 "go:github.com/xdevplatform/xurl" = "latest"
-"npm:@loongphy/codext" = "0.144.1-a8c9398"
+"npm:agent-device" = "latest"
 aube = "latest"
 bun = "latest"
 deno = "latest"
@@ -33,8 +34,6 @@ compile = false
 
 [env]
 _.path = [
-  "~/dotfiles/generated/bin",
-  "~/dotfiles/modules/bin",
   "/opt/homebrew/opt/postgresql@18/bin",
   "~/.bun/bin",
   "~/.local/bin",

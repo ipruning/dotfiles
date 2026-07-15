@@ -18,6 +18,11 @@ _dotfiles_core_path() {
     [[ -d /usr/local/bin ]] && path=(/usr/local/bin $path)
     [[ -d /opt/homebrew/sbin ]] && path=(/opt/homebrew/sbin $path)
     [[ -d /opt/homebrew/bin ]] && path=(/opt/homebrew/bin $path)
+    # Repository command collections are a macOS-only surface. Keeping them
+    # out of the cross-platform mise [env] config means restoring that config
+    # on Linux can never shadow system tools again (iproute2 ss).
+    [[ -d "$HOME/dotfiles/modules/bin" ]] && path=("$HOME/dotfiles/modules/bin" $path)
+    [[ -d "$HOME/dotfiles/generated/bin" ]] && path=("$HOME/dotfiles/generated/bin" $path)
   fi
 
   # Static equivalent of `mise activate zsh --shims`. Prefer this over calling
