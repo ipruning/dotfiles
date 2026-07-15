@@ -86,9 +86,12 @@ def plan_restore(repo_root: Path, home: Path, application: str) -> RestoreReport
 
 def _relative_path(path: Path, root: Path, label: str) -> Path:
     try:
-        return path.absolute().relative_to(root.absolute())
+        relative = path.absolute().relative_to(root.absolute())
     except ValueError as error:
         raise RestoreError(f"{label} is outside {root}: {path}") from error
+    if ".." in relative.parts:
+        raise RestoreError(f"{label} traverses outside {root}: {path}")
+    return relative
 
 
 def _path_exists(path: Path) -> bool:

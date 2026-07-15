@@ -198,3 +198,37 @@ def test_plan_restore_marks_unreadable_drift_failed(
     assert plan.ok is False
     assert plan.results[0].status is RestoreStatus.FAILED
     assert "permission denied" in (plan.results[0].error or "")
+
+
+def test_restore_rejects_traversal_segments_in_planned_paths(tmp_path: Path) -> None:
+    repo_root = tmp_path / "repo"
+    home = tmp_path / "home"
+    (repo_root / "reference").mkdir(parents=True)
+    (home / ".ssh").mkdir(parents=True)
+    (home / ".ssh/config").write_text("live ssh config\n")
+    (repo_root / "reference/.ssh").mkdir()
+    (repo_root / "reference/.ssh/config").write_text("reference\n")
+
+    plan = RestoreReport(
+        application="git",
+        apply=False,
+        results=(
+            RestoreResult(
+                Drift(
+                    application="git",
+                    reference_path=repo_root / "reference/.ssh/config",
+                    live_path=home / "foo/../.ssh/config",
+                    kind=DriftKind.MODIFIED,
+                    reference_kind=FileKind.FILE,
+                    live_kind=FileKind.FILE,
+                ),
+                action="link",
+                status=RestoreStatus.PLANNED,
+            ),
+        ),
+    )
+    applied = apply_restore(repo_root, home, plan)
+
+    assert applied.results[0].status is RestoreStatus.FAILED
+    assert "traverses" in (applied.results[0].error or "")
+    assert (home / ".ssh/config").read_text() == "live ssh config\n"
