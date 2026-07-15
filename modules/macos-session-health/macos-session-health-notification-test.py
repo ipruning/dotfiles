@@ -52,7 +52,9 @@ class NotificationStateTest(unittest.TestCase):
         payloads: list[dict[str, Any]] = []
         queued_results = list(results or [])
 
-        def deliver(payload: dict[str, Any], _timeout: float) -> dict[str, Any]:
+        def deliver(
+            payload: dict[str, Any], _timeout: float, **_kwargs: Any
+        ) -> dict[str, Any]:
             payloads.append(payload)
             if queued_results:
                 return queued_results.pop(0)
@@ -291,7 +293,7 @@ class NotificationStateTest(unittest.TestCase):
         with self.assertRaisesRegex(CollectorFailure, "original collector failure"):
             snapshot(args, self.store, "test")
 
-    def test_native_fallback_fires_when_brrr_is_unconfigured(self) -> None:
+    def test_native_fallback_fires_once_per_cooldown_when_allowed(self) -> None:
         fallback_calls: list[dict[str, Any]] = []
         deliver = self.module["deliver_brrr"]
         deliver.__globals__["brrr_configuration"] = lambda **_: {
@@ -305,11 +307,43 @@ class NotificationStateTest(unittest.TestCase):
             lambda payload, timeout: fallback_calls.append(payload) or True
         )
 
-        delivery = deliver({"title": "t", "message": "m"}, 1)
+        withheld = deliver({"title": "t", "message": "m"}, 1)
+        self.assertEqual(withheld["exit"], 3)
+        self.assertFalse(withheld["native_fallback"])
+        self.assertEqual(fallback_calls, [])
 
-        self.assertEqual(delivery["exit"], 3)
-        self.assertTrue(delivery["native_fallback"])
+        allowed = deliver({"title": "t", "message": "m"}, 1, native_fallback=True)
+        self.assertTrue(allowed["native_fallback"])
         self.assertEqual(fallback_calls, [{"title": "t", "message": "m"}])
+
+        self.assertTrue(self.module["native_fallback_due"](self.store))
+        self.store.set_state(
+            "last_brrr_native_fallback_at", self.module["utc_now"]()
+        )
+        self.assertFalse(self.module["native_fallback_due"](self.store))
+
+    def test_persistent_incident_banners_are_rate_limited(self) -> None:
+        banner_count = 0
+
+        def fake_native(payload: dict[str, Any], timeout: float) -> bool:
+            nonlocal banner_count
+            banner_count += 1
+            return True
+
+        maybe_send = self.module["maybe_send_brrr_notification"]
+        maybe_send.__globals__["deliver_native_notification"] = fake_native
+        maybe_send.__globals__["brrr_configuration"] = lambda **_: {
+            "configured": False,
+            "auth_mode": "unconfigured",
+            "endpoint": "",
+            "credential_source": "",
+            "secret": "",
+        }
+
+        for _ in range(5):
+            self.notify(self.spawn_failure())
+
+        self.assertEqual(banner_count, 1)
 
     def test_native_fallback_posts_title_and_message_via_argv(self) -> None:
         recorded: list[list[str]] = []
@@ -347,6 +381,15 @@ class NotificationStateTest(unittest.TestCase):
         self.assertTrue(health["last_snapshot_at"])
         self.assertEqual(health["last_snapshot_status"], "unhealthy")
         self.assertEqual(health["consecutive_delivery_failures"], 2)
+
+        assert self.store.conn is not None
+        self.store.conn.execute(
+            "UPDATE events SET ts = '2026-01-01T00:00:00Z'"
+            " WHERE event = 'brrr_notification'"
+        )
+        self.store.conn.commit()
+        aged = self.module["runtime_status_health"](db_path)
+        self.assertEqual(aged["consecutive_delivery_failures"], 0)
 
         missing = self.module["runtime_status_health"](
             Path(self.temp_dir.name) / "absent.sqlite3"

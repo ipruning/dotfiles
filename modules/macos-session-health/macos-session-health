@@ -410,12 +410,13 @@ def install_launch_agent(*, dry_run: bool = False) -> int:
 def uninstall_launch_agent() -> int:
     if sys.platform != "darwin":
         raise CliError("uninstall is supported only on macOS")
-    if USER_BIN.exists() or USER_BIN.is_symlink():
-        if not managed_wrapper():
-            raise CliError(f"refusing to remove unmanaged executable: {USER_BIN}")
-
     bootout_launch_agent()
     LAUNCH_AGENT.unlink(missing_ok=True)
+    if USER_BIN.exists() or USER_BIN.is_symlink():
+        if not managed_wrapper():
+            # The launch agent is unloaded either way; only the executable is
+            # kept because this tool does not own it.
+            raise CliError(f"refusing to remove unmanaged executable: {USER_BIN}")
     if managed_wrapper():
         USER_BIN.unlink()
     RUNTIME_CLI.unlink(missing_ok=True)
@@ -449,9 +450,15 @@ def runtime_status_health(db_path: Path) -> dict[str, Any]:
             record["last_snapshot_at"] = row["ended_at"] or row["started_at"]
             record["last_snapshot_status"] = row["status"] or ""
         failures = 0
+        cutoff = (
+            (dt.datetime.now(dt.timezone.utc) - dt.timedelta(hours=24))
+            .isoformat(timespec="seconds")
+            .replace("+00:00", "Z")
+        )
         for event_row in conn.execute(
             "SELECT data_json FROM events WHERE event = 'brrr_notification'"
-            " ORDER BY ts DESC, id DESC LIMIT 10"
+            " AND ts >= ? ORDER BY ts DESC, id DESC LIMIT 10",
+            (cutoff,),
         ):
             data = json.loads(event_row["data_json"])
             if data.get("sent"):
@@ -2932,6 +2939,25 @@ def brrr_configuration(*, include_environment: bool = True) -> dict[str, Any]:
     }
 
 
+NATIVE_FALLBACK_COOLDOWN_MINUTES = 240
+
+
+def native_fallback_due(store: "Store") -> bool:
+    """Allow the local banner once per cooldown, not once per snapshot retry."""
+    if store.conn is None:
+        return True
+    last = store.get_state("last_brrr_native_fallback_at")
+    if not last:
+        return True
+    try:
+        parsed = dt.datetime.fromisoformat(last.replace("Z", "+00:00"))
+    except ValueError:
+        return True
+    return dt.datetime.now(dt.timezone.utc) - parsed >= dt.timedelta(
+        minutes=NATIVE_FALLBACK_COOLDOWN_MINUTES
+    )
+
+
 def deliver_native_notification(
     payload: dict[str, Any],
     timeout: float,
@@ -2951,6 +2977,7 @@ def deliver_native_notification(
                 "display notification (item 2 of argv) with title (item 1 of argv)",
                 "-e",
                 "end run",
+                "--",
                 str(payload.get("title", "")),
                 str(payload.get("message", "")),
             ],
@@ -2965,7 +2992,11 @@ def deliver_native_notification(
 
 
 def deliver_brrr(
-    payload: dict[str, Any], timeout: float, *, dry_run: bool = False
+    payload: dict[str, Any],
+    timeout: float,
+    *,
+    dry_run: bool = False,
+    native_fallback: bool = False,
 ) -> dict[str, Any]:
     config = brrr_configuration()
     public_config = {key: value for key, value in config.items() if key != "secret"}
@@ -2981,7 +3012,8 @@ def deliver_brrr(
             "exit": 3,
             "timeout": False,
             "error": "brrr is not configured",
-            "native_fallback": deliver_native_notification(payload, timeout),
+            "native_fallback": native_fallback
+            and deliver_native_notification(payload, timeout),
         }
 
     body = json.dumps(payload, ensure_ascii=False, separators=(",", ":")).encode(
@@ -3036,7 +3068,8 @@ def deliver_brrr(
         "duration_ms": round((time.monotonic() - started) * 1000, 1),
         "attempts": attempts,
         "error": last_error,
-        "native_fallback": deliver_native_notification(payload, timeout),
+        "native_fallback": native_fallback
+        and deliver_native_notification(payload, timeout),
     }
 
 
@@ -3136,7 +3169,13 @@ def maybe_send_brrr_notification(
         }
         if args.brrr_open_url:
             payload["open_url"] = args.brrr_open_url
-        delivery = deliver_brrr(payload, args.brrr_timeout)
+        delivery = deliver_brrr(
+            payload,
+            args.brrr_timeout,
+            native_fallback=native_fallback_due(store),
+        )
+        if delivery.get("native_fallback"):
+            store.set_state("last_brrr_native_fallback_at", utc_now())
         if record_brrr_delivery(
             store,
             snapshot_id,
@@ -3182,7 +3221,13 @@ def maybe_send_brrr_notification(
     }
     if args.brrr_open_url:
         payload["open_url"] = args.brrr_open_url
-    delivery = deliver_brrr(payload, args.brrr_timeout)
+    delivery = deliver_brrr(
+        payload,
+        args.brrr_timeout,
+        native_fallback=native_fallback_due(store),
+    )
+    if delivery.get("native_fallback"):
+        store.set_state("last_brrr_native_fallback_at", utc_now())
     if record_brrr_delivery(
         store,
         snapshot_id,
