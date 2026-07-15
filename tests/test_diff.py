@@ -6,6 +6,8 @@ from typing import cast
 
 import pytest
 
+from tests.conftest import mackup_cfg
+
 from scripts.diff import (
     DriftProtocolError,
     MackupCommandError,
@@ -252,10 +254,7 @@ def test_subprocess_runner_surfaces_mackup_failure_modes(
     home = tmp_path / "home"
     (repo_root / "mackup/applications").mkdir(parents=True)
     config_path = repo_root / "mackup/mackup.cfg"
-    config_path.write_text(
-        "[storage]\nengine = file_system\npath = dotfiles\n"
-        "directory = reference\n[applications_to_sync]\n",
-    )
+    config_path.write_text(mackup_cfg())
     responses: dict[str, tuple[int, str, str]] = {}
 
     def run(command: list[str], **_kwargs) -> subprocess.CompletedProcess[str]:
@@ -290,10 +289,7 @@ def test_subprocess_runner_preserves_application_name_case(
     repo_root = tmp_path / "repo"
     home = tmp_path / "home"
     (repo_root / "mackup/applications").mkdir(parents=True)
-    (repo_root / "mackup/mackup.cfg").write_text(
-        "[storage]\nengine = file_system\npath = dotfiles\n"
-        "directory = reference\n[applications_to_sync]\nExample-App\n",
-    )
+    (repo_root / "mackup/mackup.cfg").write_text(mackup_cfg("Example-App\n"))
     captured: dict[str, str] = {}
 
     def run(command: list[str], **_kwargs) -> subprocess.CompletedProcess[str]:
@@ -321,10 +317,7 @@ def test_inspect_drift_uses_current_checkout_as_reference_storage(
     repo_root = tmp_path / "checkout"
     home = tmp_path / "home"
     (repo_root / "mackup/applications").mkdir(parents=True)
-    (repo_root / "mackup/mackup.cfg").write_text(
-        "[storage]\nengine = file_system\npath = dotfiles\n"
-        "directory = reference\n[applications_to_sync]\n",
-    )
+    (repo_root / "mackup/mackup.cfg").write_text(mackup_cfg())
     captured: dict[str, str] = {}
 
     def run(command: list[str], **_kwargs) -> subprocess.CompletedProcess[str]:

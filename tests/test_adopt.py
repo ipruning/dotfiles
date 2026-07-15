@@ -1,7 +1,6 @@
 import json
 import os
 import subprocess
-import sys
 from pathlib import Path
 
 from scripts.adopt import (
@@ -9,40 +8,11 @@ from scripts.adopt import (
     AdoptResult,
     AdoptStatus,
     apply_adopt,
+    plan_adopt,
 )
 from scripts.models import Drift, DriftKind, FileKind
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-
-
-def _run_adopt(home: Path, *arguments: str) -> subprocess.CompletedProcess[str]:
-    environment = os.environ.copy()
-    uv_dir = Path(
-        subprocess.run(
-            ["mise", "which", "uv"],
-            check=True,
-            capture_output=True,
-            text=True,
-        ).stdout.strip(),
-    ).parent
-    uv_cache = subprocess.run(
-        [uv_dir / "uv", "cache", "dir"],
-        check=True,
-        capture_output=True,
-        text=True,
-    ).stdout.strip()
-    environment["HOME"] = str(home)
-    environment["XDG_CONFIG_HOME"] = str(home / ".config")
-    environment["PATH"] = f"{uv_dir}{os.pathsep}{environment['PATH']}"
-    environment["UV_CACHE_DIR"] = uv_cache
-    return subprocess.run(
-        [sys.executable, "-m", "scripts.adopt", *arguments],
-        cwd=REPO_ROOT,
-        env=environment,
-        check=False,
-        capture_output=True,
-        text=True,
-    )
+from tests.conftest import REPO_ROOT, run_scripts_module  # noqa: E402
 
 
 def _tracked_repo(tmp_path: Path) -> tuple[Path, Path]:
@@ -100,7 +70,7 @@ def test_adopt_defaults_to_a_read_only_application_plan(tmp_path: Path) -> None:
     home = tmp_path / "home"
     home.mkdir()
 
-    completed = _run_adopt(home, "hushlogin", "--json")
+    completed = run_scripts_module("adopt", home, "hushlogin", "--json")
 
     assert completed.returncode == 0
     document = json.loads(completed.stdout)
@@ -303,3 +273,79 @@ def test_adopt_apply_copies_directories_and_confines_paths(tmp_path: Path) -> No
 
     assert escaped.ok is False
     assert not (repo_root / "escape").exists()
+
+
+def test_adopt_apply_refuses_renamed_uncommitted_reference(tmp_path: Path) -> None:
+    repo_root, home = _tracked_repo(tmp_path)
+    (repo_root / "reference/.old").write_text("content\n")
+    _commit_all(repo_root)
+    subprocess.run(
+        ["git", "-C", str(repo_root), "mv", "reference/.old", "reference/.renamed"],
+        check=True,
+    )
+    (home / ".renamed").write_text("live\n")
+
+    plan = _plan(
+        AdoptResult(
+            _drift(repo_root, home, ".renamed", DriftKind.MODIFIED),
+            action="copy",
+            status=AdoptStatus.PLANNED,
+        ),
+    )
+    applied = apply_adopt(repo_root, home, plan)
+
+    assert applied.ok is False
+    assert "uncommitted" in (applied.results[0].error or "")
+
+
+def test_adopt_apply_fails_cleanly_outside_a_git_worktree(tmp_path: Path) -> None:
+    repo_root = tmp_path / "plain"
+    home = tmp_path / "home"
+    (repo_root / "reference").mkdir(parents=True)
+    home.mkdir()
+    (home / ".gitconfig").write_text("live\n")
+
+    plan = _plan(
+        AdoptResult(
+            _drift(repo_root, home, ".gitconfig", DriftKind.ONLY_LIVE),
+            action="copy",
+            status=AdoptStatus.PLANNED,
+        ),
+    )
+    applied = apply_adopt(repo_root, home, plan)
+
+    assert applied.ok is False
+    assert applied.results[0].status is AdoptStatus.FAILED
+    assert not (repo_root / "reference/.gitconfig").exists()
+
+
+def test_plan_adopt_marks_unreadable_drift_failed(tmp_path: Path, monkeypatch) -> None:
+    from scripts import adopt as adopt_module
+    from scripts.models import DriftReport
+    from scripts.profiles import HostProfile
+
+    unreadable = Drift(
+        application="git",
+        reference_path=tmp_path / "repo/reference/.gitconfig",
+        live_path=tmp_path / "home/.gitconfig",
+        kind=DriftKind.UNREADABLE,
+        reference_kind=None,
+        live_kind=None,
+        error="permission denied",
+    )
+    monkeypatch.setattr(
+        adopt_module,
+        "inspect_drift",
+        lambda *args, **kwargs: DriftReport(
+            schema_version=1,
+            operation="diff",
+            changes=(unreadable,),
+            summary={"unreadable": 1},
+            profile=HostProfile.FULL,
+        ),
+    )
+
+    plan = plan_adopt(tmp_path / "repo", tmp_path / "home", "git")
+
+    assert plan.ok is False
+    assert "permission denied" in (plan.results[0].error or "")

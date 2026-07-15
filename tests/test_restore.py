@@ -1,7 +1,4 @@
 import json
-import os
-import subprocess
-import sys
 from pathlib import Path
 
 from scripts.models import Drift, DriftKind, FileKind
@@ -10,47 +7,18 @@ from scripts.restore import (
     RestoreResult,
     RestoreStatus,
     apply_restore,
+    plan_restore,
 )
 
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-
-
-def _run_restore(home: Path, *arguments: str) -> subprocess.CompletedProcess[str]:
-    environment = os.environ.copy()
-    uv_dir = Path(
-        subprocess.run(
-            ["mise", "which", "uv"],
-            check=True,
-            capture_output=True,
-            text=True,
-        ).stdout.strip(),
-    ).parent
-    uv_cache = subprocess.run(
-        [uv_dir / "uv", "cache", "dir"],
-        check=True,
-        capture_output=True,
-        text=True,
-    ).stdout.strip()
-    environment["HOME"] = str(home)
-    environment["XDG_CONFIG_HOME"] = str(home / ".config")
-    environment["PATH"] = f"{uv_dir}{os.pathsep}{environment['PATH']}"
-    environment["UV_CACHE_DIR"] = uv_cache
-    return subprocess.run(
-        [sys.executable, "-m", "scripts.restore", *arguments],
-        cwd=REPO_ROOT,
-        env=environment,
-        check=False,
-        capture_output=True,
-        text=True,
-    )
+from tests.conftest import REPO_ROOT, run_scripts_module  # noqa: E402
 
 
 def test_restore_defaults_to_a_read_only_application_plan(tmp_path: Path) -> None:
     home = tmp_path / "home"
     home.mkdir()
 
-    completed = _run_restore(home, "hushlogin", "--json")
+    completed = run_scripts_module("restore", home, "hushlogin", "--json")
 
     assert completed.returncode == 0
     document = json.loads(completed.stdout)
@@ -80,11 +48,11 @@ def test_restore_apply_backs_up_live_file_and_links_reference(tmp_path: Path) ->
     live_path = home / ".hushlogin"
     live_path.write_text("host-specific\n")
 
-    preview = _run_restore(home, "hushlogin", "--dry-run", "--json")
+    preview = run_scripts_module("restore", home, "hushlogin", "--dry-run", "--json")
     assert preview.returncode == 0
     assert live_path.read_text() == "host-specific\n"
 
-    applied = _run_restore(home, "hushlogin", "--apply", "--json")
+    applied = run_scripts_module("restore", home, "hushlogin", "--apply", "--json")
 
     assert applied.returncode == 0
     document = json.loads(applied.stdout)
@@ -97,7 +65,7 @@ def test_restore_apply_backs_up_live_file_and_links_reference(tmp_path: Path) ->
     assert live_path.is_symlink()
     assert live_path.resolve() == REPO_ROOT / "reference/.hushlogin"
 
-    converged = _run_restore(home, "hushlogin", "--json")
+    converged = run_scripts_module("restore", home, "hushlogin", "--json")
     assert converged.returncode == 0
     assert json.loads(converged.stdout)["changes"] == []
 
@@ -106,13 +74,16 @@ def test_restore_rejects_invalid_scope_without_changing_home(tmp_path: Path) -> 
     home = tmp_path / "home"
     home.mkdir()
 
-    conflicting = _run_restore(
+    conflicting = run_scripts_module(
+        "restore",
         home,
         "hushlogin",
         "--apply",
         "--dry-run",
     )
-    unknown = _run_restore(home, "not-a-configured-application", "--json")
+    unknown = run_scripts_module(
+        "restore", home, "not-a-configured-application", "--json"
+    )
 
     assert conflicting.returncode == 2
     assert "mutually exclusive" in conflicting.stderr
@@ -152,3 +123,80 @@ def test_restore_rejects_a_live_parent_that_escapes_home(tmp_path: Path) -> None
     assert report.results[0].status is RestoreStatus.FAILED
     assert "live parent is outside" in (report.results[0].error or "")
     assert list(external.iterdir()) == []
+
+
+def test_restore_rolls_back_live_file_when_symlink_fails(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    repo_root = tmp_path / "repo"
+    home = tmp_path / "home"
+    (repo_root / "reference").mkdir(parents=True)
+    home.mkdir()
+    (repo_root / "reference/.gitconfig").write_text("reference\n")
+    live = home / ".gitconfig"
+    live.write_text("live content\n")
+    plan = RestoreReport(
+        application="git",
+        apply=False,
+        results=(
+            RestoreResult(
+                Drift(
+                    application="git",
+                    reference_path=repo_root / "reference/.gitconfig",
+                    live_path=live,
+                    kind=DriftKind.MODIFIED,
+                    reference_kind=FileKind.FILE,
+                    live_kind=FileKind.FILE,
+                ),
+                action="link",
+                status=RestoreStatus.PLANNED,
+            ),
+        ),
+    )
+
+    def refuse(self, target, target_is_directory=False):
+        raise OSError("symlink refused")
+
+    monkeypatch.setattr(Path, "symlink_to", refuse)
+    applied = apply_restore(repo_root, home, plan)
+
+    result = applied.results[0]
+    assert result.status is RestoreStatus.FAILED
+    assert result.backup_path is None
+    assert live.read_text() == "live content\n"
+
+
+def test_plan_restore_marks_unreadable_drift_failed(
+    tmp_path: Path, monkeypatch
+) -> None:
+    from scripts import restore as restore_module
+    from scripts.models import DriftReport
+    from scripts.profiles import HostProfile
+
+    unreadable = Drift(
+        application="git",
+        reference_path=tmp_path / "repo/reference/.gitconfig",
+        live_path=tmp_path / "home/.gitconfig",
+        kind=DriftKind.UNREADABLE,
+        reference_kind=None,
+        live_kind=None,
+        error="permission denied",
+    )
+    monkeypatch.setattr(
+        restore_module,
+        "inspect_drift",
+        lambda *args, **kwargs: DriftReport(
+            schema_version=1,
+            operation="diff",
+            changes=(unreadable,),
+            summary={"unreadable": 1},
+            profile=HostProfile.FULL,
+        ),
+    )
+
+    plan = plan_restore(tmp_path / "repo", tmp_path / "home", "git")
+
+    assert plan.ok is False
+    assert plan.results[0].status is RestoreStatus.FAILED
+    assert "permission denied" in (plan.results[0].error or "")

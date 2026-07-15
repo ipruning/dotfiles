@@ -116,7 +116,7 @@ def test_inspect_host_reports_capabilities_and_their_invalid_transition(
         system_name="Darwin",
     )
 
-    assert healthy.ok is True
+    assert healthy.is_ok() is True
     assert all(finding.severity is Severity.OK for finding in healthy.findings)
 
     private_gitconfig.unlink()
@@ -130,7 +130,7 @@ def test_inspect_host_reports_capabilities_and_their_invalid_transition(
     )
     findings = {finding.code: finding for finding in degraded.findings}
 
-    assert degraded.ok is True
+    assert degraded.is_ok() is True
     assert findings["git.private_file_missing"].severity is Severity.WARN
     assert findings["skillshare.source_missing"].severity is Severity.WARN
     assert findings["runtime.function.mise_missing"].severity is Severity.WARN
@@ -600,7 +600,7 @@ def test_session_health_probe_treats_absent_tool_as_optional_warning(
 
     assert finding.severity is Severity.WARN
     assert finding.code == "session_health.missing"
-    assert report.ok is True
+    assert report.is_ok() is True
 
 
 def test_bash_integration_recognizes_symlinked_checkout(tmp_path: Path) -> None:
@@ -774,3 +774,45 @@ def test_inspect_host_rejects_empty_or_non_executable_owned_binary(
 
     assert findings["runtime.binary.atuin_invalid"].severity is Severity.WARN
     assert findings["runtime.binary.op-cache_invalid"].severity is Severity.WARN
+
+
+def test_session_health_probe_reports_unconfigured_and_invalid_status(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "home").mkdir()
+    now = datetime.now(UTC).isoformat(timespec="seconds").replace("+00:00", "Z")
+    codes = _session_health_codes(
+        tmp_path,
+        {
+            "installed": True,
+            "loaded": True,
+            "notification_configured": False,
+            "last_snapshot_at": now,
+            "consecutive_delivery_failures": 0,
+        },
+    )
+    assert (
+        codes["session_health.notifications"]
+        == "session_health.notifications_unconfigured"
+    )
+
+    garbled = tmp_path / "bin/garbled-session-health"
+    garbled.parent.mkdir(parents=True, exist_ok=True)
+    garbled.write_text("#!/bin/sh\necho this is not json\n")
+    garbled.chmod(0o755)
+    report = inspect_host(
+        tmp_path / "repo",
+        tmp_path / "home",
+        executable_finder=lambda command: (
+            str(garbled) if command == "macos-session-health" else f"/tools/{command}"
+        ),
+        system_name="Darwin",
+        profile="macos",
+    )
+    finding = next(
+        finding
+        for finding in report.findings
+        if finding.check == "session_health.agent"
+    )
+
+    assert finding.code == "session_health.status_invalid"

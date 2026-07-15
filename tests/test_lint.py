@@ -3,6 +3,8 @@ from pathlib import Path
 
 import pytest
 
+from tests.conftest import mackup_cfg
+
 from scripts.lint import inspect_repository
 from scripts.models import Severity
 
@@ -27,11 +29,7 @@ def test_inspect_repository_checks_paths_and_mapping_state(
     (repo_root / "mackup/applications/example.cfg").write_text(
         "[application]\nname = example\n[configuration_files]\n.example\n.missing\n",
     )
-    (repo_root / "mackup/mackup.cfg").write_text(
-        "[storage]\nengine = file_system\npath = dotfiles\n"
-        "directory = reference\n"
-        "[applications_to_sync]\nexample\n",
-    )
+    (repo_root / "mackup/mackup.cfg").write_text(mackup_cfg("example\n"))
     script = repo_root / "tool.sh"
     script.write_text(f"helper={absolute_path}\n")
 
@@ -47,7 +45,7 @@ def test_inspect_repository_checks_paths_and_mapping_state(
     findings = {finding.code: finding for finding in degraded.findings}
 
     assert findings["mackup.application_empty"].severity is Severity.ERROR
-    assert degraded.ok is False
+    assert degraded.is_ok() is False
 
 
 def test_inspect_repository_ignores_absolute_paths_inside_urls(
@@ -57,10 +55,7 @@ def test_inspect_repository_ignores_absolute_paths_inside_urls(
     home = tmp_path / "home"
     (repo_root / "reference").mkdir(parents=True)
     (repo_root / "mackup/applications").mkdir(parents=True)
-    (repo_root / "mackup/mackup.cfg").write_text(
-        "[storage]\nengine = file_system\npath = dotfiles\n"
-        "directory = reference\n[applications_to_sync]\n",
-    )
+    (repo_root / "mackup/mackup.cfg").write_text(mackup_cfg())
     script = repo_root / "tool.sh"
     script.write_text(
         "curl https://mirror.example/home/pkg/file.tar\n"
@@ -89,10 +84,7 @@ def test_inspect_repository_reports_only_tracked_dangling_symlinks(
     home = tmp_path / "home"
     (repo_root / "reference").mkdir(parents=True)
     (repo_root / "mackup/applications").mkdir(parents=True)
-    (repo_root / "mackup/mackup.cfg").write_text(
-        "[storage]\nengine = file_system\npath = dotfiles\n"
-        "directory = reference\n[applications_to_sync]\n",
-    )
+    (repo_root / "mackup/mackup.cfg").write_text(mackup_cfg())
     tracked_link = repo_root / "reference/.broken"
     tracked_link.symlink_to(repo_root / "reference/.target")
     venv_link = repo_root / ".venv/bin/python"
@@ -127,10 +119,7 @@ def test_inspect_repository_rejects_tracked_private_generated_and_legacy_files(
     home = tmp_path / "home"
     (repo_root / "mackup/applications").mkdir(parents=True)
     (repo_root / "reference").mkdir()
-    (repo_root / "mackup/mackup.cfg").write_text(
-        "[storage]\nengine = file_system\npath = dotfiles\n"
-        "directory = reference\n[applications_to_sync]\n",
-    )
+    (repo_root / "mackup/mackup.cfg").write_text(mackup_cfg())
     private_file = repo_root / "reference/.machine.private.zsh"
     private_file.write_text("TOKEN=secret\n")
     generated_file = repo_root / "generated/.gitkeep"
@@ -168,10 +157,7 @@ def test_inspect_repository_warns_when_checkout_is_not_home_dotfiles(
     repo_root = home / "dotfiles"
     (repo_root / "reference").mkdir(parents=True)
     (repo_root / "mackup/applications").mkdir(parents=True)
-    (repo_root / "mackup/mackup.cfg").write_text(
-        "[storage]\nengine = file_system\npath = dotfiles\n"
-        "directory = reference\n[applications_to_sync]\n",
-    )
+    (repo_root / "mackup/mackup.cfg").write_text(mackup_cfg())
     (repo_root / "tool.sh").write_text("plugin=~/dotfiles/generated/plugin.wasm\n")
 
     installed = inspect_repository(repo_root, home)
@@ -192,7 +178,7 @@ def test_inspect_repository_warns_when_checkout_is_not_home_dotfiles(
     )
 
     assert relocated_finding.severity is Severity.WARN
-    assert relocated.ok is True
+    assert relocated.is_ok() is True
     assert relocated.is_ok(strict=True) is False
 
 
@@ -210,13 +196,10 @@ def test_inspect_repository_allows_only_declared_optional_reference_candidates(
         "[configuration_files]\n.required\n.optional\n"
         "[dotfiles_optional_reference_files]\n.optional\n",
     )
-    (repo_root / "mackup/mackup.cfg").write_text(
-        "[storage]\nengine = file_system\npath = dotfiles\n"
-        "directory = reference\n[applications_to_sync]\nexample\n",
-    )
+    (repo_root / "mackup/mackup.cfg").write_text(mackup_cfg("example\n"))
 
     declared = inspect_repository(repo_root, home)
-    assert declared.ok is True
+    assert declared.is_ok() is True
     assert "mackup.reference_missing" not in {
         finding.code for finding in declared.findings
     }
@@ -238,10 +221,7 @@ def test_linux_repository_lint_skips_macos_only_paths(tmp_path: Path) -> None:
     home = tmp_path / "home"
     (repo_root / "reference").mkdir(parents=True)
     (repo_root / "mackup/applications").mkdir(parents=True)
-    (repo_root / "mackup/mackup.cfg").write_text(
-        "[storage]\nengine = file_system\npath = dotfiles\n"
-        "directory = reference\n[applications_to_sync]\n",
-    )
+    (repo_root / "mackup/mackup.cfg").write_text(mackup_cfg())
     (repo_root / "tool.sh").write_text(
         "app=/Applications/ChatGPT.app\n"
         "brew=/opt/homebrew/bin/brew\n"
@@ -269,10 +249,7 @@ def test_inspect_repository_checks_paths_under_reference_library(
     settings.parent.mkdir(parents=True)
     settings.write_text('{"tool": "/Users/someone/private/tool"}\n')
     (repo_root / "mackup/applications").mkdir(parents=True)
-    (repo_root / "mackup/mackup.cfg").write_text(
-        "[storage]\nengine = file_system\npath = dotfiles\n"
-        "directory = reference\n[applications_to_sync]\n",
-    )
+    (repo_root / "mackup/mackup.cfg").write_text(mackup_cfg())
 
     report = inspect_repository(repo_root, home, system_name="Darwin")
     finding = next(
@@ -297,10 +274,7 @@ def test_linux_lint_treats_skillshare_source_paths_as_optional(
         "extras: []\n"
     )
     (repo_root / "mackup/applications").mkdir(parents=True)
-    (repo_root / "mackup/mackup.cfg").write_text(
-        "[storage]\nengine = file_system\npath = dotfiles\n"
-        "directory = reference\n[applications_to_sync]\n",
-    )
+    (repo_root / "mackup/mackup.cfg").write_text(mackup_cfg())
 
     report = inspect_repository(repo_root, home, system_name="Linux")
     source_findings = [
@@ -327,10 +301,7 @@ def test_inspect_repository_rejects_pruning_skillshare_extra_modes(
         "extras:\n- name: codex\n  targets:\n  - path: ~/.codex\n    mode: merge\n",
     )
     (repo_root / "mackup/applications").mkdir(parents=True)
-    (repo_root / "mackup/mackup.cfg").write_text(
-        "[storage]\nengine = file_system\npath = dotfiles\n"
-        "directory = reference\n[applications_to_sync]\n",
-    )
+    (repo_root / "mackup/mackup.cfg").write_text(mackup_cfg())
 
     unsafe = inspect_repository(repo_root, home)
     unsafe_finding = next(
@@ -364,10 +335,7 @@ def test_inspect_repository_rejects_unselected_mackup_mappings(tmp_path: Path) -
     (repo_root / "mackup/applications/parked.cfg").write_text(
         "[application]\nname = parked\n[configuration_files]\n.parked\n",
     )
-    (repo_root / "mackup/mackup.cfg").write_text(
-        "[storage]\nengine = file_system\npath = dotfiles\n"
-        "directory = reference\n[applications_to_sync]\nexample\n",
-    )
+    (repo_root / "mackup/mackup.cfg").write_text(mackup_cfg("example\n"))
 
     orphaned = inspect_repository(repo_root, home)
     orphan_finding = next(
@@ -378,7 +346,7 @@ def test_inspect_repository_rejects_unselected_mackup_mappings(tmp_path: Path) -
 
     assert orphan_finding.severity is Severity.ERROR
     assert orphan_finding.path == repo_root / "mackup/applications/parked.cfg"
-    assert orphaned.ok is False
+    assert orphaned.is_ok() is False
 
     (repo_root / "mackup/applications/parked.cfg").unlink()
     clean = inspect_repository(repo_root, home)
@@ -403,14 +371,34 @@ def test_inspect_repository_rejects_malformed_skillshare_extras_shapes(
     (repo_root / "reference/.config/skillshare").mkdir(parents=True)
     (repo_root / "reference/.config/skillshare/config.yaml").write_text(extras_yaml)
     (repo_root / "mackup/applications").mkdir(parents=True)
-    (repo_root / "mackup/mackup.cfg").write_text(
-        "[storage]\nengine = file_system\npath = dotfiles\n"
-        "directory = reference\n[applications_to_sync]\n",
-    )
+    (repo_root / "mackup/mackup.cfg").write_text(mackup_cfg())
 
     report = inspect_repository(repo_root, home)
     codes = {finding.code for finding in report.findings}
 
     assert "skillshare.config_invalid" in codes
     assert "skillshare.extra_modes_safe" not in codes
-    assert report.ok is False
+    assert report.is_ok() is False
+
+
+def test_full_home_rule_fires_only_for_its_keyed_zellij_file(tmp_path: Path) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    keyed = repo_root / "reference/.config/zellij/config.kdl"
+    keyed.parent.mkdir(parents=True)
+    keyed.write_text('session_dir "/Users/stranger/work"\n')
+    other = repo_root / "reference/.config/other.conf"
+    other.write_text('session_dir "/Users/stranger/work"\n')
+    (repo_root / "mackup/applications").mkdir(parents=True)
+    (repo_root / "mackup/mackup.cfg").write_text(mackup_cfg())
+
+    report = inspect_repository(repo_root, home, system_name="Darwin")
+    by_path = {}
+    for finding in report.findings:
+        if finding.code in {"path.full_home_required", "path.absolute_home"}:
+            by_path[finding.path] = finding
+
+    assert by_path[keyed].code == "path.full_home_required"
+    assert by_path[keyed].severity is Severity.WARN
+    assert by_path[other].code == "path.absolute_home"
+    assert by_path[other].severity is Severity.ERROR

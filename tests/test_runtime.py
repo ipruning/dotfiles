@@ -13,6 +13,7 @@ from scripts.runtime import (
     RuntimeSpec,
     RuntimeStatus,
     execute_runtime,
+    plan_runtime,
 )
 
 
@@ -294,6 +295,7 @@ def test_runtime_build_installs_artifacts_from_portable_sources(tmp_path: Path) 
 
 def test_runtime_does_not_build_from_stale_source_after_update_failure(
     tmp_path: Path,
+    monkeypatch,
 ) -> None:
     repo_root = tmp_path / "dotfiles"
     home = tmp_path / "home"
@@ -304,14 +306,20 @@ def test_runtime_does_not_build_from_stale_source_after_update_failure(
         (repo_root / "generated/sources" / name / ".git").mkdir(parents=True)
     _fake_tool(bin_dir, "git", "exit 7\n")
     _fake_tool(bin_dir, "cargo", "touch build-ran\n")
+    monkeypatch.setenv("PATH", str(bin_dir))
 
-    completed = _run_runtime(repo_root, home, bin_dir, "--build", "--json")
+    def finder(tool: str) -> str | None:
+        candidate = bin_dir / tool
+        return str(candidate) if candidate.exists() else None
 
-    assert completed.returncode == 1
-    steps = {step["name"]: step for step in json.loads(completed.stdout)["steps"]}
-    assert steps["source.atuin"]["status"] == "failed"
-    assert steps["binary.atuin"]["status"] == "skipped"
-    assert "source.atuin failed" in steps["binary.atuin"]["reason"]
+    plan = plan_runtime(repo_root, home, executable_finder=finder, build=True)
+    report = execute_runtime(plan, home, downloader=lambda _url, _timeout: b"stub")
+
+    results = {result.spec.name: result for result in report.results}
+    assert report.ok is False
+    assert results["source.atuin"].status is RuntimeStatus.FAILED
+    assert results["binary.atuin"].status is RuntimeStatus.SKIPPED
+    assert "source.atuin failed" in (results["binary.atuin"].reason or "")
     assert not (repo_root / "generated/sources/atuin/build-ran").exists()
     assert not (repo_root / "generated/sources/op-cache/build-ran").exists()
 
@@ -412,3 +420,41 @@ def test_runtime_cli_runs_real_mise_in_an_isolated_home(tmp_path: Path) -> None:
     activation = repo_root / "generated/functions/_mise.zsh"
     assert activation.is_file()
     assert "mise" in activation.read_text()
+
+
+def test_runtime_refuses_to_clobber_non_git_plugin_dirs(tmp_path: Path) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    bin_dir = tmp_path / "bin"
+    home.mkdir()
+    bin_dir.mkdir()
+    _fake_tool(bin_dir, "git")
+    (repo_root / "generated/plugins/fzf-tab").mkdir(parents=True)
+
+    completed = _run_runtime(repo_root, home, bin_dir, "--dry-run", "--json")
+
+    assert completed.returncode == 1
+    steps = {step["name"]: step for step in json.loads(completed.stdout)["steps"]}
+    assert steps["plugin.fzf-tab"]["status"] == "failed"
+    assert "not a Git checkout" in steps["plugin.fzf-tab"]["reason"]
+
+
+def test_runtime_keeps_old_output_when_generator_prints_nothing(
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    bin_dir = tmp_path / "bin"
+    home.mkdir()
+    bin_dir.mkdir()
+    functions = repo_root / "generated/functions"
+    functions.mkdir(parents=True)
+    (functions / "_mise.zsh").write_text("previous good output\n")
+    _fake_tool(bin_dir, "mise", "exit 0\n")
+
+    completed = _run_runtime(repo_root, home, bin_dir, "--offline", "--json")
+
+    assert completed.returncode == 1
+    steps = {step["name"]: step for step in json.loads(completed.stdout)["steps"]}
+    assert steps["function.mise"]["status"] == "failed"
+    assert (functions / "_mise.zsh").read_text() == "previous good output\n"

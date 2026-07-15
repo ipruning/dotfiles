@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from scripts.shell import ShellCheckError, check_shell_files, classify
+from scripts.shell import ShellCheckError, check_shell_files, shell_dialect
 
 requires_shellcheck = pytest.mark.skipif(
     shutil.which("shellcheck") is None,
@@ -27,20 +27,20 @@ def _tracked_repo(tmp_path: Path, files: dict[str, str]) -> Path:
     return repo_root
 
 
-def test_classify_covers_extensions_shebangs_and_reference_data() -> None:
-    assert classify("modules/bash/init.bash", "# sourced fragment") == "bash"
-    assert classify("modules/bin/_lib/session-id.sh", "") == "bash"
-    assert classify("modules/zsh/env.zsh", "") == "zsh"
-    assert classify("modules/bin/g", "#!/usr/bin/env bash") == "bash"
-    assert classify("modules/bin/ttok", "#!/usr/bin/env -S zsh -f") == "zsh"
-    assert classify("modules/bin/watchdog", "#!/bin/sh") == "bash"
-    assert classify("modules/bin/portable", "#!/usr/bin/env sh") == "bash"
-    assert classify("modules/bin/dashy", "#!/bin/dash") == "bash"
-    assert classify("modules/bin/pyenvish", "#!/usr/bin/env -S python3 -u") is None
-    assert classify("scripts/diff.py", "#!/usr/bin/env python3") is None
-    assert classify("reference/.zshenv.private.tpl.zsh", "") is None
-    assert classify("notes.txt", "plain text") is None
-    assert classify("modules/tool/tool", "#!/bin/sh", '""":"') is None
+def test_shell_dialect_covers_extensions_shebangs_and_reference_data() -> None:
+    assert shell_dialect("modules/bash/init.bash", "# sourced fragment") == "bash"
+    assert shell_dialect("modules/bin/_lib/session-id.sh", "") == "bash"
+    assert shell_dialect("modules/zsh/env.zsh", "") == "zsh"
+    assert shell_dialect("modules/bin/g", "#!/usr/bin/env bash") == "bash"
+    assert shell_dialect("modules/bin/ttok", "#!/usr/bin/env -S zsh -f") == "zsh"
+    assert shell_dialect("modules/bin/watchdog", "#!/bin/sh") == "bash"
+    assert shell_dialect("modules/bin/portable", "#!/usr/bin/env sh") == "bash"
+    assert shell_dialect("modules/bin/dashy", "#!/bin/dash") == "bash"
+    assert shell_dialect("modules/bin/pyenvish", "#!/usr/bin/env -S python3 -u") is None
+    assert shell_dialect("scripts/diff.py", "#!/usr/bin/env python3") is None
+    assert shell_dialect("reference/.zshenv.private.tpl.zsh", "") is None
+    assert shell_dialect("notes.txt", "plain text") is None
+    assert shell_dialect("modules/tool/tool", "#!/bin/sh", '""":"') is None
 
 
 def test_check_shell_files_reports_bash_syntax_failures_then_passes(
