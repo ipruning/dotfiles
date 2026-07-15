@@ -28,6 +28,16 @@ class ShellFile:
     dialect: str
 
 
+@dataclass(frozen=True)
+class ShellReport:
+    failures: tuple[str, ...]
+    notes: tuple[str, ...]
+
+    @property
+    def ok(self) -> bool:
+        return not self.failures
+
+
 def shell_dialect(relative: str, first_line: str, second_line: str = "") -> str | None:
     """Return the shell dialect of a tracked file, or None for non-shell files."""
     if relative.startswith(SKIP_PREFIXES):
@@ -96,12 +106,13 @@ def check_shell_files(
     repo_root: Path,
     *,
     executable_finder: ExecutableFinder = shutil.which,
-) -> list[str]:
-    """Return failure descriptions for tracked bash and zsh files."""
+) -> ShellReport:
+    """Return failures and loud skips for tracked bash and zsh files."""
     files = collect_shell_files(repo_root)
     bash_files = [item.path for item in files if item.dialect == "bash"]
     zsh_files = [item.path for item in files if item.dialect == "zsh"]
     failures: list[str] = []
+    notes: list[str] = []
 
     bash_bin = _require_tool("bash", executable_finder) if bash_files else ""
     for file_path in bash_files:
@@ -130,8 +141,12 @@ def check_shell_files(
             detail = completed.stdout.strip() or completed.stderr.strip()
             failures.append(f"shellcheck: {detail}")
 
-    if zsh_files:
-        zsh_bin = _require_tool("zsh", executable_finder)
+    zsh_bin = executable_finder("zsh") if zsh_files else None
+    if zsh_files and zsh_bin is None:
+        # zsh is not pinnable through mise, and hosts without zsh never run
+        # the zsh configuration; skip loudly instead of failing the gate.
+        notes.append(f"skipped {len(zsh_files)} zsh files: zsh is not installed")
+    elif zsh_bin is not None:
         for file_path in zsh_files:
             completed = subprocess.run(
                 [zsh_bin, "-n", str(file_path)],
@@ -141,7 +156,7 @@ def check_shell_files(
             )
             if completed.returncode != 0:
                 failures.append(f"zsh syntax: {completed.stderr.strip()}")
-    return failures
+    return ShellReport(failures=tuple(failures), notes=tuple(notes))
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -149,13 +164,15 @@ def main(argv: list[str] | None = None) -> int:
     parser.parse_args(argv)
     repo_root = Path(__file__).resolve().parents[1]
     try:
-        failures = check_shell_files(repo_root)
+        report = check_shell_files(repo_root)
     except ShellCheckError as error:
         print(f"ERROR shell_check_failed {error}", file=sys.stderr)
         return 1
-    for failure in failures:
+    for note in report.notes:
+        print(note, file=sys.stderr)
+    for failure in report.failures:
         print(failure, file=sys.stderr)
-    if failures:
+    if report.failures:
         return 1
     print("Shell files pass syntax and ShellCheck gates.")
     return 0

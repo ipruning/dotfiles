@@ -31,10 +31,18 @@ def test_zsh_profile_reports_invalid_input_without_optional_gum(
         tool = tool_bin / command
         tool.write_text("#!/bin/sh\nexit 0\n")
         tool.chmod(0o755)
+    # Real bash and dirname serve the script preamble; the bare PATH keeps an
+    # optional host gum from hijacking the plain-error output this test pins.
+    import shutil as _shutil
+
+    for real in ("bash", "dirname"):
+        source = _shutil.which(real)
+        assert source is not None
+        (tool_bin / real).symlink_to(source)
 
     completed = subprocess.run(
         [str(executable), "invalid"],
-        env={"HOME": str(tmp_path), "PATH": f"{tool_bin}:/usr/bin:/bin"},
+        env={"HOME": str(tmp_path), "PATH": str(tool_bin)},
         check=False,
         capture_output=True,
         text=True,

@@ -61,12 +61,12 @@ def test_check_shell_files_reports_bash_syntax_failures_then_passes(
         return str(quiet_shellcheck) if name == "shellcheck" else shutil.which(name)
 
     failing = check_shell_files(repo_root, executable_finder=finder)
-    assert any(failure.startswith("bash syntax") for failure in failing)
+    assert any(failure.startswith("bash syntax") for failure in failing.failures)
 
     (repo_root / "modules/bin/broken").write_text(
         "#!/usr/bin/env bash\nif true; then\n  printf 'ok\\n'\nfi\n",
     )
-    assert check_shell_files(repo_root, executable_finder=finder) == []
+    assert check_shell_files(repo_root, executable_finder=finder).ok is True
 
 
 @requires_shellcheck
@@ -85,10 +85,10 @@ def test_check_shell_files_reports_shellcheck_warnings(tmp_path: Path) -> None:
         },
     )
 
-    failures = check_shell_files(repo_root)
+    report = check_shell_files(repo_root)
 
-    assert any(failure.startswith("shellcheck") for failure in failures)
-    assert any("SC2155" in failure for failure in failures)
+    assert any(failure.startswith("shellcheck") for failure in report.failures)
+    assert any("SC2155" in failure for failure in report.failures)
 
 
 @requires_zsh
@@ -100,9 +100,9 @@ def test_check_shell_files_checks_zsh_syntax(tmp_path: Path) -> None:
         },
     )
 
-    failures = check_shell_files(repo_root)
+    report = check_shell_files(repo_root)
 
-    assert any(failure.startswith("zsh syntax") for failure in failures)
+    assert any(failure.startswith("zsh syntax") for failure in report.failures)
 
 
 def test_check_shell_files_requires_missing_tools_explicitly(tmp_path: Path) -> None:
@@ -118,3 +118,30 @@ def test_check_shell_files_requires_missing_tools_explicitly(tmp_path: Path) -> 
                 None if name == "shellcheck" else shutil.which(name)
             ),
         )
+
+
+def test_check_shell_files_skips_zsh_loudly_when_zsh_is_absent(
+    tmp_path: Path,
+) -> None:
+    repo_root = _tracked_repo(
+        tmp_path,
+        {
+            "modules/zsh/env.zsh": "alias ok=true\n",
+            "modules/bin/good": "#!/usr/bin/env bash\nprintf 'ok\\n'\n",
+        },
+    )
+    quiet_shellcheck = tmp_path / "quiet-shellcheck"
+    quiet_shellcheck.write_text("#!/bin/sh\nexit 0\n")
+    quiet_shellcheck.chmod(0o755)
+
+    def finder(name: str) -> str | None:
+        if name == "zsh":
+            return None
+        if name == "shellcheck":
+            return str(quiet_shellcheck)
+        return shutil.which(name)
+
+    report = check_shell_files(repo_root, executable_finder=finder)
+
+    assert report.ok is True
+    assert any("zsh is not installed" in note for note in report.notes)
