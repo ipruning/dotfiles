@@ -160,6 +160,29 @@ def file_sha256(path: Path) -> str | None:
     return digest.hexdigest()
 
 
+def repo_aware_finder(
+    repo_root: Path,
+    executable_finder: ExecutableFinder,
+) -> ExecutableFinder:
+    """Resolve tools from PATH or from the repository's own built binaries.
+
+    Task environments do not expose generated/bin, so gating on PATH alone
+    would treat self-built tools (atuin) as absent and remove their owned
+    runtime files.
+    """
+
+    def find(tool: str) -> str | None:
+        found = executable_finder(tool)
+        if found:
+            return found
+        owned = repo_root / "generated/bin" / tool
+        if owned.is_file() and os.access(owned, os.X_OK):
+            return str(owned)
+        return None
+
+    return find
+
+
 def _generator_result(
     spec: RuntimeSpec,
     *,
@@ -193,6 +216,7 @@ def plan_runtime(
     build: bool = False,
 ) -> RuntimeReport:
     """Return the exact generated runtime refresh without changing files."""
+    executable_finder = repo_aware_finder(repo_root, executable_finder)
     functions_dir = repo_root / "generated/functions"
     completions_dir = repo_root / "generated/completions"
     plugins_dir = repo_root / "generated/plugins"
@@ -456,6 +480,11 @@ def _atomic_install(target: Path, writer: AtomicWriter) -> None:
 def _command_environment(spec: RuntimeSpec, home: Path) -> dict[str, str]:
     environment = os.environ.copy()
     environment["HOME"] = str(home)
+    if spec.tool is not None and spec.target is not None:
+        # Generator subprocesses must resolve self-built tools that exist
+        # only under the repository's generated/bin sibling directory.
+        owned_bin = spec.target.parent.parent / "bin"
+        environment["PATH"] = f"{owned_bin}{os.pathsep}{environment.get('PATH', '')}"
     environment.update(dict(spec.environment))
     if spec.name == "function.mise":
         for name in (

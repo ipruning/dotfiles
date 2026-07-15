@@ -26,6 +26,7 @@ from .runtime import (
     PLUGIN_SPECS,
     WASM_SPECS,
     file_sha256,
+    repo_aware_finder,
 )
 
 ExecutableFinder = Callable[[str], str | None]
@@ -717,12 +718,13 @@ def inspect_host(
                 repo_root / "generated" / directory, directory
             ),
         )
+    owned_tool_finder = repo_aware_finder(repo_root, executable_finder)
     for tool, _command, filename in FUNCTION_SPECS:
         finding = _owned_generated_capability(
             f"runtime.function.{tool}",
             repo_root / "generated/functions" / filename,
             f"Generated {tool} Zsh initialization",
-            tool_available=executable_finder(tool) is not None,
+            tool_available=owned_tool_finder(tool) is not None,
         )
         if finding:
             findings.append(finding)
@@ -731,7 +733,7 @@ def inspect_host(
             f"runtime.completion.{name}",
             repo_root / "generated/completions" / filename,
             f"Generated {name} completion",
-            tool_available=executable_finder(tool) is not None,
+            tool_available=owned_tool_finder(tool) is not None,
         )
         if finding:
             findings.append(finding)
