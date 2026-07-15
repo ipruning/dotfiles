@@ -149,6 +149,21 @@ def _validate_reference_parent(reference_path: Path, reference_root: Path) -> No
     _relative_path(existing.resolve(), reference_root.resolve(), "reference parent")
 
 
+def _validate_live_parent(live_path: Path, home: Path) -> None:
+    """Refuse live paths whose parent chain escapes home through a symlink.
+
+    Leaf symlinks are mirrored as symlinks, but a symlinked parent directory
+    would make the copy read content from outside $HOME into tracked data.
+    Restore applies the same confinement in the opposite direction.
+    """
+    existing = live_path.parent
+    while not (existing.exists() or existing.is_symlink()):
+        if existing == existing.parent:
+            raise AdoptError(f"live parent has no existing ancestor: {live_path}")
+        existing = existing.parent
+    _relative_path(existing.resolve(), home.resolve(), "live parent")
+
+
 def _copy_live_into_reference(live_path: Path, reference_path: Path) -> None:
     if live_path.is_dir() and not live_path.is_symlink():
         with tempfile.TemporaryDirectory(
@@ -236,6 +251,7 @@ def apply_adopt(repo_root: Path, home: Path, plan: AdoptReport) -> AdoptReport:
             if planned.action == "copy":
                 if not (drift.live_path.exists() or drift.live_path.is_symlink()):
                     raise AdoptError(f"live path does not exist: {drift.live_path}")
+                _validate_live_parent(drift.live_path, home)
                 drift.reference_path.parent.mkdir(parents=True, exist_ok=True)
             _relative_path(
                 drift.reference_path.parent.resolve(),

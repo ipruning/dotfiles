@@ -349,3 +349,42 @@ def test_plan_adopt_marks_unreadable_drift_failed(tmp_path: Path, monkeypatch) -
 
     assert plan.ok is False
     assert "permission denied" in (plan.results[0].error or "")
+
+
+def test_adopt_refuses_live_paths_under_symlinked_parents(tmp_path: Path) -> None:
+    repo_root, home = _tracked_repo(tmp_path)
+    (repo_root / "reference/.seed").write_text("seed\n")
+    _commit_all(repo_root)
+    outside = tmp_path / "volume-config"
+    outside.mkdir()
+    (outside / "secret.toml").write_text("outside-home content\n")
+    (home / ".config").symlink_to(outside)
+
+    plan = _plan(
+        AdoptResult(
+            _drift(repo_root, home, ".config/secret.toml", DriftKind.ONLY_LIVE),
+            action="copy",
+            status=AdoptStatus.PLANNED,
+        ),
+    )
+    applied = apply_adopt(repo_root, home, plan)
+
+    assert applied.ok is False
+    assert "live parent" in (applied.results[0].error or "")
+    assert not (repo_root / "reference/.config").exists()
+
+    inner = home / "real-dir"
+    inner.mkdir()
+    (inner / "ok.toml").write_text("inside content\n")
+    (home / ".linkdir2").symlink_to(inner)
+    inner_plan = _plan(
+        AdoptResult(
+            _drift(repo_root, home, ".linkdir2/ok.toml", DriftKind.ONLY_LIVE),
+            action="copy",
+            status=AdoptStatus.PLANNED,
+        ),
+    )
+    inner_applied = apply_adopt(repo_root, home, inner_plan)
+
+    assert inner_applied.ok is True
+    assert (repo_root / "reference/.linkdir2/ok.toml").read_text() == "inside content\n"
