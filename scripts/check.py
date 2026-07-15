@@ -10,13 +10,12 @@ import platform
 import shutil
 import stat
 import subprocess
-from collections.abc import Callable
 from pathlib import Path
 
 from ruamel.yaml import YAML
 from ruamel.yaml.error import YAMLError
 
-from .models import CheckReport, Finding, Severity
+from .models import CheckReport, ExecutableFinder, Finding, Severity
 from .profiles import HostProfile, resolve_profile
 from .render import finding_document, render_findings
 from .runtime import (
@@ -29,42 +28,29 @@ from .runtime import (
     repo_aware_finder,
 )
 
-ExecutableFinder = Callable[[str], str | None]
-
-
-def _finding(
-    check: str,
-    severity: Severity,
-    code: str,
-    message: str,
-    path: Path | None = None,
-    action: str | None = None,
-) -> Finding:
-    return Finding(check, severity, code, message, path, action)
-
 
 def _check_executable(
-    command: str,
+    tool: str,
     *,
     required: bool,
     executable_finder: ExecutableFinder,
 ) -> Finding:
-    executable = executable_finder(command)
+    executable = executable_finder(tool)
     if executable:
-        return _finding(
-            f"executable.{command}",
+        return Finding(
+            f"executable.{tool}",
             Severity.OK,
-            f"executable.{command}.ready",
-            f"{command} is available",
+            f"executable.{tool}.ready",
+            f"{tool} is available",
             Path(executable),
         )
     severity = Severity.ERROR if required else Severity.WARN
-    return _finding(
-        f"executable.{command}",
+    return Finding(
+        f"executable.{tool}",
         severity,
-        f"executable.{command}.missing",
-        f"{command} is not available on PATH",
-        action=f"Install {command} if this host needs that capability.",
+        f"executable.{tool}.missing",
+        f"{tool} is not available on PATH",
+        action=f"Install {tool} if this host needs that capability.",
     )
 
 
@@ -148,7 +134,7 @@ def _private_git_findings(home: Path) -> list[Finding]:
         except OSError:
             include_present = False
     findings = [
-        _finding(
+        Finding(
             "git.private_include",
             Severity.OK if include_present else Severity.WARN,
             (
@@ -167,7 +153,7 @@ def _private_git_findings(home: Path) -> list[Finding]:
     ]
     if not private_config.is_file():
         findings.append(
-            _finding(
+            Finding(
                 "git.private_file",
                 Severity.WARN,
                 "git.private_file_missing",
@@ -179,7 +165,7 @@ def _private_git_findings(home: Path) -> list[Finding]:
         return findings
     writable_by_others = private_config.stat().st_mode & (stat.S_IWGRP | stat.S_IWOTH)
     findings.append(
-        _finding(
+        Finding(
             "git.private_file",
             Severity.WARN if writable_by_others else Severity.OK,
             (
@@ -198,7 +184,7 @@ def _private_git_findings(home: Path) -> list[Finding]:
     )
     identity_ready = _private_git_identity_ready(private_config, home)
     findings.append(
-        _finding(
+        Finding(
             "git.private_identity",
             Severity.OK if identity_ready else Severity.WARN,
             (
@@ -234,7 +220,7 @@ def _skillshare_findings(home: Path) -> list[Finding]:
     config_path = home / ".config/skillshare/config.yaml"
     if not config_path.is_file():
         return [
-            _finding(
+            Finding(
                 "skillshare.config",
                 Severity.WARN,
                 "skillshare.config_missing",
@@ -250,7 +236,7 @@ def _skillshare_findings(home: Path) -> list[Finding]:
             raise TypeError("sources.skills must be a string")
     except (OSError, KeyError, TypeError, YAMLError) as error:
         return [
-            _finding(
+            Finding(
                 "skillshare.config",
                 Severity.WARN,
                 "skillshare.config_invalid",
@@ -261,14 +247,14 @@ def _skillshare_findings(home: Path) -> list[Finding]:
         ]
     source = _expand_home(source_value, home)
     return [
-        _finding(
+        Finding(
             "skillshare.config",
             Severity.OK,
             "skillshare.config_ready",
             "Skillshare configuration is readable",
             config_path,
         ),
-        _finding(
+        Finding(
             "skillshare.source",
             Severity.OK if source.is_dir() else Severity.WARN,
             (
@@ -289,7 +275,7 @@ def _skillshare_findings(home: Path) -> list[Finding]:
     ]
 
 
-def _skillshare_doctor_finding(executable: Path, home: Path) -> Finding:
+def _skillshare_doctorFinding(executable: Path, home: Path) -> Finding:
     environment = os.environ.copy()
     environment["HOME"] = str(home)
     try:
@@ -302,7 +288,7 @@ def _skillshare_doctor_finding(executable: Path, home: Path) -> Finding:
             text=True,
         )
     except OSError as error:
-        return _finding(
+        return Finding(
             "skillshare.doctor",
             Severity.WARN,
             "skillshare.doctor_unavailable",
@@ -343,7 +329,7 @@ def _skillshare_doctor_finding(executable: Path, home: Path) -> Finding:
             warnings = actionable_warnings
             errors = reported_errors
     except (json.JSONDecodeError, KeyError, TypeError) as error:
-        return _finding(
+        return Finding(
             "skillshare.doctor",
             Severity.WARN,
             "skillshare.doctor_invalid",
@@ -351,7 +337,7 @@ def _skillshare_doctor_finding(executable: Path, home: Path) -> Finding:
             action="Run skillshare doctor --json and inspect its output.",
         )
     if errors or completed.returncode != 0:
-        return _finding(
+        return Finding(
             "skillshare.doctor",
             Severity.WARN,
             "skillshare.doctor_failed",
@@ -360,14 +346,14 @@ def _skillshare_doctor_finding(executable: Path, home: Path) -> Finding:
             action="Resolve doctor errors before treating Skillshare as ready.",
         )
     if warnings:
-        return _finding(
+        return Finding(
             "skillshare.doctor",
             Severity.WARN,
             "skillshare.doctor_warnings",
             f"Skillshare doctor reports {warnings} actionable warning(s)",
             action="Review Skillshare warnings, including failed tracked repositories.",
         )
-    return _finding(
+    return Finding(
         "skillshare.doctor",
         Severity.OK,
         "skillshare.doctor_ready",
@@ -382,7 +368,7 @@ def _file_capability(
     missing_action: str | None = None,
 ) -> Finding:
     exists = file_path.is_file()
-    return _finding(
+    return Finding(
         check,
         Severity.OK if exists else Severity.WARN,
         f"{check}_{'ready' if exists else 'missing'}",
@@ -403,7 +389,7 @@ def _owned_generated_capability(
     if tool_available:
         return _file_capability(check, file_path, label, action)
     if file_path.exists() or file_path.is_symlink():
-        return _finding(
+        return Finding(
             check,
             Severity.WARN,
             f"{check}_stale",
@@ -424,14 +410,14 @@ def _binary_capability(check: str, file_path: Path, label: str) -> Finding:
     except OSError:
         ready = False
     if ready:
-        return _finding(
+        return Finding(
             check,
             Severity.OK,
             f"{check}_ready",
             f"{label} is present and executable",
             file_path,
         )
-    return _finding(
+    return Finding(
         check,
         Severity.WARN,
         f"{check}_invalid",
@@ -441,9 +427,9 @@ def _binary_capability(check: str, file_path: Path, label: str) -> Finding:
     )
 
 
-def _generated_directory_finding(directory_path: Path, label: str) -> Finding:
+def _generated_directoryFinding(directory_path: Path, label: str) -> Finding:
     if not directory_path.is_dir():
-        return _finding(
+        return Finding(
             f"shell.{label}",
             Severity.WARN,
             f"shell.{label}_missing",
@@ -456,7 +442,7 @@ def _generated_directory_finding(directory_path: Path, label: str) -> Finding:
         for child in directory_path.rglob("*")
         if child.is_file() or child.is_symlink()
     )
-    return _finding(
+    return Finding(
         f"shell.{label}",
         Severity.OK if populated else Severity.WARN,
         f"shell.{label}_{'ready' if populated else 'empty'}",
@@ -467,14 +453,14 @@ def _generated_directory_finding(directory_path: Path, label: str) -> Finding:
     )
 
 
-def _bash_integration_finding(repo_root: Path, home: Path) -> Finding:
+def _bash_integrationFinding(repo_root: Path, home: Path) -> Finding:
     bashrc = home / ".bashrc"
     module_path = repo_root.resolve() / "modules/bash/init.bash"
     try:
         configured = bashrc.is_file() and str(module_path) in bashrc.read_text()
     except OSError:
         configured = False
-    return _finding(
+    return Finding(
         "shell.bash",
         Severity.OK if configured else Severity.WARN,
         "shell.bash_ready" if configured else "shell.bash_missing",
@@ -486,7 +472,7 @@ def _bash_integration_finding(repo_root: Path, home: Path) -> Finding:
     )
 
 
-def _legacy_repo_path_finding(repo_root: Path) -> Finding:
+def _legacy_repo_pathFinding(repo_root: Path) -> Finding:
     legacy_directories = (
         (repo_root / "modules/bin").resolve(),
         (repo_root / "generated/bin").resolve(),
@@ -504,7 +490,7 @@ def _legacy_repo_path_finding(repo_root: Path) -> Finding:
         ),
         None,
     )
-    return _finding(
+    return Finding(
         "shell.repo_commands",
         Severity.WARN if exposed else Severity.OK,
         ("shell.repo_commands_exposed" if exposed else "shell.repo_commands_isolated"),
@@ -534,7 +520,7 @@ def _session_health_findings(
     executable = executable_finder("macos-session-health")
     if executable is None:
         return [
-            _finding(
+            Finding(
                 "session_health.agent",
                 Severity.WARN,
                 "session_health.missing",
@@ -554,7 +540,7 @@ def _session_health_findings(
         )
     except (OSError, subprocess.TimeoutExpired) as error:
         return [
-            _finding(
+            Finding(
                 "session_health.agent",
                 Severity.WARN,
                 "session_health.status_unavailable",
@@ -565,7 +551,7 @@ def _session_health_findings(
     if completed.returncode != 0 and not completed.stdout.strip():
         detail = completed.stderr.strip() or f"exit {completed.returncode}"
         return [
-            _finding(
+            Finding(
                 "session_health.agent",
                 Severity.WARN,
                 "session_health.status_unavailable",
@@ -583,7 +569,7 @@ def _session_health_findings(
         configured = bool(record.get("notification_configured"))
     except (json.JSONDecodeError, LookupError, TypeError, ValueError) as error:
         return [
-            _finding(
+            Finding(
                 "session_health.agent",
                 Severity.WARN,
                 "session_health.status_invalid",
@@ -594,7 +580,7 @@ def _session_health_findings(
 
     agent_ready = installed and loaded
     findings = [
-        _finding(
+        Finding(
             "session_health.agent",
             Severity.OK if agent_ready else Severity.WARN,
             "session_health.agent_ready"
@@ -620,7 +606,7 @@ def _session_health_findings(
         except ValueError, TypeError:
             snapshot_fresh = False
     findings.append(
-        _finding(
+        Finding(
             "session_health.snapshot",
             Severity.OK if snapshot_fresh else Severity.WARN,
             "session_health.snapshot_recent"
@@ -639,7 +625,7 @@ def _session_health_findings(
 
     if not configured:
         findings.append(
-            _finding(
+            Finding(
                 "session_health.notifications",
                 Severity.WARN,
                 "session_health.notifications_unconfigured",
@@ -649,7 +635,7 @@ def _session_health_findings(
         )
     elif failures >= SESSION_HEALTH_FAILURE_STREAK:
         findings.append(
-            _finding(
+            Finding(
                 "session_health.notifications",
                 Severity.WARN,
                 "session_health.notifications_failing",
@@ -659,7 +645,7 @@ def _session_health_findings(
         )
     else:
         findings.append(
-            _finding(
+            Finding(
                 "session_health.notifications",
                 Severity.OK,
                 "session_health.notifications_ready",
@@ -702,10 +688,10 @@ def inspect_host(
     findings.append(skillshare_finding)
     findings.extend(_skillshare_findings(home))
     if skillshare_finding.path and (home / ".config/skillshare/config.yaml").is_file():
-        findings.append(_skillshare_doctor_finding(skillshare_finding.path, home))
+        findings.append(_skillshare_doctorFinding(skillshare_finding.path, home))
     if active_profile is HostProfile.LINUX_LITE:
-        findings.append(_bash_integration_finding(repo_root, home))
-        findings.append(_legacy_repo_path_finding(repo_root))
+        findings.append(_bash_integrationFinding(repo_root, home))
+        findings.append(_legacy_repo_pathFinding(repo_root))
         return CheckReport(schema_version=1, findings=tuple(findings))
     if active_system == "Darwin":
         findings.extend(_session_health_findings(executable_finder))
@@ -725,9 +711,7 @@ def inspect_host(
     )
     for directory in ("plugins", "completions", "functions"):
         findings.append(
-            _generated_directory_finding(
-                repo_root / "generated" / directory, directory
-            ),
+            _generated_directoryFinding(repo_root / "generated" / directory, directory),
         )
     owned_tool_finder = repo_aware_finder(repo_root, executable_finder)
     for tool, _command, filename in FUNCTION_SPECS:
@@ -763,7 +747,7 @@ def inspect_host(
         actual_sha256 = file_sha256(plugin_path)
         if actual_sha256 == sha256:
             findings.append(
-                _finding(
+                Finding(
                     f"zellij.{plugin_name}",
                     Severity.OK,
                     f"zellij.{plugin_name}_ready",
@@ -779,7 +763,7 @@ def inspect_host(
                 else f"Zellij plugin {plugin_name} does not match its pinned checksum"
             )
             findings.append(
-                _finding(
+                Finding(
                     f"zellij.{plugin_name}",
                     Severity.WARN,
                     f"zellij.{plugin_name}_{code}",
@@ -807,7 +791,7 @@ def inspect_host(
             ):
                 continue
             findings.append(
-                _finding(
+                Finding(
                     f"runtime.binary.{file_path.name}",
                     Severity.WARN,
                     f"runtime.binary.{file_path.name}_unowned",
@@ -826,7 +810,7 @@ def inspect_host(
         )
     else:
         findings.append(
-            _finding(
+            Finding(
                 "macos.launchctl",
                 Severity.SKIPPED,
                 "macos.launchctl_skipped",

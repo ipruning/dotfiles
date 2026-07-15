@@ -33,6 +33,9 @@ semantics live in `README.md`.
   ignored.
 - Run `mise run verify` after changing Python tasks, shell files, mappings, or
   repository layout.
+- Naming rule: `apply_*` operations change file state and serialize their
+  results as `changes`; `execute_*` operations run external commands and
+  serialize theirs as `steps`.
 
 ## Skillshare boundary
 

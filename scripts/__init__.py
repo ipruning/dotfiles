@@ -1,1 +1,1 @@
-"""Read-only maintenance primitives for this repository."""
+"""Read-only maintenance tasks for this repository."""

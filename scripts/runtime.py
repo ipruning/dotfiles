@@ -17,7 +17,8 @@ from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
 
-ExecutableFinder = Callable[[str], str | None]
+from .models import ExecutableFinder
+
 Downloader = Callable[[str, int], bytes]
 AtomicWriter = Callable[[Path], object]
 
@@ -220,7 +221,6 @@ def plan_runtime(
     functions_dir = repo_root / "generated/functions"
     completions_dir = repo_root / "generated/completions"
     plugins_dir = repo_root / "generated/plugins"
-    sources_dir = repo_root / "generated/sources"
     results = []
     for tool, command, filename in FUNCTION_SPECS:
         spec = RuntimeSpec(
@@ -374,6 +374,7 @@ def plan_runtime(
         ),
     )
     if build:
+        sources_dir = repo_root / "generated/sources"
         cargo_available = executable_finder("cargo") is not None
         for name, source, build_command, artifact_relative in LOCAL_BINARY_SPECS:
             source_dir = sources_dir / name

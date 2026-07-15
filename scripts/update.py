@@ -13,7 +13,8 @@ from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
 
-ExecutableFinder = Callable[[str], str | None]
+from .models import ExecutableFinder
+
 StepCallback = Callable[["UpdateStep"], None]
 NEXT_COMMANDS = (
     "mise run runtime -- --dry-run",

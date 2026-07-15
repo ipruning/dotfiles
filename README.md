@@ -129,7 +129,7 @@ paths.
 
 ## Host health
 
-`mise run check` reports required runtimes and optional capabilities separately.
+`mise run check` reports required executables and optional capabilities separately.
 Linux Lite requires Git and mise, checks private Git configuration and optional
 Skillshare state, and warns when a legacy PATH still exposes repository command
 directories. The macOS and full profiles additionally cover the project

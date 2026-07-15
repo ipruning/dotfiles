@@ -84,7 +84,7 @@ OPTIONAL_PATHS = {
 }
 
 
-def _finding(
+def _located_finding(
     severity: Severity,
     code: str,
     message: str,
@@ -114,7 +114,7 @@ def _iter_text_files(repo_root: Path) -> list[Path]:
         relative_text = relative.as_posix()
         if any(part in SKIP_PARTS for part in relative.parts):
             continue
-        if relative_text == "scripts/lint.py":
+        if file_path == Path(__file__).resolve():
             continue
         if relative_text.startswith(SKIP_PREFIXES):
             continue
@@ -138,7 +138,7 @@ def _expand_homeish(raw: str, home: Path) -> Path | None:
     return None
 
 
-def _path_exists(raw: str, home: Path) -> bool:
+def _expanded_path_exists(raw: str, home: Path) -> bool:
     normalized = raw.replace("\\ ", " ")
     if normalized.startswith("/Applications/") and ".app/" in normalized:
         normalized = normalized[: normalized.index(".app/") + len(".app")]
@@ -159,7 +159,7 @@ def _classify_path(
         raw.startswith(("/Applications/", "/opt/homebrew"))
         or (raw.startswith("/Users/") and relative.startswith("reference/"))
     ):
-        return _finding(
+        return _located_finding(
             Severity.SKIPPED,
             "path.platform_skipped",
             "macOS-only path is not evaluated on Linux",
@@ -168,7 +168,7 @@ def _classify_path(
             value=raw,
         )
     if (relative, raw) in OPTIONAL_PATHS:
-        return _finding(
+        return _located_finding(
             Severity.OK,
             "path.optional_compatibility",
             "explicitly guarded compatibility path",
@@ -179,9 +179,9 @@ def _classify_path(
     if raw.startswith(("/Users/", "/home/", "/root/")):
         if relative in FULL_HOME_REQUIRED_FILES:
             matches_home = raw == str(home) or raw.startswith(f"{home}/")
-            return _finding(
+            return _located_finding(
                 Severity.OK
-                if matches_home and _path_exists(raw, home)
+                if matches_home and _expanded_path_exists(raw, home)
                 else Severity.WARN,
                 "path.full_home_required",
                 FULL_HOME_REQUIRED_FILES[relative],
@@ -190,7 +190,7 @@ def _classify_path(
                 value=raw,
             )
         if not (raw == str(home) or raw.startswith(f"{home}/")):
-            return _finding(
+            return _located_finding(
                 Severity.ERROR,
                 "path.absolute_home",
                 f"absolute user path does not match HOME={home}",
@@ -198,7 +198,7 @@ def _classify_path(
                 line=line,
                 value=raw,
             )
-        return _finding(
+        return _located_finding(
             Severity.ERROR,
             "path.absolute_home",
             "replace the absolute user path with a supported home-relative form",
@@ -209,7 +209,7 @@ def _classify_path(
     if raw.startswith(("~/dotfiles", "$HOME/dotfiles", "${HOME}/dotfiles")):
         expected = (home / "dotfiles").resolve()
         severity = Severity.OK if repo_root.resolve() == expected else Severity.WARN
-        return _finding(
+        return _located_finding(
             severity,
             "path.dotfiles_root",
             f"path assumes repository location {expected}",
@@ -227,8 +227,8 @@ def _classify_path(
             "${HOME}/work/",
         ),
     ):
-        return _finding(
-            Severity.OK if _path_exists(raw, home) else Severity.WARN,
+        return _located_finding(
+            Severity.OK if _expanded_path_exists(raw, home) else Severity.WARN,
             "path.personal_workspace",
             "home-relative path binds this config to a personal workspace",
             source,
@@ -236,10 +236,10 @@ def _classify_path(
             value=raw,
         )
     if raw.startswith(("/opt/homebrew", "/usr/local")):
-        return _finding(
+        return _located_finding(
             (
                 Severity.OK
-                if system_name == "Linux" or _path_exists(raw, home)
+                if system_name == "Linux" or _expanded_path_exists(raw, home)
                 else Severity.WARN
             ),
             "path.toolchain",
@@ -250,7 +250,7 @@ def _classify_path(
         )
     if raw.startswith("/Applications/"):
         if "\\" in raw or "{" in raw or raw.endswith("$"):
-            return _finding(
+            return _located_finding(
                 Severity.OK,
                 "path.application_pattern",
                 "application path pattern used for process matching",
@@ -258,15 +258,15 @@ def _classify_path(
                 line=line,
                 value=raw,
             )
-        return _finding(
-            Severity.OK if _path_exists(raw, home) else Severity.WARN,
+        return _located_finding(
+            Severity.OK if _expanded_path_exists(raw, home) else Severity.WARN,
             "path.application",
             "macOS application path",
             source,
             line=line,
             value=raw,
         )
-    return _finding(
+    return _located_finding(
         Severity.OK,
         "path.home_relative",
         "home-relative path",
@@ -321,7 +321,7 @@ def _mackup_findings(repo_root: Path) -> list[Finding]:
     config_path = repo_root / "mackup/mackup.cfg"
     if not config_path.is_file():
         return [
-            _finding(
+            _located_finding(
                 Severity.ERROR,
                 "mackup.config_missing",
                 "Mackup config is missing",
@@ -352,7 +352,7 @@ def _mackup_findings(repo_root: Path) -> list[Finding]:
         for mapping_path in sorted(applications_dir.glob("*.cfg")):
             if mapping_path.stem not in selected:
                 findings.append(
-                    _finding(
+                    _located_finding(
                         Severity.ERROR,
                         "mackup.mapping_unused",
                         "mapping is not selected in applications_to_sync;"
@@ -364,7 +364,7 @@ def _mackup_findings(repo_root: Path) -> list[Finding]:
         app_path = repo_root / "mackup/applications" / f"{application}.cfg"
         if not app_path.is_file():
             findings.append(
-                _finding(
+                _located_finding(
                     Severity.ERROR,
                     "mackup.application_missing",
                     f"selected application {application} has no mapping",
@@ -396,7 +396,7 @@ def _mackup_findings(repo_root: Path) -> list[Finding]:
         candidate_set = set(candidates)
         for candidate in sorted(optional_candidates - candidate_set):
             findings.append(
-                _finding(
+                _located_finding(
                     Severity.ERROR,
                     "mackup.optional_reference_unmapped",
                     f"selected application {application} marks an unmapped candidate optional",
@@ -412,7 +412,7 @@ def _mackup_findings(repo_root: Path) -> list[Finding]:
             if candidate not in optional_candidates
         ):
             findings.append(
-                _finding(
+                _located_finding(
                     Severity.ERROR,
                     "mackup.reference_missing",
                     f"selected application {application} maps missing reference data",
@@ -421,7 +421,7 @@ def _mackup_findings(repo_root: Path) -> list[Finding]:
             )
         if candidates and len(missing_candidates) == len(candidates):
             findings.append(
-                _finding(
+                _located_finding(
                     Severity.ERROR,
                     "mackup.application_empty",
                     f"selected application {application} has no reference data",
@@ -430,7 +430,7 @@ def _mackup_findings(repo_root: Path) -> list[Finding]:
             )
     if not findings:
         findings.append(
-            _finding(
+            _located_finding(
                 Severity.OK,
                 "mackup.mapping_ready",
                 f"{len(applications)} selected applications have reference data",
@@ -464,7 +464,7 @@ def _tracked_file_findings(repo_root: Path) -> list[Finding]:
             and ".template." not in basename
         ):
             findings.append(
-                _finding(
+                _located_finding(
                     Severity.ERROR,
                     "repository.private_tracked",
                     "materialized private file must not be tracked",
@@ -473,7 +473,7 @@ def _tracked_file_findings(repo_root: Path) -> list[Finding]:
             )
         if relative.startswith("generated/"):
             findings.append(
-                _finding(
+                _located_finding(
                     Severity.ERROR,
                     "repository.generated_tracked",
                     "generated file has no repository regeneration task",
@@ -535,7 +535,7 @@ def _legacy_reference_findings(repo_root: Path) -> list[Finding]:
             for legacy in LEGACY_REFERENCES:
                 if _contains_legacy_reference(line, legacy):
                     findings.append(
-                        _finding(
+                        _located_finding(
                             Severity.ERROR,
                             "repository.legacy_reference",
                             "removed dotfiles workflow is still referenced",
@@ -549,7 +549,7 @@ def _legacy_reference_findings(repo_root: Path) -> list[Finding]:
 
 def _symlink_findings(repo_root: Path) -> list[Finding]:
     return [
-        _finding(
+        _located_finding(
             Severity.ERROR,
             "repository.dangling_symlink",
             "tracked symlink target does not exist",
@@ -568,7 +568,7 @@ def _skillshare_config_findings(repo_root: Path) -> list[Finding]:
         document = YAML(typ="safe").load(config_path)
     except Exception as error:
         return [
-            _finding(
+            _located_finding(
                 Severity.ERROR,
                 "skillshare.config_invalid",
                 f"Skillshare config is not valid YAML: {error}",
@@ -577,7 +577,7 @@ def _skillshare_config_findings(repo_root: Path) -> list[Finding]:
         ]
     if not isinstance(document, dict):
         return [
-            _finding(
+            _located_finding(
                 Severity.ERROR,
                 "skillshare.config_invalid",
                 "Skillshare config must be a mapping",
@@ -589,7 +589,7 @@ def _skillshare_config_findings(repo_root: Path) -> list[Finding]:
     extras = document.get("extras", [])
     if not isinstance(extras, list):
         return [
-            _finding(
+            _located_finding(
                 Severity.ERROR,
                 "skillshare.config_invalid",
                 "Skillshare extras must be a list",
@@ -599,7 +599,7 @@ def _skillshare_config_findings(repo_root: Path) -> list[Finding]:
     for extra in extras:
         if not isinstance(extra, dict):
             findings.append(
-                _finding(
+                _located_finding(
                     Severity.ERROR,
                     "skillshare.config_invalid",
                     "Skillshare extras entries must be mappings",
@@ -612,7 +612,7 @@ def _skillshare_config_findings(repo_root: Path) -> list[Finding]:
         targets = extra.get("targets", [])
         if not isinstance(targets, list):
             findings.append(
-                _finding(
+                _located_finding(
                     Severity.ERROR,
                     "skillshare.config_invalid",
                     f"extra {name} targets must be a list",
@@ -624,7 +624,7 @@ def _skillshare_config_findings(repo_root: Path) -> list[Finding]:
         for target in targets:
             if not isinstance(target, dict):
                 findings.append(
-                    _finding(
+                    _located_finding(
                         Severity.ERROR,
                         "skillshare.config_invalid",
                         f"extra {name} targets must be mappings",
@@ -636,7 +636,7 @@ def _skillshare_config_findings(repo_root: Path) -> list[Finding]:
             target_path = target.get("path", "<missing>")
             if target.get("mode") != "copy":
                 findings.append(
-                    _finding(
+                    _located_finding(
                         Severity.ERROR,
                         "skillshare.extra_mode_unsafe",
                         f"extra {name} must use copy mode because its target contains runtime state",
@@ -646,7 +646,7 @@ def _skillshare_config_findings(repo_root: Path) -> list[Finding]:
                 )
     if not findings:
         findings.append(
-            _finding(
+            _located_finding(
                 Severity.OK,
                 "skillshare.extra_modes_safe",
                 "all extras targets use non-pruning copy mode",

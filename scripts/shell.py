@@ -6,11 +6,11 @@ import argparse
 import shutil
 import subprocess
 import sys
-from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
-ExecutableFinder = Callable[[str], str | None]
+from .models import ExecutableFinder
+
 
 BASH_SUFFIXES = {".bash", ".sh"}
 ZSH_SUFFIXES = {".zsh"}
@@ -28,7 +28,7 @@ class ShellFile:
     dialect: str
 
 
-def classify(relative: str, first_line: str, second_line: str = "") -> str | None:
+def shell_dialect(relative: str, first_line: str, second_line: str = "") -> str | None:
     """Return the shell dialect of a tracked file, or None for non-shell files."""
     if relative.startswith(SKIP_PREFIXES):
         return None
@@ -77,7 +77,7 @@ def collect_shell_files(repo_root: Path) -> list[ShellFile]:
             continue
         first_line = head[0].decode(errors="replace")
         second_line = head[1].decode(errors="replace") if len(head) > 1 else ""
-        dialect = classify(relative, first_line, second_line)
+        dialect = shell_dialect(relative, first_line, second_line)
         if dialect:
             files.append(ShellFile(path=file_path, dialect=dialect))
     return files

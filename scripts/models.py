@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
 
 from .profiles import HostProfile
+
+ExecutableFinder = Callable[[str], str | None]
 
 
 class DriftKind(StrEnum):
@@ -21,6 +24,7 @@ class Severity(StrEnum):
     OK = "ok"
     WARN = "warn"
     ERROR = "error"
+    # TODO(cleanup): trigger=fact:finding schema_version is bumped beyond 1; action=move SKIPPED out of Severity into an applicability field
     SKIPPED = "skipped"
 
 
@@ -45,10 +49,6 @@ class Finding:
 class FindingReport:
     schema_version: int
     findings: tuple[Finding, ...]
-
-    @property
-    def ok(self) -> bool:
-        return self.is_ok()
 
     def is_ok(self, *, strict: bool = False) -> bool:
         failing = {Severity.ERROR}
