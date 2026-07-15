@@ -2891,6 +2891,10 @@ def read_brrr_secret_from_file(env_file: Path) -> str:
             fields = shlex.split(line, comments=True, posix=True)
         except ValueError:
             continue
+        if fields and fields[0] == "export":
+            # bag-mode sources the same env files, which makes the
+            # shell-idiomatic `export KEY=value` form equally valid here.
+            fields = fields[1:]
         if len(fields) != 1 or "=" not in fields[0]:
             continue
         key, value = fields[0].split("=", 1)

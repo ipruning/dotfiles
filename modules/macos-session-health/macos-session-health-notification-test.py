@@ -397,6 +397,20 @@ class NotificationStateTest(unittest.TestCase):
         self.assertEqual(missing["consecutive_delivery_failures"], 0)
         self.assertEqual(missing["last_snapshot_at"], "")
 
+    def test_secret_file_accepts_plain_quoted_and_exported_forms(self) -> None:
+        reader = self.module["read_brrr_secret_from_file"]
+        env_file = Path(self.temp_dir.name) / "env"
+        for content, expected in (
+            ("BRRR_SECRET=plain\n", "plain"),
+            ("BRRR_SECRET='quoted value'\n", "quoted value"),
+            ("export BRRR_SECRET=exported\n", "exported"),
+            ("# comment\nexport BRRR_SECRET='exported quoted'\n", "exported quoted"),
+            ("OTHER=x\n", ""),
+            ("export\n", ""),
+        ):
+            env_file.write_text(content)
+            self.assertEqual(reader(env_file), expected, content)
+
     def test_explicit_secret_wins_over_exe_dev_proxy(self) -> None:
         with (
             mock.patch.dict(self.module["os"].environ, {"BRRR_SECRET": "test-secret"}),
