@@ -123,43 +123,18 @@ url = "https://github.com/lycorp-jp/sim-use/releases/download/v0.10.0/sim-use-v0
 url_api = "https://api.github.com/repos/lycorp-jp/sim-use/releases/assets/470891595"
 
 [[tools."github:schpet/linear-cli"]]
-version = "2.0.0"
+version = "2.1.0"
 backend = "github:schpet/linear-cli"
 
-[tools."github:schpet/linear-cli"."platforms.linux-arm64"]
-checksum = "sha256:6c3afdd11c7c0fb90053d4b53b27252b5c35bb75c679383234bef20a25558eac"
-url = "https://github.com/schpet/linear-cli/releases/download/v2.0.0/linear-aarch64-unknown-linux-gnu.tar.xz"
-url_api = "https://api.github.com/repos/schpet/linear-cli/releases/assets/388120597"
-
-[tools."github:schpet/linear-cli"."platforms.linux-arm64-musl"]
-checksum = "sha256:6c3afdd11c7c0fb90053d4b53b27252b5c35bb75c679383234bef20a25558eac"
-url = "https://github.com/schpet/linear-cli/releases/download/v2.0.0/linear-aarch64-unknown-linux-gnu.tar.xz"
-url_api = "https://api.github.com/repos/schpet/linear-cli/releases/assets/388120597"
-
 [tools."github:schpet/linear-cli"."platforms.linux-x64"]
-checksum = "sha256:affb594672c2f220cef68fa7cfeb813945c4010789a4b8cc2c0e46468feb7870"
-url = "https://github.com/schpet/linear-cli/releases/download/v2.0.0/linear-x86_64-unknown-linux-gnu.tar.xz"
-url_api = "https://api.github.com/repos/schpet/linear-cli/releases/assets/388120649"
-
-[tools."github:schpet/linear-cli"."platforms.linux-x64-musl"]
-checksum = "sha256:affb594672c2f220cef68fa7cfeb813945c4010789a4b8cc2c0e46468feb7870"
-url = "https://github.com/schpet/linear-cli/releases/download/v2.0.0/linear-x86_64-unknown-linux-gnu.tar.xz"
-url_api = "https://api.github.com/repos/schpet/linear-cli/releases/assets/388120649"
+checksum = "sha256:1371df083f1f164fed3c6df414a2facdc6e5d3be27c355f173138248238c13e3"
+url = "https://github.com/schpet/linear-cli/releases/download/v2.1.0/linear-x86_64-unknown-linux-gnu.tar.xz"
+url_api = "https://api.github.com/repos/schpet/linear-cli/releases/assets/477550606"
 
 [tools."github:schpet/linear-cli"."platforms.macos-arm64"]
-checksum = "sha256:121fe1eee6d90b22e76e4e98cbb624474eecd970a4a4c622fd4d50889b57dacc"
-url = "https://github.com/schpet/linear-cli/releases/download/v2.0.0/linear-aarch64-apple-darwin.tar.xz"
-url_api = "https://api.github.com/repos/schpet/linear-cli/releases/assets/388120583"
-
-[tools."github:schpet/linear-cli"."platforms.macos-x64"]
-checksum = "sha256:729e67166c5094c895150b672cd3a4461fa899897e1f24dbcd07c13bb3b48c13"
-url = "https://github.com/schpet/linear-cli/releases/download/v2.0.0/linear-x86_64-apple-darwin.tar.xz"
-url_api = "https://api.github.com/repos/schpet/linear-cli/releases/assets/388120619"
-
-[tools."github:schpet/linear-cli"."platforms.windows-x64"]
-checksum = "sha256:f1055b96a70c8bb403ca34b65283986b1d6bc9830e27c5f3571106db5dd92715"
-url = "https://github.com/schpet/linear-cli/releases/download/v2.0.0/linear-x86_64-pc-windows-msvc.zip"
-url_api = "https://api.github.com/repos/schpet/linear-cli/releases/assets/388120631"
+checksum = "sha256:e1ad596cea80327caa6cb5fbfff3a8cfd1e92027ab75ee267d85cd45c32ccabc"
+url = "https://github.com/schpet/linear-cli/releases/download/v2.1.0/linear-aarch64-apple-darwin.tar.xz"
+url_api = "https://api.github.com/repos/schpet/linear-cli/releases/assets/477550538"
 
 [[tools.go]]
 version = "1.26.5"
