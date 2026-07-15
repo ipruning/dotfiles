@@ -332,6 +332,16 @@ rg -q '"subtitle":"bag-mode · test host"' "$test_root/notifier-builtin-dry-run.
   || fail 'built-in brrr sender did not preserve the notification subtitle'
 rg -q '"expiration_date":"2026-07-13T18:00:00Z"' "$test_root/notifier-builtin-dry-run.out" \
   || fail 'built-in brrr sender did not preserve the expiration date'
+stub_home="$test_root/stub-env-home"
+mkdir -p "$stub_home/.config/brrr" "$stub_home/.config/notify"
+printf '# stub without a secret\n' >"$stub_home/.config/brrr/env"
+printf 'export BRRR_SECRET=from-second-file\n' >"$stub_home/.config/notify/brrr.env"
+env -u BRRR_SECRET HOME="$stub_home" /bin/bash "$user_support_dir/notifiers/brrr-send" \
+  --title 'fallthrough' --message 'stub first file' --dry-run \
+  >"$test_root/notifier-env-fallthrough.out"
+rg -q '^auth_mode=bearer$' "$test_root/notifier-env-fallthrough.out" \
+  || fail 'a secretless readable env file masked the later brrr env candidate'
+
 proxy_marker="$test_root/shelley.json"
 proxy_sender="$test_root/brrr-send-proxy-test"
 sed "s#/exe.dev/shelley.json#$proxy_marker#g" "$user_support_dir/notifiers/brrr-send" >"$proxy_sender"

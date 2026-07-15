@@ -5,7 +5,7 @@
 
 set -uo pipefail
 
-VERSION="2.5.0"
+VERSION="2.5.1"
 EXIT_USAGE=2
 EXIT_BRIGHTNESS_PENDING=69
 EXIT_START_FAILED=70
@@ -1832,7 +1832,8 @@ if [[ -z "${BRRR_SECRET:-}" ]]; then
     if [[ -r "$env_file" ]]; then
       # shellcheck disable=SC1090
       source "$env_file"
-      break
+      # A readable file without the secret must not mask later candidates.
+      [[ -n "${BRRR_SECRET:-}" ]] && break
     fi
   done
 fi
