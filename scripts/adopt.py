@@ -19,7 +19,6 @@ from .models import Drift, DriftKind
 class AdoptStatus(StrEnum):
     PLANNED = "planned"
     APPLIED = "applied"
-    SKIPPED = "skipped"
     FAILED = "failed"
 
 

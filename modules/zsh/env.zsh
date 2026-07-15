@@ -266,7 +266,7 @@ _openv_resolve_op_env_bin() {
     fi
   fi
 
-  local generated="$HOME/dotfiles/generated/bin/op"
+  local generated="$HOME/dotfiles/generated/bin/op-cache"
   if [[ -x "$generated" ]] && "$generated" environment read --help >/dev/null 2>&1; then
     echo "$generated"
     return 0

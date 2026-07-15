@@ -80,10 +80,6 @@ OPTIONAL_PATHS = {
         "modules/macos-session-health/macos-session-health",
         "/Applications/{app_name}.app/Contents/Resources/cua_node/bin/node_repl",
     ),
-    (
-        "modules/macos-session-health/macos-session-health",
-        "/Applications/ChatGPT\\.app/Contents/MacOS/ChatGPT$",
-    ),
     ("modules/zsh/env.zsh", "/usr/local/bin/op"),
 }
 

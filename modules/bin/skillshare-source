@@ -8,8 +8,8 @@
 #     "typer==0.26.8",
 # ]
 # ///
-# NOTE: ruamel.yaml is still needed for _set_source() (config write).
-# No `skillshare config set` command exists yet.
+# TODO(cleanup): trigger=fact:skillshare provides a config-set command; action=drop the ruamel-yaml dependency and write config through skillshare itself
+# ruamel.yaml is only needed because _set_source() must rewrite config.yaml directly.
 """Skillshare source switcher — manage multiple skillshare source directories."""
 
 from __future__ import annotations
