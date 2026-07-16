@@ -676,22 +676,35 @@ def inspect_repository(
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Inspect repository invariants.")
-    parser.add_argument("--json", action="store_true", dest="as_json")
-    parser.add_argument("--strict", action="store_true")
-    parser.add_argument("--include-info", action="store_true")
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        dest="as_json",
+        help="emit the report as JSON on stdout",
+    )
+    parser.add_argument(
+        "--strict",
+        action="store_true",
+        help="treat warn findings as failures",
+    )
+    parser.add_argument(
+        "--include-ok",
+        action="store_true",
+        help="also list ok findings (default: warn, error, and skipped only)",
+    )
     args = parser.parse_args(argv)
     repo_root = Path(__file__).resolve().parents[1]
     report = inspect_repository(repo_root, Path.home())
     if args.as_json:
         print(
             json.dumps(
-                finding_document(report, strict=args.strict),
+                finding_document(report, operation="lint", strict=args.strict),
                 indent=2,
                 sort_keys=True,
             ),
         )
     else:
-        render_findings(report, include_ok=args.include_info)
+        render_findings(report, include_ok=args.include_ok)
     return 0 if report.is_ok(strict=args.strict) else 1
 
 

@@ -37,16 +37,22 @@ def test_setup_cli_previews_linux_lite_as_json_without_writing(tmp_path: Path) -
         home,
         "--profile",
         "linux-lite",
-        "--dry-run",
         "--json",
     )
     document = json.loads(completed.stdout)
 
     assert completed.returncode == 0
     assert completed.stderr == ""
+    assert document["schema_version"] == 1
+    assert document["operation"] == "setup"
+    assert document["ok"] is True
     assert document["profile"] == "linux-lite"
-    assert document["dry_run"] is True
-    assert document["changed"] is True
+    assert document["apply"] is False
+    assert document["summary"] == {"planned": 2}
+    assert [change["status"] for change in document["changes"]] == [
+        "planned",
+        "planned",
+    ]
     assert not (home / ".bashrc").exists()
     assert not (home / ".gitconfig").exists()
 
@@ -107,6 +113,7 @@ def test_diff_cli_renders_profile_and_exit_status_at_the_mackup_boundary(
     assert captured.err == ""
     assert document == {
         "changes": [],
+        "ok": True,
         "operation": "diff",
         "profile": "linux-lite",
         "schema_version": 1,

@@ -64,16 +64,16 @@ def _run_update(
     return completed, log_path
 
 
-def test_update_dry_run_reports_exact_plan_without_running_tools(
+def test_update_previews_exact_plan_by_default_without_running_tools(
     tmp_path: Path,
 ) -> None:
-    completed, log_path = _run_update(tmp_path, "--dry-run", "--json")
+    completed, log_path = _run_update(tmp_path, "--json")
 
     assert completed.returncode == 0
     document = json.loads(completed.stdout)
     assert document["schema_version"] == 1
     assert document["operation"] == "update"
-    assert document["dry_run"] is True
+    assert document["apply"] is False
     assert document["ok"] is True
     assert [
         (step["name"], step["status"], step["command"])
@@ -91,7 +91,7 @@ def test_update_dry_run_reports_exact_plan_without_running_tools(
         ("amp", "planned", ["amp", "update"]),
     ]
     assert document["next"] == [
-        "mise run runtime -- --dry-run",
+        "mise run runtime",
         "mise run check",
         "mise run diff",
     ]
@@ -112,11 +112,11 @@ def test_update_gives_package_managers_transaction_scale_timeouts(
 
 
 def test_update_runs_available_tools_in_order_and_reports_skips(tmp_path: Path) -> None:
-    completed, log_path = _run_update(tmp_path, "--json")
+    completed, log_path = _run_update(tmp_path, "--apply", "--json")
 
     assert completed.returncode == 0
     document = json.loads(completed.stdout)
-    assert document["dry_run"] is False
+    assert document["apply"] is True
     assert document["ok"] is True
     assert [
         (step["name"], step["status"], step["exit_code"])
@@ -138,14 +138,27 @@ def test_update_runs_available_tools_in_order_and_reports_skips(tmp_path: Path) 
     ]
 
 
+def test_update_preview_human_output_points_to_apply(tmp_path: Path) -> None:
+    completed, log_path = _run_update(tmp_path)
+
+    assert completed.returncode == 0
+    assert "PLANNED brew.metadata: brew update" in completed.stdout
+    assert (
+        "No commands run. Re-run with --apply to update host tools." in completed.stdout
+    )
+    assert "RUN " not in completed.stdout
+    assert "Next:" not in completed.stdout
+    assert not log_path.exists()
+
+
 def test_update_human_output_announces_commands_before_summary(tmp_path: Path) -> None:
-    completed, _log_path = _run_update(tmp_path)
+    completed, _log_path = _run_update(tmp_path, "--apply")
 
     assert completed.returncode == 0
     assert completed.stdout.splitlines()[0] == "RUN brew.metadata: brew update"
-    assert "OK   brew.metadata" in completed.stdout
+    assert "SUCCEEDED brew.metadata" in completed.stdout
     assert (
-        "Next:\n  mise run runtime -- --dry-run\n  mise run check\n  mise run diff\n"
+        "Next:\n  mise run runtime\n  mise run check\n  mise run diff\n"
     ) in completed.stdout
 
 
@@ -154,6 +167,7 @@ def test_update_failure_is_contextual_and_does_not_hide_later_results(
 ) -> None:
     completed, log_path = _run_update(
         tmp_path,
+        "--apply",
         "--json",
         tools=("amp", "tigris"),
         failing_tool="amp",
@@ -173,6 +187,7 @@ def test_update_failure_is_contextual_and_does_not_hide_later_results(
 def test_update_json_reports_a_quiet_command_failure_on_stderr(tmp_path: Path) -> None:
     completed, _log_path = _run_update(
         tmp_path,
+        "--apply",
         "--json",
         tools=("amp",),
         failing_tool="amp",
@@ -227,7 +242,7 @@ def test_update_help_and_invalid_options_never_run_tools(tmp_path: Path) -> None
     invalid_result, invalid_log = _run_update(tmp_path / "invalid", "--unknown")
 
     assert help_result.returncode == 0
-    assert "--dry-run" in help_result.stdout
+    assert "--apply" in help_result.stdout
     assert "--json" in help_result.stdout
     assert not help_log.exists()
     assert invalid_result.returncode == 2

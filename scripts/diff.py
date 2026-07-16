@@ -14,6 +14,7 @@ from typing import Protocol, cast
 
 from .models import Drift, DriftKind, DriftReport, FileKind
 from .profiles import HostProfile, profile_applications, resolve_profile
+from .render import emit_error
 
 MACKUP_SOURCE = (
     "git+https://github.com/ipruning/mackup@faa5cb8cd0f5fea83711b4fc75a4996d4b8a7497"
@@ -92,7 +93,7 @@ class SubprocessMackupRunner:
             ) from error
         if completed.returncode != 0 and not completed.stdout:
             detail = completed.stderr.strip() or "Mackup produced no report"
-            raise MackupCommandError(f"{' '.join(command)}: {detail}")
+            raise MackupCommandError(detail)
         try:
             document = json.loads(completed.stdout)
         except json.JSONDecodeError as error:
@@ -232,6 +233,7 @@ def _as_json(report: DriftReport) -> dict[str, object]:
     return {
         "schema_version": report.schema_version,
         "operation": report.operation,
+        "ok": report.ok,
         "profile": report.profile.value,
         "changes": [
             {
@@ -255,12 +257,22 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="Report configuration drift without changing files.",
     )
-    parser.add_argument("application", nargs="?")
-    parser.add_argument("--json", action="store_true", dest="as_json")
+    parser.add_argument(
+        "application",
+        nargs="?",
+        help="limit the report to one configured application",
+    )
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        dest="as_json",
+        help="emit the report as JSON on stdout",
+    )
     parser.add_argument(
         "--profile",
         choices=[profile.value for profile in HostProfile],
         default=HostProfile.AUTO.value,
+        help="host profile that selects which applications to inspect",
     )
     args = parser.parse_args(argv)
     repo_root = Path(__file__).resolve().parents[1]
@@ -272,17 +284,17 @@ def main(argv: list[str] | None = None) -> int:
             profile=args.profile,
         )
     except (DriftProtocolError, MackupCommandError) as error:
-        print(f"ERROR diff_failed {error}", file=sys.stderr)
+        emit_error("diff", str(error), as_json=args.as_json)
         return 1
     if args.as_json:
         print(json.dumps(_as_json(report), indent=2, sort_keys=True))
     else:
         print(f"Profile: {report.profile.value}")
         for change in report.changes:
-            print(f"{change.kind.value.upper()} {change.live_path}")
-            print(f"  reference: {change.reference_path}")
+            print(f"{change.kind.value.upper():7} {change.live_path}")
+            print(f"        reference: {change.reference_path}")
             if change.error:
-                print(f"  error: {change.error}")
+                print(f"        error: {change.error}", file=sys.stderr)
         rendered = ", ".join(
             f"{count} {kind}" for kind, count in sorted(report.summary.items())
         )

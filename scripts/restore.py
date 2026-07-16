@@ -12,6 +12,7 @@ from pathlib import Path
 
 from .diff import DriftProtocolError, MackupCommandError, inspect_drift
 from .models import Drift, DriftKind
+from .render import emit_error
 
 
 class RestoreStatus(StrEnum):
@@ -223,18 +224,27 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="Restore one reference application into the current home.",
     )
-    parser.add_argument("application")
-    parser.add_argument("--apply", action="store_true")
-    parser.add_argument("--dry-run", action="store_true")
-    parser.add_argument("--json", action="store_true", dest="as_json")
+    parser.add_argument(
+        "application",
+        help="configured application whose reference files should be restored",
+    )
+    parser.add_argument(
+        "--apply",
+        action="store_true",
+        help="back up live paths and link them to the reference (default: preview only)",
+    )
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        dest="as_json",
+        help="emit the report as JSON on stdout",
+    )
     args = parser.parse_args(argv)
-    if args.apply and args.dry_run:
-        parser.error("--apply and --dry-run are mutually exclusive")
     repo_root = Path(__file__).resolve().parents[1]
     try:
         report = plan_restore(repo_root, Path.home(), args.application)
     except (DriftProtocolError, MackupCommandError) as error:
-        print(f"ERROR restore_failed {error}", file=sys.stderr)
+        emit_error("restore", str(error), as_json=args.as_json)
         return 1
     if args.apply:
         report = apply_restore(repo_root, Path.home(), report)

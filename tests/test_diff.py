@@ -243,7 +243,7 @@ def test_diff_cli_reports_ordinary_drift_as_success_and_unreadable_as_failure(
     assert "1 modified" in capsys.readouterr().out
 
     assert main(["--profile", "full"]) == 1
-    assert "permission denied" in capsys.readouterr().out
+    assert "permission denied" in capsys.readouterr().err
 
 
 def test_subprocess_runner_surfaces_mackup_failure_modes(

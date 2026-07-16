@@ -62,11 +62,12 @@ mise run check -- --profile full
 ## Linux Lite setup
 
 Inspection remains read-only. The explicit setup task is the only repository
-task that changes host configuration:
+task that edits shell and Git bootstrap configuration in place; like every
+mutating task it previews by default:
 
 ```bash
-mise run setup -- --profile linux-lite --dry-run
 mise run setup -- --profile linux-lite
+mise run setup -- --profile linux-lite --apply
 exec bash
 ```
 
@@ -166,9 +167,9 @@ Updating installed tools is an explicit mutation, separate from configuration
 inspection. Preview the exact commands first:
 
 ```bash
-mise run update -- --dry-run
-mise run update -- --dry-run --json
 mise run update
+mise run update -- --json
+mise run update -- --apply
 ```
 
 The task discovers supported updaters on `PATH`, reports missing tools as
@@ -185,7 +186,7 @@ or write live configuration back into `reference/`. Inspect the resulting host
 state separately:
 
 ```bash
-mise run runtime -- --dry-run
+mise run runtime
 mise run check
 mise run diff
 ```
@@ -196,9 +197,9 @@ Shell runtime is maintained separately from tool updates and configuration
 restore. Preview the owned operations, then apply them explicitly:
 
 ```bash
-mise run runtime -- --dry-run
-mise run runtime -- --dry-run --json
 mise run runtime
+mise run runtime -- --json
+mise run runtime -- --apply
 ```
 
 The runtime task generates Zsh initialization and completion files for commands
@@ -212,8 +213,8 @@ their own explicit task (see Host inventory).
 The two source-built binaries are an explicit, slower sub-operation:
 
 ```bash
-mise run runtime -- --build --dry-run
 mise run runtime -- --build
+mise run runtime -- --build --apply
 ```
 
 This clones or fast-forwards `ipruning/atuin` and `craftzdog/op-cache` under the
@@ -228,9 +229,9 @@ time. They are tracked under `inventory/<host>/` so history stays reviewable,
 and they are only ever written by the explicit task:
 
 ```bash
-mise run inventory -- --dry-run
-mise run inventory -- --json
 mise run inventory
+mise run inventory -- --json
+mise run inventory -- --apply
 ```
 
 The task writes four snapshots per host: `Brewfile` (`brew bundle dump`),

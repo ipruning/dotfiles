@@ -28,8 +28,12 @@ semantics live in `README.md`.
   entrypoint for verification.
 - Keep `diff`, `check`, and `lint` read-only. A repair or installation belongs
   in an explicit user-directed operation, not inside an inspection.
+- Mutating tasks preview by default; only `--apply` changes state. Do not add
+  `--dry-run` flags or mutate-by-default entrypoints.
 - Keep stdout machine-readable when `--json` is selected and send operational
-  failures to stderr.
+  failures to stderr. Every JSON document carries `schema_version`,
+  `operation`, and `ok`; mutating operations add `apply`; domain failures with
+  `--json` emit the shared error document from `scripts/render.py`.
 - Compare reference and live configuration by location and metadata. Do not
   expose configuration contents in drift reports.
 - Never commit secrets. Track templates; keep materialized `*private*` files

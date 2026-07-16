@@ -7,12 +7,13 @@ import json
 import os
 import shlex
 import subprocess
-import sys
 import tempfile
 from dataclasses import dataclass
+from enum import StrEnum
 from pathlib import Path
 
 from .profiles import HostProfile
+from .render import emit_error
 
 BASH_BLOCK_START = "# >>> dotfiles linux-lite >>>"
 BASH_BLOCK_END = "# <<< dotfiles linux-lite <<<"
@@ -23,12 +24,26 @@ class SetupError(RuntimeError):
     """The requested setup could not be applied safely."""
 
 
+class SetupStatus(StrEnum):
+    PLANNED = "planned"
+    APPLIED = "applied"
+
+
+@dataclass(frozen=True)
+class SetupChange:
+    action: str
+    status: SetupStatus
+
+
 @dataclass(frozen=True)
 class SetupReport:
     profile: HostProfile
-    changed: bool
-    dry_run: bool
-    actions: tuple[str, ...]
+    apply: bool
+    changes: tuple[SetupChange, ...]
+
+    @property
+    def changed(self) -> bool:
+        return bool(self.changes)
 
 
 def _bash_block(module_path: Path) -> str:
@@ -84,13 +99,22 @@ def _write_bashrc(bashrc: Path, content: str) -> None:
         raise
 
 
-def configure_linux_lite(
+def plan_setup(repo_root: Path, home: Path) -> SetupReport:
+    """Return the Linux Lite setup plan without writing host configuration."""
+    return _configure_linux_lite(repo_root, home, apply=False)
+
+
+def apply_setup(repo_root: Path, home: Path) -> SetupReport:
+    """Connect Bash and the private Git include without inventing host identity."""
+    return _configure_linux_lite(repo_root, home, apply=True)
+
+
+def _configure_linux_lite(
     repo_root: Path,
     home: Path,
     *,
-    dry_run: bool = False,
+    apply: bool,
 ) -> SetupReport:
-    """Connect Bash and the private Git include without inventing host identity."""
     module_path = repo_root.resolve() / "modules/bash/init.bash"
     if not module_path.is_file():
         raise SetupError(f"Linux Lite Bash module is missing: {module_path}")
@@ -113,7 +137,7 @@ def configure_linux_lite(
     if git_include_changed:
         actions.append(f"add {PRIVATE_GITCONFIG} to Git includes")
 
-    if not dry_run:
+    if apply:
         home.mkdir(parents=True, exist_ok=True)
         if git_include_changed:
             try:
@@ -144,11 +168,11 @@ def configure_linux_lite(
                 raise SetupError(
                     f"could not update Bash config {bashrc}: {error}",
                 ) from error
+    status = SetupStatus.APPLIED if apply else SetupStatus.PLANNED
     return SetupReport(
         profile=HostProfile.LINUX_LITE,
-        changed=bool(actions),
-        dry_run=dry_run,
-        actions=tuple(actions),
+        apply=apply,
+        changes=tuple(SetupChange(action=action, status=status) for action in actions),
     )
 
 
@@ -158,30 +182,53 @@ def main(argv: list[str] | None = None) -> int:
         "--profile",
         choices=[HostProfile.LINUX_LITE.value],
         required=True,
+        help="host profile whose setup should run",
     )
-    parser.add_argument("--dry-run", action="store_true")
-    parser.add_argument("--json", action="store_true", dest="as_json")
+    parser.add_argument(
+        "--apply",
+        action="store_true",
+        help="write the planned setup changes (default: preview only)",
+    )
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        dest="as_json",
+        help="emit the report as JSON on stdout",
+    )
     args = parser.parse_args(argv)
     repo_root = Path(__file__).resolve().parents[1]
+    setup = apply_setup if args.apply else plan_setup
     try:
-        report = configure_linux_lite(repo_root, Path.home(), dry_run=args.dry_run)
+        report = setup(repo_root, Path.home())
     except SetupError as error:
-        print(f"ERROR setup_failed {error}", file=sys.stderr)
+        emit_error("setup", str(error), as_json=args.as_json)
         return 1
+    summary = {
+        status.value: sum(change.status is status for change in report.changes)
+        for status in SetupStatus
+        if any(change.status is status for change in report.changes)
+    }
     document = {
+        "schema_version": 1,
+        "operation": "setup",
+        "apply": report.apply,
+        "ok": True,
         "profile": report.profile.value,
-        "changed": report.changed,
-        "dry_run": report.dry_run,
-        "actions": list(report.actions),
+        "changes": [
+            {"action": change.action, "status": change.status.value}
+            for change in report.changes
+        ],
+        "summary": summary,
     }
     if args.as_json:
         print(json.dumps(document, indent=2, sort_keys=True))
-    elif report.actions:
-        for action in report.actions:
-            prefix = "WOULD" if report.dry_run else "CHANGED"
-            print(f"{prefix} {action}")
-    else:
+        return 0
+    for change in report.changes:
+        print(f"{change.status.value.upper():7} {change.action}")
+    if not report.changes:
         print("No changes required.")
+    elif not report.apply:
+        print("No files changed. Re-run with --apply to configure this host.")
     return 0
 
 

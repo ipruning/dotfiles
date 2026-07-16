@@ -17,7 +17,7 @@ from .models import ExecutableFinder
 
 StepCallback = Callable[["UpdateStep"], None]
 NEXT_COMMANDS = (
-    "mise run runtime -- --dry-run",
+    "mise run runtime",
     "mise run check",
     "mise run diff",
 )
@@ -49,7 +49,7 @@ class UpdateResult:
 
 @dataclass(frozen=True)
 class UpdateReport:
-    dry_run: bool
+    apply: bool
     results: tuple[UpdateResult, ...]
 
     @property
@@ -121,7 +121,7 @@ def plan_updates(
                 reason=None if available else f"{step.tool} is not available on PATH",
             ),
         )
-    return UpdateReport(dry_run=True, results=tuple(results))
+    return UpdateReport(apply=False, results=tuple(results))
 
 
 def execute_updates(
@@ -202,14 +202,14 @@ def execute_updates(
                 ),
             ),
         )
-    return UpdateReport(dry_run=False, results=tuple(results))
+    return UpdateReport(apply=True, results=tuple(results))
 
 
 def _document(report: UpdateReport) -> dict[str, object]:
     return {
         "schema_version": 1,
         "operation": "update",
-        "dry_run": report.dry_run,
+        "apply": report.apply,
         "ok": report.ok,
         "steps": [
             {
@@ -229,17 +229,21 @@ def _document(report: UpdateReport) -> dict[str, object]:
 
 def _render(report: UpdateReport) -> None:
     for result in report.results:
-        command = " ".join(result.step.command)
+        label = result.status.value.upper()
         if result.status is UpdateStatus.PLANNED:
-            print(f"PLAN {result.step.name}: {command}")
-        elif result.status is UpdateStatus.SKIPPED:
-            print(f"SKIP {result.step.name}: {result.reason}")
+            print(f"{label:7} {result.step.name}: {' '.join(result.step.command)}")
         elif result.status is UpdateStatus.SUCCEEDED:
-            print(f"OK   {result.step.name}")
+            print(f"{label:7} {result.step.name}")
+        elif result.status is UpdateStatus.SKIPPED:
+            print(f"{label:7} {result.step.name}: {result.reason}")
         else:
-            print(f"FAIL {result.step.name}: {result.reason}", file=sys.stderr)
-    if report.dry_run:
-        print("No updates run.")
+            print(
+                f"{label:7} {result.step.name}: {result.reason}",
+                file=sys.stderr,
+            )
+    if not report.apply:
+        print("No commands run. Re-run with --apply to update host tools.")
+        return
     print("Next:")
     for command in NEXT_COMMANDS:
         print(f"  {command}")
@@ -253,17 +257,26 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="Update installed tools without synchronizing configuration.",
     )
-    parser.add_argument("--dry-run", action="store_true")
-    parser.add_argument("--json", action="store_true", dest="as_json")
+    parser.add_argument(
+        "--apply",
+        action="store_true",
+        help="run the available updaters (default: preview only)",
+    )
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        dest="as_json",
+        help="emit the report as JSON on stdout",
+    )
     args = parser.parse_args(argv)
     report = (
-        plan_updates(Path.home())
-        if args.dry_run
-        else execute_updates(
+        execute_updates(
             Path.home(),
             capture_output=args.as_json,
             on_start=None if args.as_json else _announce_step,
         )
+        if args.apply
+        else plan_updates(Path.home())
     )
     if args.as_json:
         print(json.dumps(_document(report), indent=2, sort_keys=True))

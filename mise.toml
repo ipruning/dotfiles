@@ -30,19 +30,19 @@ description = "Inspect this host's required and optional capabilities"
 run = 'uv run --locked python -m scripts.check "$@"'
 
 [tasks.setup]
-description = "Apply an explicit host profile"
+description = "Preview or apply an explicit host profile"
 run = 'uv run --locked python -m scripts.setup "$@"'
 
 [tasks.update]
-description = "Update installed host tools without synchronizing configuration"
+description = "Preview or apply host tool updates without synchronizing configuration"
 run = 'uv run --locked python -m scripts.update "$@"'
 
 [tasks.runtime]
-description = "Refresh generated shell runtime and owned plugins"
+description = "Preview or refresh generated shell runtime and owned plugins"
 run = 'uv run --locked python -m scripts.runtime "$@"'
 
 [tasks.inventory]
-description = "Snapshot installed host software into inventory/<host>/"
+description = "Preview or snapshot installed host software into inventory/<host>/"
 run = 'uv run --locked python -m scripts.inventory "$@"'
 
 [tasks.zsh-profile]

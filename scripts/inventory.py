@@ -53,7 +53,7 @@ class InventoryResult:
 @dataclass(frozen=True)
 class InventoryReport:
     host: str
-    dry_run: bool
+    apply: bool
     results: tuple[InventoryResult, ...]
 
     @property
@@ -158,7 +158,7 @@ def plan_inventory(
                 reason=reason,
             ),
         )
-    return InventoryReport(host=host, dry_run=True, results=tuple(results))
+    return InventoryReport(host=host, apply=False, results=tuple(results))
 
 
 def _emit_failure(spec: InventorySpec, reason: str, stderr: str = "") -> None:
@@ -248,7 +248,7 @@ def execute_inventory(
                     duration_ms=round((time.monotonic() - started_at) * 1000),
                 ),
             )
-    return InventoryReport(host=plan.host, dry_run=False, results=tuple(results))
+    return InventoryReport(host=plan.host, apply=True, results=tuple(results))
 
 
 def _document(report: InventoryReport, repo_root: Path) -> dict[str, object]:
@@ -256,7 +256,7 @@ def _document(report: InventoryReport, repo_root: Path) -> dict[str, object]:
         "schema_version": 1,
         "operation": "inventory",
         "host": report.host,
-        "dry_run": report.dry_run,
+        "apply": report.apply,
         "ok": report.ok,
         "steps": [
             {
@@ -281,23 +281,28 @@ def _document(report: InventoryReport, repo_root: Path) -> dict[str, object]:
 def _render(report: InventoryReport, repo_root: Path) -> None:
     for result in report.results:
         target = result.target.relative_to(repo_root)
+        label = result.status.value.upper()
         if result.status is InventoryStatus.PLANNED:
             source = (
                 " ".join(result.spec.command)
                 if result.spec.command
                 else f"scan {result.spec.scan_dir}"
             )
-            print(f"PLAN {result.spec.name}: {source} -> {target}")
+            print(f"{label:7} {result.spec.name}: {source} -> {target}")
         elif result.status is InventoryStatus.SKIPPED:
-            print(f"SKIP {result.spec.name}: {result.reason}")
+            print(f"{label:7} {result.spec.name}: {result.reason}")
         elif result.status is InventoryStatus.WRITTEN:
-            print(f"WROTE {result.spec.name}: {target}")
+            print(f"{label:7} {result.spec.name}: {target}")
         elif result.status is InventoryStatus.UNCHANGED:
-            print(f"KEEP {result.spec.name}: {target} unchanged")
+            print(f"{label:7} {result.spec.name}: {target} unchanged")
         else:
-            print(f"FAIL {result.spec.name}: {result.reason}", file=sys.stderr)
-    if report.dry_run:
-        print("No snapshots written.")
+            print(
+                f"{label:7} {result.spec.name}: {result.reason}",
+                file=sys.stderr,
+            )
+    if not report.apply:
+        print("No snapshots written. Re-run with --apply to snapshot this host.")
+        return
     print("Next:")
     for command in NEXT_COMMANDS:
         print(f"  {command}")
@@ -312,10 +317,22 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="Snapshot installed host software into inventory/<host>/.",
     )
-    parser.add_argument("--dry-run", action="store_true")
-    parser.add_argument("--json", action="store_true", dest="as_json")
     parser.add_argument(
-        "--repo-root", type=Path, default=Path(__file__).resolve().parents[1]
+        "--apply",
+        action="store_true",
+        help="write the planned snapshots (default: preview only)",
+    )
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        dest="as_json",
+        help="emit the report as JSON on stdout",
+    )
+    parser.add_argument(
+        "--repo-root",
+        type=Path,
+        default=Path(__file__).resolve().parents[1],
+        help="repository root that owns inventory/ (default: this checkout)",
     )
     parser.add_argument(
         "--host",
@@ -337,7 +354,7 @@ def main(argv: list[str] | None = None) -> int:
         host,
         applications_root=args.applications_root,
     )
-    if not args.dry_run:
+    if args.apply:
         report = execute_inventory(
             report,
             on_start=None if args.as_json else _announce_step,

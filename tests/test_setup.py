@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from scripts.setup import SetupError, configure_linux_lite
+from scripts.setup import SetupError, apply_setup, plan_setup
 from scripts.profiles import HostProfile
 
 
@@ -20,15 +20,15 @@ def test_linux_lite_setup_preserves_shell_config_and_is_idempotent(
     gitconfig = home / ".gitconfig"
     gitconfig.write_text("[init]\n\tdefaultBranch = main\n")
 
-    preview = configure_linux_lite(repo_root, home, dry_run=True)
+    preview = plan_setup(repo_root, home)
 
     assert preview.changed is True
     assert preview.profile is HostProfile.LINUX_LITE
     assert bashrc.read_text() == "# existing host setup\n"
     assert "include" not in gitconfig.read_text()
 
-    first = configure_linux_lite(repo_root, home)
-    second = configure_linux_lite(repo_root, home)
+    first = apply_setup(repo_root, home)
+    second = apply_setup(repo_root, home)
 
     assert first.changed is True
     assert second.changed is False
@@ -49,7 +49,7 @@ def test_linux_lite_setup_rejects_incomplete_managed_block(tmp_path: Path) -> No
     bashrc.write_text("# >>> dotfiles linux-lite >>>\n")
 
     with pytest.raises(SetupError, match="incomplete"):
-        configure_linux_lite(repo_root, home)
+        apply_setup(repo_root, home)
 
     assert bashrc.read_text() == "# >>> dotfiles linux-lite >>>\n"
 
@@ -67,13 +67,13 @@ def test_linux_lite_setup_refuses_symlinked_bash_config(tmp_path: Path) -> None:
     bashrc.symlink_to(external_target)
 
     with pytest.raises(SetupError, match="symlink"):
-        configure_linux_lite(repo_root, home)
+        apply_setup(repo_root, home)
 
     assert external_target.read_text() == "# external content\n"
 
     external_target.unlink()
     with pytest.raises(SetupError, match="symlink"):
-        configure_linux_lite(repo_root, home)
+        apply_setup(repo_root, home)
 
     assert bashrc.is_symlink()
     assert not external_target.exists()
@@ -90,7 +90,7 @@ def test_linux_lite_setup_preserves_bash_config_permissions(tmp_path: Path) -> N
     bashrc.chmod(0o600)
     (home / ".gitconfig").write_text("[init]\n\tdefaultBranch = main\n")
 
-    configure_linux_lite(repo_root, home)
+    apply_setup(repo_root, home)
 
     assert bashrc.stat().st_mode & 0o777 == 0o600
     assert "# existing host setup\n" in bashrc.read_text()
@@ -110,7 +110,7 @@ def test_linux_lite_setup_rejects_non_file_git_config_before_writing_bash(
     (home / ".gitconfig").mkdir()
 
     with pytest.raises(SetupError, match="Git config"):
-        configure_linux_lite(repo_root, home)
+        apply_setup(repo_root, home)
 
     assert bashrc.read_text() == "# unchanged\n"
 
@@ -128,7 +128,7 @@ def test_linux_lite_setup_preserves_bash_when_git_update_fails(
     (home / ".gitconfig").write_text("[broken\n")
 
     with pytest.raises(SetupError):
-        configure_linux_lite(repo_root, home)
+        apply_setup(repo_root, home)
 
     assert bashrc.read_text() == "# unchanged\n"
 
@@ -144,7 +144,7 @@ def test_linux_lite_loader_runs_before_noninteractive_bash_return(
     bashrc = home / ".bashrc"
     bashrc.write_text("case $- in *i*) ;; *) return;; esac\n")
 
-    configure_linux_lite(repo_root, home)
+    apply_setup(repo_root, home)
     environment = {
         "BASH_ENV": str(bashrc),
         "HOME": str(home),

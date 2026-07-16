@@ -69,7 +69,7 @@ StepCallback = Callable[[RuntimeSpec, RuntimeAction], None]
 
 @dataclass(frozen=True)
 class RuntimeReport:
-    dry_run: bool
+    apply: bool
     results: tuple[RuntimeResult, ...]
 
     @property
@@ -465,7 +465,7 @@ def plan_runtime(
                         f"{missing} is not available",
                     ),
                 )
-    return RuntimeReport(dry_run=True, results=tuple(results))
+    return RuntimeReport(apply=False, results=tuple(results))
 
 
 def _atomic_install(target: Path, writer: AtomicWriter) -> None:
@@ -649,14 +649,14 @@ def execute_runtime(
         )
         results.append(succeeded)
         completed_steps[spec.name] = succeeded
-    return RuntimeReport(dry_run=False, results=tuple(results))
+    return RuntimeReport(apply=True, results=tuple(results))
 
 
 def _document(report: RuntimeReport) -> dict[str, object]:
     return {
         "schema_version": 1,
         "operation": "runtime",
-        "dry_run": report.dry_run,
+        "apply": report.apply,
         "ok": report.ok,
         "steps": [
             {
@@ -697,8 +697,8 @@ def _render(report: RuntimeReport) -> None:
         )
         if result.reason:
             print(f"        {result.reason}")
-    if report.dry_run:
-        print("No runtime files changed.")
+    if not report.apply:
+        print("No files changed. Re-run with --apply to refresh the runtime.")
 
 
 def _announce_step(spec: RuntimeSpec, action: RuntimeAction) -> None:
@@ -710,12 +710,32 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="Refresh generated shell runtime owned by this repository.",
     )
-    parser.add_argument("--dry-run", action="store_true")
-    parser.add_argument("--offline", action="store_true")
-    parser.add_argument("--build", action="store_true")
-    parser.add_argument("--json", action="store_true", dest="as_json")
     parser.add_argument(
-        "--repo-root", type=Path, default=Path(__file__).resolve().parents[1]
+        "--apply",
+        action="store_true",
+        help="write the planned runtime changes (default: preview only)",
+    )
+    parser.add_argument(
+        "--offline",
+        action="store_true",
+        help="skip steps that need network access",
+    )
+    parser.add_argument(
+        "--build",
+        action="store_true",
+        help="include self-built tool steps",
+    )
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        dest="as_json",
+        help="emit the report as JSON on stdout",
+    )
+    parser.add_argument(
+        "--repo-root",
+        type=Path,
+        default=Path(__file__).resolve().parents[1],
+        help="repository root that owns the runtime (default: this checkout)",
     )
     args = parser.parse_args(argv)
     report = plan_runtime(
@@ -724,7 +744,7 @@ def main(argv: list[str] | None = None) -> int:
         network=not args.offline,
         build=args.build,
     )
-    if not args.dry_run:
+    if args.apply:
         report = execute_runtime(
             report,
             Path.home(),

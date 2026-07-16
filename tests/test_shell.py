@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 
+from scripts.models import Severity
 from scripts.shell import ShellCheckError, check_shell_files, shell_dialect
 
 requires_shellcheck = pytest.mark.skipif(
@@ -61,12 +62,20 @@ def test_check_shell_files_reports_bash_syntax_failures_then_passes(
         return str(quiet_shellcheck) if name == "shellcheck" else shutil.which(name)
 
     failing = check_shell_files(repo_root, executable_finder=finder)
-    assert any(failure.startswith("bash syntax") for failure in failing.failures)
+    syntax_findings = [
+        finding for finding in failing.findings if finding.code == "shell.bash_syntax"
+    ]
+    assert syntax_findings
+    assert all(
+        finding.severity is Severity.ERROR and finding.path is not None
+        for finding in syntax_findings
+    )
+    assert failing.is_ok() is False
 
     (repo_root / "modules/bin/broken").write_text(
         "#!/usr/bin/env bash\nif true; then\n  printf 'ok\\n'\nfi\n",
     )
-    assert check_shell_files(repo_root, executable_finder=finder).ok is True
+    assert check_shell_files(repo_root, executable_finder=finder).is_ok() is True
 
 
 @requires_shellcheck
@@ -87,8 +96,12 @@ def test_check_shell_files_reports_shellcheck_warnings(tmp_path: Path) -> None:
 
     report = check_shell_files(repo_root)
 
-    assert any(failure.startswith("shellcheck") for failure in report.failures)
-    assert any("SC2155" in failure for failure in report.failures)
+    shellcheck_findings = [
+        finding for finding in report.findings if finding.code == "shell.shellcheck"
+    ]
+    assert shellcheck_findings
+    assert all(finding.severity is Severity.ERROR for finding in shellcheck_findings)
+    assert any("SC2155" in finding.message for finding in shellcheck_findings)
 
 
 @requires_zsh
@@ -102,7 +115,10 @@ def test_check_shell_files_checks_zsh_syntax(tmp_path: Path) -> None:
 
     report = check_shell_files(repo_root)
 
-    assert any(failure.startswith("zsh syntax") for failure in report.failures)
+    assert any(
+        finding.code == "shell.zsh_syntax" and finding.severity is Severity.ERROR
+        for finding in report.findings
+    )
 
 
 def test_check_shell_files_requires_missing_tools_explicitly(tmp_path: Path) -> None:
@@ -143,5 +159,10 @@ def test_check_shell_files_skips_zsh_loudly_when_zsh_is_absent(
 
     report = check_shell_files(repo_root, executable_finder=finder)
 
-    assert report.ok is True
-    assert any("zsh is not installed" in note for note in report.notes)
+    assert report.is_ok() is True
+    skipped = [
+        finding for finding in report.findings if finding.code == "shell.zsh_skipped"
+    ]
+    assert skipped
+    assert skipped[0].severity is Severity.SKIPPED
+    assert "zsh is not installed" in skipped[0].message

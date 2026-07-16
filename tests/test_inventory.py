@@ -101,21 +101,21 @@ def _run_inventory(
     return completed, repo_root / "inventory/TestHost", log_path
 
 
-def test_inventory_dry_run_reports_exact_plan_without_collecting(
+def test_inventory_previews_exact_plan_by_default_without_collecting(
     tmp_path: Path,
 ) -> None:
     _make_applications(
         tmp_path / "Applications", apps=("Ghostty",), setapp=("TablePlus",)
     )
 
-    completed, host_dir, log_path = _run_inventory(tmp_path, "--dry-run", "--json")
+    completed, host_dir, log_path = _run_inventory(tmp_path, "--json")
 
     assert completed.returncode == 0
     document = json.loads(completed.stdout)
     assert document["schema_version"] == 1
     assert document["operation"] == "inventory"
     assert document["host"] == "TestHost"
-    assert document["dry_run"] is True
+    assert document["apply"] is False
     assert document["ok"] is True
     assert [
         (step["name"], step["status"], step["target"]) for step in document["steps"]
@@ -139,7 +139,7 @@ def test_inventory_writes_sorted_snapshots_then_reports_unchanged(
         setapp=("TablePlus", "CleanShot X"),
     )
 
-    first, host_dir, _log_path = _run_inventory(tmp_path, "--json")
+    first, host_dir, _log_path = _run_inventory(tmp_path, "--apply", "--json")
 
     assert first.returncode == 0
     assert (host_dir / "Brewfile").read_text() == BREWFILE
@@ -152,7 +152,7 @@ def test_inventory_writes_sorted_snapshots_then_reports_unchanged(
         step["status"] == "written" for step in json.loads(first.stdout)["steps"]
     )
 
-    second, _host_dir, _log_path = _run_inventory(tmp_path, "--json")
+    second, _host_dir, _log_path = _run_inventory(tmp_path, "--apply", "--json")
 
     assert second.returncode == 0
     assert all(
@@ -171,7 +171,7 @@ def test_inventory_skips_missing_collectors_without_touching_snapshots(
     (host_dir / "setapp.txt").write_text("Old App\n")
 
     completed, host_dir, _log_path = _run_inventory(
-        tmp_path, "--json", tools={"brew": {"stdout": BREWFILE}}
+        tmp_path, "--apply", "--json", tools={"brew": {"stdout": BREWFILE}}
     )
 
     assert completed.returncode == 0
@@ -196,6 +196,7 @@ def test_inventory_failure_keeps_existing_snapshot_and_later_steps_run(
 
     completed, host_dir, _log_path = _run_inventory(
         tmp_path,
+        "--apply",
         "--json",
         tools={
             "brew": {"stderr": "simulated brew failure\n", "exit_code": 7},
@@ -227,6 +228,7 @@ def test_inventory_empty_collector_output_fails_and_keeps_snapshot(
 
     completed, host_dir, _log_path = _run_inventory(
         tmp_path,
+        "--apply",
         "--json",
         tools={"brew": {"stdout": BREWFILE}, "gh": {"stdout": ""}},
     )
@@ -245,6 +247,7 @@ def test_inventory_rejects_unparseable_gh_output_without_writing(
 
     completed, host_dir, _log_path = _run_inventory(
         tmp_path,
+        "--apply",
         "--json",
         tools={
             "brew": {"stdout": BREWFILE},
@@ -294,14 +297,14 @@ def test_inventory_human_output_announces_collectors_and_summary(
 ) -> None:
     _make_applications(tmp_path / "Applications", apps=("Ghostty",), setapp=None)
 
-    completed, _host_dir, _log_path = _run_inventory(tmp_path)
+    completed, _host_dir, _log_path = _run_inventory(tmp_path, "--apply")
 
     assert completed.returncode == 0
     assert completed.stdout.splitlines()[0] == (
         "RUN brew.bundle: brew bundle dump --file=- --quiet"
     )
-    assert "WROTE brew.bundle: inventory/TestHost/Brewfile" in completed.stdout
-    assert "SKIP setapp:" in completed.stdout
+    assert "WRITTEN brew.bundle: inventory/TestHost/Brewfile" in completed.stdout
+    assert "SKIPPED setapp:" in completed.stdout
     assert "Next:\n  git diff inventory/\n" in completed.stdout
 
 
@@ -336,7 +339,7 @@ def test_inventory_help_and_invalid_options_never_collect(tmp_path: Path) -> Non
     invalid_result, _host_dir, invalid_log = _run_inventory(tmp_path, "--unknown")
 
     assert help_result.returncode == 0
-    assert "--dry-run" in help_result.stdout
+    assert "--apply" in help_result.stdout
     assert "--json" in help_result.stdout
     assert not help_log.exists()
     assert invalid_result.returncode == 2

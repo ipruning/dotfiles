@@ -3,13 +3,14 @@
 from __future__ import annotations
 
 import argparse
+import json
 import shutil
 import subprocess
-import sys
 from dataclasses import dataclass
 from pathlib import Path
 
-from .models import ExecutableFinder
+from .models import ExecutableFinder, Finding, FindingReport, Severity
+from .render import emit_error, finding_document, render_findings
 
 
 BASH_SUFFIXES = {".bash", ".sh"}
@@ -29,13 +30,8 @@ class ShellFile:
 
 
 @dataclass(frozen=True)
-class ShellReport:
-    failures: tuple[str, ...]
-    notes: tuple[str, ...]
-
-    @property
-    def ok(self) -> bool:
-        return not self.failures
+class ShellReport(FindingReport):
+    pass
 
 
 def shell_dialect(relative: str, first_line: str, second_line: str = "") -> str | None:
@@ -107,12 +103,11 @@ def check_shell_files(
     *,
     executable_finder: ExecutableFinder = shutil.which,
 ) -> ShellReport:
-    """Return failures and loud skips for tracked bash and zsh files."""
+    """Return error findings and loud skips for tracked bash and zsh files."""
     files = collect_shell_files(repo_root)
     bash_files = [item.path for item in files if item.dialect == "bash"]
     zsh_files = [item.path for item in files if item.dialect == "zsh"]
-    failures: list[str] = []
-    notes: list[str] = []
+    findings: list[Finding] = []
 
     bash_bin = _require_tool("bash", executable_finder) if bash_files else ""
     for file_path in bash_files:
@@ -123,7 +118,15 @@ def check_shell_files(
             text=True,
         )
         if completed.returncode != 0:
-            failures.append(f"bash syntax: {completed.stderr.strip()}")
+            findings.append(
+                Finding(
+                    check="shell",
+                    severity=Severity.ERROR,
+                    code="shell.bash_syntax",
+                    message=completed.stderr.strip(),
+                    path=file_path,
+                ),
+            )
     if bash_files:
         shellcheck_bin = _require_tool("shellcheck", executable_finder)
         completed = subprocess.run(
@@ -139,13 +142,27 @@ def check_shell_files(
         )
         if completed.returncode != 0:
             detail = completed.stdout.strip() or completed.stderr.strip()
-            failures.append(f"shellcheck: {detail}")
+            findings.append(
+                Finding(
+                    check="shell",
+                    severity=Severity.ERROR,
+                    code="shell.shellcheck",
+                    message=detail,
+                ),
+            )
 
     zsh_bin = executable_finder("zsh") if zsh_files else None
     if zsh_files and zsh_bin is None:
         # zsh is not pinnable through mise, and hosts without zsh never run
         # the zsh configuration; skip loudly instead of failing the gate.
-        notes.append(f"skipped {len(zsh_files)} zsh files: zsh is not installed")
+        findings.append(
+            Finding(
+                check="shell",
+                severity=Severity.SKIPPED,
+                code="shell.zsh_skipped",
+                message=f"skipped {len(zsh_files)} zsh files: zsh is not installed",
+            ),
+        )
     elif zsh_bin is not None:
         for file_path in zsh_files:
             completed = subprocess.run(
@@ -155,27 +172,49 @@ def check_shell_files(
                 text=True,
             )
             if completed.returncode != 0:
-                failures.append(f"zsh syntax: {completed.stderr.strip()}")
-    return ShellReport(failures=tuple(failures), notes=tuple(notes))
+                findings.append(
+                    Finding(
+                        check="shell",
+                        severity=Severity.ERROR,
+                        code="shell.zsh_syntax",
+                        message=completed.stderr.strip(),
+                        path=file_path,
+                    ),
+                )
+    return ShellReport(schema_version=1, findings=tuple(findings))
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Check repository shell files.")
-    parser.parse_args(argv)
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        dest="as_json",
+        help="emit the report as JSON on stdout",
+    )
+    parser.add_argument(
+        "--include-ok",
+        action="store_true",
+        help="also list ok findings (default: warn, error, and skipped only)",
+    )
+    args = parser.parse_args(argv)
     repo_root = Path(__file__).resolve().parents[1]
     try:
         report = check_shell_files(repo_root)
     except ShellCheckError as error:
-        print(f"ERROR shell_check_failed {error}", file=sys.stderr)
+        emit_error("shell", str(error), as_json=args.as_json)
         return 1
-    for note in report.notes:
-        print(note, file=sys.stderr)
-    for failure in report.failures:
-        print(failure, file=sys.stderr)
-    if report.failures:
-        return 1
-    print("Shell files pass syntax and ShellCheck gates.")
-    return 0
+    if args.as_json:
+        print(
+            json.dumps(
+                finding_document(report, operation="shell"),
+                indent=2,
+                sort_keys=True,
+            ),
+        )
+    else:
+        render_findings(report, include_ok=args.include_ok)
+    return 0 if report.is_ok() else 1
 
 
 if __name__ == "__main__":

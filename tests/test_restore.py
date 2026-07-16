@@ -46,7 +46,7 @@ def test_restore_apply_backs_up_live_file_and_links_reference(tmp_path: Path) ->
     live_path = home / ".hushlogin"
     live_path.write_text("host-specific\n")
 
-    preview = run_scripts_module("restore", home, "hushlogin", "--dry-run", "--json")
+    preview = run_scripts_module("restore", home, "hushlogin", "--json")
     assert preview.returncode == 0
     assert live_path.read_text() == "host-specific\n"
 
@@ -76,7 +76,6 @@ def test_restore_rejects_invalid_scope_without_changing_home(tmp_path: Path) -> 
         "restore",
         home,
         "hushlogin",
-        "--apply",
         "--dry-run",
     )
     unknown = run_scripts_module(
@@ -84,9 +83,14 @@ def test_restore_rejects_invalid_scope_without_changing_home(tmp_path: Path) -> 
     )
 
     assert conflicting.returncode == 2
-    assert "mutually exclusive" in conflicting.stderr
+    assert "unrecognized arguments: --dry-run" in conflicting.stderr
     assert unknown.returncode == 1
-    assert unknown.stdout == ""
+    error_document = json.loads(unknown.stdout)
+    assert error_document["ok"] is False
+    assert error_document["operation"] == "restore"
+    assert error_document["error"]["code"] == "restore_failed"
+    assert "Unsupported application" in error_document["error"]["message"]
+    assert "uvx" not in error_document["error"]["message"]
     assert "ERROR restore_failed" in unknown.stderr
     assert list(home.iterdir()) == []
 

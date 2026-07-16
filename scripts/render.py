@@ -1,6 +1,9 @@
-"""Shared rendering for finding-based reports."""
+"""Shared rendering for reports and CLI failure envelopes."""
 
 from __future__ import annotations
+
+import json
+import sys
 
 from .models import FindingReport, Severity
 
@@ -8,10 +11,12 @@ from .models import FindingReport, Severity
 def finding_document(
     report: FindingReport,
     *,
+    operation: str,
     strict: bool = False,
 ) -> dict[str, object]:
     return {
         "schema_version": report.schema_version,
+        "operation": operation,
         "ok": report.is_ok(strict=strict),
         "findings": [
             {
@@ -27,6 +32,29 @@ def finding_document(
     }
 
 
+def error_document(operation: str, code: str, message: str) -> dict[str, object]:
+    return {
+        "schema_version": 1,
+        "operation": operation,
+        "ok": False,
+        "error": {"code": code, "message": message},
+    }
+
+
+def emit_error(operation: str, message: str, *, as_json: bool) -> None:
+    """Report a failed operation on both streams: prose to stderr, JSON to stdout."""
+    code = f"{operation}_failed"
+    print(f"ERROR {code} {message}", file=sys.stderr)
+    if as_json:
+        print(
+            json.dumps(
+                error_document(operation, code, message),
+                indent=2,
+                sort_keys=True,
+            ),
+        )
+
+
 def finding_counts(report: FindingReport) -> dict[str, int]:
     return {
         severity.value: sum(finding.severity is severity for finding in report.findings)
@@ -38,7 +66,7 @@ def render_findings(report: FindingReport, *, include_ok: bool) -> None:
     visible = [
         finding
         for finding in report.findings
-        if include_ok or finding.severity in {Severity.WARN, Severity.ERROR}
+        if include_ok or finding.severity is not Severity.OK
     ]
     if not visible:
         print("No findings.")

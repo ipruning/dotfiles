@@ -385,7 +385,7 @@ def _owned_generated_capability(
     *,
     tool_available: bool,
 ) -> Finding | None:
-    action = "Run mise run runtime -- --dry-run, then mise run runtime."
+    action = "Run mise run runtime, then mise run runtime -- --apply."
     if tool_available:
         return _file_capability(check, file_path, label, action)
     if file_path.exists() or file_path.is_symlink():
@@ -423,7 +423,7 @@ def _binary_capability(check: str, file_path: Path, label: str) -> Finding:
         f"{check}_invalid",
         f"{label} is missing, empty, or not executable",
         file_path,
-        "Run mise run runtime -- --build --dry-run, then mise run runtime -- --build.",
+        "Run mise run runtime -- --build, then mise run runtime -- --build --apply.",
     )
 
 
@@ -738,7 +738,7 @@ def inspect_host(
                 f"runtime.plugin.{name}",
                 repo_root / "generated/plugins" / name / entrypoint,
                 f"Zsh plugin {name}",
-                "Run mise run runtime -- --dry-run, then mise run runtime.",
+                "Run mise run runtime, then mise run runtime -- --apply.",
             ),
         )
     for name, _source, sha256 in WASM_SPECS:
@@ -769,7 +769,7 @@ def inspect_host(
                     f"zellij.{plugin_name}_{code}",
                     message,
                     plugin_path,
-                    "Run mise run runtime -- --dry-run, then mise run runtime.",
+                    "Run mise run runtime, then mise run runtime -- --apply.",
                 ),
             )
     generated_bin = repo_root / "generated/bin"
@@ -822,12 +822,27 @@ def inspect_host(
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Inspect this host's capabilities.")
-    parser.add_argument("--json", action="store_true", dest="as_json")
-    parser.add_argument("--strict", action="store_true")
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        dest="as_json",
+        help="emit the report as JSON on stdout",
+    )
+    parser.add_argument(
+        "--strict",
+        action="store_true",
+        help="treat warn findings as failures",
+    )
     parser.add_argument(
         "--profile",
         choices=[profile.value for profile in HostProfile],
         default=HostProfile.AUTO.value,
+        help="host profile that selects which capabilities to inspect",
+    )
+    parser.add_argument(
+        "--include-ok",
+        action="store_true",
+        help="also list ok findings (default: warn, error, and skipped only)",
     )
     args = parser.parse_args(argv)
     repo_root = Path(__file__).resolve().parents[1]
@@ -835,13 +850,13 @@ def main(argv: list[str] | None = None) -> int:
     if args.as_json:
         print(
             json.dumps(
-                finding_document(report, strict=args.strict),
+                finding_document(report, operation="check", strict=args.strict),
                 indent=2,
                 sort_keys=True,
             ),
         )
     else:
-        render_findings(report, include_ok=True)
+        render_findings(report, include_ok=args.include_ok)
     return 0 if report.is_ok(strict=args.strict) else 1
 
 
