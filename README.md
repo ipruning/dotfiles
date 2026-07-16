@@ -177,7 +177,8 @@ skipped, applies available updates in a stable order, and continues independent
 steps after a failure. Any failed step makes the command exit non-zero. Current
 steps cover Homebrew metadata and packages, global mise tools and shims,
 GitHub CLI extensions, tldr pages, Yazi packages, Sprite's update check, Amp,
-Tigris, and Pi extensions. It deliberately does not run `brew cleanup`,
+Claude Code, Codex, Tigris, and Pi extensions. It deliberately does not run
+`brew cleanup`,
 `brew autoremove`, or `mise prune`; removal and pruning require a separate,
 explicit operation.
 

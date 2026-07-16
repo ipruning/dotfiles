@@ -95,6 +95,8 @@ def _update_steps(home: Path) -> tuple[UpdateStep, ...]:
             300,
         ),
         UpdateStep("amp", "amp", ("amp", "update"), 300),
+        UpdateStep("claude", "claude", ("claude", "update"), 300),
+        UpdateStep("codex", "codex", ("codex", "update"), 300),
         UpdateStep("tigris", "tigris", ("tigris", "update"), 300),
         UpdateStep(
             "pi.extensions",
