@@ -41,6 +41,10 @@ run = 'uv run --locked python -m scripts.update "$@"'
 description = "Refresh generated shell runtime and owned plugins"
 run = 'uv run --locked python -m scripts.runtime "$@"'
 
+[tasks.inventory]
+description = "Snapshot installed host software into inventory/<host>/"
+run = 'uv run --locked python -m scripts.inventory "$@"'
+
 [tasks.zsh-profile]
 description = "Profile Zsh startup time"
 run = 'scripts/zsh-profile "$@"'

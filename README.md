@@ -15,6 +15,8 @@ does not automatically overwrite `$HOME` or rebuild an entire machine.
   removal.
 - `generated/` is optional shell runtime state. A missing generated directory
   is a host-health warning, not a reason to mutate the repository.
+- `inventory/` contains per-host software snapshots written only by
+  `mise run inventory`.
 
 Agent-specific rules live in `AGENTS.md`. Files under `modules/` also inherit
 `modules/AGENTS.md`.
@@ -204,7 +206,8 @@ already on `PATH`, removes stale completion files in its fixed ownership set,
 clones or fast-forwards the three Zsh plugins consumed by `modules/zsh/env.zsh`,
 downloads checksum-pinned Zellij WASM files, rebuilds the bat cache, and removes
 Zsh completion dumps. `--offline` limits an apply to local generation and cache
-maintenance. It never runs Skillshare or writes host inventory.
+maintenance. It never runs Skillshare or writes host inventory; snapshots have
+their own explicit task (see Host inventory).
 
 The two source-built binaries are an explicit, slower sub-operation:
 
@@ -217,6 +220,26 @@ This clones or fast-forwards `ipruning/atuin` and `craftzdog/op-cache` under the
 ignored `generated/sources/`, builds them with Cargo, and atomically installs the
 artifacts into `generated/bin/`. Any other binary placed there must name its own
 owner; `mise run check` reports unknown binaries.
+
+## Host inventory
+
+Inventory snapshots record which software a host had installed at one point in
+time. They are tracked under `inventory/<host>/` so history stays reviewable,
+and they are only ever written by the explicit task:
+
+```bash
+mise run inventory -- --dry-run
+mise run inventory -- --json
+mise run inventory
+```
+
+The task writes four snapshots per host: `Brewfile` (`brew bundle dump`),
+`applications.txt` (`/Applications`), `setapp.txt` (`/Applications/Setapp`),
+and `gh_extensions.txt` (`gh extension list`). A collector whose tool or
+directory is absent is reported as skipped; a collector that fails or produces
+empty output makes the command exit non-zero and leaves the existing snapshot
+untouched. Nothing regenerates these files implicitly — a snapshot is as old
+as its last committed run, never a claim about current host truth.
 
 ## Standalone tools
 

@@ -46,7 +46,9 @@ SKIP_SUFFIXES = {
     ".wasm",
     ".pyc",
 }
-SKIP_PREFIXES = ("generated/",)
+# inventory/ snapshots quote live host state (Brewfile source paths, app
+# names); they are data to diff, not path references this repository maintains.
+SKIP_PREFIXES = ("generated/", "inventory/")
 FULL_HOME_REQUIRED_FILES = {
     "reference/.config/zellij/config.kdl": (
         "zellij-sessionizer paths do not expand home variables"

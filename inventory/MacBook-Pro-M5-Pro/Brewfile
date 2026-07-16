@@ -1,0 +1,252 @@
+tap "boldsoftware/tap"
+tap "charmbracelet/tap"
+tap "cirruslabs/cli"
+tap "entireio/tap"
+tap "kitlangton/tap"
+tap "longbridge/tap"
+tap "mobile-dev-inc/tap"
+tap "modem-dev/tap"
+tap "nikitabobko/tap"
+tap "nkzw-tech/tap"
+tap "openai/tools"
+tap "parallel-web/tap"
+tap "psviderski/tap"
+tap "simonbs/brrr-cli", "https://github.com/simonbs/brrr-cli.git"
+tap "steipete/tap"
+# Static analysis and lint tool, for (ba)sh scripts
+brew "shellcheck"
+# Static checker for GitHub Actions workflow files
+brew "actionlint"
+# Browser automation CLI for AI agents
+brew "agent-browser"
+# Code searching, linting, rewriting
+brew "ast-grep"
+# Linter and formatter to improve copywriting, correct spaces, words between CJK
+brew "autocorrect"
+# Bourne-Again SHell, a UNIX command interpreter
+brew "bash"
+# Clone of cat(1) with syntax highlighting and Git integration
+brew "bat"
+# Toolchain of the web
+brew "biome"
+# New way to see and navigate directory trees
+brew "broot"
+# Resource monitor. C++ version and continuation of bashtop and bpytop
+brew "btop"
+# Vector graphics library with cross-device output support
+brew "cairo"
+# Create and run Linux containers using lightweight virtual machines
+brew "container"
+# GNU File, Shell, and Text utilities
+brew "coreutils"
+# Embeddable SQL OLAP Database Management System
+brew "duckdb"
+# Modern, maintained replacement for ls
+brew "eza"
+# Simple, fast and user-friendly alternative to find
+brew "fd"
+# Play, record, convert, and stream select audio and video codecs
+brew "ffmpeg"
+# Command-line fuzzy finder written in Go
+brew "fzf"
+# GitHub command-line tool
+brew "gh"
+# Syntax-highlighting pager for git and diff output
+brew "git-delta"
+# Git extension for versioning large files
+brew "git-lfs"
+# TUI Git client inspired by Magit
+brew "gitu"
+# GNU Privacy Guard (OpenPGP)
+brew "gnupg"
+# Database client and tools for the Go vulnerability database
+brew "govulncheck"
+# Tool for glamorous shell scripts
+brew "gum"
+# Command-line interface for Hetzner Cloud
+brew "hcloud"
+# Agent multiplexer that lives in your terminal
+brew "herdr"
+# Improved top (interactive process viewer)
+brew "htop"
+# Command-line benchmarking tool
+brew "hyperfine"
+# Lightweight and flexible command-line JSON processor
+brew "jq"
+# Handy way to save and run project-specific commands
+brew "just"
+# Modern load testing tool, using Go and JavaScript
+brew "k6"
+# Lazier way to manage everything docker
+brew "lazydocker"
+# Simple terminal UI for git commands
+brew "lazygit"
+# Extremely fast file and directory name linter
+brew "ls-lint"
+# Fast, flexible, config-based cli for linting Markdown/CommonMark files
+brew "markdownlint-cli2"
+# Create modern online books from Markdown files
+brew "mdbook"
+# Polyglot runtime manager (asdf rust clone)
+brew "mise"
+# Deep clean and optimize your Mac
+brew "mole"
+# Remote terminal application
+brew "mosh"
+# Jq-like command-line tool for markdown processing
+brew "mq"
+# Open source relational database management system
+brew "mysql-client"
+# Ambitious Vim-fork focused on extensibility and agility
+brew "neovim"
+# Port scanning utility for large networks
+brew "nmap"
+# Modern shell for the GitHub era
+brew "nushell"
+# Development kit for the Java programming language
+brew "openjdk@21"
+# Package compiler and linker metadata toolkit
+brew "pkgconf"
+# Object-relational database system
+brew "postgresql@18", link: true
+# Fast Git hook manager written in Rust, drop-in alternative to pre-commit
+brew "prek"
+# Command-line tool for managing long-running shell commands
+brew "pueue", restart_service: :changed
+# Better WHOIS and domain intelligence toolkit
+brew "quien"
+# Rsync for cloud storage
+brew "rclone"
+# Safe and ergonomic alternative to rm
+brew "rip2"
+# Search tool like grep and The Silver Searcher
+brew "ripgrep"
+# Prevent committing secret keys into your source code
+brew "ripsecrets"
+# CLI proxy to minimize LLM token consumption
+brew "rtk"
+# Cross-platform command-line tool for executing jobs in parallel
+brew "rush-parallel"
+# Run commands in parallel with Rust's Tokio framework
+brew "rust-parallel"
+# Semantic version control CLI with entity-level diffs and blame
+brew "sem-cli"
+# Sync skills across AI CLI tools
+brew "skillshare"
+# SQL linter and auto-formatter for Humans
+brew "sqlfluff"
+# Fast, collaborative live terminal sharing over the web
+brew "sshx"
+# Cross-shell prompt for astronauts
+brew "starship"
+# General purpose fuzzy finder TUI
+brew "television"
+# Terminal multiplexer
+brew "tmux"
+# Program that allows you to count code, quickly
+brew "tokei"
+# TOML formatter, linter and language server
+brew "tombi"
+# Temporary workspace manager for fast experimentation in the terminal
+brew "try-rs"
+# Source code spell checker
+brew "typos-cli"
+# Markup-based typesetting system
+brew "typst"
+# Extremely fast Python package installer and resolver, written in Rust
+brew "uv"
+# Modern watch command
+brew "viddy"
+# Command-line tool to install and switch between multiple versions of Xcode
+brew "xcodes"
+# Friendly and fast tool for sending HTTP requests
+brew "xh"
+# Blazing fast terminal file manager written in Rust, based on async I/O
+brew "yazi"
+# Process YAML, JSON, XML, CSV and properties documents from the CLI
+brew "yq"
+# Pluggable terminal workspace, with terminal multiplexer as the base feature
+brew "zellij"
+# Shell extension to navigate your filesystem faster
+brew "zoxide"
+# Command-line helper for the 1Password password manager
+cask "1password-cli@beta"
+# Password manager
+cask "1password@beta"
+cask "aerospace"
+# Display management tool
+cask "betterdisplay"
+cask "codiff"
+# Write, edit, and chat about your code with AI
+cask "cursor"
+cask "font-maple-mono-nf-cn"
+# Terminal emulator that uses platform-native UI and GPU acceleration
+cask "ghostty"
+cask "git-sync"
+# Keyboard customiser
+cask "karabiner-elements"
+# Customise mouse behavior
+cask "linearmouse"
+cask "longbridge-terminal"
+# Smooths scrolling and set mouse scroll directions independently
+cask "mos"
+cask "openai"
+# Replacement for Docker Desktop
+cask "orbstack"
+cask "parallel-cli"
+# Control your tools with a few keystrokes
+cask "raycast"
+# Move and resize windows using keyboard shortcuts or snap areas
+cask "rectangle"
+cask "shelley"
+# Rime input method engine
+cask "squirrel-app"
+# Menu bar manager
+cask "thaw"
+# Open-source code editor
+cask "visual-studio-code"
+# Install and switch between multiple versions of Xcode
+cask "xcodes-app"
+# Multiplayer code editor
+cask "zed"
+vscode "antfu.file-nesting"
+vscode "astral-sh.ty"
+vscode "biomejs.biome"
+vscode "catppuccin.catppuccin-vsc"
+vscode "catppuccin.catppuccin-vsc-icons"
+vscode "charliermarsh.ruff"
+vscode "davidanson.vscode-markdownlint"
+vscode "editorconfig.editorconfig"
+vscode "github.vscode-github-actions"
+vscode "github.vscode-pull-request-github"
+vscode "golang.go"
+vscode "huacnlee.autocorrect"
+vscode "james-yu.latex-workshop"
+vscode "mermaidchart.vscode-mermaid-chart"
+vscode "ms-azuretools.vscode-containers"
+vscode "ms-python.debugpy"
+vscode "ms-python.python"
+vscode "ms-python.vscode-pylance"
+vscode "ms-python.vscode-python-envs"
+vscode "ms-vscode-remote.remote-containers"
+vscode "ms-vscode-remote.remote-ssh"
+vscode "ms-vscode-remote.remote-ssh-edit"
+vscode "ms-vscode.makefile-tools"
+vscode "ms-vscode.remote-explorer"
+vscode "myriad-dreamin.tinymist"
+vscode "ninoseki.vscode-mogami"
+vscode "redhat.vscode-yaml"
+vscode "samuelcolvin.jinjahtml"
+vscode "sqlfluff.vscode-sqlfluff"
+vscode "tekumara.typos-vscode"
+vscode "timonwong.shellcheck"
+vscode "tombi-toml.tombi"
+vscode "tomoki1207.pdf"
+vscode "usernamehw.errorlens"
+vscode "vscodevim.vim"
+go "cmd/go"
+go "cmd/gofmt"
+cargo "cargo-nextest"
+cargo "dotslash"
+cargo "mdbook-mermaid"
+uv "harness", source: "file:///Users/alex/Developer/tries/browser-harness"
