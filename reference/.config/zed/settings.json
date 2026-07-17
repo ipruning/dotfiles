@@ -9,9 +9,10 @@
     "default_width": 350.0,
     "flexible": false,
     "default_model": {
-      "effort": "low",
+      "speed": "fast",
+      "effort": "medium",
       "enable_thinking": true,
-      "model": "gpt-5.5",
+      "model": "gpt-5.6-sol",
       "provider": "openai-subscribed",
     },
     "default_profile": "write",
