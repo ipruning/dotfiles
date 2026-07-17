@@ -5,7 +5,7 @@
 
 set -uo pipefail
 
-VERSION="2.5.1"
+VERSION="2.6.0"
 EXIT_USAGE=2
 EXIT_BRIGHTNESS_PENDING=69
 EXIT_START_FAILED=70
@@ -67,7 +67,8 @@ Keep a MacBook awake with its lid closed.
 Usage: bag-mode COMMAND [OPTIONS]
 
 Setup:
-  install        Install or upgrade the CLI and LaunchDaemon
+  install        Install the CLI and LaunchDaemon (service stays stopped)
+  upgrade        Stop if needed, install, and restore the prior running state
   doctor         Check dependencies and installation state
 
 Service:
@@ -108,6 +109,11 @@ Recommended installation flow:
   5. bag-mode status --json
   6. bag-mode doctor --strict --json
 
+Upgrading an existing installation? Use `bag-mode upgrade` instead: it stops
+the service, installs, and restarts only if the service was enabled before.
+A bare `install` never starts the service, and a stopped bag mode means the
+Mac sleeps normally when the lid closes.
+
 --dry-run validates dependencies and the generated plist without changing the
 system. Installation requires sudo. In a non-interactive shell, preauthorize
 sudo in an interactive terminal with `sudo -v`, then retry the exact command.
@@ -116,6 +122,22 @@ Successful verification requires installed, launchd_loaded, and enabled to be
 true, phase to be running, controller.alive to be true, recovery_required and
 brightness_pending to be false, and strict doctor to return ok=true with
 problems=0.
+EOF
+      ;;
+    upgrade)
+      cat <<'EOF'
+Usage: bag-mode upgrade
+
+Upgrade the installed CLI and LaunchDaemon in one step:
+  1. Remember whether the service is enabled.
+  2. Stop the controller and restore captured settings when any service
+     state exists.
+  3. Install this executable and bootstrap the LaunchDaemon.
+  4. Start the service again only when step 1 found it enabled.
+
+Requires sudo like install and start. If brightness restoration stays pending
+after the stop (lid closed), the restarted controller adopts the pending
+target automatically.
 EOF
       ;;
     doctor)
@@ -504,26 +526,30 @@ load_controller_config() {
   fi
 }
 
-load_fallback_recovery_context() {
-  local recovery_session
-  recovery_session="$(config_get session_id "$RECOVERY_RECORD_FILE")"
-  [[ -n "$recovery_session" ]] || return 1
+load_fallback_user_context() {
   RUN_USER="$(resolve_user 2>/dev/null || true)"
   [[ -n "$RUN_USER" ]] || return 1
   RUN_HOME="$(resolve_home "$RUN_USER" 2>/dev/null || true)"
   [[ -n "$RUN_HOME" ]] || return 1
   RUN_GROUP="$(resolve_group "$RUN_USER" 2>/dev/null || true)"
   [[ -n "$RUN_GROUP" ]] || return 1
+  NOTIFIER=""
+  prepare_user_dirs
+}
+
+load_fallback_recovery_context() {
+  local recovery_session
+  recovery_session="$(config_get session_id "$RECOVERY_RECORD_FILE")"
+  [[ -n "$recovery_session" ]] || return 1
+  load_fallback_user_context || return 1
   BRIGHTNESS_BIN="$(resolve_brightness)"
   [[ -x "$BRIGHTNESS_BIN" ]] || return 1
-  NOTIFIER=""
   SESSION_ID="$recovery_session"
   INTERVAL="$DEFAULT_INTERVAL"
   CLOSED_INTERVAL="$DEFAULT_CLOSED_INTERVAL"
   BATTERY_EVERY="$DEFAULT_BATTERY_EVERY"
   BATTERY_MIN="$DEFAULT_BATTERY_MIN"
   BATTERY_THRESHOLDS="$DEFAULT_BATTERY_THRESHOLDS"
-  prepare_user_dirs
 }
 
 restore_power_from_snapshot() {
@@ -544,7 +570,12 @@ preflight_failure() {
   rm -f "$ENABLED_FILE" 2>/dev/null || true
   release_controller_reservation "${SESSION_ID:-}" 2>/dev/null || true
   printf 'bag-mode: %s; service disabled\n' "$reason" >&2
-  [[ -e "$RECOVERY_RECORD_FILE" ]] || exit "$EXIT_PREFLIGHT_FAILED"
+  if [[ ! -e "$RECOVERY_RECORD_FILE" ]]; then
+    if load_fallback_user_context; then
+      notify_sync startup_failed time-sensitive "bag-mode failed to start" "The controller could not start ($reason) and the service was disabled. The Mac will sleep normally when the lid closes. Inspect \`bag-mode logs\`, then run \`bag-mode start\`." || true
+    fi
+    exit "$EXIT_PREFLIGHT_FAILED"
+  fi
 
   STARTED_AT="$(now_text)"
   CURRENT_LID=unknown
@@ -556,6 +587,7 @@ preflight_failure() {
     if restore_recovery_snapshot; then
       rm -f "$RECOVERY_RECORD_FILE" "$RESTART_FILE" 2>/dev/null || true
       write_status_snapshot startup_failed || true
+      notify_sync startup_failed time-sensitive "bag-mode failed to start" "The controller could not start ($reason). Captured settings were restored and the service was disabled. The Mac will sleep normally when the lid closes. Inspect \`bag-mode logs\`, then run \`bag-mode start\`." || true
       log_line "startup failed; captured settings restored; reason=$reason"
       exit "$EXIT_PREFLIGHT_FAILED"
     fi
@@ -564,6 +596,7 @@ preflight_failure() {
   restore_power_from_snapshot || true
   if (( fallback_ready )); then
     write_status_snapshot recovery_failed || true
+    notify_sync recovery_failed time-sensitive "bag-mode settings recovery failed" "The controller could not start ($reason) and captured settings could not be fully restored. Run \`bag-mode recover\` now." || true
     log_line "startup failed; partial restoration attempted; recovery remains required; reason=$reason"
   fi
   exit "$EXIT_PREFLIGHT_FAILED"
@@ -932,7 +965,7 @@ clean_shutdown() {
       log_line "startup failed; captured settings restored"
     else
       write_status_snapshot stopped || true
-      notify_sync stopped passive "bag-mode stopped safely" "Bag mode stopped after $reason and restored the captured settings. Current battery: ${CURRENT_BATTERY:-unreadable}. No action needed." || true
+      notify_sync stopped passive "bag-mode stopped safely" "Bag mode stopped after $reason and restored the captured settings. The Mac now sleeps normally when the lid closes; run \`bag-mode start\` to keep it awake again. Current battery: ${CURRENT_BATTERY:-unreadable}." || true
       log_line "stopped"
     fi
     return 0
@@ -1226,6 +1259,25 @@ install_mode() {
   printf 'installed_controller: %s\n' "$CONTROLLER_BIN"
   printf 'launchd_label: %s\n' "$LABEL"
   printf 'next: bag-mode start\n'
+}
+
+upgrade_mode() {
+  local was_enabled=0 stop_exit=0
+  require_macos
+  [[ -e "$ENABLED_FILE" ]] && was_enabled=1
+  if [[ -e "$ENABLED_FILE" || -e "$RECOVERY_RECORD_FILE" || -e "$BRIGHTNESS_PENDING_FILE" || -e "$CONTROLLER_RESERVATION_DIR" ]]; then
+    stop_mode || stop_exit=$?
+    if (( stop_exit != 0 && stop_exit != EXIT_BRIGHTNESS_PENDING )); then
+      die "upgrade aborted because the running service could not be stopped"
+    fi
+  fi
+  install_mode
+  if (( was_enabled )); then
+    start_mode
+    printf 'upgrade complete: service restarted\n'
+  else
+    printf 'upgrade complete: service was not enabled; start it with: bag-mode start\n'
+  fi
 }
 
 internal_service_start() {
@@ -2082,6 +2134,7 @@ if [[ "${1:-}" == -h || "${1:-}" == --help ]]; then
 fi
 case "$subcommand" in
   install) install_mode "$@" ;;
+  upgrade) require_no_args "$@"; upgrade_mode ;;
   doctor) doctor_mode "$@" ;;
   start) require_no_args "$@"; start_mode ;;
   stop) require_no_args "$@"; stop_mode ;;
