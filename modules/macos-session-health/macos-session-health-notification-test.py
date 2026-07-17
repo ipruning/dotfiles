@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import os
 import runpy
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -420,6 +422,163 @@ class NotificationStateTest(unittest.TestCase):
 
         self.assertEqual(config["auth_mode"], "bearer")
         self.assertEqual(config["endpoint"], "https://api.brrr.now/v1/send")
+
+
+class BagModeGuardTest(unittest.TestCase):
+    def setUp(self) -> None:
+        self.module = runpy.run_path(str(MODULE_PATH))
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.bag_mode_dir = Path(self.temp_dir.name) / "bag-mode"
+        self.store = self.module["Store"](
+            Path(self.temp_dir.name) / "health.sqlite3", emit_stdout=False
+        )
+        self.args = SimpleNamespace(
+            bag_mode_dir=self.bag_mode_dir,
+            bag_mode_guard_min_processes=1,
+        )
+
+    def tearDown(self) -> None:
+        self.store.close()
+        self.temp_dir.cleanup()
+
+    def collect(self, codex_summary: dict[str, Any]) -> list[dict[str, Any]]:
+        self.store.current_signals = []
+        self.store.current_brrr_observations = set()
+        snapshot_id = self.store.create_snapshot("test", [])
+        self.module["collect_bag_mode_guard"](
+            self.store, snapshot_id, self.args, codex_summary
+        )
+        return self.store.current_signals
+
+    def signal_names(self, signals: list[dict[str, Any]]) -> set[str]:
+        return {str(signal.get("signal")) for signal in signals}
+
+    def write_state(self, pid: int | str) -> None:
+        (self.bag_mode_dir / "state").write_text(f"last_event\tstarted\npid\t{pid}\n")
+
+    def test_disabled_bag_mode_with_active_ai_session_alerts(self) -> None:
+        self.bag_mode_dir.mkdir(parents=True)
+        signals = self.collect({"codex_app_server_count": 1, "node_repl_count": 2})
+
+        self.assertIn("bag_mode_unarmed", self.signal_names(signals))
+        self.assertIn("bag_mode_unprotected", self.store.current_brrr_observations)
+        unarmed = next(
+            signal for signal in signals if signal["signal"] == "bag_mode_unarmed"
+        )
+        self.assertEqual(unarmed["value"], 3)
+
+    def test_disabled_bag_mode_without_ai_session_stays_quiet(self) -> None:
+        self.bag_mode_dir.mkdir(parents=True)
+        signals = self.collect({"codex_app_server_count": 0, "node_repl_count": 0})
+
+        self.assertEqual(self.signal_names(signals), set())
+        self.assertIn("bag_mode_unprotected", self.store.current_brrr_observations)
+
+    def test_enabled_bag_mode_with_live_controller_stays_quiet(self) -> None:
+        self.bag_mode_dir.mkdir(parents=True)
+        (self.bag_mode_dir / "enabled").write_text("")
+        self.write_state(os.getpid())
+        signals = self.collect({"codex_app_server_count": 1, "node_repl_count": 0})
+
+        self.assertEqual(self.signal_names(signals), set())
+        self.assertIn("bag_mode_unprotected", self.store.current_brrr_observations)
+
+    def test_enabled_bag_mode_with_dead_controller_alerts(self) -> None:
+        self.bag_mode_dir.mkdir(parents=True)
+        (self.bag_mode_dir / "enabled").write_text("")
+        dead = subprocess.Popen(["/usr/bin/true"])
+        dead.wait()
+        self.write_state(dead.pid)
+        signals = self.collect({})
+
+        self.assertIn("bag_mode_stalled", self.signal_names(signals))
+
+    def test_unreadable_state_and_failed_ps_do_not_claim_observation(self) -> None:
+        self.bag_mode_dir.mkdir(parents=True)
+        self.write_state("not-a-pid")
+        signals = self.collect({})
+
+        self.assertEqual(self.signal_names(signals), set())
+        self.assertNotIn("bag_mode_unprotected", self.store.current_brrr_observations)
+
+    def test_missing_bag_mode_installation_observes_without_signals(self) -> None:
+        signals = self.collect({"codex_app_server_count": 5})
+
+        self.assertEqual(self.signal_names(signals), set())
+        self.assertIn("bag_mode_unprotected", self.store.current_brrr_observations)
+
+    def test_incident_mapping_prefers_stalled_over_unarmed(self) -> None:
+        build = self.module["build_brrr_incident"]
+        unarmed = {"severity": "warning", "signal": "bag_mode_unarmed", "value": 2}
+        stalled = {"severity": "error", "signal": "bag_mode_stalled", "value": 1}
+
+        incident = build([unarmed], "snapshot", "unhealthy", 1000)
+        self.assertEqual(incident["kind"], "bag_mode_unprotected")
+        self.assertIn("bag-mode", incident["title"])
+        self.assertIn("bag-mode start", incident["message"])
+
+        incident = build([unarmed, stalled], "snapshot", "unhealthy", 1000)
+        self.assertEqual(incident["kind"], "bag_mode_unprotected")
+        self.assertIn("停摆", incident["title"])
+
+    def test_spawn_failure_outranks_bag_mode_and_process_table(self) -> None:
+        build = self.module["build_brrr_incident"]
+        incident = build(
+            [
+                {"severity": "warning", "signal": "bag_mode_unarmed", "value": 1},
+                {"severity": "warning", "signal": "process_table_high", "value": 900},
+                {"severity": "critical", "signal": "spawn_failed", "value": 1},
+            ],
+            "snapshot",
+            "unhealthy",
+            1000,
+        )
+        self.assertEqual(incident["kind"], "spawn_failed")
+
+
+class ProcessTablePressureTest(unittest.TestCase):
+    def setUp(self) -> None:
+        self.module = runpy.run_path(str(MODULE_PATH))
+        self.pressure = self.module["process_table_pressure_signals"]
+
+    def test_below_threshold_stays_quiet(self) -> None:
+        self.assertEqual(self.pressure(500, 400, 1000, 900, 85), [])
+
+    def test_reaching_threshold_warns_for_each_exhausted_table(self) -> None:
+        both = self.pressure(850, 765, 1000, 900, 85)
+        self.assertEqual(
+            [signal_name for signal_name, _value, _detail in both],
+            ["process_table_high", "user_process_table_high"],
+        )
+        self.assertIn("850 of 1000", both[0][2])
+
+        user_only = self.pressure(500, 765, 1000, 900, 85)
+        self.assertEqual(
+            [signal_name for signal_name, _value, _detail in user_only],
+            ["user_process_table_high"],
+        )
+
+    def test_unknown_counts_or_limits_stay_quiet(self) -> None:
+        self.assertEqual(self.pressure(None, None, 1000, 900, 85), [])
+        self.assertEqual(self.pressure(900, 800, None, 0, 85), [])
+
+    def test_incident_mapping_reports_process_table_pressure(self) -> None:
+        build = self.module["build_brrr_incident"]
+        incident = build(
+            [
+                {
+                    "severity": "warning",
+                    "signal": "process_table_high",
+                    "value": 900,
+                    "detail": "900 of 1000 system process slots are in use",
+                }
+            ],
+            "snapshot",
+            "unhealthy",
+            1000,
+        )
+        self.assertEqual(incident["kind"], "process_table_high")
+        self.assertIn("900 of 1000", incident["message"])
 
 
 if __name__ == "__main__":

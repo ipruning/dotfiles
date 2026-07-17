@@ -34,7 +34,7 @@ from pathlib import Path
 from typing import Any
 
 
-VERSION = "0.8.0"
+VERSION = "0.9.0"
 LABEL = "com.alex.macos-session-health"
 USER_BIN = Path.home() / ".local" / "bin" / "macos-session-health"
 LAUNCH_AGENT = Path.home() / "Library" / "LaunchAgents" / f"{LABEL}.plist"
@@ -58,6 +58,7 @@ BRRR_ENV_FILES = (
     Path.home() / ".config" / "notify" / "brrr.env",
 )
 CODEX_CHROME_EXTENSION_ID = "hehggadaopoacecdllhhajmbjkdcmajg"
+BAG_MODE_DIR = Path("/Library/Application Support/bag-mode")
 CODEX_BUNDLED_COMPUTER_USE = (
     CODEX_APP
     / "Contents"
@@ -78,6 +79,7 @@ KNOWN_EVENTS = {
     "app_bundle",
     "app_codesign_verify",
     "app_codesign_verify_skipped",
+    "bag_mode_guard",
     "brrr_notification",
     "brrr_notification_skipped",
     "code_sign_clone_delta",
@@ -1820,6 +1822,85 @@ def collect_codex_process_summary(
     return process_summary
 
 
+def bag_mode_controller_alive(state_file: Path) -> bool | None:
+    """Return controller liveness from the bag-mode root state file, or None."""
+    try:
+        lines = state_file.read_text().splitlines()
+    except OSError:
+        return None
+    pid_text = ""
+    for line in lines:
+        key, _, value = line.partition("\t")
+        if key == "pid":
+            pid_text = value.strip()
+            break
+    if not pid_text.isdigit():
+        return None
+    try:
+        os.kill(int(pid_text), 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    except OSError:
+        return None
+    return True
+
+
+def collect_bag_mode_guard(
+    store: Store,
+    snapshot_id: str,
+    args: argparse.Namespace,
+    codex_summary: dict[str, Any],
+) -> None:
+    root_dir: Path = args.bag_mode_dir
+    if not root_dir.is_dir():
+        store.observe_brrr_incident("bag_mode_unprotected")
+        return
+    enabled = (root_dir / "enabled").exists()
+    app_servers = parse_int(str(codex_summary.get("codex_app_server_count", ""))) or 0
+    node_repls = parse_int(str(codex_summary.get("node_repl_count", ""))) or 0
+    ai_processes = app_servers + node_repls
+    controller_alive = (
+        bag_mode_controller_alive(root_dir / "state") if enabled else None
+    )
+    store.emit(
+        snapshot_id,
+        "bag_mode_guard",
+        enabled=enabled,
+        controller_alive="" if controller_alive is None else controller_alive,
+        codex_app_server_count=app_servers,
+        node_repl_count=node_repls,
+    )
+    if enabled:
+        store.observe_brrr_incident("bag_mode_unprotected")
+        if controller_alive is False:
+            store.emit(
+                snapshot_id,
+                "health_signal",
+                "error",
+                signal="bag_mode_stalled",
+                value=1,
+                detail="bag-mode is enabled but its controller process is not running",
+            )
+        return
+    if not codex_summary:
+        return
+    store.observe_brrr_incident("bag_mode_unprotected")
+    if ai_processes >= args.bag_mode_guard_min_processes:
+        store.emit(
+            snapshot_id,
+            "health_signal",
+            "warning",
+            signal="bag_mode_unarmed",
+            value=ai_processes,
+            detail=(
+                "Codex sessions are running while bag-mode is disabled; "
+                "closing the lid will sleep the Mac and interrupt them"
+            ),
+        )
+
+
 def collect_trustd_health(
     store: Store,
     snapshot_id: str,
@@ -1976,7 +2057,40 @@ def collect_code_sign_clone_status(
         store.observe_brrr_incident("code_sign_clone_growth")
 
 
-def collect_limits(store: Store, snapshot_id: str, timeout: float) -> None:
+def process_table_pressure_signals(
+    total: int | None,
+    user_total: int | None,
+    kern_maxproc: int | None,
+    kern_maxprocperuid: int | None,
+    warn_pct: int,
+) -> list[tuple[str, int, str]]:
+    signals: list[tuple[str, int, str]] = []
+    if total is not None and kern_maxproc and total * 100 >= kern_maxproc * warn_pct:
+        signals.append(
+            (
+                "process_table_high",
+                total,
+                f"{total} of {kern_maxproc} system process slots are in use",
+            )
+        )
+    if (
+        user_total is not None
+        and kern_maxprocperuid
+        and user_total * 100 >= kern_maxprocperuid * warn_pct
+    ):
+        signals.append(
+            (
+                "user_process_table_high",
+                user_total,
+                f"{user_total} of {kern_maxprocperuid} per-user process slots are in use",
+            )
+        )
+    return signals
+
+
+def collect_limits(
+    store: Store, snapshot_id: str, timeout: float, process_table_warn_pct: int
+) -> None:
     maxproc_code, maxproc_out, maxproc_err, maxproc_timeout, maxproc_ms = run_command(
         ["launchctl", "limit", "maxproc"], timeout=timeout
     )
@@ -2039,6 +2153,33 @@ def collect_limits(store: Store, snapshot_id: str, timeout: float) -> None:
             signal="maxfiles_soft_low",
             value=soft,
             detail="GUI launchd maxfiles soft limit is low",
+        )
+
+    proc_code, proc_out, _, proc_timed_out, _ = run_command(
+        ["ps", "-axo", "user="], timeout=timeout
+    )
+    process_total: int | None = None
+    user_process_total: int | None = None
+    if proc_code == 0 and not proc_timed_out:
+        users = [line.strip() for line in proc_out.splitlines() if line.strip()]
+        current_user = getpass.getuser()
+        process_total = len(users)
+        user_process_total = sum(1 for user in users if user == current_user)
+        store.observe_brrr_incident("process_table_high")
+    for signal_name, signal_value, signal_detail in process_table_pressure_signals(
+        process_total,
+        user_process_total,
+        parse_int(sys_values[0] if len(sys_values) > 0 else ""),
+        parse_int(sys_values[1] if len(sys_values) > 1 else ""),
+        process_table_warn_pct,
+    ):
+        store.emit(
+            snapshot_id,
+            "health_signal",
+            "warning",
+            signal=signal_name,
+            value=signal_value,
+            detail=signal_detail,
         )
 
 
@@ -2790,6 +2931,10 @@ def build_brrr_incident(
         signals, "process_rss_growth_high", role="syspolicyd"
     )
     code_sign_clone_growth = strongest_signal(signals, "code_sign_clone_growth_high")
+    process_table = strongest_signal(signals, "process_table_high")
+    user_process_table = strongest_signal(signals, "user_process_table_high")
+    bag_mode_stalled = strongest_signal(signals, "bag_mode_stalled")
+    bag_mode_unarmed = strongest_signal(signals, "bag_mode_unarmed")
     collector_exception = strongest_signal(signals, "collector_exception")
 
     if spawn_failed:
@@ -2829,6 +2974,31 @@ def build_brrr_incident(
         summary = f"Codex code_sign_clone 增速约 {growth} MiB/min，可能会放大 syspolicyd 评估压力。"
         primary = code_sign_clone_growth
         kind = "code_sign_clone_growth"
+    elif process_table or user_process_table:
+        primary = process_table or user_process_table
+        summary = (
+            f"进程数已接近上限（{primary.get('detail', '')}），"
+            "继续增长会开始出现 fork 失败。"
+        )
+        title = "进程表接近耗尽"
+        kind = "process_table_high"
+    elif bag_mode_stalled:
+        title = "bag-mode 控制器已停摆"
+        summary = (
+            "bag mode 处于启用状态但控制器进程不在运行，合盖保护可能已失效。"
+            "运行 `bag-mode status` 和 `bag-mode logs` 检查。"
+        )
+        primary = bag_mode_stalled
+        kind = "bag_mode_unprotected"
+    elif bag_mode_unarmed:
+        count = bag_mode_unarmed.get("value", "")
+        title = "AI 会话未受 bag-mode 保护"
+        summary = (
+            f"检测到 {count} 个 Codex 会话进程在运行，但 bag mode 未启用；"
+            "现在合盖会让 Mac 休眠并中断这些会话。需要时运行 `bag-mode start`。"
+        )
+        primary = bag_mode_unarmed
+        kind = "bag_mode_unprotected"
     elif collector_exception:
         title = "macOS 采集器异常"
         summary = "macos-session-health 采集器自身失败，需要查看本机日志。"
@@ -3163,11 +3333,11 @@ def maybe_send_brrr_notification(
                 incident_kind=active_kind,
             )
             return
-        title = f"{socket.gethostname()}: 此前启动异常已恢复"
+        title = f"{socket.gethostname()}: 此前异常已恢复"
         payload = {
             "title": title,
             "subtitle": "macOS session health",
-            "message": "此前报告的启动异常已不再出现。当前无需针对该异常操作。",
+            "message": "此前报告的异常已不再出现。当前无需针对该异常操作。",
             "thread_id": args.brrr_thread_id,
             "interruption_level": args.brrr_interruption_level,
         }
@@ -3351,7 +3521,9 @@ def snapshot(args: argparse.Namespace, store: Store, mode: str) -> str:
                 deleted_snapshots=deleted,
             )
         collect_system_context(store, snapshot_id, args.command_timeout)
-        collect_limits(store, snapshot_id, args.command_timeout)
+        collect_limits(
+            store, snapshot_id, args.command_timeout, args.process_table_warn_pct
+        )
         run_process_top = should_run_periodic_probe(
             store,
             snapshot_id,
@@ -3380,7 +3552,10 @@ def snapshot(args: argparse.Namespace, store: Store, mode: str) -> str:
         )
         if run_trusted_root_check:
             collect_codex_trusted_project_roots(store, snapshot_id, args)
-        collect_codex_process_summary(store, snapshot_id, args, codex_config)
+        codex_summary = collect_codex_process_summary(
+            store, snapshot_id, args, codex_config
+        )
+        collect_bag_mode_guard(store, snapshot_id, args, codex_summary)
         collect_code_sign_clone_status(store, snapshot_id, args)
         collect_syspolicyd_health(store, snapshot_id, args)
         collect_trustd_health(store, snapshot_id, args)
@@ -4358,6 +4533,28 @@ Run `macos-session-health install` to install or refresh the user LaunchAgent.
         "--fd-warn",
         type=int,
         default=int(os.getenv("MACOS_SESSION_HEALTH_FD_WARN", "512")),
+    )
+    parser.add_argument(
+        "--process-table-warn-pct",
+        type=int,
+        default=int(os.getenv("MACOS_SESSION_HEALTH_PROCESS_TABLE_WARN_PCT", "85")),
+        help="Warn when live processes reach this percentage of kern.maxproc "
+        "or kern.maxprocperuid.",
+    )
+    parser.add_argument(
+        "--bag-mode-dir",
+        type=Path,
+        default=Path(os.getenv("MACOS_SESSION_HEALTH_BAG_MODE_DIR", str(BAG_MODE_DIR))),
+        help="bag-mode service metadata directory used by the lid-close guard.",
+    )
+    parser.add_argument(
+        "--bag-mode-guard-min-processes",
+        type=int,
+        default=int(
+            os.getenv("MACOS_SESSION_HEALTH_BAG_MODE_GUARD_MIN_PROCESSES", "1")
+        ),
+        help="Minimum count of Codex session processes that makes a disabled "
+        "bag-mode worth an alert.",
     )
     parser.add_argument(
         "--codex-app",
