@@ -85,6 +85,34 @@ def test_inspect_host_reports_capabilities_and_their_invalid_transition(
             "consecutive_delivery_failures": 0,
         },
     )
+    bag_mode = _bag_mode_stub(
+        tmp_path,
+        {
+            "enabled": True,
+            "phase": "running",
+            "recovery_required": False,
+            "brightness_pending": False,
+        },
+        version="2.6.0",
+    )
+    _write_module_source(
+        repo_root / "modules/bag-mode/bag-mode",
+        'VERSION="2.6.0"',
+    )
+    maxfiles = _maxfiles_stub(
+        tmp_path,
+        {
+            "installed": True,
+            "binary": True,
+            "loaded": True,
+            "soft_limit": "8192",
+            "hard_limit": "65536",
+        },
+    )
+    _write_module_source(
+        repo_root / "modules/macos-maxfiles/macos-maxfiles",
+        'SOFT_LIMIT="8192"\nHARD_LIMIT="65536"',
+    )
 
     available = {
         "git",
@@ -98,6 +126,8 @@ def test_inspect_host_reports_capabilities_and_their_invalid_transition(
         "atuin",
         "codex",
         "macos-session-health",
+        "bag-mode",
+        "macos-maxfiles",
     }
 
     def finder(command: str) -> str | None:
@@ -107,6 +137,10 @@ def test_inspect_host_reports_capabilities_and_their_invalid_transition(
             return str(skillshare)
         if command == "macos-session-health":
             return str(session_health)
+        if command == "bag-mode":
+            return str(bag_mode)
+        if command == "macos-maxfiles":
+            return str(maxfiles)
         return f"/tools/{command}"
 
     healthy = inspect_host(
@@ -601,6 +635,227 @@ def test_session_health_probe_treats_absent_tool_as_optional_warning(
     assert finding.severity is Severity.WARN
     assert finding.code == "session_health.missing"
     assert report.is_ok() is True
+
+
+def _write_module_source(source: Path, body: str) -> None:
+    source.parent.mkdir(parents=True, exist_ok=True)
+    source.write_text(f"#!/bin/bash\n{body}\n")
+
+
+def _bag_mode_stub(tmp_path: Path, record: dict, *, version: str) -> Path:
+    executable = tmp_path / "bin/bag-mode"
+    executable.parent.mkdir(parents=True, exist_ok=True)
+    executable.write_text(
+        "#!/bin/sh\n"
+        f"if [ \"$1\" = version ]; then printf '%s\\n' 'bag-mode {version}'; exit 0; fi\n"
+        f"printf '%s\\n' {json.dumps(json.dumps(record))}\n",
+    )
+    executable.chmod(0o755)
+    return executable
+
+
+def _maxfiles_stub(tmp_path: Path, record: dict) -> Path:
+    executable = tmp_path / "bin/macos-maxfiles"
+    executable.parent.mkdir(parents=True, exist_ok=True)
+    executable.write_text(
+        f"#!/bin/sh\nprintf '%s\\n' {json.dumps(json.dumps(record))}\n",
+    )
+    executable.chmod(0o755)
+    return executable
+
+
+def _module_probe_findings(tmp_path: Path, finder, prefix: str) -> dict:
+    report = inspect_host(
+        tmp_path / "repo",
+        tmp_path / "home",
+        executable_finder=finder,
+        system_name="Darwin",
+        profile="macos",
+    )
+    return {
+        finding.check: finding
+        for finding in report.findings
+        if finding.check.startswith(prefix)
+    }
+
+
+def test_bag_mode_probe_flags_version_drift_and_stalled_controller(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "home").mkdir()
+    _write_module_source(
+        tmp_path / "repo/modules/bag-mode/bag-mode",
+        'VERSION="2.6.0"',
+    )
+    stub = _bag_mode_stub(
+        tmp_path,
+        {
+            "enabled": True,
+            "phase": "starting",
+            "recovery_required": False,
+            "brightness_pending": False,
+        },
+        version="2.5.0",
+    )
+
+    def finder(command: str) -> str | None:
+        if command == "bag-mode":
+            return str(stub)
+        return (
+            f"/tools/{command}" if command in {"git", "python", "uv", "mise"} else None
+        )
+
+    findings = _module_probe_findings(tmp_path, finder, "bag_mode.")
+
+    assert findings["bag_mode.lifecycle"].severity is Severity.WARN
+    assert findings["bag_mode.lifecycle"].code == "bag_mode.stalled"
+    assert findings["bag_mode.version"].severity is Severity.WARN
+    assert findings["bag_mode.version"].code == "bag_mode.version_drift"
+    assert "upgrade" in findings["bag_mode.version"].action
+
+
+def test_bag_mode_probe_reports_recovery_then_clean_stop(tmp_path: Path) -> None:
+    (tmp_path / "home").mkdir()
+    _write_module_source(
+        tmp_path / "repo/modules/bag-mode/bag-mode",
+        'VERSION="2.6.0"',
+    )
+    stub = _bag_mode_stub(
+        tmp_path,
+        {
+            "enabled": True,
+            "phase": "running",
+            "recovery_required": False,
+            "brightness_pending": True,
+        },
+        version="2.6.0",
+    )
+
+    def finder(command: str) -> str | None:
+        if command == "bag-mode":
+            return str(stub)
+        return (
+            f"/tools/{command}" if command in {"git", "python", "uv", "mise"} else None
+        )
+
+    pending = _module_probe_findings(tmp_path, finder, "bag_mode.")
+    assert pending["bag_mode.lifecycle"].code == "bag_mode.recovery_pending"
+    assert "bag-mode recover" in pending["bag_mode.lifecycle"].action
+    assert pending["bag_mode.version"].code == "bag_mode.version_current"
+    assert pending["bag_mode.version"].severity is Severity.OK
+
+    _bag_mode_stub(
+        tmp_path,
+        {
+            "enabled": False,
+            "phase": "stopped",
+            "recovery_required": False,
+            "brightness_pending": False,
+        },
+        version="2.6.0",
+    )
+    stopped = _module_probe_findings(tmp_path, finder, "bag_mode.")
+    assert stopped["bag_mode.lifecycle"].code == "bag_mode.stopped"
+    assert stopped["bag_mode.lifecycle"].severity is Severity.OK
+
+
+def test_bag_mode_probe_handles_missing_tool_and_invalid_status(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "home").mkdir()
+
+    def absent_finder(command: str) -> str | None:
+        return (
+            f"/tools/{command}" if command in {"git", "python", "uv", "mise"} else None
+        )
+
+    missing = _module_probe_findings(tmp_path, absent_finder, "bag_mode.")
+    assert missing["bag_mode.lifecycle"].code == "bag_mode.missing"
+    assert missing["bag_mode.lifecycle"].severity is Severity.WARN
+
+    broken = tmp_path / "bin/broken-bag-mode"
+    broken.parent.mkdir(parents=True, exist_ok=True)
+    broken.write_text("#!/bin/sh\necho 'not json'\n")
+    broken.chmod(0o755)
+
+    def broken_finder(command: str) -> str | None:
+        if command == "bag-mode":
+            return str(broken)
+        return absent_finder(command)
+
+    invalid = _module_probe_findings(tmp_path, broken_finder, "bag_mode.")
+    assert invalid["bag_mode.lifecycle"].code == "bag_mode.status_unavailable"
+    assert "bag_mode.version" not in invalid
+
+
+def test_maxfiles_probe_flags_limit_drift_and_unloaded_daemon(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "home").mkdir()
+    _write_module_source(
+        tmp_path / "repo/modules/macos-maxfiles/macos-maxfiles",
+        'SOFT_LIMIT="8192"\nHARD_LIMIT="65536"',
+    )
+    stub = _maxfiles_stub(
+        tmp_path,
+        {
+            "installed": True,
+            "binary": True,
+            "loaded": True,
+            "soft_limit": "256",
+            "hard_limit": "unlimited",
+        },
+    )
+
+    def finder(command: str) -> str | None:
+        if command == "macos-maxfiles":
+            return str(stub)
+        return (
+            f"/tools/{command}" if command in {"git", "python", "uv", "mise"} else None
+        )
+
+    drifted = _module_probe_findings(tmp_path, finder, "maxfiles.")
+    assert drifted["maxfiles.agent"].code == "maxfiles.agent_ready"
+    assert drifted["maxfiles.limits"].severity is Severity.WARN
+    assert drifted["maxfiles.limits"].code == "maxfiles.limits_drift"
+    assert "install" in drifted["maxfiles.limits"].action
+
+    _maxfiles_stub(
+        tmp_path,
+        {
+            "installed": True,
+            "binary": True,
+            "loaded": True,
+            "soft_limit": "8192",
+            "hard_limit": "unlimited",
+        },
+    )
+    unlimited = _module_probe_findings(tmp_path, finder, "maxfiles.")
+    assert unlimited["maxfiles.limits"].code == "maxfiles.limits_effective"
+    assert unlimited["maxfiles.limits"].severity is Severity.OK
+
+    _maxfiles_stub(
+        tmp_path,
+        {
+            "installed": True,
+            "binary": True,
+            "loaded": False,
+            "soft_limit": "",
+            "hard_limit": "",
+        },
+    )
+    down = _module_probe_findings(tmp_path, finder, "maxfiles.")
+    assert down["maxfiles.agent"].code == "maxfiles.agent_down"
+    assert down["maxfiles.agent"].severity is Severity.WARN
+    assert "maxfiles.limits" not in down
+
+    def absent_finder(command: str) -> str | None:
+        return (
+            f"/tools/{command}" if command in {"git", "python", "uv", "mise"} else None
+        )
+
+    missing = _module_probe_findings(tmp_path, absent_finder, "maxfiles.")
+    assert missing["maxfiles.agent"].code == "maxfiles.missing"
 
 
 def test_bash_integration_recognizes_symlinked_checkout(tmp_path: Path) -> None:

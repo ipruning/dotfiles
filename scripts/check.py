@@ -655,6 +655,236 @@ def _session_health_findings(
     return findings
 
 
+def _module_source_constant(source: Path, name: str) -> str | None:
+    try:
+        for line in source.read_text().splitlines():
+            if line.startswith(f'{name}="') and line.rstrip().endswith('"'):
+                return line.rstrip()[len(name) + 2 : -1]
+    except OSError:
+        return None
+    return None
+
+
+def _bag_mode_findings(
+    executable_finder: ExecutableFinder,
+    repo_root: Path,
+) -> list[Finding]:
+    executable = executable_finder("bag-mode")
+    if executable is None:
+        return [
+            Finding(
+                "bag_mode.lifecycle",
+                Severity.WARN,
+                "bag_mode.missing",
+                "bag-mode is not installed",
+                action="Run modules/bag-mode/bag-mode install if this host needs lid-closed sessions.",
+            ),
+        ]
+    try:
+        completed = subprocess.run(
+            [str(executable), "status", "--json"],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        record = json.loads(completed.stdout)
+        enabled = bool(record["enabled"])
+        phase = str(record["phase"])
+        recovery_required = bool(record["recovery_required"])
+        brightness_pending = bool(record["brightness_pending"])
+    except (
+        OSError,
+        subprocess.TimeoutExpired,
+        json.JSONDecodeError,
+        LookupError,
+        TypeError,
+        ValueError,
+    ) as error:
+        return [
+            Finding(
+                "bag_mode.lifecycle",
+                Severity.WARN,
+                "bag_mode.status_unavailable",
+                f"bag-mode status could not be read: {error}",
+                action="Run bag-mode status --json and resolve the failure.",
+            ),
+        ]
+
+    if recovery_required or brightness_pending:
+        lifecycle = Finding(
+            "bag_mode.lifecycle",
+            Severity.WARN,
+            "bag_mode.recovery_pending",
+            "bag-mode has unrestored captured settings",
+            action="Run bag-mode recover.",
+        )
+    elif enabled and phase != "running":
+        lifecycle = Finding(
+            "bag_mode.lifecycle",
+            Severity.WARN,
+            "bag_mode.stalled",
+            f"bag-mode is enabled but its controller phase is {phase}",
+            action="Inspect bag-mode logs, then run bag-mode status.",
+        )
+    elif enabled:
+        lifecycle = Finding(
+            "bag_mode.lifecycle",
+            Severity.OK,
+            "bag_mode.running",
+            "bag-mode is enabled and its controller is running",
+        )
+    else:
+        lifecycle = Finding(
+            "bag_mode.lifecycle",
+            Severity.OK,
+            "bag_mode.stopped",
+            "bag-mode is stopped; the Mac sleeps normally when the lid closes",
+        )
+    findings = [lifecycle]
+
+    repo_version = _module_source_constant(
+        repo_root / "modules/bag-mode/bag-mode",
+        "VERSION",
+    )
+    if repo_version:
+        try:
+            reported = subprocess.run(
+                [str(executable), "version"],
+                check=False,
+                capture_output=True,
+                text=True,
+                timeout=30,
+            ).stdout.strip()
+        except OSError, subprocess.TimeoutExpired:
+            reported = ""
+        installed_version = reported.removeprefix("bag-mode ").strip()
+        drifted = installed_version != repo_version
+        findings.append(
+            Finding(
+                "bag_mode.version",
+                Severity.WARN if drifted else Severity.OK,
+                "bag_mode.version_drift" if drifted else "bag_mode.version_current",
+                (
+                    f"installed bag-mode {installed_version or 'unknown'} differs "
+                    f"from repository version {repo_version}"
+                    if drifted
+                    else f"installed bag-mode matches repository version {repo_version}"
+                ),
+                action="Run modules/bag-mode/bag-mode upgrade." if drifted else None,
+            ),
+        )
+    return findings
+
+
+def _limit_satisfied(actual: str, expected: str) -> bool:
+    """A launchd limit satisfies its target when it meets or exceeds it.
+
+    launchd reports an unbounded hard limit as the word "unlimited" even after
+    a numeric limit was applied, so that value always satisfies the target.
+    """
+    if actual == expected or actual == "unlimited":
+        return True
+    try:
+        return int(actual) >= int(expected)
+    except ValueError:
+        return False
+
+
+def _maxfiles_findings(
+    executable_finder: ExecutableFinder,
+    repo_root: Path,
+) -> list[Finding]:
+    executable = executable_finder("macos-maxfiles")
+    if executable is None:
+        return [
+            Finding(
+                "maxfiles.agent",
+                Severity.WARN,
+                "maxfiles.missing",
+                "macos-maxfiles is not installed",
+                action="Run modules/macos-maxfiles/macos-maxfiles install.",
+            ),
+        ]
+    try:
+        completed = subprocess.run(
+            [str(executable), "status", "--json"],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        record = json.loads(completed.stdout)
+        installed = bool(record["installed"])
+        loaded = bool(record["loaded"])
+        soft_limit = str(record.get("soft_limit") or "")
+        hard_limit = str(record.get("hard_limit") or "")
+    except (
+        OSError,
+        subprocess.TimeoutExpired,
+        json.JSONDecodeError,
+        LookupError,
+        TypeError,
+        ValueError,
+    ) as error:
+        return [
+            Finding(
+                "maxfiles.agent",
+                Severity.WARN,
+                "maxfiles.status_unavailable",
+                f"macos-maxfiles status could not be read: {error}",
+                action="Run macos-maxfiles status --json and resolve the failure.",
+            ),
+        ]
+
+    agent_ready = installed and loaded
+    findings = [
+        Finding(
+            "maxfiles.agent",
+            Severity.OK if agent_ready else Severity.WARN,
+            "maxfiles.agent_ready" if agent_ready else "maxfiles.agent_down",
+            "maxfiles LaunchDaemon is installed and loaded"
+            if agent_ready
+            else "maxfiles LaunchDaemon is not loaded",
+            action=(
+                None
+                if agent_ready
+                else "Run modules/macos-maxfiles/macos-maxfiles install."
+            ),
+        ),
+    ]
+    source = repo_root / "modules/macos-maxfiles/macos-maxfiles"
+    expected_soft = _module_source_constant(source, "SOFT_LIMIT")
+    expected_hard = _module_source_constant(source, "HARD_LIMIT")
+    if agent_ready and expected_soft and expected_hard:
+        matches = _limit_satisfied(soft_limit, expected_soft) and _limit_satisfied(
+            hard_limit, expected_hard
+        )
+        findings.append(
+            Finding(
+                "maxfiles.limits",
+                Severity.OK if matches else Severity.WARN,
+                "maxfiles.limits_effective" if matches else "maxfiles.limits_drift",
+                (
+                    f"effective maxfiles limits {soft_limit}/{hard_limit} satisfy "
+                    f"the configured {expected_soft}/{expected_hard}"
+                    if matches
+                    else (
+                        f"effective maxfiles limits {soft_limit or 'unknown'}/"
+                        f"{hard_limit or 'unknown'} fall below the configured "
+                        f"{expected_soft}/{expected_hard}"
+                    )
+                ),
+                action=(
+                    None
+                    if matches
+                    else "Run modules/macos-maxfiles/macos-maxfiles install to reapply the limit."
+                ),
+            ),
+        )
+    return findings
+
+
 def inspect_host(
     repo_root: Path,
     home: Path,
@@ -695,6 +925,8 @@ def inspect_host(
         return CheckReport(schema_version=1, findings=tuple(findings))
     if active_system == "Darwin":
         findings.extend(_session_health_findings(executable_finder))
+        findings.extend(_bag_mode_findings(executable_finder, repo_root))
+        findings.extend(_maxfiles_findings(executable_finder, repo_root))
     findings.append(
         _check_executable(
             "tv",
