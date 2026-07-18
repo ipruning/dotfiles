@@ -91,8 +91,10 @@ class SubprocessMackupRunner:
             raise MackupCommandError(
                 f"Unable to prepare Mackup config {source_config}: {error}",
             ) from error
-        if completed.returncode != 0 and not completed.stdout:
-            detail = completed.stderr.strip() or "Mackup produced no report"
+        if completed.returncode not in {0, 1} or (
+            completed.returncode == 1 and not completed.stdout.strip()
+        ):
+            detail = completed.stderr.strip() or f"Mackup exited {completed.returncode}"
             raise MackupCommandError(detail)
         try:
             document = json.loads(completed.stdout)
@@ -102,6 +104,15 @@ class SubprocessMackupRunner:
             ) from error
         if not isinstance(document, dict):
             raise MackupCommandError("Mackup returned a non-object JSON document")
+        if completed.returncode == 1:
+            changes = document.get("changes")
+            reports_unreadable = isinstance(changes, list) and any(
+                isinstance(change, dict) and change.get("kind") == "unreadable"
+                for change in changes
+            )
+            if not reports_unreadable:
+                detail = completed.stderr.strip() or "Mackup exited 1"
+                raise MackupCommandError(detail)
         return document
 
 

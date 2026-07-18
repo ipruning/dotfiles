@@ -10,10 +10,11 @@ import shlex
 import shutil
 import subprocess
 import sys
+import tempfile
 import urllib.error
 import urllib.request
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from enum import StrEnum
 from pathlib import Path
 
@@ -343,25 +344,19 @@ def plan_runtime(
         tool=None,
         target=legacy_try_rs,
     )
-    results.append(
-        RuntimeResult(
-            legacy_try_rs_spec,
-            RuntimeStatus.PLANNED,
-            RuntimeAction.REMOVE,
+    if legacy_try_rs.exists() or legacy_try_rs.is_symlink():
+        results.append(
+            RuntimeResult(
+                legacy_try_rs_spec,
+                RuntimeStatus.PLANNED,
+                RuntimeAction.REMOVE,
+            ),
         )
-        if legacy_try_rs.exists() or legacy_try_rs.is_symlink()
-        else RuntimeResult(
-            legacy_try_rs_spec,
-            RuntimeStatus.SKIPPED,
-            RuntimeAction.REMOVE,
-            "tracked try-rs shell fragment is already authoritative",
-        ),
-    )
     compdumps = tuple(sorted(home.glob(".zcompdump*")))
     compdump_spec = RuntimeSpec(
         name="zsh.compdump",
         tool=None,
-        target=home,
+        target=home / ".zcompdump*",
     )
     results.append(
         RuntimeResult(compdump_spec, RuntimeStatus.PLANNED, RuntimeAction.REMOVE)
@@ -500,17 +495,33 @@ def _command_environment(spec: RuntimeSpec, home: Path) -> dict[str, str]:
     return environment
 
 
-def _run_command(spec: RuntimeSpec, home: Path) -> subprocess.CompletedProcess[str]:
+def _run_command(
+    spec: RuntimeSpec,
+    home: Path,
+    *,
+    capture_output: bool,
+) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         spec.command,
         cwd=spec.working_directory or home,
         check=False,
         stdin=subprocess.DEVNULL,
-        capture_output=True,
+        capture_output=capture_output,
         text=True,
         timeout=spec.timeout_seconds,
         env=_command_environment(spec, home),
     )
+
+
+def _emit_command_output(spec: RuntimeSpec, output: str | None) -> None:
+    for line in (output or "").splitlines():
+        print(f"[{spec.name}] {line}", file=sys.stderr)
+
+
+def _command_failure_reason(completed: subprocess.CompletedProcess[str]) -> str:
+    reason = f"command exited {completed.returncode}"
+    detail = (completed.stderr or "").strip()
+    return f"{reason}: {detail}" if detail else reason
 
 
 def _download(source: str, timeout_seconds: int) -> bytes:
@@ -525,6 +536,7 @@ def execute_runtime(
     *,
     downloader: Downloader = _download,
     on_start: StepCallback | None = None,
+    capture_output: bool = True,
 ) -> RuntimeReport:
     """Execute a previously rendered runtime plan."""
     results = []
@@ -549,14 +561,14 @@ def execute_runtime(
                 continue
         if on_start:
             on_start(spec, planned.action)
+        exit_code: int | None = None
         try:
             if planned.action is RuntimeAction.GENERATE:
-                completed = _run_command(spec, home)
+                completed = _run_command(spec, home, capture_output=True)
+                exit_code = completed.returncode
+                _emit_command_output(spec, completed.stderr)
                 if completed.returncode != 0:
-                    detail = completed.stderr.strip() or "command failed without output"
-                    raise RuntimeError(
-                        f"command exited {completed.returncode}: {detail}",
-                    )
+                    raise RuntimeError(_command_failure_reason(completed))
                 if not completed.stdout:
                     raise RuntimeError("generator produced empty output")
                 assert spec.target is not None
@@ -564,38 +576,67 @@ def execute_runtime(
                     spec.target,
                     lambda temporary: temporary.write_text(completed.stdout),
                 )
-                exit_code = completed.returncode
             elif planned.action in {
                 RuntimeAction.CLONE,
                 RuntimeAction.UPDATE,
                 RuntimeAction.RUN,
             }:
-                if planned.action is RuntimeAction.CLONE and spec.target:
-                    spec.target.parent.mkdir(parents=True, exist_ok=True)
-                completed = _run_command(spec, home)
-                if completed.returncode != 0:
-                    detail = completed.stderr.strip() or "command failed without output"
-                    raise RuntimeError(
-                        f"command exited {completed.returncode}: {detail}",
+                staging: Path | None = None
+                command_spec = spec
+                target = spec.target
+                if planned.action is RuntimeAction.CLONE:
+                    assert target is not None
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    staging = Path(
+                        tempfile.mkdtemp(
+                            dir=target.parent,
+                            prefix=f".{target.name}.clone-",
+                        )
                     )
-                exit_code = completed.returncode
+                    staging.rmdir()
+                    command_spec = replace(
+                        spec,
+                        command=(*spec.command[:-1], str(staging)),
+                    )
+                try:
+                    completed = _run_command(
+                        command_spec,
+                        home,
+                        capture_output=capture_output,
+                    )
+                    exit_code = completed.returncode
+                    if capture_output:
+                        _emit_command_output(spec, completed.stdout)
+                        _emit_command_output(spec, completed.stderr)
+                    if completed.returncode != 0:
+                        raise RuntimeError(_command_failure_reason(completed))
+                    if staging is not None:
+                        assert target is not None
+                        staging.rename(target)
+                finally:
+                    if staging is not None:
+                        shutil.rmtree(staging, ignore_errors=True)
             elif planned.action is RuntimeAction.BUILD:
                 artifact = spec.artifact
                 assert artifact is not None
                 assert spec.target is not None
-                completed = _run_command(spec, home)
+                completed = _run_command(
+                    spec,
+                    home,
+                    capture_output=capture_output,
+                )
+                exit_code = completed.returncode
+                if capture_output:
+                    _emit_command_output(spec, completed.stdout)
+                    _emit_command_output(spec, completed.stderr)
                 if completed.returncode != 0:
-                    detail = completed.stderr.strip() or "command failed without output"
-                    raise RuntimeError(
-                        f"command exited {completed.returncode}: {detail}",
-                    )
+                    raise RuntimeError(_command_failure_reason(completed))
                 if not artifact.is_file():
                     raise RuntimeError(f"build artifact is missing: {artifact}")
                 _atomic_install(
                     spec.target,
                     lambda temporary: shutil.copy2(artifact, temporary),
                 )
-                exit_code = completed.returncode
             elif planned.action is RuntimeAction.DOWNLOAD:
                 assert spec.source is not None
                 assert spec.sha256 is not None
@@ -637,6 +678,7 @@ def execute_runtime(
                 RuntimeStatus.FAILED,
                 planned.action,
                 reason,
+                exit_code,
             )
             results.append(failed)
             completed_steps[spec.name] = failed
@@ -652,12 +694,27 @@ def execute_runtime(
     return RuntimeReport(apply=True, results=tuple(results))
 
 
+def _summary(report: RuntimeReport) -> dict[str, int]:
+    return {
+        status.value: count
+        for status in (
+            RuntimeStatus.PLANNED,
+            RuntimeStatus.SUCCEEDED,
+            RuntimeStatus.SKIPPED,
+            RuntimeStatus.FAILED,
+        )
+        if (count := sum(result.status is status for result in report.results))
+    }
+
+
 def _document(report: RuntimeReport) -> dict[str, object]:
     return {
         "schema_version": 1,
         "operation": "runtime",
         "apply": report.apply,
         "ok": report.ok,
+        "next": list(_next_commands(report)),
+        "shell_restart_required": _shell_restart_required(report),
         "steps": [
             {
                 "name": result.spec.name,
@@ -681,7 +738,49 @@ def _document(report: RuntimeReport) -> dict[str, object]:
             }
             for result in report.results
         ],
+        "summary": _summary(report),
     }
+
+
+def _next_commands(report: RuntimeReport) -> tuple[str, ...]:
+    if not report.apply:
+        return (
+            ("mise run runtime -- --apply",)
+            if report.ok
+            and any(result.status is RuntimeStatus.PLANNED for result in report.results)
+            else ()
+        )
+    if not report.ok:
+        return ()
+    if any(result.status is RuntimeStatus.SUCCEEDED for result in report.results):
+        return ("mise run check", "mise run diff")
+    return ()
+
+
+def _shell_restart_required(report: RuntimeReport) -> bool:
+    return any(
+        result.status is RuntimeStatus.SUCCEEDED
+        and (
+            result.spec.name.startswith(("function.", "completion.", "plugin."))
+            or result.spec.name == "zsh.compdump"
+        )
+        for result in report.results
+    )
+
+
+def _step_detail(spec: RuntimeSpec, action: RuntimeAction) -> str:
+    command = shlex.join(spec.command) if spec.command else ""
+    if action is RuntimeAction.GENERATE:
+        return f"{command} -> {spec.target}"
+    if action is RuntimeAction.BUILD:
+        return f"{command} (in {spec.working_directory}) -> {spec.target}"
+    if command:
+        return command
+    if action is RuntimeAction.DOWNLOAD:
+        return f"download {spec.source} -> {spec.target}"
+    if action is RuntimeAction.REMOVE:
+        return f"remove {spec.target}"
+    return str(spec.target or action)
 
 
 def _render(report: RuntimeReport) -> None:
@@ -692,18 +791,36 @@ def _render(report: RuntimeReport) -> None:
                 file=sys.stderr,
             )
             continue
-        print(
-            f"{result.status.value.upper():7} {result.spec.name}: {result.action}",
+        detail = (
+            _step_detail(result.spec, result.action)
+            if result.status in {RuntimeStatus.PLANNED, RuntimeStatus.SKIPPED}
+            else result.action.value
         )
+        print(f"{result.status.value.upper():7} {result.spec.name}: {detail}")
         if result.reason:
             print(f"        {result.reason}")
+    summary = _summary(report)
+    rendered = ", ".join(f"{count} {status}" for status, count in summary.items())
+    print(f"Summary: {rendered or 'no steps'}")
     if not report.apply:
-        print("No files changed. Re-run with --apply to refresh the runtime.")
+        if summary.get(RuntimeStatus.PLANNED.value, 0):
+            print("No files changed. Re-run with --apply to refresh the runtime.")
+        else:
+            print("No runtime refresh steps are available on this host.")
+        return
+    if _shell_restart_required(report):
+        print("Refreshed Zsh runtime is not active in the current shell.")
+        print("Open a new Zsh or run `exec zsh` to load it.")
+    if not report.ok:
+        return
+    if _next_commands(report):
+        print("Next:")
+        for command in _next_commands(report):
+            print(f"  {command}")
 
 
 def _announce_step(spec: RuntimeSpec, action: RuntimeAction) -> None:
-    detail = shlex.join(spec.command) if spec.command else str(spec.target or "")
-    print(f"RUN {spec.name}: {detail or action}", flush=True)
+    print(f"RUN {spec.name}: {_step_detail(spec, action)}", flush=True)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -749,6 +866,7 @@ def main(argv: list[str] | None = None) -> int:
             report,
             Path.home(),
             on_start=None if args.as_json else _announce_step,
+            capture_output=args.as_json,
         )
     if args.as_json:
         print(json.dumps(_document(report), indent=2, sort_keys=True))

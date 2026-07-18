@@ -28,6 +28,12 @@ def test_finding_document_honors_strict_warning_policy() -> None:
     assert lenient["ok"] is True
     assert lenient["operation"] == "check"
     assert lenient["schema_version"] == 1
+    assert lenient["summary"] == {
+        "ok": 0,
+        "warn": 1,
+        "error": 0,
+        "skipped": 0,
+    }
     assert strict["ok"] is False
 
 
@@ -64,12 +70,13 @@ def test_error_document_reports_a_failed_operation() -> None:
 
 
 def test_emit_error_writes_prose_to_stderr_and_json_to_stdout(capsys) -> None:
-    emit_error("adopt", "Unsupported application: xyz", as_json=True)
+    emit_error("adopt", "Unsupported application: xyz", as_json=True, apply=True)
 
     captured = capsys.readouterr()
     assert "ERROR adopt_failed Unsupported application: xyz" in captured.err
     document = json.loads(captured.out)
     assert document["ok"] is False
+    assert document["apply"] is True
     assert document["error"]["code"] == "adopt_failed"
 
 

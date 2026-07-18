@@ -11,6 +11,7 @@ EXIT_BRIGHTNESS_PENDING=69
 EXIT_START_FAILED=70
 EXIT_CRASH_LOOP=75
 EXIT_RECOVERY_CONFLICT=76
+EXIT_INSTALL_ROLLBACK_FAILED=77
 EXIT_PREFLIGHT_FAILED=78
 LABEL="dev.bag-mode.daemon"
 SELF_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)/$(basename "${BASH_SOURCE[0]}")"
@@ -367,6 +368,10 @@ require_root() {
 
 run_root() {
   if [[ "${BAG_MODE_TESTING:-0}" == 1 ]]; then
+    if [[ "${1:-}" == /bin/rm && -e "${BAG_MODE_FAKE_STATE:-}/fail-remove" ]]; then
+      printf 'injected managed-path removal failure\n' >&2
+      return 91
+    fi
     "$@"
   else
     "$SUDO_BIN" "$@"
@@ -376,10 +381,28 @@ run_root() {
 install_root_file() {
   local mode="$1" source_file="$2" destination="$3"
   if [[ "${BAG_MODE_TESTING:-0}" == 1 ]]; then
+    if [[ -e "${BAG_MODE_FAKE_STATE:-}/fail-restore" \
+      && "$(basename "$(dirname "$source_file")")" == bag-mode-install.* ]]; then
+      /bin/rm -f "$BAG_MODE_FAKE_STATE/fail-restore"
+      printf 'injected installation restore failure\n' >&2
+      return 92
+    fi
     /usr/bin/install -m "$mode" "$source_file" "$destination"
   else
     "$SUDO_BIN" /usr/bin/install -m "$mode" -o root -g wheel "$source_file" "$destination"
   fi
+}
+
+restore_root_backup() {
+  local source_file="$1" destination="$2"
+  if [[ "${BAG_MODE_TESTING:-0}" == 1 \
+    && -e "${BAG_MODE_FAKE_STATE:-}/fail-restore" ]]; then
+    /bin/rm -f "$BAG_MODE_FAKE_STATE/fail-restore"
+    printf 'injected installation restore failure\n' >&2
+    return 92
+  fi
+  run_root /bin/rm -f "$destination" || return 1
+  run_root /bin/cp -Pp "$source_file" "$destination"
 }
 
 install_root_copy() {
@@ -1193,7 +1216,8 @@ EOF
 }
 
 install_mode() {
-  local source_file plist_tmp dry_run=0
+  local source_file plist_tmp backup_dir dry_run=0 was_loaded=0 original_failure rollback_failure=""
+  local managed_file backup_file backup_name file_mode
   while (( $# > 0 )); do
     case "$1" in
       --dry-run) dry_run=1 ;;
@@ -1249,12 +1273,73 @@ install_mode() {
   run_root /bin/mkdir -p "$(dirname "$INSTALL_BIN")" "$(dirname "$PLIST_FILE")" "$ROOT_DIR" "$ROOT_LOG_DIR" || die "could not create install directories"
   prepare_controller_directory || die "could not secure controller directory: $(dirname "$CONTROLLER_BIN")"
   run_root /bin/chmod 0755 "$ROOT_DIR" || die "could not make service metadata readable"
-  install_root_copy "$source_file" "$CONTROLLER_BIN" || die "could not install $CONTROLLER_BIN"
-  install_root_copy "$source_file" "$INSTALL_BIN" || die "could not install $INSTALL_BIN"
-  install_root_file 0644 "$plist_tmp" "$PLIST_FILE" || die "could not install $PLIST_FILE"
-  rm -f "$plist_tmp"
-  unload_launchdaemon || die "could not unload the existing LaunchDaemon; installed files were kept"
-  run_root "$LAUNCHCTL_BIN" bootstrap system "$PLIST_FILE" || die "could not bootstrap LaunchDaemon"
+  launchdaemon_is_loaded && was_loaded=1
+  backup_dir="$(mktemp -d -t bag-mode-install)" || die "could not create installation backup"
+  for managed_file in "$INSTALL_BIN" "$CONTROLLER_BIN" "$PLIST_FILE"; do
+    case "$managed_file" in
+      "$INSTALL_BIN") backup_name=cli ;;
+      "$CONTROLLER_BIN") backup_name=controller ;;
+      *) backup_name=plist ;;
+    esac
+    backup_file="$backup_dir/$backup_name"
+    if [[ -e "$managed_file" || -L "$managed_file" ]]; then
+      run_root /bin/cp -Pp "$managed_file" "$backup_file" || original_failure="could not back up $managed_file"
+    else
+      : >"$backup_file.absent" || original_failure="could not record absent path $managed_file"
+    fi
+    [[ -z "${original_failure:-}" ]] || break
+  done
+  if [[ -z "${original_failure:-}" ]]; then
+    install_root_copy "$source_file" "$CONTROLLER_BIN" || original_failure="could not install $CONTROLLER_BIN"
+  fi
+  if [[ -z "${original_failure:-}" ]]; then
+    install_root_copy "$source_file" "$INSTALL_BIN" || original_failure="could not install $INSTALL_BIN"
+  fi
+  if [[ -z "${original_failure:-}" ]]; then
+    install_root_file 0644 "$plist_tmp" "$PLIST_FILE" || original_failure="could not install $PLIST_FILE"
+  fi
+  if [[ -z "${original_failure:-}" ]]; then
+    unload_launchdaemon || original_failure="could not unload the existing LaunchDaemon"
+  fi
+  if [[ -z "${original_failure:-}" ]]; then
+    run_root "$LAUNCHCTL_BIN" bootstrap system "$PLIST_FILE" || original_failure="could not bootstrap LaunchDaemon"
+  fi
+  if [[ -z "${original_failure:-}" ]] && ! launchdaemon_is_loaded; then
+    original_failure="LaunchDaemon was not loaded after bootstrap"
+  fi
+  if [[ -n "${original_failure:-}" ]]; then
+    unload_launchdaemon || rollback_failure="could not unload the failed installation"
+    for managed_file in "$INSTALL_BIN" "$CONTROLLER_BIN" "$PLIST_FILE"; do
+      case "$managed_file" in
+        "$INSTALL_BIN") backup_name=cli ;;
+        "$CONTROLLER_BIN") backup_name=controller ;;
+        *) backup_name=plist ;;
+      esac
+      backup_file="$backup_dir/$backup_name"
+      if [[ -e "$backup_file.absent" ]]; then
+        run_root /bin/rm -f "$managed_file" || rollback_failure="${rollback_failure:+$rollback_failure; }could not remove new $managed_file"
+      elif [[ -e "$backup_file" || -L "$backup_file" ]]; then
+        restore_root_backup "$backup_file" "$managed_file" || rollback_failure="${rollback_failure:+$rollback_failure; }could not restore $managed_file"
+      fi
+    done
+    if (( was_loaded )); then
+      run_root "$LAUNCHCTL_BIN" bootstrap system "$PLIST_FILE" >/dev/null 2>&1 || rollback_failure="${rollback_failure:+$rollback_failure; }could not reload prior LaunchDaemon"
+      launchdaemon_is_loaded || rollback_failure="${rollback_failure:+$rollback_failure; }prior LaunchDaemon is not loaded"
+    else
+      unload_launchdaemon || rollback_failure="${rollback_failure:+$rollback_failure; }prior unloaded LaunchDaemon state was not restored"
+    fi
+    if [[ -n "$rollback_failure" ]]; then
+      rm -f "$plist_tmp"
+      printf 'bag-mode: %s; rollback failed: %s; backups kept at %s\n' \
+        "$original_failure" "$rollback_failure" "$backup_dir" >&2
+      return "$EXIT_INSTALL_ROLLBACK_FAILED"
+    fi
+    rm -rf "$backup_dir" "$plist_tmp"
+    printf 'bag-mode: %s; prior installation and LaunchDaemon state restored\n' \
+      "$original_failure" >&2
+    return 1
+  fi
+  rm -rf "$backup_dir" "$plist_tmp"
   printf 'installed_cli: %s\n' "$INSTALL_BIN"
   printf 'installed_controller: %s\n' "$CONTROLLER_BIN"
   printf 'launchd_label: %s\n' "$LABEL"
@@ -1262,7 +1347,7 @@ install_mode() {
 }
 
 upgrade_mode() {
-  local was_enabled=0 stop_exit=0
+  local was_enabled=0 stop_exit=0 install_exit=0 restart_exit=0
   require_macos
   [[ -e "$ENABLED_FILE" ]] && was_enabled=1
   if [[ -e "$ENABLED_FILE" || -e "$RECOVERY_RECORD_FILE" || -e "$BRIGHTNESS_PENDING_FILE" || -e "$CONTROLLER_RESERVATION_DIR" ]]; then
@@ -1271,7 +1356,19 @@ upgrade_mode() {
       die "upgrade aborted because the running service could not be stopped"
     fi
   fi
-  install_mode
+  (install_mode) || install_exit=$?
+  if (( install_exit != 0 )); then
+    if (( install_exit == EXIT_INSTALL_ROLLBACK_FAILED )); then
+      die "upgrade installation failed and rollback was incomplete; prior service restart was not attempted"
+    fi
+    if (( was_enabled )); then
+      start_mode || restart_exit=$?
+      if (( restart_exit != 0 )); then
+        die "upgrade installation failed and the prior service could not be restarted"
+      fi
+    fi
+    die "upgrade installation failed; prior installation and LaunchDaemon state restored"
+  fi
   if (( was_enabled )); then
     start_mode
     printf 'upgrade complete: service restarted\n'
@@ -1820,7 +1917,7 @@ logs_mode() {
 }
 
 uninstall_mode() {
-  local exit_code=0
+  local exit_code=0 removal_failure="" remaining="" managed_path
   [[ "${1:-}" == --yes && $# -eq 1 ]] || usage_error "usage: bag-mode uninstall --yes"
   authorize_root
   if [[ -e "$ENABLED_FILE" || -e "$RECOVERY_RECORD_FILE" || -e "$BRIGHTNESS_PENDING_FILE" || -e "$CONTROLLER_RESERVATION_DIR" ]]; then
@@ -1832,8 +1929,16 @@ uninstall_mode() {
     (( exit_code == 0 )) || die "uninstall aborted because captured settings could not be restored"
   fi
   unload_launchdaemon || die "uninstall aborted because the LaunchDaemon is still loaded; system files were kept"
-  run_root /bin/rm -f "$PLIST_FILE" "$INSTALL_BIN" "$CONTROLLER_BIN"
-  run_root /bin/rm -rf "$ROOT_DIR" "$ROOT_LOG_DIR"
+  run_root /bin/rm -f "$PLIST_FILE" "$INSTALL_BIN" "$CONTROLLER_BIN" || removal_failure="could not remove one or more managed files"
+  run_root /bin/rm -rf "$ROOT_DIR" "$ROOT_LOG_DIR" || removal_failure="${removal_failure:+$removal_failure; }could not remove one or more managed directories"
+  for managed_path in "$PLIST_FILE" "$INSTALL_BIN" "$CONTROLLER_BIN" "$ROOT_DIR" "$ROOT_LOG_DIR"; do
+    if [[ -e "$managed_path" || -L "$managed_path" ]]; then
+      remaining="${remaining:+$remaining, }$managed_path"
+    fi
+  done
+  if [[ -n "$removal_failure" || -n "$remaining" ]]; then
+    die "uninstall incomplete${removal_failure:+: $removal_failure}${remaining:+; remaining: $remaining}"
+  fi
   printf 'bag-mode system files removed\n'
   printf 'user logs and notifier configuration were kept\n'
 }

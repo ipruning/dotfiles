@@ -151,6 +151,11 @@ if [[ "${1:-}" == bootout ]]; then
   exit 0
 fi
 if [[ "${1:-}" == bootstrap ]]; then
+  if [[ -e "$BAG_MODE_FAKE_STATE/fail-bootstrap-once" ]]; then
+    rm -f "$BAG_MODE_FAKE_STATE/fail-bootstrap-once"
+    echo 'injected launchctl bootstrap failure' >&2
+    exit 9
+  fi
   rm -f "$BAG_MODE_FAKE_STATE/launchd-unloaded"
   exit 0
 fi
@@ -216,8 +221,62 @@ plutil -extract ProgramArguments.0 raw "$runtime_plist" | rg -Fxq "$runtime_cont
 env "${test_env[@]}" "$runtime_bin" install >"$test_root/idempotent-install.out"
 rg -q '^installed_controller: ' "$test_root/idempotent-install.out" || fail 'installed executable could not reinstall itself'
 
+printf '# prior cli bytes\n' >>"$runtime_bin"
+printf '# prior controller bytes\n' >>"$runtime_controller"
+printf '<!-- prior plist bytes -->\n' >>"$runtime_plist"
+chmod 0700 "$runtime_bin"
+chmod 0710 "$runtime_controller"
+chmod 0600 "$runtime_plist"
+cp "$runtime_bin" "$test_root/prior-cli"
+cp "$runtime_controller" "$test_root/prior-controller"
+cp "$runtime_plist" "$test_root/prior-plist"
+: >"$fake_state/fail-bootstrap-once"
+exit_code=0
+env "${test_env[@]}" "$bag_mode" install >"$test_root/bootstrap-failed-install.out" 2>"$test_root/bootstrap-failed-install.err" || exit_code=$?
+[[ "$exit_code" == 1 ]] || fail 'injected bootstrap failure returned success'
+[[ ! -s "$test_root/bootstrap-failed-install.out" ]] || fail 'failed install printed installation success'
+cmp -s "$test_root/prior-cli" "$runtime_bin" || fail 'failed install did not restore byte-identical prior CLI'
+cmp -s "$test_root/prior-controller" "$runtime_controller" || fail 'failed install did not restore byte-identical prior controller'
+cmp -s "$test_root/prior-plist" "$runtime_plist" || fail 'failed install did not restore byte-identical prior plist'
+[[ "$(stat -f '%Lp' "$runtime_bin")" == 700 \
+  && "$(stat -f '%Lp' "$runtime_controller")" == 710 \
+  && "$(stat -f '%Lp' "$runtime_plist")" == 600 ]] \
+  || fail 'failed install did not restore prior managed-file modes'
+env "${test_env[@]}" "$fake_bin/launchctl" print system/dev.bag-mode.daemon >/dev/null \
+  || fail 'failed install did not restore the prior loaded state'
+rg -q 'prior installation and LaunchDaemon state restored' "$test_root/bootstrap-failed-install.err" \
+  || fail 'failed install did not report successful rollback'
+
+: >"$fake_state/fail-bootstrap-once"
+: >"$fake_state/fail-restore"
+exit_code=0
+env "${test_env[@]}" "$runtime_bin" upgrade \
+  >"$test_root/rollback-failed-upgrade.out" 2>"$test_root/rollback-failed-upgrade.err" || exit_code=$?
+[[ "$exit_code" == 1 ]] || fail 'upgrade with incomplete rollback returned success'
+rg -q 'rollback was incomplete; prior service restart was not attempted' "$test_root/rollback-failed-upgrade.err" \
+  || fail 'upgrade did not distinguish an incomplete install rollback'
+if rg -q 'prior installation state restored' "$test_root/rollback-failed-upgrade.err"; then
+  fail 'upgrade falsely claimed restoration after rollback failure'
+fi
+backup_dir="$(sed -n 's/.*backups kept at //p' "$test_root/rollback-failed-upgrade.err" | tail -1)"
+[[ -n "$backup_dir" && -d "$backup_dir" && -f "$backup_dir/cli" \
+  && -f "$backup_dir/controller" && -f "$backup_dir/plist" ]] \
+  || fail 'incomplete install rollback discarded its recovery backup'
+cp "$test_root/prior-cli" "$runtime_bin"
+cp "$test_root/prior-controller" "$runtime_controller"
+cp "$test_root/prior-plist" "$runtime_plist"
+chmod +x "$runtime_bin" "$runtime_controller"
+rm -rf "$backup_dir"
+
 rm -f "$runtime_bin"
 ln -s "$bag_mode" "$runtime_bin"
+: >"$fake_state/fail-bootstrap-once"
+exit_code=0
+env "${test_env[@]}" "$bag_mode" install \
+  >"$test_root/symlink-rollback.out" 2>"$test_root/symlink-rollback.err" || exit_code=$?
+[[ "$exit_code" == 1 && -L "$runtime_bin" \
+  && "$(readlink "$runtime_bin")" == "$bag_mode" ]] \
+  || fail 'failed install did not restore the prior managed-path symlink'
 env "${test_env[@]}" "$runtime_bin" install >"$test_root/symlink-install.out"
 [[ -f "$runtime_bin" && ! -L "$runtime_bin" ]] || fail 'install left a symlink as the privileged controller executable'
 [[ "$(stat -f '%Lp' "$runtime_bin")" == 755 ]] || fail 'installed controller executable remained group- or user-writable'
@@ -910,6 +969,16 @@ env "${test_env[@]}" "$fake_bin/launchctl" print system/dev.bag-mode.daemon >/de
 rg -q 'LaunchDaemon is still loaded' "$test_root/foreground-uninstall-failed.err" \
   || fail 'failed uninstall did not explain that the LaunchDaemon remained loaded'
 rm -f "$fake_state/fail-bootout" "$runtime_plist"
+: >"$fake_state/fail-remove"
+exit_code=0
+env "${test_env[@]}" "$runtime_bin" uninstall --yes >"$test_root/removal-failed-uninstall.out" 2>"$test_root/removal-failed-uninstall.err" || exit_code=$?
+rm -f "$fake_state/fail-remove"
+[[ "$exit_code" == 1 ]] || fail 'uninstall ignored a managed-path removal failure'
+[[ ! -s "$test_root/removal-failed-uninstall.out" ]] || fail 'failed uninstall printed removal success'
+[[ -x "$runtime_bin" && -x "$runtime_controller" && -d "$control_dir" ]] \
+  || fail 'removal-failed uninstall state did not retain the paths it failed to remove'
+rg -q 'uninstall incomplete' "$test_root/removal-failed-uninstall.err" \
+  || fail 'removal-failed uninstall did not report incomplete state'
 env "${test_env[@]}" "$runtime_bin" uninstall --yes >"$test_root/foreground-uninstall-command.out"
 if env "${test_env[@]}" "$fake_bin/launchctl" print system/dev.bag-mode.daemon >/dev/null 2>&1; then
   fail 'uninstall reported success while the LaunchDaemon remained loaded'

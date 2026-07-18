@@ -9,7 +9,8 @@ does not automatically overwrite `$HOME` or rebuild an entire machine.
 - `reference/` contains the intended examples compared with live files under
   `$HOME`.
 - `mackup/` declares which application paths belong to each reference.
-- `scripts/` implements the read-only repository tasks in typed Python.
+- `scripts/` implements typed inspection tasks and explicit maintenance tasks;
+  every mutating task previews by default and writes only with `--apply`.
 - `modules/bin/` contains independent user commands.
 - `modules/<tool>/` contains substantial tools that own their installation and
   removal.
@@ -38,7 +39,9 @@ mise tasks
 
 `mise trust` is required because this repository declares a project virtual
 environment. mise then provides the pinned Python and uv versions; uv provides
-the locked project dependencies.
+the locked project dependencies. Task auto-install is disabled: `mise install`
+is the explicit bootstrap boundary, and a later `mise run ...` does not quietly
+download a missing task tool.
 
 `mise tasks` is the authoritative command list. The main inspection interface
 is:
@@ -158,8 +161,9 @@ are likewise reported as not ready.
 
 `mise run lint` inspects repository paths, Mackup mappings, and dangling
 symlinks. `mise run verify` adds Python formatting, type checking, behavior
-tests, the standalone module suites on macOS, and the shell gate: `mise run shell` runs Bash and Zsh syntax checks
-plus ShellCheck over the tracked shell files outside `reference/`.
+tests, the standalone module suites on macOS, and the shell gate: `mise run shell`
+runs Bash syntax checks and ShellCheck for Bash files. Zsh files receive syntax
+checking when `zsh` is available.
 
 ## Host updates
 
@@ -176,18 +180,37 @@ The task discovers supported updaters on `PATH`, reports missing tools as
 skipped, applies available updates in a stable order, and continues independent
 steps after a failure. Any failed step makes the command exit non-zero. Current
 steps cover Homebrew metadata and packages, global mise tools and shims,
-GitHub CLI extensions, tldr pages, Yazi packages, Sprite's update check, Amp,
+GitHub CLI extensions, tldr pages, Yazi packages, Sprite, Amp,
 Claude Code, Codex, Tigris, and Pi extensions. It deliberately does not run
 `brew cleanup`,
 `brew autoremove`, or `mise prune`; removal and pruning require a separate,
 explicit operation.
 
-`update` does not pull this repository, install missing tools, run Skillshare,
-or write live configuration back into `reference/`. Inspect the resulting host
-state separately:
+For mise, the preview first reads the active installed versions and passes that
+explicit list to `mise upgrade`; a configured but missing mise tool is not
+installed. Other missing CLIs are skipped rather than bootstrapped. Package
+managers may still replace package dependencies as part of an ordinary upgrade.
+
+`update` does not pull this repository, run Skillshare, or write live
+configuration back into `reference/`. Inspect the resulting host state
+separately:
 
 ```bash
 mise run runtime
+```
+
+Review the runtime preview and apply it only when needed. If runtime reports
+refreshed Zsh state, apply it and then open a new Zsh or run `exec zsh` to load
+the new functions, completions, and plugins:
+
+```bash
+mise run runtime -- --apply
+exec zsh
+```
+
+From the refreshed shell, inspect the resulting host and configuration state:
+
+```bash
 mise run check
 mise run diff
 ```

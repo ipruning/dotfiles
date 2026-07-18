@@ -17,8 +17,20 @@ def _fake_tool(
     *,
     exit_code: int = 0,
     failure_output: bool = True,
+    mise_inventory: str | None = None,
 ) -> None:
     tool_path = bin_dir / name
+    inventory = ""
+    if name == "mise":
+        inventory_document = mise_inventory or json.dumps(
+            {"python": [{"version": "3.14.6", "installed": True}]},
+        )
+        inventory = (
+            'if [ "$1" = "ls" ]; then\n'
+            f"  printf '%s\\n' {shlex.quote(inventory_document)}\n"
+            "  exit 0\n"
+            "fi\n"
+        )
     failure = (
         (f"printf '%s\\n' 'simulated {name} failure' >&2\n" if failure_output else "")
         + f"exit {exit_code}\n"
@@ -27,6 +39,7 @@ def _fake_tool(
     )
     tool_path.write_text(
         "#!/bin/sh\n"
+        f"{inventory}"
         f"printf '%s\\n' \"{name} $*\" >> {shlex.quote(str(log_path))}\n"
         f"{failure}",
     )
@@ -85,16 +98,20 @@ def test_update_previews_exact_plan_by_default_without_running_tools(
         (
             "mise.tools",
             "planned",
-            ["mise", "upgrade", "--bump", "-C", str(tmp_path / "home")],
+            [
+                "mise",
+                "upgrade",
+                "--bump",
+                "-C",
+                str(tmp_path / "home"),
+                "python@3.14.6",
+            ],
         ),
         ("mise.shims", "planned", ["mise", "reshim"]),
         ("amp", "planned", ["amp", "update"]),
     ]
-    assert document["next"] == [
-        "mise run runtime",
-        "mise run check",
-        "mise run diff",
-    ]
+    assert document["summary"] == {"planned": 5, "skipped": 8}
+    assert document["next"] == ["mise run update -- --apply"]
     assert not log_path.exists()
 
 
@@ -111,6 +128,21 @@ def test_update_gives_package_managers_transaction_scale_timeouts(
     assert steps["mise.tools"].timeout_seconds >= 1800
 
 
+def test_update_installs_sprite_updates_instead_of_only_checking(
+    tmp_path: Path,
+) -> None:
+    report = plan_updates(
+        tmp_path / "home",
+        executable_finder=lambda tool: "/tools/sprite" if tool == "sprite" else None,
+    )
+
+    sprite = next(
+        result for result in report.results if result.step.name == "sprite.version"
+    )
+
+    assert sprite.step.command == ("sprite", "upgrade")
+
+
 def test_update_runs_available_tools_in_order_and_reports_skips(tmp_path: Path) -> None:
     completed, log_path = _run_update(tmp_path, "--apply", "--json")
 
@@ -118,6 +150,7 @@ def test_update_runs_available_tools_in_order_and_reports_skips(tmp_path: Path) 
     document = json.loads(completed.stdout)
     assert document["apply"] is True
     assert document["ok"] is True
+    assert document["summary"] == {"skipped": 8, "succeeded": 5}
     assert [
         (step["name"], step["status"], step["exit_code"])
         for step in document["steps"]
@@ -132,7 +165,7 @@ def test_update_runs_available_tools_in_order_and_reports_skips(tmp_path: Path) 
     assert log_path.read_text().splitlines() == [
         "brew update",
         "brew upgrade",
-        f"mise upgrade --bump -C {tmp_path / 'home'}",
+        f"mise upgrade --bump -C {tmp_path / 'home'} python@3.14.6",
         "mise reshim",
         "amp update",
     ]
@@ -157,9 +190,8 @@ def test_update_human_output_announces_commands_before_summary(tmp_path: Path) -
     assert completed.returncode == 0
     assert completed.stdout.splitlines()[0] == "RUN brew.metadata: brew update"
     assert "SUCCEEDED brew.metadata" in completed.stdout
-    assert (
-        "Next:\n  mise run runtime\n  mise run check\n  mise run diff\n"
-    ) in completed.stdout
+    assert ("Next:\n  mise run runtime\n") in completed.stdout
+    assert "Summary: 5 succeeded, 8 skipped" in completed.stdout
 
 
 def test_update_failure_is_contextual_and_does_not_hide_later_results(
@@ -180,6 +212,7 @@ def test_update_failure_is_contextual_and_does_not_hide_later_results(
     assert results["amp"]["status"] == "failed"
     assert results["amp"]["exit_code"] == 7
     assert results["tigris"]["status"] == "succeeded"
+    assert document["next"] == []
     assert log_path.read_text().splitlines() == ["amp update", "tigris update"]
     assert "[amp] simulated amp failure" in completed.stderr
 
@@ -235,6 +268,71 @@ def test_update_reports_timeout_and_launch_failures_on_stderr(
     )
     assert launch_result.status is UpdateStatus.FAILED
     assert "[amp] FAIL permission denied" in capsys.readouterr().err
+
+
+def test_update_mise_step_passes_only_installed_versions(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    inventory = json.dumps(
+        {
+            "python": [{"version": "3.14.6", "installed": True}],
+            "github:larksuite/cli": [
+                {"version": "1.0.72", "installed": True},
+            ],
+        },
+    )
+
+    def fake_run(
+        command: tuple[str, ...],
+        **_kwargs: object,
+    ) -> subprocess.CompletedProcess[str]:
+        assert command[:4] == ("mise", "ls", "--current", "--installed")
+        return subprocess.CompletedProcess(command, 0, inventory, "")
+
+    monkeypatch.setattr("scripts.update.subprocess.run", fake_run)
+    report = plan_updates(
+        tmp_path,
+        executable_finder=lambda tool: "/tools/mise" if tool == "mise" else None,
+    )
+
+    result = next(
+        result for result in report.results if result.step.name == "mise.tools"
+    )
+    assert result.status is UpdateStatus.PLANNED
+    assert result.step.command == (
+        "mise",
+        "upgrade",
+        "--bump",
+        "-C",
+        str(tmp_path),
+        "github:larksuite/cli@1.0.72",
+        "python@3.14.6",
+    )
+
+
+def test_update_fails_closed_when_mise_inventory_is_invalid(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        "scripts.update.subprocess.run",
+        lambda command, **_kwargs: subprocess.CompletedProcess(
+            command, 0, "not-json", ""
+        ),
+    )
+
+    report = plan_updates(
+        tmp_path,
+        executable_finder=lambda tool: "/tools/mise" if tool == "mise" else None,
+    )
+
+    result = next(
+        result for result in report.results if result.step.name == "mise.tools"
+    )
+    assert result.status is UpdateStatus.FAILED
+    assert "invalid JSON" in (result.reason or "")
+    assert report.ok is False
 
 
 def test_update_help_and_invalid_options_never_run_tools(tmp_path: Path) -> None:

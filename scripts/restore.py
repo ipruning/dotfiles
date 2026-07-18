@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import shlex
 import sys
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -44,6 +45,18 @@ class RestoreReport:
     @property
     def ok(self) -> bool:
         return all(result.status is not RestoreStatus.FAILED for result in self.results)
+
+
+def _next_commands(report: RestoreReport) -> tuple[str, ...]:
+    if (
+        not report.apply
+        and report.ok
+        and any(result.status is RestoreStatus.PLANNED for result in report.results)
+    ):
+        return (
+            shlex.join(["mise", "run", "restore", "--", report.application, "--apply"]),
+        )
+    return ()
 
 
 def plan_restore(repo_root: Path, home: Path, application: str) -> RestoreReport:
@@ -191,6 +204,7 @@ def _document(report: RestoreReport) -> dict[str, object]:
         "application": report.application,
         "apply": report.apply,
         "ok": report.ok,
+        "next": list(_next_commands(report)),
         "changes": [
             {
                 "reference_path": str(result.drift.reference_path),
@@ -214,10 +228,26 @@ def _render(report: RestoreReport) -> None:
         label = result.status.value.upper()
         print(f"{label:7} {result.drift.live_path}")
         print(f"        reference: {result.drift.reference_path}")
+        if result.backup_path:
+            print(f"        backup: {result.backup_path}")
         if result.error:
-            print(f"        error: {result.error}", file=sys.stderr)
-    if not report.apply:
+            detail_label = (
+                "error" if result.status is RestoreStatus.FAILED else "reason"
+            )
+            stream = sys.stderr if result.status is RestoreStatus.FAILED else sys.stdout
+            print(f"        {detail_label}: {result.error}", file=stream)
+    summary = {
+        status.value: count
+        for status in RestoreStatus
+        if (count := sum(result.status is status for result in report.results))
+    }
+    rendered = ", ".join(f"{count} {status}" for status, count in summary.items())
+    print(f"Summary: {rendered or 'no changes'}")
+    if not report.apply and summary.get(RestoreStatus.PLANNED.value, 0):
         print("No files changed. Re-run with --apply to restore this application.")
+        print("Next:")
+        for command in _next_commands(report):
+            print(f"  {command}")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -244,7 +274,7 @@ def main(argv: list[str] | None = None) -> int:
     try:
         report = plan_restore(repo_root, Path.home(), args.application)
     except (DriftProtocolError, MackupCommandError) as error:
-        emit_error("restore", str(error), as_json=args.as_json)
+        emit_error("restore", str(error), as_json=args.as_json, apply=args.apply)
         return 1
     if args.apply:
         report = apply_restore(repo_root, Path.home(), report)

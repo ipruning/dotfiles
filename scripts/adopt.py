@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import shlex
 import shutil
 import subprocess
 import sys
@@ -45,6 +46,18 @@ class AdoptReport:
     @property
     def ok(self) -> bool:
         return all(result.status is not AdoptStatus.FAILED for result in self.results)
+
+
+def _next_commands(report: AdoptReport) -> tuple[str, ...]:
+    if (
+        not report.apply
+        and report.ok
+        and any(result.status is AdoptStatus.PLANNED for result in report.results)
+    ):
+        return (
+            shlex.join(["mise", "run", "adopt", "--", report.application, "--apply"]),
+        )
+    return ()
 
 
 def plan_adopt(repo_root: Path, home: Path, application: str) -> AdoptReport:
@@ -165,6 +178,41 @@ def _validate_live_parent(live_path: Path, home: Path) -> None:
     _relative_path(existing.resolve(), home.resolve(), "live parent")
 
 
+def _publish_staged_reference(staged: Path, reference_path: Path) -> None:
+    had_reference = reference_path.exists() or reference_path.is_symlink()
+    backup_directory: Path | None = None
+    backup: Path | None = None
+    if had_reference:
+        backup_directory = Path(
+            tempfile.mkdtemp(
+                dir=reference_path.parent,
+                prefix=f".{reference_path.name}.adopt-backup-",
+            ),
+        )
+        backup = backup_directory / "previous"
+        try:
+            reference_path.rename(backup)
+        except OSError:
+            backup_directory.rmdir()
+            raise
+    try:
+        staged.rename(reference_path)
+    except OSError as publish_error:
+        if backup is not None:
+            try:
+                backup.rename(reference_path)
+            except OSError as rollback_error:
+                raise AdoptError(
+                    f"{publish_error}; rollback failed: {rollback_error}; "
+                    f"previous reference retained at {backup}",
+                ) from publish_error
+            assert backup_directory is not None
+            backup_directory.rmdir()
+        raise
+    if backup_directory is not None:
+        shutil.rmtree(backup_directory)
+
+
 def _copy_live_into_reference(live_path: Path, reference_path: Path) -> None:
     if live_path.is_dir() and not live_path.is_symlink():
         with tempfile.TemporaryDirectory(
@@ -175,11 +223,7 @@ def _copy_live_into_reference(live_path: Path, reference_path: Path) -> None:
             # symlinks=True mirrors the live tree instead of materializing
             # link targets (possibly outside $HOME) into tracked data.
             shutil.copytree(live_path, staged, symlinks=True)
-            if reference_path.is_dir() and not reference_path.is_symlink():
-                shutil.rmtree(reference_path)
-            elif reference_path.exists() or reference_path.is_symlink():
-                reference_path.unlink()
-            staged.rename(reference_path)
+            _publish_staged_reference(staged, reference_path)
         return
     descriptor = tempfile.NamedTemporaryFile(
         dir=reference_path.parent,
@@ -194,10 +238,8 @@ def _copy_live_into_reference(live_path: Path, reference_path: Path) -> None:
             staged_file.symlink_to(os.readlink(live_path))
         else:
             shutil.copy2(live_path, staged_file)
-        if reference_path.is_dir() and not reference_path.is_symlink():
-            shutil.rmtree(reference_path)
-        staged_file.replace(reference_path)
-    except OSError:
+        _publish_staged_reference(staged_file, reference_path)
+    except AdoptError, OSError:
         staged_file.unlink(missing_ok=True)
         raise
 
@@ -295,6 +337,7 @@ def _document(report: AdoptReport) -> dict[str, object]:
         "application": report.application,
         "apply": report.apply,
         "ok": report.ok,
+        "next": list(_next_commands(report)),
         "changes": [
             {
                 "reference_path": str(result.drift.reference_path),
@@ -319,11 +362,21 @@ def _render(report: AdoptReport) -> None:
             print(f"        action: {result.action}")
         if result.error:
             print(f"        error: {result.error}", file=sys.stderr)
-    if not report.apply:
+    summary = {
+        status.value: count
+        for status in AdoptStatus
+        if (count := sum(result.status is status for result in report.results))
+    }
+    rendered = ", ".join(f"{count} {status}" for status, count in summary.items())
+    print(f"Summary: {rendered or 'no changes'}")
+    if not report.apply and summary.get(AdoptStatus.PLANNED.value, 0):
         print(
             "No files changed. Re-run with --apply to adopt this application's"
             " live configuration.",
         )
+        print("Next:")
+        for command in _next_commands(report):
+            print(f"  {command}")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -350,7 +403,7 @@ def main(argv: list[str] | None = None) -> int:
     try:
         report = plan_adopt(repo_root, Path.home(), args.application)
     except (DriftProtocolError, MackupCommandError) as error:
-        emit_error("adopt", str(error), as_json=args.as_json)
+        emit_error("adopt", str(error), as_json=args.as_json, apply=args.apply)
         return 1
     if args.apply:
         report = apply_adopt(repo_root, Path.home(), report)

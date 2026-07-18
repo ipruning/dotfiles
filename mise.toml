@@ -1,5 +1,10 @@
 min_version = "2026.7.5"
 
+[settings]
+# Bootstrap is explicit (`mise install`); ordinary tasks must not install tools
+# as a side effect before their own preview/apply contract starts.
+task.run_auto_install = false
+
 [tools]
 # fd, jq, and ripgrep serve the module test suites that verify depends on;
 # every tool in the verify chain must be mise-pinned (see AGENTS.md).
@@ -77,6 +82,7 @@ if [ "$(uname)" != Darwin ]; then
 fi
 ./modules/macos-session-health/macos-session-health-test
 ./modules/bag-mode/bag-mode-test
+./modules/macos-maxfiles/macos-maxfiles-test
 """
 
 [tasks.typecheck]

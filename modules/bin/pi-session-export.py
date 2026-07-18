@@ -20,9 +20,6 @@ Supports input:
 Examples:
   pi-session-export.py convert ~/Downloads/pi-session-xxx.html
   pi-session-export.py convert ~/Downloads/abc.jsonl -o ~/Downloads
-
-Backward-compatible shortcut (no explicit command):
-  pi-session-export.py ~/Downloads/pi-session-xxx.html
 """
 
 from __future__ import annotations
@@ -31,7 +28,6 @@ import base64
 import json
 import re
 import shutil
-import sys
 from pathlib import Path
 from typing import Any, Literal
 
@@ -413,14 +409,6 @@ def convert(
 
 
 def main() -> None:
-    # Backward compatibility: allow `pi-session-export.py <input>` by injecting
-    # default command when first arg looks like a positional input path.
-    if len(sys.argv) > 1:
-        first = sys.argv[1]
-        known = {"convert", "--help", "-h", "--version"}
-        if first not in known and not first.startswith("-"):
-            sys.argv.insert(1, "convert")
-
     app()
 
 

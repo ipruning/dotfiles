@@ -581,5 +581,65 @@ class ProcessTablePressureTest(unittest.TestCase):
         self.assertIn("900 of 1000", incident["message"])
 
 
+class LifecycleRollbackTest(unittest.TestCase):
+    def setUp(self) -> None:
+        self.module = runpy.run_path(str(MODULE_PATH))
+        self.temp_dir = tempfile.TemporaryDirectory()
+        root = Path(self.temp_dir.name)
+        self.runtime = root / "runtime"
+        self.wrapper = root / "bin/macos-session-health"
+        self.plist = root / "LaunchAgents/com.alex.macos-session-health.plist"
+        self.runtime.parent.mkdir(parents=True, exist_ok=True)
+        self.wrapper.parent.mkdir(parents=True)
+        self.plist.parent.mkdir(parents=True)
+        self.runtime.write_text("runtime\n")
+        marker = self.module["WRAPPER_MARKER"]
+        self.wrapper.write_text(f"#!/bin/sh\n{marker}\nexit 0\n")
+        self.plist.write_text("plist\n")
+
+    def tearDown(self) -> None:
+        self.temp_dir.cleanup()
+
+    def test_uninstall_failure_restores_files_and_loaded_state(self) -> None:
+        uninstall = self.module["uninstall_launch_agent"]
+        function_globals = uninstall.__globals__
+        original_unlink = Path.unlink
+        failed = False
+
+        def fail_wrapper_unlink(file_path: Path, *args: Any, **kwargs: Any) -> None:
+            nonlocal failed
+            if file_path == self.wrapper and not failed:
+                failed = True
+                raise OSError("injected wrapper removal failure")
+            original_unlink(file_path, *args, **kwargs)
+
+        loaded = subprocess.CompletedProcess(["launchctl", "print"], 0, "", "")
+        with (
+            mock.patch.object(function_globals["sys"], "platform", "darwin"),
+            mock.patch.dict(
+                function_globals,
+                {
+                    "RUNTIME_CLI": self.runtime,
+                    "USER_BIN": self.wrapper,
+                    "LAUNCH_AGENT": self.plist,
+                    "DEFAULT_DB": Path(self.temp_dir.name) / "state/health.sqlite3",
+                    "launchd_job": mock.Mock(return_value=loaded),
+                    "bootout_launch_agent": mock.Mock(),
+                    "bootstrap_launch_agent": mock.Mock(),
+                },
+            ),
+            mock.patch.object(Path, "unlink", fail_wrapper_unlink),
+        ):
+            with self.assertRaises(self.module["CliError"]) as raised:
+                uninstall()
+            bootstrap = function_globals["bootstrap_launch_agent"]
+            bootstrap.assert_called_once()
+
+        self.assertIn("LaunchAgent state restored", str(raised.exception))
+        self.assertEqual(self.runtime.read_text(), "runtime\n")
+        self.assertIn(self.module["WRAPPER_MARKER"], self.wrapper.read_text())
+        self.assertEqual(self.plist.read_text(), "plist\n")
+
+
 if __name__ == "__main__":
     unittest.main()

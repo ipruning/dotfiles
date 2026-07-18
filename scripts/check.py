@@ -216,6 +216,14 @@ def _expand_home(value: str, home: Path) -> Path:
     return Path(value)
 
 
+def _configured_skillshare_source(config_path: Path, home: Path) -> Path:
+    document = YAML(typ="safe").load(config_path)
+    source_value = document["sources"]["skills"]
+    if not isinstance(source_value, str):
+        raise TypeError("sources.skills must be a string")
+    return _expand_home(source_value, home)
+
+
 def _skillshare_findings(home: Path) -> list[Finding]:
     config_path = home / ".config/skillshare/config.yaml"
     if not config_path.is_file():
@@ -230,10 +238,7 @@ def _skillshare_findings(home: Path) -> list[Finding]:
             ),
         ]
     try:
-        document = YAML(typ="safe").load(config_path)
-        source_value = document["sources"]["skills"]
-        if not isinstance(source_value, str):
-            raise TypeError("sources.skills must be a string")
+        source = _configured_skillshare_source(config_path, home)
     except (OSError, KeyError, TypeError, YAMLError) as error:
         return [
             Finding(
@@ -245,7 +250,6 @@ def _skillshare_findings(home: Path) -> list[Finding]:
                 "Repair sources.skills in the host-specific Skillshare config.",
             ),
         ]
-    source = _expand_home(source_value, home)
     return [
         Finding(
             "skillshare.config",
@@ -273,6 +277,38 @@ def _skillshare_findings(home: Path) -> list[Finding]:
             else "Clone or restore the configured skills source.",
         ),
     ]
+
+
+def _skillshare_resource_containers(details: object, home: Path) -> bool:
+    if not isinstance(details, list) or not details:
+        return False
+    containers: list[str] = []
+    for detail in details:
+        if not isinstance(detail, str):
+            return False
+        containers.append(detail)
+    config_path = home / ".config/skillshare/config.yaml"
+    try:
+        source = _configured_skillshare_source(config_path, home)
+    except OSError, KeyError, TypeError, YAMLError:
+        return False
+    for detail in containers:
+        if detail == "extras":
+            continue
+        relative = Path(detail)
+        if relative.is_absolute() or ".." in relative.parts:
+            return False
+        container = source / relative
+        try:
+            if not any(
+                (child / "SKILL.md").is_file()
+                for child in container.iterdir()
+                if child.is_dir()
+            ):
+                return False
+        except OSError:
+            return False
+    return True
 
 
 def _skillshare_doctorFinding(executable: Path, home: Path) -> Finding:
@@ -303,6 +339,7 @@ def _skillshare_doctorFinding(executable: Path, home: Path) -> Finding:
         if not isinstance(warnings, int) or not isinstance(errors, int):
             raise TypeError("summary counts must be integers")
         raw_checks = document.get("checks")
+        issues: list[str] = []
         if isinstance(raw_checks, list):
             ignored_warnings = {"git_status", "theme"}
             actionable_warnings = 0
@@ -315,17 +352,30 @@ def _skillshare_doctorFinding(executable: Path, home: Path) -> Finding:
                 if not isinstance(name, str) or not isinstance(check_status, str):
                     raise TypeError("check name and status must be strings")
                 details = raw_check.get("details")
-                known_resource_warning = name == "skills_validity" and details == [
-                    "extras"
-                ]
+                raw_message = raw_check.get("message")
+                if raw_message is not None and not isinstance(raw_message, str):
+                    raise TypeError("check message must be a string")
+                known_resource_warning = (
+                    name == "skills_validity"
+                    and _skillshare_resource_containers(details, home)
+                )
+                description = name
+                if raw_message:
+                    description = f"{name}: {' '.join(raw_message.split())}"
+                elif isinstance(details, list) and all(
+                    isinstance(detail, str) for detail in details
+                ):
+                    description = f"{name}: {', '.join(details)}"
                 if check_status == "error":
                     reported_errors += 1
+                    issues.append(description)
                 elif (
                     check_status == "warning"
                     and name not in ignored_warnings
                     and not known_resource_warning
                 ):
                     actionable_warnings += 1
+                    issues.append(description)
             warnings = actionable_warnings
             errors = reported_errors
     except (json.JSONDecodeError, KeyError, TypeError) as error:
@@ -342,7 +392,8 @@ def _skillshare_doctorFinding(executable: Path, home: Path) -> Finding:
             Severity.WARN,
             "skillshare.doctor_failed",
             f"Skillshare doctor reports {errors} error(s) and "
-            f"{warnings} actionable warning(s)",
+            f"{warnings} actionable warning(s)"
+            + (f": {'; '.join(issues)}" if issues else ""),
             action="Resolve doctor errors before treating Skillshare as ready.",
         )
     if warnings:
@@ -350,8 +401,9 @@ def _skillshare_doctorFinding(executable: Path, home: Path) -> Finding:
             "skillshare.doctor",
             Severity.WARN,
             "skillshare.doctor_warnings",
-            f"Skillshare doctor reports {warnings} actionable warning(s)",
-            action="Review Skillshare warnings, including failed tracked repositories.",
+            f"Skillshare doctor reports {warnings} actionable warning(s)"
+            + (f": {'; '.join(issues)}" if issues else ""),
+            action="Run skillshare doctor --json and resolve the listed warnings.",
         )
     return Finding(
         "skillshare.doctor",
@@ -468,7 +520,12 @@ def _bash_integrationFinding(repo_root: Path, home: Path) -> Finding:
         if configured
         else "Bash does not load the Linux Lite module",
         bashrc,
-        None if configured else "Run mise run setup -- --profile linux-lite.",
+        None
+        if configured
+        else (
+            "Preview with mise run setup -- --profile linux-lite, then apply with "
+            "mise run setup -- --profile linux-lite --apply."
+        ),
     )
 
 
@@ -579,6 +636,16 @@ def _session_health_findings(
         ]
 
     agent_ready = installed and loaded
+    if completed.returncode != 0 and agent_ready:
+        return [
+            Finding(
+                "session_health.agent",
+                Severity.WARN,
+                "session_health.status_unavailable",
+                f"macos-session-health status contradicted exit {completed.returncode}",
+                action="Run macos-session-health status and resolve the failure.",
+            )
+        ]
     findings = [
         Finding(
             "session_health.agent",
@@ -688,6 +755,8 @@ def _bag_mode_findings(
             text=True,
             timeout=30,
         )
+        if completed.returncode != 0:
+            raise RuntimeError(f"status exited {completed.returncode}")
         record = json.loads(completed.stdout)
         enabled = bool(record["enabled"])
         phase = str(record["phase"])
@@ -698,6 +767,7 @@ def _bag_mode_findings(
         subprocess.TimeoutExpired,
         json.JSONDecodeError,
         LookupError,
+        RuntimeError,
         TypeError,
         ValueError,
     ) as error:
@@ -748,30 +818,55 @@ def _bag_mode_findings(
         "VERSION",
     )
     if repo_version:
+        version_error = ""
         try:
-            reported = subprocess.run(
+            completed = subprocess.run(
                 [str(executable), "version"],
                 check=False,
                 capture_output=True,
                 text=True,
                 timeout=30,
-            ).stdout.strip()
-        except OSError, subprocess.TimeoutExpired:
+            )
+            reported = completed.stdout.strip()
+            if completed.returncode != 0:
+                detail = completed.stderr.strip() or completed.stdout.strip()
+                version_error = f"command exited {completed.returncode}"
+                if detail:
+                    version_error += f": {detail}"
+                reported = ""
+        except (OSError, subprocess.TimeoutExpired) as error:
             reported = ""
+            version_error = str(error)
         installed_version = reported.removeprefix("bag-mode ").strip()
         drifted = installed_version != repo_version
         findings.append(
             Finding(
                 "bag_mode.version",
-                Severity.WARN if drifted else Severity.OK,
-                "bag_mode.version_drift" if drifted else "bag_mode.version_current",
+                Severity.WARN if drifted or version_error else Severity.OK,
                 (
-                    f"installed bag-mode {installed_version or 'unknown'} differs "
-                    f"from repository version {repo_version}"
-                    if drifted
-                    else f"installed bag-mode matches repository version {repo_version}"
+                    "bag_mode.version_unavailable"
+                    if version_error
+                    else (
+                        "bag_mode.version_drift"
+                        if drifted
+                        else "bag_mode.version_current"
+                    )
                 ),
-                action="Run modules/bag-mode/bag-mode upgrade." if drifted else None,
+                (
+                    f"could not read installed bag-mode version: {version_error}"
+                    if version_error
+                    else (
+                        f"installed bag-mode {installed_version or 'unknown'} differs "
+                        f"from repository version {repo_version}"
+                        if drifted
+                        else f"installed bag-mode matches repository version {repo_version}"
+                    )
+                ),
+                action=(
+                    "Run bag-mode version, then inspect or upgrade the installation."
+                    if version_error
+                    else ("Run modules/bag-mode/bag-mode upgrade." if drifted else None)
+                ),
             ),
         )
     return findings
@@ -838,6 +933,16 @@ def _maxfiles_findings(
         ]
 
     agent_ready = installed and loaded
+    if completed.returncode != 0 and agent_ready:
+        return [
+            Finding(
+                "maxfiles.agent",
+                Severity.WARN,
+                "maxfiles.status_unavailable",
+                f"macos-maxfiles status contradicted exit {completed.returncode}",
+                action="Run macos-maxfiles status --json and resolve the failure.",
+            )
+        ]
     findings = [
         Finding(
             "maxfiles.agent",
@@ -922,7 +1027,11 @@ def inspect_host(
     if active_profile is HostProfile.LINUX_LITE:
         findings.append(_bash_integrationFinding(repo_root, home))
         findings.append(_legacy_repo_pathFinding(repo_root))
-        return CheckReport(schema_version=1, findings=tuple(findings))
+        return CheckReport(
+            schema_version=1,
+            findings=tuple(findings),
+            profile=active_profile,
+        )
     if active_system == "Darwin":
         findings.extend(_session_health_findings(executable_finder))
         findings.extend(_bag_mode_findings(executable_finder, repo_root))
@@ -973,9 +1082,27 @@ def inspect_host(
                 "Run mise run runtime, then mise run runtime -- --apply.",
             ),
         )
+    generated_plugins = repo_root / "generated/plugins"
+    owned_plugins = {name for name, _source, _entrypoint in PLUGIN_SPECS} | {
+        f"{name}.wasm" for name, _source, _sha256 in WASM_SPECS
+    }
+    if generated_plugins.is_dir():
+        for plugin_path in sorted(generated_plugins.iterdir()):
+            if plugin_path.name in owned_plugins or plugin_path.name == ".gitkeep":
+                continue
+            findings.append(
+                Finding(
+                    f"runtime.plugin.{plugin_path.name}",
+                    Severity.WARN,
+                    f"runtime.plugin.{plugin_path.name}_unowned",
+                    f"Generated plugin {plugin_path.name} has no repository owner",
+                    plugin_path,
+                    "Remove it explicitly if obsolete, or define its runtime owner.",
+                ),
+            )
     for name, _source, sha256 in WASM_SPECS:
         plugin_name = f"{name}.wasm"
-        plugin_path = repo_root / "generated/plugins" / plugin_name
+        plugin_path = generated_plugins / plugin_name
         actual_sha256 = file_sha256(plugin_path)
         if actual_sha256 == sha256:
             findings.append(
@@ -1049,7 +1176,11 @@ def inspect_host(
                 f"launchctl is not applicable on {active_system}",
             ),
         )
-    return CheckReport(schema_version=1, findings=tuple(findings))
+    return CheckReport(
+        schema_version=1,
+        findings=tuple(findings),
+        profile=active_profile,
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -1080,14 +1211,21 @@ def main(argv: list[str] | None = None) -> int:
     repo_root = Path(__file__).resolve().parents[1]
     report = inspect_host(repo_root, Path.home(), profile=args.profile)
     if args.as_json:
+        document = finding_document(
+            report,
+            operation="check",
+            strict=args.strict,
+        )
+        document["profile"] = report.profile.value
         print(
             json.dumps(
-                finding_document(report, operation="check", strict=args.strict),
+                document,
                 indent=2,
                 sort_keys=True,
             ),
         )
     else:
+        print(f"Profile: {report.profile.value}")
         render_findings(report, include_ok=args.include_ok)
     return 0 if report.is_ok(strict=args.strict) else 1
 

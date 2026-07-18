@@ -46,6 +46,20 @@ class SetupReport:
         return bool(self.changes)
 
 
+def _next_commands(report: SetupReport) -> tuple[str, ...]:
+    if not report.apply and report.profile is HostProfile.LINUX_LITE and report.changed:
+        return ("mise run setup -- --profile linux-lite --apply",)
+    return ()
+
+
+def _shell_restart_required(report: SetupReport) -> bool:
+    return report.apply and any(
+        change.status is SetupStatus.APPLIED
+        and change.action.startswith("configure Bash through ")
+        for change in report.changes
+    )
+
+
 def _bash_block(module_path: Path) -> str:
     quoted_module = shlex.quote(str(module_path))
     return (
@@ -83,20 +97,31 @@ def _git_include_present(gitconfig: Path) -> bool:
         )
     except OSError as error:
         raise SetupError(f"could not run git: {error}") from error
+    if completed.returncode not in {0, 1}:
+        raise SetupError(
+            completed.stderr.strip() or "could not inspect Git include configuration"
+        )
     return PRIVATE_GITCONFIG in completed.stdout.splitlines()
+
+
+def _write_file(path: Path, content: bytes, mode: int) -> None:
+    descriptor, tmp_name = tempfile.mkstemp(
+        dir=str(path.parent),
+        prefix=f".{path.name}.",
+    )
+    try:
+        with os.fdopen(descriptor, "wb") as handle:
+            handle.write(content)
+        os.chmod(tmp_name, mode)
+        os.replace(tmp_name, path)
+    except OSError:
+        Path(tmp_name).unlink(missing_ok=True)
+        raise
 
 
 def _write_bashrc(bashrc: Path, content: str) -> None:
     mode = bashrc.stat().st_mode & 0o777 if bashrc.is_file() else 0o644
-    descriptor, tmp_name = tempfile.mkstemp(dir=str(bashrc.parent), prefix=".bashrc.")
-    try:
-        with os.fdopen(descriptor, "w") as handle:
-            handle.write(content)
-        os.chmod(tmp_name, mode)
-        os.replace(tmp_name, bashrc)
-    except OSError:
-        Path(tmp_name).unlink(missing_ok=True)
-        raise
+    _write_file(bashrc, content.encode(), mode)
 
 
 def plan_setup(repo_root: Path, home: Path) -> SetupReport:
@@ -128,6 +153,8 @@ def _configure_linux_lite(
     bash_changed = desired_bashrc != current_bashrc
 
     gitconfig = home / ".gitconfig"
+    if gitconfig.is_symlink():
+        raise SetupError(f"Refusing to write through Git config symlink: {gitconfig}")
     if gitconfig.exists() and not gitconfig.is_file():
         raise SetupError(f"Refusing to replace non-file Git config: {gitconfig}")
     git_include_changed = not _git_include_present(gitconfig)
@@ -139,8 +166,15 @@ def _configure_linux_lite(
 
     if apply:
         home.mkdir(parents=True, exist_ok=True)
+        gitconfig_existed = False
+        gitconfig_before = b""
+        gitconfig_mode = 0o644
         if git_include_changed:
+            gitconfig_existed = gitconfig.is_file()
             try:
+                if gitconfig_existed:
+                    gitconfig_before = gitconfig.read_bytes()
+                    gitconfig_mode = gitconfig.stat().st_mode & 0o777
                 completed = subprocess.run(
                     [
                         "git",
@@ -156,7 +190,9 @@ def _configure_linux_lite(
                     text=True,
                 )
             except OSError as error:
-                raise SetupError(f"could not run git: {error}") from error
+                raise SetupError(
+                    f"could not update Git config {gitconfig}: {error}"
+                ) from error
             if completed.returncode != 0:
                 raise SetupError(
                     completed.stderr.strip() or "Git include update failed",
@@ -165,8 +201,28 @@ def _configure_linux_lite(
             try:
                 _write_bashrc(bashrc, desired_bashrc)
             except OSError as error:
+                if git_include_changed:
+                    try:
+                        if gitconfig_existed:
+                            _write_file(
+                                gitconfig,
+                                gitconfig_before,
+                                gitconfig_mode,
+                            )
+                        else:
+                            gitconfig.unlink(missing_ok=True)
+                    except OSError as rollback_error:
+                        raise SetupError(
+                            f"could not update Bash config {bashrc}: {error}; "
+                            "Git include was added and rollback failed: "
+                            f"{rollback_error}"
+                        ) from error
+                    raise SetupError(
+                        f"could not update Bash config {bashrc}: {error}; "
+                        "rolled back the Git include update",
+                    ) from error
                 raise SetupError(
-                    f"could not update Bash config {bashrc}: {error}",
+                    f"could not update Bash config {bashrc}: {error}"
                 ) from error
     status = SetupStatus.APPLIED if apply else SetupStatus.PLANNED
     return SetupReport(
@@ -201,7 +257,7 @@ def main(argv: list[str] | None = None) -> int:
     try:
         report = setup(repo_root, Path.home())
     except SetupError as error:
-        emit_error("setup", str(error), as_json=args.as_json)
+        emit_error("setup", str(error), as_json=args.as_json, apply=args.apply)
         return 1
     summary = {
         status.value: sum(change.status is status for change in report.changes)
@@ -213,6 +269,8 @@ def main(argv: list[str] | None = None) -> int:
         "operation": "setup",
         "apply": report.apply,
         "ok": True,
+        "next": list(_next_commands(report)),
+        "shell_restart_required": _shell_restart_required(report),
         "profile": report.profile.value,
         "changes": [
             {"action": change.action, "status": change.status.value}
@@ -223,12 +281,21 @@ def main(argv: list[str] | None = None) -> int:
     if args.as_json:
         print(json.dumps(document, indent=2, sort_keys=True))
         return 0
+    print(f"Profile: {report.profile.value}")
     for change in report.changes:
         print(f"{change.status.value.upper():7} {change.action}")
+    rendered = ", ".join(f"{count} {status}" for status, count in summary.items())
+    print(f"Summary: {rendered or 'no changes'}")
     if not report.changes:
         print("No changes required.")
     elif not report.apply:
         print("No files changed. Re-run with --apply to configure this host.")
+        print("Next:")
+        for command in _next_commands(report):
+            print(f"  {command}")
+    elif _shell_restart_required(report):
+        print("Updated Bash startup configuration is not active in this shell.")
+        print("Open a new Bash or run `exec bash` to load it.")
     return 0
 
 

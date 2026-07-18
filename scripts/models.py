@@ -59,7 +59,7 @@ class FindingReport:
 
 @dataclass(frozen=True)
 class CheckReport(FindingReport):
-    pass
+    profile: HostProfile
 
 
 @dataclass(frozen=True)

@@ -7,6 +7,7 @@ from scripts.adopt import (
     AdoptReport,
     AdoptResult,
     AdoptStatus,
+    _render,
     apply_adopt,
     plan_adopt,
 )
@@ -78,6 +79,7 @@ def test_adopt_defaults_to_a_read_only_application_plan(tmp_path: Path) -> None:
     assert document["operation"] == "adopt"
     assert document["apply"] is False
     assert document["ok"] is True
+    assert document["next"] == ["mise run adopt -- hushlogin --apply"]
     assert document["changes"] == [
         {
             "action": "remove",
@@ -89,6 +91,14 @@ def test_adopt_defaults_to_a_read_only_application_plan(tmp_path: Path) -> None:
         },
     ]
     assert (REPO_ROOT / "reference/.hushlogin").exists()
+
+
+def test_adopt_human_output_does_not_suggest_apply_when_converged(capsys) -> None:
+    _render(AdoptReport(application="example", apply=False, results=()))
+
+    captured = capsys.readouterr()
+    assert captured.out == "Summary: no changes\n"
+    assert captured.err == ""
 
 
 def test_adopt_apply_copies_live_truth_and_removes_dead_reference(
@@ -273,6 +283,125 @@ def test_adopt_apply_copies_directories_and_confines_paths(tmp_path: Path) -> No
 
     assert escaped.ok is False
     assert not (repo_root / "escape").exists()
+
+
+def test_adopt_failed_publish_restores_the_previous_directory(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    repo_root, home = _tracked_repo(tmp_path)
+    reference = repo_root / "reference/.config/example"
+    reference.mkdir(parents=True)
+    (reference / "old.txt").write_text("old\n")
+    _commit_all(repo_root)
+    live = home / ".config/example"
+    live.mkdir(parents=True)
+    (live / "new.txt").write_text("new\n")
+    original_rename = Path.rename
+
+    def fail_staged_publish(source: Path, target: Path) -> Path:
+        if source.parent.name.startswith(".adopt-") and target == reference:
+            raise OSError("injected publish failure")
+        return original_rename(source, target)
+
+    monkeypatch.setattr(Path, "rename", fail_staged_publish)
+    applied = apply_adopt(
+        repo_root,
+        home,
+        _plan(
+            AdoptResult(
+                _drift(repo_root, home, ".config/example", DriftKind.MODIFIED),
+                action="copy",
+                status=AdoptStatus.PLANNED,
+            ),
+        ),
+    )
+
+    assert applied.ok is False
+    assert (reference / "old.txt").read_text() == "old\n"
+    assert not (reference / "new.txt").exists()
+    assert not list(reference.parent.glob(".example.adopt-backup-*"))
+
+
+def test_adopt_retains_backup_when_publish_rollback_fails(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    repo_root, home = _tracked_repo(tmp_path)
+    reference = repo_root / "reference/.config/example"
+    reference.mkdir(parents=True)
+    (reference / "old.txt").write_text("old\n")
+    _commit_all(repo_root)
+    live = home / ".config/example"
+    live.mkdir(parents=True)
+    (live / "new.txt").write_text("new\n")
+    original_rename = Path.rename
+
+    def fail_publish_and_rollback(source: Path, target: Path) -> Path:
+        if target == reference and (
+            source.parent.name.startswith(".adopt-") or source.name == "previous"
+        ):
+            raise OSError("injected rename failure")
+        return original_rename(source, target)
+
+    monkeypatch.setattr(Path, "rename", fail_publish_and_rollback)
+    applied = apply_adopt(
+        repo_root,
+        home,
+        _plan(
+            AdoptResult(
+                _drift(repo_root, home, ".config/example", DriftKind.MODIFIED),
+                action="copy",
+                status=AdoptStatus.PLANNED,
+            ),
+        ),
+    )
+
+    assert applied.ok is False
+    assert "previous reference retained at" in (applied.results[0].error or "")
+    backups = list(reference.parent.glob(".*adopt-backup-*/previous"))
+    assert len(backups) == 1
+    assert (backups[0] / "old.txt").read_text() == "old\n"
+
+
+def test_adopt_file_rollback_failure_cleans_staged_copy(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    repo_root, home = _tracked_repo(tmp_path)
+    reference = repo_root / "reference/.example"
+    reference.write_text("old\n")
+    _commit_all(repo_root)
+    live = home / ".example"
+    live.write_text("new\n")
+    original_rename = Path.rename
+
+    def fail_publish_and_rollback(source: Path, target: Path) -> Path:
+        if target == reference and (
+            source.name.startswith(".adopt-") or source.name == "previous"
+        ):
+            raise OSError("injected rename failure")
+        return original_rename(source, target)
+
+    monkeypatch.setattr(Path, "rename", fail_publish_and_rollback)
+    applied = apply_adopt(
+        repo_root,
+        home,
+        _plan(
+            AdoptResult(
+                _drift(repo_root, home, ".example", DriftKind.MODIFIED),
+                action="copy",
+                status=AdoptStatus.PLANNED,
+            ),
+        ),
+    )
+
+    assert applied.ok is False
+    assert "previous reference retained at" in (applied.results[0].error or "")
+    assert not list(reference.parent.glob(".adopt-*"))
+    backups = list(reference.parent.glob(".*adopt-backup-*/previous"))
+    assert len(backups) == 1
+    assert backups[0].read_text() == "old\n"
 
 
 def test_adopt_apply_refuses_renamed_uncommitted_reference(tmp_path: Path) -> None:

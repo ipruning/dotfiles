@@ -9,18 +9,14 @@ import subprocess
 import sys
 import time
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from enum import StrEnum
 from pathlib import Path
 
 from .models import ExecutableFinder
 
 StepCallback = Callable[["UpdateStep"], None]
-NEXT_COMMANDS = (
-    "mise run runtime",
-    "mise run check",
-    "mise run diff",
-)
+NEXT_COMMANDS = ("mise run runtime",)
 
 
 class UpdateStatus(StrEnum):
@@ -66,6 +62,58 @@ def _emit_failure(step: UpdateStep, reason: str) -> None:
     print(f"[{step.name}] FAIL {reason}", file=sys.stderr)
 
 
+def _installed_mise_tools(home: Path) -> tuple[str, ...]:
+    """Return active installed versions so upgrade cannot bootstrap missing tools."""
+    command = (
+        "mise",
+        "ls",
+        "--current",
+        "--installed",
+        "--json",
+        "-C",
+        str(home),
+    )
+    try:
+        completed = subprocess.run(
+            command,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=120,
+        )
+    except subprocess.TimeoutExpired as error:
+        raise RuntimeError("mise tool inventory timed out after 120s") from error
+    except OSError as error:
+        raise RuntimeError(
+            f"could not inspect installed mise tools: {error}"
+        ) from error
+    if completed.returncode != 0:
+        detail = completed.stderr.strip() or completed.stdout.strip()
+        reason = f"mise tool inventory exited {completed.returncode}"
+        raise RuntimeError(f"{reason}: {detail}" if detail else reason)
+    try:
+        document = json.loads(completed.stdout)
+    except json.JSONDecodeError as error:
+        raise RuntimeError(
+            f"mise tool inventory returned invalid JSON: {error}"
+        ) from error
+    if not isinstance(document, dict):
+        raise RuntimeError("mise tool inventory must be a JSON object")
+
+    installed: list[str] = []
+    for name, raw_versions in document.items():
+        if not isinstance(name, str) or not isinstance(raw_versions, list):
+            raise RuntimeError("mise tool inventory has an invalid tool entry")
+        for raw_version in raw_versions:
+            if not isinstance(raw_version, dict):
+                raise RuntimeError(f"mise tool inventory for {name} is invalid")
+            version = raw_version.get("version")
+            if not isinstance(version, str) or not version:
+                raise RuntimeError(f"mise tool inventory for {name} has no version")
+            installed.append(f"{name}@{version}")
+    return tuple(sorted(set(installed)))
+
+
 def _update_steps(home: Path) -> tuple[UpdateStep, ...]:
     return (
         UpdateStep("brew.metadata", "brew", ("brew", "update"), 900),
@@ -91,7 +139,7 @@ def _update_steps(home: Path) -> tuple[UpdateStep, ...]:
         UpdateStep(
             "sprite.version",
             "sprite",
-            ("sprite", "upgrade", "--check"),
+            ("sprite", "upgrade"),
             300,
         ),
         UpdateStep("amp", "amp", ("amp", "update"), 300),
@@ -116,6 +164,28 @@ def plan_updates(
     results = []
     for step in _update_steps(home):
         available = executable_finder(step.tool) is not None
+        if available and step.name == "mise.tools":
+            try:
+                installed = _installed_mise_tools(home)
+            except RuntimeError as error:
+                results.append(
+                    UpdateResult(
+                        step=step,
+                        status=UpdateStatus.FAILED,
+                        reason=str(error),
+                    ),
+                )
+                continue
+            if not installed:
+                results.append(
+                    UpdateResult(
+                        step=step,
+                        status=UpdateStatus.SKIPPED,
+                        reason="no active mise tools are installed",
+                    ),
+                )
+                continue
+            step = replace(step, command=(*step.command, *installed))
         results.append(
             UpdateResult(
                 step=step,
@@ -207,6 +277,33 @@ def execute_updates(
     return UpdateReport(apply=True, results=tuple(results))
 
 
+def _summary(report: UpdateReport) -> dict[str, int]:
+    return {
+        status.value: count
+        for status in (
+            UpdateStatus.PLANNED,
+            UpdateStatus.SUCCEEDED,
+            UpdateStatus.SKIPPED,
+            UpdateStatus.FAILED,
+        )
+        if (count := sum(result.status is status for result in report.results))
+    }
+
+
+def _next_commands(report: UpdateReport) -> tuple[str, ...]:
+    if not report.apply:
+        return (
+            ("mise run update -- --apply",)
+            if any(result.status is UpdateStatus.PLANNED for result in report.results)
+            else ()
+        )
+    if not report.ok or not any(
+        result.status is UpdateStatus.SUCCEEDED for result in report.results
+    ):
+        return ()
+    return NEXT_COMMANDS
+
+
 def _document(report: UpdateReport) -> dict[str, object]:
     return {
         "schema_version": 1,
@@ -225,7 +322,8 @@ def _document(report: UpdateReport) -> dict[str, object]:
             }
             for result in report.results
         ],
-        "next": list(NEXT_COMMANDS),
+        "summary": _summary(report),
+        "next": list(_next_commands(report)),
     }
 
 
@@ -243,11 +341,24 @@ def _render(report: UpdateReport) -> None:
                 f"{label:7} {result.step.name}: {result.reason}",
                 file=sys.stderr,
             )
+    summary = _summary(report)
+    rendered = ", ".join(f"{count} {status}" for status, count in summary.items())
+    print(f"Summary: {rendered or 'no steps'}")
     if not report.apply:
-        print("No commands run. Re-run with --apply to update host tools.")
+        if _next_commands(report):
+            print("No commands run. Re-run with --apply to update host tools.")
+        else:
+            print("No update commands are available on this host.")
+        return
+    if not report.ok:
+        print("Update incomplete. Resolve failed steps before refreshing runtime.")
+        return
+    next_commands = _next_commands(report)
+    if not next_commands:
+        print("No update commands ran.")
         return
     print("Next:")
-    for command in NEXT_COMMANDS:
+    for command in next_commands:
         print(f"  {command}")
 
 

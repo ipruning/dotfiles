@@ -6,6 +6,7 @@ from scripts.restore import (
     RestoreReport,
     RestoreResult,
     RestoreStatus,
+    _render,
     apply_restore,
     plan_restore,
 )
@@ -25,6 +26,7 @@ def test_restore_defaults_to_a_read_only_application_plan(tmp_path: Path) -> Non
     assert document["application"] == "hushlogin"
     assert document["apply"] is False
     assert document["ok"] is True
+    assert document["next"] == ["mise run restore -- hushlogin --apply"]
     assert document["summary"] == {"planned": 1}
     assert document["changes"] == [
         {
@@ -38,6 +40,14 @@ def test_restore_defaults_to_a_read_only_application_plan(tmp_path: Path) -> Non
         },
     ]
     assert not (home / ".hushlogin").exists()
+
+
+def test_restore_human_output_does_not_suggest_apply_when_converged(capsys) -> None:
+    _render(RestoreReport(application="example", apply=False, results=()))
+
+    captured = capsys.readouterr()
+    assert captured.out == "Summary: no changes\n"
+    assert captured.err == ""
 
 
 def test_restore_apply_backs_up_live_file_and_links_reference(tmp_path: Path) -> None:
@@ -68,6 +78,19 @@ def test_restore_apply_backs_up_live_file_and_links_reference(tmp_path: Path) ->
     assert json.loads(converged.stdout)["changes"] == []
 
 
+def test_restore_human_apply_reports_the_backup_location(tmp_path: Path) -> None:
+    home = tmp_path / "home"
+    home.mkdir()
+    (home / ".hushlogin").write_text("host-specific\n")
+
+    completed = run_scripts_module("restore", home, "hushlogin", "--apply")
+
+    assert completed.returncode == 0
+    assert "backup:" in completed.stdout
+    assert ".local/state/dotfiles/restore-backups/" in completed.stdout
+    assert "Summary: 1 applied" in completed.stdout
+
+
 def test_restore_rejects_invalid_scope_without_changing_home(tmp_path: Path) -> None:
     home = tmp_path / "home"
     home.mkdir()
@@ -79,7 +102,7 @@ def test_restore_rejects_invalid_scope_without_changing_home(tmp_path: Path) -> 
         "--dry-run",
     )
     unknown = run_scripts_module(
-        "restore", home, "not-a-configured-application", "--json"
+        "restore", home, "not-a-configured-application", "--apply", "--json"
     )
 
     assert conflicting.returncode == 2
@@ -87,6 +110,7 @@ def test_restore_rejects_invalid_scope_without_changing_home(tmp_path: Path) -> 
     assert unknown.returncode == 1
     error_document = json.loads(unknown.stdout)
     assert error_document["ok"] is False
+    assert error_document["apply"] is True
     assert error_document["operation"] == "restore"
     assert error_document["error"]["code"] == "restore_failed"
     assert "Unsupported application" in error_document["error"]["message"]

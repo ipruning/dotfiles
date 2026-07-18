@@ -1,6 +1,7 @@
 import json
 import os
 import shlex
+import stat
 import subprocess
 import sys
 from pathlib import Path
@@ -125,7 +126,8 @@ def test_inventory_previews_exact_plan_by_default_without_collecting(
         ("applications", "planned", "inventory/TestHost/applications.txt"),
         ("setapp", "planned", "inventory/TestHost/setapp.txt"),
     ]
-    assert document["next"] == ["git diff inventory/"]
+    assert document["summary"] == {"planned": 4}
+    assert document["next"] == ["mise run inventory -- --apply"]
     assert not host_dir.exists()
     assert not log_path.exists()
 
@@ -148,6 +150,7 @@ def test_inventory_writes_sorted_snapshots_then_reports_unchanged(
     )
     assert (host_dir / "applications.txt").read_text() == "Alpha\nbeta\n"
     assert (host_dir / "setapp.txt").read_text() == "CleanShot X\nTablePlus\n"
+    assert stat.S_IMODE((host_dir / "Brewfile").stat().st_mode) == 0o644
     assert all(
         step["status"] == "written" for step in json.loads(first.stdout)["steps"]
     )
@@ -155,9 +158,9 @@ def test_inventory_writes_sorted_snapshots_then_reports_unchanged(
     second, _host_dir, _log_path = _run_inventory(tmp_path, "--apply", "--json")
 
     assert second.returncode == 0
-    assert all(
-        step["status"] == "unchanged" for step in json.loads(second.stdout)["steps"]
-    )
+    second_document = json.loads(second.stdout)
+    assert all(step["status"] == "unchanged" for step in second_document["steps"])
+    assert second_document["next"] == []
 
 
 def test_inventory_skips_missing_collectors_without_touching_snapshots(
@@ -210,6 +213,7 @@ def test_inventory_failure_keeps_existing_snapshot_and_later_steps_run(
     steps = {step["name"]: step for step in document["steps"]}
     assert steps["brew.bundle"]["status"] == "failed"
     assert steps["brew.bundle"]["reason"] == "command exited 7"
+    assert steps["brew.bundle"]["exit_code"] == 7
     assert steps["gh.extensions"]["status"] == "written"
     assert steps["applications"]["status"] == "written"
     assert (host_dir / "Brewfile").read_text() == 'brew "previous"\n'
@@ -240,6 +244,40 @@ def test_inventory_empty_collector_output_fails_and_keeps_snapshot(
     assert (host_dir / "gh_extensions.txt").read_text() == "old/extension\n"
 
 
+def test_inventory_failed_atomic_publish_keeps_previous_snapshot(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    applications_root = tmp_path / "Applications"
+    _make_applications(applications_root, apps=("Ghostty",), setapp=None)
+    repo_root = tmp_path / "dotfiles"
+    target = repo_root / "inventory/TestHost/applications.txt"
+    target.parent.mkdir(parents=True)
+    target.write_text("Previous App\n")
+    plan = plan_inventory(
+        repo_root,
+        "TestHost",
+        applications_root=applications_root,
+        executable_finder=lambda _tool: None,
+    )
+    original_replace = Path.replace
+
+    def fail_publish(source: Path, destination: Path) -> Path:
+        if destination == target and source.name.startswith(f".{target.name}.tmp-"):
+            raise OSError("injected snapshot publish failure")
+        return original_replace(source, destination)
+
+    monkeypatch.setattr(Path, "replace", fail_publish)
+    report = execute_inventory(plan)
+
+    application = next(
+        result for result in report.results if result.spec.name == "applications"
+    )
+    assert application.status is InventoryStatus.FAILED
+    assert target.read_text() == "Previous App\n"
+    assert not list(target.parent.glob(f".{target.name}.tmp-*"))
+
+
 def test_inventory_rejects_unparseable_gh_output_without_writing(
     tmp_path: Path,
 ) -> None:
@@ -258,6 +296,7 @@ def test_inventory_rejects_unparseable_gh_output_without_writing(
     assert completed.returncode == 1
     steps = {step["name"]: step for step in json.loads(completed.stdout)["steps"]}
     assert steps["gh.extensions"]["status"] == "failed"
+    assert steps["gh.extensions"]["exit_code"] == 0
     assert "unrecognized gh extension list line" in steps["gh.extensions"]["reason"]
     assert not (host_dir / "gh_extensions.txt").exists()
 
@@ -305,6 +344,7 @@ def test_inventory_human_output_announces_collectors_and_summary(
     )
     assert "WRITTEN brew.bundle: inventory/TestHost/Brewfile" in completed.stdout
     assert "SKIPPED setapp:" in completed.stdout
+    assert "Summary: 3 written, 1 skipped" in completed.stdout
     assert "Next:\n  git diff inventory/\n" in completed.stdout
 
 

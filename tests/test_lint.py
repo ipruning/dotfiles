@@ -402,3 +402,33 @@ def test_full_home_rule_fires_only_for_its_keyed_zellij_file(tmp_path: Path) -> 
     assert by_path[keyed].severity is Severity.WARN
     assert by_path[other].code == "path.absolute_home"
     assert by_path[other].severity is Severity.ERROR
+
+
+def test_inspect_repository_reports_git_inventory_failure(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    (repo_root / "mackup/applications").mkdir(parents=True)
+    (repo_root / "mackup/mackup.cfg").write_text(mackup_cfg())
+
+    monkeypatch.setattr(
+        "scripts.lint.subprocess.run",
+        lambda *_args, **_kwargs: subprocess.CompletedProcess(
+            args=("git", "ls-files"),
+            returncode=7,
+            stdout=b"",
+            stderr=b"injected git failure",
+        ),
+    )
+
+    report = inspect_repository(repo_root, home)
+    finding = next(
+        finding
+        for finding in report.findings
+        if finding.code == "repository.tracked_files_unavailable"
+    )
+    assert finding.severity is Severity.ERROR
+    assert "injected git failure" in finding.message
+    assert report.is_ok() is False

@@ -268,6 +268,22 @@ def test_subprocess_runner_surfaces_mackup_failure_modes(
     with pytest.raises(MackupCommandError, match="mackup exploded"):
         runner.inspect(repo_root, home, None)
 
+    responses["next"] = (
+        7,
+        '{"schema_version":1,"operation":"diff","changes":[],"summary":{}}',
+        "mackup failed after reporting",
+    )
+    with pytest.raises(MackupCommandError, match="failed after reporting"):
+        runner.inspect(repo_root, home, None)
+
+    unreadable = _drift_document("unreadable", error="permission denied")
+    responses["next"] = (1, json.dumps(unreadable), "")
+    assert runner.inspect(repo_root, home, None) == unreadable
+
+    responses["next"] = (1, json.dumps(_drift_document("modified")), "")
+    with pytest.raises(MackupCommandError, match="Mackup exited 1"):
+        runner.inspect(repo_root, home, None)
+
     responses["next"] = (0, "not json", "")
     with pytest.raises(MackupCommandError, match="invalid JSON"):
         runner.inspect(repo_root, home, None)

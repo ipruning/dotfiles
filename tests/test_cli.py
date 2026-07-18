@@ -80,6 +80,8 @@ def test_check_cli_reports_optional_linux_lite_gaps_as_json(tmp_path: Path) -> N
     assert completed.returncode == 0
     assert completed.stderr == ""
     assert document["ok"] is True
+    assert document["profile"] == "linux-lite"
+    assert sum(document["summary"].values()) == len(document["findings"])
     assert "git.private_include_missing" in codes
     assert "skillshare.config_missing" in codes
     assert "shell.bash_missing" in codes

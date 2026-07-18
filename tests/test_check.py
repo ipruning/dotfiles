@@ -32,7 +32,8 @@ def test_inspect_host_reports_capabilities_and_their_invalid_transition(
     private_gitconfig.chmod(0o600)
     for directory in ("plugins", "completions", "functions"):
         (repo_root / "generated" / directory).mkdir(parents=True)
-        (repo_root / "generated" / directory / "generated.txt").write_text(
+        marker = ".gitkeep" if directory == "plugins" else "generated.txt"
+        (repo_root / "generated" / directory / marker).write_text(
             "generated\n",
         )
     runtime_files = (
@@ -260,6 +261,9 @@ def test_skillshare_doctor_ignores_non_health_warnings(tmp_path: Path) -> None:
     home = tmp_path / "home"
     source = home / "skills"
     source.mkdir(parents=True)
+    grouped_skill = source / "skill-group/example/SKILL.md"
+    grouped_skill.parent.mkdir(parents=True)
+    grouped_skill.write_text("---\nname: example\n---\n")
     config_path = home / ".config/skillshare/config.yaml"
     config_path.parent.mkdir(parents=True)
     config_path.write_text("sources:\n  skills: ~/skills\n")
@@ -271,7 +275,7 @@ def test_skillshare_doctor_ignores_non_health_warnings(tmp_path: Path) -> None:
             {
                 "name": "skills_validity",
                 "status": "warning",
-                "details": ["extras"],
+                "details": ["extras", "skill-group"],
             },
             {"name": "tracked_repos", "status": "warning"},
         ],
@@ -295,7 +299,9 @@ def test_skillshare_doctor_ignores_non_health_warnings(tmp_path: Path) -> None:
     )
 
     assert finding.code == "skillshare.doctor_warnings"
-    assert finding.message == "Skillshare doctor reports 1 actionable warning(s)"
+    assert finding.message == (
+        "Skillshare doctor reports 1 actionable warning(s): tracked_repos"
+    )
 
 
 def test_skillshare_doctor_keeps_real_skill_validity_warning(tmp_path: Path) -> None:
@@ -335,7 +341,10 @@ def test_skillshare_doctor_keeps_real_skill_validity_warning(tmp_path: Path) -> 
     )
 
     assert finding.code == "skillshare.doctor_warnings"
-    assert finding.message == "Skillshare doctor reports 1 actionable warning(s)"
+    assert finding.message == (
+        "Skillshare doctor reports 1 actionable warning(s): "
+        "skills_validity: broken-skill"
+    )
 
 
 def test_linux_lite_check_omits_macos_and_optional_desktop_capabilities(
@@ -759,6 +768,43 @@ def test_bag_mode_probe_reports_recovery_then_clean_stop(tmp_path: Path) -> None
     assert stopped["bag_mode.lifecycle"].severity is Severity.OK
 
 
+def test_bag_mode_probe_rejects_version_output_from_failed_command(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "home").mkdir()
+    _write_module_source(
+        tmp_path / "repo/modules/bag-mode/bag-mode",
+        'VERSION="2.6.0"',
+    )
+    stub = _bag_mode_stub(
+        tmp_path,
+        {
+            "enabled": False,
+            "phase": "stopped",
+            "recovery_required": False,
+            "brightness_pending": False,
+        },
+        version="2.6.0",
+    )
+    stub.write_text(
+        stub.read_text().replace("exit 0; fi", "echo broken >&2; exit 9; fi")
+    )
+
+    def finder(command: str) -> str | None:
+        if command == "bag-mode":
+            return str(stub)
+        return (
+            f"/tools/{command}" if command in {"git", "python", "uv", "mise"} else None
+        )
+
+    findings = _module_probe_findings(tmp_path, finder, "bag_mode.")
+    version = findings["bag_mode.version"]
+
+    assert version.severity is Severity.WARN
+    assert version.code == "bag_mode.version_unavailable"
+    assert "command exited 9: broken" in version.message
+
+
 def test_bag_mode_probe_handles_missing_tool_and_invalid_status(
     tmp_path: Path,
 ) -> None:
@@ -981,6 +1027,32 @@ def test_inspect_host_reports_generated_binaries_without_an_owner(
     assert finding.path == custom_binary
     assert finding.action is not None
     assert "build or install owner" in finding.action
+
+
+def test_inspect_host_reports_generated_plugins_without_an_owner(
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "repo"
+    home = tmp_path / "home"
+    generated_plugins = repo_root / "generated/plugins"
+    generated_plugins.mkdir(parents=True)
+    stale_plugin = generated_plugins / "old-plugin"
+    stale_plugin.mkdir()
+
+    report = inspect_host(
+        repo_root,
+        home,
+        executable_finder=lambda _command: None,
+        system_name="Darwin",
+        profile="full",
+    )
+    findings = {finding.code: finding for finding in report.findings}
+
+    finding = findings["runtime.plugin.old-plugin_unowned"]
+    assert finding.severity is Severity.WARN
+    assert finding.path == stale_plugin
+    assert finding.action is not None
+    assert "Remove it explicitly" in finding.action
 
 
 def test_inspect_host_reports_stale_owned_completion_when_tool_is_missing(

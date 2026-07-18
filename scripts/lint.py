@@ -319,7 +319,7 @@ def _config() -> configparser.ConfigParser:
     return _CaseConfigParser(allow_no_value=True)
 
 
-def _mackup_findings(repo_root: Path) -> list[Finding]:
+def _mackup_findings(repo_root: Path, tracked_paths: set[Path]) -> list[Finding]:
     config_path = repo_root / "mackup/mackup.cfg"
     if not config_path.is_file():
         return [
@@ -337,7 +337,6 @@ def _mackup_findings(repo_root: Path) -> list[Finding]:
         if config.has_section("applications_to_sync")
         else []
     )
-    tracked_paths = set(_tracked_paths(repo_root))
 
     def reference_exists(candidate: Path) -> bool:
         if not tracked_paths:
@@ -442,20 +441,38 @@ def _mackup_findings(repo_root: Path) -> list[Finding]:
     return findings
 
 
-def _tracked_paths(repo_root: Path) -> list[Path]:
+def _tracked_paths(repo_root: Path) -> tuple[list[Path], Finding | None]:
     completed = subprocess.run(
         ["git", "-C", str(repo_root), "ls-files", "-z"],
         check=False,
         capture_output=True,
     )
-    if completed.returncode != 0:
-        return []
-    return [repo_root / item.decode() for item in completed.stdout.split(b"\0") if item]
+    if completed.returncode == 0:
+        return (
+            [
+                repo_root / item.decode()
+                for item in completed.stdout.split(b"\0")
+                if item
+            ],
+            None,
+        )
+    detail = completed.stderr.decode(errors="replace").strip()
+    if "not a git repository" in detail.lower():
+        return [], None
+    return (
+        [],
+        _located_finding(
+            Severity.ERROR,
+            "repository.tracked_files_unavailable",
+            "git ls-files failed" + (f": {detail}" if detail else ""),
+            repo_root,
+        ),
+    )
 
 
-def _tracked_file_findings(repo_root: Path) -> list[Finding]:
+def _tracked_file_findings(repo_root: Path, tracked_paths: list[Path]) -> list[Finding]:
     findings: list[Finding] = []
-    for file_path in _tracked_paths(repo_root):
+    for file_path in tracked_paths:
         if not file_path.exists():
             continue
         relative = file_path.relative_to(repo_root).as_posix()
@@ -517,9 +534,12 @@ def _contains_legacy_reference(line: str, legacy: str) -> bool:
     return re.search(rf"{re.escape(legacy)}(?![\w-])", line) is not None
 
 
-def _legacy_reference_findings(repo_root: Path) -> list[Finding]:
+def _legacy_reference_findings(
+    repo_root: Path,
+    tracked_paths: list[Path],
+) -> list[Finding]:
     findings: list[Finding] = []
-    for file_path in _tracked_paths(repo_root):
+    for file_path in tracked_paths:
         relative = file_path.relative_to(repo_root)
         if (
             file_path == Path(__file__).resolve()
@@ -549,7 +569,7 @@ def _legacy_reference_findings(repo_root: Path) -> list[Finding]:
     return findings
 
 
-def _symlink_findings(repo_root: Path) -> list[Finding]:
+def _symlink_findings(repo_root: Path, tracked_paths: list[Path]) -> list[Finding]:
     return [
         _located_finding(
             Severity.ERROR,
@@ -557,7 +577,7 @@ def _symlink_findings(repo_root: Path) -> list[Finding]:
             "tracked symlink target does not exist",
             file_path,
         )
-        for file_path in _tracked_paths(repo_root)
+        for file_path in tracked_paths
         if file_path.is_symlink() and not file_path.exists()
     ]
 
@@ -666,10 +686,13 @@ def inspect_repository(
 ) -> LintReport:
     """Return repository path, mapping, and symlink invariants."""
     findings = _path_findings(repo_root, home, system_name or platform.system())
-    findings.extend(_mackup_findings(repo_root))
-    findings.extend(_symlink_findings(repo_root))
-    findings.extend(_tracked_file_findings(repo_root))
-    findings.extend(_legacy_reference_findings(repo_root))
+    tracked_paths, tracked_finding = _tracked_paths(repo_root)
+    if tracked_finding:
+        findings.append(tracked_finding)
+    findings.extend(_mackup_findings(repo_root, set(tracked_paths)))
+    findings.extend(_symlink_findings(repo_root, tracked_paths))
+    findings.extend(_tracked_file_findings(repo_root, tracked_paths))
+    findings.extend(_legacy_reference_findings(repo_root, tracked_paths))
     findings.extend(_skillshare_config_findings(repo_root))
     return LintReport(schema_version=1, findings=tuple(findings))
 

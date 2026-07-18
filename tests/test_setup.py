@@ -1,10 +1,47 @@
 import subprocess
+import json
 from pathlib import Path
 
 import pytest
 
+import scripts.setup as setup_script
 from scripts.setup import SetupError, apply_setup, plan_setup
 from scripts.profiles import HostProfile
+from tests.conftest import run_scripts_module
+
+
+def test_setup_json_exposes_apply_handoff_and_shell_restart(tmp_path: Path) -> None:
+    home = tmp_path / "home"
+    home.mkdir()
+
+    preview = run_scripts_module(
+        "setup",
+        home,
+        "--profile",
+        "linux-lite",
+        "--json",
+    )
+    assert preview.returncode == 0
+    preview_document = json.loads(preview.stdout)
+    assert preview_document["apply"] is False
+    assert preview_document["next"] == [
+        "mise run setup -- --profile linux-lite --apply"
+    ]
+    assert preview_document["shell_restart_required"] is False
+
+    applied = run_scripts_module(
+        "setup",
+        home,
+        "--profile",
+        "linux-lite",
+        "--apply",
+        "--json",
+    )
+    assert applied.returncode == 0
+    applied_document = json.loads(applied.stdout)
+    assert applied_document["apply"] is True
+    assert applied_document["next"] == []
+    assert applied_document["shell_restart_required"] is True
 
 
 def test_linux_lite_setup_preserves_shell_config_and_is_idempotent(
@@ -131,6 +168,50 @@ def test_linux_lite_setup_preserves_bash_when_git_update_fails(
         apply_setup(repo_root, home)
 
     assert bashrc.read_text() == "# unchanged\n"
+
+
+def test_linux_lite_setup_rolls_back_git_when_bash_update_fails(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    (repo_root / "modules/bash").mkdir(parents=True)
+    (repo_root / "modules/bash/init.bash").write_text("export READY=1\n")
+    home.mkdir()
+    bashrc = home / ".bashrc"
+    bashrc.write_text("# unchanged\n")
+    gitconfig = home / ".gitconfig"
+    original_gitconfig = "[init]\n\tdefaultBranch = main\n"
+    gitconfig.write_text(original_gitconfig)
+
+    def refuse_bash_update(_bashrc: Path, _content: str) -> None:
+        raise OSError("disk refused write")
+
+    monkeypatch.setattr(setup_script, "_write_bashrc", refuse_bash_update)
+
+    with pytest.raises(SetupError, match="rolled back the Git include update"):
+        apply_setup(repo_root, home)
+
+    assert bashrc.read_text() == "# unchanged\n"
+    assert gitconfig.read_text() == original_gitconfig
+
+
+def test_linux_lite_setup_refuses_symlinked_git_config(tmp_path: Path) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    (repo_root / "modules/bash").mkdir(parents=True)
+    (repo_root / "modules/bash/init.bash").write_text("export READY=1\n")
+    home.mkdir()
+    external_target = tmp_path / "elsewhere/gitconfig"
+    external_target.parent.mkdir()
+    external_target.write_text("[init]\n\tdefaultBranch = main\n")
+    (home / ".gitconfig").symlink_to(external_target)
+
+    with pytest.raises(SetupError, match="Git config symlink"):
+        apply_setup(repo_root, home)
+
+    assert external_target.read_text() == "[init]\n\tdefaultBranch = main\n"
 
 
 def test_linux_lite_loader_runs_before_noninteractive_bash_return(

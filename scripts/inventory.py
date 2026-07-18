@@ -4,11 +4,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import shutil
 import socket
 import subprocess
 import sys
+import tempfile
 import time
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -18,7 +20,8 @@ from pathlib import Path
 from .models import ExecutableFinder
 
 StepCallback = Callable[["InventorySpec"], None]
-NEXT_COMMANDS = ("git diff inventory/",)
+APPLY_COMMAND = "mise run inventory -- --apply"
+REVIEW_COMMAND = "git diff inventory/"
 HOST_NAME_RE = re.compile(r"[^A-Za-z0-9._-]")
 
 
@@ -65,6 +68,10 @@ class InventoryReport:
 
 class SnapshotParseError(ValueError):
     """Collector output cannot be turned into a snapshot."""
+
+    def __init__(self, message: str, exit_code: int | None = None) -> None:
+        super().__init__(message)
+        self.exit_code = exit_code
 
 
 def sanitize_host(raw: str) -> str:
@@ -182,9 +189,14 @@ def _collect(spec: InventorySpec) -> tuple[str, int | None]:
     if completed.returncode != 0:
         raise SnapshotParseError(
             f"command exited {completed.returncode}"
-            + (f"\n{completed.stderr}" if completed.stderr else "")
+            + (f"\n{completed.stderr}" if completed.stderr else ""),
+            completed.returncode,
         )
-    return _parse_output(spec, completed.stdout), completed.returncode
+    try:
+        content = _parse_output(spec, completed.stdout)
+    except SnapshotParseError as error:
+        raise SnapshotParseError(str(error), completed.returncode) from error
+    return content, completed.returncode
 
 
 def execute_inventory(
@@ -212,7 +224,20 @@ def execute_inventory(
                 status = InventoryStatus.UNCHANGED
             else:
                 planned.target.parent.mkdir(parents=True, exist_ok=True)
-                planned.target.write_text(content)
+                descriptor, temporary_name = tempfile.mkstemp(
+                    dir=planned.target.parent,
+                    prefix=f".{planned.target.name}.tmp-",
+                )
+                temporary = Path(temporary_name)
+                try:
+                    os.fchmod(descriptor, 0o644)
+                    with os.fdopen(descriptor, "w") as snapshot:
+                        snapshot.write(content)
+                        snapshot.flush()
+                        os.fsync(snapshot.fileno())
+                    temporary.replace(planned.target)
+                finally:
+                    temporary.unlink(missing_ok=True)
                 status = InventoryStatus.WRITTEN
             results.append(
                 InventoryResult(
@@ -236,6 +261,8 @@ def execute_inventory(
                 ),
             )
         except (OSError, SnapshotParseError) as error:
+            if isinstance(error, SnapshotParseError) and error.exit_code is not None:
+                exit_code = error.exit_code
             reason, _, stderr = str(error).partition("\n")
             _emit_failure(planned.spec, reason, stderr)
             results.append(
@@ -249,6 +276,36 @@ def execute_inventory(
                 ),
             )
     return InventoryReport(host=plan.host, apply=True, results=tuple(results))
+
+
+def _summary(report: InventoryReport) -> dict[str, int]:
+    return {
+        status.value: count
+        for status in (
+            InventoryStatus.PLANNED,
+            InventoryStatus.WRITTEN,
+            InventoryStatus.UNCHANGED,
+            InventoryStatus.SKIPPED,
+            InventoryStatus.FAILED,
+        )
+        if (count := sum(result.status is status for result in report.results))
+    }
+
+
+def _next_commands(report: InventoryReport) -> tuple[str, ...]:
+    if not report.apply:
+        return (
+            (APPLY_COMMAND,)
+            if any(
+                result.status is InventoryStatus.PLANNED for result in report.results
+            )
+            else ()
+        )
+    return (
+        (REVIEW_COMMAND,)
+        if any(result.status is InventoryStatus.WRITTEN for result in report.results)
+        else ()
+    )
 
 
 def _document(report: InventoryReport, repo_root: Path) -> dict[str, object]:
@@ -274,7 +331,8 @@ def _document(report: InventoryReport, repo_root: Path) -> dict[str, object]:
             }
             for result in report.results
         ],
-        "next": list(NEXT_COMMANDS),
+        "summary": _summary(report),
+        "next": list(_next_commands(report)),
     }
 
 
@@ -300,11 +358,21 @@ def _render(report: InventoryReport, repo_root: Path) -> None:
                 f"{label:7} {result.spec.name}: {result.reason}",
                 file=sys.stderr,
             )
+    summary = _summary(report)
+    rendered = ", ".join(f"{count} {status}" for status, count in summary.items())
+    print(f"Summary: {rendered or 'no steps'}")
     if not report.apply:
-        print("No snapshots written. Re-run with --apply to snapshot this host.")
+        if _next_commands(report):
+            print("No snapshots written. Re-run with --apply to snapshot this host.")
+        else:
+            print("No inventory collectors are available on this host.")
+        return
+    next_commands = _next_commands(report)
+    if not next_commands:
+        print("No inventory changes.")
         return
     print("Next:")
-    for command in NEXT_COMMANDS:
+    for command in next_commands:
         print(f"  {command}")
 
 

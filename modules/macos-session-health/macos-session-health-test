@@ -56,9 +56,12 @@ test_env=(
 )
 
 blocked_home="$test_root/blocked-home"
-mkdir -p "$blocked_home/.local/bin"
+blocked_plist="$blocked_home/Library/LaunchAgents/com.alex.macos-session-health.plist"
+mkdir -p "$blocked_home/.local/bin" "$(dirname "$blocked_plist")"
 printf '#!/bin/sh\nexit 0\n' >"$test_root/unmanaged-command"
 ln -s "$test_root/unmanaged-command" "$blocked_home/.local/bin/macos-session-health"
+printf 'blocked plist must remain\n' >"$blocked_plist"
+: >"$test_root/launchd-loaded"
 exit_code=0
 env "${test_env[@]}" HOME="$blocked_home" "$python_bin" "$health_cli" install --dry-run \
   >"$test_root/unmanaged.out" 2>"$test_root/unmanaged.err" || exit_code=$?
@@ -67,8 +70,11 @@ env "${test_env[@]}" HOME="$blocked_home" "$python_bin" "$health_cli" install --
 exit_code=0
 env "${test_env[@]}" HOME="$blocked_home" "$python_bin" "$health_cli" uninstall \
   >"$test_root/unmanaged-uninstall.out" 2>"$test_root/unmanaged-uninstall.err" || exit_code=$?
-[[ "$exit_code" == 1 && -L "$blocked_home/.local/bin/macos-session-health" ]] \
-  || fail 'uninstall removed an unmanaged symlink'
+[[ "$exit_code" == 1 && -L "$blocked_home/.local/bin/macos-session-health" \
+  && "$(cat "$blocked_plist")" == 'blocked plist must remain' \
+  && -f "$test_root/launchd-loaded" ]] \
+  || fail 'rejected uninstall mutated an unmanaged wrapper, plist, or loaded LaunchAgent'
+rm -f "$test_root/launchd-loaded"
 
 bad_python_home="$test_root/bad-python-home"
 bad_python="$bad_python_home/.local/share/mise/installs/python/latest/bin/python3"
@@ -114,6 +120,70 @@ env "${test_env[@]}" "$python_bin" "$health_cli" install \
 env "${test_env[@]}" "$installed_cli" notify-test --dry-run >"$test_root/notify.json"
 jq -e 'select(.exit == 0 and .auth_mode == "bearer" and .payload.thread_id == "macos-session-health")' \
   "$test_root/notify.json" >/dev/null || fail 'built-in notification dry-run failed'
+
+cat >"$fake_bin/pgrep" <<'EOF'
+#!/bin/bash
+if [[ ! -f "$FAKE_SYSPOLICYD_SIGNALED" ]]; then
+  echo 111
+elif [[ "$FAKE_SYSPOLICYD_RESULT" == replaced || "$FAKE_SYSPOLICYD_RESULT" == kill-failed ]]; then
+  echo 222
+elif [[ "$FAKE_SYSPOLICYD_RESULT" == same ]]; then
+  echo 111
+fi
+EOF
+cat >"$fake_bin/ps" <<'EOF'
+#!/bin/bash
+pid=''
+while (($#)); do
+  [[ "$1" == -p ]] && { pid="$2"; break; }
+  shift
+done
+printf '%s 1 S 0.0 1024 00:01 /usr/libexec/syspolicyd\n' "$pid"
+EOF
+cat >"$fake_bin/sudo" <<'EOF'
+#!/bin/bash
+: >"$FAKE_SYSPOLICYD_SIGNALED"
+[[ "$FAKE_SYSPOLICYD_RESULT" == kill-failed ]] && exit 7
+exit 0
+EOF
+chmod +x "$fake_bin/pgrep" "$fake_bin/ps" "$fake_bin/sudo"
+for recovery_result in replaced same missing kill-failed; do
+  rm -f "$test_root/syspolicyd-signaled"
+  exit_code=0
+  env "${test_env[@]}" FAKE_SYSPOLICYD_SIGNALED="$test_root/syspolicyd-signaled" \
+    FAKE_SYSPOLICYD_RESULT="$recovery_result" "$installed_cli" recover --execute \
+    --assume-codex-desktop-closed --wait-seconds 0 --format json \
+    >"$test_root/recover-$recovery_result.json" || exit_code=$?
+  if [[ "$recovery_result" == replaced ]]; then
+    [[ "$exit_code" == 0 ]] || fail 'verified syspolicyd replacement returned failure'
+    jq -e 'select(.replacement_verified == true and .before.pid == "111" and .after.pid == "222" and (.error | not))' \
+      "$test_root/recover-$recovery_result.json" >/dev/null \
+      || fail 'verified syspolicyd replacement report was not truthful'
+  else
+    [[ "$exit_code" == 1 ]] || fail "unverified syspolicyd $recovery_result result returned success"
+    if [[ "$recovery_result" == kill-failed ]]; then
+      jq -e 'select(.replacement_verified == false and .after.pid == "222" and (.error | contains("signal command failed with exit 7")))' \
+        "$test_root/recover-$recovery_result.json" >/dev/null \
+        || fail 'failed signal command with a replacement returned an untruthful report'
+    else
+      jq -e 'select(.replacement_verified == false and .error == "signal sent but syspolicyd replacement not verified")' \
+        "$test_root/recover-$recovery_result.json" >/dev/null \
+        || fail "unverified syspolicyd $recovery_result report was not truthful"
+    fi
+  fi
+done
+
+rm -f "$test_root/syspolicyd-signaled"
+exit_code=0
+env "${test_env[@]}" FAKE_SYSPOLICYD_SIGNALED="$test_root/syspolicyd-signaled" \
+  FAKE_SYSPOLICYD_RESULT=same "$installed_cli" recover --execute \
+  --assume-codex-desktop-closed --wait-seconds 0 --format markdown \
+  >"$test_root/recover-same.md" || exit_code=$?
+[[ "$exit_code" == 1 ]] || fail 'unverified markdown recovery returned success'
+rg -q 'replacement_verified: `False`' "$test_root/recover-same.md" \
+  || fail 'markdown recovery omitted replacement verification'
+rg -q 'signal sent but syspolicyd replacement not verified' "$test_root/recover-same.md" \
+  || fail 'markdown recovery omitted verification error'
 
 query_db="$test_root/query.sqlite3"
 "$python_bin" - "$query_db" <<'PY'
