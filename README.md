@@ -130,10 +130,10 @@ mise run diff -- --profile full
 ```
 
 The command runs the immutable Mackup fork pinned as a locked git dependency in
-`pyproject.toml` (recorded in `uv.lock`), so `mise install` provisions it and no
-Mackup fetch happens during inspection. It loads application definitions
-directly from `mackup/applications/` and does not install `~/.mackup` links or
-change either side.
+`pyproject.toml` and recorded in `uv.lock`. The bootstrap command `mise exec --
+uv sync --locked` provisions it, so no Mackup fetch happens during inspection.
+It loads application definitions directly from `mackup/applications/` and does
+not install `~/.mackup` links or change either side.
 
 Restore is deliberately application-scoped. It defaults to the same read-only
 plan; `--apply` first moves each changed live path into
@@ -210,11 +210,9 @@ mise run update -- --apply
 
 The task discovers supported updaters on `PATH`, reports missing tools as
 skipped, applies available updates in a stable order, and continues independent
-steps after a failure. Any failed step makes the command exit non-zero. Current
-steps cover Homebrew metadata and packages, global mise tools and shims,
-GitHub CLI extensions, tldr pages, Yazi packages, Sprite, Amp,
-Claude Code, Codex, Tigris, and Pi extensions. It deliberately does not run
-`brew cleanup`,
+steps after a failure. Its preview is the authoritative list of supported
+updaters and the exact commands available on the current host. Any failed step
+makes the command exit non-zero. It deliberately does not run `brew cleanup`,
 `brew autoremove`, or `mise prune`; removal and pruning require a separate,
 explicit operation.
 
@@ -260,23 +258,24 @@ mise run runtime -- --apply
 
 The runtime task generates Zsh initialization and completion files for commands
 already on `PATH`, removes stale completion files in its fixed ownership set,
-clones or fast-forwards the three Zsh plugins consumed by `modules/zsh/env.zsh`,
-downloads checksum-pinned Zellij WASM files, rebuilds the bat cache, and removes
-Zsh completion dumps. `--offline` limits an apply to local generation and cache
+refreshes the plugins consumed by `modules/zsh/env.zsh`, downloads
+checksum-pinned Zellij WASM files, rebuilds the bat cache, and removes Zsh
+completion dumps. The preview is the authoritative list of owned artifacts and
+planned operations. `--offline` limits an apply to local generation and cache
 maintenance. It never runs Skillshare or writes host inventory; snapshots have
 their own explicit task (see Host inventory).
 
-The two source-built binaries are an explicit, slower sub-operation:
+Repository-owned source builds are an explicit, slower sub-operation:
 
 ```bash
 mise run runtime -- --build
 mise run runtime -- --build --apply
 ```
 
-This clones or fast-forwards `ipruning/atuin` and `craftzdog/op-cache` under the
-ignored `generated/sources/`, builds them with Cargo, and atomically installs the
-artifacts into `generated/bin/`. Any other binary placed there must name its own
-owner; `mise run check` reports unknown binaries.
+This refreshes the sources named by the runtime plan under the ignored
+`generated/sources/`, builds them with their declared commands, and atomically
+installs the artifacts into `generated/bin/`. Any other binary placed there
+must name its own owner; `mise run check` reports unknown binaries.
 
 ## Host inventory
 
@@ -290,13 +289,12 @@ mise run inventory -- --json
 mise run inventory -- --apply
 ```
 
-The task writes four snapshots per host: `Brewfile` (`brew bundle dump`),
-`applications.txt` (`/Applications`), `setapp.txt` (`/Applications/Setapp`),
-and `gh_extensions.txt` (`gh extension list`). A collector whose tool or
-directory is absent is reported as skipped; a collector that fails or produces
-empty output makes the command exit non-zero and leaves the existing snapshot
-untouched. Nothing regenerates these files implicitly — a snapshot is as old
-as its last committed run, never a claim about current host truth.
+The preview is the authoritative list of collectors, destinations, and skipped
+host capabilities. A failed collector or an invalid empty result makes the
+command exit non-zero and leaves the existing snapshot untouched. Collectors
+whose domain permits zero items instead write an empty snapshot, replacing any
+stale non-empty result. Nothing regenerates these files implicitly — a snapshot
+is as old as its last committed run, never a claim about current host truth.
 
 ## Standalone tools
 

@@ -9,13 +9,11 @@
 
 <0>
 
-When you need to look something up on the web,
-
-```bash
-codex -m gpt-5.3-codex-spark -c model_reasoning_effort=xhigh --search exec --ephemeral --skip-git-repo-check --sandbox read-only "<question>. Use the web search tool. Search for the latest available information as of <early|mid|late> <year>. Do not execute commands or modify files. Return an answer with source URLs (if available)."
-```
-
-use Codex web search.
+Use an available web-search tool when current external information matters.
+Prefer authoritative sources, include source URLs, and state the time boundary.
+If only Codex CLI is available, inspect the installed `codex exec --help` and
+use its supported ephemeral, read-only search interface. The installed Codex
+configuration owns model selection and reasoning effort.
 
 </0>
 
@@ -25,21 +23,21 @@ We are collaborators. I may be wrong about something; when that happens, the rig
 
 I have ADHD, so our conversations will wander. The thread still matters — follow it and bring us back when we drift.
 
-The best outcome is one where you work through a problem, arrive at a few clear options, and present them. Asking me which direction to go is rarely useful; showing me what you found and recommending a path is almost always better. The same goes for permission — inform, don't ask. The only reason to stop is a genuine need for information only I can provide.
+The best outcome is one where you work through a problem, arrive at a few clear options, and present them. Asking me which direction to go is rarely useful; showing me what you found and recommending a path is almost always better. Proceed independently within the already authorized, reversible task scope. Stop for information only I can provide or before a destructive, shared, or external write that I have not authorized.
 
-When something is uncertain, the answer is usually in the code, on the web, or behind a tool you haven't installed yet. Go find it.
+When something is uncertain, look in the code, current documentation, or an available authorized tool before asking me.
 
 </1>
 
 <2>
 
-A change that touches more than three files is not one task — it is several.
+A task follows one logical behavior and verification boundary, not a file-count limit. Split work when its parts can be reviewed, verified, and reverted independently.
 
 After writing code, the natural next question is what could break. Name those things, and name the tests that would catch them.
 
-A bug fix begins with a test that reproduces the bug. The fix is done when the test passes.
+A bug fix begins with a test that reproduces the bug when the behavior can be tested deterministically. The fix is done when that test and the relevant regression checks pass.
 
-When I correct a mistake, the correction belongs in this file as a new rule, so the same mistake never recurs.
+Add a durable rule only when a correction generalizes across tasks and is not already enforced by code or tooling. Merge it with an existing rule or replace the obsolete rule instead of accumulating exceptions.
 
 </2>
 
@@ -51,9 +49,11 @@ When the working directory is not a repository and the task is disposable, `$TMP
 
 <4>
 
-Rewriting the message on HEAD is straightforward: `git commit --amend -m "..."`. For an older commit, the non-interactive form is `GIT_SEQUENCE_EDITOR="sed -i '' '1s/^pick/reword/'" GIT_EDITOR="sed -i '' '1s/old/new/'" git rebase -i HEAD~<N>`. The target commit is always line 1 in the todo because rebase lists oldest-first. There is no reason to open an interactive editor.
-
 Before any commit, `git status --short` shows what is staged. Stage only the files that belong to the current logical change — prior staging state is not trustworthy.
+
+Use amend only for HEAD. Rewriting older commits requires an interactive rebase
+range that actually contains the target; locate the target in the oldest-first
+todo instead of assuming a line number.
 
 </4>
 

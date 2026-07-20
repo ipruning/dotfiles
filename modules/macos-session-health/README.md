@@ -60,12 +60,15 @@ incident because they add work to the failing service. Active `spctl` and
 Do not treat a higher maxfiles limit as the root-cause fix. It reduces secondary
 launch failures but does not stop `syspolicyd` RSS or FD growth.
 
-The CLI never closes ChatGPT Desktop. Confirm that it is safe to close before
-executing recovery, and do not terminate unrelated Codex CLI sessions.
+The executable recovery path never closes Codex Desktop. Its read-only report
+includes a separate manual command that closes the app; do not copy or run that
+command until closing the app is safe. The
+`--assume-codex-desktop-closed` flag confirms that precondition but does not
+close the app. Do not terminate unrelated Codex CLI sessions.
 
 ## Recovery
 
-`recover` without `--execute` is read-only. After ChatGPT Desktop is closed or
+`recover` without `--execute` is read-only. After Codex Desktop is closed or
 confirmed safe to leave closed, execute the guarded restart:
 
 ```zsh
@@ -116,10 +119,11 @@ Validate the payload and local credential lookup without sending:
 macos-session-health notify-test --dry-run
 ```
 
-Process inventories run every five minutes and are stored as one aggregate
-event per inventory instead of one row per process. Core resource and spawn
-signals remain sampled every minute. The 14-day snapshot retention still
-applies to both formats; existing detailed rows age out normally.
+Process inventories are stored as one aggregate event per inventory instead of
+one row per process. Snapshot retention applies to both formats; use the
+collector's `--retention-days` option or
+`MACOS_SESSION_HEALTH_RETENTION_DAYS` to change its current default. Existing
+detailed rows age out normally.
 
 After a storage-format upgrade, reclaim unused SQLite pages without losing
 history. The command stops and restarts only this LaunchAgent around `VACUUM`:
