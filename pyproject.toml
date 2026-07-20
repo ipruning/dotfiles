@@ -5,20 +5,13 @@ description = "This is my dotfiles development environment"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
-    "argcomplete>=3.6.3",
-    "autocorrect-py>=2.14.0",
-    "fire>=0.7.1",
-    "loguru>=0.7.3",
-    # The read-only Mackup fork drives `diff`; pinning it here (locked in
-    # uv.lock) keeps it inside the `mise install` bootstrap boundary instead of
-    # a runtime uvx fetch.
+    # Runtime dependencies of scripts/: ruamel-yaml (check, lint) and the pinned
+    # read-only Mackup fork (diff). Pinning Mackup here — locked in uv.lock —
+    # keeps it inside the `mise install` bootstrap boundary instead of a runtime
+    # uvx fetch. Type-only imports for the standalone modules/bin scripts live in
+    # the dev group so this list stays true to what the package runs.
     "mackup @ git+https://github.com/ipruning/mackup@faa5cb8cd0f5fea83711b4fc75a4996d4b8a7497",
-    "pydantic-ai>=2.0.0",
-    "rich>=15.0.0",
     "ruamel-yaml>=0.19.1",
-    "tiktoken>=0.13.0",
-    "typer>=0.26.8",
-    "youtube-transcript-api>=1.2.4",
 ]
 
 [tool.tombi.format.rules]
@@ -34,4 +27,15 @@ dev = [
     "pytest>=9.1.1",
     "ruff>=0.15.21",
     "ty>=0.0.58",
+    # Import targets so the editor/ty can resolve the standalone modules/bin
+    # scripts. Each is a PEP 723 `uv run --script` with its own inline runtime
+    # deps; these entries exist only to type-check them, not to run scripts/.
+    "autocorrect-py>=2.14.0",
+    "fire>=0.7.1",
+    "loguru>=0.7.3",
+    "pydantic>=2.0",
+    "rich>=15.0.0",
+    "tiktoken>=0.13.0",
+    "typer>=0.26.8",
+    "youtube-transcript-api>=1.2.4",
 ]
