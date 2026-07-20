@@ -1,7 +1,9 @@
 import json
 import os
+import shutil
 import subprocess
 import sys
+import tomllib
 from pathlib import Path
 
 import scripts.diff as diff_module
@@ -26,6 +28,57 @@ def _run_module(
         capture_output=True,
         text=True,
     )
+
+
+def test_mise_python_tasks_never_sync_dependencies_implicitly(tmp_path: Path) -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    config = tomllib.loads((repo_root / "mise.toml").read_text())
+    task_commands: list[str] = []
+    for task in config["tasks"].values():
+        run = task.get("run")
+        commands = run if isinstance(run, list) else [run]
+        task_commands.extend(
+            command for command in commands if isinstance(command, str)
+        )
+
+    assert config["settings"]["task"]["run_auto_install"] is False
+    assert task_commands
+    assert all("uv run " not in command for command in task_commands)
+    assert "uv run" not in (repo_root / "scripts/zsh-profile").read_text()
+
+    # Exercise a real preview task from a checkout without .venv. The task must
+    # use the provisioned interpreter without creating project runtime state.
+    project = tmp_path / "project"
+    shutil.copytree(repo_root / "scripts", project / "scripts")
+    bash_module = project / "modules/bash/init.bash"
+    bash_module.parent.mkdir(parents=True)
+    shutil.copy2(repo_root / "modules/bash/init.bash", bash_module)
+    home = tmp_path / "home"
+    home.mkdir()
+    environment = os.environ.copy()
+    environment.pop("VIRTUAL_ENV", None)
+    environment["HOME"] = str(home)
+    completed = subprocess.run(
+        [
+            "bash",
+            "-c",
+            config["tasks"]["setup"]["run"],
+            "mise-task",
+            "--profile",
+            "linux-lite",
+            "--json",
+        ],
+        cwd=project,
+        env=environment,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert completed.returncode == 0
+    assert json.loads(completed.stdout)["apply"] is False
+    assert not (project / ".venv").exists()
+    assert not (project / "uv.lock").exists()
 
 
 def test_setup_cli_previews_linux_lite_as_json_without_writing(tmp_path: Path) -> None:

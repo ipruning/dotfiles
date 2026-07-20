@@ -28,7 +28,7 @@ warmup_count="${2:-10}"
   || { log_message error "warmup must be a nonnegative integer (got: $warmup_count)"; exit 1; }
 
 missing_commands=()
-for required_command in hyperfine uv zsh; do
+for required_command in hyperfine python zsh; do
   command -v "$required_command" >/dev/null 2>&1 \
     || missing_commands+=("$required_command")
 done
@@ -52,7 +52,7 @@ if [[ ! -f "$trace_file" ]]; then
   exit 1
 fi
 
-uv run --no-project --python 3.14 python - "$trace_file" <<'PYEOF'
+python - "$trace_file" <<'PYEOF'
 import re
 import sys
 from collections import defaultdict

@@ -18,35 +18,35 @@ _.python.venv = { path = ".venv" }
 
 [tasks.diff]
 description = "Report configuration drift without changing files"
-run = 'uv run --locked --no-dev python -m scripts.diff "$@"'
+run = 'python -m scripts.diff "$@"'
 
 [tasks.restore]
 description = "Preview or apply one reference application"
-run = 'uv run --locked --no-dev python -m scripts.restore "$@"'
+run = 'python -m scripts.restore "$@"'
 
 [tasks.adopt]
 description = "Preview or adopt one application's live configuration into the reference"
-run = 'uv run --locked --no-dev python -m scripts.adopt "$@"'
+run = 'python -m scripts.adopt "$@"'
 
 [tasks.check]
 description = "Inspect this host's required and optional capabilities"
-run = 'uv run --locked --no-dev python -m scripts.check "$@"'
+run = 'python -m scripts.check "$@"'
 
 [tasks.setup]
 description = "Preview or apply an explicit host profile"
-run = 'uv run --locked --no-dev python -m scripts.setup "$@"'
+run = 'python -m scripts.setup "$@"'
 
 [tasks.update]
 description = "Preview or apply host tool updates without synchronizing configuration"
-run = 'uv run --locked --no-dev python -m scripts.update "$@"'
+run = 'python -m scripts.update "$@"'
 
 [tasks.runtime]
 description = "Preview or refresh generated shell runtime and owned plugins"
-run = 'uv run --locked --no-dev python -m scripts.runtime "$@"'
+run = 'python -m scripts.runtime "$@"'
 
 [tasks.inventory]
 description = "Preview or snapshot installed host software into inventory/<host>/"
-run = 'uv run --locked --no-dev python -m scripts.inventory "$@"'
+run = 'python -m scripts.inventory "$@"'
 
 [tasks.zsh-profile]
 description = "Profile Zsh startup time"
@@ -54,22 +54,22 @@ run = 'scripts/zsh-profile "$@"'
 
 [tasks.lint]
 description = "Inspect repository paths, mappings, and symlinks"
-run = 'uv run --locked --no-dev python -m scripts.lint "$@"'
+run = 'python -m scripts.lint "$@"'
 
 [tasks.shell]
 description = "Check shell files with syntax and ShellCheck gates"
-run = 'uv run --locked --no-dev python -m scripts.shell "$@"'
+run = 'python -m scripts.shell "$@"'
 
 [tasks.format]
 description = "Check Python formatting and style"
 run = [
-    "uv run --locked ruff check scripts tests",
-    "uv run --locked ruff format --check scripts tests",
+    "ruff check scripts tests",
+    "ruff format --check scripts tests",
 ]
 
 [tasks.test]
 description = "Run behavior tests"
-run = "uv run --locked pytest"
+run = "pytest"
 
 [tasks.test-modules]
 description = "Run standalone module test suites (macOS only)"
@@ -85,7 +85,7 @@ fi
 
 [tasks.typecheck]
 description = "Check Python types"
-run = "uv run --locked ty check scripts tests"
+run = "ty check scripts tests"
 
 [tasks.verify]
 description = "Run all repository verification"
