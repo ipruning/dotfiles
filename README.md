@@ -160,7 +160,10 @@ that synchronization is healthy. Missing or empty generated shell directories
 are likewise reported as not ready.
 
 `mise run lint` inspects repository paths, Mackup mappings, and dangling
-symlinks. `mise run verify` adds Python formatting, type checking, behavior
+symlinks. Its `path.*` findings are host-relative: a machine-specific path
+referenced by tracked configuration is reported OK where it exists and as a
+warning on hosts where it does not, so warning counts legitimately differ
+between machines running the same commit. `mise run verify` adds Python formatting, type checking, behavior
 tests, the standalone module suites on macOS, and the shell gate: `mise run shell`
 runs Bash syntax checks and ShellCheck for Bash files. Zsh files receive syntax
 checking when `zsh` is available.
