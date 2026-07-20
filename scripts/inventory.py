@@ -106,7 +106,16 @@ def _inventory_specs(applications_root: Path) -> tuple[InventorySpec, ...]:
             allow_empty=True,
         ),
         InventorySpec("applications", "applications.txt", scan_dir=applications_root),
-        InventorySpec("setapp", "setapp.txt", scan_dir=applications_root / "Setapp"),
+        InventorySpec(
+            "setapp",
+            "setapp.txt",
+            scan_dir=applications_root / "Setapp",
+            # Setapp is optional: an absent or empty Setapp directory is a
+            # legitimate zero-app state that must overwrite a stale snapshot,
+            # not be skipped. Availability is gated on the /Applications root
+            # (below) so a non-macOS host still skips it.
+            allow_empty=True,
+        ),
     )
 
 
@@ -157,8 +166,12 @@ def plan_inventory(
             reason = None if available else f"{spec.tool} is not available on PATH"
         else:
             assert spec.scan_dir is not None
-            available = spec.scan_dir.is_dir()
-            reason = None if available else f"{spec.scan_dir} is not a directory"
+            # A scan is applicable whenever the /Applications root exists, so a
+            # macOS host records zero apps for an absent Setapp subdirectory
+            # instead of leaving a stale snapshot; a non-macOS host (no
+            # /Applications) skips both scans.
+            available = applications_root.is_dir()
+            reason = None if available else f"{applications_root} is not a directory"
         results.append(
             InventoryResult(
                 spec=spec,

@@ -163,7 +163,7 @@ def test_inventory_writes_sorted_snapshots_then_reports_unchanged(
     assert second_document["next"] == []
 
 
-def test_inventory_skips_missing_collectors_without_touching_snapshots(
+def test_inventory_skips_missing_tools_but_records_zero_for_absent_scan_dirs(
     tmp_path: Path,
 ) -> None:
     _make_applications(tmp_path / "Applications", apps=("Ghostty",), setapp=None)
@@ -180,12 +180,35 @@ def test_inventory_skips_missing_collectors_without_touching_snapshots(
     assert completed.returncode == 0
     document = json.loads(completed.stdout)
     steps = {step["name"]: step for step in document["steps"]}
+    # A missing tool cannot answer, so it stays skipped and its snapshot is
+    # untouched...
     assert steps["gh.extensions"]["status"] == "skipped"
     assert "gh is not available on PATH" in steps["gh.extensions"]["reason"]
-    assert steps["setapp"]["status"] == "skipped"
-    assert steps["brew.bundle"]["status"] == "written"
     assert (host_dir / "gh_extensions.txt").read_text() == "old/extension\n"
-    assert (host_dir / "setapp.txt").read_text() == "Old App\n"
+    # ...but an absent Setapp directory is a known zero-app state that must
+    # overwrite the stale snapshot rather than leave it misleading.
+    assert steps["setapp"]["status"] == "written"
+    assert steps["brew.bundle"]["status"] == "written"
+    assert (host_dir / "setapp.txt").read_text() == ""
+
+
+def test_inventory_records_zero_for_an_empty_setapp_directory(
+    tmp_path: Path,
+) -> None:
+    _make_applications(tmp_path / "Applications", apps=("Ghostty",), setapp=())
+    repo_root = tmp_path / "dotfiles"
+    host_dir = repo_root / "inventory/TestHost"
+    host_dir.mkdir(parents=True)
+    (host_dir / "setapp.txt").write_text("Old App\n")
+
+    completed, host_dir, _log_path = _run_inventory(
+        tmp_path, "--apply", "--json", tools={"brew": {"stdout": BREWFILE}}
+    )
+
+    assert completed.returncode == 0
+    steps = {step["name"]: step for step in json.loads(completed.stdout)["steps"]}
+    assert steps["setapp"]["status"] == "written"
+    assert (host_dir / "setapp.txt").read_text() == ""
 
 
 def test_inventory_failure_keeps_existing_snapshot_and_later_steps_run(
@@ -388,8 +411,9 @@ def test_inventory_human_output_announces_collectors_and_summary(
         "RUN brew.bundle: brew bundle dump --file=- --quiet"
     )
     assert "WRITTEN brew.bundle: inventory/TestHost/Brewfile" in completed.stdout
-    assert "SKIPPED setapp:" in completed.stdout
-    assert "Summary: 3 written, 1 skipped" in completed.stdout
+    # Setapp is absent but /Applications exists, so it records zero apps.
+    assert "WRITTEN setapp: inventory/TestHost/setapp.txt" in completed.stdout
+    assert "Summary: 4 written" in completed.stdout
     assert "Next:\n  git diff inventory/\n" in completed.stdout
 
 
