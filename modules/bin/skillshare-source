@@ -951,7 +951,7 @@ def exec_cmd(
                 Text.assemble(
                     ("Restore manually by editing ", "red"),
                     (str(SKILLSHARE_CFG), "bold"),
-                    (f"\n  source: {orig}", "dim"),
+                    (f"\n  sources:\n    skills: {orig}", "dim"),
                 )
             )
     if child_error is not None:

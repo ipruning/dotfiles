@@ -221,6 +221,10 @@ def test_skillshare_exec_restore_failure_overrides_child_success(
     assert completed.returncode != 0
     assert "Failed to restore source" in completed.stderr
     assert "Restore manually by editing" in completed.stderr
+    # The manual-restore hint must name the nested key skillshare actually
+    # reads, not the shadowed legacy `source` key.
+    assert "skills:" in completed.stderr
+    assert "\n  source:" not in completed.stderr
 
 
 def test_skillshare_exec_requires_a_command_before_switching_source(
