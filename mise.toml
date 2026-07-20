@@ -18,35 +18,35 @@ _.python.venv = { path = ".venv" }
 
 [tasks.diff]
 description = "Report configuration drift without changing files"
-run = 'uv run --locked python -m scripts.diff "$@"'
+run = 'uv run --locked --no-dev python -m scripts.diff "$@"'
 
 [tasks.restore]
 description = "Preview or apply one reference application"
-run = 'uv run --locked python -m scripts.restore "$@"'
+run = 'uv run --locked --no-dev python -m scripts.restore "$@"'
 
 [tasks.adopt]
 description = "Preview or adopt one application's live configuration into the reference"
-run = 'uv run --locked python -m scripts.adopt "$@"'
+run = 'uv run --locked --no-dev python -m scripts.adopt "$@"'
 
 [tasks.check]
 description = "Inspect this host's required and optional capabilities"
-run = 'uv run --locked python -m scripts.check "$@"'
+run = 'uv run --locked --no-dev python -m scripts.check "$@"'
 
 [tasks.setup]
 description = "Preview or apply an explicit host profile"
-run = 'uv run --locked python -m scripts.setup "$@"'
+run = 'uv run --locked --no-dev python -m scripts.setup "$@"'
 
 [tasks.update]
 description = "Preview or apply host tool updates without synchronizing configuration"
-run = 'uv run --locked python -m scripts.update "$@"'
+run = 'uv run --locked --no-dev python -m scripts.update "$@"'
 
 [tasks.runtime]
 description = "Preview or refresh generated shell runtime and owned plugins"
-run = 'uv run --locked python -m scripts.runtime "$@"'
+run = 'uv run --locked --no-dev python -m scripts.runtime "$@"'
 
 [tasks.inventory]
 description = "Preview or snapshot installed host software into inventory/<host>/"
-run = 'uv run --locked python -m scripts.inventory "$@"'
+run = 'uv run --locked --no-dev python -m scripts.inventory "$@"'
 
 [tasks.zsh-profile]
 description = "Profile Zsh startup time"
@@ -54,11 +54,11 @@ run = 'scripts/zsh-profile "$@"'
 
 [tasks.lint]
 description = "Inspect repository paths, mappings, and symlinks"
-run = 'uv run --locked python -m scripts.lint "$@"'
+run = 'uv run --locked --no-dev python -m scripts.lint "$@"'
 
 [tasks.shell]
 description = "Check shell files with syntax and ShellCheck gates"
-run = 'uv run --locked python -m scripts.shell "$@"'
+run = 'uv run --locked --no-dev python -m scripts.shell "$@"'
 
 [tasks.format]
 description = "Check Python formatting and style"
