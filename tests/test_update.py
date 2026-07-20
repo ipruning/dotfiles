@@ -335,6 +335,33 @@ def test_update_fails_closed_when_mise_inventory_is_invalid(
     assert report.ok is False
 
 
+def test_update_apply_does_not_execute_a_failed_mise_preflight(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    ran: list[tuple[str, ...]] = []
+
+    def fake_run(command, **_kwargs):
+        ran.append(tuple(command))
+        if tuple(command[:2]) == ("mise", "ls"):
+            return subprocess.CompletedProcess(command, 0, "not-json", "")
+        return subprocess.CompletedProcess(command, 0, "", "")
+
+    monkeypatch.setattr("scripts.update.subprocess.run", fake_run)
+
+    report = execute_updates(
+        tmp_path,
+        executable_finder=lambda tool: "/tools/mise" if tool == "mise" else None,
+    )
+
+    mise_result = next(r for r in report.results if r.step.name == "mise.tools")
+    assert mise_result.status is UpdateStatus.FAILED
+    # A failed inventory must not fall through to `mise upgrade` with no tool
+    # arguments, which would upgrade every installed tool.
+    assert not any(cmd[:2] == ("mise", "upgrade") for cmd in ran)
+    assert report.ok is False
+
+
 def test_update_help_and_invalid_options_never_run_tools(tmp_path: Path) -> None:
     help_result, help_log = _run_update(tmp_path / "help", "--help")
     invalid_result, invalid_log = _run_update(tmp_path / "invalid", "--unknown")

@@ -206,7 +206,11 @@ def execute_updates(
     """Run every available updater and retain independent failure results."""
     results = []
     for planned in plan_updates(home, executable_finder=executable_finder).results:
-        if planned.status is UpdateStatus.SKIPPED:
+        # Carry through anything the preflight already resolved (SKIPPED, or a
+        # FAILED mise inventory). Only PLANNED steps run: executing a FAILED
+        # mise.tools step would run `mise upgrade` with no tool arguments and
+        # upgrade every installed tool — the exact outcome the preflight avoids.
+        if planned.status is not UpdateStatus.PLANNED:
             results.append(planned)
             continue
         if on_start:
