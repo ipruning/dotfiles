@@ -48,8 +48,13 @@ def _fake_tool(
     if stderr:
         lines.append(f"printf '%s' {shlex.quote(stderr)} >&2")
     lines.append(f"exit {exit_code}")
-    tool_path.write_text("\n".join(lines) + "\n")
-    tool_path.chmod(0o755)
+    temporary_path = bin_dir / f".{name}.replacement.{os.getpid()}"
+    try:
+        temporary_path.write_text("\n".join(lines) + "\n")
+        temporary_path.chmod(0o755)
+        temporary_path.replace(tool_path)
+    finally:
+        temporary_path.unlink(missing_ok=True)
 
 
 def _make_applications(

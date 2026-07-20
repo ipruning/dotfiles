@@ -366,13 +366,24 @@ require_root() {
   [[ "${BAG_MODE_TESTING:-0}" == 1 || $EUID -eq 0 ]] || die "this internal operation must run as root"
 }
 
+execute_installed() {
+  if [[ "${BAG_MODE_TESTING:-0}" == 1 ]]; then
+    /bin/bash "$@"
+  else
+    "$@"
+  fi
+}
+
 run_root() {
   if [[ "${BAG_MODE_TESTING:-0}" == 1 ]]; then
     if [[ "${1:-}" == /bin/rm && -e "${BAG_MODE_FAKE_STATE:-}/fail-remove" ]]; then
       printf 'injected managed-path removal failure\n' >&2
       return 91
     fi
-    "$@"
+    case "${1:-}" in
+      "$INSTALL_BIN"|"$CONTROLLER_BIN") execute_installed "$@" ;;
+      *) "$@" ;;
+    esac
   else
     "$SUDO_BIN" "$@"
   fi
@@ -1428,7 +1439,7 @@ start_mode() {
   local owner_user owner_home owner_matches=0
   require_macos
   [[ -x "$INSTALL_BIN" && -x "$CONTROLLER_BIN" && -f "$PLIST_FILE" ]] || die "not installed; run: bag-mode install"
-  controller_version="$($CONTROLLER_BIN version 2>/dev/null || true)"
+  controller_version="$(execute_installed "$CONTROLLER_BIN" version 2>/dev/null || true)"
   [[ "$controller_version" == "bag-mode $VERSION" ]] || die "installed controller version differs from this CLI; run: bag-mode install"
   run_user="$(resolve_user)" || die "could not resolve the invoking user"
   run_home="$(resolve_home "$run_user")" || die "could not resolve home for $run_user"
@@ -1781,8 +1792,8 @@ doctor_mode() {
   "$LAUNCHCTL_BIN" print "system/$LABEL" >/dev/null 2>&1 && loaded=yes
   [[ -x "$INSTALL_BIN" ]] && installed_binary=yes
   [[ -x "$CONTROLLER_BIN" ]] && installed_controller=yes
-  installed_version="$($INSTALL_BIN version 2>/dev/null || true)"
-  controller_version="$($CONTROLLER_BIN version 2>/dev/null || true)"
+  installed_version="$(execute_installed "$INSTALL_BIN" version 2>/dev/null || true)"
+  controller_version="$(execute_installed "$CONTROLLER_BIN" version 2>/dev/null || true)"
   if [[ "$installed_binary" == yes ]]; then
     if [[ "$installed_version" == "bag-mode $VERSION" ]]; then
       version_matches=yes

@@ -214,6 +214,26 @@ env "${test_env[@]}" "$bag_mode" install >/dev/null
 runtime_bin="$test_root/usr/local/bin/bag-mode"
 runtime_controller="$test_root/Library/PrivilegedHelperTools/dev.bag-mode.controller"
 runtime_plist="$test_root/Library/LaunchDaemons/dev.bag-mode.daemon.plist"
+
+# macOS can SIGKILL execve of a freshly rewritten temporary script inode. Keep
+# the harness focused on shell behavior by opening reinstalled fixtures through
+# the stable system interpreter; production execution remains unchanged.
+env() {
+  local -a environment_args=()
+  if [[ "${1:-}" != *=* ]]; then
+    command env "$@"
+    return
+  fi
+  while [[ "${1:-}" == *=* ]]; do
+    environment_args+=("$1")
+    shift
+  done
+  case "${1:-}" in
+    "$runtime_bin"|"$runtime_controller") command env "${environment_args[@]}" /bin/bash "$@" ;;
+    *) command env "${environment_args[@]}" "$@" ;;
+  esac
+}
+
 [[ -x "$runtime_bin" && -x "$runtime_controller" ]] || fail 'install did not create the CLI and privileged controller copies'
 plutil -lint "$runtime_plist" >/dev/null || fail 'install generated an invalid plist'
 plutil -extract ProgramArguments.0 raw "$runtime_plist" | rg -Fxq "$runtime_controller" \
@@ -262,10 +282,12 @@ backup_dir="$(sed -n 's/.*backups kept at //p' "$test_root/rollback-failed-upgra
 [[ -n "$backup_dir" && -d "$backup_dir" && -f "$backup_dir/cli" \
   && -f "$backup_dir/controller" && -f "$backup_dir/plist" ]] \
   || fail 'incomplete install rollback discarded its recovery backup'
-cp "$test_root/prior-cli" "$runtime_bin"
-cp "$test_root/prior-controller" "$runtime_controller"
-cp "$test_root/prior-plist" "$runtime_plist"
-chmod +x "$runtime_bin" "$runtime_controller"
+cp -p "$test_root/prior-cli" "$runtime_bin.replacement"
+cp -p "$test_root/prior-controller" "$runtime_controller.replacement"
+cp -p "$test_root/prior-plist" "$runtime_plist.replacement"
+mv -f "$runtime_bin.replacement" "$runtime_bin"
+mv -f "$runtime_controller.replacement" "$runtime_controller"
+mv -f "$runtime_plist.replacement" "$runtime_plist"
 rm -rf "$backup_dir"
 
 rm -f "$runtime_bin"
@@ -585,14 +607,17 @@ rg -q 'service not modified' "$test_root/other-user-unhealthy.err" || fail 'fore
 printf '%s\n' "$controller_pid" >"$fake_state/launchd-pid"
 chmod 0600 "$control_dir/config"
 printf 'status victim unchanged\n' >"$test_root/status-victim"
-ln -s "$test_root/status-victim" "$user_support_dir/state.tmp.$controller_pid"
-sleep 1.2
-rg -q '^status victim unchanged$' "$test_root/status-victim" || fail 'root status update followed a user-controlled temporary symlink'
+ln -shf "$test_root/status-victim" "$user_support_dir/state"
+printf 'closed\n' >"$fake_state/lid"
+wait_for 'safe status symlink replacement' "[[ ! -L '$user_support_dir/state' ]] && rg -q '^lid[[:space:]]+closed$' '$user_support_dir/state'"
+rg -q '^status victim unchanged$' "$test_root/status-victim" || fail 'root status update followed a user-controlled destination symlink'
+printf 'open\n' >"$fake_state/lid"
+wait_for 'open lid after status symlink replacement' "rg -q '^lid[[:space:]]+open$' '$user_support_dir/state'"
 printf 'brightness victim unchanged\n' >"$test_root/brightness-victim"
-ln -s "$test_root/brightness-victim" "$user_support_dir/brightness.tmp.$controller_pid"
+ln -shf "$test_root/brightness-victim" "$user_support_dir/brightness"
 printf '0.750000\n' >"$fake_state/brightness"
-wait_for 'updated brightness persistence' "[[ \"\$(sed -n '1p' '$user_support_dir/brightness')\" == 0.750000 ]]"
-rg -q '^brightness victim unchanged$' "$test_root/brightness-victim" || fail 'root brightness update followed a user-controlled temporary symlink'
+wait_for 'safe brightness symlink replacement' "[[ ! -L '$user_support_dir/brightness' && \"\$(sed -n '1p' '$user_support_dir/brightness')\" == 0.750000 ]]"
+rg -q '^brightness victim unchanged$' "$test_root/brightness-victim" || fail 'root brightness update followed a user-controlled destination symlink'
 printf '0.700000\n' >"$fake_state/brightness"
 wait_for 'reset brightness persistence' "[[ \"\$(sed -n '1p' '$user_support_dir/brightness')\" == 0.700000 ]]"
 late_notifier="$fake_bin/late-notifier"
