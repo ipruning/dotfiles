@@ -474,10 +474,12 @@ def plan_runtime(
         cargo_available = executable_finder("cargo") is not None
         for name, source, build_command, artifact_relative in LOCAL_BINARY_SPECS:
             source_dir = sources_dir / name
+            source_is_symlink = source_dir.is_symlink()
+            source_is_checkout = (
+                not source_is_symlink and (source_dir / ".git").is_dir()
+            )
             source_action = (
-                RuntimeAction.UPDATE
-                if (source_dir / ".git").is_dir()
-                else RuntimeAction.CLONE
+                RuntimeAction.UPDATE if source_is_checkout else RuntimeAction.CLONE
             )
             source_spec = RuntimeSpec(
                 name=f"source.{name}",
@@ -490,7 +492,17 @@ def plan_runtime(
                     else ("git", "clone", "--depth=1", source, str(source_dir))
                 ),
             )
-            if not network:
+            if source_is_symlink:
+                results.append(
+                    RuntimeResult(
+                        source_spec,
+                        RuntimeStatus.FAILED,
+                        source_action,
+                        f"source target is a symlink ({os.readlink(source_dir)}); "
+                        "remove it before building",
+                    ),
+                )
+            elif not network:
                 results.append(
                     RuntimeResult(
                         source_spec,
@@ -534,7 +546,6 @@ def plan_runtime(
                 depends_on=f"source.{name}",
                 timeout_seconds=1800,
             )
-            source_is_checkout = (source_dir / ".git").is_dir()
             source_will_exist = (
                 source_is_checkout and (not network or git_available)
             ) or (not source_dir.exists() and network and git_available)
@@ -676,6 +687,19 @@ def execute_runtime(
                 )
             ):
                 raise RuntimeError(_symlinked_directory_reason(symlinked_directory))
+            command_directory = (
+                spec.working_directory
+                if planned.action is RuntimeAction.BUILD
+                else spec.target
+                if planned.action is RuntimeAction.UPDATE
+                else None
+            )
+            if command_directory is not None and command_directory.is_symlink():
+                raise RuntimeError(
+                    "runtime command directory is a symlink "
+                    f"({os.readlink(command_directory)}); refusing to execute outside "
+                    "generated state",
+                )
             if planned.action is RuntimeAction.GENERATE:
                 completed = _run_command(spec, home, capture_output=True)
                 exit_code = completed.returncode

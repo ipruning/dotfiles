@@ -780,6 +780,67 @@ def test_runtime_refuses_symlinked_plugin_targets(tmp_path: Path) -> None:
     assert (plugins / "fzf-tab").is_symlink()
 
 
+def test_runtime_refuses_symlinked_build_sources(tmp_path: Path) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    external = tmp_path / "external-atuin"
+    home.mkdir()
+    (external / ".git").mkdir(parents=True)
+    (external / "sentinel").write_text("do not touch\n")
+    sources = repo_root / "generated/sources"
+    sources.mkdir(parents=True)
+    (sources / "atuin").symlink_to(external)
+
+    plan = plan_runtime(
+        repo_root,
+        home,
+        executable_finder=lambda tool: f"/fake/{tool}",
+        network=False,
+        build=True,
+    )
+    report = execute_runtime(plan, home)
+
+    results = {result.spec.name: result for result in report.results}
+    assert report.ok is False
+    assert results["source.atuin"].status is RuntimeStatus.FAILED
+    assert "symlink" in (results["source.atuin"].reason or "")
+    assert results["binary.atuin"].status is RuntimeStatus.SKIPPED
+    assert (external / "sentinel").read_text() == "do not touch\n"
+    assert (sources / "atuin").is_symlink()
+
+
+def test_runtime_rechecks_build_source_before_execution(tmp_path: Path) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    source_dir = repo_root / "generated/sources/atuin"
+    external = tmp_path / "external-atuin"
+    home.mkdir()
+    (source_dir / ".git").mkdir(parents=True)
+    external.mkdir()
+    (external / "sentinel").write_text("do not touch\n")
+    plan = plan_runtime(
+        repo_root,
+        home,
+        executable_finder=lambda tool: f"/fake/{tool}",
+        network=False,
+        build=True,
+    )
+
+    def replace_source(spec: RuntimeSpec, _action: RuntimeAction) -> None:
+        if spec.name != "binary.atuin":
+            return
+        shutil.rmtree(source_dir)
+        source_dir.symlink_to(external)
+
+    report = execute_runtime(plan, home, on_start=replace_source)
+
+    result = next(item for item in report.results if item.spec.name == "binary.atuin")
+    assert result.status is RuntimeStatus.FAILED
+    assert "command directory is a symlink" in (result.reason or "")
+    assert (external / "sentinel").read_text() == "do not touch\n"
+    assert source_dir.is_symlink()
+
+
 def test_runtime_rechecks_owned_directories_immediately_before_execution(
     tmp_path: Path,
 ) -> None:
