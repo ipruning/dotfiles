@@ -824,7 +824,9 @@ def test_runtime_refuses_symlinked_build_sources(tmp_path: Path) -> None:
     plan = plan_runtime(
         repo_root,
         home,
-        executable_finder=lambda tool: f"/fake/{tool}",
+        executable_finder=lambda tool: (
+            f"/fake/{tool}" if tool in {"cargo", "git"} else None
+        ),
         network=False,
         build=True,
     )
@@ -965,7 +967,9 @@ def test_runtime_rechecks_build_source_before_execution(tmp_path: Path) -> None:
     plan = plan_runtime(
         repo_root,
         home,
-        executable_finder=lambda tool: f"/fake/{tool}",
+        executable_finder=lambda tool: (
+            f"/fake/{tool}" if tool in {"cargo", "git"} else None
+        ),
         network=False,
         build=True,
     )
@@ -999,7 +1003,9 @@ def test_runtime_rechecks_build_source_git_metadata_before_execution(
     plan = plan_runtime(
         repo_root,
         home,
-        executable_finder=lambda tool: f"/fake/{tool}",
+        executable_finder=lambda tool: (
+            f"/fake/{tool}" if tool in {"cargo", "git"} else None
+        ),
         network=False,
         build=True,
     )
