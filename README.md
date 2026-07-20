@@ -65,6 +65,20 @@ mise run diff -- --profile full
 mise run check -- --profile full
 ```
 
+Choose the operation by intent; `mise tasks` and each task's `--help` remain the
+authoritative command interfaces:
+
+| Intent | Documentation |
+| --- | --- |
+| Bootstrap a small Linux host | [Linux Lite setup](#linux-lite-setup) |
+| Compare, restore, or adopt configuration | [Configuration drift](#configuration-drift) |
+| Inspect host and repository health | [Host health](#host-health) |
+| Update installed tools | [Host updates](#host-updates) |
+| Refresh generated shell state | [Generated runtime](#generated-runtime) |
+| Record installed software | [Host inventory](#host-inventory) |
+| Operate a self-installing module | [Standalone tools](#standalone-tools) |
+| Inspect Skillshare ownership | [Skillshare](#skillshare) |
+
 ## Linux Lite setup
 
 Inspection remains read-only. The explicit setup task is the only repository
@@ -164,15 +178,11 @@ paths.
 
 ## Host health
 
-`mise run check` reports required executables and optional capabilities separately.
-Linux Lite requires Git and mise, checks private Git configuration and optional
-Skillshare state, and warns when a legacy PATH still exposes repository command
-directories. The macOS and full profiles additionally cover the project
-Python/uv runtime, Television, generated shell directories, their required
-runtime files, and generated binaries without a repository owner. On macOS,
-`check` also consumes `macos-session-health status --format json` to warn when
-the launch agent is missing or unloaded, the last snapshot is stale, or recent
-notification deliveries keep failing.
+`mise run check` reports required executables and optional capabilities
+separately. The selected profile determines the current check set, which the
+plain or JSON report lists directly. On macOS, the report also consumes
+`macos-session-health status --format json` to detect an unavailable collector
+or notification path.
 
 ```bash
 mise run check
@@ -229,9 +239,9 @@ separately:
 mise run runtime
 ```
 
-Review the runtime preview and apply it only when needed. If runtime reports
-refreshed Zsh state, apply it and then open a new Zsh or run `exec zsh` to load
-the new functions, completions, and plugins:
+Review the runtime preview and apply it only when it plans relevant Zsh changes.
+If the apply reports refreshed Zsh state, open a new Zsh or run `exec zsh` to
+load the new functions, completions, and plugins:
 
 ```bash
 mise run runtime -- --apply
@@ -256,14 +266,11 @@ mise run runtime -- --json
 mise run runtime -- --apply
 ```
 
-The runtime task generates Zsh initialization and completion files for commands
-already on `PATH`, removes stale completion files in its fixed ownership set,
-refreshes the plugins consumed by `modules/zsh/env.zsh`, downloads
-checksum-pinned Zellij WASM files, rebuilds the bat cache, and removes Zsh
-completion dumps. The preview is the authoritative list of owned artifacts and
-planned operations. `--offline` limits an apply to local generation and cache
-maintenance. It never runs Skillshare or writes host inventory; snapshots have
-their own explicit task (see Host inventory).
+The runtime task owns generated shell functions, completions, plugins, caches,
+and other declared runtime artifacts. Its preview is the authoritative list of
+planned operations on the current host. `--offline` limits an apply to local
+generation and cache maintenance. It never runs Skillshare or writes host
+inventory; snapshots have their own explicit task (see Host inventory).
 
 Repository-owned source builds are an explicit, slower sub-operation:
 
@@ -322,10 +329,11 @@ repository. This repository stores only the reference Skillshare configuration
 and reports when its executable, configuration, or source directory is absent.
 It does not install or synchronize Skillshare automatically.
 
-The stored configuration synchronizes skills only. Harness extras such as
-global `AGENTS.md` or `CLAUDE.md` remain machine-specific because managed hosts
-like exe.dev may already own those paths. Before any extras operation, inspect
-the exact affected files:
+The default `skillshare sync` operation synchronizes skills. The stored
+configuration also declares opt-in extras targets under `~/.config/amp`,
+`~/.codex`, and `~/.claude`; an explicit extras sync writes those global
+harness directories. Before that external write, inspect the exact affected
+files:
 
 ```bash
 skillshare diff --json

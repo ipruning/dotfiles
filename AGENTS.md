@@ -60,9 +60,9 @@ Three tiers, in decreasing strictness:
    feature.
 
 Adjudication when adding a dependency: if a tool participates in `mise run
-verify`, it must be pinnable through mise (the ShellCheck precedent); if it is
-not pinnable (the zsh precedent), the gate must skip its scope loudly instead
-of failing. Do not add cross-platform installers for optional tools.
+verify`, it must be pinnable through mise. If it is not pinnable, the gate must
+skip its scope loudly instead of failing. Do not add cross-platform installers
+for optional tools.
 
 ## Skillshare boundary
 

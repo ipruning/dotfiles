@@ -82,13 +82,15 @@ Successful recovery has all of these properties:
 - recent resource and passive-log signals stop increasing;
 - app and shell launches work again.
 
-If TERM does not replace the process, retry once with the CLI's KILL option:
+After TERM, read the recovery report again. Use KILL only when the report still
+shows the same failed process and forceful termination is acceptable:
 
 ```zsh
 macos-session-health recover --execute --assume-codex-desktop-closed --signal KILL
 ```
 
-If macOS rejects direct signal delivery, reboot is the remaining clean recovery.
+If macOS rejects direct signal delivery, use the report to decide between
+further platform diagnosis and a system restart.
 
 ## Notifications
 
@@ -106,12 +108,10 @@ and recovery deliveries remain eligible for the next run. Notifications never
 execute recovery actions. Use the incident report to see both emitted and
 suppressed decisions.
 
-When a push delivery exhausts its retries or brrr is unconfigured, the CLI
-posts the same title and message as a local macOS notification through
-`osascript` as a last resort, at most once every four hours. `status` additionally reports
-`last_snapshot_at`, `last_snapshot_status`, and
-`consecutive_delivery_failures` (counting the last 24 hours), which `mise run check` in the dotfiles
-repository consumes to detect a silently dead agent or a dead push channel.
+When a push delivery exhausts its retries or brrr is unconfigured, the CLI uses
+a rate-limited local macOS notification as a last resort. `status --format json`
+is the authoritative delivery-health report; `mise run check` consumes it to
+detect a silently dead agent or push channel.
 
 Validate the payload and local credential lookup without sending:
 

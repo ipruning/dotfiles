@@ -51,9 +51,8 @@ When the working directory is not a repository and the task is disposable, `$TMP
 
 Before any commit, `git status --short` shows what is staged. Stage only the files that belong to the current logical change — prior staging state is not trustworthy.
 
-Use amend only for HEAD. Rewriting older commits requires an interactive rebase
-range that actually contains the target; locate the target in the oldest-first
-todo instead of assuming a line number.
+Use amend only for HEAD. Rewrite older commits only when the task explicitly
+requires history rewriting, using a rebase range that contains the target.
 
 </4>
 
