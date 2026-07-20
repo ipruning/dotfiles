@@ -41,9 +41,6 @@ LM Studio
 Logic Pro Creator Studio
 Longbridge
 MainStage Creator Studio
-Microsoft Excel
-Microsoft PowerPoint
-Microsoft Word
 Mos
 Motion Creator Studio
 MyCard
