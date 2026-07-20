@@ -505,7 +505,10 @@ def _generated_directory_finding(directory_path: Path, label: str) -> Finding:
     )
 
 
-HOME_LINK_SCAN_DEPTH = 3
+# Deep enough to reach XDG app configs such as ~/.config/Code/User/settings.json
+# (mapped by mackup/applications/visual-studio-code.cfg); deeper macOS paths
+# under Library are covered by the dedicated area scan below.
+HOME_LINK_SCAN_DEPTH = 4
 LIBRARY_LINK_SCAN_DEPTH = 4
 LIBRARY_LINK_SCAN_AREAS = ("Library/Application Support", "Library/Preferences")
 

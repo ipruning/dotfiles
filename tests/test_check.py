@@ -1161,7 +1161,12 @@ def test_dangling_repo_links_are_reported_and_track_target_removal(
     code_user = home / "Library/Application Support/Code/User"
     code_user.mkdir(parents=True)
     (code_user / "keybindings.json").symlink_to(repo_root / "assets/keybindings.json")
-    deep = home / "a/b/c"
+    # XDG app config at depth 4 — the mapped path a shallower scan missed.
+    code_xdg = home / ".config/Code/User"
+    code_xdg.mkdir(parents=True)
+    (code_xdg / "settings.json").symlink_to(repo_root / "reference/removed.json")
+    # Depth 5, still beyond the scan and beyond any mapped path.
+    deep = home / "a/b/c/d"
     deep.mkdir(parents=True)
     (deep / "too-deep").symlink_to(repo_root / "gone")
 
@@ -1170,7 +1175,11 @@ def test_dangling_repo_links_are_reported_and_track_target_removal(
         finding.path for finding in findings if finding.severity is Severity.WARN
     }
 
-    assert dangling == {home / ".condarc", code_user / "keybindings.json"}
+    assert dangling == {
+        home / ".condarc",
+        code_user / "keybindings.json",
+        code_xdg / "settings.json",
+    }
     assert all(
         finding.code == "home.dangling_repo_link"
         for finding in findings
