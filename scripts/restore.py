@@ -112,11 +112,17 @@ def _path_exists(path: Path) -> bool:
     return path.exists() or path.is_symlink()
 
 
-def _validate_live_parent(path: Path, home: Path) -> None:
-    existing = path
+def _validate_live_parent(live_path: Path, home: Path) -> None:
+    """Refuse live paths whose parent chain escapes home through a symlink.
+
+    Leaf symlinks are relinked, but a symlinked parent directory would place
+    the restored link outside $HOME. Adopt applies the same confinement in the
+    opposite direction.
+    """
+    existing = live_path.parent
     while not _path_exists(existing):
         if existing == existing.parent:
-            raise RestoreError(f"live parent has no existing ancestor: {path}")
+            raise RestoreError(f"live parent has no existing ancestor: {live_path}")
         existing = existing.parent
     _relative_path(existing.resolve(), home.resolve(), "live parent")
 
@@ -148,7 +154,7 @@ def apply_restore(repo_root: Path, home: Path, plan: RestoreReport) -> RestoreRe
             _relative_path(
                 resolved_reference, reference_root.resolve(), "reference target"
             )
-            _validate_live_parent(drift.live_path.parent, home)
+            _validate_live_parent(drift.live_path, home)
             drift.live_path.parent.mkdir(parents=True, exist_ok=True)
             resolved_parent = drift.live_path.parent.resolve()
             _relative_path(resolved_parent, home.resolve(), "live parent")

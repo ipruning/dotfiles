@@ -104,6 +104,10 @@ def _relative_path(path: Path, root: Path, label: str) -> Path:
     return relative
 
 
+def _path_exists(path: Path) -> bool:
+    return path.exists() or path.is_symlink()
+
+
 def _dirty_reference_paths(repo_root: Path, plan: AdoptReport) -> list[str]:
     reference_root = repo_root / "reference"
     relative_paths = [
@@ -154,7 +158,7 @@ def _dirty_reference_paths(repo_root: Path, plan: AdoptReport) -> list[str]:
 def _validate_reference_parent(reference_path: Path, reference_root: Path) -> None:
     """Confine the nearest existing ancestor before mkdir can follow symlinks."""
     existing = reference_path.parent
-    while not (existing.exists() or existing.is_symlink()):
+    while not _path_exists(existing):
         if existing == existing.parent:
             raise AdoptError(
                 f"reference parent has no existing ancestor: {reference_path}"
@@ -171,7 +175,7 @@ def _validate_live_parent(live_path: Path, home: Path) -> None:
     Restore applies the same confinement in the opposite direction.
     """
     existing = live_path.parent
-    while not (existing.exists() or existing.is_symlink()):
+    while not _path_exists(existing):
         if existing == existing.parent:
             raise AdoptError(f"live parent has no existing ancestor: {live_path}")
         existing = existing.parent
@@ -179,7 +183,7 @@ def _validate_live_parent(live_path: Path, home: Path) -> None:
 
 
 def _publish_staged_reference(staged: Path, reference_path: Path) -> None:
-    had_reference = reference_path.exists() or reference_path.is_symlink()
+    had_reference = _path_exists(reference_path)
     backup_directory: Path | None = None
     backup: Path | None = None
     if had_reference:
@@ -292,7 +296,7 @@ def apply_adopt(repo_root: Path, home: Path, plan: AdoptReport) -> AdoptReport:
             _relative_path(drift.live_path, home, "live path")
             _validate_reference_parent(drift.reference_path, reference_root)
             if planned.action == "copy":
-                if not (drift.live_path.exists() or drift.live_path.is_symlink()):
+                if not _path_exists(drift.live_path):
                     raise AdoptError(f"live path does not exist: {drift.live_path}")
                 _validate_live_parent(drift.live_path, home)
                 drift.reference_path.parent.mkdir(parents=True, exist_ok=True)
