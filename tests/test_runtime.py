@@ -809,6 +809,120 @@ def test_runtime_refuses_symlinked_build_sources(tmp_path: Path) -> None:
     assert (sources / "atuin").is_symlink()
 
 
+def test_runtime_refuses_symlinked_git_metadata(tmp_path: Path) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    home.mkdir()
+    plugin = repo_root / "generated/plugins/fzf-tab"
+    source = repo_root / "generated/sources/atuin"
+    external_plugin_git = tmp_path / "external-plugin.git"
+    external_source_git = tmp_path / "external-source.git"
+    for checkout, external_git in (
+        (plugin, external_plugin_git),
+        (source, external_source_git),
+    ):
+        checkout.mkdir(parents=True)
+        external_git.mkdir()
+        (external_git / "sentinel").write_text("do not touch\n")
+        (checkout / ".git").symlink_to(external_git)
+
+    report = plan_runtime(
+        repo_root,
+        home,
+        executable_finder=lambda tool: f"/fake/{tool}",
+        network=True,
+        build=True,
+    )
+
+    results = {result.spec.name: result for result in report.results}
+    assert report.ok is False
+    assert results["plugin.fzf-tab"].status is RuntimeStatus.FAILED
+    assert "Git metadata is a symlink" in (results["plugin.fzf-tab"].reason or "")
+    assert results["source.atuin"].status is RuntimeStatus.FAILED
+    assert "Git metadata is a symlink" in (results["source.atuin"].reason or "")
+    assert results["binary.atuin"].status is RuntimeStatus.SKIPPED
+    assert (external_plugin_git / "sentinel").read_text() == "do not touch\n"
+    assert (external_source_git / "sentinel").read_text() == "do not touch\n"
+
+
+def test_runtime_rechecks_plugin_git_metadata_before_update(tmp_path: Path) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    plugin = repo_root / "generated/plugins/fzf-tab"
+    external_git = tmp_path / "external-plugin.git"
+    home.mkdir()
+    (plugin / ".git").mkdir(parents=True)
+    external_git.mkdir()
+    (external_git / "sentinel").write_text("do not touch\n")
+    plan = plan_runtime(
+        repo_root,
+        home,
+        executable_finder=lambda tool: f"/fake/{tool}" if tool == "git" else None,
+        network=True,
+    )
+    plugin_step = next(
+        item for item in plan.results if item.spec.name == "plugin.fzf-tab"
+    )
+    plan = RuntimeReport(
+        apply=plan.apply,
+        results=(plugin_step,),
+        generated_root=plan.generated_root,
+    )
+
+    def replace_git_metadata(spec: RuntimeSpec, _action: RuntimeAction) -> None:
+        if spec.name != "plugin.fzf-tab":
+            return
+        shutil.rmtree(plugin / ".git")
+        (plugin / ".git").symlink_to(external_git)
+
+    report = execute_runtime(plan, home, on_start=replace_git_metadata)
+
+    result = next(item for item in report.results if item.spec.name == "plugin.fzf-tab")
+    assert result.status is RuntimeStatus.FAILED
+    assert "Git metadata is a symlink" in (result.reason or "")
+    assert (external_git / "sentinel").read_text() == "do not touch\n"
+    assert (plugin / ".git").is_symlink()
+
+
+def test_runtime_rechecks_plugin_gitdir_file_before_update(tmp_path: Path) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    plugin = repo_root / "generated/plugins/fzf-tab"
+    external_git = tmp_path / "external-plugin.git"
+    home.mkdir()
+    (plugin / ".git").mkdir(parents=True)
+    external_git.mkdir()
+    (external_git / "sentinel").write_text("do not touch\n")
+    plan = plan_runtime(
+        repo_root,
+        home,
+        executable_finder=lambda tool: f"/fake/{tool}" if tool == "git" else None,
+        network=True,
+    )
+    plugin_step = next(
+        item for item in plan.results if item.spec.name == "plugin.fzf-tab"
+    )
+    plan = RuntimeReport(
+        apply=plan.apply,
+        results=(plugin_step,),
+        generated_root=plan.generated_root,
+    )
+
+    def replace_git_metadata(spec: RuntimeSpec, _action: RuntimeAction) -> None:
+        if spec.name != "plugin.fzf-tab":
+            return
+        shutil.rmtree(plugin / ".git")
+        (plugin / ".git").write_text(f"gitdir: {external_git}\n")
+
+    report = execute_runtime(plan, home, on_start=replace_git_metadata)
+
+    result = next(item for item in report.results if item.spec.name == "plugin.fzf-tab")
+    assert result.status is RuntimeStatus.FAILED
+    assert "Git metadata is not a directory" in (result.reason or "")
+    assert (external_git / "sentinel").read_text() == "do not touch\n"
+    assert (plugin / ".git").is_file()
+
+
 def test_runtime_rechecks_build_source_before_execution(tmp_path: Path) -> None:
     repo_root = tmp_path / "dotfiles"
     home = tmp_path / "home"
@@ -839,6 +953,40 @@ def test_runtime_rechecks_build_source_before_execution(tmp_path: Path) -> None:
     assert "command directory is a symlink" in (result.reason or "")
     assert (external / "sentinel").read_text() == "do not touch\n"
     assert source_dir.is_symlink()
+
+
+def test_runtime_rechecks_build_source_git_metadata_before_execution(
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    source_dir = repo_root / "generated/sources/atuin"
+    external_git = tmp_path / "external-atuin.git"
+    home.mkdir()
+    (source_dir / ".git").mkdir(parents=True)
+    external_git.mkdir()
+    (external_git / "sentinel").write_text("do not touch\n")
+    plan = plan_runtime(
+        repo_root,
+        home,
+        executable_finder=lambda tool: f"/fake/{tool}",
+        network=False,
+        build=True,
+    )
+
+    def replace_git_metadata(spec: RuntimeSpec, _action: RuntimeAction) -> None:
+        if spec.name != "binary.atuin":
+            return
+        shutil.rmtree(source_dir / ".git")
+        (source_dir / ".git").symlink_to(external_git)
+
+    report = execute_runtime(plan, home, on_start=replace_git_metadata)
+
+    result = next(item for item in report.results if item.spec.name == "binary.atuin")
+    assert result.status is RuntimeStatus.FAILED
+    assert "Git metadata is a symlink" in (result.reason or "")
+    assert (external_git / "sentinel").read_text() == "do not touch\n"
+    assert (source_dir / ".git").is_symlink()
 
 
 def test_runtime_rechecks_owned_directories_immediately_before_execution(

@@ -333,13 +333,17 @@ def plan_runtime(
     git_available = executable_finder("git") is not None
     for name, source, _entrypoint in PLUGIN_SPECS:
         target = plugins_dir / name
+        git_directory = target / ".git"
         # A symlink here would point outside repository-owned generated state;
         # `(target / ".git")` follows it, so an UPDATE would `git pull` inside
         # that external checkout. Never treat a symlink as an updatable clone.
         is_symlink = target.is_symlink()
+        git_directory_is_symlink = git_directory.is_symlink()
         action = (
             RuntimeAction.UPDATE
-            if not is_symlink and (target / ".git").is_dir()
+            if not is_symlink
+            and not git_directory_is_symlink
+            and git_directory.is_dir()
             else RuntimeAction.CLONE
         )
         spec = RuntimeSpec(
@@ -353,16 +357,7 @@ def plan_runtime(
                 else ("git", "clone", "--depth=1", source, str(target))
             ),
         )
-        if not network:
-            results.append(
-                RuntimeResult(
-                    spec,
-                    RuntimeStatus.SKIPPED,
-                    action,
-                    "network refresh is disabled",
-                ),
-            )
-        elif is_symlink:
+        if is_symlink:
             results.append(
                 RuntimeResult(
                     spec,
@@ -370,6 +365,25 @@ def plan_runtime(
                     action,
                     f"plugin target is a symlink ({os.readlink(target)}); "
                     "remove it before refreshing",
+                ),
+            )
+        elif git_directory_is_symlink:
+            results.append(
+                RuntimeResult(
+                    spec,
+                    RuntimeStatus.FAILED,
+                    action,
+                    f"plugin Git metadata is a symlink "
+                    f"({os.readlink(git_directory)}); remove it before refreshing",
+                ),
+            )
+        elif not network:
+            results.append(
+                RuntimeResult(
+                    spec,
+                    RuntimeStatus.SKIPPED,
+                    action,
+                    "network refresh is disabled",
                 ),
             )
         elif target.exists() and action is RuntimeAction.CLONE:
@@ -474,9 +488,13 @@ def plan_runtime(
         cargo_available = executable_finder("cargo") is not None
         for name, source, build_command, artifact_relative in LOCAL_BINARY_SPECS:
             source_dir = sources_dir / name
+            source_git_directory = source_dir / ".git"
             source_is_symlink = source_dir.is_symlink()
+            source_git_directory_is_symlink = source_git_directory.is_symlink()
             source_is_checkout = (
-                not source_is_symlink and (source_dir / ".git").is_dir()
+                not source_is_symlink
+                and not source_git_directory_is_symlink
+                and source_git_directory.is_dir()
             )
             source_action = (
                 RuntimeAction.UPDATE if source_is_checkout else RuntimeAction.CLONE
@@ -499,6 +517,17 @@ def plan_runtime(
                         RuntimeStatus.FAILED,
                         source_action,
                         f"source target is a symlink ({os.readlink(source_dir)}); "
+                        "remove it before building",
+                    ),
+                )
+            elif source_git_directory_is_symlink:
+                results.append(
+                    RuntimeResult(
+                        source_spec,
+                        RuntimeStatus.FAILED,
+                        source_action,
+                        f"source Git metadata is a symlink "
+                        f"({os.readlink(source_git_directory)}); "
                         "remove it before building",
                     ),
                 )
@@ -700,6 +729,19 @@ def execute_runtime(
                     f"({os.readlink(command_directory)}); refusing to execute outside "
                     "generated state",
                 )
+            if command_directory is not None:
+                command_git_directory = command_directory / ".git"
+                if command_git_directory.is_symlink():
+                    raise RuntimeError(
+                        "runtime command Git metadata is a symlink "
+                        f"({os.readlink(command_git_directory)}); refusing to execute "
+                        "outside generated state",
+                    )
+                if not command_git_directory.is_dir():
+                    raise RuntimeError(
+                        "runtime command Git metadata is not a directory; refusing "
+                        "to execute outside generated state",
+                    )
             if planned.action is RuntimeAction.GENERATE:
                 completed = _run_command(spec, home, capture_output=True)
                 exit_code = completed.returncode
