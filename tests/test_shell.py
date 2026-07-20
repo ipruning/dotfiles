@@ -164,5 +164,6 @@ def test_check_shell_files_skips_zsh_loudly_when_zsh_is_absent(
         finding for finding in report.findings if finding.code == "shell.zsh_skipped"
     ]
     assert skipped
-    assert skipped[0].severity is Severity.SKIPPED
+    assert skipped[0].severity is None
+    assert skipped[0].applicable is False
     assert "zsh is not installed" in skipped[0].message

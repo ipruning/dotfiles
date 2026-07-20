@@ -1258,7 +1258,7 @@ def inspect_host(
         findings.append(
             Finding(
                 "macos.launchctl",
-                Severity.SKIPPED,
+                None,
                 "macos.launchctl_skipped",
                 f"launchctl is not applicable on {active_system}",
             ),

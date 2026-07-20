@@ -158,7 +158,7 @@ def check_shell_files(
         findings.append(
             Finding(
                 check="shell",
-                severity=Severity.SKIPPED,
+                severity=None,
                 code="shell.zsh_skipped",
                 message=f"skipped {len(zsh_files)} zsh files: zsh is not installed",
             ),

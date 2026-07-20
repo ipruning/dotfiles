@@ -87,7 +87,7 @@ OPTIONAL_PATHS = {
 
 
 def _located_finding(
-    severity: Severity,
+    severity: Severity | None,
     code: str,
     message: str,
     source: Path,
@@ -162,7 +162,7 @@ def _classify_path(
         or (raw.startswith("/Users/") and relative.startswith("reference/"))
     ):
         return _located_finding(
-            Severity.SKIPPED,
+            None,
             "path.platform_skipped",
             "macOS-only path is not evaluated on Linux",
             source,

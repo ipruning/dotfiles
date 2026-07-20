@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import sys
 
-from .models import FindingReport, Severity
+from .models import NOT_APPLICABLE, FindingReport, Severity
 
 
 def finding_document(
@@ -22,7 +22,8 @@ def finding_document(
         "findings": [
             {
                 "check": finding.check,
-                "severity": finding.severity.value,
+                "severity": finding.severity.value if finding.severity else None,
+                "applicable": finding.applicable,
                 "code": finding.code,
                 "message": finding.message,
                 "path": str(finding.path) if finding.path else None,
@@ -72,10 +73,11 @@ def emit_error(
 
 
 def finding_counts(report: FindingReport) -> dict[str, int]:
-    return {
-        severity.value: sum(finding.severity is severity for finding in report.findings)
-        for severity in Severity
-    }
+    counts = {severity.value: 0 for severity in Severity}
+    counts[NOT_APPLICABLE] = 0
+    for finding in report.findings:
+        counts[finding.label] += 1
+    return counts
 
 
 def render_findings(report: FindingReport, *, include_ok: bool) -> None:
@@ -87,7 +89,7 @@ def render_findings(report: FindingReport, *, include_ok: bool) -> None:
     if not visible:
         print("No findings.")
     for finding in visible:
-        print(f"{finding.severity.value.upper():7} {finding.code}")
+        print(f"{finding.label.upper():7} {finding.code}")
         print(f"        {finding.message}")
         if finding.path:
             print(f"        {finding.path}")

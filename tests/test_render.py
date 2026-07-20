@@ -37,12 +37,33 @@ def test_finding_document_honors_strict_warning_policy() -> None:
     assert strict["ok"] is False
 
 
+def test_finding_document_marks_inapplicable_checks_without_a_severity() -> None:
+    report = FindingReport(
+        schema_version=1,
+        findings=(
+            Finding("shell", None, "shell.zsh_skipped", "no zsh here"),
+            Finding("shell", Severity.ERROR, "shell.zsh_syntax", "broken"),
+        ),
+    )
+
+    document = finding_document(report, operation="shell")
+    skipped, failing = document["findings"]
+
+    assert skipped["severity"] is None
+    assert skipped["applicable"] is False
+    assert failing["severity"] == "error"
+    assert failing["applicable"] is True
+    assert document["summary"] == {"ok": 0, "warn": 0, "error": 1, "skipped": 1}
+    # An inapplicable check never gates, but a real error still does.
+    assert document["ok"] is False
+
+
 def test_plain_render_hides_only_ok_findings_by_default(capsys) -> None:
     report = FindingReport(
         schema_version=1,
         findings=(
             Finding("ready", Severity.OK, "ready.code", "all good"),
-            Finding("not-applicable", Severity.SKIPPED, "gate.skipped", "no zsh"),
+            Finding("not-applicable", None, "gate.skipped", "no zsh"),
         ),
     )
 

@@ -24,8 +24,10 @@ class Severity(StrEnum):
     OK = "ok"
     WARN = "warn"
     ERROR = "error"
-    # TODO(cleanup): trigger=fact:finding schema_version is bumped beyond 1; action=move SKIPPED out of Severity into an applicability field
-    SKIPPED = "skipped"
+
+
+# Rendering/summary label for a finding whose check did not apply to this host.
+NOT_APPLICABLE = "skipped"
 
 
 class FileKind(StrEnum):
@@ -38,11 +40,22 @@ class FileKind(StrEnum):
 @dataclass(frozen=True)
 class Finding:
     check: str
-    severity: Severity
+    # None severity means the check did not apply to this host (no zsh,
+    # launchctl on Linux, macOS-only path). It is not assessed, so it never
+    # gates and always renders loudly under the NOT_APPLICABLE label.
+    severity: Severity | None
     code: str
     message: str
     path: Path | None = None
     action: str | None = None
+
+    @property
+    def applicable(self) -> bool:
+        return self.severity is not None
+
+    @property
+    def label(self) -> str:
+        return self.severity.value if self.severity is not None else NOT_APPLICABLE
 
 
 @dataclass(frozen=True)
