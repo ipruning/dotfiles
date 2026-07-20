@@ -268,18 +268,21 @@ def legacy_symlink_install() -> bool:
 
     The previous version symlinked USER_BIN at the repository's own module
     script; that symlink is ours to replace or remove, unlike an arbitrary
-    user-placed file. Match only a link resolving to a `macos-session-health`
-    command inside a `macos-session-health` directory, never a random symlink.
+    user-placed file. Require both the old path shape and the module's stable
+    launchd label so a same-named third-party command is never claimed.
     """
     if not USER_BIN.is_symlink():
         return False
     try:
         target = USER_BIN.resolve()
-    except OSError:
+        if target.name != "macos-session-health" or target.parent.name != (
+            "macos-session-health"
+        ):
+            return False
+        content = target.read_text()
+    except (OSError, UnicodeError):
         return False
-    return target.name == "macos-session-health" and target.parent.name == (
-        "macos-session-health"
-    )
+    return f'LABEL = "{LABEL}"' in content
 
 
 def replaceable_install() -> bool:

@@ -925,7 +925,9 @@ class LegacyInstallDetectionTest(unittest.TestCase):
         module_dir = self.root / "dotfiles/modules/macos-session-health"
         module_dir.mkdir(parents=True)
         script = module_dir / "macos-session-health"
-        script.write_text("#!/usr/bin/env python3\n")
+        script.write_text(
+            '#!/usr/bin/env python3\nLABEL = "com.alex.macos-session-health"\n'
+        )
         self.user_bin.symlink_to(script)
 
         self.assertTrue(self.module["legacy_symlink_install"]())
@@ -935,6 +937,15 @@ class LegacyInstallDetectionTest(unittest.TestCase):
         other = self.root / "elsewhere/some-tool"
         other.parent.mkdir(parents=True)
         other.write_text("x")
+        self.user_bin.symlink_to(other)
+
+        self.assertFalse(self.module["legacy_symlink_install"]())
+        self.assertFalse(self.module["replaceable_install"]())
+
+    def test_same_named_unmanaged_command_is_not_legacy(self) -> None:
+        other = self.root / "opt/custom/macos-session-health/macos-session-health"
+        other.parent.mkdir(parents=True)
+        other.write_text("#!/bin/sh\necho unrelated\n")
         self.user_bin.symlink_to(other)
 
         self.assertFalse(self.module["legacy_symlink_install"]())

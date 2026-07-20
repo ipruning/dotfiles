@@ -34,14 +34,17 @@ git clone https://github.com/ipruning/dotfiles.git ~/dotfiles
 cd ~/dotfiles
 mise trust
 mise install
+mise exec -- uv sync --locked
 mise tasks
 ```
 
 `mise trust` is required because this repository declares a project virtual
-environment. mise then provides the pinned Python and uv versions; uv provides
-the locked project dependencies. Task auto-install is disabled: `mise install`
-is the explicit bootstrap boundary, and a later `mise run ...` does not quietly
-download a missing task tool.
+environment. `mise install` provides the pinned Python and uv versions, then
+`mise exec -- uv sync --locked` materializes the locked project dependencies,
+including the pinned Mackup fork, before shell activation makes uv directly
+available. Task auto-install is disabled: these two commands form the explicit
+bootstrap boundary, and a later `mise run ...` does not quietly download a
+missing task tool or project dependency.
 
 `mise tasks` is the authoritative command list. The main inspection interface
 is:

@@ -10,6 +10,9 @@ from typing import NotRequired, TypedDict
 import pytest
 
 from scripts.inventory import (
+    InventoryReport,
+    InventoryResult,
+    InventorySpec,
     InventoryStatus,
     execute_inventory,
     plan_inventory,
@@ -242,6 +245,34 @@ def test_inventory_failure_keeps_existing_snapshot_and_later_steps_run(
     assert (host_dir / "Brewfile").read_text() == 'brew "previous"\n'
     assert "[brew.bundle] simulated brew failure" in completed.stderr
     assert "[brew.bundle] FAIL command exited 7" in completed.stderr
+
+
+def test_inventory_executes_only_planned_results(tmp_path: Path) -> None:
+    target = tmp_path / "snapshot.txt"
+    spec = InventorySpec(
+        "applications",
+        target.name,
+        scan_dir=tmp_path / "Applications",
+    )
+    terminal_results = tuple(
+        InventoryResult(spec, status, target, reason="terminal state")
+        for status in (
+            InventoryStatus.SKIPPED,
+            InventoryStatus.FAILED,
+            InventoryStatus.WRITTEN,
+            InventoryStatus.UNCHANGED,
+        )
+    )
+    started: list[InventorySpec] = []
+
+    report = execute_inventory(
+        InventoryReport("TestHost", False, terminal_results),
+        on_start=started.append,
+    )
+
+    assert report.results == terminal_results
+    assert started == []
+    assert not target.exists()
 
 
 def test_inventory_empty_collector_output_fails_and_keeps_snapshot(

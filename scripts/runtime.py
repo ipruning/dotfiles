@@ -39,6 +39,7 @@ class RuntimeAction(StrEnum):
     DOWNLOAD = "download"
     REMOVE = "remove"
     BUILD = "build"
+    VALIDATE = "validate"
 
 
 @dataclass(frozen=True)
@@ -72,6 +73,7 @@ StepCallback = Callable[[RuntimeSpec, RuntimeAction], None]
 class RuntimeReport:
     apply: bool
     results: tuple[RuntimeResult, ...]
+    generated_root: Path | None = None
 
     @property
     def ok(self) -> bool:
@@ -151,6 +153,24 @@ LOCAL_BINARY_SPECS = (
 # Tools that live only under generated/bin and may legitimately need it on a
 # command's PATH; every other tool must resolve from the host PATH.
 SELF_BUILT_TOOLS = frozenset(name for name, *_rest in LOCAL_BINARY_SPECS)
+OWNED_GENERATED_DIRECTORIES = ("functions", "completions", "plugins", "bin", "sources")
+
+
+def _symlinked_generated_directory(generated_root: Path) -> Path | None:
+    for directory in (
+        generated_root,
+        *(generated_root / name for name in OWNED_GENERATED_DIRECTORIES),
+    ):
+        if directory.is_symlink():
+            return directory
+    return None
+
+
+def _symlinked_directory_reason(directory: Path) -> str:
+    return (
+        f"generated runtime directory is a symlink ({os.readlink(directory)}); "
+        "remove it before refreshing"
+    )
 
 
 def file_sha256(path: Path) -> str | None:
@@ -261,10 +281,32 @@ def plan_runtime(
     build: bool = False,
 ) -> RuntimeReport:
     """Return the exact generated runtime refresh without changing files."""
+    generated_root = repo_root / "generated"
+    if symlinked_directory := _symlinked_generated_directory(generated_root):
+        relative_name = (
+            symlinked_directory.relative_to(repo_root).as_posix().replace("/", ".")
+        )
+        spec = RuntimeSpec(
+            name=f"directory.{relative_name}",
+            tool=None,
+            target=symlinked_directory,
+        )
+        return RuntimeReport(
+            apply=False,
+            results=(
+                RuntimeResult(
+                    spec,
+                    RuntimeStatus.FAILED,
+                    RuntimeAction.VALIDATE,
+                    _symlinked_directory_reason(symlinked_directory),
+                ),
+            ),
+            generated_root=generated_root,
+        )
     executable_finder = repo_aware_finder(repo_root, executable_finder)
-    functions_dir = repo_root / "generated/functions"
-    completions_dir = repo_root / "generated/completions"
-    plugins_dir = repo_root / "generated/plugins"
+    functions_dir = generated_root / "functions"
+    completions_dir = generated_root / "completions"
+    plugins_dir = generated_root / "plugins"
     results = []
     for tool, command, filename in FUNCTION_SPECS:
         spec = RuntimeSpec(
@@ -519,7 +561,11 @@ def plan_runtime(
                         f"{missing} is not available",
                     ),
                 )
-    return RuntimeReport(apply=False, results=tuple(results))
+    return RuntimeReport(
+        apply=False,
+        results=tuple(results),
+        generated_root=generated_root,
+    )
 
 
 def _atomic_install(target: Path, writer: AtomicWriter) -> None:
@@ -624,6 +670,12 @@ def execute_runtime(
             on_start(spec, planned.action)
         exit_code: int | None = None
         try:
+            if plan.generated_root is not None and (
+                symlinked_directory := _symlinked_generated_directory(
+                    plan.generated_root
+                )
+            ):
+                raise RuntimeError(_symlinked_directory_reason(symlinked_directory))
             if planned.action is RuntimeAction.GENERATE:
                 completed = _run_command(spec, home, capture_output=True)
                 exit_code = completed.returncode
@@ -752,7 +804,11 @@ def execute_runtime(
         )
         results.append(succeeded)
         completed_steps[spec.name] = succeeded
-    return RuntimeReport(apply=True, results=tuple(results))
+    return RuntimeReport(
+        apply=True,
+        results=tuple(results),
+        generated_root=plan.generated_root,
+    )
 
 
 def _summary(report: RuntimeReport) -> dict[str, int]:

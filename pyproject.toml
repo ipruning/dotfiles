@@ -7,9 +7,10 @@ requires-python = ">=3.14"
 dependencies = [
     # Runtime dependencies of scripts/: ruamel-yaml (check, lint) and the pinned
     # read-only Mackup fork (diff). Pinning Mackup here — locked in uv.lock —
-    # keeps it inside the `mise install` bootstrap boundary instead of a runtime
-    # uvx fetch. Type-only imports for the standalone modules/bin scripts live in
-    # the dev group so this list stays true to what the package runs.
+    # keeps it inside the explicit `uv sync --locked` bootstrap boundary instead
+    # of a runtime uvx fetch. Type-only imports for the standalone modules/bin
+    # scripts live in the dev group so this list stays true to what the package
+    # runs.
     "mackup @ git+https://github.com/ipruning/mackup@faa5cb8cd0f5fea83711b4fc75a4996d4b8a7497",
     "ruamel-yaml>=0.19.1",
 ]

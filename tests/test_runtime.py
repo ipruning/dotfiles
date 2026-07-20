@@ -93,6 +93,50 @@ def test_runtime_previews_owned_refresh_by_default_without_writing(
     assert not (repo_root / "generated").exists()
 
 
+def test_runtime_refuses_symlinked_owned_directories(tmp_path: Path) -> None:
+    cases = (
+        (Path("generated"), ()),
+        (Path("generated/functions"), ()),
+        (Path("generated/completions"), ()),
+        (Path("generated/plugins"), ()),
+        (Path("generated/bin"), ()),
+        (Path("generated/sources"), ("--build",)),
+    )
+    for relative_path, extra_arguments in cases:
+        case_root = tmp_path / relative_path.as_posix().replace("/", "-")
+        repo_root = case_root / "dotfiles"
+        home = case_root / "home"
+        bin_dir = case_root / "bin"
+        outside = case_root / "outside"
+        home.mkdir(parents=True)
+        bin_dir.mkdir()
+        outside.mkdir()
+        symlink = repo_root / relative_path
+        symlink.parent.mkdir(parents=True, exist_ok=True)
+        symlink.symlink_to(outside, target_is_directory=True)
+
+        completed = _run_runtime(
+            repo_root,
+            home,
+            bin_dir,
+            *extra_arguments,
+            "--offline",
+            "--apply",
+            "--json",
+        )
+
+        assert completed.returncode == 1
+        document = json.loads(completed.stdout)
+        assert document["apply"] is True
+        assert document["ok"] is False
+        assert len(document["steps"]) == 1
+        result = document["steps"][0]
+        assert result["action"] == "validate"
+        assert result["status"] == "failed"
+        assert "directory is a symlink" in result["reason"]
+        assert not any(outside.iterdir())
+
+
 def test_runtime_offline_apply_generates_and_removes_owned_shell_files(
     tmp_path: Path,
 ) -> None:
@@ -734,6 +778,43 @@ def test_runtime_refuses_symlinked_plugin_targets(tmp_path: Path) -> None:
     # The external checkout must be left untouched (no git pull ran there).
     assert (external / "sentinel").read_text() == "do not touch\n"
     assert (plugins / "fzf-tab").is_symlink()
+
+
+def test_runtime_rechecks_owned_directories_immediately_before_execution(
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    bin_dir = tmp_path / "bin"
+    outside = tmp_path / "outside"
+    home.mkdir()
+    bin_dir.mkdir()
+    outside.mkdir()
+    _fake_tool(bin_dir, "mise", "printf 'generated output\\n'\n")
+    plan = plan_runtime(
+        repo_root,
+        home,
+        executable_finder=lambda tool: str(bin_dir / tool) if tool == "mise" else None,
+        network=False,
+    )
+
+    replaced = False
+
+    def replace_owned_directory(spec: RuntimeSpec, _action: RuntimeAction) -> None:
+        nonlocal replaced
+        if replaced or spec.name != "function.mise":
+            return
+        functions = repo_root / "generated/functions"
+        functions.parent.mkdir(parents=True)
+        functions.symlink_to(outside, target_is_directory=True)
+        replaced = True
+
+    report = execute_runtime(plan, home, on_start=replace_owned_directory)
+
+    result = next(item for item in report.results if item.spec.name == "function.mise")
+    assert result.status is RuntimeStatus.FAILED
+    assert "directory is a symlink" in (result.reason or "")
+    assert not any(outside.iterdir())
 
 
 def test_runtime_keeps_old_output_when_generator_prints_nothing(

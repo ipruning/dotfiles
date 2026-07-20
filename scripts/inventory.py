@@ -224,7 +224,7 @@ def execute_inventory(
     """Run every planned collector and retain independent failure results."""
     results = []
     for planned in plan.results:
-        if planned.status is InventoryStatus.SKIPPED:
+        if planned.status is not InventoryStatus.PLANNED:
             results.append(planned)
             continue
         if on_start:

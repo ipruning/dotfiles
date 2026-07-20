@@ -322,8 +322,9 @@ def _skillshare_doctor_finding(executable: Path, home: Path) -> Finding:
             check=False,
             capture_output=True,
             text=True,
+            timeout=30,
         )
-    except OSError as error:
+    except (OSError, subprocess.TimeoutExpired) as error:
         return Finding(
             "skillshare.doctor",
             Severity.WARN,
@@ -480,6 +481,15 @@ def _binary_capability(check: str, file_path: Path, label: str) -> Finding:
 
 
 def _generated_directory_finding(directory_path: Path, label: str) -> Finding:
+    if directory_path.is_symlink():
+        return Finding(
+            f"shell.{label}",
+            Severity.WARN,
+            f"shell.{label}_symlinked",
+            f"Generated shell {label} directory is a symlink",
+            directory_path,
+            "Remove the symlink before refreshing repository-owned runtime state.",
+        )
     if not directory_path.is_dir():
         return Finding(
             f"shell.{label}",

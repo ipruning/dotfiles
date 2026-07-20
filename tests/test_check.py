@@ -1,5 +1,6 @@
 import json
 import hashlib
+import subprocess
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -214,6 +215,33 @@ def test_inspect_host_rejects_wasm_with_wrong_checksum(
     assert finding.path == target
 
 
+def test_inspect_host_reports_symlinked_generated_directories(tmp_path: Path) -> None:
+    repo_root = tmp_path / "repo"
+    home = tmp_path / "home"
+    external = tmp_path / "external-functions"
+    home.mkdir()
+    external.mkdir()
+    (external / "generated.zsh").write_text("external\n")
+    functions = repo_root / "generated/functions"
+    functions.parent.mkdir(parents=True)
+    functions.symlink_to(external, target_is_directory=True)
+
+    report = inspect_host(
+        repo_root,
+        home,
+        executable_finder=lambda _command: None,
+        system_name="Darwin",
+        profile="full",
+    )
+    findings = {finding.code: finding for finding in report.findings}
+
+    finding = findings["shell.functions_symlinked"]
+    assert finding.severity is Severity.WARN
+    assert finding.path == functions
+    assert finding.action is not None
+    assert "Remove the symlink" in finding.action
+
+
 def test_inspect_host_reports_empty_generated_state_and_skillshare_doctor_errors(
     tmp_path: Path,
 ) -> None:
@@ -345,6 +373,26 @@ def test_skillshare_doctor_keeps_real_skill_validity_warning(tmp_path: Path) -> 
         "Skillshare doctor reports 1 actionable warning(s): "
         "skills_validity: broken-skill"
     )
+
+
+def test_skillshare_doctor_timeout_returns_a_warning(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    def time_out(*args: object, **kwargs: object) -> None:
+        assert kwargs["timeout"] == 30
+        raise subprocess.TimeoutExpired(["skillshare", "doctor", "--json"], 30)
+
+    monkeypatch.setattr(check_module.subprocess, "run", time_out)
+
+    finding = check_module._skillshare_doctor_finding(
+        tmp_path / "skillshare",
+        tmp_path,
+    )
+
+    assert finding.severity is Severity.WARN
+    assert finding.code == "skillshare.doctor_unavailable"
+    assert "timed out" in finding.message
 
 
 def test_linux_lite_check_omits_macos_and_optional_desktop_capabilities(
