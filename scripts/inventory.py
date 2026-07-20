@@ -41,6 +41,7 @@ class InventorySpec:
     command: tuple[str, ...] = ()
     scan_dir: Path | None = None
     timeout_seconds: int = 300
+    allow_empty: bool = False
 
 
 @dataclass(frozen=True)
@@ -100,6 +101,9 @@ def _inventory_specs(applications_root: Path) -> tuple[InventorySpec, ...]:
             tool="gh",
             command=("gh", "extension", "list"),
             timeout_seconds=120,
+            # Zero installed extensions is a legitimate host state, not a
+            # broken collector; the successful exit code already guards that.
+            allow_empty=True,
         ),
         InventorySpec("applications", "applications.txt", scan_dir=applications_root),
         InventorySpec("setapp", "setapp.txt", scan_dir=applications_root / "Setapp"),
@@ -216,7 +220,7 @@ def execute_inventory(
         exit_code: int | None = None
         try:
             content, exit_code = _collect(planned.spec)
-            if not content:
+            if not content and not planned.spec.allow_empty:
                 raise SnapshotParseError(
                     "collector produced empty output; kept existing snapshot"
                 )

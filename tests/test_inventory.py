@@ -228,6 +228,29 @@ def test_inventory_empty_collector_output_fails_and_keeps_snapshot(
     repo_root = tmp_path / "dotfiles"
     host_dir = repo_root / "inventory/TestHost"
     host_dir.mkdir(parents=True)
+    (host_dir / "Brewfile").write_text('brew "old"\n')
+
+    completed, host_dir, _log_path = _run_inventory(
+        tmp_path,
+        "--apply",
+        "--json",
+        tools={"brew": {"stdout": ""}, "gh": {"stdout": GH_EXTENSIONS}},
+    )
+
+    assert completed.returncode == 1
+    steps = {step["name"]: step for step in json.loads(completed.stdout)["steps"]}
+    assert steps["brew.bundle"]["status"] == "failed"
+    assert "empty output" in steps["brew.bundle"]["reason"]
+    assert (host_dir / "Brewfile").read_text() == 'brew "old"\n'
+
+
+def test_inventory_zero_gh_extensions_is_a_legitimate_snapshot(
+    tmp_path: Path,
+) -> None:
+    _make_applications(tmp_path / "Applications", apps=("Ghostty",), setapp=None)
+    repo_root = tmp_path / "dotfiles"
+    host_dir = repo_root / "inventory/TestHost"
+    host_dir.mkdir(parents=True)
     (host_dir / "gh_extensions.txt").write_text("old/extension\n")
 
     completed, host_dir, _log_path = _run_inventory(
@@ -237,10 +260,32 @@ def test_inventory_empty_collector_output_fails_and_keeps_snapshot(
         tools={"brew": {"stdout": BREWFILE}, "gh": {"stdout": ""}},
     )
 
+    assert completed.returncode == 0
+    steps = {step["name"]: step for step in json.loads(completed.stdout)["steps"]}
+    assert steps["gh.extensions"]["status"] == "written"
+    assert (host_dir / "gh_extensions.txt").read_text() == ""
+
+
+def test_inventory_failing_gh_with_empty_output_still_fails(
+    tmp_path: Path,
+) -> None:
+    _make_applications(tmp_path / "Applications", apps=("Ghostty",), setapp=None)
+    repo_root = tmp_path / "dotfiles"
+    host_dir = repo_root / "inventory/TestHost"
+    host_dir.mkdir(parents=True)
+    (host_dir / "gh_extensions.txt").write_text("old/extension\n")
+
+    completed, host_dir, _log_path = _run_inventory(
+        tmp_path,
+        "--apply",
+        "--json",
+        tools={"brew": {"stdout": BREWFILE}, "gh": {"stdout": "", "exit_code": 4}},
+    )
+
     assert completed.returncode == 1
     steps = {step["name"]: step for step in json.loads(completed.stdout)["steps"]}
     assert steps["gh.extensions"]["status"] == "failed"
-    assert "empty output" in steps["gh.extensions"]["reason"]
+    assert "exited 4" in steps["gh.extensions"]["reason"]
     assert (host_dir / "gh_extensions.txt").read_text() == "old/extension\n"
 
 
