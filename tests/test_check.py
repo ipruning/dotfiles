@@ -1143,3 +1143,55 @@ def test_session_health_probe_reports_unconfigured_and_invalid_status(
     )
 
     assert finding.code == "session_health.status_invalid"
+
+
+def test_dangling_repo_links_are_reported_and_track_target_removal(
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "dotfiles"
+    (repo_root / "reference").mkdir(parents=True)
+    home = tmp_path / "home"
+    (home / ".config").mkdir(parents=True)
+
+    healthy_target = repo_root / "reference/.zshrc"
+    healthy_target.write_text("reference\n")
+    (home / ".zshrc").symlink_to(healthy_target)
+    (home / ".condarc").symlink_to(repo_root / "home/.condarc")
+    (home / ".unrelated").symlink_to(tmp_path / "elsewhere/file")
+    code_user = home / "Library/Application Support/Code/User"
+    code_user.mkdir(parents=True)
+    (code_user / "keybindings.json").symlink_to(repo_root / "assets/keybindings.json")
+    deep = home / "a/b/c"
+    deep.mkdir(parents=True)
+    (deep / "too-deep").symlink_to(repo_root / "gone")
+
+    findings = check_module._dangling_repo_link_findings(repo_root, home)
+    dangling = {
+        finding.path for finding in findings if finding.severity is Severity.WARN
+    }
+
+    assert dangling == {home / ".condarc", code_user / "keybindings.json"}
+    assert all(
+        finding.code == "home.dangling_repo_link"
+        for finding in findings
+        if finding.severity is Severity.WARN
+    )
+
+    healthy_target.unlink()
+    degraded = check_module._dangling_repo_link_findings(repo_root, home)
+    assert home / ".zshrc" in {
+        finding.path for finding in degraded if finding.severity is Severity.WARN
+    }
+
+
+def test_home_without_repository_links_reports_clean(tmp_path: Path) -> None:
+    repo_root = tmp_path / "dotfiles"
+    (repo_root / "reference").mkdir(parents=True)
+    home = tmp_path / "home"
+    home.mkdir()
+    (home / ".zshrc").write_text("plain file\n")
+
+    findings = check_module._dangling_repo_link_findings(repo_root, home)
+
+    assert [finding.code for finding in findings] == ["home.repo_links_clean"]
+    assert findings[0].severity is Severity.OK

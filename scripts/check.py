@@ -505,6 +505,92 @@ def _generated_directoryFinding(directory_path: Path, label: str) -> Finding:
     )
 
 
+HOME_LINK_SCAN_DEPTH = 3
+LIBRARY_LINK_SCAN_DEPTH = 4
+LIBRARY_LINK_SCAN_AREAS = ("Library/Application Support", "Library/Preferences")
+
+
+def _collect_symlinks(
+    root: Path, depth: int, *, skip_names: frozenset[str]
+) -> list[Path]:
+    links: list[Path] = []
+    pending: list[tuple[Path, int]] = [(root, depth)]
+    while pending:
+        directory, remaining = pending.pop()
+        try:
+            entries = list(os.scandir(directory))
+        except OSError:
+            continue
+        for entry in entries:
+            entry_path = Path(entry.path)
+            try:
+                if entry.is_symlink():
+                    links.append(entry_path)
+                    continue
+                if entry.is_dir(follow_symlinks=False):
+                    if directory == root and entry.name in skip_names:
+                        continue
+                    if remaining > 1:
+                        pending.append((entry_path, remaining - 1))
+            except OSError:
+                continue
+    return links
+
+
+def _dangling_repo_link_findings(repo_root: Path, home: Path) -> list[Finding]:
+    """Report $HOME symlinks into the repository whose targets are gone.
+
+    Restore and adopt only observe currently mapped applications, so links
+    left behind by removed mappings or renamed repository roots are invisible
+    to diff; this is the one place that still looks for them.
+    """
+    repository = repo_root.resolve()
+    links = _collect_symlinks(
+        home, HOME_LINK_SCAN_DEPTH, skip_names=frozenset({"Library"})
+    )
+    for area in LIBRARY_LINK_SCAN_AREAS:
+        area_root = home / area
+        if area_root.is_dir():
+            links.extend(
+                _collect_symlinks(
+                    area_root, LIBRARY_LINK_SCAN_DEPTH, skip_names=frozenset()
+                )
+            )
+    findings = []
+    for link in sorted(links):
+        try:
+            raw_target = os.readlink(link)
+        except OSError:
+            continue
+        target = Path(raw_target)
+        if not target.is_absolute():
+            target = link.parent / target
+        target = Path(os.path.normpath(target))
+        if not target.is_relative_to(repository) or link.exists():
+            continue
+        findings.append(
+            Finding(
+                "home.repo_links",
+                Severity.WARN,
+                "home.dangling_repo_link",
+                f"Symlink into the repository is dangling (-> {raw_target})",
+                link,
+                "Remove the link, or restore its application with "
+                "mise run restore -- <application> --apply.",
+            ),
+        )
+    if not findings:
+        findings.append(
+            Finding(
+                "home.repo_links",
+                Severity.OK,
+                "home.repo_links_clean",
+                "No dangling repository symlinks under $HOME",
+            ),
+        )
+    return findings
+
+
 def _bash_integrationFinding(repo_root: Path, home: Path) -> Finding:
     bashrc = home / ".bashrc"
     module_path = repo_root.resolve() / "modules/bash/init.bash"
@@ -1024,6 +1110,7 @@ def inspect_host(
     findings.extend(_skillshare_findings(home))
     if skillshare_finding.path and (home / ".config/skillshare/config.yaml").is_file():
         findings.append(_skillshare_doctorFinding(skillshare_finding.path, home))
+    findings.extend(_dangling_repo_link_findings(repo_root, home))
     if active_profile is HostProfile.LINUX_LITE:
         findings.append(_bash_integrationFinding(repo_root, home))
         findings.append(_legacy_repo_pathFinding(repo_root))
