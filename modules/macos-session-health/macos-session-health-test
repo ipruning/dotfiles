@@ -1,0 +1,255 @@
+#!/bin/bash
+set -euo pipefail
+
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+health_cli="$script_dir/macos-session-health"
+test_root="$(mktemp -d -t macos-session-health-test)"
+test_home="$test_root/home"
+fake_bin="$test_root/bin"
+
+cleanup() {
+  rm -rf "$test_root"
+}
+trap cleanup EXIT
+
+fail() {
+  echo "FAIL: $*" >&2
+  exit 1
+}
+
+mkdir -p "$test_home" "$fake_bin"
+mkdir -p "$test_home/.config/brrr"
+printf "BRRR_SECRET='test-secret'\n" >"$test_home/.config/brrr/env"
+chmod 0600 "$test_home/.config/brrr/env"
+python_bin="$(mise which python)"
+tool_path="$fake_bin:$(dirname "$python_bin"):/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+"$python_bin" "$script_dir/macos-session-health-notification-test.py"
+cat >"$fake_bin/launchctl" <<'EOF'
+#!/bin/bash
+case "${1:-}" in
+  bootstrap)
+    if [[ -f "${FAKE_BOOTSTRAP_FAIL_ONCE:-}" ]]; then
+      rm -f "$FAKE_BOOTSTRAP_FAIL_ONCE"
+      echo 'injected bootstrap failure' >&2
+      exit 9
+    fi
+    : >"$FAKE_LAUNCHCTL_STATE"
+    exit 0
+    ;;
+  bootout) rm -f "$FAKE_LAUNCHCTL_STATE"; exit 0 ;;
+  print)
+    [[ -f "$FAKE_LAUNCHCTL_STATE" ]] || exit 3
+    printf 'state = running\npid = 4242\nruns = 1\n'
+    exit 0
+    ;;
+esac
+exit 0
+EOF
+chmod +x "$fake_bin/launchctl"
+
+test_env=(
+  HOME="$test_home"
+  PATH="$tool_path"
+  BRRR_SECRET=test-secret
+  FAKE_LAUNCHCTL_STATE="$test_root/launchd-loaded"
+  FAKE_BOOTSTRAP_FAIL_ONCE="$test_root/bootstrap-fail-once"
+)
+
+blocked_home="$test_root/blocked-home"
+blocked_plist="$blocked_home/Library/LaunchAgents/com.alex.macos-session-health.plist"
+mkdir -p "$blocked_home/.local/bin" "$(dirname "$blocked_plist")"
+printf '#!/bin/sh\nexit 0\n' >"$test_root/unmanaged-command"
+ln -s "$test_root/unmanaged-command" "$blocked_home/.local/bin/macos-session-health"
+printf 'blocked plist must remain\n' >"$blocked_plist"
+: >"$test_root/launchd-loaded"
+exit_code=0
+env "${test_env[@]}" HOME="$blocked_home" "$python_bin" "$health_cli" install --dry-run \
+  >"$test_root/unmanaged.out" 2>"$test_root/unmanaged.err" || exit_code=$?
+[[ "$exit_code" == 1 && -L "$blocked_home/.local/bin/macos-session-health" ]] \
+  || fail 'install dry-run accepted or replaced an unmanaged symlink'
+exit_code=0
+env "${test_env[@]}" HOME="$blocked_home" "$python_bin" "$health_cli" uninstall \
+  >"$test_root/unmanaged-uninstall.out" 2>"$test_root/unmanaged-uninstall.err" || exit_code=$?
+[[ "$exit_code" == 1 && -L "$blocked_home/.local/bin/macos-session-health" \
+  && "$(cat "$blocked_plist")" == 'blocked plist must remain' \
+  && -f "$test_root/launchd-loaded" ]] \
+  || fail 'rejected uninstall mutated an unmanaged wrapper, plist, or loaded LaunchAgent'
+rm -f "$test_root/launchd-loaded"
+
+bad_python_home="$test_root/bad-python-home"
+bad_python="$bad_python_home/.local/share/mise/installs/python/latest/bin/python3"
+mkdir -p "$(dirname "$bad_python")"
+printf '#!/bin/sh\nexit 9\n' >"$bad_python"
+chmod +x "$bad_python"
+exit_code=0
+env "${test_env[@]}" HOME="$bad_python_home" "$python_bin" "$health_cli" install --dry-run \
+  >"$test_root/bad-python.out" 2>"$test_root/bad-python.err" || exit_code=$?
+[[ "$exit_code" == 1 && ! -e "$bad_python_home/.local/bin/macos-session-health" ]] \
+  || fail 'install dry-run accepted a broken mise Python runtime'
+
+env "${test_env[@]}" "$python_bin" "$health_cli" install --dry-run >"$test_root/install-dry-run.out"
+rg -q 'ready="True"' "$test_root/install-dry-run.out" || fail 'install dry-run did not report readiness'
+[[ ! -e "$test_home/.local/bin/macos-session-health" ]] || fail 'install dry-run changed the executable path'
+
+env "${test_env[@]}" "$python_bin" "$health_cli" install >"$test_root/install.out"
+installed_cli="$test_home/.local/bin/macos-session-health"
+runtime_cli="$test_home/Library/Application Support/macos-session-health/macos-session-health"
+plist="$test_home/Library/LaunchAgents/com.alex.macos-session-health.plist"
+[[ -x "$installed_cli" && ! -L "$installed_cli" && -x "$runtime_cli" && -f "$plist" ]] \
+  || fail 'install did not create its command, runtime, and LaunchAgent'
+plutil -lint "$plist" >/dev/null || fail 'install generated an invalid LaunchAgent'
+if rg -q 'skillshare|\.agents/skills|brrr-helper' "$plist"; then
+  fail 'LaunchAgent depends on a Skillshare path'
+fi
+# The runtime may observe Skillshare state (skill-sync readiness guard), but
+# notification delivery must never route through a Skillshare-managed sender.
+if rg -q '\.agents/skills|brrr-helper' "$runtime_cli"; then
+  fail 'installed runtime depends on a Skillshare-managed sender path'
+fi
+
+env "${test_env[@]}" "$installed_cli" status --format json >"$test_root/status.json"
+jq -e --arg source "$test_home/.config/brrr/env" \
+  '.[0] | select(.installed == true and .loaded == true and .pid == 4242 and .notification_backend == "builtin" and .notification_configured == true and .notification_credential_source == $source)' \
+  "$test_root/status.json" >/dev/null || fail 'status did not expose the self-contained notification backend'
+
+before_hashes="$(shasum -a 256 "$installed_cli" "$runtime_cli" "$plist")"
+: >"$test_root/bootstrap-fail-once"
+exit_code=0
+env "${test_env[@]}" "$python_bin" "$health_cli" install \
+  >"$test_root/install-failed.out" 2>"$test_root/install-failed.err" || exit_code=$?
+[[ "$exit_code" == 1 ]] || fail 'failed upgrade returned success'
+[[ "$before_hashes" == "$(shasum -a 256 "$installed_cli" "$runtime_cli" "$plist")" ]] \
+  || fail 'failed upgrade did not restore managed files'
+[[ -f "$test_root/launchd-loaded" ]] || fail 'failed upgrade did not restore the previous LaunchAgent'
+
+env "${test_env[@]}" "$installed_cli" notify-test --dry-run >"$test_root/notify.json"
+jq -e 'select(.exit == 0 and .auth_mode == "bearer" and .payload.thread_id == "macos-session-health")' \
+  "$test_root/notify.json" >/dev/null || fail 'built-in notification dry-run failed'
+
+cat >"$fake_bin/pgrep" <<'EOF'
+#!/bin/bash
+if [[ ! -f "$FAKE_SYSPOLICYD_SIGNALED" ]]; then
+  echo 111
+elif [[ "$FAKE_SYSPOLICYD_RESULT" == replaced || "$FAKE_SYSPOLICYD_RESULT" == kill-failed ]]; then
+  echo 222
+elif [[ "$FAKE_SYSPOLICYD_RESULT" == same ]]; then
+  echo 111
+fi
+EOF
+cat >"$fake_bin/ps" <<'EOF'
+#!/bin/bash
+pid=''
+while (($#)); do
+  [[ "$1" == -p ]] && { pid="$2"; break; }
+  shift
+done
+printf '%s 1 S 0.0 1024 00:01 /usr/libexec/syspolicyd\n' "$pid"
+EOF
+cat >"$fake_bin/sudo" <<'EOF'
+#!/bin/bash
+: >"$FAKE_SYSPOLICYD_SIGNALED"
+[[ "$FAKE_SYSPOLICYD_RESULT" == kill-failed ]] && exit 7
+exit 0
+EOF
+chmod +x "$fake_bin/pgrep" "$fake_bin/ps" "$fake_bin/sudo"
+for recovery_result in replaced same missing kill-failed; do
+  rm -f "$test_root/syspolicyd-signaled"
+  exit_code=0
+  env "${test_env[@]}" FAKE_SYSPOLICYD_SIGNALED="$test_root/syspolicyd-signaled" \
+    FAKE_SYSPOLICYD_RESULT="$recovery_result" "$installed_cli" recover --execute \
+    --assume-codex-desktop-closed --wait-seconds 0 --format json \
+    >"$test_root/recover-$recovery_result.json" || exit_code=$?
+  if [[ "$recovery_result" == replaced ]]; then
+    [[ "$exit_code" == 0 ]] || fail 'verified syspolicyd replacement returned failure'
+    jq -e 'select(.replacement_verified == true and .before.pid == "111" and .after.pid == "222" and (.error | not))' \
+      "$test_root/recover-$recovery_result.json" >/dev/null \
+      || fail 'verified syspolicyd replacement report was not truthful'
+  else
+    [[ "$exit_code" == 1 ]] || fail "unverified syspolicyd $recovery_result result returned success"
+    if [[ "$recovery_result" == kill-failed ]]; then
+      jq -e 'select(.replacement_verified == false and .after.pid == "222" and (.error | contains("signal command failed with exit 7")))' \
+        "$test_root/recover-$recovery_result.json" >/dev/null \
+        || fail 'failed signal command with a replacement returned an untruthful report'
+    else
+      jq -e 'select(.replacement_verified == false and .error == "signal sent but syspolicyd replacement not verified")' \
+        "$test_root/recover-$recovery_result.json" >/dev/null \
+        || fail "unverified syspolicyd $recovery_result report was not truthful"
+    fi
+  fi
+done
+
+rm -f "$test_root/syspolicyd-signaled"
+exit_code=0
+env "${test_env[@]}" FAKE_SYSPOLICYD_SIGNALED="$test_root/syspolicyd-signaled" \
+  FAKE_SYSPOLICYD_RESULT=same "$installed_cli" recover --execute \
+  --assume-codex-desktop-closed --wait-seconds 0 --format markdown \
+  >"$test_root/recover-same.md" || exit_code=$?
+[[ "$exit_code" == 1 ]] || fail 'unverified markdown recovery returned success'
+rg -q 'replacement_verified: `False`' "$test_root/recover-same.md" \
+  || fail 'markdown recovery omitted replacement verification'
+rg -q 'signal sent but syspolicyd replacement not verified' "$test_root/recover-same.md" \
+  || fail 'markdown recovery omitted verification error'
+
+query_db="$test_root/query.sqlite3"
+"$python_bin" - "$query_db" <<'PY'
+import json
+import sqlite3
+import sys
+
+with sqlite3.connect(sys.argv[1]) as conn:
+    conn.executescript(
+        """
+        CREATE TABLE snapshots (
+          id TEXT PRIMARY KEY, started_at TEXT NOT NULL, ended_at TEXT,
+          hostname TEXT NOT NULL, username TEXT NOT NULL, pid INTEGER NOT NULL,
+          mode TEXT NOT NULL, app_paths_json TEXT NOT NULL, status TEXT
+        );
+        CREATE TABLE events (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          snapshot_id TEXT NOT NULL REFERENCES snapshots(id) ON DELETE CASCADE,
+          ts TEXT NOT NULL, event TEXT NOT NULL, severity TEXT, data_json TEXT NOT NULL
+        );
+        """
+    )
+    conn.execute(
+        "INSERT INTO snapshots VALUES ('snapshot-1','2026-01-01T00:00:00Z','2026-01-01T00:00:01Z','host','user',1,'snapshot','[]','ok')"
+    )
+    conn.execute(
+        "INSERT INTO events (snapshot_id,ts,event,data_json) VALUES (?,?,?,?)",
+        (
+            "snapshot-1",
+            "2026-01-01T00:00:00Z",
+            "command_process_count",
+            json.dumps({"rows": [{"comm": "alpha", "count": 3}, {"comm": "beta", "count": 2}]}),
+        ),
+    )
+PY
+env "${test_env[@]}" "$installed_cli" --db "$query_db" query \
+  --event command_process_count --limit 10 --format json >"$test_root/query.json"
+jq -e 'select(length == 2 and .[0].rows == null and .[0].comm == "alpha" and .[1].comm == "beta")' \
+  "$test_root/query.json" >/dev/null || fail 'query did not preserve the flat process-inventory contract'
+env "${test_env[@]}" "$installed_cli" --db "$query_db" compact --format json >"$test_root/custom-compact.json"
+jq -e --arg database "$query_db" \
+  '.[0] | select(.database == $database and .service_restarted == false)' \
+  "$test_root/custom-compact.json" >/dev/null \
+  || fail 'compact ignored the selected database'
+
+health_db="$test_home/Library/Application Support/macos-session-health/health.sqlite3"
+"$python_bin" - "$health_db" <<'PY'
+import sqlite3
+import sys
+
+with sqlite3.connect(sys.argv[1]) as conn:
+    conn.execute("CREATE TABLE sample (value TEXT)")
+    conn.executemany("INSERT INTO sample VALUES (?)", [("x" * 1000,)] * 100)
+    conn.execute("DELETE FROM sample")
+PY
+env "${test_env[@]}" "$installed_cli" compact --format json >"$test_root/compact.json"
+jq -e '.[0] | select(.compacted == true and .service_restarted == true and .after_bytes <= .before_bytes)' \
+  "$test_root/compact.json" >/dev/null || fail 'database compaction did not preserve the service lifecycle'
+
+env "${test_env[@]}" "$installed_cli" uninstall >"$test_root/uninstall.out"
+[[ ! -e "$installed_cli" && ! -e "$runtime_cli" && ! -e "$plist" ]] \
+  || fail 'uninstall left installed lifecycle files'
+
+echo 'macos-session-health tests passed'

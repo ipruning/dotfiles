@@ -1,0 +1,43 @@
+[tools]
+"gem:kamal" = "latest"
+"github:earendil-works/pi" = "latest"
+"github:larksuite/cli" = "latest"
+"github:lycorp-jp/sim-use" = "latest"
+"github:schpet/linear-cli" = "latest"
+"go:github.com/xdevplatform/xurl" = "latest"
+"npm:agent-device" = "latest"
+aube = "latest"
+bun = "latest"
+deno = "latest"
+go = "latest"
+node = "latest"
+pnpm = "latest"
+python = "latest"
+ruby = "latest"
+rust = "stable"
+uv = "latest"
+yarn = "latest"
+zig = "latest"
+
+[settings]
+lockfile_platforms = ["macos-arm64", "linux-x64"]
+minimum_release_age = "0s"
+trusted_config_paths = [
+  "~/Desktop",
+  "~/Developer",
+  "~/Documents",
+  "~/Downloads",
+]
+
+[settings.ruby]
+compile = false
+
+[env]
+_.path = [
+  "/opt/homebrew/opt/postgresql@18/bin",
+  "~/.bun/bin",
+  "~/.local/bin",
+  "~/.modular/bin",
+  "~/.opencode/bin",
+  "~/.raindrop/bin",
+]

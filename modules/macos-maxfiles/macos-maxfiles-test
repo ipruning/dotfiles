@@ -1,0 +1,206 @@
+#!/bin/bash
+set -euo pipefail
+
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+cli="$script_dir/macos-maxfiles"
+test_root="$(mktemp -d -t macos-maxfiles-test)"
+fake_bin="$test_root/fake-bin"
+state="$test_root/state"
+
+cleanup() { rm -rf "$test_root"; }
+trap cleanup EXIT
+fail() { printf 'FAIL: %s\n' "$*" >&2; exit 1; }
+
+mkdir -p "$fake_bin" "$state" "$test_root/usr/local/bin" "$test_root/Library/LaunchDaemons"
+printf '256 10240\n' >"$state/limits"
+
+cat >"$fake_bin/uname" <<'EOF'
+#!/bin/bash
+echo Darwin
+EOF
+cat >"$fake_bin/install" <<'EOF'
+#!/bin/bash
+while [[ $# -gt 2 ]]; do shift; done
+if [[ -e "$FAKE_STATE/fail-restore" && "$1" == *macos-maxfiles.backup.* ]]; then
+  /bin/rm -f "$FAKE_STATE/fail-restore"
+  echo 'injected restore failure' >&2
+  exit 10
+fi
+/bin/cp "$1" "$2" && /bin/chmod "${FAKE_INSTALL_MODE:-755}" "$2"
+EOF
+cat >"$fake_bin/cp" <<'EOF'
+#!/bin/bash
+source="${@: -2:1}"
+if [[ -e "$FAKE_STATE/fail-restore" && "$source" == *macos-maxfiles.backup.* ]]; then
+  /bin/rm -f "$FAKE_STATE/fail-restore"
+  echo 'injected restore failure' >&2
+  exit 10
+fi
+/bin/cp "$@"
+EOF
+cat >"$fake_bin/rm" <<'EOF'
+#!/bin/bash
+target="${*: -1}"
+if [[ -e "$FAKE_STATE/fail-rm-bin" && "$target" == */usr/local/bin/macos-maxfiles ]]; then
+  /bin/rm -f "$FAKE_STATE/fail-rm-bin"
+  echo 'injected removal failure' >&2
+  exit 8
+fi
+/bin/rm "$@"
+EOF
+cat >"$fake_bin/launchctl" <<'EOF'
+#!/bin/bash
+case "${1:-}" in
+  print) [[ -e "$FAKE_STATE/loaded" ]] ;;
+  bootout) /bin/rm -f "$FAKE_STATE/loaded" ;;
+  bootstrap)
+    if [[ -e "$FAKE_STATE/fail-bootstrap" ]]; then
+      /bin/rm -f "$FAKE_STATE/fail-bootstrap"
+      echo 'injected bootstrap failure' >&2
+      exit 9
+    fi
+    : >"$FAKE_STATE/loaded"
+    if [[ -e "$FAKE_STATE/inject-bad-readback" ]]; then
+      /bin/rm -f "$FAKE_STATE/inject-bad-readback"
+      : >"$FAKE_STATE/bad-readback"
+    else
+      : >"$FAKE_STATE/pending-limits"
+    fi
+    ;;
+  limit)
+    if [[ $# == 2 ]]; then
+      if [[ -e "$FAKE_STATE/bad-readback" ]]; then
+        echo 'maxfiles 1 2'
+      elif [[ -e "$FAKE_STATE/pending-limits" ]]; then
+        /bin/rm -f "$FAKE_STATE/pending-limits"
+        read -r soft hard <"$FAKE_STATE/limits"
+        printf 'maxfiles %s %s\n' "$soft" "$hard"
+        if [[ -e "$FAKE_STATE/use-unlimited" ]]; then
+          printf '8192 unlimited\n' >"$FAKE_STATE/limits"
+        else
+          printf '8192 65536\n' >"$FAKE_STATE/limits"
+        fi
+      else
+        read -r soft hard <"$FAKE_STATE/limits"
+        printf 'maxfiles %s %s\n' "$soft" "$hard"
+      fi
+    else
+      /bin/rm -f "$FAKE_STATE/pending-limits" "$FAKE_STATE/bad-readback"
+      if [[ -e "$FAKE_STATE/fail-limit-restore" ]]; then
+        /bin/rm -f "$FAKE_STATE/fail-limit-restore"
+        printf '999 999\n' >"$FAKE_STATE/limits"
+      else
+        printf '%s %s\n' "$3" "$4" >"$FAKE_STATE/limits"
+      fi
+    fi
+    ;;
+  *) exit 2 ;;
+esac
+EOF
+chmod +x "$fake_bin"/*
+
+test_env=(
+  MACOS_MAXFILES_TEST_ROOT="$test_root"
+  MACOS_MAXFILES_LAUNCHCTL_BIN="$fake_bin/launchctl"
+  MACOS_MAXFILES_INSTALL_BIN="$fake_bin/install"
+  MACOS_MAXFILES_RM_BIN="$fake_bin/rm"
+  MACOS_MAXFILES_CP_BIN="$fake_bin/cp"
+  MACOS_MAXFILES_UNAME_BIN="$fake_bin/uname"
+  MACOS_MAXFILES_PLUTIL_BIN=/usr/bin/plutil
+  MACOS_MAXFILES_LIMIT_VERIFY_ATTEMPTS=2
+  MACOS_MAXFILES_LIMIT_VERIFY_INTERVAL=0.01
+  FAKE_STATE="$state"
+)
+installed_bin="$test_root/usr/local/bin/macos-maxfiles"
+plist="$test_root/Library/LaunchDaemons/com.alex.limit.maxfiles.plist"
+
+env "${test_env[@]}" "$cli" install --dry-run >"$test_root/dry-run.out"
+[[ ! -e "$installed_bin" && ! -e "$plist" && ! -e "$state/loaded" ]] || fail 'dry-run mutated state'
+
+: >"$state/use-unlimited"
+env "${test_env[@]}" FAKE_INSTALL_MODE=755 "$cli" install >"$test_root/install.out"
+rm -f "$state/use-unlimited"
+rg -q '^installed="true" loaded="true"' "$test_root/install.out" || fail 'install did not report verified success'
+[[ -x "$installed_bin" && -f "$plist" && -e "$state/loaded" ]] || fail 'install lifecycle is incomplete'
+[[ "$(cat "$state/limits")" == '8192 unlimited' ]] || fail 'install did not accept launchd unlimited hard-limit reporting'
+env "${test_env[@]}" "$cli" status --json >"$test_root/healthy-status.json"
+rg -q '"limits_satisfied":true' "$test_root/healthy-status.json" \
+  || fail 'status rejected an unlimited hard limit above the target'
+
+printf '1024 65536\n' >"$state/limits"
+exit_code=0
+env "${test_env[@]}" "$cli" status --json >"$test_root/low-limit-status.json" || exit_code=$?
+[[ "$exit_code" == 1 ]] || fail 'status accepted effective limits below the target'
+rg -q '"limits_satisfied":false' "$test_root/low-limit-status.json" \
+  || fail 'status did not expose the failed effective-limit check'
+printf '8192 unlimited\n' >"$state/limits"
+
+chmod 0700 "$installed_bin"
+chmod 0600 "$plist"
+baseline="$(shasum -a 256 "$installed_bin" "$plist")"
+
+: >"$state/fail-bootstrap"
+exit_code=0
+env "${test_env[@]}" "$cli" install >"$test_root/bootstrap.out" 2>"$test_root/bootstrap.err" || exit_code=$?
+[[ "$exit_code" == 1 && -e "$state/loaded" && "$baseline" == "$(shasum -a 256 "$installed_bin" "$plist")" ]] \
+  || fail 'bootstrap failure did not roll back the installed lifecycle'
+[[ "$(stat -f '%Lp' "$installed_bin")" == 700 && "$(stat -f '%Lp' "$plist")" == 600 ]] \
+  || fail 'bootstrap rollback did not restore prior managed-file modes'
+[[ "$(cat "$state/limits")" == '8192 unlimited' ]] || fail 'bootstrap rollback did not restore limits'
+
+: >"$state/inject-bad-readback"
+exit_code=0
+env "${test_env[@]}" "$cli" install >"$test_root/readback.out" 2>"$test_root/readback.err" || exit_code=$?
+[[ "$exit_code" == 1 && -e "$state/loaded" && "$baseline" == "$(shasum -a 256 "$installed_bin" "$plist")" ]] \
+  || fail 'readback failure did not roll back the installed lifecycle'
+rg -q 'effective maxfiles verification failed' "$test_root/readback.err" || fail 'readback failure was not diagnosed'
+rm -f "$state/bad-readback"
+
+env "${test_env[@]}" "$cli" uninstall --yes >"$test_root/uninstall.out"
+rg -q '^installed="false" loaded="false" effective_until_reboot="true"$' "$test_root/uninstall.out" \
+  || fail 'successful uninstall output lost its effective-limit warning'
+[[ ! -e "$installed_bin" && ! -e "$plist" && ! -e "$state/loaded" ]] || fail 'uninstall left managed state'
+
+env "${test_env[@]}" "$cli" install >/dev/null
+rm -f "$installed_bin"
+ln -s "$cli" "$installed_bin"
+: >"$state/fail-bootstrap"
+exit_code=0
+env "${test_env[@]}" "$cli" install >"$test_root/symlink-rollback.out" 2>"$test_root/symlink-rollback.err" || exit_code=$?
+[[ "$exit_code" == 1 && -L "$installed_bin" && "$(readlink "$installed_bin")" == "$cli" ]] \
+  || fail 'failed install did not restore the prior managed-path symlink'
+env "${test_env[@]}" "$cli" install >/dev/null
+baseline="$(shasum -a 256 "$installed_bin" "$plist")"
+
+: >"$state/fail-bootstrap"
+: >"$state/fail-limit-restore"
+exit_code=0
+env "${test_env[@]}" "$cli" install >"$test_root/limit-rollback.out" 2>"$test_root/limit-rollback.err" || exit_code=$?
+[[ "$exit_code" == 1 ]] || fail 'unverified limit rollback returned success'
+rg -q 'rollback failed: effective-limits; backups kept at ' "$test_root/limit-rollback.err" \
+  || fail 'unverified limit rollback did not retain recovery backups'
+backup_dir="$(sed -n 's/.*backups kept at //p' "$test_root/limit-rollback.err" | tail -1)"
+rm -rf "$backup_dir"
+printf '8192 65536\n' >"$state/limits"
+
+: >"$state/fail-bootstrap"
+: >"$state/fail-restore"
+exit_code=0
+env "${test_env[@]}" "$cli" install >"$test_root/rollback-failed.out" 2>"$test_root/rollback-failed.err" || exit_code=$?
+[[ "$exit_code" == 1 ]] || fail 'rollback failure returned success'
+backup_dir="$(sed -n 's/.*backups kept at //p' "$test_root/rollback-failed.err" | tail -1)"
+[[ -n "$backup_dir" && -d "$backup_dir" && -f "$backup_dir/executable" && -f "$backup_dir/plist" ]] \
+  || fail 'rollback failure discarded its recovery backup'
+/bin/cp -p "$backup_dir/executable" "$installed_bin"
+/bin/cp -p "$backup_dir/plist" "$plist"
+rm -rf "$backup_dir"
+
+: >"$state/fail-rm-bin"
+exit_code=0
+env "${test_env[@]}" "$cli" uninstall --yes >"$test_root/uninstall-failed.out" 2>"$test_root/uninstall-failed.err" || exit_code=$?
+[[ "$exit_code" == 1 ]] || fail 'removal failure returned success'
+[[ ! -s "$test_root/uninstall-failed.out" ]] || fail 'removal failure printed false success'
+[[ -e "$state/loaded" && "$baseline" == "$(shasum -a 256 "$installed_bin" "$plist")" ]] \
+  || fail 'removal failure did not restore files and loaded state'
+
+echo 'macos-maxfiles tests passed'

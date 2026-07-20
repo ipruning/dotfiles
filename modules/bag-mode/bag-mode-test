@@ -4,7 +4,7 @@ set -euo pipefail
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 bag_mode="$script_dir/bag-mode"
-readme="$script_dir/../../README.md"
+readme="$script_dir/README.md"
 test_root="$(mktemp -d -t bag-mode-test)"
 test_home="$test_root/home"
 fake_bin="$test_root/fake-bin"
@@ -19,7 +19,6 @@ user_support_dir="$test_home/Library/Application Support/bag-mode"
 controller_pid=""
 foreground_pid=""
 rejected_run_pid=""
-legacy_lock_pid=""
 
 cleanup() {
   if [[ -n "$controller_pid" ]]; then
@@ -30,9 +29,6 @@ cleanup() {
   fi
   if [[ -n "$rejected_run_pid" ]]; then
     kill -KILL "$rejected_run_pid" 2>/dev/null || true
-  fi
-  if [[ -n "$legacy_lock_pid" ]]; then
-    kill -KILL "$legacy_lock_pid" 2>/dev/null || true
   fi
   if [[ "${BAG_MODE_TEST_KEEP:-0}" == 1 ]]; then
     printf 'test artifacts kept: %s\n' "$test_root" >&2
@@ -155,6 +151,11 @@ if [[ "${1:-}" == bootout ]]; then
   exit 0
 fi
 if [[ "${1:-}" == bootstrap ]]; then
+  if [[ -e "$BAG_MODE_FAKE_STATE/fail-bootstrap-once" ]]; then
+    rm -f "$BAG_MODE_FAKE_STATE/fail-bootstrap-once"
+    echo 'injected launchctl bootstrap failure' >&2
+    exit 9
+  fi
   rm -f "$BAG_MODE_FAKE_STATE/launchd-unloaded"
   exit 0
 fi
@@ -213,6 +214,26 @@ env "${test_env[@]}" "$bag_mode" install >/dev/null
 runtime_bin="$test_root/usr/local/bin/bag-mode"
 runtime_controller="$test_root/Library/PrivilegedHelperTools/dev.bag-mode.controller"
 runtime_plist="$test_root/Library/LaunchDaemons/dev.bag-mode.daemon.plist"
+
+# macOS can SIGKILL execve of a freshly rewritten temporary script inode. Keep
+# the harness focused on shell behavior by opening reinstalled fixtures through
+# the stable system interpreter; production execution remains unchanged.
+env() {
+  local -a environment_args=()
+  if [[ "${1:-}" != *=* ]]; then
+    command env "$@"
+    return
+  fi
+  while [[ "${1:-}" == *=* ]]; do
+    environment_args+=("$1")
+    shift
+  done
+  case "${1:-}" in
+    "$runtime_bin"|"$runtime_controller") command env "${environment_args[@]}" /bin/bash "$@" ;;
+    *) command env "${environment_args[@]}" "$@" ;;
+  esac
+}
+
 [[ -x "$runtime_bin" && -x "$runtime_controller" ]] || fail 'install did not create the CLI and privileged controller copies'
 plutil -lint "$runtime_plist" >/dev/null || fail 'install generated an invalid plist'
 plutil -extract ProgramArguments.0 raw "$runtime_plist" | rg -Fxq "$runtime_controller" \
@@ -220,28 +241,64 @@ plutil -extract ProgramArguments.0 raw "$runtime_plist" | rg -Fxq "$runtime_cont
 env "${test_env[@]}" "$runtime_bin" install >"$test_root/idempotent-install.out"
 rg -q '^installed_controller: ' "$test_root/idempotent-install.out" || fail 'installed executable could not reinstall itself'
 
-legacy_other_home="$test_root/legacy-other-home"
-legacy_lock_file="$legacy_other_home/Library/Application Support/bag-mode/bag-mode.lock"
-mkdir -p "$(dirname "$legacy_lock_file")"
-: >"$legacy_lock_file"
-/usr/bin/lockf -k "$legacy_lock_file" /bin/sleep 30 &
-legacy_lock_pid=$!
-wait_for 'legacy controller lock' "! /usr/bin/lockf -t 0 '$legacy_lock_file' /usr/bin/true 2>/dev/null"
+printf '# prior cli bytes\n' >>"$runtime_bin"
+printf '# prior controller bytes\n' >>"$runtime_controller"
+printf '<!-- prior plist bytes -->\n' >>"$runtime_plist"
+chmod 0700 "$runtime_bin"
+chmod 0710 "$runtime_controller"
+chmod 0600 "$runtime_plist"
+cp "$runtime_bin" "$test_root/prior-cli"
+cp "$runtime_controller" "$test_root/prior-controller"
+cp "$runtime_plist" "$test_root/prior-plist"
+: >"$fake_state/fail-bootstrap-once"
 exit_code=0
-env "${test_env[@]}" CI=1 "$runtime_bin" install --dry-run >"$test_root/legacy-install-dry-run.out" 2>"$test_root/legacy-install-dry-run.err" || exit_code=$?
-[[ "$exit_code" == 1 ]] || fail "install dry-run accepted another user's legacy controller"
-rg -q '^blocker: legacy controller is running; stop it with the legacy CLI$' "$test_root/legacy-install-dry-run.out" \
-  || fail 'install dry-run did not identify the legacy controller blocker'
+env "${test_env[@]}" "$bag_mode" install >"$test_root/bootstrap-failed-install.out" 2>"$test_root/bootstrap-failed-install.err" || exit_code=$?
+[[ "$exit_code" == 1 ]] || fail 'injected bootstrap failure returned success'
+[[ ! -s "$test_root/bootstrap-failed-install.out" ]] || fail 'failed install printed installation success'
+cmp -s "$test_root/prior-cli" "$runtime_bin" || fail 'failed install did not restore byte-identical prior CLI'
+cmp -s "$test_root/prior-controller" "$runtime_controller" || fail 'failed install did not restore byte-identical prior controller'
+cmp -s "$test_root/prior-plist" "$runtime_plist" || fail 'failed install did not restore byte-identical prior plist'
+[[ "$(stat -f '%Lp' "$runtime_bin")" == 700 \
+  && "$(stat -f '%Lp' "$runtime_controller")" == 710 \
+  && "$(stat -f '%Lp' "$runtime_plist")" == 600 ]] \
+  || fail 'failed install did not restore prior managed-file modes'
+env "${test_env[@]}" "$fake_bin/launchctl" print system/dev.bag-mode.daemon >/dev/null \
+  || fail 'failed install did not restore the prior loaded state'
+rg -q 'prior installation and LaunchDaemon state restored' "$test_root/bootstrap-failed-install.err" \
+  || fail 'failed install did not report successful rollback'
+
+: >"$fake_state/fail-bootstrap-once"
+: >"$fake_state/fail-restore"
 exit_code=0
-env "${test_env[@]}" "$runtime_bin" install >"$test_root/legacy-install.out" 2>"$test_root/legacy-install.err" || exit_code=$?
-[[ "$exit_code" == 1 ]] || fail "install accepted another user's legacy controller"
-rg -q 'legacy controller is running' "$test_root/legacy-install.err" || fail 'blocked legacy install did not explain the conflict'
-kill -TERM "$legacy_lock_pid"
-wait "$legacy_lock_pid" 2>/dev/null || true
-legacy_lock_pid=""
+env "${test_env[@]}" "$runtime_bin" upgrade \
+  >"$test_root/rollback-failed-upgrade.out" 2>"$test_root/rollback-failed-upgrade.err" || exit_code=$?
+[[ "$exit_code" == 1 ]] || fail 'upgrade with incomplete rollback returned success'
+rg -q 'rollback was incomplete; prior service restart was not attempted' "$test_root/rollback-failed-upgrade.err" \
+  || fail 'upgrade did not distinguish an incomplete install rollback'
+if rg -q 'prior installation state restored' "$test_root/rollback-failed-upgrade.err"; then
+  fail 'upgrade falsely claimed restoration after rollback failure'
+fi
+backup_dir="$(sed -n 's/.*backups kept at //p' "$test_root/rollback-failed-upgrade.err" | tail -1)"
+[[ -n "$backup_dir" && -d "$backup_dir" && -f "$backup_dir/cli" \
+  && -f "$backup_dir/controller" && -f "$backup_dir/plist" ]] \
+  || fail 'incomplete install rollback discarded its recovery backup'
+cp -p "$test_root/prior-cli" "$runtime_bin.replacement"
+cp -p "$test_root/prior-controller" "$runtime_controller.replacement"
+cp -p "$test_root/prior-plist" "$runtime_plist.replacement"
+mv -f "$runtime_bin.replacement" "$runtime_bin"
+mv -f "$runtime_controller.replacement" "$runtime_controller"
+mv -f "$runtime_plist.replacement" "$runtime_plist"
+rm -rf "$backup_dir"
 
 rm -f "$runtime_bin"
 ln -s "$bag_mode" "$runtime_bin"
+: >"$fake_state/fail-bootstrap-once"
+exit_code=0
+env "${test_env[@]}" "$bag_mode" install \
+  >"$test_root/symlink-rollback.out" 2>"$test_root/symlink-rollback.err" || exit_code=$?
+[[ "$exit_code" == 1 && -L "$runtime_bin" \
+  && "$(readlink "$runtime_bin")" == "$bag_mode" ]] \
+  || fail 'failed install did not restore the prior managed-path symlink'
 env "${test_env[@]}" "$runtime_bin" install >"$test_root/symlink-install.out"
 [[ -f "$runtime_bin" && ! -L "$runtime_bin" ]] || fail 'install left a symlink as the privileged controller executable'
 [[ "$(stat -f '%Lp' "$runtime_bin")" == 755 ]] || fail 'installed controller executable remained group- or user-writable'
@@ -343,11 +400,44 @@ exit_code=0
 env "${test_env[@]}" CI=1 "$runtime_bin" logs --bogus >"$test_root/logs-bogus.out" 2>"$test_root/logs-bogus.err" || exit_code=$?
 [[ "$exit_code" == 2 ]] || fail "unknown logs option exited $exit_code instead of 2"
 
+env "${test_env[@]}" "$runtime_bin" notifier install-brrr >"$test_root/notifier-builtin-install.out"
+BRRR_SECRET=test-secret /bin/bash "$user_support_dir/notifiers/brrr-send" \
+  --title 'dry run' --subtitle 'bag-mode · test host' --message 'built in' \
+  --thread-id bag-mode --expiration-date '2026-07-13T18:00:00Z' --dry-run \
+  >"$test_root/notifier-builtin-dry-run.out"
+rg -q '^auth_mode=bearer$' "$test_root/notifier-builtin-dry-run.out" \
+  || fail 'built-in brrr sender did not validate its configured delivery path'
+rg -q '"thread_id":"bag-mode"' "$test_root/notifier-builtin-dry-run.out" \
+  || fail 'built-in brrr sender did not preserve the notification payload'
+rg -q '"subtitle":"bag-mode · test host"' "$test_root/notifier-builtin-dry-run.out" \
+  || fail 'built-in brrr sender did not preserve the notification subtitle'
+rg -q '"expiration_date":"2026-07-13T18:00:00Z"' "$test_root/notifier-builtin-dry-run.out" \
+  || fail 'built-in brrr sender did not preserve the expiration date'
+stub_home="$test_root/stub-env-home"
+mkdir -p "$stub_home/.config/brrr" "$stub_home/.config/notify"
+printf '# stub without a secret\n' >"$stub_home/.config/brrr/env"
+printf 'export BRRR_SECRET=from-second-file\n' >"$stub_home/.config/notify/brrr.env"
+env -u BRRR_SECRET HOME="$stub_home" /bin/bash "$user_support_dir/notifiers/brrr-send" \
+  --title 'fallthrough' --message 'stub first file' --dry-run \
+  >"$test_root/notifier-env-fallthrough.out"
+rg -q '^auth_mode=bearer$' "$test_root/notifier-env-fallthrough.out" \
+  || fail 'a secretless readable env file masked the later brrr env candidate'
+
+proxy_marker="$test_root/shelley.json"
+proxy_sender="$test_root/brrr-send-proxy-test"
+sed "s#/exe.dev/shelley.json#$proxy_marker#g" "$user_support_dir/notifiers/brrr-send" >"$proxy_sender"
+chmod +x "$proxy_sender"
+: >"$proxy_marker"
+BRRR_SECRET=test-secret /bin/bash "$proxy_sender" \
+  --title 'auth precedence' --message 'explicit bearer' --dry-run \
+  >"$test_root/notifier-builtin-proxy-dry-run.out"
+rg -q '^auth_mode=bearer$' "$test_root/notifier-builtin-proxy-dry-run.out" \
+  || fail 'explicit brrr secret did not take precedence over the exe.dev proxy'
 env "${test_env[@]}" "$runtime_bin" notifier install-brrr "$fake_bin/brrr-send.sh" >/dev/null
 rm -f "$fake_bin/brrr-send.sh"
 env "${test_env[@]}" "$user_support_dir/notifier" \
   --event test --level passive --title 'test title' --message 'test message'
-rg -q -- '--title test title --message test message --thread-id bag-mode --interruption-level passive' "$fake_state/notifier-call" \
+rg -q -- '--title .*: test title --subtitle bag-mode · macOS power safety --message test message --thread-id bag-mode --interruption-level passive' "$fake_state/notifier-call" \
   || fail 'installed brrr adapter did not preserve the generic notifier contract'
 env "${test_env[@]}" "$runtime_bin" notifier test >"$test_root/notifier-test.out"
 rg -q '^notifier test accepted$' "$test_root/notifier-test.out" || fail 'CLI notifier test did not use the bounded notifier path'
@@ -517,14 +607,17 @@ rg -q 'service not modified' "$test_root/other-user-unhealthy.err" || fail 'fore
 printf '%s\n' "$controller_pid" >"$fake_state/launchd-pid"
 chmod 0600 "$control_dir/config"
 printf 'status victim unchanged\n' >"$test_root/status-victim"
-ln -s "$test_root/status-victim" "$user_support_dir/state.tmp.$controller_pid"
-sleep 1.2
-rg -q '^status victim unchanged$' "$test_root/status-victim" || fail 'root status update followed a user-controlled temporary symlink'
+ln -shf "$test_root/status-victim" "$user_support_dir/state"
+printf 'closed\n' >"$fake_state/lid"
+wait_for 'safe status symlink replacement' "[[ ! -L '$user_support_dir/state' ]] && rg -q '^lid[[:space:]]+closed$' '$user_support_dir/state'"
+rg -q '^status victim unchanged$' "$test_root/status-victim" || fail 'root status update followed a user-controlled destination symlink'
+printf 'open\n' >"$fake_state/lid"
+wait_for 'open lid after status symlink replacement' "rg -q '^lid[[:space:]]+open$' '$user_support_dir/state'"
 printf 'brightness victim unchanged\n' >"$test_root/brightness-victim"
-ln -s "$test_root/brightness-victim" "$user_support_dir/brightness.tmp.$controller_pid"
+ln -shf "$test_root/brightness-victim" "$user_support_dir/brightness"
 printf '0.750000\n' >"$fake_state/brightness"
-wait_for 'updated brightness persistence' "[[ \"\$(sed -n '1p' '$user_support_dir/brightness')\" == 0.750000 ]]"
-rg -q '^brightness victim unchanged$' "$test_root/brightness-victim" || fail 'root brightness update followed a user-controlled temporary symlink'
+wait_for 'safe brightness symlink replacement' "[[ ! -L '$user_support_dir/brightness' && \"\$(sed -n '1p' '$user_support_dir/brightness')\" == 0.750000 ]]"
+rg -q '^brightness victim unchanged$' "$test_root/brightness-victim" || fail 'root brightness update followed a user-controlled destination symlink'
 printf '0.700000\n' >"$fake_state/brightness"
 wait_for 'reset brightness persistence' "[[ \"\$(sed -n '1p' '$user_support_dir/brightness')\" == 0.700000 ]]"
 late_notifier="$fake_bin/late-notifier"
@@ -552,6 +645,7 @@ kill -TERM "$controller_pid"
 wait "$controller_pid"
 controller_pid=""
 rg -q -- '--event stopped' "$fake_state/late-notifier-call" || fail 'notifier installed after startup did not receive controller events'
+rg -q 'sleeps normally when the lid closes' "$fake_state/late-notifier-call" || fail 'stopped notification did not warn that lid close now sleeps the Mac'
 rm -f "$user_support_dir/notifier"
 
 [[ "$(sed -n '1p' "$fake_state/sleep-disabled")" == 0 ]] || fail 'clean stop did not restore SleepDisabled'
@@ -722,6 +816,12 @@ kill -KILL "$controller_pid"
 wait "$controller_pid" 2>/dev/null || true
 controller_pid=""
 [[ -e "$control_dir/recovery-record" && "$(sed -n '1p' "$fake_state/sleep-disabled")" == 1 ]] || fail 'preflight fixture did not leave a recovery record'
+preflight_notifier="$user_support_dir/notifier"
+cat >"$preflight_notifier" <<'EOF'
+#!/bin/bash
+printf '%s\n' "$*" >>"$BAG_MODE_FAKE_STATE/preflight-notifier-call"
+EOF
+chmod +x "$preflight_notifier"
 rm -f "$control_dir/config"
 exit_code=0
 env "${test_env[@]}" "$runtime_controller" _controller >"$test_root/preflight-failed.out" 2>"$test_root/preflight-failed.err" || exit_code=$?
@@ -730,6 +830,8 @@ env "${test_env[@]}" "$runtime_controller" _controller >"$test_root/preflight-fa
 [[ ! -e "$control_dir/recovery-record" ]] || fail 'preflight failure did not clear the recovery record after successful fallback restoration'
 [[ "$(sed -n '1p' "$fake_state/sleep-disabled")" == 0 ]] || fail 'preflight fallback did not restore SleepDisabled'
 rg -q '^last_event[[:space:]]+startup_failed$' "$user_support_dir/state" || fail 'preflight failure did not record its event'
+rg -q -- '--event startup_failed' "$fake_state/preflight-notifier-call" || fail 'preflight failure with fallback restoration did not notify'
+rg -q 'bag-mode start' "$fake_state/preflight-notifier-call" || fail 'preflight failure notification did not provide the restart action'
 
 rm -f "$control_dir/recovery-snapshot" "$control_dir/restarts" "$control_dir/recovery-record" "$user_support_dir/brightness"
 printf '0.550000\n' >"$fake_state/brightness"
@@ -749,6 +851,53 @@ env "${test_env[@]}" "$runtime_controller" _controller >"$test_root/invalid-sess
 [[ ! -e "$control_dir/enabled" ]] || fail 'invalid recovery session left launchd KeepAlive enabled'
 [[ -e "$control_dir/recovery-record" ]] || fail 'invalid recovery snapshot discarded the recovery record'
 rg -q '^last_event[[:space:]]+recovery_failed$' "$user_support_dir/state" || fail 'invalid recovery snapshot did not record its failure'
+rg -q -- '--event recovery_failed' "$fake_state/preflight-notifier-call" || fail 'failed fallback restoration did not notify recovery_failed'
+rg -q 'bag-mode recover' "$fake_state/preflight-notifier-call" || fail 'recovery_failed notification did not provide the recover action'
+
+rm -f "$control_dir/recovery-snapshot" "$control_dir/restarts" "$control_dir/recovery-record" "$user_support_dir/brightness" "$fake_state/preflight-notifier-call"
+printf '0\n' >"$fake_state/sleep-disabled"
+write_config fresh-preflight "" no
+rm -f "$control_dir/config"
+exit_code=0
+env "${test_env[@]}" "$runtime_controller" _controller >"$test_root/fresh-preflight.out" 2>"$test_root/fresh-preflight.err" || exit_code=$?
+[[ "$exit_code" == 78 ]] || fail "fresh preflight failure exited $exit_code instead of 78"
+[[ ! -e "$control_dir/enabled" ]] || fail 'fresh preflight failure left launchd KeepAlive enabled'
+[[ "$(sed -n '1p' "$fake_state/sleep-disabled")" == 0 ]] || fail 'fresh preflight failure altered SleepDisabled'
+rg -q -- '--event startup_failed' "$fake_state/preflight-notifier-call" || fail 'fresh preflight failure without a recovery record did not notify'
+rg -q -- '--level time-sensitive' "$fake_state/preflight-notifier-call" || fail 'fresh preflight failure notification was not time-sensitive'
+
+exit_code=0
+env "${test_env[@]}" CI=1 "$runtime_bin" upgrade --bogus >"$test_root/upgrade-bogus.out" 2>"$test_root/upgrade-bogus.err" || exit_code=$?
+[[ "$exit_code" == 2 ]] || fail "upgrade with arguments exited $exit_code instead of 2"
+env "${test_env[@]}" "$runtime_bin" upgrade >"$test_root/upgrade-stopped.out"
+rg -q '^upgrade complete: service was not enabled; start it with: bag-mode start$' "$test_root/upgrade-stopped.out" \
+  || fail 'upgrade on a stopped service did not report the manual start step'
+rg -q '^installed_controller: ' "$test_root/upgrade-stopped.out" || fail 'upgrade on a stopped service did not reinstall'
+[[ ! -e "$control_dir/enabled" ]] || fail 'upgrade on a stopped service enabled it'
+
+rm -f "$control_dir/recovery-snapshot" "$control_dir/restarts" "$user_support_dir/brightness"
+printf '0.580000\n' >"$fake_state/brightness"
+printf '0\n' >"$fake_state/sleep-disabled"
+printf '55\n' >"$fake_state/battery"
+printf 'open\n' >"$fake_state/lid"
+write_config upgrade-session "" no
+env "${test_env[@]}" "$runtime_controller" _controller >"$test_root/upgrade-running.out" 2>"$test_root/upgrade-running.err" &
+controller_pid=$!
+printf '%s\n' "$controller_pid" >"$fake_state/launchd-pid"
+wait_for 'upgrade fixture controller ready' "[[ -f '$control_dir/recovery-record' && -f '$root_status_file' ]] && rg -q '^session_id[[:space:]]+upgrade-session$' '$control_dir/recovery-record' && [[ \"\$(sed -n '1p' '$fake_state/sleep-disabled')\" == 1 ]]"
+exit_code=0
+env "${test_env[@]}" BAG_MODE_STOP_WAIT_ATTEMPTS=100 "$runtime_bin" upgrade >"$test_root/upgrade-enabled.out" 2>"$test_root/upgrade-enabled.err" || exit_code=$?
+wait "$controller_pid" 2>/dev/null || true
+controller_pid=""
+rg -q '^bag-mode stopped; captured settings restored$' "$test_root/upgrade-enabled.out" || fail 'upgrade did not stop the running service first'
+rg -q '^installed_controller: ' "$test_root/upgrade-enabled.out" || fail 'upgrade did not reinstall after stopping'
+[[ ! -e "$control_dir/recovery-record" ]] || fail 'upgrade left a recovery record after its stop'
+[[ "$exit_code" == 1 ]] || fail "upgrade restart in the harness exited $exit_code instead of failing readiness"
+rg -q 'controller did not become ready' "$test_root/upgrade-enabled.err" \
+  || fail 'upgrade of an enabled service did not attempt to restart it'
+[[ ! -e "$control_dir/enabled" ]] || fail 'failed upgrade restart left the enabled marker'
+[[ ! -e "$controller_reservation_dir" ]] || fail 'failed upgrade restart left a controller reservation'
+rm -f "$fake_state/launchd-pid" "$user_support_dir/notifier" "$fake_state/preflight-notifier-call"
 
 rm -f "$control_dir/recovery-snapshot" "$control_dir/restarts" "$control_dir/recovery-record" "$user_support_dir/brightness"
 printf '0.500000\n' >"$fake_state/brightness"
@@ -845,6 +994,16 @@ env "${test_env[@]}" "$fake_bin/launchctl" print system/dev.bag-mode.daemon >/de
 rg -q 'LaunchDaemon is still loaded' "$test_root/foreground-uninstall-failed.err" \
   || fail 'failed uninstall did not explain that the LaunchDaemon remained loaded'
 rm -f "$fake_state/fail-bootout" "$runtime_plist"
+: >"$fake_state/fail-remove"
+exit_code=0
+env "${test_env[@]}" "$runtime_bin" uninstall --yes >"$test_root/removal-failed-uninstall.out" 2>"$test_root/removal-failed-uninstall.err" || exit_code=$?
+rm -f "$fake_state/fail-remove"
+[[ "$exit_code" == 1 ]] || fail 'uninstall ignored a managed-path removal failure'
+[[ ! -s "$test_root/removal-failed-uninstall.out" ]] || fail 'failed uninstall printed removal success'
+[[ -x "$runtime_bin" && -x "$runtime_controller" && -d "$control_dir" ]] \
+  || fail 'removal-failed uninstall state did not retain the paths it failed to remove'
+rg -q 'uninstall incomplete' "$test_root/removal-failed-uninstall.err" \
+  || fail 'removal-failed uninstall did not report incomplete state'
 env "${test_env[@]}" "$runtime_bin" uninstall --yes >"$test_root/foreground-uninstall-command.out"
 if env "${test_env[@]}" "$fake_bin/launchctl" print system/dev.bag-mode.daemon >/dev/null 2>&1; then
   fail 'uninstall reported success while the LaunchDaemon remained loaded'

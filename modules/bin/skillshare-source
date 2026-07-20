@@ -1,0 +1,1598 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.11"
+# dependencies = [
+#     "rich==15.0.0",
+#     "ruamel-yaml==0.19.1",
+#     "tiktoken==0.13.0",
+#     "typer==0.26.8",
+# ]
+# ///
+# TODO(cleanup): trigger=fact:skillshare provides a config-set command; action=drop the ruamel-yaml dependency and write config through skillshare itself
+# ruamel.yaml is only needed because _set_source() must rewrite config.yaml directly.
+"""Skillshare source switcher — manage multiple skillshare source directories."""
+
+from __future__ import annotations
+
+import json
+import os
+import platform
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+from enum import StrEnum
+from io import StringIO
+from pathlib import Path, PurePosixPath
+from typing import Annotated
+
+if platform.system() == "Windows":
+    print("skillshare-source: Windows is not supported", file=sys.stderr)
+    sys.exit(1)
+
+import typer
+from rich.console import Console
+from rich.table import Table
+from rich.text import Text
+from ruamel.yaml import YAML
+from ruamel.yaml.error import YAMLError
+
+app = typer.Typer(help="Skillshare source switcher.", no_args_is_help=True)
+console = Console()
+error_console = Console(stderr=True)
+SKILLSHARE_SOURCE_VERSION = "skillshare-source 0.2.0"
+
+
+def _config_path() -> Path:
+    """Mirror Go's ConfigPath() for config writes (used by _set_source only)."""
+    if p := os.environ.get("SKILLSHARE_CONFIG"):
+        return Path(p)
+    base = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config"))
+    return base / "skillshare" / "config.yaml"
+
+
+SKILLSHARE_CFG = _config_path()
+SOURCES_CFG = SKILLSHARE_CFG.parent / "sources.json"
+
+_yaml = YAML()
+_yaml.preserve_quotes = True
+
+AVAILABLE_SKILLS_CONTEXT_WINDOW_PERCENT = 2
+CODEX_BYTES_PER_TOKEN = 4
+CODEX_DESCRIPTION_TRUNCATION_WARNING_THRESHOLD_CHARS = 100
+DEFAULT_CODEX_CONTEXT_WINDOW = 258_400
+
+
+class PathMode(StrEnum):
+    absolute = "absolute"
+    relative = "relative"
+
+
+def _version_callback(value: bool) -> None:
+    if value:
+        console.print(SKILLSHARE_SOURCE_VERSION)
+        raise typer.Exit()
+
+
+@app.callback()
+def main(
+    version: Annotated[
+        bool,
+        typer.Option(
+            "--version",
+            callback=_version_callback,
+            is_eager=True,
+            help="Show version and exit.",
+        ),
+    ] = False,
+):
+    """Manage Skillshare sources and inspect Available skills list budgets."""
+
+
+def _load_sources() -> dict[str, str]:
+    if not SOURCES_CFG.exists():
+        return {}
+    try:
+        data = json.loads(SOURCES_CFG.read_text()) or {}
+    except (OSError, json.JSONDecodeError) as exc:
+        error_console.print(f"[red]Invalid sources registry:[/red] {SOURCES_CFG}")
+        error_console.print(Text(str(exc).splitlines()[0], style="dim"))
+        raise typer.Exit(1) from None
+    if not isinstance(data, dict):
+        error_console.print(f"[red]Invalid sources registry:[/red] {SOURCES_CFG}")
+        error_console.print("[dim]expected a JSON object at the document root[/dim]")
+        raise typer.Exit(1)
+    sources: dict[str, str] = {}
+    for name, value in data.items():
+        if not isinstance(name, str) or not isinstance(value, str):
+            error_console.print(f"[red]Invalid sources registry:[/red] {SOURCES_CFG}")
+            error_console.print(
+                "[dim]expected string source names and string paths[/dim]"
+            )
+            raise typer.Exit(1)
+        sources[name] = str(Path(value).expanduser())
+    return sources
+
+
+def _atomic_write_text(destination: Path, contents: str) -> None:
+    if destination.is_symlink():
+        destination = destination.resolve(strict=False)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    mode = destination.stat().st_mode & 0o777 if destination.exists() else 0o600
+    descriptor, temporary_name = tempfile.mkstemp(
+        dir=destination.parent,
+        prefix=f".{destination.name}.",
+    )
+    temporary = Path(temporary_name)
+    try:
+        with os.fdopen(descriptor, "w") as stream:
+            stream.write(contents)
+            stream.flush()
+            os.fsync(stream.fileno())
+        temporary.chmod(mode)
+        os.replace(temporary, destination)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
+def _save_sources(sources: dict[str, str]) -> None:
+    _atomic_write_text(SOURCES_CFG, json.dumps(sources, indent=2) + "\n")
+
+
+def _load_skillshare_config() -> dict:
+    if not SKILLSHARE_CFG.exists():
+        return {}
+    try:
+        data = _yaml.load(SKILLSHARE_CFG) or {}
+    except OSError as exc:
+        error_console.print(
+            f"[red]Failed to read skillshare config:[/red] {SKILLSHARE_CFG}"
+        )
+        error_console.print(Text(str(exc), style="dim"))
+        raise typer.Exit(1) from None
+    except YAMLError as exc:
+        error_console.print(f"[red]Invalid skillshare config:[/red] {SKILLSHARE_CFG}")
+        error_console.print(Text(str(exc).splitlines()[0], style="dim"))
+        raise typer.Exit(1) from None
+    if not isinstance(data, dict):
+        error_console.print(f"[red]Invalid skillshare config:[/red] {SKILLSHARE_CFG}")
+        error_console.print("[dim]expected a YAML mapping at the document root[/dim]")
+        raise typer.Exit(1)
+    return data
+
+
+def _skillshare_json(*args: str) -> dict | list:
+    """Run a skillshare command with --global --json and return parsed output."""
+    result = subprocess.run(
+        ["skillshare", *args, "--global", "--json"],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        error_console.print(f"[red]skillshare {' '.join(args)} failed[/red]")
+        detail = result.stderr.strip() or result.stdout.strip()
+        if detail:
+            error_console.print(Text(detail, style="dim"))
+        raise typer.Exit(1)
+    try:
+        return json.loads(result.stdout)
+    except json.JSONDecodeError as exc:
+        error_console.print(
+            f"[red]skillshare {' '.join(args)} returned invalid JSON[/red]"
+        )
+        error_console.print(Text(str(exc), style="dim"))
+        raise typer.Exit(1) from None
+
+
+def _current_source() -> str:
+    data = _skillshare_json("status")
+    raw = data.get("source", {}).get("path", "")  # ty:ignore[unresolved-attribute]
+    if not raw:
+        error_console.print("[red]skillshare config has no source[/red]")
+        raise typer.Exit(1)
+    return str(Path(raw).expanduser()).rstrip("/")
+
+
+def _set_source(path: str) -> None:
+    data = _load_skillshare_config()
+    # The active source lives at sources.skills; skillshare resolves that key
+    # ahead of the legacy top-level `source`, so writing `source` here would be
+    # shadowed and the switch would silently no-op. Write the nested key and
+    # drop any legacy key so it cannot shadow the new value.
+    sources = data.get("sources")
+    if not isinstance(sources, dict):
+        sources = {}
+        data["sources"] = sources
+    sources["skills"] = path
+    data.pop("source", None)
+    stream = StringIO()
+    _yaml.dump(data, stream)
+    _atomic_write_text(SKILLSHARE_CFG, stream.getvalue())
+
+
+def _resolve_name(sources: dict[str, str], current: str) -> str | None:
+    return next((k for k, v in sources.items() if v == current), None)
+
+
+def _pick_other(sources: dict[str, str], current: str, no_input: bool) -> str | None:
+    others = {k: v for k, v in sources.items() if v != current}
+    if not others:
+        return None
+    if len(others) == 1:
+        return next(iter(others))
+    if no_input or not sys.stdin.isatty():
+        error_console.print(
+            "[red]Multiple sources available; pass the source name explicitly[/red]"
+        )
+        raise typer.Exit(2)
+    names = list(others.keys())
+    for i, name in enumerate(names, 1):
+        console.print(
+            Text.assemble(f"  {i}) ", (name, "bold"), "  ", (others[name], "dim"))
+        )
+    choice = console.input("[bold]Switch to:[/bold] ").strip()
+    if choice.isdigit() and 1 <= int(choice) <= len(names):
+        return names[int(choice) - 1]
+    if choice in others:
+        return choice
+    return None
+
+
+def _managed_skill_paths(source_dir: Path) -> set[str]:
+    metadata_path = source_dir / ".metadata.json"
+    if not metadata_path.exists():
+        return set()
+
+    data = json.loads(metadata_path.read_text())
+    entries = data.get("entries", {})
+    if not isinstance(entries, dict):
+        return set()
+    return {entry for entry in entries if isinstance(entry, str)}
+
+
+def _iter_skill_files(source_dir: Path):
+    for skill_file in sorted(source_dir.glob("**/SKILL.md")):
+        rel_file = skill_file.relative_to(source_dir)
+        if any(part.startswith(".") or part.startswith("_") for part in rel_file.parts):
+            continue
+        yield skill_file
+
+
+def _skill_frontmatter(skill_file: Path) -> dict | None:
+    text = skill_file.read_text()
+    match = re.match(r"\A---\n(.*?)\n---\n", text, re.S)
+    if not match:
+        return None
+
+    data = _yaml.load(match.group(1)) or {}
+    if not isinstance(data, dict):
+        return None
+    return data
+
+
+def _source_dir(source: str | None) -> Path:
+    return Path(source).expanduser().resolve() if source else Path(_current_source())
+
+
+def _default_skillshare_target_dir() -> Path:
+    data = _load_skillshare_config()
+
+    targets = data.get("targets") if isinstance(data, dict) else None
+    if isinstance(targets, dict):
+        universal = targets.get("universal")
+        if isinstance(universal, dict):
+            skills = universal.get("skills")
+            if isinstance(skills, dict):
+                path = skills.get("path")
+                if isinstance(path, str) and path:
+                    return Path(path).expanduser()
+    return Path.home() / ".agents" / "skills"
+
+
+def _description_from_frontmatter(frontmatter: dict) -> str:
+    return str(frontmatter.get("description") or "").replace("\n", " ").strip()
+
+
+def _iter_skill_description_items(source_dir: Path, include_managed: bool):
+    managed = _managed_skill_paths(source_dir)
+    for skill_file in _iter_skill_files(source_dir):
+        rel_dir = skill_file.parent.relative_to(source_dir).as_posix()
+        if not include_managed and rel_dir in managed:
+            continue
+
+        frontmatter = _skill_frontmatter(skill_file)
+        if frontmatter is None:
+            continue
+
+        yield {
+            "name": str(frontmatter.get("name") or skill_file.parent.name),
+            "path": rel_dir,
+            "description": _description_from_frontmatter(frontmatter),
+            "skill_file": skill_file,
+        }
+
+
+def _installed_skill_description_items(
+    target_dir: Path,
+) -> tuple[list[dict], list[str]]:
+    manifest_path = target_dir / ".skillshare-manifest.json"
+    if manifest_path.exists():
+        data = json.loads(manifest_path.read_text())
+        managed = data.get("managed", {})
+        if not isinstance(managed, dict):
+            managed = {}
+        rel_dirs = sorted(key for key in managed if isinstance(key, str))
+    else:
+        rel_dirs = sorted(
+            entry.name
+            for entry in target_dir.iterdir()
+            if not entry.name.startswith(".") and (entry / "SKILL.md").exists()
+        )
+
+    items = []
+    missing_entries = []
+    for rel_dir in rel_dirs:
+        skill_file = target_dir / rel_dir / "SKILL.md"
+        if not skill_file.exists():
+            missing_entries.append(rel_dir)
+            continue
+        frontmatter = _skill_frontmatter(skill_file)
+        if frontmatter is None:
+            continue
+        items.append(
+            {
+                "name": str(frontmatter.get("name") or Path(rel_dir).name),
+                "path": rel_dir,
+                "description": _description_from_frontmatter(frontmatter),
+                "skill_file": skill_file,
+            }
+        )
+    return items, missing_entries
+
+
+def _iter_installed_skill_description_items(target_dir: Path):
+    items, _missing_entries = _installed_skill_description_items(target_dir)
+    yield from items
+
+
+def _codex_token_count(text: str) -> int:
+    size = len(text.encode())
+    return (size + CODEX_BYTES_PER_TOKEN - 1) // CODEX_BYTES_PER_TOKEN
+
+
+def _load_tiktoken_counter():
+    import tiktoken
+
+    enc = tiktoken.get_encoding("o200k_base")
+
+    def count_batch(texts: list[str]) -> list[int]:
+        return [len(enc.encode(text, disallowed_special=())) for text in texts]
+
+    return count_batch
+
+
+def _skill_line(name: str, description: str, path: str) -> str:
+    if description:
+        return f"- {name}: {description} (file: {path})"
+    return f"- {name}: (file: {path})"
+
+
+def _line_cost(counter, line: str) -> int:
+    return counter(f"{line}\n")
+
+
+def _codex_home() -> Path:
+    return Path(os.environ.get("CODEX_HOME", Path.home() / ".codex")).expanduser()
+
+
+def _latest_codex_model_context_window() -> int | None:
+    rollout_files = _latest_codex_rollout_files(limit=20)
+    for rollout_file in rollout_files:
+        if window := _codex_model_context_window_from_rollout(rollout_file):
+            return window
+    return None
+
+
+def _codex_model_context_window_from_rollout(rollout_file: Path) -> int | None:
+    try:
+        with rollout_file.open() as f:
+            for line in f:
+                event = json.loads(line)
+                payload = event.get("payload")
+                if not isinstance(payload, dict):
+                    continue
+                if payload.get("type") != "task_started":
+                    continue
+                value = payload.get("model_context_window")
+                if isinstance(value, int) and value > 0:
+                    return value
+    except (
+        OSError,
+        json.JSONDecodeError,
+    ):
+        return None
+    return None
+
+
+def _latest_codex_rollout_files(limit: int) -> list[Path]:
+    sessions_dir = _codex_home() / "sessions"
+    if not sessions_dir.is_dir():
+        return []
+
+    try:
+        return sorted(
+            sessions_dir.glob("**/rollout-*.jsonl"),
+            key=lambda path: path.stat().st_mtime,
+            reverse=True,
+        )[:limit]
+    except OSError:
+        return []
+
+
+def _latest_codex_rollout_file() -> Path | None:
+    files = _latest_codex_rollout_files(limit=1)
+    return files[0] if files else None
+
+
+_AVAILABLE_SKILL_RE = re.compile(
+    r"^- (.*?): .*? \(file: (.*?)\)$",
+    re.MULTILINE,
+)
+_SKILL_ROOT_RE = re.compile(r"^- `?([^`\s]+)`? = `?([^`\n]+)`?$", re.MULTILINE)
+
+
+def _resolve_rollout_skill_file(raw_path: str, roots: dict[str, Path]) -> Path:
+    if "/" in raw_path:
+        prefix, rest = raw_path.split("/", 1)
+        if prefix in roots:
+            return roots[prefix] / rest
+    return Path(raw_path).expanduser()
+
+
+def _codex_visible_skill_items(
+    rollout_file: Path | None = None,
+) -> tuple[Path, list[dict]]:
+    rollout_file = rollout_file or _latest_codex_rollout_file()
+    if rollout_file is None:
+        error_console.print(
+            "[red]No Codex rollout files found under $CODEX_HOME/sessions[/red]"
+        )
+        raise typer.Exit(1)
+    if not rollout_file.is_file():
+        error_console.print(
+            Text.assemble(("Codex rollout file not found: ", "red"), str(rollout_file))
+        )
+        raise typer.Exit(1)
+
+    latest_skills_text = None
+    latest_roots_text = None
+    seen: set[tuple[str, Path]] = set()
+    try:
+        with rollout_file.open() as f:
+            for line in f:
+                event = json.loads(line)
+                payload = event.get("payload")
+                if not isinstance(payload, dict):
+                    continue
+                if (
+                    payload.get("type") != "message"
+                    or payload.get("role") != "developer"
+                ):
+                    continue
+                for content in payload.get("content", []):
+                    if not isinstance(content, dict):
+                        continue
+                    text = str(content.get("text") or "")
+                    if "### Available skills" not in text:
+                        continue
+                    latest_skills_text = text
+                    latest_roots_text = text
+    except OSError as exc:
+        error_console.print(f"[red]Failed to read Codex rollout:[/red] {exc}")
+        raise typer.Exit(1) from exc
+    except json.JSONDecodeError as exc:
+        error_console.print(f"[red]Failed to parse Codex rollout JSONL:[/red] {exc}")
+        raise typer.Exit(1) from exc
+
+    if latest_skills_text is None:
+        error_console.print(
+            Text.assemble(
+                ("No available skills list found in latest Codex rollout: ", "red"),
+                str(rollout_file),
+            )
+        )
+        raise typer.Exit(1)
+
+    roots = {
+        name: Path(path).expanduser()
+        for name, path in _SKILL_ROOT_RE.findall(latest_roots_text or "")
+    }
+    items = []
+    missing_entries = []
+    for name, raw_path in _AVAILABLE_SKILL_RE.findall(latest_skills_text):
+        skill_file = _resolve_rollout_skill_file(raw_path, roots)
+        key = (name, skill_file)
+        if key in seen:
+            continue
+        seen.add(key)
+        if not skill_file.exists():
+            missing_entries.append(raw_path)
+            continue
+        frontmatter = _skill_frontmatter(skill_file)
+        if frontmatter is None:
+            continue
+        items.append(
+            {
+                "name": name,
+                "path": str(skill_file.parent),
+                "description": _description_from_frontmatter(frontmatter),
+                "skill_file": skill_file,
+            }
+        )
+
+    if not items:
+        error_console.print(
+            Text.assemble(
+                ("No readable skills found in latest Codex rollout: ", "red"),
+                str(rollout_file),
+            )
+        )
+        raise typer.Exit(1)
+    if missing_entries:
+        error_console.print(
+            Text.assemble(
+                ("Skipped missing rollout skill paths: ", "yellow"),
+                ", ".join(missing_entries[:5]),
+                (" ..." if len(missing_entries) > 5 else ""),
+            )
+        )
+    return rollout_file, items
+
+
+def _latest_codex_visible_skill_count() -> int | None:
+    for rollout_file in _latest_codex_rollout_files(limit=20):
+        try:
+            with rollout_file.open() as f:
+                for line in f:
+                    event = json.loads(line)
+                    payload = event.get("payload")
+                    if not isinstance(payload, dict):
+                        continue
+                    if (
+                        payload.get("type") != "message"
+                        or payload.get("role") != "developer"
+                    ):
+                        continue
+                    for content in payload.get("content", []):
+                        if not isinstance(content, dict):
+                            continue
+                        text = str(content.get("text") or "")
+                        if "### Available skills" in text:
+                            return len(_AVAILABLE_SKILL_RE.findall(text))
+        except (
+            OSError,
+            json.JSONDecodeError,
+        ):
+            continue
+    return None
+
+
+def _resolve_context_window(
+    spec: str, rollout_file: Path | None = None
+) -> tuple[int, str]:
+    normalized = spec.strip().lower().replace("_", "-")
+    if normalized in {"current", "codex", "codex-current"}:
+        if rollout_file is not None and (
+            window := _codex_model_context_window_from_rollout(rollout_file)
+        ):
+            return window, "codex-rollout"
+        if window := _latest_codex_model_context_window():
+            return window, "latest-codex-rollout"
+        return DEFAULT_CODEX_CONTEXT_WINDOW, "default-codex-fallback"
+    try:
+        window = int(spec)
+    except ValueError:
+        error_console.print(
+            "[red]--context-window must be a positive integer, current, or codex[/red]"
+        )
+        raise typer.Exit(2) from None
+    if window <= 0:
+        error_console.print("[red]--context-window must be positive[/red]")
+        raise typer.Exit(2)
+    return window, "explicit"
+
+
+def _render_description_prefix(description: str, chars: int) -> str:
+    if chars <= 0:
+        return ""
+    return "".join(list(description)[:chars])
+
+
+def _analyze_skill_context(
+    items: list[dict],
+    budget: int,
+    counter,
+    path_mode: str,
+) -> dict:
+    rows = []
+    for item in sorted(items, key=lambda x: (x["name"], x["path"])):
+        path = (
+            str(item["skill_file"]).replace("\\", "/")
+            if path_mode == "absolute"
+            else f"{item['path']}/SKILL.md"
+        )
+        description = item["description"]
+        full_line = _skill_line(item["name"], description, path)
+        minimum_line = _skill_line(item["name"], "", path)
+        rows.append(
+            {
+                "name": item["name"],
+                "path": item["path"],
+                "render_path": path,
+                "description": description,
+                "description_chars": len(description),
+                "description_tokens": counter(description),
+                "full_tokens": _line_cost(counter, full_line),
+                "minimum_tokens": _line_cost(counter, minimum_line),
+                "allocated_description_chars": len(description),
+                "truncated_description_chars": 0,
+                "included": True,
+            }
+        )
+
+    full_tokens = sum(row["full_tokens"] for row in rows)
+    minimum_tokens = sum(row["minimum_tokens"] for row in rows)
+    if full_tokens <= budget:
+        status = "fits"
+    elif minimum_tokens <= budget:
+        status = "truncated_descriptions"
+        remaining = budget - minimum_tokens
+        allocations = [0] * len(rows)
+        current_extra_costs = [0] * len(rows)
+        extra_costs_by_row = []
+        for row in rows:
+            description = row["description"]
+            minimum_cost = row["minimum_tokens"]
+            costs = [0]
+            for chars in range(1, len(description) + 1):
+                prefix = _render_description_prefix(description, chars)
+                line = _skill_line(row["name"], prefix, row["render_path"])
+                costs.append(_line_cost(counter, line) - minimum_cost)
+            extra_costs_by_row.append(costs)
+
+        while True:
+            changed = False
+            for index, row in enumerate(rows):
+                if allocations[index] >= row["description_chars"]:
+                    continue
+                next_chars = allocations[index] + 1
+                next_cost = extra_costs_by_row[index][next_chars]
+                delta = next_cost - current_extra_costs[index]
+                if delta <= remaining:
+                    allocations[index] = next_chars
+                    current_extra_costs[index] = next_cost
+                    remaining -= delta
+                    changed = True
+            if not changed:
+                break
+
+        for index, row in enumerate(rows):
+            row["allocated_description_chars"] = allocations[index]
+            row["truncated_description_chars"] = (
+                row["description_chars"] - allocations[index]
+            )
+    else:
+        status = "omitted_skills"
+        used = 0
+        for row in rows:
+            row["allocated_description_chars"] = 0
+            row["truncated_description_chars"] = row["description_chars"]
+            if used + row["minimum_tokens"] <= budget:
+                used += row["minimum_tokens"]
+                row["included"] = True
+            else:
+                row["included"] = False
+
+    included_count = sum(1 for row in rows if row["included"])
+    omitted_count = len(rows) - included_count
+    truncated_description_chars = sum(
+        row["truncated_description_chars"] for row in rows
+    )
+    truncated_description_count = sum(
+        1 for row in rows if row["truncated_description_chars"] > 0
+    )
+    average_truncated_description_chars = (
+        (truncated_description_chars + len(rows) - 1) // len(rows) if rows else 0
+    )
+    warning = None
+    if omitted_count:
+        warning = "Exceeded Available skills list budget"
+    elif (
+        average_truncated_description_chars
+        > CODEX_DESCRIPTION_TRUNCATION_WARNING_THRESHOLD_CHARS
+    ):
+        warning = "Skill descriptions were shortened"
+
+    return {
+        "budget_tokens": budget,
+        "status": status,
+        "warning": warning,
+        "skill_count": len(rows),
+        "included_count": included_count,
+        "omitted_count": omitted_count,
+        "full_tokens": full_tokens,
+        "minimum_tokens": minimum_tokens,
+        "tokens_over_budget_for_full_descriptions": max(0, full_tokens - budget),
+        "description_budget_tokens": max(0, budget - minimum_tokens),
+        "truncated_description_chars": truncated_description_chars,
+        "truncated_description_count": truncated_description_count,
+        "average_truncated_description_chars": average_truncated_description_chars,
+        "chars_to_restore_below_warning": max(
+            0,
+            truncated_description_chars
+            - (
+                CODEX_DESCRIPTION_TRUNCATION_WARNING_THRESHOLD_CHARS * max(1, len(rows))
+            ),
+        ),
+        "rows": rows,
+    }
+
+
+@app.command(name="list")
+def list_sources(
+    json_output: bool = typer.Option(
+        False,
+        "--json",
+        help="Output registered sources as JSON.",
+    ),
+):
+    """List all registered sources."""
+    current = _current_source()
+    sources = _load_sources()
+    if json_output:
+        print(
+            json.dumps(
+                {
+                    "current": current,
+                    "sources": [
+                        {
+                            "name": name,
+                            "path": path,
+                            "active": path == current,
+                        }
+                        for name, path in sources.items()
+                    ],
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+        return
+    if not sources:
+        console.print(
+            "[dim]No sources registered. Use "
+            "[bold]skillshare-source add <name> <path>[/bold] to add one.[/dim]"
+        )
+        return
+    for name, path in sources.items():
+        active = path == current
+        marker = "*" if active else " "
+        style = "bold" if active else ""
+        console.print(Text.assemble(f"  {marker} ", (name, style), "  ", (path, "dim")))
+
+
+@app.command()
+def switch(
+    name: str | None = typer.Argument(None),
+    no_input: bool = typer.Option(
+        False,
+        "--no-input",
+        help="Do not prompt when the target source is ambiguous.",
+    ),
+    dry_run: bool = typer.Option(
+        False,
+        "--dry-run",
+        help="Show the source change without writing config.",
+    ),
+):
+    """Switch active source: auto-pick the other when 2 sources total; prompt otherwise."""
+    sources = _load_sources()
+    if not sources:
+        error_console.print("[dim]No sources registered.[/dim]")
+        raise typer.Exit(1)
+    current = _current_source()
+    if name is None:
+        if no_input:
+            error_console.print(
+                "[red]--no-input requires an explicit source name[/red]"
+            )
+            raise typer.Exit(2)
+        name = _pick_other(sources, current, no_input)
+        if name is None:
+            return
+    if name not in sources:
+        error_console.print(Text.assemble(("Source not found: ", "red"), name))
+        error_console.print(Text(f"Available: {', '.join(sources)}", style="dim"))
+        raise typer.Exit(1)
+    if sources[name] == current:
+        console.print(Text.assemble("Already on ", (name, "bold")))
+    elif dry_run:
+        console.print(
+            Text.assemble(
+                ("Would switch to ", "yellow"), (name, "bold"), f" → {sources[name]}"
+            )
+        )
+    else:
+        try:
+            _set_source(sources[name])
+        except (OSError, TypeError, ValueError) as error:
+            error_console.print(f"[red]Failed to switch source: {error}[/red]")
+            raise typer.Exit(1) from None
+        console.print(
+            Text.assemble(
+                ("✓ ", "green"), "Switched to ", (name, "bold"), f" → {sources[name]}"
+            )
+        )
+
+
+@app.command()
+def add(
+    name: str,
+    path: str,
+    dry_run: bool = typer.Option(
+        False,
+        "--dry-run",
+        help="Show the source registration without writing sources.json.",
+    ),
+):
+    """Register a new source."""
+    resolved = str(Path(path).expanduser().resolve())
+    if not Path(resolved).is_dir():
+        error_console.print(Text.assemble(("Directory not found: ", "red"), resolved))
+        raise typer.Exit(1)
+    sources = _load_sources()
+    if dry_run:
+        console.print(
+            Text.assemble(("Would add ", "yellow"), (name, "bold"), f" → {resolved}")
+        )
+        return
+    sources[name] = resolved
+    try:
+        _save_sources(sources)
+    except OSError as error:
+        error_console.print(f"[red]Failed to register source: {error}[/red]")
+        raise typer.Exit(1) from None
+    console.print(
+        Text.assemble(("✓ ", "green"), "Added ", (name, "bold"), f" → {resolved}")
+    )
+
+
+@app.command(name="rm")
+def remove(
+    name: str,
+    dry_run: bool = typer.Option(
+        False,
+        "--dry-run",
+        help="Show the source removal without writing sources.json.",
+    ),
+):
+    """Unregister a source."""
+    sources = _load_sources()
+    if name not in sources:
+        error_console.print(Text.assemble(("Source not found: ", "red"), name))
+        raise typer.Exit(1)
+    if dry_run:
+        console.print(Text.assemble(("Would remove ", "yellow"), (name, "bold")))
+        return
+    del sources[name]
+    try:
+        _save_sources(sources)
+    except OSError as error:
+        error_console.print(f"[red]Failed to remove source: {error}[/red]")
+        raise typer.Exit(1) from None
+    console.print(Text.assemble(("✓ ", "green"), "Removed ", (name, "bold")))
+
+
+@app.command(name="exec")
+def exec_cmd(
+    name: str,
+    cmd: list[str],
+    dry_run: bool = typer.Option(
+        False,
+        "--dry-run",
+        help="Show the temporary source and command without writing config or running it.",
+    ),
+):
+    """Run a command with a temporary source, then restore.
+
+    Example: skillshare-source exec <source-name> -- skillshare install foo --track
+    """
+    sources = _load_sources()
+    if name not in sources:
+        error_console.print(Text.assemble(("Source not found: ", "red"), name))
+        raise typer.Exit(1)
+    orig = _current_source()
+    if dry_run:
+        console.print(
+            Text.assemble(
+                ("Would run with source ", "yellow"),
+                (name, "bold"),
+                f" → {sources[name]}",
+                ("\n  command: ", "dim"),
+                (" ".join(cmd), "dim"),
+                ("\n  restore: ", "dim"),
+                (orig, "dim"),
+            )
+        )
+        return
+    try:
+        _set_source(sources[name])
+    except (OSError, TypeError, ValueError) as error:
+        error_console.print(f"[red]Failed to switch source: {error}[/red]")
+        raise typer.Exit(1) from None
+    child_status = 0
+    child_error: OSError | None = None
+    restore_failed = False
+    try:
+        try:
+            result = subprocess.run(cmd)
+            child_status = result.returncode
+        except OSError as error:
+            child_error = error
+            child_status = 1
+    finally:
+        try:
+            _set_source(orig)
+        except (OSError, TypeError, ValueError) as e:
+            restore_failed = True
+            error_console.print(f"[red]Failed to restore source: {e}[/red]")
+            error_console.print(
+                Text.assemble(
+                    ("Restore manually by editing ", "red"),
+                    (str(SKILLSHARE_CFG), "bold"),
+                    (f"\n  sources:\n    skills: {orig}", "dim"),
+                )
+            )
+    if child_error is not None:
+        error_console.print(f"[red]Command could not start: {child_error}[/red]")
+    raise typer.Exit(1 if restore_failed else child_status)
+
+
+@app.command(name="descriptions")
+def descriptions(
+    source: str | None = typer.Option(
+        None,
+        "--source",
+        "-s",
+        help="Export descriptions from a Skillshare source tree instead of the installed target.",
+    ),
+    include_managed: bool = typer.Option(
+        True,
+        "--include-managed/--exclude-managed",
+        help="Include skills tracked in .metadata.json.",
+    ),
+    installed: bool = typer.Option(
+        False,
+        "--installed",
+        help="Export descriptions from the synced Skillshare universal target. This is the default.",
+    ),
+    target: str | None = typer.Option(
+        None,
+        "--target",
+        help="Export descriptions from an installed skills target directory. Implies --installed.",
+    ),
+):
+    """Export SKILL.md descriptions as JSONL."""
+    target_dir = Path(target).expanduser().resolve() if target else None
+    installed_requested = installed or target_dir is not None
+    if source is not None and installed_requested:
+        error_console.print(
+            "[red]--source cannot be combined with --installed or --target[/red]"
+        )
+        raise typer.Exit(2)
+    if source is None and not include_managed:
+        error_console.print("[red]--exclude-managed is only valid with --source[/red]")
+        raise typer.Exit(2)
+
+    if source is not None:
+        source_dir = _source_dir(source)
+        if not source_dir.is_dir():
+            error_console.print(
+                Text.assemble(("Source directory not found: ", "red"), str(source_dir))
+            )
+            raise typer.Exit(1)
+        items = _iter_skill_description_items(source_dir, include_managed)
+    else:
+        target_dir = target_dir or _default_skillshare_target_dir()
+        if not target_dir.is_dir():
+            error_console.print(
+                Text.assemble(("Target directory not found: ", "red"), str(target_dir))
+            )
+            raise typer.Exit(1)
+        items = _iter_installed_skill_description_items(target_dir)
+
+    for item in items:
+        print(
+            json.dumps(
+                {
+                    "name": item["name"],
+                    "path": item["path"],
+                    "description": item["description"],
+                },
+                ensure_ascii=False,
+                separators=(",", ":"),
+            )
+        )
+
+
+@app.command(name="budget")
+def analyze_context(
+    source: str | None = typer.Option(
+        None,
+        "--source",
+        "-s",
+        help="Analyze a Skillshare source tree instead of the installed target.",
+    ),
+    include_managed: bool = typer.Option(
+        True,
+        "--include-managed/--exclude-managed",
+        help="Include skills tracked in .metadata.json.",
+    ),
+    installed: bool = typer.Option(
+        False,
+        "--installed",
+        help="Analyze the synced Skillshare universal target. This is the default.",
+    ),
+    target: str | None = typer.Option(
+        None,
+        "--target",
+        help="Analyze an installed skills target directory. Implies --installed.",
+    ),
+    codex_visible: bool = typer.Option(
+        False,
+        "--codex-visible",
+        help="Analyze the latest Codex rollout's actual visible skills instead of a Skillshare source.",
+    ),
+    rollout: str | None = typer.Option(
+        None,
+        "--rollout",
+        help="Codex rollout JSONL to analyze. Implies --codex-visible.",
+    ),
+    context_window: str = typer.Option(
+        "current",
+        "--context-window",
+        "-w",
+        help="Model context window: positive integer, current, or codex.",
+    ),
+    percent: int = typer.Option(
+        AVAILABLE_SKILLS_CONTEXT_WINDOW_PERCENT,
+        "--percent",
+        min=1,
+        max=100,
+        help="Percent of context window reserved for the rendered Available skills list.",
+    ),
+    budget: int | None = typer.Option(
+        None,
+        "--budget",
+        min=1,
+        help="Override token budget directly instead of context-window * percent.",
+    ),
+    path_mode: Annotated[
+        PathMode,
+        typer.Option("--path-mode", help="Path cost mode: absolute or relative."),
+    ] = PathMode.absolute,
+    use_tiktoken: bool = typer.Option(
+        False,
+        "--tiktoken",
+        help="Add tiktoken o200k_base reference counts.",
+    ),
+    limit: int = typer.Option(
+        25,
+        "--limit",
+        "-n",
+        min=1,
+        help="Number of largest descriptions to show.",
+    ),
+    json_output: bool = typer.Option(
+        False,
+        "--json",
+        help="Output full analysis as JSON.",
+    ),
+):
+    """Analyze skill description cost against the Available skills list budget."""
+    rollout_file = None
+    missing_entries = []
+    target_dir = Path(target).expanduser().resolve() if target else None
+    requested_rollout_file = Path(rollout).expanduser().resolve() if rollout else None
+    codex_requested = codex_visible or requested_rollout_file is not None
+    installed_requested = installed or target_dir is not None
+    modes = [codex_requested, installed_requested, source is not None]
+    if sum(1 for enabled in modes if enabled) > 1:
+        error_console.print(
+            "[red]Choose only one of --codex-visible, --installed/--target, or --source[/red]"
+        )
+        raise typer.Exit(2)
+    if source is None and not include_managed:
+        error_console.print("[red]--exclude-managed is only valid with --source[/red]")
+        raise typer.Exit(2)
+
+    if codex_requested:
+        rollout_file, items = _codex_visible_skill_items(requested_rollout_file)
+        source_label = f"codex-visible:{rollout_file}"
+        scope = "codex-visible"
+    elif source is not None:
+        source_dir = _source_dir(source)
+        if not source_dir.is_dir():
+            error_console.print(
+                Text.assemble(("Source directory not found: ", "red"), str(source_dir))
+            )
+            raise typer.Exit(1)
+        items = list(_iter_skill_description_items(source_dir, include_managed))
+        source_label = str(source_dir)
+        scope = "source"
+    else:
+        target_dir = target_dir or _default_skillshare_target_dir()
+        if not target_dir.is_dir():
+            error_console.print(
+                Text.assemble(("Target directory not found: ", "red"), str(target_dir))
+            )
+            raise typer.Exit(1)
+        items, missing_entries = _installed_skill_description_items(target_dir)
+        source_label = f"installed:{target_dir}"
+        scope = "installed"
+
+    resolved_context_window, context_window_source = _resolve_context_window(
+        context_window, rollout_file
+    )
+    token_budget = budget or max(1, resolved_context_window * percent // 100)
+    analysis = _analyze_skill_context(
+        items, token_budget, _codex_token_count, path_mode.value
+    )
+    if use_tiktoken:
+        tiktoken_count_batch = _load_tiktoken_counter()
+        tiktoken_inputs = []
+        for row in analysis["rows"]:
+            tiktoken_inputs.extend(
+                [
+                    row["description"],
+                    f"{_skill_line(row['name'], row['description'], row['render_path'])}\n",
+                    f"{_skill_line(row['name'], '', row['render_path'])}\n",
+                ]
+            )
+        tiktoken_counts = tiktoken_count_batch(tiktoken_inputs)
+        for row, offset in zip(
+            analysis["rows"], range(0, len(tiktoken_counts), 3), strict=True
+        ):
+            row["tiktoken_description_tokens"] = tiktoken_counts[offset]
+            row["tiktoken_full_tokens"] = tiktoken_counts[offset + 1]
+            row["tiktoken_minimum_tokens"] = tiktoken_counts[offset + 2]
+    analysis.update(
+        {
+            "source": source_label,
+            "scope": scope,
+            "skillignore_applied": scope == "installed",
+            "missing_entries": missing_entries,
+            "missing_entry_count": len(missing_entries),
+            "codex_visible": codex_requested,
+            "installed": scope == "installed",
+            "target": str(target_dir) if target_dir else None,
+            "codex_rollout": str(rollout_file) if rollout_file else None,
+            "counter": "codex:ceil(bytes/4)",
+            "tiktoken": "o200k_base" if use_tiktoken else None,
+            "context_window": resolved_context_window,
+            "context_window_input": context_window,
+            "context_window_source": context_window_source,
+            "percent": percent,
+            "path_mode": path_mode.value,
+            "include_managed": include_managed,
+            "budget_source": "explicit" if budget else "context-window-percent",
+        }
+    )
+
+    if json_output:
+        print(json.dumps(analysis, ensure_ascii=False, indent=2))
+        return
+
+    console.print("[bold]Available skills list budget analysis[/bold]")
+    console.print(f"source: {source_label}")
+    console.print("counter: codex:ceil(bytes/4)")
+    if use_tiktoken:
+        console.print("tiktoken: o200k_base reference columns enabled")
+    console.print(
+        f"budget: {analysis['budget_tokens']} tokens ({percent}% of {resolved_context_window}, {context_window_source})"
+    )
+    console.print(
+        f"skills: {analysis['skill_count']} total, "
+        f"{analysis['included_count']} included, "
+        f"{analysis['omitted_count']} omitted"
+    )
+    if analysis["missing_entry_count"]:
+        console.print(
+            Text(
+                f"missing manifest entries: {analysis['missing_entry_count']}",
+                style="yellow",
+            )
+        )
+    console.print(
+        f"full: {analysis['full_tokens']} tokens, "
+        f"minimum: {analysis['minimum_tokens']} tokens, "
+        f"remaining for descriptions: {analysis['description_budget_tokens']} tokens"
+    )
+    console.print(
+        f"over full budget: {analysis['tokens_over_budget_for_full_descriptions']} tokens"
+    )
+    console.print(
+        f"truncated description chars: {analysis['truncated_description_chars']} "
+        f"across {analysis['truncated_description_count']} skills "
+        f"(avg {analysis['average_truncated_description_chars']})"
+    )
+    if analysis["warning"]:
+        console.print(Text(f"warning: {analysis['warning']}", style="yellow"))
+    else:
+        console.print(Text("warning: none", style="green"))
+
+    table = Table(title=f"Largest descriptions (top {limit})")
+    table.add_column("name", style="bold")
+    table.add_column("path", style="dim")
+    table.add_column("desc chars", justify="right")
+    table.add_column("desc tokens", justify="right")
+    if use_tiktoken:
+        table.add_column("o200k desc", justify="right")
+    table.add_column("full line", justify="right")
+    table.add_column("trunc chars", justify="right")
+    table.add_column("included", justify="right")
+    for row in sorted(
+        analysis["rows"],
+        key=lambda item: (
+            item["description_tokens"],
+            item["description_chars"],
+            item["full_tokens"],
+        ),
+        reverse=True,
+    )[:limit]:
+        cells = [
+            row["name"],
+            row["path"],
+            str(row["description_chars"]),
+            str(row["description_tokens"]),
+        ]
+        if use_tiktoken:
+            cells.append(str(row["tiktoken_description_tokens"]))
+        cells.extend(
+            [
+                str(row["full_tokens"]),
+                str(row["truncated_description_chars"]),
+                "yes" if row["included"] else "no",
+            ]
+        )
+        table.add_row(*cells)
+    console.print(table)
+
+
+def _parse_skill_name(name: str) -> tuple[str, str | None]:
+    """Split 'dir/skill' into (skill, into) or (skill, None)."""
+    p = PurePosixPath(name)
+    into = str(p.parent) if p.parent != PurePosixPath(".") else None
+    return p.name, into
+
+
+def _build_rel(name: str, into: str | None) -> str:
+    return f"{into}/{name}" if into else name
+
+
+_VALID_NAME = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9_-]*$")
+
+
+def _validate_name(name: str) -> str | None:
+    """Return error message if name is invalid, else None."""
+    if not _VALID_NAME.match(name):
+        return "must start with letter/number, contain only [a-zA-Z0-9_-]"
+    if len(name) > 64:
+        return "max 64 characters"
+    if name == "agents":
+        return "'agents' is a reserved name"
+    return None
+
+
+@app.command()
+def rename(
+    old: str,
+    new: str,
+    dry_run: bool = typer.Option(
+        False,
+        "--dry-run",
+        help="Show uninstall/install operations without changing skills.",
+    ),
+):
+    """Rename an installed skill: uninstall + reinstall with a new name."""
+
+    # --- validate new name and --into segments ---
+    new_name, new_into = _parse_skill_name(new)
+    if err := _validate_name(new_name):
+        error_console.print(
+            Text.assemble(
+                ("Invalid skill name: ", "red"), (new_name, "bold"), f"\n{err}"
+            )
+        )
+        raise typer.Exit(1)
+    if new_into:
+        for seg in PurePosixPath(new_into).parts:
+            if seg in (".", "..") or not _VALID_NAME.match(seg):
+                error_console.print(
+                    Text.assemble(("Invalid --into segment: ", "red"), (seg, "bold"))
+                )
+                raise typer.Exit(1)
+
+    # --- load skill list via CLI ---
+    source_dir = Path(_current_source())
+    items = _skillshare_json("list")
+    skills_by_rel: dict[str, dict] = {}
+    for item in items:
+        if item.get("kind", "skill") == "skill":
+            skills_by_rel[item["relPath"]] = item
+
+    # --- resolve old name (exact relPath match, then basename fallback) ---
+    entry: dict | None = skills_by_rel.get(old)
+    entry_key = old if entry else None
+    if entry is None:
+        matches = {
+            k: v for k, v in skills_by_rel.items() if PurePosixPath(k).name == old
+        }
+        if len(matches) == 1:
+            entry_key, entry = next(iter(matches.items()))
+        elif len(matches) > 1:
+            error_console.print(
+                Text.assemble(("Ambiguous name: ", "red"), (old, "bold"))
+            )
+            for m in sorted(matches):
+                error_console.print(Text(f"  {m}", style="dim"))
+            raise typer.Exit(1)
+
+    if entry is None or entry_key is None:
+        error_console.print(Text.assemble(("Skill not found: ", "red"), (old, "bold")))
+        available = sorted(skills_by_rel.keys())
+        if available:
+            error_console.print(Text(f"Available: {', '.join(available)}", style="dim"))
+        raise typer.Exit(1)
+
+    if entry.get("repoName"):
+        error_console.print(
+            Text.assemble(
+                ("Cannot rename tracked repo skill: ", "red"),
+                (entry_key, "bold"),
+                ("\nUse 'skillshare uninstall' on the tracked repo instead.", "dim"),
+            )
+        )
+        raise typer.Exit(1)
+
+    # --- derive canonical current path ---
+    cur_name, cur_into = _parse_skill_name(entry_key)
+    current_rel = _build_rel(cur_name, cur_into)
+    target_rel = _build_rel(new_name, new_into)
+
+    # --- preflight: no-op check ---
+    if current_rel == target_rel:
+        console.print(
+            "[yellow]Old and new resolve to the same path; nothing to do.[/yellow]"
+        )
+        raise typer.Exit(0)
+
+    # --- preflight: target already exists ---
+    target_path = source_dir / Path(*PurePosixPath(target_rel).parts)
+    if target_path.exists() or target_rel in skills_by_rel:
+        error_console.print(
+            Text.assemble(("Target already exists: ", "red"), (target_rel, "bold"))
+        )
+        raise typer.Exit(1)
+
+    install_url = entry.get("source", "")
+    if not install_url:
+        error_console.print(
+            Text.assemble(("No source recorded for: ", "red"), (current_rel, "bold"))
+        )
+        raise typer.Exit(1)
+
+    if dry_run:
+        console.print(
+            Text.assemble(
+                ("Would rename ", "yellow"),
+                (current_rel, "bold"),
+                " → ",
+                (target_rel, "bold"),
+                ("\n  uninstall: ", "dim"),
+                (current_rel, "dim"),
+                ("\n  install source: ", "dim"),
+                (install_url, "dim"),
+            )
+        )
+        return
+
+    console.print(
+        Text.assemble(
+            ("Renaming ", ""),
+            (current_rel, "bold"),
+            " → ",
+            (target_rel, "bold"),
+            ("\n  source: ", "dim"),
+            (install_url, "dim"),
+        )
+    )
+
+    # --- uninstall ---
+    r1 = subprocess.run(["skillshare", "uninstall", "--force", current_rel])
+    if r1.returncode != 0:
+        error_console.print("[red]Uninstall failed[/red]")
+        raise typer.Exit(1)
+
+    # --- reinstall ---
+    install_cmd = ["skillshare", "install", install_url, "--name", new_name, "--force"]
+    if new_into:
+        install_cmd += ["--into", new_into]
+    r2 = subprocess.run(install_cmd)
+    if r2.returncode != 0:
+        error_console.print("[yellow]Reinstall failed, rolling back…[/yellow]")
+        rollback_cmd = [
+            "skillshare",
+            "install",
+            install_url,
+            "--name",
+            cur_name,
+            "--force",
+        ]
+        if cur_into:
+            rollback_cmd += ["--into", cur_into]
+        rb = subprocess.run(rollback_cmd)
+        if rb.returncode == 0:
+            console.print("[green]✓ Rolled back to original name[/green]")
+        else:
+            restore_hint = f"skillshare install {install_url} --name {cur_name}"
+            if cur_into:
+                restore_hint += f" --into {cur_into}"
+            error_console.print(
+                Text.assemble(
+                    ("[red]Rollback also failed. Restore manually:[/red]\n  ", ""),
+                    (restore_hint, "dim"),
+                )
+            )
+        raise typer.Exit(1)
+
+    console.print(
+        Text.assemble(
+            ("✓ ", "green"),
+            "Renamed ",
+            (current_rel, "bold"),
+            " → ",
+            (target_rel, "bold"),
+        )
+    )
+
+
+def _check(ok: bool, label: str, detail: str) -> bool:
+    mark = Text("✓ ", style="green") if ok else Text("✗ ", style="red")
+    console.print(Text.assemble("  ", mark, label, "  ", (detail, "dim")))
+    return ok
+
+
+def _doctor_report() -> dict:
+    checks = []
+
+    def add_check(section: str, label: str, ok: bool, detail: str) -> None:
+        checks.append(
+            {
+                "section": section,
+                "label": label,
+                "ok": ok,
+                "detail": detail,
+            }
+        )
+
+    config_exists = SKILLSHARE_CFG.exists()
+    add_check("environment", "Config", config_exists, str(SKILLSHARE_CFG))
+    sources_exists = SOURCES_CFG.exists()
+    add_check("environment", "Sources", sources_exists, str(SOURCES_CFG))
+
+    current = _current_source() if config_exists else ""
+    if current:
+        add_check("environment", "Active source dir", Path(current).is_dir(), current)
+    else:
+        add_check("environment", "Active source dir", False, "(missing)")
+
+    sources = _load_sources()
+    name = _resolve_name(sources, current) if current else None
+    add_check(
+        "environment",
+        "Active source registered",
+        name is not None,
+        name or "(unregistered)",
+    )
+
+    source_details = []
+    for sname, spath in sources.items():
+        p = Path(spath)
+        ok = p.is_dir()
+        add_check("sources", sname, ok, spath)
+        skill_count = 0
+        if ok:
+            skill_count = sum(
+                1 for d in p.iterdir() if d.is_dir() and (d / "SKILL.md").exists()
+            )
+        source_details.append(
+            {
+                "name": sname,
+                "path": spath,
+                "ok": ok,
+                "skill_count": skill_count,
+            }
+        )
+
+    has_skillshare = shutil.which("skillshare") is not None
+    add_check("tools", "skillshare", has_skillshare, "required")
+
+    required = {
+        ("environment", "Config"),
+        ("environment", "Sources"),
+        ("environment", "Active source dir"),
+        ("tools", "skillshare"),
+    }
+    errors = sum(
+        1
+        for check in checks
+        if (check["section"], check["label"]) in required and not check["ok"]
+    )
+    return {
+        "ok": errors == 0,
+        "error_count": errors,
+        "current": current,
+        "active_source_name": name,
+        "config_path": str(SKILLSHARE_CFG),
+        "sources_path": str(SOURCES_CFG),
+        "sources": source_details,
+        "checks": checks,
+    }
+
+
+@app.command()
+def doctor(
+    json_output: bool = typer.Option(
+        False,
+        "--json",
+        help="Output checks as JSON.",
+    ),
+):
+    """Check skillshare config, registered sources, and required tools."""
+    report = _doctor_report()
+    if json_output:
+        print(json.dumps(report, ensure_ascii=False, indent=2))
+        if not report["ok"]:
+            raise typer.Exit(1)
+        return
+
+    console.print("[bold]Checking environment[/bold]")
+    for check in report["checks"]:
+        if check["section"] == "environment":
+            _check(check["ok"], check["label"], check["detail"])
+
+    console.print()
+    console.print("[bold]Checking sources[/bold]")
+    for source in report["sources"]:
+        if not _check(source["ok"], source["name"], source["path"]):
+            continue
+        console.print(Text(f"        {source['skill_count']} skill(s)", style="dim"))
+
+    console.print()
+    console.print("[bold]Checking tools[/bold]")
+    for check in report["checks"]:
+        if check["section"] == "tools":
+            _check(check["ok"], check["label"], check["detail"])
+
+    console.print()
+    if report["error_count"]:
+        console.print(f"[red]{report['error_count']} error(s) found[/red]")
+        raise typer.Exit(1)
+    else:
+        console.print("[green]All checks passed[/green]")
+
+
+if __name__ == "__main__":
+    app()

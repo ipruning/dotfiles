@@ -5,16 +5,40 @@ set -uo pipefail
 VERSION="1.0.0"
 LABEL="com.alex.limit.maxfiles"
 SELF_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)/$(basename "${BASH_SOURCE[0]}")"
-INSTALL_BIN="/usr/local/bin/macos-maxfiles"
-PLIST_FILE="/Library/LaunchDaemons/$LABEL.plist"
+TEST_ROOT="${MACOS_MAXFILES_TEST_ROOT:-}"
+INSTALL_BIN="$TEST_ROOT/usr/local/bin/macos-maxfiles"
+PLIST_FILE="$TEST_ROOT/Library/LaunchDaemons/$LABEL.plist"
 LAUNCHCTL_BIN="/bin/launchctl"
 SUDO_BIN="/usr/bin/sudo"
+INSTALL_TOOL="/usr/bin/install"
+RM_BIN="/bin/rm"
+CP_BIN="/bin/cp"
+PLUTIL_BIN="/usr/bin/plutil"
+UNAME_BIN="/usr/bin/uname"
+if [[ -n "$TEST_ROOT" ]]; then
+  LAUNCHCTL_BIN="${MACOS_MAXFILES_LAUNCHCTL_BIN:-$LAUNCHCTL_BIN}"
+  SUDO_BIN="${MACOS_MAXFILES_SUDO_BIN:-$SUDO_BIN}"
+  INSTALL_TOOL="${MACOS_MAXFILES_INSTALL_BIN:-$INSTALL_TOOL}"
+  RM_BIN="${MACOS_MAXFILES_RM_BIN:-$RM_BIN}"
+  CP_BIN="${MACOS_MAXFILES_CP_BIN:-$CP_BIN}"
+  PLUTIL_BIN="${MACOS_MAXFILES_PLUTIL_BIN:-$PLUTIL_BIN}"
+  UNAME_BIN="${MACOS_MAXFILES_UNAME_BIN:-$UNAME_BIN}"
+fi
 SOFT_LIMIT="8192"
 HARD_LIMIT="65536"
 PLIST_TMP=""
+BACKUP_DIR=""
+EFFECTIVE_LIMITS=""
+LIMIT_VERIFY_ATTEMPTS=31
+LIMIT_VERIFY_INTERVAL=0.1
+if [[ -n "$TEST_ROOT" ]]; then
+  LIMIT_VERIFY_ATTEMPTS="${MACOS_MAXFILES_LIMIT_VERIFY_ATTEMPTS:-$LIMIT_VERIFY_ATTEMPTS}"
+  LIMIT_VERIFY_INTERVAL="${MACOS_MAXFILES_LIMIT_VERIFY_INTERVAL:-$LIMIT_VERIFY_INTERVAL}"
+fi
 
 cleanup() {
   [[ -z "$PLIST_TMP" ]] || rm -f "$PLIST_TMP"
+  [[ -z "$BACKUP_DIR" ]] || rm -rf "$BACKUP_DIR"
 }
 trap cleanup EXIT
 
@@ -43,6 +67,7 @@ usage_error() {
 }
 
 authorize_root() {
+  [[ -z "$TEST_ROOT" ]] || return 0
   if (( EUID == 0 )); then
     return
   fi
@@ -54,6 +79,10 @@ authorize_root() {
 }
 
 run_root() {
+  if [[ -n "$TEST_ROOT" ]]; then
+    "$@"
+    return
+  fi
   if (( EUID == 0 )); then
     "$@"
   else
@@ -92,26 +121,135 @@ loaded() {
   "$LAUNCHCTL_BIN" print "system/$LABEL" >/dev/null 2>&1
 }
 
-unload() {
-  local deadline
-  loaded || return 0
-  run_root "$LAUNCHCTL_BIN" bootout "system/$LABEL" >/dev/null || return 1
-  deadline=$((SECONDS + 3))
+read_limits() {
+  "$LAUNCHCTL_BIN" limit maxfiles 2>/dev/null | awk '$1 == "maxfiles" { print $2, $3; found=1 } END { if (!found) exit 1 }'
+}
+
+limits_satisfied() {
+  local limits="$1" actual_soft actual_hard
+  read -r actual_soft actual_hard <<<"$limits"
+  [[ "$actual_soft" =~ ^[0-9]+$ ]] || return 1
+  (( 10#$actual_soft >= 10#$SOFT_LIMIT )) || return 1
+  [[ "$actual_hard" == unlimited ]] && return 0
+  [[ "$actual_hard" =~ ^[0-9]+$ ]] || return 1
+  (( 10#$actual_hard >= 10#$HARD_LIMIT ))
+}
+
+wait_effective_limits() {
+  local attempt
+  for (( attempt = 0; attempt < LIMIT_VERIFY_ATTEMPTS; attempt++ )); do
+    EFFECTIVE_LIMITS="$(read_limits || true)"
+    limits_satisfied "$EFFECTIVE_LIMITS" && return 0
+    (( attempt + 1 < LIMIT_VERIFY_ATTEMPTS )) || return 1
+    sleep "$LIMIT_VERIFY_INTERVAL"
+  done
+  return 1
+}
+
+wait_unloaded() {
+  local deadline=$((SECONDS + 3))
   while loaded; do
     (( SECONDS < deadline )) || return 1
     sleep 0.1
   done
 }
 
+unload() {
+  local deadline
+  loaded || return 0
+  run_root "$LAUNCHCTL_BIN" bootout "system/$LABEL" >/dev/null || return 1
+  wait_unloaded
+}
+
+backup_managed_files() {
+  if [[ -n "$TEST_ROOT" ]]; then
+    BACKUP_DIR="$(mktemp -d "$TEST_ROOT/macos-maxfiles.backup.XXXXXX")" || return 1
+  else
+    BACKUP_DIR="$(mktemp -d -t macos-maxfiles.backup.XXXXXX)" || return 1
+  fi
+  backup_managed_path "$INSTALL_BIN" executable || return 1
+  backup_managed_path "$PLIST_FILE" plist || return 1
+}
+
+backup_managed_path() {
+  local source="$1" name="$2" link_target
+  if [[ -L "$source" ]]; then
+    link_target="$(/usr/bin/readlink "$source")" || return 1
+    printf '%s\n' "$link_target" >"$BACKUP_DIR/$name.symlink" || return 1
+  elif [[ -e "$source" ]]; then
+    run_root "$CP_BIN" -p "$source" "$BACKUP_DIR/$name" || return 1
+  else
+    : >"$BACKUP_DIR/$name.absent" || return 1
+  fi
+}
+
+restore_managed_path() {
+  local name="$1" destination="$2" link_target
+  if [[ -e "$BACKUP_DIR/$name.symlink" ]]; then
+    link_target="$(cat "$BACKUP_DIR/$name.symlink")" || return 1
+    run_root "$RM_BIN" -f "$destination" || return 1
+    run_root /bin/ln -s "$link_target" "$destination" || return 1
+  elif [[ -e "$BACKUP_DIR/$name" ]]; then
+    run_root "$RM_BIN" -f "$destination" || return 1
+    run_root "$CP_BIN" -p "$BACKUP_DIR/$name" "$destination" || return 1
+  elif [[ -e "$BACKUP_DIR/$name.absent" ]]; then
+    run_root "$RM_BIN" -f "$destination" || return 1
+  else
+    return 1
+  fi
+}
+
+restore_files() {
+  local failed=0
+  restore_managed_path executable "$INSTALL_BIN" || failed=1
+  restore_managed_path plist "$PLIST_FILE" || failed=1
+  return "$failed"
+}
+
+rollback() {
+  local was_loaded="$1" old_soft="$2" old_hard="$3" failures="" restored_limits=""
+  unload || failures="${failures} unload"
+  restore_files || failures="${failures} files"
+  if [[ "$was_loaded" == true ]]; then
+    run_root "$LAUNCHCTL_BIN" bootstrap system "$PLIST_FILE" >/dev/null 2>&1 && loaded \
+      || failures="${failures} loaded-state"
+  else
+    unload || failures="${failures} unloaded-state"
+  fi
+  if [[ -n "$old_soft" && -n "$old_hard" ]]; then
+    if run_root "$LAUNCHCTL_BIN" limit maxfiles "$old_soft" "$old_hard" >/dev/null 2>&1; then
+      restored_limits="$(read_limits || true)"
+      [[ "$restored_limits" == "$old_soft $old_hard" ]] \
+        || failures="${failures} effective-limits"
+    else
+      failures="${failures} effective-limits"
+    fi
+  fi
+  if [[ -n "$failures" ]]; then
+    printf 'macos-maxfiles: rollback failed:%s; backups kept at %s\n' \
+      "$failures" "$BACKUP_DIR" >&2
+    BACKUP_DIR=""
+    return 1
+  fi
+}
+
+transaction_failed() {
+  local message="$1" was_loaded="$2" old_soft="$3" old_hard="$4"
+  printf 'macos-maxfiles: %s\n' "$message" >&2
+  rollback "$was_loaded" "$old_soft" "$old_hard" || true
+  return 1
+}
+
 install_mode() {
-  local dry_run=0
+  local dry_run=0 was_loaded=false old_soft="" old_hard="" limits=""
   [[ "${1:-}" == --dry-run ]] && { dry_run=1; shift; }
   (( $# == 0 )) || usage_error "usage: macos-maxfiles install [--dry-run]"
-  [[ "$(uname -s)" == Darwin ]] || die "install is supported only on macOS"
+  [[ "$($UNAME_BIN -s)" == Darwin ]] || die "install is supported only on macOS"
 
   PLIST_TMP="$(mktemp -t macos-maxfiles.plist.XXXXXX)" || die "could not create temporary plist"
   write_plist "$PLIST_TMP"
-  /usr/bin/plutil -lint "$PLIST_TMP" >/dev/null || die "generated plist is invalid"
+  "$PLUTIL_BIN" -lint "$PLIST_TMP" >/dev/null || die "generated plist is invalid"
+  /bin/bash -n "$SELF_PATH" || die "executable is invalid"
 
   if (( dry_run == 1 )); then
     printf 'ready="true" executable="%s" plist="%s" soft_limit="%s" hard_limit="%s"\n' \
@@ -120,24 +258,36 @@ install_mode() {
   fi
 
   authorize_root
-  unload || die "could not unload system/$LABEL"
-  if [[ ! -e "$INSTALL_BIN" || ! "$SELF_PATH" -ef "$INSTALL_BIN" ]]; then
-    run_root /usr/bin/install -o root -g wheel -m 0755 "$SELF_PATH" "$INSTALL_BIN" \
-      || die "could not install $INSTALL_BIN"
+  loaded && was_loaded=true
+  limits="$(read_limits || true)"
+  read -r old_soft old_hard <<<"$limits"
+  backup_managed_files || die "could not back up managed files"
+  unload || transaction_failed "could not unload system/$LABEL" "$was_loaded" "$old_soft" "$old_hard" || return 1
+  if [[ -L "$INSTALL_BIN" || ! -e "$INSTALL_BIN" || ! "$SELF_PATH" -ef "$INSTALL_BIN" ]]; then
+    run_root "$RM_BIN" -f "$INSTALL_BIN" \
+      || { transaction_failed "could not replace $INSTALL_BIN" "$was_loaded" "$old_soft" "$old_hard"; return 1; }
+    run_root "$INSTALL_TOOL" -o root -g wheel -m 0755 "$SELF_PATH" "$INSTALL_BIN" \
+      || { transaction_failed "could not install $INSTALL_BIN" "$was_loaded" "$old_soft" "$old_hard"; return 1; }
   else
-    run_root /usr/sbin/chown root:wheel "$INSTALL_BIN" || die "could not secure $INSTALL_BIN"
-    run_root /bin/chmod 0755 "$INSTALL_BIN" || die "could not secure $INSTALL_BIN"
+    run_root /usr/sbin/chown root:wheel "$INSTALL_BIN" \
+      || { transaction_failed "could not secure $INSTALL_BIN" "$was_loaded" "$old_soft" "$old_hard"; return 1; }
+    run_root /bin/chmod 0755 "$INSTALL_BIN" \
+      || { transaction_failed "could not secure $INSTALL_BIN" "$was_loaded" "$old_soft" "$old_hard"; return 1; }
   fi
-  run_root /usr/bin/install -o root -g wheel -m 0644 "$PLIST_TMP" "$PLIST_FILE" \
-    || die "could not install $PLIST_FILE"
+  run_root "$RM_BIN" -f "$PLIST_FILE" \
+    || { transaction_failed "could not replace $PLIST_FILE" "$was_loaded" "$old_soft" "$old_hard"; return 1; }
+  run_root "$INSTALL_TOOL" -o root -g wheel -m 0644 "$PLIST_TMP" "$PLIST_FILE" \
+    || { transaction_failed "could not install $PLIST_FILE" "$was_loaded" "$old_soft" "$old_hard"; return 1; }
   run_root "$LAUNCHCTL_BIN" bootstrap system "$PLIST_FILE" >/dev/null \
-    || die "could not bootstrap system/$LABEL"
-  loaded || die "LaunchDaemon did not load: system/$LABEL"
+    || { transaction_failed "could not bootstrap system/$LABEL" "$was_loaded" "$old_soft" "$old_hard"; return 1; }
+  loaded || { transaction_failed "LaunchDaemon did not load: system/$LABEL" "$was_loaded" "$old_soft" "$old_hard"; return 1; }
+  wait_effective_limits \
+    || { transaction_failed "effective maxfiles verification failed: expected at least $SOFT_LIMIT $HARD_LIMIT, got ${EFFECTIVE_LIMITS:-unavailable}" "$was_loaded" "$old_soft" "$old_hard"; return 1; }
   printf 'installed="true" loaded="true" executable="%s" plist="%s"\n' "$INSTALL_BIN" "$PLIST_FILE"
 }
 
 status_mode() {
-  local output_json=0 installed=false binary=false is_loaded=false limits soft hard owner mode
+  local output_json=0 installed=false binary=false is_loaded=false limits_ok=false limits soft hard owner mode
   [[ "${1:-}" == --json ]] && { output_json=1; shift; }
   (( $# == 0 )) || usage_error "usage: macos-maxfiles status [--json]"
 
@@ -146,25 +296,36 @@ status_mode() {
   loaded && is_loaded=true
   limits="$("$LAUNCHCTL_BIN" limit maxfiles 2>/dev/null || true)"
   read -r soft hard < <(awk '$1 == "maxfiles" { print $2, $3 }' <<<"$limits")
+  limits_satisfied "${soft:-} ${hard:-}" && limits_ok=true
   owner="$(stat -f '%Su:%Sg' "$PLIST_FILE" 2>/dev/null || true)"
   mode="$(stat -f '%Lp' "$PLIST_FILE" 2>/dev/null || true)"
 
   if (( output_json == 1 )); then
-    printf '{"installed":%s,"binary":%s,"loaded":%s,"soft_limit":"%s","hard_limit":"%s","owner":"%s","mode":"%s","executable":"%s","plist":"%s"}\n' \
-      "$installed" "$binary" "$is_loaded" "${soft:-}" "${hard:-}" "$owner" "$mode" "$INSTALL_BIN" "$PLIST_FILE"
+    printf '{"installed":%s,"binary":%s,"loaded":%s,"limits_satisfied":%s,"soft_limit":"%s","hard_limit":"%s","owner":"%s","mode":"%s","executable":"%s","plist":"%s"}\n' \
+      "$installed" "$binary" "$is_loaded" "$limits_ok" "${soft:-}" "${hard:-}" "$owner" "$mode" "$INSTALL_BIN" "$PLIST_FILE"
   else
-    printf 'installed="%s" binary="%s" loaded="%s" soft_limit="%s" hard_limit="%s" owner="%s" mode="%s" executable="%s" plist="%s"\n' \
-      "$installed" "$binary" "$is_loaded" "${soft:-}" "${hard:-}" "$owner" "$mode" "$INSTALL_BIN" "$PLIST_FILE"
+    printf 'installed="%s" binary="%s" loaded="%s" limits_satisfied="%s" soft_limit="%s" hard_limit="%s" owner="%s" mode="%s" executable="%s" plist="%s"\n' \
+      "$installed" "$binary" "$is_loaded" "$limits_ok" "${soft:-}" "${hard:-}" "$owner" "$mode" "$INSTALL_BIN" "$PLIST_FILE"
   fi
-  [[ "$installed" == true && "$binary" == true && "$is_loaded" == true ]]
+  [[ "$installed" == true && "$binary" == true && "$is_loaded" == true && "$limits_ok" == true ]]
 }
 
 uninstall_mode() {
+  local was_loaded=false limits="" old_soft="" old_hard=""
   [[ "${1:-}" == --yes && $# == 1 ]] || usage_error "usage: macos-maxfiles uninstall --yes"
   authorize_root
-  unload || die "could not unload system/$LABEL; installed file was kept"
-  run_root /bin/rm -f "$PLIST_FILE" || die "could not remove $PLIST_FILE"
-  run_root /bin/rm -f "$INSTALL_BIN" || die "could not remove $INSTALL_BIN"
+  loaded && was_loaded=true
+  limits="$(read_limits || true)"; read -r old_soft old_hard <<<"$limits"
+  backup_managed_files || die "could not back up managed files"
+  unload || { transaction_failed "could not unload system/$LABEL; installed files were kept" "$was_loaded" "$old_soft" "$old_hard"; return 1; }
+  run_root "$RM_BIN" -f "$PLIST_FILE" \
+    || { transaction_failed "could not remove $PLIST_FILE" "$was_loaded" "$old_soft" "$old_hard"; return 1; }
+  run_root "$RM_BIN" -f "$INSTALL_BIN" \
+    || { transaction_failed "could not remove $INSTALL_BIN" "$was_loaded" "$old_soft" "$old_hard"; return 1; }
+  if [[ -e "$PLIST_FILE" || -L "$PLIST_FILE" || -e "$INSTALL_BIN" || -L "$INSTALL_BIN" ]] || loaded; then
+    transaction_failed "uninstall verification failed" "$was_loaded" "$old_soft" "$old_hard"
+    return 1
+  fi
   printf 'installed="false" loaded="false" effective_until_reboot="true"\n'
 }
 

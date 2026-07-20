@@ -5,12 +5,13 @@
 
 set -uo pipefail
 
-VERSION="2.3.4"
+VERSION="2.6.0"
 EXIT_USAGE=2
 EXIT_BRIGHTNESS_PENDING=69
 EXIT_START_FAILED=70
 EXIT_CRASH_LOOP=75
 EXIT_RECOVERY_CONFLICT=76
+EXIT_INSTALL_ROLLBACK_FAILED=77
 EXIT_PREFLIGHT_FAILED=78
 LABEL="dev.bag-mode.daemon"
 SELF_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)/$(basename "${BASH_SOURCE[0]}")"
@@ -67,7 +68,8 @@ Keep a MacBook awake with its lid closed.
 Usage: bag-mode COMMAND [OPTIONS]
 
 Setup:
-  install        Install or upgrade the CLI and LaunchDaemon
+  install        Install the CLI and LaunchDaemon (service stays stopped)
+  upgrade        Stop if needed, install, and restore the prior running state
   doctor         Check dependencies and installation state
 
 Service:
@@ -108,6 +110,11 @@ Recommended installation flow:
   5. bag-mode status --json
   6. bag-mode doctor --strict --json
 
+Upgrading an existing installation? Use `bag-mode upgrade` instead: it stops
+the service, installs, and restarts only if the service was enabled before.
+A bare `install` never starts the service, and a stopped bag mode means the
+Mac sleeps normally when the lid closes.
+
 --dry-run validates dependencies and the generated plist without changing the
 system. Installation requires sudo. In a non-interactive shell, preauthorize
 sudo in an interactive terminal with `sudo -v`, then retry the exact command.
@@ -116,6 +123,22 @@ Successful verification requires installed, launchd_loaded, and enabled to be
 true, phase to be running, controller.alive to be true, recovery_required and
 brightness_pending to be false, and strict doctor to return ok=true with
 problems=0.
+EOF
+      ;;
+    upgrade)
+      cat <<'EOF'
+Usage: bag-mode upgrade
+
+Upgrade the installed CLI and LaunchDaemon in one step:
+  1. Remember whether the service is enabled.
+  2. Stop the controller and restore captured settings when any service
+     state exists.
+  3. Install this executable and bootstrap the LaunchDaemon.
+  4. Start the service again only when step 1 found it enabled.
+
+Requires sudo like install and start. If brightness restoration stays pending
+after the stop (lid closed), the restarted controller adopts the pending
+target automatically.
 EOF
       ;;
     doctor)
@@ -157,7 +180,8 @@ Usage:
 The generic notifier contract is:
   notifier --event NAME --level LEVEL --title TEXT --message TEXT
 
-install-brrr copies the sender into stable user Application Support storage.
+install-brrr uses the built-in sender by default, or copies PATH when provided,
+then stores it in stable user Application Support storage.
 The controller does not depend on the original Skill or Skillshare path afterward.
 EOF
       ;;
@@ -342,9 +366,24 @@ require_root() {
   [[ "${BAG_MODE_TESTING:-0}" == 1 || $EUID -eq 0 ]] || die "this internal operation must run as root"
 }
 
+execute_installed() {
+  if [[ "${BAG_MODE_TESTING:-0}" == 1 ]]; then
+    /bin/bash "$@"
+  else
+    "$@"
+  fi
+}
+
 run_root() {
   if [[ "${BAG_MODE_TESTING:-0}" == 1 ]]; then
-    "$@"
+    if [[ "${1:-}" == /bin/rm && -e "${BAG_MODE_FAKE_STATE:-}/fail-remove" ]]; then
+      printf 'injected managed-path removal failure\n' >&2
+      return 91
+    fi
+    case "${1:-}" in
+      "$INSTALL_BIN"|"$CONTROLLER_BIN") execute_installed "$@" ;;
+      *) "$@" ;;
+    esac
   else
     "$SUDO_BIN" "$@"
   fi
@@ -353,10 +392,28 @@ run_root() {
 install_root_file() {
   local mode="$1" source_file="$2" destination="$3"
   if [[ "${BAG_MODE_TESTING:-0}" == 1 ]]; then
+    if [[ -e "${BAG_MODE_FAKE_STATE:-}/fail-restore" \
+      && "$(basename "$(dirname "$source_file")")" == bag-mode-install.* ]]; then
+      /bin/rm -f "$BAG_MODE_FAKE_STATE/fail-restore"
+      printf 'injected installation restore failure\n' >&2
+      return 92
+    fi
     /usr/bin/install -m "$mode" "$source_file" "$destination"
   else
     "$SUDO_BIN" /usr/bin/install -m "$mode" -o root -g wheel "$source_file" "$destination"
   fi
+}
+
+restore_root_backup() {
+  local source_file="$1" destination="$2"
+  if [[ "${BAG_MODE_TESTING:-0}" == 1 \
+    && -e "${BAG_MODE_FAKE_STATE:-}/fail-restore" ]]; then
+    /bin/rm -f "$BAG_MODE_FAKE_STATE/fail-restore"
+    printf 'injected installation restore failure\n' >&2
+    return 92
+  fi
+  run_root /bin/rm -f "$destination" || return 1
+  run_root /bin/cp -Pp "$source_file" "$destination"
 }
 
 install_root_copy() {
@@ -394,15 +451,6 @@ run_as_user() {
 
 user_support_dir() {
   printf '%s/Library/Application Support/bag-mode\n' "$1"
-}
-
-# TODO(cleanup): trigger=date:2026-10-01; action=remove the legacy lock probe and install blocker
-legacy_controller_running() {
-  ps -axo command= -ww 2>/dev/null | awk '
-    BEGIN { lock_command = "/usr/bin/" "lockf"; lock_name = "bag-mode" ".lock" }
-    index($0, lock_command) && index($0, lock_name) { found = 1 }
-    END { exit !found }
-  '
 }
 
 user_log_dir() {
@@ -512,26 +560,30 @@ load_controller_config() {
   fi
 }
 
-load_fallback_recovery_context() {
-  local recovery_session
-  recovery_session="$(config_get session_id "$RECOVERY_RECORD_FILE")"
-  [[ -n "$recovery_session" ]] || return 1
+load_fallback_user_context() {
   RUN_USER="$(resolve_user 2>/dev/null || true)"
   [[ -n "$RUN_USER" ]] || return 1
   RUN_HOME="$(resolve_home "$RUN_USER" 2>/dev/null || true)"
   [[ -n "$RUN_HOME" ]] || return 1
   RUN_GROUP="$(resolve_group "$RUN_USER" 2>/dev/null || true)"
   [[ -n "$RUN_GROUP" ]] || return 1
+  NOTIFIER=""
+  prepare_user_dirs
+}
+
+load_fallback_recovery_context() {
+  local recovery_session
+  recovery_session="$(config_get session_id "$RECOVERY_RECORD_FILE")"
+  [[ -n "$recovery_session" ]] || return 1
+  load_fallback_user_context || return 1
   BRIGHTNESS_BIN="$(resolve_brightness)"
   [[ -x "$BRIGHTNESS_BIN" ]] || return 1
-  NOTIFIER=""
   SESSION_ID="$recovery_session"
   INTERVAL="$DEFAULT_INTERVAL"
   CLOSED_INTERVAL="$DEFAULT_CLOSED_INTERVAL"
   BATTERY_EVERY="$DEFAULT_BATTERY_EVERY"
   BATTERY_MIN="$DEFAULT_BATTERY_MIN"
   BATTERY_THRESHOLDS="$DEFAULT_BATTERY_THRESHOLDS"
-  prepare_user_dirs
 }
 
 restore_power_from_snapshot() {
@@ -552,7 +604,12 @@ preflight_failure() {
   rm -f "$ENABLED_FILE" 2>/dev/null || true
   release_controller_reservation "${SESSION_ID:-}" 2>/dev/null || true
   printf 'bag-mode: %s; service disabled\n' "$reason" >&2
-  [[ -e "$RECOVERY_RECORD_FILE" ]] || exit "$EXIT_PREFLIGHT_FAILED"
+  if [[ ! -e "$RECOVERY_RECORD_FILE" ]]; then
+    if load_fallback_user_context; then
+      notify_sync startup_failed time-sensitive "bag-mode failed to start" "The controller could not start ($reason) and the service was disabled. The Mac will sleep normally when the lid closes. Inspect \`bag-mode logs\`, then run \`bag-mode start\`." || true
+    fi
+    exit "$EXIT_PREFLIGHT_FAILED"
+  fi
 
   STARTED_AT="$(now_text)"
   CURRENT_LID=unknown
@@ -564,6 +621,7 @@ preflight_failure() {
     if restore_recovery_snapshot; then
       rm -f "$RECOVERY_RECORD_FILE" "$RESTART_FILE" 2>/dev/null || true
       write_status_snapshot startup_failed || true
+      notify_sync startup_failed time-sensitive "bag-mode failed to start" "The controller could not start ($reason). Captured settings were restored and the service was disabled. The Mac will sleep normally when the lid closes. Inspect \`bag-mode logs\`, then run \`bag-mode start\`." || true
       log_line "startup failed; captured settings restored; reason=$reason"
       exit "$EXIT_PREFLIGHT_FAILED"
     fi
@@ -572,6 +630,7 @@ preflight_failure() {
   restore_power_from_snapshot || true
   if (( fallback_ready )); then
     write_status_snapshot recovery_failed || true
+    notify_sync recovery_failed time-sensitive "bag-mode settings recovery failed" "The controller could not start ($reason) and captured settings could not be fully restored. Run \`bag-mode recover\` now." || true
     log_line "startup failed; partial restoration attempted; recovery remains required; reason=$reason"
   fi
   exit "$EXIT_PREFLIGHT_FAILED"
@@ -933,20 +992,20 @@ clean_shutdown() {
     rm -f "$RECOVERY_RECORD_FILE" "$RESTART_FILE" 2>/dev/null || true
     if [[ -e "$BRIGHTNESS_PENDING_FILE" ]]; then
       write_status_snapshot brightness_pending || true
-      notify_sync brightness_pending time-sensitive "bag-mode brightness recovery pending" "reason=$reason; open_lid=true; command=bag-mode recover" || true
+      notify_sync brightness_pending time-sensitive "bag-mode brightness recovery pending" "The lid is closed, so display brightness could not be restored after $reason. Open the lid and run \`bag-mode recover\`." || true
       log_line "power settings restored; brightness recovery pending; open the lid and run bag-mode recover"
     elif [[ "$reason" == startup_failed ]]; then
       write_status_snapshot startup_failed || true
       log_line "startup failed; captured settings restored"
     else
       write_status_snapshot stopped || true
-      notify_sync stopped passive "bag-mode stopped" "reason=$reason; battery=${CURRENT_BATTERY:-unreadable}" || true
+      notify_sync stopped passive "bag-mode stopped safely" "Bag mode stopped after $reason and restored the captured settings. The Mac now sleeps normally when the lid closes; run \`bag-mode start\` to keep it awake again. Current battery: ${CURRENT_BATTERY:-unreadable}." || true
       log_line "stopped"
     fi
     return 0
   fi
   write_status_snapshot recovery_failed || true
-  notify_sync recovery_failed time-sensitive "bag-mode could not restore captured settings" "reason=$reason; recovery_required=true" || true
+  notify_sync recovery_failed time-sensitive "bag-mode settings recovery failed" "Captured power or brightness settings could not be restored after $reason. Run \`bag-mode recover\` now." || true
   log_line "restoration failed; recovery remains required"
   return 1
 }
@@ -977,7 +1036,7 @@ controller_main() {
       release_controller_reservation "$SESSION_ID" 2>/dev/null || true
       write_status_snapshot recovery_conflict || true
       log_line "recovery belongs to another controller session; explicit recovery required"
-      notify_sync recovery_conflict time-sensitive "bag-mode recovery required" "recovery_conflict=true; command=bag-mode recover" || true
+      notify_sync recovery_conflict time-sensitive "bag-mode recovery requires attention" "An interrupted controller session owns the captured settings. Run \`bag-mode recover\` before starting bag mode again." || true
       exit "$EXIT_RECOVERY_CONFLICT"
     fi
     if [[ -e "$CONTROLLER_RESERVATION_DIR" ]]; then
@@ -1000,7 +1059,7 @@ controller_main() {
         log_line "crash-loop restoration failed; recovery remains required"
       fi
       write_status_snapshot crash_loop || true
-      notify_sync crash_loop time-sensitive "bag-mode stopped after repeated crashes" "restart_count=$restart_count; window=${RESTART_WINDOW}s; recovery_required=$([[ -e "$RECOVERY_RECORD_FILE" ]] && printf true || printf false)" || true
+      notify_sync crash_loop time-sensitive "bag-mode stopped after repeated crashes" "The controller crashed $restart_count times within ${RESTART_WINDOW} seconds and has been disabled. Inspect \`bag-mode logs\` before restarting; run \`bag-mode recover\` if settings remain unrestored." || true
       exit "$EXIT_CRASH_LOOP"
     fi
   else
@@ -1035,7 +1094,7 @@ controller_main() {
   if ! set_sleep_disabled 1; then
     rm -f "$ENABLED_FILE" 2>/dev/null || true
     write_status_snapshot startup_failed || true
-    notify_sync power_setting_failed time-sensitive "bag-mode could not disable sleep" "setting=sleep_disabled; value=1; service_enabled=false" || true
+    notify_sync power_setting_failed time-sensitive "bag-mode could not keep the Mac awake" "The required sleep setting could not be applied, so bag mode was not started. Inspect \`bag-mode logs\` before retrying." || true
     clean_shutdown startup_failed || true
     exit "$EXIT_START_FAILED"
   fi
@@ -1048,9 +1107,9 @@ controller_main() {
   fi
   log_line "started session=$SESSION_ID restart_count=$restart_count brightness_target=$BRIGHTNESS_TARGET captured_sleep_disabled=$CAPTURED_SLEEP_DISABLED"
   if (( restarting_after_crash )); then
-    notify_async restarted time-sensitive "bag-mode restarted after a crash" "restart_count=$restart_count; lid=$CURRENT_LID; battery=$CURRENT_BATTERY"
+    notify_async restarted time-sensitive "bag-mode restarted after a crash" "The controller is running again after crash $restart_count in the current window. Lid: $CURRENT_LID. Battery: $CURRENT_BATTERY. Inspect \`bag-mode logs\` if it repeats."
   else
-    notify_async started passive "bag-mode started" "lid=$CURRENT_LID; battery=$CURRENT_BATTERY"
+    notify_async started passive "bag-mode started" "Bag mode is active. Lid: $CURRENT_LID. Battery: $CURRENT_BATTERY. No action needed."
   fi
 
   interval="$INTERVAL"
@@ -1069,12 +1128,12 @@ controller_main() {
         live_brightness="$(builtin_brightness)"
         usable_brightness "$live_brightness" && remember_brightness "$live_brightness"
         set_brightness 0 || true
-        set_low_power "$LOW_POWER_KEY" 1 || notify_async power_setting_failed time-sensitive "bag-mode power setting failed" "setting=$LOW_POWER_KEY; value=1"
+        set_low_power "$LOW_POWER_KEY" 1 || notify_async power_setting_failed time-sensitive "bag-mode power setting failed" "The $LOW_POWER_KEY setting could not be enabled while the lid is closed. Inspect \`bag-mode logs\`."
         interval="$CLOSED_INTERVAL"
         last_observed_brightness=""
         CURRENT_BATTERY="$(battery_status)"
         write_status_snapshot lid_closed || true
-        notify_async lid_closed time-sensitive "bag-mode lid closed" "staying_awake=true; battery=$CURRENT_BATTERY"
+        notify_async lid_closed time-sensitive "bag-mode lid closed" "The Mac will stay awake with the lid closed. Battery: $CURRENT_BATTERY. No action needed."
       else
         if set_brightness "$BRIGHTNESS_TARGET"; then
           clear_matching_brightness_pending || log_line "could not clear matching pending brightness record"
@@ -1084,7 +1143,7 @@ controller_main() {
         last_observed_brightness="$BRIGHTNESS_TARGET"
         CURRENT_BATTERY="$(battery_status)"
         write_status_snapshot lid_open || true
-        [[ -n "$previous_lid" ]] && notify_async lid_open passive "bag-mode lid open" "brightness_restored=true; battery=$CURRENT_BATTERY"
+        [[ -n "$previous_lid" ]] && notify_async lid_open passive "bag-mode lid open" "Display brightness and captured power settings were restored. Battery: $CURRENT_BATTERY. No action needed."
       fi
       previous_lid="$lid"
     fi
@@ -1108,7 +1167,7 @@ controller_main() {
           log_line "battery ${percentage}% <= minimum ${BATTERY_MIN}%; stopping"
           rm -f "$ENABLED_FILE" 2>/dev/null || true
           if clean_shutdown battery_min; then
-            notify_sync battery_min time-sensitive "bag-mode stopped at ${percentage}%" "battery_min=${BATTERY_MIN}%" || true
+            notify_sync battery_min time-sensitive "bag-mode stopped at ${percentage}% battery" "Battery reached the configured ${BATTERY_MIN}% minimum. Captured settings were restored; connect power before starting bag mode again." || true
             exit 0
           fi
           exit 1
@@ -1117,7 +1176,7 @@ controller_main() {
           for threshold in $BATTERY_THRESHOLDS; do
             if [[ "$threshold" =~ ^[0-9]+$ ]] && (( percentage <= threshold )) && [[ "$NOTIFIED_THRESHOLDS" != *" $threshold "* ]]; then
               NOTIFIED_THRESHOLDS+="$threshold "
-              notify_async battery_threshold time-sensitive "bag-mode battery ${percentage}%" "crossed_threshold=${threshold}%"
+              notify_async battery_threshold time-sensitive "bag-mode battery reached ${percentage}%" "Battery crossed the configured ${threshold}% warning threshold while the lid is closed. Connect power if bag mode should continue."
               break
             fi
           done
@@ -1168,7 +1227,8 @@ EOF
 }
 
 install_mode() {
-  local source_file plist_tmp dry_run=0 legacy_running=0
+  local source_file plist_tmp backup_dir dry_run=0 was_loaded=0 original_failure rollback_failure=""
+  local managed_file backup_file backup_name file_mode
   while (( $# > 0 )); do
     case "$1" in
       --dry-run) dry_run=1 ;;
@@ -1180,7 +1240,6 @@ install_mode() {
   source_file="$SELF_PATH"
   /bin/bash -n "$source_file" || die "source file failed bash syntax validation"
   [[ -n "$(resolve_brightness)" ]] || die "brightness is required; install it with: brew install brightness"
-  legacy_controller_running && legacy_running=1
   plist_tmp="$(mktemp -t bag-mode.plist)" || die "could not create temporary plist"
   write_plist "$plist_tmp"
   plutil -lint "$plist_tmp" >/dev/null || die "generated LaunchDaemon plist is invalid"
@@ -1191,11 +1250,6 @@ install_mode() {
     printf 'install_controller: %s\n' "$CONTROLLER_BIN"
     printf 'install_plist: %s\n' "$PLIST_FILE"
     printf 'launchd_label: %s\n' "$LABEL"
-    if (( legacy_running )); then
-      printf 'ready: false\n'
-      printf 'blocker: legacy controller is running; stop it with the legacy CLI\n'
-      return 1
-    fi
     if [[ -e "$ENABLED_FILE" ]]; then
       printf 'ready: false\n'
       printf 'blocker: service is enabled; run bag-mode stop\n'
@@ -1214,10 +1268,6 @@ install_mode() {
     printf 'ready: true\n'
     return 0
   fi
-  if (( legacy_running )); then
-    rm -f "$plist_tmp"
-    die "legacy controller is running; stop it with the legacy CLI before installing"
-  fi
   if [[ -e "$ENABLED_FILE" ]]; then
     rm -f "$plist_tmp"
     die "bag-mode is enabled; run 'bag-mode stop' before installing or upgrading"
@@ -1234,16 +1284,108 @@ install_mode() {
   run_root /bin/mkdir -p "$(dirname "$INSTALL_BIN")" "$(dirname "$PLIST_FILE")" "$ROOT_DIR" "$ROOT_LOG_DIR" || die "could not create install directories"
   prepare_controller_directory || die "could not secure controller directory: $(dirname "$CONTROLLER_BIN")"
   run_root /bin/chmod 0755 "$ROOT_DIR" || die "could not make service metadata readable"
-  install_root_copy "$source_file" "$CONTROLLER_BIN" || die "could not install $CONTROLLER_BIN"
-  install_root_copy "$source_file" "$INSTALL_BIN" || die "could not install $INSTALL_BIN"
-  install_root_file 0644 "$plist_tmp" "$PLIST_FILE" || die "could not install $PLIST_FILE"
-  rm -f "$plist_tmp"
-  unload_launchdaemon || die "could not unload the existing LaunchDaemon; installed files were kept"
-  run_root "$LAUNCHCTL_BIN" bootstrap system "$PLIST_FILE" || die "could not bootstrap LaunchDaemon"
+  launchdaemon_is_loaded && was_loaded=1
+  backup_dir="$(mktemp -d -t bag-mode-install)" || die "could not create installation backup"
+  for managed_file in "$INSTALL_BIN" "$CONTROLLER_BIN" "$PLIST_FILE"; do
+    case "$managed_file" in
+      "$INSTALL_BIN") backup_name=cli ;;
+      "$CONTROLLER_BIN") backup_name=controller ;;
+      *) backup_name=plist ;;
+    esac
+    backup_file="$backup_dir/$backup_name"
+    if [[ -e "$managed_file" || -L "$managed_file" ]]; then
+      run_root /bin/cp -Pp "$managed_file" "$backup_file" || original_failure="could not back up $managed_file"
+    else
+      : >"$backup_file.absent" || original_failure="could not record absent path $managed_file"
+    fi
+    [[ -z "${original_failure:-}" ]] || break
+  done
+  if [[ -z "${original_failure:-}" ]]; then
+    install_root_copy "$source_file" "$CONTROLLER_BIN" || original_failure="could not install $CONTROLLER_BIN"
+  fi
+  if [[ -z "${original_failure:-}" ]]; then
+    install_root_copy "$source_file" "$INSTALL_BIN" || original_failure="could not install $INSTALL_BIN"
+  fi
+  if [[ -z "${original_failure:-}" ]]; then
+    install_root_file 0644 "$plist_tmp" "$PLIST_FILE" || original_failure="could not install $PLIST_FILE"
+  fi
+  if [[ -z "${original_failure:-}" ]]; then
+    unload_launchdaemon || original_failure="could not unload the existing LaunchDaemon"
+  fi
+  if [[ -z "${original_failure:-}" ]]; then
+    run_root "$LAUNCHCTL_BIN" bootstrap system "$PLIST_FILE" || original_failure="could not bootstrap LaunchDaemon"
+  fi
+  if [[ -z "${original_failure:-}" ]] && ! launchdaemon_is_loaded; then
+    original_failure="LaunchDaemon was not loaded after bootstrap"
+  fi
+  if [[ -n "${original_failure:-}" ]]; then
+    unload_launchdaemon || rollback_failure="could not unload the failed installation"
+    for managed_file in "$INSTALL_BIN" "$CONTROLLER_BIN" "$PLIST_FILE"; do
+      case "$managed_file" in
+        "$INSTALL_BIN") backup_name=cli ;;
+        "$CONTROLLER_BIN") backup_name=controller ;;
+        *) backup_name=plist ;;
+      esac
+      backup_file="$backup_dir/$backup_name"
+      if [[ -e "$backup_file.absent" ]]; then
+        run_root /bin/rm -f "$managed_file" || rollback_failure="${rollback_failure:+$rollback_failure; }could not remove new $managed_file"
+      elif [[ -e "$backup_file" || -L "$backup_file" ]]; then
+        restore_root_backup "$backup_file" "$managed_file" || rollback_failure="${rollback_failure:+$rollback_failure; }could not restore $managed_file"
+      fi
+    done
+    if (( was_loaded )); then
+      run_root "$LAUNCHCTL_BIN" bootstrap system "$PLIST_FILE" >/dev/null 2>&1 || rollback_failure="${rollback_failure:+$rollback_failure; }could not reload prior LaunchDaemon"
+      launchdaemon_is_loaded || rollback_failure="${rollback_failure:+$rollback_failure; }prior LaunchDaemon is not loaded"
+    else
+      unload_launchdaemon || rollback_failure="${rollback_failure:+$rollback_failure; }prior unloaded LaunchDaemon state was not restored"
+    fi
+    if [[ -n "$rollback_failure" ]]; then
+      rm -f "$plist_tmp"
+      printf 'bag-mode: %s; rollback failed: %s; backups kept at %s\n' \
+        "$original_failure" "$rollback_failure" "$backup_dir" >&2
+      return "$EXIT_INSTALL_ROLLBACK_FAILED"
+    fi
+    rm -rf "$backup_dir" "$plist_tmp"
+    printf 'bag-mode: %s; prior installation and LaunchDaemon state restored\n' \
+      "$original_failure" >&2
+    return 1
+  fi
+  rm -rf "$backup_dir" "$plist_tmp"
   printf 'installed_cli: %s\n' "$INSTALL_BIN"
   printf 'installed_controller: %s\n' "$CONTROLLER_BIN"
   printf 'launchd_label: %s\n' "$LABEL"
   printf 'next: bag-mode start\n'
+}
+
+upgrade_mode() {
+  local was_enabled=0 stop_exit=0 install_exit=0 restart_exit=0
+  require_macos
+  [[ -e "$ENABLED_FILE" ]] && was_enabled=1
+  if [[ -e "$ENABLED_FILE" || -e "$RECOVERY_RECORD_FILE" || -e "$BRIGHTNESS_PENDING_FILE" || -e "$CONTROLLER_RESERVATION_DIR" ]]; then
+    stop_mode || stop_exit=$?
+    if (( stop_exit != 0 && stop_exit != EXIT_BRIGHTNESS_PENDING )); then
+      die "upgrade aborted because the running service could not be stopped"
+    fi
+  fi
+  (install_mode) || install_exit=$?
+  if (( install_exit != 0 )); then
+    if (( install_exit == EXIT_INSTALL_ROLLBACK_FAILED )); then
+      die "upgrade installation failed and rollback was incomplete; prior service restart was not attempted"
+    fi
+    if (( was_enabled )); then
+      start_mode || restart_exit=$?
+      if (( restart_exit != 0 )); then
+        die "upgrade installation failed and the prior service could not be restarted"
+      fi
+    fi
+    die "upgrade installation failed; prior installation and LaunchDaemon state restored"
+  fi
+  if (( was_enabled )); then
+    start_mode
+    printf 'upgrade complete: service restarted\n'
+  else
+    printf 'upgrade complete: service was not enabled; start it with: bag-mode start\n'
+  fi
 }
 
 internal_service_start() {
@@ -1297,7 +1439,7 @@ start_mode() {
   local owner_user owner_home owner_matches=0
   require_macos
   [[ -x "$INSTALL_BIN" && -x "$CONTROLLER_BIN" && -f "$PLIST_FILE" ]] || die "not installed; run: bag-mode install"
-  controller_version="$($CONTROLLER_BIN version 2>/dev/null || true)"
+  controller_version="$(execute_installed "$CONTROLLER_BIN" version 2>/dev/null || true)"
   [[ "$controller_version" == "bag-mode $VERSION" ]] || die "installed controller version differs from this CLI; run: bag-mode install"
   run_user="$(resolve_user)" || die "could not resolve the invoking user"
   run_home="$(resolve_home "$run_user")" || die "could not resolve home for $run_user"
@@ -1650,8 +1792,8 @@ doctor_mode() {
   "$LAUNCHCTL_BIN" print "system/$LABEL" >/dev/null 2>&1 && loaded=yes
   [[ -x "$INSTALL_BIN" ]] && installed_binary=yes
   [[ -x "$CONTROLLER_BIN" ]] && installed_controller=yes
-  installed_version="$($INSTALL_BIN version 2>/dev/null || true)"
-  controller_version="$($CONTROLLER_BIN version 2>/dev/null || true)"
+  installed_version="$(execute_installed "$INSTALL_BIN" version 2>/dev/null || true)"
+  controller_version="$(execute_installed "$CONTROLLER_BIN" version 2>/dev/null || true)"
   if [[ "$installed_binary" == yes ]]; then
     if [[ "$installed_version" == "bag-mode $VERSION" ]]; then
       version_matches=yes
@@ -1786,7 +1928,7 @@ logs_mode() {
 }
 
 uninstall_mode() {
-  local exit_code=0
+  local exit_code=0 removal_failure="" remaining="" managed_path
   [[ "${1:-}" == --yes && $# -eq 1 ]] || usage_error "usage: bag-mode uninstall --yes"
   authorize_root
   if [[ -e "$ENABLED_FILE" || -e "$RECOVERY_RECORD_FILE" || -e "$BRIGHTNESS_PENDING_FILE" || -e "$CONTROLLER_RESERVATION_DIR" ]]; then
@@ -1798,26 +1940,144 @@ uninstall_mode() {
     (( exit_code == 0 )) || die "uninstall aborted because captured settings could not be restored"
   fi
   unload_launchdaemon || die "uninstall aborted because the LaunchDaemon is still loaded; system files were kept"
-  run_root /bin/rm -f "$PLIST_FILE" "$INSTALL_BIN" "$CONTROLLER_BIN"
-  run_root /bin/rm -rf "$ROOT_DIR" "$ROOT_LOG_DIR"
+  run_root /bin/rm -f "$PLIST_FILE" "$INSTALL_BIN" "$CONTROLLER_BIN" || removal_failure="could not remove one or more managed files"
+  run_root /bin/rm -rf "$ROOT_DIR" "$ROOT_LOG_DIR" || removal_failure="${removal_failure:+$removal_failure; }could not remove one or more managed directories"
+  for managed_path in "$PLIST_FILE" "$INSTALL_BIN" "$CONTROLLER_BIN" "$ROOT_DIR" "$ROOT_LOG_DIR"; do
+    if [[ -e "$managed_path" || -L "$managed_path" ]]; then
+      remaining="${remaining:+$remaining, }$managed_path"
+    fi
+  done
+  if [[ -n "$removal_failure" || -n "$remaining" ]]; then
+    die "uninstall incomplete${removal_failure:+: $removal_failure}${remaining:+; remaining: $remaining}"
+  fi
   printf 'bag-mode system files removed\n'
   printf 'user logs and notifier configuration were kept\n'
 }
 
-find_brrr_sender() {
-  local run_home="$1" candidate_bin skill_source
-  for candidate_bin in \
-    "$run_home"/.agents/skills/*brrr-now*/scripts/brrr-send.sh \
-    "$run_home"/.claude/skills/*brrr-now*/scripts/brrr-send.sh \
-    "$run_home"/.codex/skills/*brrr-now*/scripts/brrr-send.sh; do
-    [[ -f "$candidate_bin" ]] && { printf '%s\n' "$candidate_bin"; return; }
+write_builtin_brrr_sender() {
+  cat <<'BRRR_SENDER'
+#!/bin/bash
+set -euo pipefail
+
+message=
+title=
+subtitle=
+thread_id=
+open_url=
+image_url=
+expiration_date=
+filter_criteria=
+sound=
+interruption_level=
+volume=
+dry_run=0
+
+while (( $# > 0 )); do
+  case "$1" in
+    --message) message="${2:?missing value for --message}"; shift 2 ;;
+    --title) title="${2:?missing value for --title}"; shift 2 ;;
+    --subtitle) subtitle="${2:?missing value for --subtitle}"; shift 2 ;;
+    --thread-id) thread_id="${2:?missing value for --thread-id}"; shift 2 ;;
+    --open-url) open_url="${2:?missing value for --open-url}"; shift 2 ;;
+    --image-url) image_url="${2:?missing value for --image-url}"; shift 2 ;;
+    --expiration-date) expiration_date="${2:?missing value for --expiration-date}"; shift 2 ;;
+    --filter-criteria) filter_criteria="${2:?missing value for --filter-criteria}"; shift 2 ;;
+    --sound) sound="${2:?missing value for --sound}"; shift 2 ;;
+    --interruption-level) interruption_level="${2:?missing value for --interruption-level}"; shift 2 ;;
+    --volume) volume="${2:?missing value for --volume}"; shift 2 ;;
+    --dry-run) dry_run=1; shift ;;
+    *) echo "unknown argument: $1" >&2; exit 2 ;;
+  esac
+done
+
+[[ -n "$message" && -n "$title" ]] || { echo 'missing required --title or --message' >&2; exit 2; }
+
+if [[ -z "${BRRR_SECRET:-}" ]]; then
+  env_files=()
+  [[ -n "${BRRR_ENV_FILE:-}" ]] && env_files+=("$BRRR_ENV_FILE")
+  env_files+=("${HOME:-}/.config/brrr/env" "${HOME:-}/.config/notify/brrr.env")
+  for env_file in "${env_files[@]}"; do
+    if [[ -r "$env_file" ]]; then
+      # shellcheck disable=SC1090
+      source "$env_file"
+      # A readable file without the secret must not mask later candidates.
+      [[ -n "${BRRR_SECRET:-}" ]] && break
+    fi
   done
-  if [[ -r "$run_home/.config/skillshare/config.yaml" ]]; then
-    skill_source="$(awk -F ': ' '$1 == "source" { print $2; exit }' "$run_home/.config/skillshare/config.yaml")"
-    skill_source="${skill_source/#\~/$run_home}"
-    candidate_bin="$skill_source/skills-stable/brrr-now/scripts/brrr-send.sh"
-    [[ -f "$candidate_bin" ]] && printf '%s\n' "$candidate_bin"
-  fi
+fi
+
+endpoint=
+auth_mode=
+if [[ -n "${BRRR_SECRET:-}" ]]; then
+  endpoint=https://api.brrr.now/v1/send
+  auth_mode=bearer
+elif [[ -f /exe.dev/shelley.json ]]; then
+  endpoint=https://brrr.int.exe.xyz/v1/send
+  auth_mode=exe.dev-proxy
+elif (( dry_run )); then
+  auth_mode=unconfigured
+else
+  echo 'brrr is not configured; set BRRR_SECRET or a supported env file' >&2
+  exit 3
+fi
+
+python_bin=/usr/bin/python3
+[[ -x "$python_bin" ]] || python_bin="$(command -v python3 || true)"
+[[ -n "$python_bin" ]] || { echo 'python3 is required' >&2; exit 4; }
+payload="$(
+  "$python_bin" - "$message" "$title" "$subtitle" "$thread_id" "$open_url" "$image_url" "$expiration_date" "$filter_criteria" "$sound" "$interruption_level" "$volume" <<'PY'
+import json
+import sys
+from datetime import datetime
+
+names = [
+    "message",
+    "title",
+    "subtitle",
+    "thread_id",
+    "open_url",
+    "image_url",
+    "expiration_date",
+    "filter_criteria",
+    "sound",
+    "interruption_level",
+    "volume",
+]
+values = dict(zip(names, sys.argv[1:]))
+payload = {key: value for key, value in values.items() if value and key != "volume"}
+expiration_date = values["expiration_date"]
+if expiration_date:
+    normalized = expiration_date[:-1] + "+00:00" if expiration_date.endswith("Z") else expiration_date
+    try:
+        parsed = datetime.fromisoformat(normalized)
+    except ValueError:
+        raise SystemExit("expiration date must be ISO 8601 with a timezone")
+    if "T" not in expiration_date or parsed.tzinfo is None:
+        raise SystemExit("expiration date must be ISO 8601 with a timezone")
+level = values["interruption_level"]
+if level and level not in {"passive", "active", "time-sensitive", "critical"}:
+    raise SystemExit("invalid interruption level")
+if values["volume"]:
+    if level != "critical":
+        raise SystemExit("volume requires critical interruption level")
+    volume = float(values["volume"])
+    if not 0 <= volume <= 1:
+        raise SystemExit("volume must be between 0 and 1")
+    payload["volume"] = volume
+print(json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
+PY
+)"
+
+if (( dry_run )); then
+  printf 'auth_mode=%s\n%s\n' "$auth_mode" "$payload"
+  [[ "$auth_mode" != unconfigured ]] || exit 3
+  exit 0
+fi
+
+curl_args=(-fsS --max-time "${BRRR_TIMEOUT:-10}" --retry 2 -X POST)
+[[ "$auth_mode" == bearer ]] && curl_args+=(-H "Authorization: Bearer $BRRR_SECRET")
+/usr/bin/curl "${curl_args[@]}" -H 'Content-Type: application/json' --data-binary "$payload" "$endpoint" >/dev/null
+BRRR_SENDER
 }
 
 notifier_set() {
@@ -1834,17 +2094,25 @@ notifier_set() {
 }
 
 notifier_install_brrr() {
-  local sender="${1:-}" run_user run_home support_dir sender_copy wrapper wrapper_tmp
+  local sender="${1:-}" run_user run_home support_dir sender_copy sender_tmp wrapper wrapper_tmp
   run_user="$(resolve_user)" || die "could not resolve user"
   run_home="$(resolve_home "$run_user")" || die "could not resolve home"
-  [[ -n "$sender" ]] || sender="$(find_brrr_sender "$run_home")"
-  [[ -f "$sender" ]] || die "brrr sender not found; pass its path explicitly"
   support_dir="$(user_support_dir "$run_home")"
   sender_copy="$support_dir/notifiers/brrr-send"
   wrapper="$support_dir/notifier"
   mkdir -p "$support_dir/notifiers" || die "could not create notifier directory: $support_dir/notifiers"
-  /usr/bin/install -m 0700 "$sender" "$sender_copy" \
-    || die "could not install brrr sender: $sender_copy"
+  if [[ -n "$sender" ]]; then
+    [[ -f "$sender" ]] || die "brrr sender not found: $sender"
+    /usr/bin/install -m 0700 "$sender" "$sender_copy" \
+      || die "could not install brrr sender: $sender_copy"
+  else
+    sender_tmp="$(mktemp "$support_dir/notifiers/.brrr-send.XXXXXX")" \
+      || die "could not create temporary brrr sender"
+    if ! write_builtin_brrr_sender >"$sender_tmp" || ! chmod 0700 "$sender_tmp" || ! mv -f "$sender_tmp" "$sender_copy"; then
+      rm -f "$sender_tmp"
+      die "could not install built-in brrr sender: $sender_copy"
+    fi
+  fi
   wrapper_tmp="$(mktemp "$support_dir/.notifier.XXXXXX")" \
     || die "could not create temporary notifier in $support_dir"
   if ! cat >"$wrapper_tmp" <<'WRAPPER'
@@ -1864,7 +2132,8 @@ while (( $# > 0 )); do
   esac
 done
 sender="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/notifiers/brrr-send"
-args=(--title "$title" --message "$message" --thread-id bag-mode)
+host="$(hostname -f 2>/dev/null || hostname)"
+args=(--title "$host: $title" --subtitle "bag-mode · macOS power safety" --message "$message" --thread-id bag-mode)
 [[ -n "$level" ]] && args+=(--interruption-level "$level")
 BRRR_TIMEOUT="${BAG_MODE_NOTIFY_TIMEOUT:-5}" /bin/bash "$sender" "${args[@]}"
 WRAPPER
@@ -1981,6 +2250,7 @@ if [[ "${1:-}" == -h || "${1:-}" == --help ]]; then
 fi
 case "$subcommand" in
   install) install_mode "$@" ;;
+  upgrade) require_no_args "$@"; upgrade_mode ;;
   doctor) doctor_mode "$@" ;;
   start) require_no_args "$@"; start_mode ;;
   stop) require_no_args "$@"; stop_mode ;;

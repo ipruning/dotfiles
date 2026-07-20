@@ -1,30 +1,92 @@
+[settings]
+# Bootstrap is explicit (`mise install`); ordinary tasks must not install tools
+# as a side effect before their own preview/apply contract starts.
+task.run_auto_install = false
+
+[tools]
+# fd, jq, and ripgrep serve the module test suites that verify depends on;
+# every tool in the verify chain must be mise-pinned (see AGENTS.md).
+fd = "10.4.2"
+jq = "1.8.2"
+python = "3.14.6"
+ripgrep = "15.2.0"
+shellcheck = "0.11.0"
+uv = "0.11.29"
+
 [env]
 _.python.venv = { path = ".venv" }
 
-[tasks.backup]
-description = "Copy current configs into home/"
-run = 'modules/bin/dotfiles-backup "$@"'
-
-[tasks.doctor]
-description = "Check hardcoded paths in dotfiles"
-run = 'modules/bin/dotfiles-doctor "$@"'
-
-[tasks.init]
-description = "Set up tools, plugins, and Mackup links"
-run = 'modules/bin/dotfiles-init "$@"'
+[tasks.diff]
+description = "Report configuration drift without changing files"
+run = 'python -m scripts.diff "$@"'
 
 [tasks.restore]
-description = "Restore files from home/ with Mackup"
-run = 'modules/bin/dotfiles-restore "$@"'
+description = "Preview or apply one reference application"
+run = 'python -m scripts.restore "$@"'
 
-[tasks.sync]
-description = "Sync plugins, completions, functions, Skillshare, and host inventory"
-run = 'modules/bin/dotfiles-sync "$@"'
+[tasks.adopt]
+description = "Preview or adopt one application's live configuration into the reference"
+run = 'python -m scripts.adopt "$@"'
 
-[tasks.up]
-description = "Update Homebrew, mise tools, and developer CLIs"
-run = 'modules/bin/dotfiles-up "$@"'
+[tasks.check]
+description = "Inspect this host's required and optional capabilities"
+run = 'python -m scripts.check "$@"'
+
+[tasks.setup]
+description = "Preview or apply an explicit host profile"
+run = 'python -m scripts.setup "$@"'
+
+[tasks.update]
+description = "Preview or apply host tool updates without synchronizing configuration"
+run = 'python -m scripts.update "$@"'
+
+[tasks.runtime]
+description = "Preview or refresh generated shell runtime and owned plugins"
+run = 'python -m scripts.runtime "$@"'
+
+[tasks.inventory]
+description = "Preview or snapshot installed host software into inventory/<host>/"
+run = 'python -m scripts.inventory "$@"'
 
 [tasks.zsh-profile]
-description = "Profile zsh startup time"
-run = 'modules/bin/dotfiles-zsh-profile "$@"'
+description = "Profile Zsh startup time"
+run = 'scripts/zsh-profile "$@"'
+
+[tasks.lint]
+description = "Inspect repository paths, mappings, and symlinks"
+run = 'python -m scripts.lint "$@"'
+
+[tasks.shell]
+description = "Check shell files with syntax and ShellCheck gates"
+run = 'python -m scripts.shell "$@"'
+
+[tasks.format]
+description = "Check Python formatting and style"
+run = [
+    "ruff check scripts tests",
+    "ruff format --check scripts tests",
+]
+
+[tasks.test]
+description = "Run behavior tests"
+run = "pytest"
+
+[tasks.test-modules]
+description = "Run standalone module test suites (macOS only)"
+run = """
+if [ "$(uname)" != Darwin ]; then
+  echo "skipped: module suites are macOS-only"
+  exit 0
+fi
+./modules/macos-session-health/macos-session-health-test
+./modules/bag-mode/bag-mode-test
+./modules/macos-maxfiles/macos-maxfiles-test
+"""
+
+[tasks.typecheck]
+description = "Check Python types"
+run = "ty check scripts tests"
+
+[tasks.verify]
+description = "Run all repository verification"
+depends = ["format", "lint", "shell", "typecheck", "test", "test-modules"]

@@ -1,0 +1,1185 @@
+import json
+import hashlib
+import os
+import shlex
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+from scripts.runtime import (
+    RuntimeReport,
+    RuntimeAction,
+    RuntimeResult,
+    RuntimeSpec,
+    RuntimeStatus,
+    _command_environment,
+    _next_commands,
+    execute_runtime,
+    plan_runtime,
+    repo_aware_finder,
+)
+
+
+def _fake_tool(bin_dir: Path, name: str, body: str = "exit 0\n") -> None:
+    tool_path = bin_dir / name
+    tool_path.write_text(f"#!/bin/sh\n{body}")
+    tool_path.chmod(0o755)
+
+
+def _run_runtime(
+    repo_root: Path,
+    home: Path,
+    bin_dir: Path,
+    *arguments: str,
+) -> subprocess.CompletedProcess[str]:
+    environment = os.environ.copy()
+    environment["HOME"] = str(home)
+    environment["PATH"] = str(bin_dir)
+    return subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "scripts.runtime",
+            "--repo-root",
+            str(repo_root),
+            *arguments,
+        ],
+        cwd=Path(__file__).resolve().parents[1],
+        env=environment,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+
+def test_runtime_previews_owned_refresh_by_default_without_writing(
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    bin_dir = tmp_path / "bin"
+    home.mkdir()
+    bin_dir.mkdir()
+    for name in ("mise", "starship", "atuin", "codex", "git", "bat"):
+        _fake_tool(bin_dir, name)
+
+    completed = _run_runtime(
+        repo_root,
+        home,
+        bin_dir,
+        "--json",
+    )
+
+    assert completed.returncode == 0
+    document = json.loads(completed.stdout)
+    assert document["schema_version"] == 1
+    assert document["operation"] == "runtime"
+    assert document["apply"] is False
+    steps = {step["name"]: step for step in document["steps"]}
+    assert steps["function.mise"]["action"] == "generate"
+    assert steps["function.starship"]["status"] == "planned"
+    assert steps["function.atuin"]["status"] == "planned"
+    assert steps["completion.codex"]["action"] == "generate"
+    assert steps["completion.op"]["status"] == "skipped"
+    assert steps["plugin.fzf-tab"]["action"] == "clone"
+    assert steps["plugin.zsh-autosuggestions"]["action"] == "clone"
+    assert steps["plugin.fast-syntax-highlighting"]["action"] == "clone"
+    assert steps["wasm.zellij-sessionizer"]["action"] == "download"
+    assert steps["wasm.zjstatus"]["action"] == "download"
+    assert steps["bat.cache"]["status"] == "planned"
+    assert steps["zsh.compdump"]["status"] == "skipped"
+    assert steps["zsh.compdump"]["target"] == str(home / ".zcompdump*")
+    assert document["summary"] == {"planned": 10, "skipped": 9}
+    assert not (repo_root / "generated").exists()
+
+
+def test_runtime_refuses_symlinked_owned_directories(tmp_path: Path) -> None:
+    cases = (
+        (Path("generated"), ()),
+        (Path("generated/functions"), ()),
+        (Path("generated/completions"), ()),
+        (Path("generated/plugins"), ()),
+        (Path("generated/bin"), ()),
+        (Path("generated/sources"), ("--build",)),
+    )
+    for relative_path, extra_arguments in cases:
+        case_root = tmp_path / relative_path.as_posix().replace("/", "-")
+        repo_root = case_root / "dotfiles"
+        home = case_root / "home"
+        bin_dir = case_root / "bin"
+        outside = case_root / "outside"
+        home.mkdir(parents=True)
+        bin_dir.mkdir()
+        outside.mkdir()
+        symlink = repo_root / relative_path
+        symlink.parent.mkdir(parents=True, exist_ok=True)
+        symlink.symlink_to(outside, target_is_directory=True)
+
+        completed = _run_runtime(
+            repo_root,
+            home,
+            bin_dir,
+            *extra_arguments,
+            "--offline",
+            "--apply",
+            "--json",
+        )
+
+        assert completed.returncode == 1
+        document = json.loads(completed.stdout)
+        assert document["apply"] is True
+        assert document["ok"] is False
+        assert len(document["steps"]) == 1
+        result = document["steps"][0]
+        assert result["action"] == "validate"
+        assert result["status"] == "failed"
+        assert "directory is a symlink" in result["reason"]
+        assert not any(outside.iterdir())
+
+
+def test_runtime_offline_apply_generates_and_removes_owned_shell_files(
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    bin_dir = tmp_path / "bin"
+    completions = repo_root / "generated/completions"
+    completions.mkdir(parents=True)
+    home.mkdir()
+    bin_dir.mkdir()
+    stale_completion = completions / "_op"
+    stale_completion.write_text("stale\n")
+    legacy_try_rs = completions / "_try-rs"
+    legacy_try_rs.write_text("legacy\n")
+    compdump = home / ".zcompdump-test"
+    compdump.write_text("cache\n")
+    for name in ("mise", "starship", "atuin", "codex"):
+        _fake_tool(bin_dir, name, f"printf 'generated by {name}: %s\\n' \"$*\"\n")
+
+    completed = _run_runtime(
+        repo_root,
+        home,
+        bin_dir,
+        "--offline",
+        "--apply",
+        "--json",
+    )
+
+    assert completed.returncode == 0
+    document = json.loads(completed.stdout)
+    assert document["apply"] is True
+    assert document["ok"] is True
+    results = {step["name"]: step for step in document["steps"]}
+    assert results["function.mise"]["status"] == "succeeded"
+    assert results["completion.codex"]["status"] == "succeeded"
+    assert results["completion.op"]["action"] == "remove"
+    assert results["completion.op"]["status"] == "succeeded"
+    assert results["plugin.fzf-tab"]["status"] == "skipped"
+    assert results["wasm.zjstatus"]["status"] == "skipped"
+    assert document["summary"] == {"skipped": 13, "succeeded": 7}
+    assert (repo_root / "generated/functions/_mise.zsh").read_text() == (
+        "generated by mise: activate zsh\n"
+    )
+    assert (completions / "_codex").read_text() == (
+        "generated by codex: completion zsh\n"
+    )
+    assert not stale_completion.exists()
+    assert not legacy_try_rs.exists()
+    assert not compdump.exists()
+
+
+def test_runtime_keeps_generating_for_self_built_tools_off_path(
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    bin_dir = tmp_path / "bin"
+    home.mkdir()
+    bin_dir.mkdir()
+    owned_bin = repo_root / "generated/bin"
+    owned_bin.mkdir(parents=True)
+    functions = repo_root / "generated/functions"
+    functions.mkdir(parents=True)
+    (functions / "_atuin.zsh").write_text("previously generated\n")
+    _fake_tool(owned_bin, "atuin", "printf 'generated by owned atuin\\n'\n")
+
+    completed = _run_runtime(repo_root, home, bin_dir, "--offline", "--apply", "--json")
+
+    assert completed.returncode == 0
+    document = json.loads(completed.stdout)
+    results = {step["name"]: step for step in document["steps"]}
+    assert results["function.atuin"]["action"] == "generate"
+    assert results["function.atuin"]["status"] == "succeeded"
+    assert (functions / "_atuin.zsh").read_text() == "generated by owned atuin\n"
+
+    (owned_bin / "atuin").unlink()
+    removed = _run_runtime(repo_root, home, bin_dir, "--offline", "--apply", "--json")
+
+    assert removed.returncode == 0
+    document = json.loads(removed.stdout)
+    results = {step["name"]: step for step in document["steps"]}
+    assert results["function.atuin"]["action"] == "remove"
+    assert not (functions / "_atuin.zsh").exists()
+
+
+def test_runtime_generates_llm_completion_through_uvx(tmp_path: Path) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    bin_dir = tmp_path / "bin"
+    completion = repo_root / "generated/completions/_llm"
+    completion.parent.mkdir(parents=True)
+    completion.write_text("stale\n")
+    home.mkdir()
+    bin_dir.mkdir()
+    _fake_tool(
+        bin_dir,
+        "uvx",
+        'test "$1" = --offline || exit 9\n'
+        'test "$2" = llm || exit 7\n'
+        'test "$_LLM_COMPLETE" = zsh_source || exit 8\n'
+        "printf 'llm completion\\n'\n",
+    )
+
+    completed = _run_runtime(repo_root, home, bin_dir, "--offline", "--apply", "--json")
+
+    assert completed.returncode == 0
+    steps = {step["name"]: step for step in json.loads(completed.stdout)["steps"]}
+    assert steps["completion.llm"]["status"] == "succeeded"
+    assert steps["completion.llm"]["command"] == ["uvx", "--offline", "llm"]
+    assert completion.read_text() == "llm completion\n"
+
+
+def test_runtime_rejects_invalid_download_without_replacing_asset(
+    tmp_path: Path,
+) -> None:
+    target = tmp_path / "plugin.wasm"
+    target.write_bytes(b"known-good")
+    expected = hashlib.sha256(b"new-valid").hexdigest()
+    spec = RuntimeSpec(
+        name="wasm.test",
+        tool=None,
+        target=target,
+        source="https://example.invalid/plugin.wasm",
+        sha256=expected,
+    )
+    plan = RuntimeReport(
+        apply=False,
+        results=(RuntimeResult(spec, RuntimeStatus.PLANNED, RuntimeAction.DOWNLOAD),),
+    )
+
+    report = execute_runtime(
+        plan,
+        tmp_path,
+        downloader=lambda _source, _timeout: b"corrupt",
+    )
+
+    assert report.ok is False
+    assert report.results[0].status is RuntimeStatus.FAILED
+    assert "checksum mismatch" in (report.results[0].reason or "")
+    assert target.read_bytes() == b"known-good"
+
+
+def test_runtime_failed_preview_does_not_suggest_apply(tmp_path: Path) -> None:
+    planned = RuntimeResult(
+        RuntimeSpec(name="planned", tool=None, target=tmp_path / "planned"),
+        RuntimeStatus.PLANNED,
+        RuntimeAction.DOWNLOAD,
+    )
+    failed = RuntimeResult(
+        RuntimeSpec(name="failed", tool=None, target=tmp_path / "failed"),
+        RuntimeStatus.FAILED,
+        RuntimeAction.CLONE,
+        "target is not a Git checkout",
+    )
+
+    assert _next_commands(RuntimeReport(False, (planned, failed))) == ()
+
+
+def test_runtime_build_plan_owns_custom_rust_binaries(tmp_path: Path) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    bin_dir = tmp_path / "bin"
+    home.mkdir()
+    bin_dir.mkdir()
+    for name in ("git", "cargo"):
+        _fake_tool(bin_dir, name)
+
+    completed = _run_runtime(
+        repo_root,
+        home,
+        bin_dir,
+        "--build",
+        "--json",
+    )
+
+    assert completed.returncode == 0
+    steps = {step["name"]: step for step in json.loads(completed.stdout)["steps"]}
+    assert steps["source.atuin"]["action"] == "clone"
+    assert steps["binary.atuin"]["action"] == "build"
+    assert steps["source.op-cache"]["action"] == "clone"
+    assert steps["binary.op-cache"]["action"] == "build"
+    assert steps["binary.atuin"]["target"] == str(repo_root / "generated/bin/atuin")
+    assert not (repo_root / "generated/sources").exists()
+
+
+def test_runtime_build_installs_artifacts_from_portable_sources(tmp_path: Path) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    bin_dir = tmp_path / "bin"
+    home.mkdir()
+    bin_dir.mkdir()
+    for name in ("atuin", "op-cache"):
+        (repo_root / "generated/sources" / name / ".git").mkdir(parents=True)
+    _fake_tool(
+        bin_dir,
+        "cargo",
+        'case "$PWD" in\n'
+        "  */atuin) binary=atuin ;;\n"
+        "  */op-cache) binary=op-cache ;;\n"
+        "esac\n"
+        "/bin/mkdir -p target/release\n"
+        'printf \'built %s\\n\' "$binary" > "target/release/$binary"\n'
+        '/bin/chmod 755 "target/release/$binary"\n',
+    )
+
+    completed = _run_runtime(
+        repo_root,
+        home,
+        bin_dir,
+        "--build",
+        "--offline",
+        "--apply",
+        "--json",
+    )
+
+    assert completed.returncode == 0
+    steps = {step["name"]: step for step in json.loads(completed.stdout)["steps"]}
+    assert steps["source.atuin"]["status"] == "skipped"
+    assert steps["binary.atuin"]["status"] == "succeeded"
+    assert steps["binary.op-cache"]["status"] == "succeeded"
+    assert (repo_root / "generated/bin/atuin").read_text() == "built atuin\n"
+    assert (repo_root / "generated/bin/op-cache").read_text() == "built op-cache\n"
+
+
+def test_runtime_does_not_build_from_stale_source_after_update_failure(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    bin_dir = tmp_path / "bin"
+    home.mkdir()
+    bin_dir.mkdir()
+    for name in ("atuin", "op-cache"):
+        (repo_root / "generated/sources" / name / ".git").mkdir(parents=True)
+    _fake_tool(bin_dir, "git", "exit 7\n")
+    _fake_tool(bin_dir, "cargo", "touch build-ran\n")
+    monkeypatch.setenv("PATH", str(bin_dir))
+
+    def finder(tool: str) -> str | None:
+        candidate = bin_dir / tool
+        return str(candidate) if candidate.exists() else None
+
+    plan = plan_runtime(repo_root, home, executable_finder=finder, build=True)
+    report = execute_runtime(plan, home, downloader=lambda _url, _timeout: b"stub")
+
+    results = {result.spec.name: result for result in report.results}
+    assert report.ok is False
+    assert results["source.atuin"].status is RuntimeStatus.FAILED
+    assert results["binary.atuin"].status is RuntimeStatus.SKIPPED
+    assert "source.atuin failed" in (results["binary.atuin"].reason or "")
+    assert not (repo_root / "generated/sources/atuin/build-ran").exists()
+    assert not (repo_root / "generated/sources/op-cache/build-ran").exists()
+
+
+def test_runtime_failed_clone_never_publishes_partial_checkout(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    bin_dir = tmp_path / "bin"
+    target = repo_root / "generated/plugins/example"
+    home.mkdir()
+    bin_dir.mkdir()
+    _fake_tool(
+        bin_dir,
+        "git",
+        'for final_argument do :; done\n/bin/mkdir -p "$final_argument/.git"\nexit 7\n',
+    )
+    monkeypatch.setenv("PATH", str(bin_dir))
+    spec = RuntimeSpec(
+        name="plugin.example",
+        tool="git",
+        target=target,
+        source="https://example.invalid/example.git",
+        command=(
+            "git",
+            "clone",
+            "--depth=1",
+            "https://example.invalid/example.git",
+            str(target),
+        ),
+    )
+    report = execute_runtime(
+        RuntimeReport(
+            apply=False,
+            results=(
+                RuntimeResult(
+                    spec,
+                    RuntimeStatus.PLANNED,
+                    RuntimeAction.CLONE,
+                ),
+            ),
+        ),
+        home,
+    )
+
+    assert report.ok is False
+    assert report.results[0].exit_code == 7
+    assert not target.exists()
+    assert not list(target.parent.glob(".example.clone-*"))
+    next_plan = plan_runtime(
+        repo_root,
+        home,
+        executable_finder=lambda tool: str(bin_dir / tool) if tool == "git" else None,
+    )
+    next_result = next(
+        result for result in next_plan.results if result.spec.name == "plugin.fzf-tab"
+    )
+    assert next_result.action is RuntimeAction.CLONE
+
+
+def test_runtime_successful_clone_atomically_publishes_checkout(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    bin_dir = tmp_path / "bin"
+    target = repo_root / "generated/plugins/example"
+    home.mkdir()
+    bin_dir.mkdir()
+    _fake_tool(
+        bin_dir,
+        "git",
+        "for final_argument do :; done\n"
+        '/bin/mkdir -p "$final_argument/.git"\n'
+        'printf "checkout\\n" >"$final_argument/plugin.zsh"\n',
+    )
+    monkeypatch.setenv("PATH", str(bin_dir))
+    spec = RuntimeSpec(
+        name="plugin.example",
+        tool="git",
+        target=target,
+        command=("git", "clone", "https://example.invalid/example.git", str(target)),
+    )
+    report = execute_runtime(
+        RuntimeReport(
+            apply=False,
+            results=(
+                RuntimeResult(
+                    spec,
+                    RuntimeStatus.PLANNED,
+                    RuntimeAction.CLONE,
+                ),
+            ),
+        ),
+        home,
+    )
+
+    assert report.ok is True
+    assert (target / ".git").is_dir()
+    assert (target / "plugin.zsh").read_text() == "checkout\n"
+    assert not list(target.parent.glob(".example.clone-*"))
+
+
+def test_runtime_offline_build_is_locked_and_offline(tmp_path: Path) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    bin_dir = tmp_path / "bin"
+    home.mkdir()
+    bin_dir.mkdir()
+    (repo_root / "generated/sources/atuin/.git").mkdir(parents=True)
+    (repo_root / "generated/sources/op-cache/.git").mkdir(parents=True)
+    _fake_tool(bin_dir, "cargo")
+
+    completed = _run_runtime(
+        repo_root,
+        home,
+        bin_dir,
+        "--build",
+        "--offline",
+        "--json",
+    )
+
+    assert completed.returncode == 0
+    document = json.loads(completed.stdout)
+    steps = {step["name"]: step for step in document["steps"]}
+    for name in ("atuin", "op-cache"):
+        command = steps[f"binary.{name}"]["command"]
+        assert "--locked" in command
+        assert "--offline" in command
+    assert document["next"] == [
+        shlex.join(
+            (
+                "mise",
+                "run",
+                "runtime",
+                "--",
+                "--repo-root",
+                str(repo_root),
+                "--offline",
+                "--build",
+                "--apply",
+            ),
+        ),
+    ]
+
+
+def test_runtime_online_build_requires_git_to_refresh_existing_source(
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    bin_dir = tmp_path / "bin"
+    home.mkdir()
+    bin_dir.mkdir()
+    for name in ("atuin", "op-cache"):
+        (repo_root / "generated/sources" / name / ".git").mkdir(parents=True)
+    _fake_tool(bin_dir, "cargo")
+
+    completed = _run_runtime(
+        repo_root,
+        home,
+        bin_dir,
+        "--build",
+        "--json",
+    )
+
+    assert completed.returncode == 0
+    steps = {step["name"]: step for step in json.loads(completed.stdout)["steps"]}
+    assert steps["source.atuin"]["status"] == "skipped"
+    assert steps["binary.atuin"]["status"] == "skipped"
+    assert steps["binary.atuin"]["reason"] == "git is not available"
+
+
+def test_runtime_human_mode_announces_work_and_reports_failure_to_stderr(
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    bin_dir = tmp_path / "bin"
+    home.mkdir()
+    bin_dir.mkdir()
+    _fake_tool(bin_dir, "mise", "exit 7\n")
+    _fake_tool(bin_dir, "codex", "printf 'codex completion\\n'\n")
+
+    completed = _run_runtime(repo_root, home, bin_dir, "--offline", "--apply")
+
+    assert completed.returncode == 1
+    assert completed.stdout.splitlines()[0] == (
+        "RUN function.mise: mise activate zsh -> "
+        f"{repo_root}/generated/functions/_mise.zsh"
+    )
+    assert "[function.mise] FAIL command exited 7" in completed.stderr
+    assert (repo_root / "generated/completions/_codex").read_text() == (
+        "codex completion\n"
+    )
+
+
+def test_runtime_announces_the_exact_compdump_pattern(tmp_path: Path) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    bin_dir = tmp_path / "bin"
+    home.mkdir()
+    bin_dir.mkdir()
+    (home / ".zcompdump-test").write_text("cache\n")
+
+    completed = _run_runtime(repo_root, home, bin_dir, "--offline", "--apply")
+
+    assert completed.returncode == 0
+    assert completed.stdout.splitlines()[0] == (
+        f"RUN zsh.compdump: remove {home}/.zcompdump*"
+    )
+    assert not (home / ".zcompdump-test").exists()
+
+
+def test_runtime_human_preview_shows_commands_and_targets(tmp_path: Path) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    bin_dir = tmp_path / "bin"
+    home.mkdir()
+    bin_dir.mkdir()
+    _fake_tool(bin_dir, "codex")
+
+    completed = _run_runtime(repo_root, home, bin_dir, "--offline")
+
+    assert completed.returncode == 0
+    assert (
+        "PLANNED completion.codex: codex completion zsh -> "
+        f"{repo_root}/generated/completions/_codex"
+    ) in completed.stdout
+    apply_command = shlex.join(
+        (
+            "mise",
+            "run",
+            "runtime",
+            "--",
+            "--repo-root",
+            str(repo_root),
+            "--offline",
+            "--apply",
+        ),
+    )
+    assert f"Next:\n  {apply_command}\n" in completed.stdout
+
+
+def test_runtime_preview_does_not_suggest_apply_when_every_step_is_skipped(
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    bin_dir = tmp_path / "bin"
+    home.mkdir()
+    bin_dir.mkdir()
+
+    completed = _run_runtime(repo_root, home, bin_dir, "--offline")
+
+    assert completed.returncode == 0
+    assert "No runtime refresh steps are available" in completed.stdout
+    assert "--apply" not in completed.stdout
+
+
+def test_runtime_surfaces_operational_output_but_keeps_json_on_stdout(
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    bin_dir = tmp_path / "bin"
+    home.mkdir()
+    bin_dir.mkdir()
+    _fake_tool(
+        bin_dir,
+        "bat",
+        "printf 'cache rebuilt\\n'\nprintf 'cache note\\n' >&2\n",
+    )
+
+    human = _run_runtime(repo_root, home, bin_dir, "--offline", "--apply")
+    machine = _run_runtime(
+        repo_root,
+        home,
+        bin_dir,
+        "--offline",
+        "--apply",
+        "--json",
+    )
+
+    assert human.returncode == 0
+    assert "cache rebuilt" in human.stdout
+    assert "cache note" in human.stderr
+    assert machine.returncode == 0
+    assert json.loads(machine.stdout)["ok"] is True
+    assert "[bat.cache] cache rebuilt" in machine.stderr
+    assert "[bat.cache] cache note" in machine.stderr
+
+
+def test_runtime_json_keeps_captured_failure_detail(tmp_path: Path) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    bin_dir = tmp_path / "bin"
+    home.mkdir()
+    bin_dir.mkdir()
+    _fake_tool(bin_dir, "bat", "printf 'cache failed\\n' >&2\nexit 7\n")
+
+    completed = _run_runtime(
+        repo_root,
+        home,
+        bin_dir,
+        "--offline",
+        "--apply",
+        "--json",
+    )
+
+    result = next(
+        step
+        for step in json.loads(completed.stdout)["steps"]
+        if step["name"] == "bat.cache"
+    )
+    assert completed.returncode == 1
+    assert result["reason"] == "command exited 7: cache failed"
+    assert result["exit_code"] == 7
+    assert "[bat.cache] cache failed" in completed.stderr
+
+
+def test_runtime_partial_apply_keeps_exit_code_and_restart_handoff(
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    bin_dir = tmp_path / "bin"
+    home.mkdir()
+    bin_dir.mkdir()
+    _fake_tool(bin_dir, "mise", "exit 7\n")
+    _fake_tool(bin_dir, "codex", "printf 'codex completion\\n'\n")
+
+    machine = _run_runtime(
+        repo_root,
+        home,
+        bin_dir,
+        "--offline",
+        "--apply",
+        "--json",
+    )
+    human = _run_runtime(repo_root, home, bin_dir, "--offline", "--apply")
+
+    document = json.loads(machine.stdout)
+    failed = next(step for step in document["steps"] if step["name"] == "function.mise")
+    assert machine.returncode == 1
+    assert failed["exit_code"] == 7
+    assert document["shell_restart_required"] is True
+    assert document["next"] == []
+    assert human.returncode == 1
+    assert "Refreshed Zsh runtime is not active in the current shell." in human.stdout
+    assert "Open a new Zsh or run `exec zsh`" in human.stdout
+    assert "Next:" not in human.stdout
+
+
+def test_runtime_cli_runs_real_mise_in_an_isolated_home(tmp_path: Path) -> None:
+    mise = shutil.which("mise")
+    if mise is None:
+        raise AssertionError("mise is required to verify this repository")
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    bin_dir = tmp_path / "bin"
+    home.mkdir()
+    bin_dir.mkdir()
+    (bin_dir / "mise").symlink_to(Path(mise).resolve())
+
+    completed = _run_runtime(repo_root, home, bin_dir, "--offline", "--apply", "--json")
+
+    assert completed.returncode == 0, completed.stderr
+    steps = {step["name"]: step for step in json.loads(completed.stdout)["steps"]}
+    assert steps["function.mise"]["status"] == "succeeded"
+    activation = repo_root / "generated/functions/_mise.zsh"
+    assert activation.is_file()
+    assert "mise" in activation.read_text()
+
+
+def test_runtime_refuses_to_clobber_non_git_plugin_dirs(tmp_path: Path) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    bin_dir = tmp_path / "bin"
+    home.mkdir()
+    bin_dir.mkdir()
+    _fake_tool(bin_dir, "git")
+    (repo_root / "generated/plugins/fzf-tab").mkdir(parents=True)
+
+    completed = _run_runtime(repo_root, home, bin_dir, "--json")
+
+    assert completed.returncode == 1
+    steps = {step["name"]: step for step in json.loads(completed.stdout)["steps"]}
+    assert steps["plugin.fzf-tab"]["status"] == "failed"
+    assert "not a Git checkout" in steps["plugin.fzf-tab"]["reason"]
+
+
+def test_runtime_refuses_symlinked_plugin_targets(tmp_path: Path) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    bin_dir = tmp_path / "bin"
+    home.mkdir()
+    bin_dir.mkdir()
+    _fake_tool(bin_dir, "git")
+    # A leftover symlink to an external checkout that has its own .git.
+    external = tmp_path / "external-fzf-tab"
+    (external / ".git").mkdir(parents=True)
+    (external / "sentinel").write_text("do not touch\n")
+    plugins = repo_root / "generated/plugins"
+    plugins.mkdir(parents=True)
+    (plugins / "fzf-tab").symlink_to(external)
+
+    completed = _run_runtime(repo_root, home, bin_dir, "--json")
+
+    assert completed.returncode == 1
+    steps = {step["name"]: step for step in json.loads(completed.stdout)["steps"]}
+    assert steps["plugin.fzf-tab"]["status"] == "failed"
+    assert "symlink" in steps["plugin.fzf-tab"]["reason"]
+    # The external checkout must be left untouched (no git pull ran there).
+    assert (external / "sentinel").read_text() == "do not touch\n"
+    assert (plugins / "fzf-tab").is_symlink()
+
+
+def test_runtime_refuses_symlinked_build_sources(tmp_path: Path) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    external = tmp_path / "external-atuin"
+    home.mkdir()
+    (external / ".git").mkdir(parents=True)
+    (external / "sentinel").write_text("do not touch\n")
+    sources = repo_root / "generated/sources"
+    sources.mkdir(parents=True)
+    (sources / "atuin").symlink_to(external)
+
+    plan = plan_runtime(
+        repo_root,
+        home,
+        executable_finder=lambda tool: f"/fake/{tool}",
+        network=False,
+        build=True,
+    )
+    report = execute_runtime(plan, home)
+
+    results = {result.spec.name: result for result in report.results}
+    assert report.ok is False
+    assert results["source.atuin"].status is RuntimeStatus.FAILED
+    assert "symlink" in (results["source.atuin"].reason or "")
+    assert results["binary.atuin"].status is RuntimeStatus.SKIPPED
+    assert (external / "sentinel").read_text() == "do not touch\n"
+    assert (sources / "atuin").is_symlink()
+
+
+def test_runtime_refuses_symlinked_git_metadata(tmp_path: Path) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    home.mkdir()
+    plugin = repo_root / "generated/plugins/fzf-tab"
+    source = repo_root / "generated/sources/atuin"
+    external_plugin_git = tmp_path / "external-plugin.git"
+    external_source_git = tmp_path / "external-source.git"
+    for checkout, external_git in (
+        (plugin, external_plugin_git),
+        (source, external_source_git),
+    ):
+        checkout.mkdir(parents=True)
+        external_git.mkdir()
+        (external_git / "sentinel").write_text("do not touch\n")
+        (checkout / ".git").symlink_to(external_git)
+
+    report = plan_runtime(
+        repo_root,
+        home,
+        executable_finder=lambda tool: f"/fake/{tool}",
+        network=True,
+        build=True,
+    )
+
+    results = {result.spec.name: result for result in report.results}
+    assert report.ok is False
+    assert results["plugin.fzf-tab"].status is RuntimeStatus.FAILED
+    assert "Git metadata is a symlink" in (results["plugin.fzf-tab"].reason or "")
+    assert results["source.atuin"].status is RuntimeStatus.FAILED
+    assert "Git metadata is a symlink" in (results["source.atuin"].reason or "")
+    assert results["binary.atuin"].status is RuntimeStatus.SKIPPED
+    assert (external_plugin_git / "sentinel").read_text() == "do not touch\n"
+    assert (external_source_git / "sentinel").read_text() == "do not touch\n"
+
+
+def test_runtime_rechecks_plugin_git_metadata_before_update(tmp_path: Path) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    plugin = repo_root / "generated/plugins/fzf-tab"
+    external_git = tmp_path / "external-plugin.git"
+    home.mkdir()
+    (plugin / ".git").mkdir(parents=True)
+    external_git.mkdir()
+    (external_git / "sentinel").write_text("do not touch\n")
+    plan = plan_runtime(
+        repo_root,
+        home,
+        executable_finder=lambda tool: f"/fake/{tool}" if tool == "git" else None,
+        network=True,
+    )
+    plugin_step = next(
+        item for item in plan.results if item.spec.name == "plugin.fzf-tab"
+    )
+    plan = RuntimeReport(
+        apply=plan.apply,
+        results=(plugin_step,),
+        generated_root=plan.generated_root,
+    )
+
+    def replace_git_metadata(spec: RuntimeSpec, _action: RuntimeAction) -> None:
+        if spec.name != "plugin.fzf-tab":
+            return
+        shutil.rmtree(plugin / ".git")
+        (plugin / ".git").symlink_to(external_git)
+
+    report = execute_runtime(plan, home, on_start=replace_git_metadata)
+
+    result = next(item for item in report.results if item.spec.name == "plugin.fzf-tab")
+    assert result.status is RuntimeStatus.FAILED
+    assert "Git metadata is a symlink" in (result.reason or "")
+    assert (external_git / "sentinel").read_text() == "do not touch\n"
+    assert (plugin / ".git").is_symlink()
+
+
+def test_runtime_rechecks_plugin_gitdir_file_before_update(tmp_path: Path) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    plugin = repo_root / "generated/plugins/fzf-tab"
+    external_git = tmp_path / "external-plugin.git"
+    home.mkdir()
+    (plugin / ".git").mkdir(parents=True)
+    external_git.mkdir()
+    (external_git / "sentinel").write_text("do not touch\n")
+    plan = plan_runtime(
+        repo_root,
+        home,
+        executable_finder=lambda tool: f"/fake/{tool}" if tool == "git" else None,
+        network=True,
+    )
+    plugin_step = next(
+        item for item in plan.results if item.spec.name == "plugin.fzf-tab"
+    )
+    plan = RuntimeReport(
+        apply=plan.apply,
+        results=(plugin_step,),
+        generated_root=plan.generated_root,
+    )
+
+    def replace_git_metadata(spec: RuntimeSpec, _action: RuntimeAction) -> None:
+        if spec.name != "plugin.fzf-tab":
+            return
+        shutil.rmtree(plugin / ".git")
+        (plugin / ".git").write_text(f"gitdir: {external_git}\n")
+
+    report = execute_runtime(plan, home, on_start=replace_git_metadata)
+
+    result = next(item for item in report.results if item.spec.name == "plugin.fzf-tab")
+    assert result.status is RuntimeStatus.FAILED
+    assert "Git metadata is not a directory" in (result.reason or "")
+    assert (external_git / "sentinel").read_text() == "do not touch\n"
+    assert (plugin / ".git").is_file()
+
+
+def test_runtime_rechecks_build_source_before_execution(tmp_path: Path) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    source_dir = repo_root / "generated/sources/atuin"
+    external = tmp_path / "external-atuin"
+    home.mkdir()
+    (source_dir / ".git").mkdir(parents=True)
+    external.mkdir()
+    (external / "sentinel").write_text("do not touch\n")
+    plan = plan_runtime(
+        repo_root,
+        home,
+        executable_finder=lambda tool: f"/fake/{tool}",
+        network=False,
+        build=True,
+    )
+
+    def replace_source(spec: RuntimeSpec, _action: RuntimeAction) -> None:
+        if spec.name != "binary.atuin":
+            return
+        shutil.rmtree(source_dir)
+        source_dir.symlink_to(external)
+
+    report = execute_runtime(plan, home, on_start=replace_source)
+
+    result = next(item for item in report.results if item.spec.name == "binary.atuin")
+    assert result.status is RuntimeStatus.FAILED
+    assert "command directory is a symlink" in (result.reason or "")
+    assert (external / "sentinel").read_text() == "do not touch\n"
+    assert source_dir.is_symlink()
+
+
+def test_runtime_rechecks_build_source_git_metadata_before_execution(
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    source_dir = repo_root / "generated/sources/atuin"
+    external_git = tmp_path / "external-atuin.git"
+    home.mkdir()
+    (source_dir / ".git").mkdir(parents=True)
+    external_git.mkdir()
+    (external_git / "sentinel").write_text("do not touch\n")
+    plan = plan_runtime(
+        repo_root,
+        home,
+        executable_finder=lambda tool: f"/fake/{tool}",
+        network=False,
+        build=True,
+    )
+
+    def replace_git_metadata(spec: RuntimeSpec, _action: RuntimeAction) -> None:
+        if spec.name != "binary.atuin":
+            return
+        shutil.rmtree(source_dir / ".git")
+        (source_dir / ".git").symlink_to(external_git)
+
+    report = execute_runtime(plan, home, on_start=replace_git_metadata)
+
+    result = next(item for item in report.results if item.spec.name == "binary.atuin")
+    assert result.status is RuntimeStatus.FAILED
+    assert "Git metadata is a symlink" in (result.reason or "")
+    assert (external_git / "sentinel").read_text() == "do not touch\n"
+    assert (source_dir / ".git").is_symlink()
+
+
+def test_runtime_rechecks_owned_directories_immediately_before_execution(
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    bin_dir = tmp_path / "bin"
+    outside = tmp_path / "outside"
+    home.mkdir()
+    bin_dir.mkdir()
+    outside.mkdir()
+    _fake_tool(bin_dir, "mise", "printf 'generated output\\n'\n")
+    plan = plan_runtime(
+        repo_root,
+        home,
+        executable_finder=lambda tool: str(bin_dir / tool) if tool == "mise" else None,
+        network=False,
+    )
+
+    replaced = False
+
+    def replace_owned_directory(spec: RuntimeSpec, _action: RuntimeAction) -> None:
+        nonlocal replaced
+        if replaced or spec.name != "function.mise":
+            return
+        functions = repo_root / "generated/functions"
+        functions.parent.mkdir(parents=True)
+        functions.symlink_to(outside, target_is_directory=True)
+        replaced = True
+
+    report = execute_runtime(plan, home, on_start=replace_owned_directory)
+
+    result = next(item for item in report.results if item.spec.name == "function.mise")
+    assert result.status is RuntimeStatus.FAILED
+    assert "directory is a symlink" in (result.reason or "")
+    assert not any(outside.iterdir())
+
+
+def test_runtime_keeps_old_output_when_generator_prints_nothing(
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    bin_dir = tmp_path / "bin"
+    home.mkdir()
+    bin_dir.mkdir()
+    functions = repo_root / "generated/functions"
+    functions.mkdir(parents=True)
+    (functions / "_mise.zsh").write_text("previous good output\n")
+    _fake_tool(bin_dir, "mise", "exit 0\n")
+
+    completed = _run_runtime(repo_root, home, bin_dir, "--offline", "--apply", "--json")
+
+    assert completed.returncode == 1
+    steps = {step["name"]: step for step in json.loads(completed.stdout)["steps"]}
+    assert steps["function.mise"]["status"] == "failed"
+    assert (functions / "_mise.zsh").read_text() == "previous good output\n"
+
+
+def test_repo_aware_finder_rejects_stale_mise_shims(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    repo_root = tmp_path / "dotfiles"
+    repo_root.mkdir()
+    data_dir = tmp_path / "mise-data"
+    shims = data_dir / "shims"
+    shims.mkdir(parents=True)
+    monkeypatch.setenv("MISE_DATA_DIR", str(data_dir))
+    for name in ("stale-tool", "good-tool"):
+        _fake_tool(shims, name)
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    _fake_tool(
+        bin_dir,
+        "mise",
+        'case "$2" in good-tool) exit 0 ;; *) exit 1 ;; esac\n',
+    )
+    _fake_tool(bin_dir, "plain-tool")
+    executables = {
+        "mise": str(bin_dir / "mise"),
+        "stale-tool": str(shims / "stale-tool"),
+        "good-tool": str(shims / "good-tool"),
+        "plain-tool": str(bin_dir / "plain-tool"),
+    }
+
+    finder = repo_aware_finder(repo_root, executables.get)
+
+    assert finder("stale-tool") is None
+    assert finder("good-tool") == str(shims / "good-tool")
+    assert finder("plain-tool") == str(bin_dir / "plain-tool")
+
+
+def test_generated_bin_fallback_is_limited_to_self_built_tools(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    repo_root = tmp_path / "dotfiles"
+    owned_bin = repo_root / "generated/bin"
+    owned_bin.mkdir(parents=True)
+    _fake_tool(owned_bin, "atuin")
+    _fake_tool(owned_bin, "codex")
+    data_dir = tmp_path / "mise-data"
+    shims = data_dir / "shims"
+    shims.mkdir(parents=True)
+    monkeypatch.setenv("MISE_DATA_DIR", str(data_dir))
+    _fake_tool(shims, "atuin")
+
+    finder = repo_aware_finder(repo_root, {"atuin": str(shims / "atuin")}.get)
+
+    # A self-built tool still resolves from generated/bin when its shim is stale...
+    assert finder("atuin") == str(owned_bin / "atuin")
+    # ...but a leftover host-managed binary in generated/bin is never used, so
+    # plan_runtime cannot mark an absent host tool available.
+    assert finder("codex") is None
+
+
+def test_shim_without_reachable_mise_counts_as_absent(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    repo_root = tmp_path / "dotfiles"
+    repo_root.mkdir()
+    data_dir = tmp_path / "mise-data"
+    shims = data_dir / "shims"
+    shims.mkdir(parents=True)
+    monkeypatch.setenv("MISE_DATA_DIR", str(data_dir))
+    _fake_tool(shims, "orphan-tool")
+
+    finder = repo_aware_finder(
+        repo_root,
+        {"orphan-tool": str(shims / "orphan-tool")}.get,
+    )
+
+    assert finder("orphan-tool") is None
+
+
+def test_command_environment_prepends_generated_bin_only_for_self_built_tools(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    monkeypatch.setenv("PATH", "/host/bin")
+    owned_bin = str(tmp_path / "generated/bin")
+    home = tmp_path / "home"
+
+    atuin_spec = RuntimeSpec(
+        name="function.atuin",
+        tool="atuin",
+        target=tmp_path / "generated/functions/_atuin.zsh",
+        command=("atuin", "init", "zsh"),
+    )
+    codex_spec = RuntimeSpec(
+        name="completion.codex",
+        tool="codex",
+        target=tmp_path / "generated/completions/_codex",
+        command=("codex", "completion", "zsh"),
+    )
+
+    atuin_path = _command_environment(atuin_spec, home)["PATH"].split(os.pathsep)
+    codex_path = _command_environment(codex_spec, home)["PATH"].split(os.pathsep)
+
+    # The self-built tool gets generated/bin first; a host tool must not, or a
+    # stale generated/bin/codex would shadow the real codex.
+    assert atuin_path[0] == owned_bin
+    assert owned_bin not in codex_path

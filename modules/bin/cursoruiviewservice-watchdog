@@ -1,9 +1,18 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
+if (( $# > 1 )) || [[ -z "${1-CursorUIViewService}" ]]; then
+  echo "Usage: cursoruiviewservice-watchdog [PROCESS_NAME]" >&2
+  exit 2
+fi
 APP="${1:-CursorUIViewService}"
+OSASCRIPT="${WATCHDOG_OSASCRIPT:-/usr/bin/osascript}"
+PGREP="${WATCHDOG_PGREP:-/usr/bin/pgrep}"
+KILL="${WATCHDOG_KILL:-/bin/kill}"
+SLEEP="${WATCHDOG_SLEEP:-/bin/sleep}"
 
-is_hung=$(/usr/bin/osascript - "$APP" <<'AS'
+set +e
+is_hung=$("$OSASCRIPT" - "$APP" <<'AS'
 on run argv
   set pname to item 1 of argv
   tell application "System Events"
@@ -20,27 +29,49 @@ on run argv
     if errNum is -1712 then
       return true
     else
-      return false
+      return "probe-failed"
     end if
   end try
 end run
 AS
 )
+probe_status=$?
+set -e
 
 time_now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+if (( probe_status != 0 )) || [[ "$is_hung" != true && "$is_hung" != false ]]; then
+  echo "$time_now - $APP accessibility probe failed" >&2
+  exit 1
+fi
+
+collect_pids() {
+  pids=()
+  while IFS= read -r pid; do
+    [[ -n "$pid" ]] && pids+=("$pid")
+  done < <("$PGREP" -x "$APP" || true)
+}
+
 if [[ "$is_hung" = "true" ]]; then
   echo "$time_now - $APP is hung"
 
-  mapfile -t pids < <(/usr/bin/pgrep -x "$APP" || true)
+  collect_pids
 
   if (( ${#pids[@]} )); then
-    /bin/kill -TERM "${pids[@]}" 2>/dev/null || true
-    /bin/sleep 2
-    mapfile -t pids < <(/usr/bin/pgrep -x "$APP" || true)
+    "$KILL" -TERM "${pids[@]}" 2>/dev/null || true
+    "$SLEEP" 2
+    collect_pids
     if (( ${#pids[@]} )); then
-      /bin/kill -KILL "${pids[@]}" 2>/dev/null || true
+      "$KILL" -KILL "${pids[@]}" 2>/dev/null || true
+      "$SLEEP" 1
+      collect_pids
     fi
-    echo "$time_now - $APP is killed"
+    if (( ${#pids[@]} )); then
+      echo "$time_now - $APP remains after KILL (PIDs: ${pids[*]})" >&2
+      exit 1
+    fi
+    echo "$time_now - $APP is terminated"
+  else
+    echo "$time_now - no matching $APP process remains"
   fi
 else
   echo "$time_now - $APP is not hung"

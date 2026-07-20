@@ -5,6 +5,7 @@
 .repoprompt/
 
 __pycache__/
+.pytest_cache/
 .ruff_cache/
 .venv/
 
@@ -12,9 +13,8 @@ generated/bin/*
 generated/completions/*
 generated/functions/*
 generated/plugins/*
-!**/.gitkeep
+generated/sources/*
 
-home/.config/karabiner/automatic_backups/
-home/.config/zellij/plugins/
+reference/.config/karabiner/automatic_backups/
 
 !*tpl*

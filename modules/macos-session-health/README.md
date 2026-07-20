@@ -7,16 +7,20 @@ logs under `~/Library/Logs/macos-session-health/`.
 
 ## Lifecycle
 
-The single-file CLI owns its `~/.local/bin/macos-session-health` symlink and
-generated LaunchAgent.
+The single-file CLI owns a small wrapper at `~/.local/bin/macos-session-health`,
+a runtime copy under its Application Support directory, and its generated
+LaunchAgent. It requires Python 3.11 or newer. Installation records the stable
+mise `python/latest` path when available, so the daemon and CLI do not depend on
+mise shims or a long-lived uv script environment.
 
 ```zsh
+modules/macos-session-health/macos-session-health install --dry-run
 modules/macos-session-health/macos-session-health install
 macos-session-health status --format json
 ```
 
-`uninstall` removes the command symlink and LaunchAgent but preserves SQLite
-state and logs:
+`uninstall` removes the command wrapper, runtime copy, and LaunchAgent but
+preserves SQLite state and logs:
 
 ```zsh
 macos-session-health uninstall
@@ -56,12 +60,15 @@ incident because they add work to the failing service. Active `spctl` and
 Do not treat a higher maxfiles limit as the root-cause fix. It reduces secondary
 launch failures but does not stop `syspolicyd` RSS or FD growth.
 
-The CLI never closes ChatGPT Desktop. Confirm that it is safe to close before
-executing recovery, and do not terminate unrelated Codex CLI sessions.
+The executable recovery path never closes Codex Desktop. Its read-only report
+includes a separate manual command that closes the app; do not copy or run that
+command until closing the app is safe. The
+`--assume-codex-desktop-closed` flag confirms that precondition but does not
+close the app. Do not terminate unrelated Codex CLI sessions.
 
 ## Recovery
 
-`recover` without `--execute` is read-only. After ChatGPT Desktop is closed or
+`recover` without `--execute` is read-only. After Codex Desktop is closed or
 confirmed safe to leave closed, execute the guarded restart:
 
 ```zsh
@@ -75,19 +82,58 @@ Successful recovery has all of these properties:
 - recent resource and passive-log signals stop increasing;
 - app and shell launches work again.
 
-If TERM does not replace the process, retry once with the CLI's KILL option:
+After TERM, read the recovery report again. Use KILL only when the report still
+shows the same failed process and forceful termination is acceptable:
 
 ```zsh
 macos-session-health recover --execute --assume-codex-desktop-closed --signal KILL
 ```
 
-If macOS rejects direct signal delivery, reboot is the remaining clean recovery.
+If macOS rejects direct signal delivery, use the report to decide between
+further platform diagnosis and a system restart.
 
 ## Notifications
 
 Notifications are passive alerts for a narrow set of launch-impacting health
-signals. They are cooldown-limited, recorded in SQLite, and never execute
-recovery. Use the incident report to see both emitted and suppressed decisions.
+signals. The single-file CLI contains its own brrr client; it does not execute a
+Skillshare-managed sender. An explicit `BRRR_SECRET` from the environment,
+`BRRR_ENV_FILE`, `~/.config/brrr/env`, or `~/.config/notify/brrr.env` takes
+precedence over the exe.dev brrr proxy. Notifications identify the host and
+summarize impact and action without embedding snapshot IDs or raw signal fields.
+
+The SQLite state machine sends an onset, a changed incident, and one recovery.
+It suppresses an unchanged incident regardless of sample count, and records
+cooldown or incident-state changes only after successful delivery. Failed onset
+and recovery deliveries remain eligible for the next run. Notifications never
+execute recovery actions. Use the incident report to see both emitted and
+suppressed decisions.
+
+When a push delivery exhausts its retries or brrr is unconfigured, the CLI uses
+a rate-limited local macOS notification as a last resort. `status --format json`
+is the authoritative delivery-health report; `mise run check` consumes it to
+detect a silently dead agent or push channel.
+
+Validate the payload and local credential lookup without sending:
+
+```zsh
+macos-session-health notify-test --dry-run
+```
+
+Process inventories are stored as one aggregate event per inventory instead of
+one row per process. Snapshot retention applies to both formats; use the
+collector's `--retention-days` option or
+`MACOS_SESSION_HEALTH_RETENTION_DAYS` to change its current default. Existing
+detailed rows age out normally.
+
+After a storage-format upgrade, reclaim unused SQLite pages without losing
+history. The command stops and restarts only this LaunchAgent around `VACUUM`:
+
+```zsh
+macos-session-health compact --format json
+```
+
+Pass global `--db PATH` before `compact` to compact an offline database without
+stopping the installed LaunchAgent.
 
 ## Maintenance
 
@@ -96,6 +142,7 @@ outputs before reinstalling it:
 
 ```zsh
 modules/macos-session-health/macos-session-health --version
+modules/macos-session-health/macos-session-health-test
 modules/macos-session-health/macos-session-health incident --hours 1 --limit 3 --format json
 modules/macos-session-health/macos-session-health recover --format json
 git diff --check
