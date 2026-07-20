@@ -582,6 +582,29 @@ def _symlink_findings(repo_root: Path, tracked_paths: list[Path]) -> list[Findin
     ]
 
 
+LEGACY_LAYOUT_ROOTS = ("home", "config", "vendor")
+
+
+def _legacy_layout_findings(repo_root: Path) -> list[Finding]:
+    """Report pre-rename layout roots that survived a checkout.
+
+    Ignored or untracked files (caches, .DS_Store, old plugin payloads) keep
+    these directories alive across the home/ -> reference/ migration, and no
+    tracked-path collector ever visits them.
+    """
+    return [
+        _located_finding(
+            Severity.WARN,
+            "repository.legacy_layout_root",
+            f"legacy layout directory {name}/ still exists; "
+            "inspect its remaining files and remove it",
+            repo_root / name,
+        )
+        for name in LEGACY_LAYOUT_ROOTS
+        if (repo_root / name).exists()
+    ]
+
+
 def _skillshare_config_findings(repo_root: Path) -> list[Finding]:
     config_path = repo_root / "reference/.config/skillshare/config.yaml"
     if not config_path.is_file():
@@ -693,6 +716,7 @@ def inspect_repository(
     findings.extend(_symlink_findings(repo_root, tracked_paths))
     findings.extend(_tracked_file_findings(repo_root, tracked_paths))
     findings.extend(_legacy_reference_findings(repo_root, tracked_paths))
+    findings.extend(_legacy_layout_findings(repo_root))
     findings.extend(_skillshare_config_findings(repo_root))
     return LintReport(schema_version=1, findings=tuple(findings))
 

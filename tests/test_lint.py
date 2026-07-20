@@ -432,3 +432,35 @@ def test_inspect_repository_reports_git_inventory_failure(
     assert finding.severity is Severity.ERROR
     assert "injected git failure" in finding.message
     assert report.is_ok() is False
+
+
+def test_legacy_layout_roots_are_flagged_until_removed(tmp_path: Path) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    (repo_root / "reference").mkdir(parents=True)
+    (repo_root / "reference/.example").write_text("configured\n")
+    (repo_root / "mackup/applications").mkdir(parents=True)
+    (repo_root / "mackup/applications/example.cfg").write_text(
+        "[application]\nname = example\n[configuration_files]\n.example\n",
+    )
+    (repo_root / "mackup/mackup.cfg").write_text(mackup_cfg("example\n"))
+
+    clean = inspect_repository(repo_root, home)
+    assert not [
+        finding
+        for finding in clean.findings
+        if finding.code == "repository.legacy_layout_root"
+    ]
+
+    leftover = repo_root / "home/.config/zellij/plugins"
+    leftover.mkdir(parents=True)
+    (leftover / "zjstatus.wasm").write_bytes(b"wasm")
+
+    degraded = inspect_repository(repo_root, home)
+    findings = [
+        finding
+        for finding in degraded.findings
+        if finding.code == "repository.legacy_layout_root"
+    ]
+    assert [finding.severity for finding in findings] == [Severity.WARN]
+    assert findings[0].path == repo_root / "home"
