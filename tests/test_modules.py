@@ -315,7 +315,50 @@ def test_skillshare_exec_preserves_symlinked_config(tmp_path: Path) -> None:
 
     assert completed.returncode == 0
     assert config.is_symlink()
-    assert actual_config.read_text() == f"source: {original}\nother: retained\n"
+    # The round-trip migrates the legacy top-level key to sources.skills and
+    # preserves unrelated keys; assert semantically, not byte-for-byte.
+    content = actual_config.read_text()
+    assert not any(line.startswith("source:") for line in content.splitlines())
+    assert "skills: /original" in content
+    assert "other: retained" in content
+
+
+def test_skillshare_switch_writes_the_nested_sources_skills_key(
+    tmp_path: Path,
+) -> None:
+    executable = Path(__file__).resolve().parents[1] / "modules/bin/skillshare-source"
+    config_dir = tmp_path / "skillshare"
+    config_dir.mkdir()
+    config = config_dir / "config.yaml"
+    # Legacy top-level key on input; the switch must migrate to sources.skills,
+    # the key skillshare actually reads, not leave a shadowed `source`.
+    config.write_text("source: /original\nother: retained\n")
+    (config_dir / "sources.json").write_text(
+        json.dumps({"original": "/original", "temporary": "/temporary"})
+    )
+    tool_bin = tmp_path / "bin"
+    tool_bin.mkdir()
+    _write_executable(
+        tool_bin / "skillshare",
+        '#!/bin/sh\nprintf \'%s\\n\' \'{"source":{"path":"/original"}}\'\n',
+    )
+
+    completed = subprocess.run(
+        [str(executable), "switch", "temporary"],
+        env={
+            **os.environ,
+            "PATH": f"{tool_bin}:{os.environ['PATH']}",
+            "SKILLSHARE_CONFIG": str(config),
+        },
+        capture_output=True,
+        text=True,
+    )
+
+    assert completed.returncode == 0, completed.stderr
+    content = config.read_text()
+    assert "  skills: /temporary" in content
+    assert not any(line.startswith("source:") for line in content.splitlines())
+    assert "other: retained" in content
 
 
 def test_skillshare_add_preserves_symlinked_sources_registry(tmp_path: Path) -> None:

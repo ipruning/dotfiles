@@ -196,7 +196,16 @@ def _current_source() -> str:
 
 def _set_source(path: str) -> None:
     data = _load_skillshare_config()
-    data["source"] = path
+    # The active source lives at sources.skills; skillshare resolves that key
+    # ahead of the legacy top-level `source`, so writing `source` here would be
+    # shadowed and the switch would silently no-op. Write the nested key and
+    # drop any legacy key so it cannot shadow the new value.
+    sources = data.get("sources")
+    if not isinstance(sources, dict):
+        sources = {}
+        data["sources"] = sources
+    sources["skills"] = path
+    data.pop("source", None)
     stream = StringIO()
     _yaml.dump(data, stream)
     _atomic_write_text(SKILLSHARE_CFG, stream.getvalue())
