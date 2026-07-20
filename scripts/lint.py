@@ -11,6 +11,7 @@ import subprocess
 from pathlib import Path
 
 from ruamel.yaml import YAML
+from ruamel.yaml.error import YAMLError
 
 from .models import Finding, LintReport, Severity
 from .render import finding_document, render_findings
@@ -611,7 +612,7 @@ def _skillshare_config_findings(repo_root: Path) -> list[Finding]:
         return []
     try:
         document = YAML(typ="safe").load(config_path)
-    except Exception as error:
+    except (OSError, YAMLError) as error:
         return [
             _located_finding(
                 Severity.ERROR,

@@ -688,7 +688,7 @@ def execute_runtime(
             elif planned.action is RuntimeAction.REMOVE:
                 if spec.name == "zsh.compdump":
                     for file_path in home.glob(".zcompdump*"):
-                        file_path.unlink()
+                        file_path.unlink(missing_ok=True)
                 else:
                     assert spec.target is not None
                     spec.target.unlink(missing_ok=True)

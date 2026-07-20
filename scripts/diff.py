@@ -86,7 +86,13 @@ class SubprocessMackupRunner:
                     check=False,
                     capture_output=True,
                     text=True,
+                    # First run may resolve the pinned Mackup fork over the
+                    # network; bound it so diff (and adopt/restore, which call
+                    # inspect_drift) cannot wedge forever.
+                    timeout=180,
                 )
+        except subprocess.TimeoutExpired as error:
+            raise MackupCommandError("Mackup diff timed out after 180s") from error
         except (configparser.Error, OSError) as error:
             raise MackupCommandError(
                 f"Unable to prepare Mackup config {source_config}: {error}",
