@@ -39,6 +39,12 @@ def test_shell_dialect_covers_extensions_shebangs_and_reference_data() -> None:
     assert shell_dialect("modules/bin/dashy", "#!/bin/dash") == "bash"
     assert shell_dialect("modules/bin/pyenvish", "#!/usr/bin/env -S python3 -u") is None
     assert shell_dialect("scripts/diff.py", "#!/usr/bin/env python3") is None
+    # Restored startup dotfiles are gated by name even under reference/...
+    assert shell_dialect("reference/.zshrc", "autoload -Uz compinit") == "zsh"
+    assert shell_dialect("reference/.zshenv", "# read by every zsh") == "zsh"
+    assert shell_dialect("reference/.zprofile", "# login-shell only") == "zsh"
+    assert shell_dialect("reference/.bashrc", "# bash startup") == "bash"
+    # ...but the private template keeps its skip (it may hold placeholders).
     assert shell_dialect("reference/.zshenv.private.tpl.zsh", "") is None
     assert shell_dialect("notes.txt", "plain text") is None
     assert shell_dialect("modules/tool/tool", "#!/bin/sh", '""":"') is None
@@ -119,6 +125,27 @@ def test_check_shell_files_checks_zsh_syntax(tmp_path: Path) -> None:
         finding.code == "shell.zsh_syntax" and finding.severity is Severity.ERROR
         for finding in report.findings
     )
+
+
+@requires_zsh
+def test_check_shell_files_gates_restored_reference_startup_dotfiles(
+    tmp_path: Path,
+) -> None:
+    repo_root = _tracked_repo(
+        tmp_path,
+        # A syntax error in a startup file restore links into $HOME must fail
+        # the gate even though it lives under reference/.
+        {"reference/.zshrc": "if true; then\n"},
+    )
+
+    report = check_shell_files(repo_root)
+
+    assert any(
+        finding.code == "shell.zsh_syntax"
+        and finding.path == repo_root / "reference/.zshrc"
+        for finding in report.findings
+    )
+    assert report.is_ok() is False
 
 
 def test_check_shell_files_requires_missing_tools_explicitly(tmp_path: Path) -> None:

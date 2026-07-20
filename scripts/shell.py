@@ -15,6 +15,10 @@ from .render import emit_error, finding_document, render_findings
 
 BASH_SUFFIXES = {".bash", ".sh"}
 ZSH_SUFFIXES = {".zsh"}
+# Startup dotfiles carry no shell suffix or shebang but are real shell that
+# restore links into $HOME, so recognize them by name even under reference/.
+ZSH_DOTFILES = {".zshrc", ".zshenv", ".zprofile", ".zlogin", ".zlogout"}
+BASH_DOTFILES = {".bashrc", ".bash_profile", ".bash_login", ".profile"}
 SKIP_PREFIXES = ("reference/",)
 SHELLCHECK_SEVERITY = "warning"
 
@@ -36,6 +40,11 @@ class ShellReport(FindingReport):
 
 def shell_dialect(relative: str, first_line: str, second_line: str = "") -> str | None:
     """Return the shell dialect of a tracked file, or None for non-shell files."""
+    name = Path(relative).name
+    if name in ZSH_DOTFILES:
+        return "zsh"
+    if name in BASH_DOTFILES:
+        return "bash"
     if relative.startswith(SKIP_PREFIXES):
         return None
     suffix = Path(relative).suffix
