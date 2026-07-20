@@ -148,6 +148,10 @@ LOCAL_BINARY_SPECS = (
     ),
 )
 
+# Tools that live only under generated/bin and may legitimately need it on a
+# command's PATH; every other tool must resolve from the host PATH.
+SELF_BUILT_TOOLS = frozenset(name for name, *_rest in LOCAL_BINARY_SPECS)
+
 
 def file_sha256(path: Path) -> str | None:
     if not path.is_file():
@@ -510,9 +514,11 @@ def _command_environment(spec: RuntimeSpec, home: Path) -> dict[str, str]:
     environment = os.environ.copy()
     environment["HOME"] = str(home)
     owned_root = spec.target if spec.target is not None else spec.working_directory
-    if spec.command and owned_root is not None:
-        # Command subprocesses must resolve self-built tools that exist
-        # only under the repository's generated/bin sibling directory.
+    if spec.command and owned_root is not None and spec.tool in SELF_BUILT_TOOLS:
+        # Only a self-built tool (atuin) lives under generated/bin and needs it
+        # on PATH. Prepending it for every command would let a stale or unowned
+        # generated/bin/<tool> (e.g. codex, git) shadow the host executable that
+        # plan_runtime actually checked.
         owned_bin = owned_root.parent.parent / "bin"
         environment["PATH"] = f"{owned_bin}{os.pathsep}{environment.get('PATH', '')}"
     environment.update(dict(spec.environment))

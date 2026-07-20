@@ -12,6 +12,7 @@ from scripts.runtime import (
     RuntimeResult,
     RuntimeSpec,
     RuntimeStatus,
+    _command_environment,
     _next_commands,
     execute_runtime,
     plan_runtime,
@@ -804,3 +805,33 @@ def test_shim_without_reachable_mise_counts_as_absent(
     )
 
     assert finder("orphan-tool") is None
+
+
+def test_command_environment_prepends_generated_bin_only_for_self_built_tools(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    monkeypatch.setenv("PATH", "/host/bin")
+    owned_bin = str(tmp_path / "generated/bin")
+    home = tmp_path / "home"
+
+    atuin_spec = RuntimeSpec(
+        name="function.atuin",
+        tool="atuin",
+        target=tmp_path / "generated/functions/_atuin.zsh",
+        command=("atuin", "init", "zsh"),
+    )
+    codex_spec = RuntimeSpec(
+        name="completion.codex",
+        tool="codex",
+        target=tmp_path / "generated/completions/_codex",
+        command=("codex", "completion", "zsh"),
+    )
+
+    atuin_path = _command_environment(atuin_spec, home)["PATH"].split(os.pathsep)
+    codex_path = _command_environment(codex_spec, home)["PATH"].split(os.pathsep)
+
+    # The self-built tool gets generated/bin first; a host tool must not, or a
+    # stale generated/bin/codex would shadow the real codex.
+    assert atuin_path[0] == owned_bin
+    assert owned_bin not in codex_path
