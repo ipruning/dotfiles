@@ -825,10 +825,12 @@ class SkillshareGuardTest(unittest.TestCase):
         self.store.current_signals = []
         self.store.current_brrr_observations = set()
         self.status_calls = []
+        self.status_environments: list[dict[str, str]] = []
         snapshot_id = self.store.create_snapshot("test", [])
 
-        def runner(cmd: list[str], **_kwargs: Any) -> SimpleNamespace:
+        def runner(cmd: list[str], **kwargs: Any) -> SimpleNamespace:
             self.status_calls.append(cmd)
+            self.status_environments.append(kwargs["env"])
             document = {"source": status} if status is not None else {}
             return SimpleNamespace(
                 returncode=status_returncode, stdout=json.dumps(document)
@@ -875,6 +877,9 @@ class SkillshareGuardTest(unittest.TestCase):
         self.assertIn("skillshare_unready", self.store.current_brrr_observations)
         # It queries skillshare's own status, not the config file.
         self.assertEqual(self.status_calls[0][1:4], ["status", "--json", "-g"])
+        self.assertEqual(
+            self.status_environments[0]["SKILLSHARE_CONFIG"], str(self.config_path)
+        )
 
         broken = self.collect(
             "/opt/homebrew/bin/skillshare",

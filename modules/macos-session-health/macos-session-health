@@ -2028,6 +2028,7 @@ def collect_notification_channel_guard(
 
 def skillshare_source_status(
     executable: Path,
+    config_path: Path,
     *,
     runner: Any = subprocess.run,
 ) -> dict[str, Any] | None:
@@ -2036,9 +2037,12 @@ def skillshare_source_status(
     skillshare resolves the effective skills source (sources.skills, with the
     legacy `source` fallback and ~ expansion) and reports whether it exists,
     so this authoritative query replaces parsing config.yaml ourselves. `-g`
-    forces global mode so a monitor's cwd cannot flip it into project mode.
-    Returns None when the command is unavailable, fails, or is unparseable.
+    forces global mode so a monitor's cwd cannot flip it into project mode;
+    SKILLSHARE_CONFIG selects the same config file the guard validated. Returns
+    None when the command is unavailable, fails, or is unparseable.
     """
+    environment = os.environ.copy()
+    environment["SKILLSHARE_CONFIG"] = str(config_path)
     try:
         completed = runner(
             [str(executable), "status", "--json", "-g"],
@@ -2047,6 +2051,7 @@ def skillshare_source_status(
             capture_output=True,
             text=True,
             timeout=30,
+            env=environment,
         )
     except (OSError, subprocess.TimeoutExpired):
         return None
@@ -2079,7 +2084,9 @@ def collect_skillshare_guard(
     elif not config_path.is_file():
         detail = f"skillshare configuration is missing ({config_path})"
     else:
-        status = skillshare_source_status(Path(executable), runner=runner)
+        status = skillshare_source_status(
+            Path(executable), config_path, runner=runner
+        )
         if status is None:
             detail = "skillshare status could not be read"
         else:
