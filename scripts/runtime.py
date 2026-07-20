@@ -162,6 +162,12 @@ def file_sha256(path: Path) -> str | None:
     return digest.hexdigest()
 
 
+def _mise_shims_dir() -> Path:
+    data_dir = os.environ.get("MISE_DATA_DIR")
+    base = Path(data_dir) if data_dir else Path.home() / ".local/share/mise"
+    return base / "shims"
+
+
 def repo_aware_finder(
     repo_root: Path,
     executable_finder: ExecutableFinder,
@@ -170,11 +176,38 @@ def repo_aware_finder(
 
     Task environments do not expose generated/bin, so gating on PATH alone
     would treat self-built tools (atuin) as absent and remove their owned
-    runtime files.
+    runtime files. A mise shim only proves a tool was installed at some
+    point; after a configuration change the shim can outlive its tool, so
+    shim hits are validated with `mise which` before they count as present.
     """
+    shims_dir = _mise_shims_dir()
+    shim_health: dict[str, bool] = {}
+
+    def shim_is_healthy(tool: str) -> bool:
+        cached = shim_health.get(tool)
+        if cached is not None:
+            return cached
+        mise_executable = executable_finder("mise")
+        healthy = False
+        if mise_executable:
+            try:
+                completed = subprocess.run(
+                    (mise_executable, "which", tool),
+                    check=False,
+                    stdin=subprocess.DEVNULL,
+                    capture_output=True,
+                    timeout=30,
+                )
+                healthy = completed.returncode == 0
+            except OSError, subprocess.TimeoutExpired:
+                healthy = False
+        shim_health[tool] = healthy
+        return healthy
 
     def find(tool: str) -> str | None:
         found = executable_finder(tool)
+        if found and Path(found).parent == shims_dir and not shim_is_healthy(tool):
+            found = None
         if found:
             return found
         owned = repo_root / "generated/bin" / tool

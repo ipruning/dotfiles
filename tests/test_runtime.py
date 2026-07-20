@@ -15,6 +15,7 @@ from scripts.runtime import (
     _next_commands,
     execute_runtime,
     plan_runtime,
+    repo_aware_finder,
 )
 
 
@@ -727,3 +728,79 @@ def test_runtime_keeps_old_output_when_generator_prints_nothing(
     steps = {step["name"]: step for step in json.loads(completed.stdout)["steps"]}
     assert steps["function.mise"]["status"] == "failed"
     assert (functions / "_mise.zsh").read_text() == "previous good output\n"
+
+
+def test_repo_aware_finder_rejects_stale_mise_shims(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    repo_root = tmp_path / "dotfiles"
+    repo_root.mkdir()
+    data_dir = tmp_path / "mise-data"
+    shims = data_dir / "shims"
+    shims.mkdir(parents=True)
+    monkeypatch.setenv("MISE_DATA_DIR", str(data_dir))
+    for name in ("stale-tool", "good-tool"):
+        _fake_tool(shims, name)
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    _fake_tool(
+        bin_dir,
+        "mise",
+        'case "$2" in good-tool) exit 0 ;; *) exit 1 ;; esac\n',
+    )
+    _fake_tool(bin_dir, "plain-tool")
+    executables = {
+        "mise": str(bin_dir / "mise"),
+        "stale-tool": str(shims / "stale-tool"),
+        "good-tool": str(shims / "good-tool"),
+        "plain-tool": str(bin_dir / "plain-tool"),
+    }
+
+    finder = repo_aware_finder(repo_root, executables.get)
+
+    assert finder("stale-tool") is None
+    assert finder("good-tool") == str(shims / "good-tool")
+    assert finder("plain-tool") == str(bin_dir / "plain-tool")
+
+
+def test_stale_shim_still_resolves_through_owned_binaries(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    repo_root = tmp_path / "dotfiles"
+    owned_bin = repo_root / "generated/bin"
+    owned_bin.mkdir(parents=True)
+    _fake_tool(owned_bin, "stale-tool")
+    data_dir = tmp_path / "mise-data"
+    shims = data_dir / "shims"
+    shims.mkdir(parents=True)
+    monkeypatch.setenv("MISE_DATA_DIR", str(data_dir))
+    _fake_tool(shims, "stale-tool")
+
+    finder = repo_aware_finder(
+        repo_root,
+        {"stale-tool": str(shims / "stale-tool")}.get,
+    )
+
+    assert finder("stale-tool") == str(owned_bin / "stale-tool")
+
+
+def test_shim_without_reachable_mise_counts_as_absent(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    repo_root = tmp_path / "dotfiles"
+    repo_root.mkdir()
+    data_dir = tmp_path / "mise-data"
+    shims = data_dir / "shims"
+    shims.mkdir(parents=True)
+    monkeypatch.setenv("MISE_DATA_DIR", str(data_dir))
+    _fake_tool(shims, "orphan-tool")
+
+    finder = repo_aware_finder(
+        repo_root,
+        {"orphan-tool": str(shims / "orphan-tool")}.get,
+    )
+
+    assert finder("orphan-tool") is None
