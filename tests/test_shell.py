@@ -148,6 +148,57 @@ def test_check_shell_files_gates_restored_reference_startup_dotfiles(
     assert report.is_ok() is False
 
 
+@requires_zsh
+def test_zshenv_exposes_user_and_mise_commands_without_repo_bins_on_linux(
+    tmp_path: Path,
+) -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    zshenv = repo_root / "reference/.zshenv"
+    home = tmp_path / "home"
+    local_bin = home / ".local/bin"
+    shims = home / ".local/share/mise/shims"
+    modules_bin = home / "dotfiles/modules/bin"
+    generated_bin = home / "dotfiles/generated/bin"
+    system_bin = tmp_path / "system-bin"
+    for directory in (local_bin, shims, modules_bin, generated_bin, system_bin):
+        directory.mkdir(parents=True)
+    for executable in (local_bin / "mise", shims / "uv", system_bin / "ss"):
+        executable.write_text("#!/bin/sh\nexit 0\n")
+        executable.chmod(0o755)
+
+    completed = subprocess.run(
+        [
+            "zsh",
+            "-dfc",
+            f'OSTYPE=linux-gnu; source "{zshenv}"; source "{zshenv}"; '
+            "command -v mise; command -v uv; command -v ss; "
+            'command -v skillshare-source || print -r -- "skillshare-source missing"; '
+            'print -r -- "$PATH"',
+        ],
+        env={
+            "HOME": str(home),
+            "PATH": f"{system_bin}:/usr/bin:/bin",
+        },
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert completed.returncode == 0
+    lines = completed.stdout.splitlines()
+    assert lines[:4] == [
+        str(local_bin / "mise"),
+        str(shims / "uv"),
+        str(system_bin / "ss"),
+        "skillshare-source missing",
+    ]
+    loaded_path = lines[4].split(":")
+    assert loaded_path.count(str(local_bin)) == 1
+    assert loaded_path.count(str(shims)) == 1
+    assert str(modules_bin) not in loaded_path
+    assert str(generated_bin) not in loaded_path
+
+
 def test_check_shell_files_requires_missing_tools_explicitly(tmp_path: Path) -> None:
     repo_root = _tracked_repo(
         tmp_path,

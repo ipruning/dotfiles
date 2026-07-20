@@ -100,10 +100,11 @@ there. The contract is a split between experience and commands:
   environment, completions, plugins) and the generated completion directory
   regardless of platform; the Homebrew block is macOS-only and the clash block
   is Linux-only.
-- The repository *command directories* never load on Linux. `.zshenv` prepends
-  `modules/bin` and `generated/bin` to `PATH` only under `darwin*`, so a Linux
-  host never gains repository commands and can never shadow a system tool — most
-  importantly iproute2 `ss`, whose repository namesake is `skillshare-source`.
+- The user bin and mise shim directories load on every platform. The repository
+  *command directories* do not: `.zshenv` prepends `modules/bin` and
+  `generated/bin` to `PATH` only under `darwin*`, so a Linux host never gains
+  repository commands and can never shadow a system tool — most importantly
+  iproute2 `ss`, whose repository namesake is `skillshare-source`.
 - The mise configuration reinforces this: it carries no repository bins, and its
   `lockfile_platforms` covers both `macos-arm64` and `linux-x64`, so restoring
   the macOS mise config onto Linux cannot expose a repository command either.

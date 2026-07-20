@@ -25,6 +25,11 @@ _dotfiles_core_path() {
     [[ -d "$HOME/dotfiles/generated/bin" ]] && path=("$HOME/dotfiles/generated/bin" $path)
   fi
 
+  # mise's installer and other per-user executables use this cross-platform
+  # location. It must be available before interactive initialization so a
+  # direct Linux Zsh session can discover mise without first passing through Bash.
+  [[ -d "$HOME/.local/bin" ]] && path=("$HOME/.local/bin" $path)
+
   # Static equivalent of `mise activate zsh --shims`. Prefer this over calling
   # `mise` here because this file must also bootstrap shells where `mise` is not
   # on PATH yet.
