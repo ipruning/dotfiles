@@ -311,7 +311,7 @@ def _skillshare_resource_containers(details: object, home: Path) -> bool:
     return True
 
 
-def _skillshare_doctorFinding(executable: Path, home: Path) -> Finding:
+def _skillshare_doctor_finding(executable: Path, home: Path) -> Finding:
     environment = os.environ.copy()
     environment["HOME"] = str(home)
     try:
@@ -479,7 +479,7 @@ def _binary_capability(check: str, file_path: Path, label: str) -> Finding:
     )
 
 
-def _generated_directoryFinding(directory_path: Path, label: str) -> Finding:
+def _generated_directory_finding(directory_path: Path, label: str) -> Finding:
     if not directory_path.is_dir():
         return Finding(
             f"shell.{label}",
@@ -591,7 +591,7 @@ def _dangling_repo_link_findings(repo_root: Path, home: Path) -> list[Finding]:
     return findings
 
 
-def _bash_integrationFinding(repo_root: Path, home: Path) -> Finding:
+def _bash_integration_finding(repo_root: Path, home: Path) -> Finding:
     bashrc = home / ".bashrc"
     module_path = repo_root.resolve() / "modules/bash/init.bash"
     try:
@@ -615,7 +615,7 @@ def _bash_integrationFinding(repo_root: Path, home: Path) -> Finding:
     )
 
 
-def _legacy_repo_pathFinding(repo_root: Path) -> Finding:
+def _legacy_repo_path_finding(repo_root: Path) -> Finding:
     legacy_directories = (
         (repo_root / "modules/bin").resolve(),
         (repo_root / "generated/bin").resolve(),
@@ -1109,11 +1109,11 @@ def inspect_host(
     findings.append(skillshare_finding)
     findings.extend(_skillshare_findings(home))
     if skillshare_finding.path and (home / ".config/skillshare/config.yaml").is_file():
-        findings.append(_skillshare_doctorFinding(skillshare_finding.path, home))
+        findings.append(_skillshare_doctor_finding(skillshare_finding.path, home))
     findings.extend(_dangling_repo_link_findings(repo_root, home))
     if active_profile is HostProfile.LINUX_LITE:
-        findings.append(_bash_integrationFinding(repo_root, home))
-        findings.append(_legacy_repo_pathFinding(repo_root))
+        findings.append(_bash_integration_finding(repo_root, home))
+        findings.append(_legacy_repo_path_finding(repo_root))
         return CheckReport(
             schema_version=1,
             findings=tuple(findings),
@@ -1139,7 +1139,9 @@ def inspect_host(
     )
     for directory in ("plugins", "completions", "functions"):
         findings.append(
-            _generated_directoryFinding(repo_root / "generated" / directory, directory),
+            _generated_directory_finding(
+                repo_root / "generated" / directory, directory
+            ),
         )
     owned_tool_finder = repo_aware_finder(repo_root, executable_finder)
     for tool, _command, filename in FUNCTION_SPECS:
