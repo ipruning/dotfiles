@@ -87,6 +87,29 @@ The Linux Lite drift profile observes only Git and Skillshare configuration.
 Skillshare remains optional: a missing executable, configuration, or source is a
 warning for a human or AI operator to evaluate, not a setup action.
 
+## Linux Zsh contract
+
+Linux Lite targets Bash, but the full Zsh reference is deliberately safe to
+restore on a Linux host as well, so `mise run restore -- zsh` is supported
+there. The contract is a split between experience and commands:
+
+- The Zsh *experience* loads on Linux. `.zshrc` sources `modules/zsh/` (aliases,
+  environment, completions, plugins) and the generated completion directory
+  regardless of platform; the Homebrew block is macOS-only and the clash block
+  is Linux-only.
+- The repository *command directories* never load on Linux. `.zshenv` prepends
+  `modules/bin` and `generated/bin` to `PATH` only under `darwin*`, so a Linux
+  host never gains repository commands and can never shadow a system tool — most
+  importantly iproute2 `ss`, whose repository namesake is `skillshare-source`.
+- The mise configuration reinforces this: it carries no repository bins, and its
+  `lockfile_platforms` covers both `macos-arm64` and `linux-x64`, so restoring
+  the macOS mise config onto Linux cannot expose a repository command either.
+
+What is not promised: optional tools (atuin, starship, tv) are host-managed and
+their integrations degrade silently when the tool is absent. `mise run shell`
+reflects the same asymmetry — it syntax-checks Zsh files only where `zsh` is
+installed and marks them not-applicable elsewhere rather than failing.
+
 ## Configuration drift
 
 `mise run diff` compares profile-relevant files under `reference/` with the
