@@ -641,5 +641,253 @@ class LifecycleRollbackTest(unittest.TestCase):
         self.assertEqual(self.plist.read_text(), "plist\n")
 
 
+class ChannelGuardTest(unittest.TestCase):
+    def setUp(self) -> None:
+        self.module = runpy.run_path(str(MODULE_PATH))
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.store = self.module["Store"](
+            Path(self.temp_dir.name) / "health.sqlite3", emit_stdout=False
+        )
+        self.args = SimpleNamespace()
+
+    def tearDown(self) -> None:
+        self.store.close()
+        self.temp_dir.cleanup()
+
+    def collect(self, *, secret: str = "") -> list[dict[str, Any]]:
+        self.store.current_signals = []
+        self.store.current_brrr_observations = set()
+        snapshot_id = self.store.create_snapshot("test", [])
+        environment = {"BRRR_SECRET": secret, "BRRR_ENV_FILE": ""}
+        with (
+            mock.patch.dict(self.module["os"].environ, environment),
+            mock.patch.dict(
+                self.module["collect_notification_channel_guard"].__globals__,
+                {"BRRR_ENV_FILES": (Path(self.temp_dir.name) / "missing-env",)},
+            ),
+        ):
+            self.module["collect_notification_channel_guard"](
+                self.store, snapshot_id, self.args
+            )
+        return self.store.current_signals
+
+    def seed_failed_deliveries(self, count: int) -> None:
+        snapshot_id = self.store.create_snapshot("seed", [])
+        for _ in range(count):
+            self.store.emit(
+                snapshot_id, "brrr_notification", "warning", sent=False
+            )
+
+    def signal_names(self, signals: list[dict[str, Any]]) -> set[str]:
+        return {str(signal.get("signal")) for signal in signals}
+
+    def test_unconfigured_channel_signals_and_claims_observation(self) -> None:
+        signals = self.collect()
+
+        self.assertIn("notification_channel_unconfigured", self.signal_names(signals))
+        self.assertIn(
+            "notification_channel_unhealthy", self.store.current_brrr_observations
+        )
+
+    def test_configured_channel_without_failures_stays_quiet(self) -> None:
+        signals = self.collect(secret="test-secret")
+
+        self.assertEqual(self.signal_names(signals), set())
+        self.assertIn(
+            "notification_channel_unhealthy", self.store.current_brrr_observations
+        )
+
+    def test_failure_streak_crosses_threshold_into_a_signal(self) -> None:
+        self.seed_failed_deliveries(2)
+        below = self.collect(secret="test-secret")
+        self.assertEqual(self.signal_names(below), set())
+
+        self.seed_failed_deliveries(1)
+        at_threshold = self.collect(secret="test-secret")
+        self.assertIn(
+            "notification_channel_failing", self.signal_names(at_threshold)
+        )
+        failing = next(
+            signal
+            for signal in at_threshold
+            if signal["signal"] == "notification_channel_failing"
+        )
+        self.assertEqual(failing["value"], 3)
+
+    def test_incident_mapping_and_priorities_for_channel_health(self) -> None:
+        build = self.module["build_brrr_incident"]
+        unconfigured = {
+            "severity": "warning",
+            "signal": "notification_channel_unconfigured",
+            "value": 1,
+        }
+        failing = {
+            "severity": "warning",
+            "signal": "notification_channel_failing",
+            "value": 4,
+        }
+        skillshare = {
+            "severity": "warning",
+            "signal": "skillshare_unready",
+            "value": 1,
+            "detail": "skillshare executable is missing from PATH",
+        }
+        spawn = {"severity": "critical", "signal": "spawn_failed", "value": 1}
+
+        incident = build([unconfigured], "snapshot", "unhealthy", 1000)
+        self.assertEqual(incident["kind"], "notification_channel_unhealthy")
+        self.assertIn("BRRR_SECRET", incident["message"])
+
+        incident = build([failing], "snapshot", "unhealthy", 1000)
+        self.assertEqual(incident["kind"], "notification_channel_unhealthy")
+        self.assertIn("4", incident["message"])
+
+        incident = build([unconfigured, spawn], "snapshot", "unhealthy", 1000)
+        self.assertEqual(incident["kind"], "spawn_failed")
+
+        incident = build([skillshare, unconfigured], "snapshot", "unhealthy", 1000)
+        self.assertEqual(incident["kind"], "notification_channel_unhealthy")
+
+    def test_channel_recovery_follows_the_observed_state_machine(self) -> None:
+        notify_args = SimpleNamespace(
+            brrr_syspolicyd_assessment_failure_count=1000,
+            brrr_notify_cooldown_minutes=0,
+            brrr_thread_id="macos-session-health",
+            brrr_interruption_level="passive",
+            brrr_open_url="",
+            brrr_timeout=10,
+        )
+        payloads: list[dict[str, Any]] = []
+
+        def deliver(
+            payload: dict[str, Any], _timeout: float, **_kwargs: Any
+        ) -> dict[str, Any]:
+            payloads.append(payload)
+            return {
+                "exit": 0,
+                "timeout": False,
+                "duration_ms": 1,
+                "auth_mode": "bearer",
+                "credential_source": "test",
+                "http_status": 202,
+                "attempts": 1,
+            }
+
+        self.module["maybe_send_brrr_notification"].__globals__["deliver_brrr"] = (
+            deliver
+        )
+        failing = {
+            "severity": "warning",
+            "signal": "notification_channel_failing",
+            "value": 3,
+        }
+
+        snapshot_id = self.store.create_snapshot("test", [])
+        self.store.current_signals = [failing]
+        self.store.current_brrr_observations = {"notification_channel_unhealthy"}
+        self.module["maybe_send_brrr_notification"](
+            self.store, snapshot_id, notify_args, "unhealthy"
+        )
+        self.assertEqual(len(payloads), 1)
+
+        snapshot_id = self.store.create_snapshot("test", [])
+        self.store.current_signals = []
+        self.store.current_brrr_observations = {"notification_channel_unhealthy"}
+        self.module["maybe_send_brrr_notification"](
+            self.store, snapshot_id, notify_args, "ok"
+        )
+        self.assertEqual(len(payloads), 2)
+        self.assertIn("已恢复", payloads[1]["title"])
+
+
+class SkillshareGuardTest(unittest.TestCase):
+    def setUp(self) -> None:
+        self.module = runpy.run_path(str(MODULE_PATH))
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.config_path = Path(self.temp_dir.name) / "skillshare/config.yaml"
+        self.store = self.module["Store"](
+            Path(self.temp_dir.name) / "health.sqlite3", emit_stdout=False
+        )
+        self.args = SimpleNamespace(skillshare_config=self.config_path)
+
+    def tearDown(self) -> None:
+        self.store.close()
+        self.temp_dir.cleanup()
+
+    def collect(self, executable: str | None) -> list[dict[str, Any]]:
+        self.store.current_signals = []
+        self.store.current_brrr_observations = set()
+        snapshot_id = self.store.create_snapshot("test", [])
+        self.module["collect_skillshare_guard"](
+            self.store,
+            snapshot_id,
+            self.args,
+            executable_finder=lambda _name: executable,
+        )
+        return self.store.current_signals
+
+    def details(self, signals: list[dict[str, Any]]) -> list[str]:
+        return [
+            str(signal.get("detail"))
+            for signal in signals
+            if signal.get("signal") == "skillshare_unready"
+        ]
+
+    def write_config(self, source: Path | None) -> None:
+        self.config_path.parent.mkdir(parents=True, exist_ok=True)
+        lines = ["targets:", "  - claude"]
+        if source is not None:
+            lines.insert(0, f"source: {source}")
+        self.config_path.write_text("\n".join(lines) + "\n")
+
+    def test_missing_executable_signals_first(self) -> None:
+        signals = self.collect(None)
+
+        self.assertIn("executable is missing", self.details(signals)[0])
+        self.assertIn("skillshare_unready", self.store.current_brrr_observations)
+
+    def test_missing_configuration_signals_with_its_path(self) -> None:
+        signals = self.collect("/opt/homebrew/bin/skillshare")
+
+        self.assertIn("configuration is missing", self.details(signals)[0])
+
+    def test_configured_source_transitions_between_present_and_missing(self) -> None:
+        source = Path(self.temp_dir.name) / "skills"
+        source.mkdir()
+        self.write_config(source)
+        ready = self.collect("/opt/homebrew/bin/skillshare")
+        self.assertEqual(self.details(ready), [])
+        self.assertIn("skillshare_unready", self.store.current_brrr_observations)
+
+        source.rmdir()
+        broken = self.collect("/opt/homebrew/bin/skillshare")
+        self.assertIn("source is missing", self.details(broken)[0])
+
+    def test_config_without_source_line_counts_as_ready(self) -> None:
+        self.write_config(None)
+        signals = self.collect("/opt/homebrew/bin/skillshare")
+
+        self.assertEqual(self.details(signals), [])
+
+    def test_incident_mapping_carries_the_detail(self) -> None:
+        build = self.module["build_brrr_incident"]
+        incident = build(
+            [
+                {
+                    "severity": "warning",
+                    "signal": "skillshare_unready",
+                    "value": 1,
+                    "detail": "skillshare configuration is missing (/tmp/x)",
+                }
+            ],
+            "snapshot",
+            "unhealthy",
+            1000,
+        )
+        self.assertEqual(incident["kind"], "skillshare_unready")
+        self.assertIn("skillshare doctor", incident["message"])
+        self.assertIn("configuration is missing", incident["message"])
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -98,8 +98,13 @@ plist="$test_home/Library/LaunchAgents/com.alex.macos-session-health.plist"
 [[ -x "$installed_cli" && ! -L "$installed_cli" && -x "$runtime_cli" && -f "$plist" ]] \
   || fail 'install did not create its command, runtime, and LaunchAgent'
 plutil -lint "$plist" >/dev/null || fail 'install generated an invalid LaunchAgent'
-if rg -q 'skillshare|\.agents/skills|brrr-helper' "$plist" "$runtime_cli"; then
-  fail 'installed runtime depends on a Skillshare path'
+if rg -q 'skillshare|\.agents/skills|brrr-helper' "$plist"; then
+  fail 'LaunchAgent depends on a Skillshare path'
+fi
+# The runtime may observe Skillshare state (skill-sync readiness guard), but
+# notification delivery must never route through a Skillshare-managed sender.
+if rg -q '\.agents/skills|brrr-helper' "$runtime_cli"; then
+  fail 'installed runtime depends on a Skillshare-managed sender path'
 fi
 
 env "${test_env[@]}" "$installed_cli" status --format json >"$test_root/status.json"

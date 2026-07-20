@@ -21,6 +21,7 @@ import plistlib
 import re
 import resource
 import shlex
+import shutil
 import socket
 import sqlite3
 import subprocess
@@ -469,27 +470,35 @@ def runtime_status_health(db_path: Path) -> dict[str, Any]:
         if row:
             record["last_snapshot_at"] = row["ended_at"] or row["started_at"]
             record["last_snapshot_status"] = row["status"] or ""
-        failures = 0
-        cutoff = (
-            (dt.datetime.now(dt.timezone.utc) - dt.timedelta(hours=24))
-            .isoformat(timespec="seconds")
-            .replace("+00:00", "Z")
-        )
+        record["consecutive_delivery_failures"] = delivery_failure_streak(conn)
+    except sqlite3.Error:
+        pass
+    finally:
+        conn.close()
+    return record
+
+
+def delivery_failure_streak(conn: sqlite3.Connection) -> int:
+    """Count trailing failed deliveries within the last 24 hours."""
+    failures = 0
+    cutoff = (
+        (dt.datetime.now(dt.timezone.utc) - dt.timedelta(hours=24))
+        .isoformat(timespec="seconds")
+        .replace("+00:00", "Z")
+    )
+    try:
         for event_row in conn.execute(
             "SELECT data_json FROM events WHERE event = 'brrr_notification'"
             " AND ts >= ? ORDER BY ts DESC, id DESC LIMIT 10",
             (cutoff,),
         ):
-            data = json.loads(event_row["data_json"])
+            data = json.loads(event_row[0])
             if data.get("sent"):
                 break
             failures += 1
-        record["consecutive_delivery_failures"] = failures
     except (sqlite3.Error, json.JSONDecodeError):
-        pass
-    finally:
-        conn.close()
-    return record
+        return 0
+    return failures
 
 
 def launch_agent_status(output_format: str) -> int:
@@ -1938,6 +1947,107 @@ def collect_bag_mode_guard(
         )
 
 
+NOTIFICATION_FAILURE_STREAK = 3
+
+
+def collect_notification_channel_guard(
+    store: Store,
+    snapshot_id: str,
+    _args: argparse.Namespace,
+) -> None:
+    """Alert while the alert channel itself cannot deliver.
+
+    An unconfigured or persistently failing push channel can only announce
+    itself through the native banner fallback; the signal repeats every
+    sample and the shared fallback cooldown paces the banners.
+    """
+    store.observe_brrr_incident("notification_channel_unhealthy")
+    configuration = brrr_configuration()
+    failures = delivery_failure_streak(store.conn) if store.conn is not None else 0
+    store.emit(
+        snapshot_id,
+        "notification_channel",
+        configured=configuration["configured"],
+        auth_mode=configuration["auth_mode"],
+        failure_streak=failures,
+    )
+    if not configuration["configured"]:
+        store.emit(
+            snapshot_id,
+            "health_signal",
+            "warning",
+            signal="notification_channel_unconfigured",
+            value=1,
+            detail=(
+                "push notifications are unconfigured; provide BRRR_SECRET via "
+                "~/.config/brrr/env so alerts can leave this machine"
+            ),
+        )
+        return
+    if failures >= NOTIFICATION_FAILURE_STREAK:
+        store.emit(
+            snapshot_id,
+            "health_signal",
+            "warning",
+            signal="notification_channel_failing",
+            value=failures,
+            detail=(
+                f"the last {failures} push deliveries failed; "
+                "alerts may not be reaching you"
+            ),
+        )
+
+
+def skillshare_configured_source(config_path: Path) -> Path | None:
+    try:
+        text = config_path.read_text()
+    except OSError:
+        return None
+    for line in text.splitlines():
+        match = re.match(r"^source:\s*(\S+)", line)
+        if match:
+            return Path(match.group(1)).expanduser()
+    return None
+
+
+def collect_skillshare_guard(
+    store: Store,
+    snapshot_id: str,
+    args: argparse.Namespace,
+    *,
+    executable_finder: Any = shutil.which,
+) -> None:
+    """Warn while the AI skill-sync surface is missing on this host."""
+    store.observe_brrr_incident("skillshare_unready")
+    config_path: Path = args.skillshare_config
+    executable = executable_finder("skillshare")
+    source = skillshare_configured_source(config_path)
+    detail = ""
+    if not executable:
+        detail = "skillshare executable is missing from PATH"
+    elif not config_path.is_file():
+        detail = f"skillshare configuration is missing ({config_path})"
+    elif source is not None and not source.is_dir():
+        detail = f"configured skillshare source is missing ({source})"
+    store.emit(
+        snapshot_id,
+        "skillshare_guard",
+        executable=str(executable or ""),
+        config_present=config_path.is_file(),
+        source=str(source or ""),
+        ready=not detail,
+    )
+    if detail:
+        store.emit(
+            snapshot_id,
+            "health_signal",
+            "warning",
+            signal="skillshare_unready",
+            value=1,
+            detail=detail,
+        )
+
+
 def collect_trustd_health(
     store: Store,
     snapshot_id: str,
@@ -2973,6 +3083,9 @@ def build_brrr_incident(
     bag_mode_stalled = strongest_signal(signals, "bag_mode_stalled")
     bag_mode_unarmed = strongest_signal(signals, "bag_mode_unarmed")
     collector_exception = strongest_signal(signals, "collector_exception")
+    channel_unconfigured = strongest_signal(signals, "notification_channel_unconfigured")
+    channel_failing = strongest_signal(signals, "notification_channel_failing")
+    skillshare_unready = strongest_signal(signals, "skillshare_unready")
 
     if spawn_failed:
         title = "macOS 无法正常启动进程"
@@ -3041,6 +3154,32 @@ def build_brrr_incident(
         summary = "macos-session-health 采集器自身失败，需要查看本机日志。"
         primary = collector_exception
         kind = "collector_exception"
+    elif channel_unconfigured:
+        title = "通知渠道未配置"
+        summary = (
+            "session-health 无法推送告警：BRRR 凭据未配置。"
+            "在 `~/.config/brrr/env` 配置 BRRR_SECRET 后推送才能离开本机；"
+            "在此之前告警只会以本机横幅出现。"
+        )
+        primary = channel_unconfigured
+        kind = "notification_channel_unhealthy"
+    elif channel_failing:
+        count = channel_failing.get("value", "")
+        title = "通知推送持续失败"
+        summary = (
+            f"最近 {count} 次推送投递失败，告警可能送不到你手上。"
+            "检查网络与 BRRR 凭据。"
+        )
+        primary = channel_failing
+        kind = "notification_channel_unhealthy"
+    elif skillshare_unready:
+        title = "Skillshare 未就绪"
+        summary = (
+            f"{skillshare_unready.get('detail', '')}；"
+            "AI 会话缺少全局技能同步。运行 `skillshare doctor` 检查。"
+        )
+        primary = skillshare_unready
+        kind = "skillshare_unready"
     else:
         return None
 
@@ -3593,6 +3732,8 @@ def snapshot(args: argparse.Namespace, store: Store, mode: str) -> str:
             store, snapshot_id, args, codex_config
         )
         collect_bag_mode_guard(store, snapshot_id, args, codex_summary)
+        collect_notification_channel_guard(store, snapshot_id, args)
+        collect_skillshare_guard(store, snapshot_id, args)
         collect_code_sign_clone_status(store, snapshot_id, args)
         collect_syspolicyd_health(store, snapshot_id, args)
         collect_trustd_health(store, snapshot_id, args)
@@ -4592,6 +4733,17 @@ Run `macos-session-health install` to install or refresh the user LaunchAgent.
         ),
         help="Minimum count of Codex session processes that makes a disabled "
         "bag-mode worth an alert.",
+    )
+    parser.add_argument(
+        "--skillshare-config",
+        type=Path,
+        default=Path(
+            os.getenv(
+                "MACOS_SESSION_HEALTH_SKILLSHARE_CONFIG",
+                str(Path.home() / ".config" / "skillshare" / "config.yaml"),
+            )
+        ),
+        help="Skillshare config path used by the skill-sync readiness guard.",
     )
     parser.add_argument(
         "--codex-app",
