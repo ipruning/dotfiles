@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import json
 import os
 import runpy
 import subprocess
@@ -814,15 +815,31 @@ class SkillshareGuardTest(unittest.TestCase):
         self.store.close()
         self.temp_dir.cleanup()
 
-    def collect(self, executable: str | None) -> list[dict[str, Any]]:
+    def collect(
+        self,
+        executable: str | None,
+        *,
+        status: dict[str, Any] | None = None,
+        status_returncode: int = 0,
+    ) -> list[dict[str, Any]]:
         self.store.current_signals = []
         self.store.current_brrr_observations = set()
+        self.status_calls = []
         snapshot_id = self.store.create_snapshot("test", [])
+
+        def runner(cmd: list[str], **_kwargs: Any) -> SimpleNamespace:
+            self.status_calls.append(cmd)
+            document = {"source": status} if status is not None else {}
+            return SimpleNamespace(
+                returncode=status_returncode, stdout=json.dumps(document)
+            )
+
         self.module["collect_skillshare_guard"](
             self.store,
             snapshot_id,
             self.args,
             executable_finder=lambda _name: executable,
+            runner=runner,
         )
         return self.store.current_signals
 
@@ -833,12 +850,9 @@ class SkillshareGuardTest(unittest.TestCase):
             if signal.get("signal") == "skillshare_unready"
         ]
 
-    def write_config(self, source: Path | None) -> None:
+    def touch_config(self) -> None:
         self.config_path.parent.mkdir(parents=True, exist_ok=True)
-        lines = ["targets:", "  - claude"]
-        if source is not None:
-            lines.insert(0, f"source: {source}")
-        self.config_path.write_text("\n".join(lines) + "\n")
+        self.config_path.write_text("sources:\n  skills: ~/skills\n")
 
     def test_missing_executable_signals_first(self) -> None:
         signals = self.collect(None)
@@ -851,23 +865,28 @@ class SkillshareGuardTest(unittest.TestCase):
 
         self.assertIn("configuration is missing", self.details(signals)[0])
 
-    def test_configured_source_transitions_between_present_and_missing(self) -> None:
-        source = Path(self.temp_dir.name) / "skills"
-        source.mkdir()
-        self.write_config(source)
-        ready = self.collect("/opt/homebrew/bin/skillshare")
+    def test_source_status_transitions_between_present_and_missing(self) -> None:
+        self.touch_config()
+        ready = self.collect(
+            "/opt/homebrew/bin/skillshare",
+            status={"path": "/Users/x/skills", "exists": True},
+        )
         self.assertEqual(self.details(ready), [])
         self.assertIn("skillshare_unready", self.store.current_brrr_observations)
+        # It queries skillshare's own status, not the config file.
+        self.assertEqual(self.status_calls[0][1:4], ["status", "--json", "-g"])
 
-        source.rmdir()
-        broken = self.collect("/opt/homebrew/bin/skillshare")
-        self.assertIn("source is missing", self.details(broken)[0])
+        broken = self.collect(
+            "/opt/homebrew/bin/skillshare",
+            status={"path": "/Users/x/skills", "exists": False},
+        )
+        self.assertIn("source is missing (/Users/x/skills)", self.details(broken)[0])
 
-    def test_config_without_source_line_counts_as_ready(self) -> None:
-        self.write_config(None)
-        signals = self.collect("/opt/homebrew/bin/skillshare")
+    def test_unreadable_status_is_reported_not_silently_ready(self) -> None:
+        self.touch_config()
+        signals = self.collect("/opt/homebrew/bin/skillshare", status_returncode=1)
 
-        self.assertEqual(self.details(signals), [])
+        self.assertIn("status could not be read", self.details(signals)[0])
 
     def test_incident_mapping_carries_the_detail(self) -> None:
         build = self.module["build_brrr_incident"]
@@ -887,6 +906,45 @@ class SkillshareGuardTest(unittest.TestCase):
         self.assertEqual(incident["kind"], "skillshare_unready")
         self.assertIn("skillshare doctor", incident["message"])
         self.assertIn("configuration is missing", incident["message"])
+
+
+class LegacyInstallDetectionTest(unittest.TestCase):
+    def setUp(self) -> None:
+        self.module = runpy.run_path(str(MODULE_PATH))
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.root = Path(self.temp_dir.name)
+        self.user_bin = self.root / "macos-session-health"
+        # runpy returns a copy of the namespace; the functions read USER_BIN
+        # from their shared __globals__, so patch there, not on self.module.
+        self.module["legacy_symlink_install"].__globals__["USER_BIN"] = self.user_bin
+
+    def tearDown(self) -> None:
+        self.temp_dir.cleanup()
+
+    def test_symlink_to_module_script_is_recognized_as_legacy(self) -> None:
+        module_dir = self.root / "dotfiles/modules/macos-session-health"
+        module_dir.mkdir(parents=True)
+        script = module_dir / "macos-session-health"
+        script.write_text("#!/usr/bin/env python3\n")
+        self.user_bin.symlink_to(script)
+
+        self.assertTrue(self.module["legacy_symlink_install"]())
+        self.assertTrue(self.module["replaceable_install"]())
+
+    def test_symlink_to_an_unrelated_target_is_not_legacy(self) -> None:
+        other = self.root / "elsewhere/some-tool"
+        other.parent.mkdir(parents=True)
+        other.write_text("x")
+        self.user_bin.symlink_to(other)
+
+        self.assertFalse(self.module["legacy_symlink_install"]())
+        self.assertFalse(self.module["replaceable_install"]())
+
+    def test_plain_unmanaged_file_is_neither_legacy_nor_replaceable(self) -> None:
+        self.user_bin.write_text("#!/bin/sh\necho hi\n")
+
+        self.assertFalse(self.module["legacy_symlink_install"]())
+        self.assertFalse(self.module["replaceable_install"]())
 
 
 if __name__ == "__main__":

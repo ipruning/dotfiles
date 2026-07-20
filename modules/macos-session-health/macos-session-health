@@ -263,6 +263,29 @@ def managed_wrapper() -> bool:
     return WRAPPER_MARKER in first_lines
 
 
+def legacy_symlink_install() -> bool:
+    """Recognize the pre-wrapper layout so it can be migrated in place.
+
+    The previous version symlinked USER_BIN at the repository's own module
+    script; that symlink is ours to replace or remove, unlike an arbitrary
+    user-placed file. Match only a link resolving to a `macos-session-health`
+    command inside a `macos-session-health` directory, never a random symlink.
+    """
+    if not USER_BIN.is_symlink():
+        return False
+    try:
+        target = USER_BIN.resolve()
+    except OSError:
+        return False
+    return target.name == "macos-session-health" and target.parent.name == (
+        "macos-session-health"
+    )
+
+
+def replaceable_install() -> bool:
+    return managed_wrapper() or legacy_symlink_install()
+
+
 def backup_path(file_path: Path) -> dict[str, Any]:
     if file_path.is_symlink():
         return {"kind": "symlink", "target": os.readlink(file_path)}
@@ -331,7 +354,7 @@ def install_launch_agent(*, dry_run: bool = False) -> int:
     source = Path(__file__).resolve()
     python_bin = runtime_python()
     if USER_BIN.exists() or USER_BIN.is_symlink():
-        if not managed_wrapper():
+        if not replaceable_install():
             raise CliError(f"refusing to replace unmanaged executable: {USER_BIN}")
 
     if dry_run:
@@ -416,7 +439,7 @@ def uninstall_launch_agent() -> int:
     if sys.platform != "darwin":
         raise CliError("uninstall is supported only on macOS")
     if USER_BIN.exists() or USER_BIN.is_symlink():
-        if not managed_wrapper():
+        if not replaceable_install():
             raise CliError(f"refusing to remove unmanaged executable: {USER_BIN}")
     managed_paths = (RUNTIME_CLI, USER_BIN, LAUNCH_AGENT)
     try:
@@ -427,7 +450,7 @@ def uninstall_launch_agent() -> int:
     bootout_launch_agent()
     try:
         LAUNCH_AGENT.unlink(missing_ok=True)
-        if managed_wrapper():
+        if replaceable_install():
             USER_BIN.unlink()
         RUNTIME_CLI.unlink(missing_ok=True)
     except OSError as uninstall_error:
@@ -2000,16 +2023,38 @@ def collect_notification_channel_guard(
         )
 
 
-def skillshare_configured_source(config_path: Path) -> Path | None:
+def skillshare_source_status(
+    executable: Path,
+    *,
+    runner: Any = subprocess.run,
+) -> dict[str, Any] | None:
+    """Return skillshare's own `.source` object from `status --json`.
+
+    skillshare resolves the effective skills source (sources.skills, with the
+    legacy `source` fallback and ~ expansion) and reports whether it exists,
+    so this authoritative query replaces parsing config.yaml ourselves. `-g`
+    forces global mode so a monitor's cwd cannot flip it into project mode.
+    Returns None when the command is unavailable, fails, or is unparseable.
+    """
     try:
-        text = config_path.read_text()
-    except OSError:
+        completed = runner(
+            [str(executable), "status", "--json", "-g"],
+            check=False,
+            stdin=subprocess.DEVNULL,
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+    except (OSError, subprocess.TimeoutExpired):
         return None
-    for line in text.splitlines():
-        match = re.match(r"^source:\s*(\S+)", line)
-        if match:
-            return Path(match.group(1)).expanduser()
-    return None
+    if completed.returncode != 0:
+        return None
+    try:
+        document = json.loads(completed.stdout)
+    except (json.JSONDecodeError, ValueError):
+        return None
+    source = document.get("source")
+    return source if isinstance(source, dict) else None
 
 
 def collect_skillshare_guard(
@@ -2018,25 +2063,32 @@ def collect_skillshare_guard(
     args: argparse.Namespace,
     *,
     executable_finder: Any = shutil.which,
+    runner: Any = subprocess.run,
 ) -> None:
     """Warn while the AI skill-sync surface is missing on this host."""
     store.observe_brrr_incident("skillshare_unready")
     config_path: Path = args.skillshare_config
     executable = executable_finder("skillshare")
-    source = skillshare_configured_source(config_path)
     detail = ""
+    source_path = ""
     if not executable:
         detail = "skillshare executable is missing from PATH"
     elif not config_path.is_file():
         detail = f"skillshare configuration is missing ({config_path})"
-    elif source is not None and not source.is_dir():
-        detail = f"configured skillshare source is missing ({source})"
+    else:
+        status = skillshare_source_status(Path(executable), runner=runner)
+        if status is None:
+            detail = "skillshare status could not be read"
+        else:
+            source_path = str(status.get("path", ""))
+            if not status.get("exists", True):
+                detail = f"configured skillshare source is missing ({source_path})"
     store.emit(
         snapshot_id,
         "skillshare_guard",
         executable=str(executable or ""),
         config_present=config_path.is_file(),
-        source=str(source or ""),
+        source=source_path,
         ready=not detail,
     )
     if detail:
