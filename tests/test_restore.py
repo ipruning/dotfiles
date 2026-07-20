@@ -1,4 +1,5 @@
 import json
+import os
 from pathlib import Path
 
 from scripts.models import Drift, DriftKind, FileKind
@@ -76,6 +77,47 @@ def test_restore_apply_backs_up_live_file_and_links_reference(tmp_path: Path) ->
     converged = run_scripts_module("restore", home, "hushlogin", "--json")
     assert converged.returncode == 0
     assert json.loads(converged.stdout)["changes"] == []
+
+
+def test_restore_recreates_an_adopted_symlink(tmp_path: Path) -> None:
+    repo_root = tmp_path / "repo"
+    home = tmp_path / "home"
+    reference = repo_root / "reference/.linked"
+    live = home / ".linked"
+    external = tmp_path / "outside-config"
+    reference.parent.mkdir(parents=True)
+    home.mkdir()
+    external.write_text("outside content\n")
+    reference.symlink_to(external)
+    live.write_text("host-specific\n")
+    plan = RestoreReport(
+        application="example",
+        apply=False,
+        results=(
+            RestoreResult(
+                Drift(
+                    application="example",
+                    reference_path=reference,
+                    live_path=live,
+                    kind=DriftKind.TYPE_CHANGED,
+                    reference_kind=FileKind.LINK,
+                    live_kind=FileKind.FILE,
+                ),
+                action="link",
+                status=RestoreStatus.PLANNED,
+            ),
+        ),
+    )
+
+    applied = apply_restore(repo_root, home, plan)
+
+    result = applied.results[0]
+    assert result.status is RestoreStatus.APPLIED
+    assert result.backup_path is not None
+    assert result.backup_path.read_text() == "host-specific\n"
+    assert live.is_symlink()
+    assert os.readlink(live) == str(external)
+    assert external.read_text() == "outside content\n"
 
 
 def test_restore_human_apply_reports_the_backup_location(tmp_path: Path) -> None:

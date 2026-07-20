@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import shlex
 import sys
 from dataclasses import dataclass
@@ -150,10 +151,19 @@ def apply_restore(repo_root: Path, home: Path, plan: RestoreReport) -> RestoreRe
                 raise RestoreError(
                     f"reference path does not exist: {drift.reference_path}"
                 )
-            resolved_reference = drift.reference_path.resolve()
             _relative_path(
-                resolved_reference, reference_root.resolve(), "reference target"
+                drift.reference_path.parent.resolve(),
+                reference_root.resolve(),
+                "reference parent",
             )
+            if drift.reference_path.is_symlink():
+                link_target = Path(os.readlink(drift.reference_path))
+            else:
+                resolved_reference = drift.reference_path.resolve()
+                _relative_path(
+                    resolved_reference, reference_root.resolve(), "reference target"
+                )
+                link_target = drift.reference_path
             _validate_live_parent(drift.live_path, home)
             drift.live_path.parent.mkdir(parents=True, exist_ok=True)
             resolved_parent = drift.live_path.parent.resolve()
@@ -165,7 +175,7 @@ def apply_restore(repo_root: Path, home: Path, plan: RestoreReport) -> RestoreRe
                 moved_live = True
             try:
                 drift.live_path.symlink_to(
-                    drift.reference_path,
+                    link_target,
                     target_is_directory=drift.reference_path.is_dir(),
                 )
             except OSError:
