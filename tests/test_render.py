@@ -47,12 +47,27 @@ def test_finding_document_marks_inapplicable_checks_without_a_severity() -> None
     )
 
     document = finding_document(report, operation="shell")
-    skipped, failing = document["findings"]
 
-    assert skipped["severity"] is None
-    assert skipped["applicable"] is False
-    assert failing["severity"] == "error"
-    assert failing["applicable"] is True
+    assert document["findings"] == [
+        {
+            "check": "shell",
+            "severity": None,
+            "applicable": False,
+            "code": "shell.zsh_skipped",
+            "message": "no zsh here",
+            "path": None,
+            "action": None,
+        },
+        {
+            "check": "shell",
+            "severity": "error",
+            "applicable": True,
+            "code": "shell.zsh_syntax",
+            "message": "broken",
+            "path": None,
+            "action": None,
+        },
+    ]
     assert document["summary"] == {"ok": 0, "warn": 0, "error": 1, "skipped": 1}
     # An inapplicable check never gates, but a real error still does.
     assert document["ok"] is False
