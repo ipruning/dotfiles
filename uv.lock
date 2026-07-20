@@ -329,6 +329,15 @@ wheels = [
 ]
 
 [[package]]
+name = "docopt-ng"
+version = "0.9.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/e4/50/8d6806cf13138127692ae6ff79ddeb4e25eb3b0bcc3c1bd033e7e04531a9/docopt_ng-0.9.0.tar.gz", hash = "sha256:91c6da10b5bb6f2e9e25345829fb8278c78af019f6fc40887ad49b060483b1d7", size = 32264, upload-time = "2023-05-30T20:46:25.064Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/6c/4a/c3b77fc1a24510b08918b43a473410c0168f6e657118807015f1f1edceea/docopt_ng-0.9.0-py3-none-any.whl", hash = "sha256:bfe4c8b03f9fca424c24ee0b4ffa84bf7391cb18c29ce0f6a8227a3b01b81ff9", size = 16689, upload-time = "2023-05-30T20:46:45.294Z" },
+]
+
+[[package]]
 name = "docstring-parser"
 version = "0.18.0"
 source = { registry = "https://pypi.org/simple" }
@@ -346,6 +355,7 @@ dependencies = [
     { name = "autocorrect-py" },
     { name = "fire" },
     { name = "loguru" },
+    { name = "mackup" },
     { name = "pydantic-ai" },
     { name = "rich" },
     { name = "ruamel-yaml" },
@@ -367,6 +377,7 @@ requires-dist = [
     { name = "autocorrect-py", specifier = ">=2.14.0" },
     { name = "fire", specifier = ">=0.7.1" },
     { name = "loguru", specifier = ">=0.7.3" },
+    { name = "mackup", git = "https://github.com/ipruning/mackup?rev=faa5cb8cd0f5fea83711b4fc75a4996d4b8a7497" },
     { name = "pydantic-ai", specifier = ">=2.0.0" },
     { name = "rich", specifier = ">=15.0.0" },
     { name = "ruamel-yaml", specifier = ">=0.19.1" },
@@ -794,6 +805,14 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/3a/05/a1dae3dffd1116099471c643b8924f5aa6524411dc6c63fdae648c4f1aca/loguru-0.7.3.tar.gz", hash = "sha256:19480589e77d47b8d85b2c827ad95d49bf31b0dcde16593892eb51dd18706eb6", size = 63559, upload-time = "2024-12-06T11:20:56.608Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/0c/29/0348de65b8cc732daa3e33e67806420b2ae89bdce2b04af740289c5c6c8c/loguru-0.7.3-py3-none-any.whl", hash = "sha256:31a33c10c8e1e10422bfd431aeb5d351c7cf7fa671e3c4df004162264b28220c", size = 61595, upload-time = "2024-12-06T11:20:54.538Z" },
+]
+
+[[package]]
+name = "mackup"
+version = "0.11.1+ipruning.2"
+source = { git = "https://github.com/ipruning/mackup?rev=faa5cb8cd0f5fea83711b4fc75a4996d4b8a7497#faa5cb8cd0f5fea83711b4fc75a4996d4b8a7497" }
+dependencies = [
+    { name = "docopt-ng" },
 ]
 
 [[package]]

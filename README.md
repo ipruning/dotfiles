@@ -125,9 +125,11 @@ mise run diff -- --json
 mise run diff -- --profile full
 ```
 
-The command runs the immutable Mackup commit pinned in `scripts/diff.py` and
-loads application definitions directly from `mackup/applications/`. It does not
-install `~/.mackup` links or change either side.
+The command runs the immutable Mackup fork pinned as a locked git dependency in
+`pyproject.toml` (recorded in `uv.lock`), so `mise install` provisions it and no
+Mackup fetch happens during inspection. It loads application definitions
+directly from `mackup/applications/` and does not install `~/.mackup` links or
+change either side.
 
 Restore is deliberately application-scoped. It defaults to the same read-only
 plan; `--apply` first moves each changed live path into

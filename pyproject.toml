@@ -9,6 +9,10 @@ dependencies = [
     "autocorrect-py>=2.14.0",
     "fire>=0.7.1",
     "loguru>=0.7.3",
+    # The read-only Mackup fork drives `diff`; pinning it here (locked in
+    # uv.lock) keeps it inside the `mise install` bootstrap boundary instead of
+    # a runtime uvx fetch.
+    "mackup @ git+https://github.com/ipruning/mackup@faa5cb8cd0f5fea83711b4fc75a4996d4b8a7497",
     "pydantic-ai>=2.0.0",
     "rich>=15.0.0",
     "ruamel-yaml>=0.19.1",

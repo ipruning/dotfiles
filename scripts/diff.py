@@ -16,9 +16,9 @@ from .models import Drift, DriftKind, DriftReport, FileKind
 from .profiles import HostProfile, profile_applications, resolve_profile
 from .render import emit_error
 
-MACKUP_SOURCE = (
-    "git+https://github.com/ipruning/mackup@faa5cb8cd0f5fea83711b4fc75a4996d4b8a7497"
-)
+# The pinned Mackup fork is a locked git dependency (pyproject.toml / uv.lock),
+# so `mise install` provisions it and diff resolves it from the project venv
+# rather than fetching it at runtime.
 
 
 class DriftProtocolError(ValueError):
@@ -44,7 +44,7 @@ class _CaseConfigParser(configparser.ConfigParser):
 
 
 class SubprocessMackupRunner:
-    """Run the immutable Mackup fork through uv's isolated tool environment."""
+    """Run the pinned Mackup fork installed in the project environment."""
 
     def inspect(
         self,
@@ -62,12 +62,9 @@ class SubprocessMackupRunner:
                 runtime_config = Path(temp_dir) / "mackup.cfg"
                 with runtime_config.open("w") as config_file:
                     config.write(config_file)
+                mackup_bin = Path(sys.executable).parent / "mackup"
                 command = [
-                    "uvx",
-                    "--isolated",
-                    "--from",
-                    MACKUP_SOURCE,
-                    "mackup",
+                    str(mackup_bin),
                     "--config-file",
                     str(runtime_config),
                     "--applications-dir",
@@ -86,9 +83,8 @@ class SubprocessMackupRunner:
                     check=False,
                     capture_output=True,
                     text=True,
-                    # First run may resolve the pinned Mackup fork over the
-                    # network; bound it so diff (and adopt/restore, which call
-                    # inspect_drift) cannot wedge forever.
+                    # Bound a wedged Mackup so diff (and adopt/restore, which
+                    # call inspect_drift) cannot hang forever.
                     timeout=180,
                 )
         except subprocess.TimeoutExpired as error:
