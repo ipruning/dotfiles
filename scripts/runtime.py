@@ -214,6 +214,12 @@ def repo_aware_finder(
             found = None
         if found:
             return found
+        # Only self-built tools live under generated/bin. Falling back there
+        # for a host-managed tool (codex, git) would let a stale, unowned
+        # leftover mark it available in plan_runtime while the apply path,
+        # which only exposes generated/bin for SELF_BUILT_TOOLS, cannot run it.
+        if tool not in SELF_BUILT_TOOLS:
+            return None
         owned = repo_root / "generated/bin" / tool
         if owned.is_file() and os.access(owned, os.X_OK):
             return str(owned)

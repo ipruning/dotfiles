@@ -765,26 +765,28 @@ def test_repo_aware_finder_rejects_stale_mise_shims(
     assert finder("plain-tool") == str(bin_dir / "plain-tool")
 
 
-def test_stale_shim_still_resolves_through_owned_binaries(
+def test_generated_bin_fallback_is_limited_to_self_built_tools(
     tmp_path: Path,
     monkeypatch,
 ) -> None:
     repo_root = tmp_path / "dotfiles"
     owned_bin = repo_root / "generated/bin"
     owned_bin.mkdir(parents=True)
-    _fake_tool(owned_bin, "stale-tool")
+    _fake_tool(owned_bin, "atuin")
+    _fake_tool(owned_bin, "codex")
     data_dir = tmp_path / "mise-data"
     shims = data_dir / "shims"
     shims.mkdir(parents=True)
     monkeypatch.setenv("MISE_DATA_DIR", str(data_dir))
-    _fake_tool(shims, "stale-tool")
+    _fake_tool(shims, "atuin")
 
-    finder = repo_aware_finder(
-        repo_root,
-        {"stale-tool": str(shims / "stale-tool")}.get,
-    )
+    finder = repo_aware_finder(repo_root, {"atuin": str(shims / "atuin")}.get)
 
-    assert finder("stale-tool") == str(owned_bin / "stale-tool")
+    # A self-built tool still resolves from generated/bin when its shim is stale...
+    assert finder("atuin") == str(owned_bin / "atuin")
+    # ...but a leftover host-managed binary in generated/bin is never used, so
+    # plan_runtime cannot mark an absent host tool available.
+    assert finder("codex") is None
 
 
 def test_shim_without_reachable_mise_counts_as_absent(
