@@ -4,6 +4,16 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
+# These tests induce a write failure by making a directory read-only. Root
+# bypasses directory permission checks (CAP_DAC_OVERRIDE), so the failure path
+# never triggers and the assertions are meaningless — skip them there.
+skip_as_root = pytest.mark.skipif(
+    os.geteuid() == 0,
+    reason="permission-denied write failure cannot be induced as root",
+)
+
 
 def test_skillshare_source_uses_a_descriptive_non_system_command_name() -> None:
     repo_root = Path(__file__).resolve().parents[1]
@@ -175,6 +185,7 @@ def test_watchdog_rejects_extra_arguments_before_probing(tmp_path: Path) -> None
     assert not probe_log.exists()
 
 
+@skip_as_root
 def test_skillshare_exec_restore_failure_overrides_child_success(
     tmp_path: Path,
 ) -> None:
@@ -234,6 +245,7 @@ def test_skillshare_exec_requires_a_command_before_switching_source(
     assert config.read_text() == "source: /original\n"
 
 
+@skip_as_root
 def test_skillshare_exec_switch_failure_preserves_config(tmp_path: Path) -> None:
     executable = Path(__file__).resolve().parents[1] / "modules/bin/skillshare-source"
     config_dir = tmp_path / "skillshare"
