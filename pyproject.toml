@@ -11,7 +11,7 @@ dependencies = [
     # of a runtime uvx fetch. Type-only imports for the standalone modules/bin
     # scripts live in the dev group so this list stays true to what the package
     # runs.
-    "mackup @ git+https://github.com/ipruning/mackup@faa5cb8cd0f5fea83711b4fc75a4996d4b8a7497",
+    "mackup @ git+https://github.com/ipruning/mackup@f5b1984d9d6e9ef6d9bb0c54678f36bce4b9cdc7",
     "ruamel-yaml>=0.19.1",
 ]
 

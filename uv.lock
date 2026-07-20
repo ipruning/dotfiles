@@ -145,7 +145,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "mackup", git = "https://github.com/ipruning/mackup?rev=faa5cb8cd0f5fea83711b4fc75a4996d4b8a7497" },
+    { name = "mackup", git = "https://github.com/ipruning/mackup?rev=f5b1984d9d6e9ef6d9bb0c54678f36bce4b9cdc7" },
     { name = "ruamel-yaml", specifier = ">=0.19.1" },
 ]
 
@@ -210,7 +210,7 @@ wheels = [
 [[package]]
 name = "mackup"
 version = "0.11.1+ipruning.2"
-source = { git = "https://github.com/ipruning/mackup?rev=faa5cb8cd0f5fea83711b4fc75a4996d4b8a7497#faa5cb8cd0f5fea83711b4fc75a4996d4b8a7497" }
+source = { git = "https://github.com/ipruning/mackup?rev=f5b1984d9d6e9ef6d9bb0c54678f36bce4b9cdc7#f5b1984d9d6e9ef6d9bb0c54678f36bce4b9cdc7" }
 dependencies = [
     { name = "docopt-ng" },
 ]
