@@ -29,6 +29,12 @@ HARD_LIMIT="65536"
 PLIST_TMP=""
 BACKUP_DIR=""
 EFFECTIVE_LIMITS=""
+LIMIT_VERIFY_ATTEMPTS=31
+LIMIT_VERIFY_INTERVAL=0.1
+if [[ -n "$TEST_ROOT" ]]; then
+  LIMIT_VERIFY_ATTEMPTS="${MACOS_MAXFILES_LIMIT_VERIFY_ATTEMPTS:-$LIMIT_VERIFY_ATTEMPTS}"
+  LIMIT_VERIFY_INTERVAL="${MACOS_MAXFILES_LIMIT_VERIFY_INTERVAL:-$LIMIT_VERIFY_INTERVAL}"
+fi
 
 cleanup() {
   [[ -z "$PLIST_TMP" ]] || rm -f "$PLIST_TMP"
@@ -130,13 +136,14 @@ limits_satisfied() {
 }
 
 wait_effective_limits() {
-  local deadline=$((SECONDS + 3))
-  while :; do
+  local attempt
+  for (( attempt = 0; attempt < LIMIT_VERIFY_ATTEMPTS; attempt++ )); do
     EFFECTIVE_LIMITS="$(read_limits || true)"
     limits_satisfied "$EFFECTIVE_LIMITS" && return 0
-    (( SECONDS < deadline )) || return 1
-    sleep 0.1
+    (( attempt + 1 < LIMIT_VERIFY_ATTEMPTS )) || return 1
+    sleep "$LIMIT_VERIFY_INTERVAL"
   done
+  return 1
 }
 
 wait_unloaded() {

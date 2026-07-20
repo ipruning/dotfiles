@@ -107,6 +107,8 @@ test_env=(
   MACOS_MAXFILES_CP_BIN="$fake_bin/cp"
   MACOS_MAXFILES_UNAME_BIN="$fake_bin/uname"
   MACOS_MAXFILES_PLUTIL_BIN=/usr/bin/plutil
+  MACOS_MAXFILES_LIMIT_VERIFY_ATTEMPTS=2
+  MACOS_MAXFILES_LIMIT_VERIFY_INTERVAL=0.01
   FAKE_STATE="$state"
 )
 installed_bin="$test_root/usr/local/bin/macos-maxfiles"
