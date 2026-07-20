@@ -74,6 +74,8 @@ class RuntimeReport:
     apply: bool
     results: tuple[RuntimeResult, ...]
     generated_root: Path | None = None
+    network: bool = True
+    build: bool = False
 
     @property
     def ok(self) -> bool:
@@ -302,6 +304,8 @@ def plan_runtime(
                 ),
             ),
             generated_root=generated_root,
+            network=network,
+            build=build,
         )
     executable_finder = repo_aware_finder(repo_root, executable_finder)
     functions_dir = generated_root / "functions"
@@ -605,6 +609,8 @@ def plan_runtime(
         apply=False,
         results=tuple(results),
         generated_root=generated_root,
+        network=network,
+        build=build,
     )
 
 
@@ -874,6 +880,8 @@ def execute_runtime(
         apply=True,
         results=tuple(results),
         generated_root=plan.generated_root,
+        network=plan.network,
+        build=plan.build,
     )
 
 
@@ -927,12 +935,19 @@ def _document(report: RuntimeReport) -> dict[str, object]:
 
 def _next_commands(report: RuntimeReport) -> tuple[str, ...]:
     if not report.apply:
-        return (
-            ("mise run runtime -- --apply",)
-            if report.ok
-            and any(result.status is RuntimeStatus.PLANNED for result in report.results)
-            else ()
-        )
+        if not report.ok or not any(
+            result.status is RuntimeStatus.PLANNED for result in report.results
+        ):
+            return ()
+        arguments = ["mise", "run", "runtime", "--"]
+        if report.generated_root is not None:
+            arguments.extend(("--repo-root", str(report.generated_root.parent)))
+        if not report.network:
+            arguments.append("--offline")
+        if report.build:
+            arguments.append("--build")
+        arguments.append("--apply")
+        return (shlex.join(arguments),)
     if not report.ok:
         return ()
     if any(result.status is RuntimeStatus.SUCCEEDED for result in report.results):
@@ -988,6 +1003,9 @@ def _render(report: RuntimeReport) -> None:
     if not report.apply:
         if summary.get(RuntimeStatus.PLANNED.value, 0):
             print("No files changed. Re-run with --apply to refresh the runtime.")
+            print("Next:")
+            for command in _next_commands(report):
+                print(f"  {command}")
         else:
             print("No runtime refresh steps are available on this host.")
         return

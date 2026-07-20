@@ -1,6 +1,7 @@
 import json
 import hashlib
 import os
+import shlex
 import shutil
 import subprocess
 import sys
@@ -514,11 +515,27 @@ def test_runtime_offline_build_is_locked_and_offline(tmp_path: Path) -> None:
     )
 
     assert completed.returncode == 0
-    steps = {step["name"]: step for step in json.loads(completed.stdout)["steps"]}
+    document = json.loads(completed.stdout)
+    steps = {step["name"]: step for step in document["steps"]}
     for name in ("atuin", "op-cache"):
         command = steps[f"binary.{name}"]["command"]
         assert "--locked" in command
         assert "--offline" in command
+    assert document["next"] == [
+        shlex.join(
+            (
+                "mise",
+                "run",
+                "runtime",
+                "--",
+                "--repo-root",
+                str(repo_root),
+                "--offline",
+                "--build",
+                "--apply",
+            ),
+        ),
+    ]
 
 
 def test_runtime_online_build_requires_git_to_refresh_existing_source(
@@ -604,6 +621,19 @@ def test_runtime_human_preview_shows_commands_and_targets(tmp_path: Path) -> Non
         "PLANNED completion.codex: codex completion zsh -> "
         f"{repo_root}/generated/completions/_codex"
     ) in completed.stdout
+    apply_command = shlex.join(
+        (
+            "mise",
+            "run",
+            "runtime",
+            "--",
+            "--repo-root",
+            str(repo_root),
+            "--offline",
+            "--apply",
+        ),
+    )
+    assert f"Next:\n  {apply_command}\n" in completed.stdout
 
 
 def test_runtime_preview_does_not_suggest_apply_when_every_step_is_skipped(

@@ -6,6 +6,7 @@ import argparse
 import json
 import os
 import re
+import shlex
 import shutil
 import socket
 import subprocess
@@ -20,8 +21,6 @@ from pathlib import Path
 from .models import ExecutableFinder
 
 StepCallback = Callable[["InventorySpec"], None]
-APPLY_COMMAND = "mise run inventory -- --apply"
-REVIEW_COMMAND = "git diff inventory/"
 HOST_NAME_RE = re.compile(r"[^A-Za-z0-9._-]")
 
 
@@ -59,6 +58,8 @@ class InventoryReport:
     host: str
     apply: bool
     results: tuple[InventoryResult, ...]
+    repo_root: Path | None = None
+    applications_root: Path = Path("/Applications")
 
     @property
     def ok(self) -> bool:
@@ -182,7 +183,13 @@ def plan_inventory(
                 reason=reason,
             ),
         )
-    return InventoryReport(host=host, apply=False, results=tuple(results))
+    return InventoryReport(
+        host=host,
+        apply=False,
+        results=tuple(results),
+        repo_root=repo_root,
+        applications_root=applications_root,
+    )
 
 
 def _emit_failure(spec: InventorySpec, reason: str, stderr: str = "") -> None:
@@ -292,7 +299,13 @@ def execute_inventory(
                     duration_ms=round((time.monotonic() - started_at) * 1000),
                 ),
             )
-    return InventoryReport(host=plan.host, apply=True, results=tuple(results))
+    return InventoryReport(
+        host=plan.host,
+        apply=True,
+        results=tuple(results),
+        repo_root=plan.repo_root,
+        applications_root=plan.applications_root,
+    )
 
 
 def _summary(report: InventoryReport) -> dict[str, int]:
@@ -311,17 +324,23 @@ def _summary(report: InventoryReport) -> dict[str, int]:
 
 def _next_commands(report: InventoryReport) -> tuple[str, ...]:
     if not report.apply:
-        return (
-            (APPLY_COMMAND,)
-            if any(
-                result.status is InventoryStatus.PLANNED for result in report.results
-            )
-            else ()
-        )
+        if not any(
+            result.status is InventoryStatus.PLANNED for result in report.results
+        ):
+            return ()
+        arguments = ["mise", "run", "inventory", "--"]
+        if report.repo_root is not None:
+            arguments.extend(("--repo-root", str(report.repo_root)))
+        arguments.extend(("--host", report.host))
+        arguments.extend(("--applications-root", str(report.applications_root)))
+        arguments.append("--apply")
+        return (shlex.join(arguments),)
+    if not any(result.status is InventoryStatus.WRITTEN for result in report.results):
+        return ()
+    if report.repo_root is None:
+        return ("git diff inventory/",)
     return (
-        (REVIEW_COMMAND,)
-        if any(result.status is InventoryStatus.WRITTEN for result in report.results)
-        else ()
+        shlex.join(("git", "-C", str(report.repo_root), "diff", "--", "inventory/")),
     )
 
 
@@ -381,6 +400,9 @@ def _render(report: InventoryReport, repo_root: Path) -> None:
     if not report.apply:
         if _next_commands(report):
             print("No snapshots written. Re-run with --apply to snapshot this host.")
+            print("Next:")
+            for command in _next_commands(report):
+                print(f"  {command}")
         else:
             print("No inventory collectors are available on this host.")
         return

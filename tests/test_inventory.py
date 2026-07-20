@@ -135,7 +135,23 @@ def test_inventory_previews_exact_plan_by_default_without_collecting(
         ("setapp", "planned", "inventory/TestHost/setapp.txt"),
     ]
     assert document["summary"] == {"planned": 4}
-    assert document["next"] == ["mise run inventory -- --apply"]
+    assert document["next"] == [
+        shlex.join(
+            (
+                "mise",
+                "run",
+                "inventory",
+                "--",
+                "--repo-root",
+                str(tmp_path / "dotfiles"),
+                "--host",
+                "TestHost",
+                "--applications-root",
+                str(tmp_path / "Applications"),
+                "--apply",
+            ),
+        ),
+    ]
     assert not host_dir.exists()
     assert not log_path.exists()
 
@@ -450,7 +466,17 @@ def test_inventory_human_output_announces_collectors_and_summary(
     # Setapp is absent but /Applications exists, so it records zero apps.
     assert "WRITTEN setapp: inventory/TestHost/setapp.txt" in completed.stdout
     assert "Summary: 4 written" in completed.stdout
-    assert "Next:\n  git diff inventory/\n" in completed.stdout
+    review_command = shlex.join(
+        (
+            "git",
+            "-C",
+            str(tmp_path / "dotfiles"),
+            "diff",
+            "--",
+            "inventory/",
+        ),
+    )
+    assert f"Next:\n  {review_command}\n" in completed.stdout
 
 
 def test_inventory_reports_timeout_on_stderr_and_keeps_going(
