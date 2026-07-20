@@ -710,6 +710,32 @@ def test_runtime_refuses_to_clobber_non_git_plugin_dirs(tmp_path: Path) -> None:
     assert "not a Git checkout" in steps["plugin.fzf-tab"]["reason"]
 
 
+def test_runtime_refuses_symlinked_plugin_targets(tmp_path: Path) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    bin_dir = tmp_path / "bin"
+    home.mkdir()
+    bin_dir.mkdir()
+    _fake_tool(bin_dir, "git")
+    # A leftover symlink to an external checkout that has its own .git.
+    external = tmp_path / "external-fzf-tab"
+    (external / ".git").mkdir(parents=True)
+    (external / "sentinel").write_text("do not touch\n")
+    plugins = repo_root / "generated/plugins"
+    plugins.mkdir(parents=True)
+    (plugins / "fzf-tab").symlink_to(external)
+
+    completed = _run_runtime(repo_root, home, bin_dir, "--json")
+
+    assert completed.returncode == 1
+    steps = {step["name"]: step for step in json.loads(completed.stdout)["steps"]}
+    assert steps["plugin.fzf-tab"]["status"] == "failed"
+    assert "symlink" in steps["plugin.fzf-tab"]["reason"]
+    # The external checkout must be left untouched (no git pull ran there).
+    assert (external / "sentinel").read_text() == "do not touch\n"
+    assert (plugins / "fzf-tab").is_symlink()
+
+
 def test_runtime_keeps_old_output_when_generator_prints_nothing(
     tmp_path: Path,
 ) -> None:

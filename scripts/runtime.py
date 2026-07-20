@@ -291,8 +291,14 @@ def plan_runtime(
     git_available = executable_finder("git") is not None
     for name, source, _entrypoint in PLUGIN_SPECS:
         target = plugins_dir / name
+        # A symlink here would point outside repository-owned generated state;
+        # `(target / ".git")` follows it, so an UPDATE would `git pull` inside
+        # that external checkout. Never treat a symlink as an updatable clone.
+        is_symlink = target.is_symlink()
         action = (
-            RuntimeAction.UPDATE if (target / ".git").is_dir() else RuntimeAction.CLONE
+            RuntimeAction.UPDATE
+            if not is_symlink and (target / ".git").is_dir()
+            else RuntimeAction.CLONE
         )
         spec = RuntimeSpec(
             name=f"plugin.{name}",
@@ -312,6 +318,16 @@ def plan_runtime(
                     RuntimeStatus.SKIPPED,
                     action,
                     "network refresh is disabled",
+                ),
+            )
+        elif is_symlink:
+            results.append(
+                RuntimeResult(
+                    spec,
+                    RuntimeStatus.FAILED,
+                    action,
+                    f"plugin target is a symlink ({os.readlink(target)}); "
+                    "remove it before refreshing",
                 ),
             )
         elif target.exists() and action is RuntimeAction.CLONE:
