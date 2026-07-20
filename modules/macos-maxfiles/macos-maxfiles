@@ -287,7 +287,7 @@ install_mode() {
 }
 
 status_mode() {
-  local output_json=0 installed=false binary=false is_loaded=false limits soft hard owner mode
+  local output_json=0 installed=false binary=false is_loaded=false limits_ok=false limits soft hard owner mode
   [[ "${1:-}" == --json ]] && { output_json=1; shift; }
   (( $# == 0 )) || usage_error "usage: macos-maxfiles status [--json]"
 
@@ -296,17 +296,18 @@ status_mode() {
   loaded && is_loaded=true
   limits="$("$LAUNCHCTL_BIN" limit maxfiles 2>/dev/null || true)"
   read -r soft hard < <(awk '$1 == "maxfiles" { print $2, $3 }' <<<"$limits")
+  limits_satisfied "${soft:-} ${hard:-}" && limits_ok=true
   owner="$(stat -f '%Su:%Sg' "$PLIST_FILE" 2>/dev/null || true)"
   mode="$(stat -f '%Lp' "$PLIST_FILE" 2>/dev/null || true)"
 
   if (( output_json == 1 )); then
-    printf '{"installed":%s,"binary":%s,"loaded":%s,"soft_limit":"%s","hard_limit":"%s","owner":"%s","mode":"%s","executable":"%s","plist":"%s"}\n' \
-      "$installed" "$binary" "$is_loaded" "${soft:-}" "${hard:-}" "$owner" "$mode" "$INSTALL_BIN" "$PLIST_FILE"
+    printf '{"installed":%s,"binary":%s,"loaded":%s,"limits_satisfied":%s,"soft_limit":"%s","hard_limit":"%s","owner":"%s","mode":"%s","executable":"%s","plist":"%s"}\n' \
+      "$installed" "$binary" "$is_loaded" "$limits_ok" "${soft:-}" "${hard:-}" "$owner" "$mode" "$INSTALL_BIN" "$PLIST_FILE"
   else
-    printf 'installed="%s" binary="%s" loaded="%s" soft_limit="%s" hard_limit="%s" owner="%s" mode="%s" executable="%s" plist="%s"\n' \
-      "$installed" "$binary" "$is_loaded" "${soft:-}" "${hard:-}" "$owner" "$mode" "$INSTALL_BIN" "$PLIST_FILE"
+    printf 'installed="%s" binary="%s" loaded="%s" limits_satisfied="%s" soft_limit="%s" hard_limit="%s" owner="%s" mode="%s" executable="%s" plist="%s"\n' \
+      "$installed" "$binary" "$is_loaded" "$limits_ok" "${soft:-}" "${hard:-}" "$owner" "$mode" "$INSTALL_BIN" "$PLIST_FILE"
   fi
-  [[ "$installed" == true && "$binary" == true && "$is_loaded" == true ]]
+  [[ "$installed" == true && "$binary" == true && "$is_loaded" == true && "$limits_ok" == true ]]
 }
 
 uninstall_mode() {

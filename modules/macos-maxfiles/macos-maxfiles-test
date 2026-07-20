@@ -123,6 +123,18 @@ rm -f "$state/use-unlimited"
 rg -q '^installed="true" loaded="true"' "$test_root/install.out" || fail 'install did not report verified success'
 [[ -x "$installed_bin" && -f "$plist" && -e "$state/loaded" ]] || fail 'install lifecycle is incomplete'
 [[ "$(cat "$state/limits")" == '8192 unlimited' ]] || fail 'install did not accept launchd unlimited hard-limit reporting'
+env "${test_env[@]}" "$cli" status --json >"$test_root/healthy-status.json"
+rg -q '"limits_satisfied":true' "$test_root/healthy-status.json" \
+  || fail 'status rejected an unlimited hard limit above the target'
+
+printf '1024 65536\n' >"$state/limits"
+exit_code=0
+env "${test_env[@]}" "$cli" status --json >"$test_root/low-limit-status.json" || exit_code=$?
+[[ "$exit_code" == 1 ]] || fail 'status accepted effective limits below the target'
+rg -q '"limits_satisfied":false' "$test_root/low-limit-status.json" \
+  || fail 'status did not expose the failed effective-limit check'
+printf '8192 unlimited\n' >"$state/limits"
+
 chmod 0700 "$installed_bin"
 chmod 0600 "$plist"
 baseline="$(shasum -a 256 "$installed_bin" "$plist")"

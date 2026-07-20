@@ -302,8 +302,15 @@ as its last committed run, never a claim about current host truth.
 
 `bag-mode`, `macos-session-health`, and `macos-maxfiles` are self-installing
 modules. Each executable owns its command interface, installation, removal,
-tests, and generated launchd configuration. Their source and usage remain under
-the corresponding `modules/<tool>/` directory.
+tests, and generated launchd configuration. Their local runbooks own the
+module-specific operating and recovery decisions:
+
+- [`bag-mode`](modules/bag-mode/README.md): closed-lid operation, restoration,
+  and safe removal;
+- [`macos-session-health`](modules/macos-session-health/README.md): incident
+  diagnosis and guarded recovery;
+- [`macos-maxfiles`](modules/macos-maxfiles/README.md): machine-wide limit
+  lifecycle, rollback, and reboot behavior.
 
 Ordinary commands under `modules/bin/` are independent of the dotfiles
 inspection tasks. Linux Lite deliberately does not add them to `PATH`. The macOS
