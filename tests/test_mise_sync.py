@@ -2,6 +2,8 @@ import json
 import os
 from pathlib import Path
 
+import pytest
+
 from tests.conftest import REPO_ROOT, run_scripts_module
 
 
@@ -145,6 +147,58 @@ def test_mise_sync_normalizes_an_explicit_backend_to_its_tracked_alias(
     document = json.loads(completed.stdout)
     assert document["safety"]["apply_blocked"] is False
     assert document["safety"]["live_only_tools"] == []
+
+
+def test_mise_sync_accepts_a_previous_tracked_backend_without_its_new_alias(
+    tmp_path: Path,
+) -> None:
+    home = tmp_path / "home"
+    home.mkdir()
+    _write_live_config(home)
+    (home / ".config/mise/config.toml").write_text(
+        '[tools]\n"aqua:yarnpkg/berry" = "latest"\n'
+    )
+    _write_mise(home, tmp_path / "mise.log")
+
+    completed = run_scripts_module("mise_sync", home, "--json")
+
+    assert completed.returncode == 0
+    document = json.loads(completed.stdout)
+    assert document["safety"]["apply_blocked"] is False
+    assert document["safety"]["live_only_tools"] == []
+
+
+@pytest.mark.parametrize(
+    ("live_config", "live_only_tool"),
+    [
+        (
+            '[tool_alias]\npueue = "aqua:yarnpkg/berry"\n\n[tools]\npueue = "latest"\n',
+            "pueue",
+        ),
+        (
+            '[tool_alias]\nnode = "aqua:evil/thing"\n\n'
+            '[tools]\n"aqua:evil/thing" = "latest"\n',
+            "aqua:evil/thing",
+        ),
+    ],
+)
+def test_mise_sync_does_not_trust_live_aliases_to_claim_tracked_ownership(
+    tmp_path: Path,
+    live_config: str,
+    live_only_tool: str,
+) -> None:
+    home = tmp_path / "home"
+    home.mkdir()
+    _write_live_config(home)
+    (home / ".config/mise/config.toml").write_text(live_config)
+    _write_mise(home, tmp_path / "mise.log")
+
+    completed = run_scripts_module("mise_sync", home, "--json")
+
+    assert completed.returncode == 1
+    document = json.loads(completed.stdout)
+    assert document["safety"]["apply_blocked"] is True
+    assert document["safety"]["live_only_tools"] == [live_only_tool]
 
 
 def test_mise_sync_blocks_when_live_tool_ownership_cannot_be_parsed(

@@ -71,14 +71,16 @@ class MiseSyncReport:
         )
 
 
-def _tool_names(config_path: Path, *, required: bool) -> frozenset[str]:
+def _tool_declaration(
+    config_path: Path, *, required: bool
+) -> tuple[frozenset[str], dict[str, str]]:
     try:
         with config_path.open("rb") as config_file:
             document = tomllib.load(config_file)
     except FileNotFoundError:
         if required:
             raise ValueError(f"{config_path} is missing") from None
-        return frozenset()
+        return frozenset(), {}
     except (OSError, tomllib.TOMLDecodeError) as error:
         raise ValueError(f"{config_path} cannot be read as TOML: {error}") from error
     tools = document.get("tools", {})
@@ -87,19 +89,22 @@ def _tool_names(config_path: Path, *, required: bool) -> frozenset[str]:
     aliases = document.get("tool_alias", {})
     if not isinstance(aliases, dict):
         raise ValueError(f"{config_path} [tool_alias] must be a table")
-    aliases_by_backend: dict[str, set[str]] = {}
-    for alias, backend in aliases.items():
-        if not isinstance(alias, str) or not isinstance(backend, str):
-            raise ValueError(
-                f"{config_path} [tool_alias] entries must map strings to strings"
-            )
-        aliases_by_backend.setdefault(backend, set()).add(alias)
-    names: set[str] = set()
+    backend_aliases: dict[str, str] = {}
+    for alias, value in aliases.items():
+        if not isinstance(alias, str):
+            raise ValueError(f"{config_path} [tool_alias] keys must be strings")
+        backend = value.get("backend") if isinstance(value, dict) else value
+        if backend is None:
+            continue
+        if not isinstance(backend, str):
+            raise ValueError(f"{config_path} [tool_alias] backends must be strings")
+        backend_aliases[alias] = backend
+    tool_names: set[str] = set()
     for tool in tools:
         if not isinstance(tool, str):
             raise ValueError(f"{config_path} [tools] keys must be strings")
-        names.update(aliases_by_backend.get(tool, {tool}))
-    return frozenset(names)
+        tool_names.add(tool)
+    return frozenset(tool_names), backend_aliases
 
 
 def _mise_tool_safety(
@@ -108,11 +113,19 @@ def _mise_tool_safety(
     reference_config = repo_root / "reference/.config/mise/config.toml"
     live_config = home / ".config/mise/config.toml"
     try:
-        reference_tools = _tool_names(reference_config, required=True)
-        live_tools = _tool_names(live_config, required=False)
+        reference_tools, reference_aliases = _tool_declaration(
+            reference_config, required=True
+        )
+        live_tools, _live_aliases = _tool_declaration(live_config, required=False)
     except ValueError as error:
         return (), str(error)
-    return tuple(sorted(live_tools - reference_tools)), None
+    reference_identities = set(reference_tools)
+    for alias, backend in reference_aliases.items():
+        if alias in reference_tools:
+            reference_identities.add(backend)
+        if backend in reference_tools:
+            reference_identities.add(alias)
+    return tuple(sorted(live_tools - reference_identities)), None
 
 
 def _sync_steps(home: Path) -> tuple[MiseSyncStep, ...]:
