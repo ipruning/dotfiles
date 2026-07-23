@@ -124,12 +124,23 @@ def test_update_previews_exact_plan_by_default_without_running_tools(
         (
             "mise.shims",
             "planned",
-            [str(tmp_path / "home/.local/bin/mise"), "reshim"],
+            [
+                str(tmp_path / "home/.local/bin/mise"),
+                "reshim",
+                "-C",
+                str(tmp_path / "home"),
+            ],
         ),
         ("amp", "planned", ["amp", "update"]),
     ]
     assert document["summary"] == {"planned": 6, "skipped": 8}
     assert document["next"] == ["mise run update -- --apply"]
+    steps = {step["name"]: step for step in document["steps"]}
+    expected_mise_path = [str(tmp_path / "home/.local/bin")]
+    assert steps["mise.self"]["environment"]["PATH_prepend"] == expected_mise_path
+    assert steps["mise.tools"]["environment"]["PATH_prepend"] == expected_mise_path
+    assert steps["mise.shims"]["environment"]["PATH_prepend"] == expected_mise_path
+    assert steps["brew.metadata"]["environment"]["PATH_prepend"] == []
     assert not log_path.exists()
 
 
@@ -190,9 +201,39 @@ def test_update_runs_available_tools_in_order_and_reports_skips(tmp_path: Path) 
         "brew upgrade",
         "mise self-update --yes --no-plugins",
         f"mise upgrade --bump -C {tmp_path / 'home'} python@3.14.6",
-        "mise reshim",
+        f"mise reshim -C {tmp_path / 'home'}",
         "amp update",
     ]
+
+
+def test_update_executes_reshim_with_canonical_mise_first_on_path(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    home = tmp_path / "home"
+    canonical = home / ".local/bin/mise"
+    canonical.parent.mkdir(parents=True)
+    canonical.write_text("#!/bin/sh\nexit 0\n")
+    canonical.chmod(0o755)
+    observed_path = ""
+
+    def fake_run(command, **kwargs):
+        nonlocal observed_path
+        if tuple(command[:2]) == (str(canonical), "ls"):
+            return subprocess.CompletedProcess(command, 0, "{}", "")
+        if tuple(command) == (str(canonical), "reshim", "-C", str(home)):
+            observed_path = kwargs["env"]["PATH"]
+        return subprocess.CompletedProcess(command, 0, "", "")
+
+    monkeypatch.setattr("scripts.update.subprocess.run", fake_run)
+
+    report = execute_updates(
+        home,
+        executable_finder=lambda tool: str(canonical) if tool == "mise" else None,
+    )
+
+    assert report.ok is True
+    assert observed_path.split(os.pathsep)[0] == str(canonical.parent)
 
 
 def test_update_preview_human_output_points_to_apply(tmp_path: Path) -> None:

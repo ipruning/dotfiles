@@ -36,6 +36,8 @@ mise trust
 mise install --locked fd jq python ripgrep shellcheck uv
 mise exec -- uv sync --locked
 mise tasks
+mise run mise-sync
+mise run mise-sync -- --apply
 ```
 
 This repository deliberately standardizes both macOS and Linux on the
@@ -81,6 +83,7 @@ authoritative command interfaces:
 | --- | --- |
 | Bootstrap a small Linux host | [Linux Lite setup](#linux-lite-setup) |
 | Compare, restore, or adopt configuration | [Configuration drift](#configuration-drift) |
+| Converge global mise tools across hosts | [Global mise convergence](#global-mise-convergence) |
 | Inspect host and repository health | [Host health](#host-health) |
 | Update installed tools | [Host updates](#host-updates) |
 | Refresh generated shell state | [Generated runtime](#generated-runtime) |
@@ -109,9 +112,9 @@ expose `modules/bin` or `generated/bin` on Linux. The managed block is placed
 before Ubuntu's non-interactive early return, so direct SSH commands also receive
 the user and mise paths without interactive shell initialization.
 
-The Linux Lite drift profile observes only Git and Skillshare configuration.
-Skillshare remains optional: a missing executable, configuration, or source is a
-warning for a human or AI operator to evaluate, not a setup action.
+The Linux Lite drift profile observes Git, mise, and Skillshare configuration.
+Skillshare remains optional: a missing executable, configuration, or source is
+a warning for a human or AI operator to evaluate, not a setup action.
 
 ## Linux Zsh contract
 
@@ -185,6 +188,40 @@ mise run adopt -- mise --apply
 Git protects repository changes; restore backups protect the replaced live
 paths.
 
+## Global mise convergence
+
+The tracked global `config.toml` and multi-platform `mise.lock` are the shared
+declaration for personal macOS and Linux hosts. Installed tools, download
+caches, shims, and generated shell functions remain local runtime state and are
+rebuilt from that declaration rather than synchronized through Git.
+
+Preview the complete convergence first:
+
+```bash
+mise run mise-sync
+mise run mise-sync -- --json
+```
+
+An apply backs up and links the live mise configuration to `reference/`, runs
+the canonical executable's `install --locked` against `$HOME`, then rebuilds
+shims with `~/.local/bin` forced to the front of `PATH`:
+
+```bash
+mise run mise-sync -- --apply
+```
+
+This operation deliberately does not pull Git, self-update mise, update the
+lockfile, remove an alternate package-managed mise, or install tools during
+shell startup. A canonical binary older than the repository's hard minimum
+must still be updated directly before any repository task can launch.
+Backends that support lockfile URLs are artifact-locked; package-manager
+backends such as `gem:`, `go:`, and `npm:` are version-locked but retain their
+upstream package manager's artifact and integrity semantics.
+
+Global tools should be commands wanted on every personal host. Project tools
+belong in that project's mise configuration. A genuinely host-specific tool is
+an explicit exception, not a second global configuration truth.
+
 ## Host health
 
 `mise run check` reports required executables and optional capabilities
@@ -208,8 +245,8 @@ that synchronization is healthy. Missing or empty generated shell directories
 are likewise reported as not ready. The report also verifies that
 `~/.local/bin/mise` is a real executable rather than a package-manager symlink,
 warns when another mise installation exists on `PATH` or at a common system
-location, and checks that generated Zsh activation names only the canonical
-executable.
+location, verifies that mise-owned shims target the canonical executable, and
+checks that generated Zsh activation names only the canonical executable.
 
 `mise run lint` inspects repository paths, Mackup mappings, and dangling
 symlinks. Its `path.*` findings are host-relative: a machine-specific path
@@ -246,6 +283,11 @@ updates the standalone CLI first, then passes that explicit list to
 `mise upgrade`; a configured but missing mise tool is not installed. Other
 missing CLIs are skipped rather than bootstrapped. Package managers may still
 replace package dependencies as part of an ordinary upgrade.
+
+When the live global mise files are linked to `reference/`, the mise tool
+upgrade may refresh the tracked lockfile. Run `update --apply` on a checkout
+where that declaration change will be reviewed and committed. Other hosts use
+`mise-sync --apply` to consume the committed lock without bumping it.
 
 A hard `min_version` failure happens before mise can launch this repository's
 `update` task. In that bootstrap case, update the canonical binary directly

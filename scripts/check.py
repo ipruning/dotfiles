@@ -164,6 +164,63 @@ def _mise_installation_findings(
     return [canonical_finding, installations_finding]
 
 
+def _mise_shim_finding(home: Path) -> Finding | None:
+    shims_directory = home / ".local/share/mise/shims"
+    if not shims_directory.exists():
+        return None
+    canonical = canonical_mise_path(home)
+    canonical_ready = canonical_mise_executable(home) is not None
+    canonical_count = 0
+    stale: list[tuple[Path, Path]] = []
+    try:
+        entries = sorted(shims_directory.iterdir())
+        for shim in entries:
+            if not shim.is_symlink():
+                continue
+            raw_target = Path(os.readlink(shim))
+            target = (
+                raw_target if raw_target.is_absolute() else shim.parent / raw_target
+            )
+            if target.name != "mise":
+                continue
+            if canonical_ready and _same_file(target, canonical):
+                canonical_count += 1
+            else:
+                stale.append((shim, target))
+    except OSError as error:
+        return Finding(
+            "mise.shims",
+            Severity.WARN,
+            "mise.shims_unreadable",
+            f"Mise shim ownership cannot be inspected: {error}",
+            shims_directory,
+            "Make the shim directory readable, then run mise run check again.",
+        )
+    if stale:
+        targets = ", ".join(sorted({str(target) for _shim, target in stale}))
+        return Finding(
+            "mise.shims",
+            Severity.WARN,
+            "mise.shims_stale",
+            f"Mise shims are not owned by the valid canonical executable; targets: {targets}",
+            stale[0][0],
+            (
+                "Run mise run mise-sync, then mise run mise-sync -- --apply."
+                if canonical_ready
+                else "Install standalone mise at ~/.local/bin/mise before rebuilding shims."
+            ),
+        )
+    if canonical_count:
+        return Finding(
+            "mise.shims",
+            Severity.OK,
+            "mise.shims_ready",
+            f"All {canonical_count} mise-owned shims target the canonical executable",
+            shims_directory,
+        )
+    return None
+
+
 def _mise_runtime_binding_finding(
     generated_function: Path,
     home: Path,
@@ -1268,6 +1325,8 @@ def inspect_host(
             scan_host_path=executable_finder is shutil.which,
         ),
     )
+    if mise_shims := _mise_shim_finding(home):
+        findings.append(mise_shims)
     findings.extend(_private_git_findings(home))
     skillshare_finding = _check_executable(
         "skillshare",

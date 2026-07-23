@@ -85,6 +85,17 @@ class MultiApplicationRunner:
                     "error": None,
                 },
                 {
+                    "application": "mise",
+                    "reference_path": str(
+                        repo_root / "reference/.config/mise/config.toml"
+                    ),
+                    "live_path": str(home / ".config/mise/config.toml"),
+                    "kind": "only-reference",
+                    "reference_kind": "file",
+                    "live_kind": None,
+                    "error": None,
+                },
+                {
                     "application": "skillshare",
                     "reference_path": str(
                         repo_root / "reference/.config/skillshare/config.yaml"
@@ -125,7 +136,7 @@ class MultiApplicationRunner:
                     "error": None,
                 },
             ],
-            "summary": {"modified": 1, "only-reference": 4},
+            "summary": {"modified": 1, "only-reference": 5},
         }
 
 
@@ -161,9 +172,10 @@ def test_linux_lite_profile_excludes_macos_drift_by_default(tmp_path: Path) -> N
     assert report.profile is HostProfile.LINUX_LITE
     assert [change.application for change in report.changes] == [
         "git",
+        "mise",
         "skillshare",
     ]
-    assert report.summary == {"modified": 1, "only-reference": 1}
+    assert report.summary == {"modified": 1, "only-reference": 2}
 
     full = inspect_drift(
         tmp_path / "repo",
@@ -175,6 +187,7 @@ def test_linux_lite_profile_excludes_macos_drift_by_default(tmp_path: Path) -> N
     assert full.profile is HostProfile.FULL
     assert [change.application for change in full.changes] == [
         "git",
+        "mise",
         "skillshare",
         "hushlogin",
         "uv",
