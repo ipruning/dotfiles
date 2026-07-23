@@ -166,9 +166,11 @@ def _mise_tool_safety(
         if live_config not in config_paths:
             config_paths = (*config_paths, live_config)
         live_tools: set[str] = set()
+        live_aliases: dict[str, str] = {}
         for config_path in config_paths:
-            tools, _aliases = _tool_declaration(config_path, required=False)
+            tools, aliases = _tool_declaration(config_path, required=False)
             live_tools.update(tools)
+            live_aliases.update(aliases)
     except ValueError as error:
         return (), (), str(error)
     additional_configs = tuple(
@@ -184,8 +186,12 @@ def _mise_tool_safety(
             reference_identities.add(backend)
         if backend in reference_tools:
             reference_identities.add(alias)
+    live_identities = set(live_tools)
+    for alias, backend in live_aliases.items():
+        if alias in live_tools:
+            live_identities.add(backend)
     return (
-        tuple(sorted(live_tools - reference_identities)),
+        tuple(sorted(live_identities - reference_identities)),
         additional_configs,
         None,
     )
