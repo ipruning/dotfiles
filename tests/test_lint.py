@@ -77,6 +77,51 @@ def test_inspect_repository_ignores_absolute_paths_inside_urls(
     assert "/home/someone/private/tool" in absolute_findings[0].message
 
 
+@pytest.mark.parametrize(
+    "manual_parser",
+    [
+        "rg -q '\"ok\":true' report.json\n",
+        "grep '^tool =' config.toml | sed 's/tool = //'\n",
+        "grep '^enabled:' config.yaml\n",
+    ],
+)
+def test_inspect_repository_rejects_text_based_structured_data_parsers(
+    tmp_path: Path,
+    manual_parser: str,
+) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    (repo_root / "reference").mkdir(parents=True)
+    (repo_root / "mackup/applications").mkdir(parents=True)
+    (repo_root / "mackup/mackup.cfg").write_text(mackup_cfg())
+    script = repo_root / "tool.sh"
+    script.write_text(f"#!/bin/sh\n{manual_parser}")
+
+    report = inspect_repository(repo_root, home)
+    findings = [
+        finding
+        for finding in report.findings
+        if finding.code == "repository.structured_data_text_parser"
+    ]
+
+    assert len(findings) == 1
+    assert findings[0].severity is Severity.ERROR
+    assert findings[0].path == script
+
+
+def test_inspect_repository_with_relative_root_does_not_scan_its_own_patterns(
+    monkeypatch,
+) -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    monkeypatch.chdir(repo_root)
+
+    report = inspect_repository(Path("."), Path.home())
+
+    assert "repository.structured_data_text_parser" not in {
+        finding.code for finding in report.findings
+    }
+
+
 def test_inspect_repository_reports_only_tracked_dangling_symlinks(
     tmp_path: Path,
 ) -> None:

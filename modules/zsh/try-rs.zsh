@@ -42,12 +42,12 @@ _try_rs_get_tries_paths() {
   local config_file try_paths
   for config_file in "${config_files[@]}"; do
     if [[ -f "$config_file" ]]; then
-      try_paths=$(grep -E '^[[:space:]]*tries_paths[[:space:]]*=' "$config_file" 2>/dev/null | sed -E 's/.*=[[:space:]]*"?([^"]*)"?.*/\1/' | tr ',' '\n')
+      try_paths=$(command mise config get -f "$config_file" tries_paths 2>/dev/null)
       if [[ -z "$try_paths" ]]; then
-        try_paths=$(grep -E '^[[:space:]]*tries_path[[:space:]]*=' "$config_file" 2>/dev/null | sed -E 's/.*=[[:space:]]*"?([^"]*)"?.*/\1/' | tr ',' '\n')
+        try_paths=$(command mise config get -f "$config_file" tries_path 2>/dev/null)
       fi
       if [[ -n "$try_paths" ]]; then
-        print -r -- "$try_paths"
+        print -r -- "$try_paths" | tr ',' '\n'
         return
       fi
     fi

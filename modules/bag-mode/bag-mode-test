@@ -389,7 +389,8 @@ mise exec -- jq -e 'select(.ok == false and .installation.binary == true and .in
   || fail 'strict doctor did not describe the unloaded service failure'
 env "${test_env[@]}" CI=1 "$runtime_bin" doctor --strict --json >"$test_root/doctor.json"
 mise exec -- jq -e . "$test_root/doctor.json" >/dev/null || fail 'doctor JSON was invalid'
-rg -q '"ok":true' "$test_root/doctor.json" || fail 'strict doctor JSON did not report success'
+mise exec -- jq -e '.ok == true' "$test_root/doctor.json" >/dev/null \
+  || fail 'strict doctor JSON did not report success'
 exit_code=0
 env "${test_env[@]}" CI=1 "$runtime_bin" doctor --bogus >"$test_root/bogus.out" 2>"$test_root/bogus.err" || exit_code=$?
 [[ "$exit_code" == 2 ]] || fail "unknown doctor option exited $exit_code instead of 2"

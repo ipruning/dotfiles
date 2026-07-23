@@ -319,6 +319,78 @@ def test_mise_installation_scan_finds_an_alternate_later_on_path(
     assert repaired[1].severity is Severity.OK
 
 
+def test_linux_systemd_check_reports_global_mise_shim_dependencies(
+    tmp_path: Path,
+) -> None:
+    home = tmp_path / "home"
+    system_units = tmp_path / "systemd"
+    user_units = home / ".config/systemd/user"
+    system_units.mkdir()
+    user_units.mkdir(parents=True)
+    worker = system_units / "worker.service"
+    worker.write_text("[Service]\nExecStart=/usr/bin/worker\n")
+    drop_in = system_units / "worker.service.d/override.conf"
+    drop_in.parent.mkdir()
+    safe = user_units / "pueued.service"
+    safe.write_text("[Service]\nExecStart=/usr/bin/pueued -vv\n")
+
+    for execution_directive in check_module.SYSTEMD_SERVICE_EXEC_DIRECTIVES:
+        drop_in.write_text(
+            f"[Service]\n{execution_directive} = "
+            "/root/.local/share/mise/shims/pueued --token=private\n"
+        )
+        findings = check_module._mise_systemd_shim_findings(
+            home,
+            system_unit_directory=system_units,
+        )
+
+        assert len(findings) == 1
+        assert findings[0].code == "mise.systemd_shim_dependency"
+        assert findings[0].severity is Severity.WARN
+        assert findings[0].path == drop_in
+        assert execution_directive in findings[0].message
+        assert "private" not in findings[0].message
+
+    drop_in.write_text(
+        "[Service]\nExecStart=/root/.local/bin/mise -C /root/project exec -- pueued\n"
+    )
+    repaired = check_module._mise_systemd_shim_findings(
+        home,
+        system_unit_directory=system_units,
+    )
+    assert repaired[0].code == "mise.systemd_shims_clean"
+    assert repaired[0].severity is Severity.OK
+
+
+def test_linux_systemd_check_scans_global_and_data_user_unit_paths(
+    tmp_path: Path,
+) -> None:
+    home = tmp_path / "home"
+    system_units = tmp_path / "systemd/system"
+    system_units.mkdir(parents=True)
+    user_unit_directories = (
+        system_units.parent / "user",
+        home / ".local/share/systemd/user",
+    )
+
+    for unit_directory in user_unit_directories:
+        unit_directory.mkdir(parents=True)
+        unit = unit_directory / "worker.service"
+        unit.write_text(
+            "[Service]\nExecStart=/home/alex/.local/share/mise/shims/worker\n"
+        )
+
+        findings = check_module._mise_systemd_shim_findings(
+            home,
+            system_unit_directory=system_units,
+        )
+
+        assert len(findings) == 1
+        assert findings[0].code == "mise.systemd_shim_dependency"
+        assert findings[0].path == unit
+        unit.unlink()
+
+
 def test_inspect_host_rejects_wasm_with_wrong_checksum(
     tmp_path: Path,
     monkeypatch,

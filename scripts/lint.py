@@ -27,6 +27,13 @@ PATH_RE = re.compile(
     r")",
 )
 URL_RE = re.compile(r"https?://\S+")
+STRUCTURED_DATA_TEXT_PARSER_RES = (
+    re.compile(
+        r"\b(?:grep|rg)\b[^\n]*(?:\.jsonl?|\.toml|\.ya?ml)\b",
+        re.IGNORECASE,
+    ),
+    re.compile(r"\b(?:grep|rg)\b[^\n]*=[^\n]*\|\s*sed\b"),
+)
 
 SKIP_PARTS = {
     ".git",
@@ -117,7 +124,7 @@ def _iter_text_files(repo_root: Path) -> list[Path]:
         relative_text = relative.as_posix()
         if any(part in SKIP_PARTS for part in relative.parts):
             continue
-        if file_path == Path(__file__).resolve():
+        if file_path.resolve() == Path(__file__).resolve():
             continue
         if relative_text.startswith(SKIP_PREFIXES):
             continue
@@ -308,6 +315,36 @@ def _path_findings(
                         system_name,
                     ),
                 )
+    return findings
+
+
+def _structured_data_parser_findings(repo_root: Path) -> list[Finding]:
+    findings: list[Finding] = []
+    for file_path in _iter_text_files(repo_root):
+        try:
+            lines = file_path.read_text(errors="replace").splitlines()
+        except OSError:
+            continue
+        for line_number, line in enumerate(lines, start=1):
+            if any(pattern.search(line) for pattern in STRUCTURED_DATA_TEXT_PARSER_RES):
+                findings.append(
+                    _located_finding(
+                        Severity.ERROR,
+                        "repository.structured_data_text_parser",
+                        "use a JSON, TOML, or YAML parser instead of text matching",
+                        file_path,
+                        line=line_number,
+                    ),
+                )
+    if not findings:
+        findings.append(
+            _located_finding(
+                Severity.OK,
+                "repository.structured_data_parsers",
+                "no text-based JSON, TOML, or YAML parser detected",
+                repo_root,
+            ),
+        )
     return findings
 
 
@@ -710,6 +747,7 @@ def inspect_repository(
 ) -> LintReport:
     """Return repository path, mapping, and symlink invariants."""
     findings = _path_findings(repo_root, home, system_name or platform.system())
+    findings.extend(_structured_data_parser_findings(repo_root))
     tracked_paths, tracked_finding = _tracked_paths(repo_root)
     if tracked_finding:
         findings.append(tracked_finding)

@@ -67,6 +67,15 @@ MISE_COMMON_LOCATIONS = tuple(
     )
 )
 MISE_BINDING_PATTERN = re.compile(r"(?<![\w])(/[^\s\"'()]+/mise)(?=[\s\"'();]|$)")
+SYSTEMD_SERVICE_EXEC_DIRECTIVES = {
+    "ExecCondition",
+    "ExecStartPre",
+    "ExecStart",
+    "ExecStartPost",
+    "ExecReload",
+    "ExecStop",
+    "ExecStopPost",
+}
 
 
 def _executable_file(file_path: Path) -> bool:
@@ -219,6 +228,68 @@ def _mise_shim_finding(home: Path) -> Finding | None:
             shims_directory,
         )
     return None
+
+
+def _mise_systemd_shim_findings(
+    home: Path,
+    *,
+    system_unit_directory: Path = Path("/etc/systemd/system"),
+) -> list[Finding]:
+    unit_directories = (
+        system_unit_directory,
+        system_unit_directory.parent / "user",
+        home / ".config/systemd/user",
+        home / ".local/share/systemd/user",
+    )
+    risky_units: list[tuple[Path, str]] = []
+    for unit_directory in unit_directories:
+        try:
+            unit_files = sorted(
+                [
+                    *unit_directory.glob("*.service"),
+                    *unit_directory.glob("*.service.d/*.conf"),
+                ],
+            )
+        except OSError:
+            continue
+        for unit_file in unit_files:
+            try:
+                lines = unit_file.read_text().splitlines()
+            except OSError:
+                continue
+            for line in lines:
+                directive = line.strip()
+                key, separator, value = directive.partition("=")
+                if (
+                    separator
+                    and key.strip() in SYSTEMD_SERVICE_EXEC_DIRECTIVES
+                    and ".local/share/mise/shims/" in value
+                ):
+                    risky_units.append((unit_file, key.strip()))
+                    break
+    if not risky_units:
+        return [
+            Finding(
+                "mise.systemd_shims",
+                Severity.OK,
+                "mise.systemd_shims_clean",
+                "No readable custom systemd service directly uses a global Mise shim",
+            ),
+        ]
+    return [
+        Finding(
+            "mise.systemd_shims",
+            Severity.WARN,
+            "mise.systemd_shim_dependency",
+            f"{unit_file.name} uses a global Mise shim in {directive_name}",
+            unit_file,
+            (
+                "Bind the service to a project config with ~/.local/bin/mise -C "
+                "<project> exec -- <tool>, or use a system package; then reload systemd."
+            ),
+        )
+        for unit_file, directive_name in risky_units
+    ]
 
 
 def _mise_runtime_binding_finding(
@@ -1327,6 +1398,8 @@ def inspect_host(
     )
     if mise_shims := _mise_shim_finding(home):
         findings.append(mise_shims)
+    if active_system == "Linux":
+        findings.extend(_mise_systemd_shim_findings(home))
     findings.extend(_private_git_findings(home))
     skillshare_finding = _check_executable(
         "skillshare",

@@ -124,14 +124,14 @@ rg -q '^installed="true" loaded="true"' "$test_root/install.out" || fail 'instal
 [[ -x "$installed_bin" && -f "$plist" && -e "$state/loaded" ]] || fail 'install lifecycle is incomplete'
 [[ "$(cat "$state/limits")" == '8192 unlimited' ]] || fail 'install did not accept launchd unlimited hard-limit reporting'
 env "${test_env[@]}" "$cli" status --json >"$test_root/healthy-status.json"
-rg -q '"limits_satisfied":true' "$test_root/healthy-status.json" \
+mise exec -- jq -e '.limits_satisfied == true' "$test_root/healthy-status.json" >/dev/null \
   || fail 'status rejected an unlimited hard limit above the target'
 
 printf '1024 65536\n' >"$state/limits"
 exit_code=0
 env "${test_env[@]}" "$cli" status --json >"$test_root/low-limit-status.json" || exit_code=$?
 [[ "$exit_code" == 1 ]] || fail 'status accepted effective limits below the target'
-rg -q '"limits_satisfied":false' "$test_root/low-limit-status.json" \
+mise exec -- jq -e '.limits_satisfied == false' "$test_root/low-limit-status.json" >/dev/null \
   || fail 'status did not expose the failed effective-limit check'
 printf '8192 unlimited\n' >"$state/limits"
 
