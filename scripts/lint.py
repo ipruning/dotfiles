@@ -124,7 +124,7 @@ def _iter_text_files(repo_root: Path) -> list[Path]:
         relative_text = relative.as_posix()
         if any(part in SKIP_PARTS for part in relative.parts):
             continue
-        if file_path == Path(__file__).resolve():
+        if file_path.resolve() == Path(__file__).resolve():
             continue
         if relative_text.startswith(SKIP_PREFIXES):
             continue

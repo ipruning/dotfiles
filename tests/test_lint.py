@@ -109,6 +109,19 @@ def test_inspect_repository_rejects_text_based_structured_data_parsers(
     assert findings[0].path == script
 
 
+def test_inspect_repository_with_relative_root_does_not_scan_its_own_patterns(
+    monkeypatch,
+) -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    monkeypatch.chdir(repo_root)
+
+    report = inspect_repository(Path("."), Path.home())
+
+    assert "repository.structured_data_text_parser" not in {
+        finding.code for finding in report.findings
+    }
+
+
 def test_inspect_repository_reports_only_tracked_dangling_symlinks(
     tmp_path: Path,
 ) -> None:
