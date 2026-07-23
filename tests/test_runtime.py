@@ -33,6 +33,11 @@ def _run_runtime(
     bin_dir: Path,
     *arguments: str,
 ) -> subprocess.CompletedProcess[str]:
+    mise = bin_dir / "mise"
+    canonical_mise = home / ".local/bin/mise"
+    if mise.is_file() and not canonical_mise.exists():
+        canonical_mise.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(mise, canonical_mise)
     environment = os.environ.copy()
     environment["HOME"] = str(home)
     environment["PATH"] = str(bin_dir)
@@ -187,6 +192,44 @@ def test_runtime_offline_apply_generates_and_removes_owned_shell_files(
     assert not stale_completion.exists()
     assert not legacy_try_rs.exists()
     assert not compdump.exists()
+
+
+def test_runtime_generates_mise_activation_with_the_canonical_binary(
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    bin_dir = tmp_path / "bin"
+    home.mkdir()
+    bin_dir.mkdir()
+    canonical_bin = home / ".local/bin"
+    canonical_bin.mkdir(parents=True)
+    _fake_tool(
+        canonical_bin,
+        "mise",
+        "printf 'bound to %s\\n' \"$0\"\n",
+    )
+    _fake_tool(bin_dir, "mise", "printf 'wrong mise\\n'\n")
+
+    completed = _run_runtime(
+        repo_root,
+        home,
+        bin_dir,
+        "--offline",
+        "--apply",
+        "--json",
+    )
+
+    assert completed.returncode == 0
+    document = json.loads(completed.stdout)
+    mise_step = next(
+        step for step in document["steps"] if step["name"] == "function.mise"
+    )
+    canonical_mise = canonical_bin / "mise"
+    assert mise_step["command"] == [str(canonical_mise), "activate", "zsh"]
+    assert (repo_root / "generated/functions/_mise.zsh").read_text() == (
+        f"bound to {canonical_mise}\n"
+    )
 
 
 def test_runtime_keeps_generating_for_self_built_tools_off_path(
@@ -580,7 +623,7 @@ def test_runtime_human_mode_announces_work_and_reports_failure_to_stderr(
 
     assert completed.returncode == 1
     assert completed.stdout.splitlines()[0] == (
-        "RUN function.mise: mise activate zsh -> "
+        f"RUN function.mise: {home}/.local/bin/mise activate zsh -> "
         f"{repo_root}/generated/functions/_mise.zsh"
     )
     assert "[function.mise] FAIL command exited 7" in completed.stderr
@@ -1036,6 +1079,9 @@ def test_runtime_rechecks_owned_directories_immediately_before_execution(
     bin_dir.mkdir()
     outside.mkdir()
     _fake_tool(bin_dir, "mise", "printf 'generated output\\n'\n")
+    canonical_mise = home / ".local/bin/mise"
+    canonical_mise.parent.mkdir(parents=True)
+    shutil.copy2(bin_dir / "mise", canonical_mise)
     plan = plan_runtime(
         repo_root,
         home,

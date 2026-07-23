@@ -18,6 +18,7 @@ from dataclasses import dataclass, replace
 from enum import StrEnum
 from pathlib import Path
 
+from .mise import canonical_mise_executable, canonical_mise_path
 from .models import ExecutableFinder
 
 Downloader = Callable[[str, int], bytes]
@@ -313,13 +314,18 @@ def plan_runtime(
     plugins_dir = generated_root / "plugins"
     results = []
     for tool, command, filename in FUNCTION_SPECS:
+        generator_finder = executable_finder
+        if tool == "mise":
+            mise_executable = canonical_mise_executable(home)
+            command = (str(canonical_mise_path(home)), *command[1:])
+            generator_finder = {tool: mise_executable}.get
         spec = RuntimeSpec(
             name=f"function.{tool}",
             tool=tool,
             target=functions_dir / filename,
             command=command,
         )
-        results.append(_generator_result(spec, executable_finder=executable_finder))
+        results.append(_generator_result(spec, executable_finder=generator_finder))
     for name, tool, command, filename, environment in COMPLETION_SPECS:
         effective_command = (
             (command[0], "--offline", *command[1:])

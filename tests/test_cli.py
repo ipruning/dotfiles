@@ -41,7 +41,20 @@ def test_mise_python_tasks_never_sync_dependencies_implicitly(tmp_path: Path) ->
             command for command in commands if isinstance(command, str)
         )
 
-    assert config["settings"]["task"]["run_auto_install"] is False
+    assert config["settings"]["auto_install"] is False
+    assert config["settings"]["lockfile"] is True
+    assert config["settings"]["lockfile_platforms"] == [
+        "macos-arm64",
+        "linux-x64",
+    ]
+    assert config["min_version"]["hard"] == "2026.7.12"
+    assert config["tool_alias"] == {
+        "fd": "aqua:sharkdp/fd",
+        "jq": "aqua:jqlang/jq",
+        "ripgrep": "aqua:BurntSushi/ripgrep",
+        "shellcheck": "aqua:koalaman/shellcheck",
+        "uv": "aqua:astral-sh/uv",
+    }
     assert task_commands
     assert all("uv run " not in command for command in task_commands)
     assert "uv run" not in (repo_root / "scripts/zsh-profile").read_text()
@@ -113,8 +126,8 @@ def test_setup_cli_previews_linux_lite_as_json_without_writing(tmp_path: Path) -
 def test_check_cli_reports_optional_linux_lite_gaps_as_json(tmp_path: Path) -> None:
     home = tmp_path / "home"
     home.mkdir()
-    tool_bin = tmp_path / "bin"
-    tool_bin.mkdir()
+    tool_bin = home / ".local/bin"
+    tool_bin.mkdir(parents=True)
     mise = tool_bin / "mise"
     mise.write_text("#!/bin/sh\nexit 0\n")
     mise.chmod(0o755)

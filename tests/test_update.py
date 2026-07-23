@@ -55,17 +55,21 @@ def _run_update(
 ) -> tuple[subprocess.CompletedProcess[str], Path]:
     bin_dir = tmp_path / "bin"
     bin_dir.mkdir(parents=True)
+    home = tmp_path / "home"
+    home.mkdir()
     log_path = tmp_path / "invocations.log"
     for name in tools:
+        tool_dir = home / ".local/bin" if name == "mise" else bin_dir
+        tool_dir.mkdir(parents=True, exist_ok=True)
         _fake_tool(
-            bin_dir,
+            tool_dir,
             name,
             log_path,
             exit_code=7 if name == failing_tool else 0,
             failure_output=failure_output,
         )
     environment = os.environ.copy()
-    environment["HOME"] = str(tmp_path / "home")
+    environment["HOME"] = str(home)
     environment["PATH"] = str(bin_dir)
     completed = subprocess.run(
         [sys.executable, "-m", "scripts.update", *arguments],
@@ -96,10 +100,20 @@ def test_update_previews_exact_plan_by_default_without_running_tools(
         ("brew.metadata", "planned", ["brew", "update"]),
         ("brew.packages", "planned", ["brew", "upgrade"]),
         (
+            "mise.self",
+            "planned",
+            [
+                str(tmp_path / "home/.local/bin/mise"),
+                "self-update",
+                "--yes",
+                "--no-plugins",
+            ],
+        ),
+        (
             "mise.tools",
             "planned",
             [
-                "mise",
+                str(tmp_path / "home/.local/bin/mise"),
                 "upgrade",
                 "--bump",
                 "-C",
@@ -107,10 +121,14 @@ def test_update_previews_exact_plan_by_default_without_running_tools(
                 "python@3.14.6",
             ],
         ),
-        ("mise.shims", "planned", ["mise", "reshim"]),
+        (
+            "mise.shims",
+            "planned",
+            [str(tmp_path / "home/.local/bin/mise"), "reshim"],
+        ),
         ("amp", "planned", ["amp", "update"]),
     ]
-    assert document["summary"] == {"planned": 5, "skipped": 8}
+    assert document["summary"] == {"planned": 6, "skipped": 8}
     assert document["next"] == ["mise run update -- --apply"]
     assert not log_path.exists()
 
@@ -118,8 +136,12 @@ def test_update_previews_exact_plan_by_default_without_running_tools(
 def test_update_gives_package_managers_transaction_scale_timeouts(
     tmp_path: Path,
 ) -> None:
+    home = tmp_path / "home"
+    mise_bin = home / ".local/bin"
+    mise_bin.mkdir(parents=True)
+    _fake_tool(mise_bin, "mise", tmp_path / "mise.log")
     report = plan_updates(
-        tmp_path / "home",
+        home,
         executable_finder=lambda tool: f"/tools/{tool}",
     )
     steps = {result.step.name: result.step for result in report.results}
@@ -150,7 +172,7 @@ def test_update_runs_available_tools_in_order_and_reports_skips(tmp_path: Path) 
     document = json.loads(completed.stdout)
     assert document["apply"] is True
     assert document["ok"] is True
-    assert document["summary"] == {"skipped": 8, "succeeded": 5}
+    assert document["summary"] == {"skipped": 8, "succeeded": 6}
     assert [
         (step["name"], step["status"], step["exit_code"])
         for step in document["steps"]
@@ -158,6 +180,7 @@ def test_update_runs_available_tools_in_order_and_reports_skips(tmp_path: Path) 
     ] == [
         ("brew.metadata", "succeeded", 0),
         ("brew.packages", "succeeded", 0),
+        ("mise.self", "succeeded", 0),
         ("mise.tools", "succeeded", 0),
         ("mise.shims", "succeeded", 0),
         ("amp", "succeeded", 0),
@@ -165,6 +188,7 @@ def test_update_runs_available_tools_in_order_and_reports_skips(tmp_path: Path) 
     assert log_path.read_text().splitlines() == [
         "brew update",
         "brew upgrade",
+        "mise self-update --yes --no-plugins",
         f"mise upgrade --bump -C {tmp_path / 'home'} python@3.14.6",
         "mise reshim",
         "amp update",
@@ -191,7 +215,7 @@ def test_update_human_output_announces_commands_before_summary(tmp_path: Path) -
     assert completed.stdout.splitlines()[0] == "RUN brew.metadata: brew update"
     assert "SUCCEEDED brew.metadata" in completed.stdout
     assert ("Next:\n  mise run runtime\n") in completed.stdout
-    assert "Summary: 5 succeeded, 8 skipped" in completed.stdout
+    assert "Summary: 6 succeeded, 8 skipped" in completed.stdout
 
 
 def test_update_failure_is_contextual_and_does_not_hide_later_results(
@@ -274,6 +298,10 @@ def test_update_mise_step_passes_only_installed_versions(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    mise = tmp_path / ".local/bin/mise"
+    mise.parent.mkdir(parents=True)
+    mise.write_text("#!/bin/sh\nexit 0\n")
+    mise.chmod(0o755)
     inventory = json.dumps(
         {
             "python": [{"version": "3.14.6", "installed": True}],
@@ -287,7 +315,12 @@ def test_update_mise_step_passes_only_installed_versions(
         command: tuple[str, ...],
         **_kwargs: object,
     ) -> subprocess.CompletedProcess[str]:
-        assert command[:4] == ("mise", "ls", "--current", "--installed")
+        assert command[:4] == (
+            str(mise),
+            "ls",
+            "--current",
+            "--installed",
+        )
         return subprocess.CompletedProcess(command, 0, inventory, "")
 
     monkeypatch.setattr("scripts.update.subprocess.run", fake_run)
@@ -301,7 +334,7 @@ def test_update_mise_step_passes_only_installed_versions(
     )
     assert result.status is UpdateStatus.PLANNED
     assert result.step.command == (
-        "mise",
+        str(mise),
         "upgrade",
         "--bump",
         "-C",
@@ -315,6 +348,10 @@ def test_update_fails_closed_when_mise_inventory_is_invalid(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    mise = tmp_path / ".local/bin/mise"
+    mise.parent.mkdir(parents=True)
+    mise.write_text("#!/bin/sh\nexit 0\n")
+    mise.chmod(0o755)
     monkeypatch.setattr(
         "scripts.update.subprocess.run",
         lambda command, **_kwargs: subprocess.CompletedProcess(
@@ -339,11 +376,15 @@ def test_update_apply_does_not_execute_a_failed_mise_preflight(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    mise = tmp_path / ".local/bin/mise"
+    mise.parent.mkdir(parents=True)
+    mise.write_text("#!/bin/sh\nexit 0\n")
+    mise.chmod(0o755)
     ran: list[tuple[str, ...]] = []
 
     def fake_run(command, **_kwargs):
         ran.append(tuple(command))
-        if tuple(command[:2]) == ("mise", "ls"):
+        if tuple(command[:2]) == (str(mise), "ls"):
             return subprocess.CompletedProcess(command, 0, "not-json", "")
         return subprocess.CompletedProcess(command, 0, "", "")
 
@@ -358,7 +399,7 @@ def test_update_apply_does_not_execute_a_failed_mise_preflight(
     assert mise_result.status is UpdateStatus.FAILED
     # A failed inventory must not fall through to `mise upgrade` with no tool
     # arguments, which would upgrade every installed tool.
-    assert not any(cmd[:2] == ("mise", "upgrade") for cmd in ran)
+    assert not any(cmd[:2] == (str(mise), "upgrade") for cmd in ran)
     assert report.ok is False
 
 

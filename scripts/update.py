@@ -13,6 +13,7 @@ from dataclasses import dataclass, replace
 from enum import StrEnum
 from pathlib import Path
 
+from .mise import canonical_mise_executable, canonical_mise_path
 from .models import ExecutableFinder
 
 StepCallback = Callable[["UpdateStep"], None]
@@ -62,10 +63,10 @@ def _emit_failure(step: UpdateStep, reason: str) -> None:
     print(f"[{step.name}] FAIL {reason}", file=sys.stderr)
 
 
-def _installed_mise_tools(home: Path) -> tuple[str, ...]:
+def _installed_mise_tools(home: Path, mise_executable: str) -> tuple[str, ...]:
     """Return active installed versions so upgrade cannot bootstrap missing tools."""
     command = (
-        "mise",
+        mise_executable,
         "ls",
         "--current",
         "--installed",
@@ -115,6 +116,7 @@ def _installed_mise_tools(home: Path) -> tuple[str, ...]:
 
 
 def _update_steps(home: Path) -> tuple[UpdateStep, ...]:
+    mise_executable = str(canonical_mise_path(home))
     return (
         UpdateStep("brew.metadata", "brew", ("brew", "update"), 900),
         # Package-mutating steps get transaction-scale timeouts: killing brew or
@@ -122,12 +124,18 @@ def _update_steps(home: Path) -> tuple[UpdateStep, ...]:
         # tool state, which is worse than waiting out a slow upgrade.
         UpdateStep("brew.packages", "brew", ("brew", "upgrade"), 3600),
         UpdateStep(
+            "mise.self",
+            "mise",
+            (mise_executable, "self-update", "--yes", "--no-plugins"),
+            900,
+        ),
+        UpdateStep(
             "mise.tools",
             "mise",
-            ("mise", "upgrade", "--bump", "-C", str(home)),
+            (mise_executable, "upgrade", "--bump", "-C", str(home)),
             1800,
         ),
-        UpdateStep("mise.shims", "mise", ("mise", "reshim"), 120),
+        UpdateStep("mise.shims", "mise", (mise_executable, "reshim"), 120),
         UpdateStep(
             "gh.extensions",
             "gh",
@@ -162,11 +170,17 @@ def plan_updates(
 ) -> UpdateReport:
     """Return the exact available update plan without running commands."""
     results = []
+    mise_executable = canonical_mise_executable(home)
     for step in _update_steps(home):
-        available = executable_finder(step.tool) is not None
+        available = (
+            mise_executable is not None
+            if step.tool == "mise"
+            else executable_finder(step.tool) is not None
+        )
         if available and step.name == "mise.tools":
+            assert mise_executable is not None
             try:
-                installed = _installed_mise_tools(home)
+                installed = _installed_mise_tools(home, mise_executable)
             except RuntimeError as error:
                 results.append(
                     UpdateResult(
@@ -190,7 +204,15 @@ def plan_updates(
             UpdateResult(
                 step=step,
                 status=UpdateStatus.PLANNED if available else UpdateStatus.SKIPPED,
-                reason=None if available else f"{step.tool} is not available on PATH",
+                reason=(
+                    None
+                    if available
+                    else (
+                        f"{canonical_mise_path(home)} is missing, symlinked, or not executable"
+                        if step.tool == "mise"
+                        else f"{step.tool} is not available on PATH"
+                    )
+                ),
             ),
         )
     return UpdateReport(apply=False, results=tuple(results))

@@ -1,3 +1,11 @@
+min_version = { hard = "2026.7.12" }
+
+[tool_alias]
+aube = "aqua:jdx/aube"
+pnpm = "aqua:pnpm/pnpm"
+uv = "aqua:astral-sh/uv"
+yarn = "vfox:mise-plugins/vfox-yarn"
+
 [tools]
 "gem:kamal" = "latest"
 "github:earendil-works/pi" = "latest"
@@ -20,6 +28,8 @@ yarn = "latest"
 zig = "latest"
 
 [settings]
+auto_install = false
+lockfile = true
 lockfile_platforms = ["macos-arm64", "linux-x64"]
 minimum_release_age = "0s"
 trusted_config_paths = [
