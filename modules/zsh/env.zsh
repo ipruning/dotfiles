@@ -436,7 +436,7 @@ if command -v try-rs >/dev/null 2>&1; then
 fi
 
 # 👇 mise (will cost 40ms)
-if command -v mise >/dev/null 2>&1 && [[ -f "$GENERATED_FUNCTIONS_DIR/_mise.zsh" ]]; then
+if [[ -x "$HOME/.local/bin/mise" && ! -L "$HOME/.local/bin/mise" && -f "$GENERATED_FUNCTIONS_DIR/_mise.zsh" ]]; then
   source "$GENERATED_FUNCTIONS_DIR/_mise.zsh"
 fi
 

@@ -33,18 +33,27 @@ export PATH="$HOME/.local/bin:$PATH"
 git clone https://github.com/ipruning/dotfiles.git ~/dotfiles
 cd ~/dotfiles
 mise trust
-mise install
+mise install --locked fd jq python ripgrep shellcheck uv
 mise exec -- uv sync --locked
 mise tasks
 ```
 
+This repository deliberately standardizes both macOS and Linux on the
+standalone executable at `~/.local/bin/mise`. Do not install a second copy with
+Homebrew, apt, or another package manager: package-managed mise has a different
+update owner and may leave generated shell activation bound to the wrong
+binary. The upstream installer uses this standalone path by default, and this
+installation supports `mise self-update`.
+
 `mise trust` is required because this repository declares a project virtual
-environment. `mise install` provides the pinned Python and uv versions, then
-`mise exec -- uv sync --locked` materializes the locked project dependencies,
-including the pinned Mackup fork, before shell activation makes uv directly
-available. Task auto-install is disabled: these two commands form the explicit
-bootstrap boundary, and a later `mise run ...` does not quietly download a
-missing task tool or project dependency.
+environment. The explicit `mise install --locked ...` command requires every
+project tool to have a URL and checksum for the current platform in
+`mise.lock`. `mise exec -- uv sync --locked` then materializes the locked Python
+dependencies, including the pinned Mackup fork, before shell activation makes
+uv directly available. Mise auto-install is disabled for task, exec, and
+command-not-found paths: these two commands form the explicit bootstrap
+boundary, and later commands fail instead of quietly downloading a missing
+tool or project dependency.
 
 `mise tasks` is the authoritative command list. The main inspection interface
 is:
@@ -119,9 +128,9 @@ there. The contract is a split between experience and commands:
   `generated/bin` to `PATH` only under `darwin*`, so a Linux host never gains
   repository commands and can never shadow a system tool — most importantly
   iproute2 `ss`, whose repository namesake is `skillshare-source`.
-- The mise configuration reinforces this: it carries no repository bins, and its
-  `lockfile_platforms` covers both `macos-arm64` and `linux-x64`, so restoring
-  the macOS mise config onto Linux cannot expose a repository command either.
+- The repository mise configuration carries no repository bins. Its committed
+  lockfile contains URLs and checksums for both `macos-arm64` and `linux-x64`,
+  so bootstrap uses the same reviewed tool artifacts on both platforms.
 
 What is not promised: optional tools (atuin, starship, tv) are host-managed and
 their integrations degrade silently when the tool is absent. `mise run shell`
@@ -196,7 +205,11 @@ have different capabilities. `--strict` treats warnings as failures.
 When Skillshare is present, `check` also runs `skillshare doctor --json`. It
 does not treat the executable, YAML file, and source directory alone as proof
 that synchronization is healthy. Missing or empty generated shell directories
-are likewise reported as not ready.
+are likewise reported as not ready. The report also verifies that
+`~/.local/bin/mise` is a real executable rather than a package-manager symlink,
+warns when another mise installation exists on `PATH` or at a common system
+location, and checks that generated Zsh activation names only the canonical
+executable.
 
 `mise run lint` inspects repository paths, Mackup mappings, and dangling
 symlinks. Its `path.*` findings are host-relative: a machine-specific path
@@ -218,18 +231,25 @@ mise run update -- --json
 mise run update -- --apply
 ```
 
-The task discovers supported updaters on `PATH`, reports missing tools as
+The task discovers most supported updaters on `PATH`, reports missing tools as
 skipped, applies available updates in a stable order, and continues independent
-steps after a failure. Its preview is the authoritative list of supported
-updaters and the exact commands available on the current host. Any failed step
-makes the command exit non-zero. It deliberately does not run `brew cleanup`,
-`brew autoremove`, or `mise prune`; removal and pruning require a separate,
-explicit operation.
+steps after a failure. Mise is the exception: its self-update, tool upgrade,
+and reshim steps always invoke `~/.local/bin/mise` explicitly. The self-update
+runs without the unrelated plugin update side effect. The preview is the
+authoritative list of supported updaters and the exact commands available on
+the current host. Any failed step makes the command exit non-zero. It
+deliberately does not run `brew cleanup`, `brew autoremove`, or `mise prune`;
+removal and pruning require a separate, explicit operation.
 
-For mise, the preview first reads the active installed versions and passes that
-explicit list to `mise upgrade`; a configured but missing mise tool is not
-installed. Other missing CLIs are skipped rather than bootstrapped. Package
-managers may still replace package dependencies as part of an ordinary upgrade.
+For mise, the preview records the active installed tool versions. An apply
+updates the standalone CLI first, then passes that explicit list to
+`mise upgrade`; a configured but missing mise tool is not installed. Other
+missing CLIs are skipped rather than bootstrapped. Package managers may still
+replace package dependencies as part of an ordinary upgrade.
+
+A hard `min_version` failure happens before mise can launch this repository's
+`update` task. In that bootstrap case, update the canonical binary directly
+with `~/.local/bin/mise self-update`, then run the task normally.
 
 `update` does not pull this repository, run Skillshare, or write live
 configuration back into `reference/`. Inspect the resulting host state
@@ -271,6 +291,10 @@ and other declared runtime artifacts. Its preview is the authoritative list of
 planned operations on the current host. `--offline` limits an apply to local
 generation and cache maintenance. It never runs Skillshare or writes host
 inventory; snapshots have their own explicit task (see Host inventory).
+Generated files are a cache: shell startup sources them but does not regenerate
+them. The mise generator always invokes `~/.local/bin/mise` by absolute path, so
+the cached activation remains stable across self-updates and across macOS and
+Linux hosts.
 
 Repository-owned source builds are an explicit, slower sub-operation:
 

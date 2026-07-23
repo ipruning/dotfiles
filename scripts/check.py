@@ -7,6 +7,7 @@ import datetime as dt
 import json
 import os
 import platform
+import re
 import shutil
 import stat
 import subprocess
@@ -15,6 +16,7 @@ from pathlib import Path
 from ruamel.yaml import YAML
 from ruamel.yaml.error import YAMLError
 
+from .mise import canonical_mise_executable, canonical_mise_path
 from .models import CheckReport, ExecutableFinder, Finding, Severity
 from .profiles import HostProfile, resolve_profile
 from .render import finding_document, render_findings
@@ -51,6 +53,152 @@ def _check_executable(
         f"executable.{tool}.missing",
         f"{tool} is not available on PATH",
         action=f"Install {tool} if this host needs that capability.",
+    )
+
+
+MISE_COMMON_LOCATIONS = tuple(
+    Path("/").joinpath(*parts)
+    for parts in (
+        ("opt", "homebrew", "bin", "mise"),
+        ("usr", "local", "bin", "mise"),
+        ("home", "linuxbrew", ".linuxbrew", "bin", "mise"),
+        ("usr", "bin", "mise"),
+        ("snap", "bin", "mise"),
+    )
+)
+MISE_BINDING_PATTERN = re.compile(r"(?<![\w])(/[^\s\"'()]+/mise)(?=[\s\"'();]|$)")
+
+
+def _executable_file(file_path: Path) -> bool:
+    try:
+        return file_path.is_file() and os.access(file_path, os.X_OK)
+    except OSError:
+        return False
+
+
+def _same_file(left: Path, right: Path) -> bool:
+    try:
+        return left.samefile(right)
+    except OSError:
+        return False
+
+
+def _mise_candidate_paths(
+    executable_finder: ExecutableFinder,
+    *,
+    scan_host_path: bool,
+) -> tuple[Path, ...]:
+    candidates: list[Path] = []
+    if found := executable_finder("mise"):
+        candidates.append(Path(found).expanduser())
+    if scan_host_path:
+        candidates.extend(
+            Path(entry).expanduser() / "mise"
+            for entry in os.environ.get("PATH", "").split(os.pathsep)
+            if entry
+        )
+        candidates.extend(MISE_COMMON_LOCATIONS)
+    return tuple(candidates)
+
+
+def _mise_installation_findings(
+    home: Path,
+    *,
+    executable_finder: ExecutableFinder,
+    scan_host_path: bool,
+) -> list[Finding]:
+    canonical = canonical_mise_path(home)
+    canonical_ready = canonical_mise_executable(home) is not None
+    if canonical_ready:
+        canonical_finding = Finding(
+            "mise.canonical",
+            Severity.OK,
+            "mise.canonical_ready",
+            "The standalone mise executable is ready at its canonical location",
+            canonical,
+        )
+    else:
+        state = "symlinked" if canonical.is_symlink() else "missing_or_invalid"
+        canonical_finding = Finding(
+            "mise.canonical",
+            Severity.WARN,
+            f"mise.canonical_{state}",
+            "The canonical standalone mise executable is missing, symlinked, or not executable",
+            canonical,
+            "Install standalone mise at ~/.local/bin/mise with https://mise.run.",
+        )
+
+    alternatives: dict[str, Path] = {}
+    for candidate in _mise_candidate_paths(
+        executable_finder,
+        scan_host_path=scan_host_path,
+    ):
+        if candidate == canonical or not _executable_file(candidate):
+            continue
+        if canonical_ready and _same_file(candidate, canonical):
+            continue
+        try:
+            identity = str(candidate.resolve(strict=True))
+        except OSError:
+            identity = str(candidate.absolute())
+        alternatives.setdefault(identity, candidate)
+
+    if alternatives:
+        paths = ", ".join(str(file_path) for file_path in alternatives.values())
+        installations_finding = Finding(
+            "mise.installations",
+            Severity.WARN,
+            "mise.installations_multiple",
+            f"Additional mise executable installations exist outside the canonical path: {paths}",
+            next(iter(alternatives.values())),
+            "Remove package-managed mise copies after ~/.local/bin/mise is ready.",
+        )
+    else:
+        installations_finding = Finding(
+            "mise.installations",
+            Severity.OK,
+            "mise.installations_single",
+            "No alternate mise executable installation was found",
+            canonical,
+        )
+    return [canonical_finding, installations_finding]
+
+
+def _mise_runtime_binding_finding(
+    generated_function: Path,
+    home: Path,
+) -> Finding | None:
+    if not generated_function.is_file():
+        return None
+    try:
+        content = generated_function.read_text()
+    except OSError as error:
+        return Finding(
+            "runtime.function.mise_binding",
+            Severity.WARN,
+            "runtime.function.mise_binding_unreadable",
+            f"Generated mise Zsh initialization cannot be read: {error}",
+            generated_function,
+            "Run mise run runtime, then mise run runtime -- --apply.",
+        )
+    expected = str(canonical_mise_path(home))
+    bindings = sorted(set(MISE_BINDING_PATTERN.findall(content)))
+    if bindings == [expected]:
+        return Finding(
+            "runtime.function.mise_binding",
+            Severity.OK,
+            "runtime.function.mise_binding_ready",
+            "Generated mise Zsh initialization is bound to the canonical executable",
+            generated_function,
+        )
+    actual = ", ".join(bindings) if bindings else "no absolute mise executable"
+    return Finding(
+        "runtime.function.mise_binding",
+        Severity.WARN,
+        "runtime.function.mise_binding_mismatch",
+        f"Generated mise Zsh initialization is not bound only to {expected}: {actual}",
+        generated_function,
+        "Run mise run runtime, then mise run runtime -- --apply.",
     )
 
 
@@ -1113,6 +1261,13 @@ def inspect_host(
         )
         for command in required_commands
     ]
+    findings.extend(
+        _mise_installation_findings(
+            home,
+            executable_finder=executable_finder,
+            scan_host_path=executable_finder is shutil.which,
+        ),
+    )
     findings.extend(_private_git_findings(home))
     skillshare_finding = _check_executable(
         "skillshare",
@@ -1156,6 +1311,12 @@ def inspect_host(
                 repo_root / "generated" / directory, directory
             ),
         )
+    mise_binding = _mise_runtime_binding_finding(
+        repo_root / "generated/functions/_mise.zsh",
+        home,
+    )
+    if mise_binding:
+        findings.append(mise_binding)
     owned_tool_finder = repo_aware_finder(repo_root, executable_finder)
     for tool, _command, filename in FUNCTION_SPECS:
         finding = _owned_generated_capability(

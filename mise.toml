@@ -1,7 +1,18 @@
+min_version = { hard = "2026.7.12" }
+
+[tool_alias]
+fd = "aqua:sharkdp/fd"
+jq = "aqua:jqlang/jq"
+ripgrep = "aqua:BurntSushi/ripgrep"
+shellcheck = "aqua:koalaman/shellcheck"
+uv = "aqua:astral-sh/uv"
+
 [settings]
-# Bootstrap is explicit (`mise install`); ordinary tasks must not install tools
-# as a side effect before their own preview/apply contract starts.
-task.run_auto_install = false
+# Bootstrap is explicit; task, exec, and command-not-found paths must not
+# install tools as a side effect before their own preview/apply contract starts.
+auto_install = false
+lockfile = true
+lockfile_platforms = ["macos-arm64", "linux-x64"]
 
 [tools]
 # fd, jq, and ripgrep serve the module test suites that verify depends on;

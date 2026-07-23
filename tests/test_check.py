@@ -31,6 +31,10 @@ def test_inspect_host_reports_capabilities_and_their_invalid_transition(
         "[user]\n  name = Test User\n  email = test@example.com\n"
     )
     private_gitconfig.chmod(0o600)
+    canonical_mise = home / ".local/bin/mise"
+    canonical_mise.parent.mkdir(parents=True)
+    canonical_mise.write_text("#!/bin/sh\nexit 0\n")
+    canonical_mise.chmod(0o755)
     for directory in ("plugins", "completions", "functions"):
         (repo_root / "generated" / directory).mkdir(parents=True)
         marker = ".gitkeep" if directory == "plugins" else "generated.txt"
@@ -50,6 +54,9 @@ def test_inspect_host_reports_capabilities_and_their_invalid_transition(
         runtime_path = repo_root / relative_path
         runtime_path.parent.mkdir(parents=True, exist_ok=True)
         runtime_path.write_text("runtime\n")
+    (repo_root / "generated/functions/_mise.zsh").write_text(
+        f"command {canonical_mise}\n",
+    )
     for binary_name in ("atuin", "op-cache"):
         binary_path = repo_root / "generated/bin" / binary_name
         binary_path.parent.mkdir(parents=True, exist_ok=True)
@@ -143,6 +150,8 @@ def test_inspect_host_reports_capabilities_and_their_invalid_transition(
             return str(bag_mode)
         if command == "macos-maxfiles":
             return str(maxfiles)
+        if command == "mise":
+            return str(canonical_mise)
         return f"/tools/{command}"
 
     healthy = inspect_host(
@@ -183,6 +192,78 @@ def test_inspect_host_reports_capabilities_and_their_invalid_transition(
     )
     findings = {finding.code: finding for finding in commented.findings}
     assert findings["git.private_include_missing"].severity is Severity.WARN
+
+
+def test_inspect_host_reports_duplicate_mise_and_stale_runtime_binding(
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "repo"
+    home = tmp_path / "home"
+    canonical = home / ".local/bin/mise"
+    alternate = tmp_path / "package-manager/bin/mise"
+    generated = repo_root / "generated/functions/_mise.zsh"
+    for executable in (canonical, alternate):
+        executable.parent.mkdir(parents=True)
+        executable.write_text("#!/bin/sh\nexit 0\n")
+        executable.chmod(0o755)
+    generated.parent.mkdir(parents=True)
+    generated.write_text(f"command {alternate}\n")
+
+    def alternate_finder(command: str) -> str | None:
+        return str(alternate) if command == "mise" else f"/tools/{command}"
+
+    conflicted = inspect_host(
+        repo_root,
+        home,
+        executable_finder=alternate_finder,
+        system_name="Linux",
+        profile="full",
+    )
+    findings = {finding.check: finding for finding in conflicted.findings}
+
+    assert findings["mise.canonical"].severity is Severity.OK
+    assert findings["mise.installations"].code == "mise.installations_multiple"
+    assert findings["mise.installations"].severity is Severity.WARN
+    assert (
+        findings["runtime.function.mise_binding"].code
+        == "runtime.function.mise_binding_mismatch"
+    )
+
+    alternate.unlink()
+    generated.write_text(f"command {canonical}\n")
+    repaired = inspect_host(
+        repo_root,
+        home,
+        executable_finder=lambda command: (
+            str(canonical) if command == "mise" else f"/tools/{command}"
+        ),
+        system_name="Linux",
+        profile="full",
+    )
+    findings = {finding.check: finding for finding in repaired.findings}
+
+    assert findings["mise.installations"].code == "mise.installations_single"
+    assert findings["mise.installations"].severity is Severity.OK
+    assert (
+        findings["runtime.function.mise_binding"].code
+        == "runtime.function.mise_binding_ready"
+    )
+
+    canonical.unlink()
+    missing = inspect_host(
+        repo_root,
+        home,
+        executable_finder=lambda command: (
+            str(canonical) if command == "mise" else f"/tools/{command}"
+        ),
+        system_name="Linux",
+        profile="full",
+    )
+    missing_canonical = next(
+        finding for finding in missing.findings if finding.check == "mise.canonical"
+    )
+    assert missing_canonical.code == "mise.canonical_missing_or_invalid"
+    assert missing_canonical.severity is Severity.WARN
 
 
 def test_inspect_host_rejects_wasm_with_wrong_checksum(
