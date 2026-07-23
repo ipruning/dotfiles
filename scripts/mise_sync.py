@@ -57,6 +57,7 @@ class MiseSyncReport:
     restore: RestoreReport
     results: tuple[MiseSyncResult, ...]
     live_only_tools: tuple[str, ...] = ()
+    live_alias_overrides: tuple[tuple[str, str], ...] = ()
     additional_global_configs: tuple[str, ...] = ()
     configuration_error: str | None = None
 
@@ -65,6 +66,7 @@ class MiseSyncReport:
         return (
             self.restore.ok
             and not self.live_only_tools
+            and not self.live_alias_overrides
             and not self.additional_global_configs
             and self.configuration_error is None
             and all(
@@ -206,7 +208,12 @@ def _same_config_file(left: Path, right: Path) -> bool:
 
 def _mise_tool_safety(
     repo_root: Path, home: Path, executable: str | None
-) -> tuple[tuple[str, ...], tuple[str, ...], str | None]:
+) -> tuple[
+    tuple[str, ...],
+    tuple[tuple[str, str], ...],
+    tuple[str, ...],
+    str | None,
+]:
     reference_config = repo_root / "reference/.config/mise/config.toml"
     live_config = (home / ".config/mise/config.toml").absolute()
     try:
@@ -236,7 +243,7 @@ def _mise_tool_safety(
             live_tools.update(tools)
             live_aliases.update(aliases)
     except ValueError as error:
-        return (), (), str(error)
+        return (), (), (), str(error)
     additional_configs = tuple(
         sorted(
             str(config_path)
@@ -250,15 +257,17 @@ def _mise_tool_safety(
             reference_identities.add(backend)
         if backend in reference_tools:
             reference_identities.add(alias)
-    live_identities = set(live_tools)
-    for alias, backend in live_aliases.items():
-        if backend == reference_aliases.get(alias):
-            continue
-        if backend in trusted_alias_backends.get(alias, frozenset()):
-            continue
-        live_identities.add(backend)
+    alias_overrides = tuple(
+        sorted(
+            (alias, backend)
+            for alias, backend in live_aliases.items()
+            if backend != reference_aliases.get(alias)
+            and backend not in trusted_alias_backends.get(alias, frozenset())
+        )
+    )
     return (
-        tuple(sorted(live_identities - reference_identities)),
+        tuple(sorted(live_tools - reference_identities)),
+        alias_overrides,
         additional_configs,
         None,
     )
@@ -287,9 +296,12 @@ def plan_mise_sync(repo_root: Path, home: Path) -> MiseSyncReport:
     """Return the configuration changes and locked commands without applying them."""
     restore = plan_restore(repo_root, home, "mise")
     executable = canonical_mise_executable(home)
-    live_only_tools, additional_global_configs, configuration_error = _mise_tool_safety(
-        repo_root, home, executable
-    )
+    (
+        live_only_tools,
+        live_alias_overrides,
+        additional_global_configs,
+        configuration_error,
+    ) = _mise_tool_safety(repo_root, home, executable)
     steps = _sync_steps(home)
     if not restore.ok:
         reason = "mise configuration restore is not safe to apply"
@@ -312,6 +324,15 @@ def plan_mise_sync(repo_root: Path, home: Path) -> MiseSyncReport:
                 step,
                 MiseSyncStatus.SKIPPED,
                 reason="additional global mise configs are active",
+            )
+            for step in steps
+        )
+    elif live_alias_overrides:
+        results = tuple(
+            MiseSyncResult(
+                step,
+                MiseSyncStatus.SKIPPED,
+                reason="live global mise aliases differ from the shared declaration",
             )
             for step in steps
         )
@@ -341,6 +362,7 @@ def plan_mise_sync(repo_root: Path, home: Path) -> MiseSyncReport:
         restore=restore,
         results=results,
         live_only_tools=live_only_tools,
+        live_alias_overrides=live_alias_overrides,
         additional_global_configs=additional_global_configs,
         configuration_error=configuration_error,
     )
@@ -365,6 +387,7 @@ def execute_mise_sync(
             restore=plan.restore,
             results=plan.results,
             live_only_tools=plan.live_only_tools,
+            live_alias_overrides=plan.live_alias_overrides,
             additional_global_configs=plan.additional_global_configs,
             configuration_error=plan.configuration_error,
         )
@@ -383,6 +406,7 @@ def execute_mise_sync(
             restore=restore,
             results=results,
             live_only_tools=plan.live_only_tools,
+            live_alias_overrides=plan.live_alias_overrides,
             additional_global_configs=plan.additional_global_configs,
             configuration_error=plan.configuration_error,
         )
@@ -448,6 +472,7 @@ def execute_mise_sync(
         restore=restore,
         results=tuple(results),
         live_only_tools=plan.live_only_tools,
+        live_alias_overrides=plan.live_alias_overrides,
         additional_global_configs=plan.additional_global_configs,
         configuration_error=plan.configuration_error,
     )
@@ -486,11 +511,16 @@ def _document(report: MiseSyncReport) -> dict[str, object]:
         "safety": {
             "apply_blocked": bool(
                 report.live_only_tools
+                or report.live_alias_overrides
                 or report.additional_global_configs
                 or report.configuration_error
             ),
             "additional_global_configs": list(report.additional_global_configs),
             "configuration_error": report.configuration_error,
+            "live_alias_overrides": [
+                {"alias": alias, "backend": backend}
+                for alias, backend in report.live_alias_overrides
+            ],
             "live_only_tools": list(report.live_only_tools),
         },
         "changes": [
@@ -557,6 +587,15 @@ def _render(report: MiseSyncReport) -> None:
         print(
             "          Move project/service tools to their owner, add genuinely shared "
             "tools to reference, or remove them explicitly; then preview again.",
+            file=sys.stderr,
+        )
+    if report.live_alias_overrides:
+        print("BLOCKED   untracked global mise alias backends:", file=sys.stderr)
+        for alias, backend in report.live_alias_overrides:
+            print(f"          {alias} -> {backend}", file=sys.stderr)
+        print(
+            "          Track the alias or its historical backend explicitly, or "
+            "remove the live override; then preview again.",
             file=sys.stderr,
         )
     for result in report.restore.results:
@@ -637,6 +676,15 @@ def main(argv: list[str] | None = None) -> int:
             print(
                 "[mise.safety] FAIL live-only global tools: "
                 + ", ".join(report.live_only_tools),
+                file=sys.stderr,
+            )
+        if report.live_alias_overrides:
+            print(
+                "[mise.safety] FAIL untracked alias backends: "
+                + ", ".join(
+                    f"{alias} -> {backend}"
+                    for alias, backend in report.live_alias_overrides
+                ),
                 file=sys.stderr,
             )
         for result in report.restore.results:

@@ -136,6 +136,7 @@ def test_mise_sync_blocks_live_only_tools_until_ownership_is_resolved(
         "apply_blocked": True,
         "additional_global_configs": [],
         "configuration_error": None,
+        "live_alias_overrides": [],
         "live_only_tools": ["pueue"],
     }
     assert [step["status"] for step in preview_document["steps"]] == [
@@ -275,6 +276,7 @@ def test_mise_sync_accepts_a_tracked_backend_migration_alias(
     assert preview.returncode == 0
     document = json.loads(preview.stdout)
     assert document["safety"]["apply_blocked"] is False
+    assert document["safety"]["live_alias_overrides"] == []
     assert document["safety"]["live_only_tools"] == []
 
     applied = run_scripts_module("mise_sync", home, "--apply", "--json")
@@ -326,36 +328,54 @@ def test_mise_sync_accepts_a_previous_tracked_backend_without_its_new_alias(
 
 
 @pytest.mark.parametrize(
-    ("live_config", "live_only_tool"),
+    ("live_config", "live_only_tools", "alias", "backend"),
     [
         (
             '[tool_alias]\npueue = "aqua:yarnpkg/berry"\n\n[tools]\npueue = "latest"\n',
+            ["pueue"],
             "pueue",
+            "aqua:yarnpkg/berry",
         ),
         (
             '[tool_alias]\nnode = "aqua:evil/thing"\n\n'
             '[tools]\n"aqua:evil/thing" = "latest"\n',
+            ["aqua:evil/thing"],
+            "node",
             "aqua:evil/thing",
         ),
         (
             '[tool_alias]\nnode = "aqua:evil/thing"\n\n[tools]\nnode = "latest"\n',
+            [],
+            "node",
             "aqua:evil/thing",
         ),
         (
             '[alias]\nnode = "aqua:evil/thing"\n\n[tools]\nnode = "latest"\n',
+            [],
+            "node",
             "aqua:evil/thing",
         ),
         (
             '[tool_alias]\nnode = "aqua:evil/thing"\n\n'
             '[tools]\n"aqua:yarnpkg/berry" = "latest"\n',
+            [],
+            "node",
             "aqua:evil/thing",
+        ),
+        (
+            '[tool_alias]\nnode = "aqua:yarnpkg/berry"\n\n[tools]\nnode = "latest"\n',
+            [],
+            "node",
+            "aqua:yarnpkg/berry",
         ),
     ],
 )
 def test_mise_sync_does_not_trust_live_aliases_to_claim_tracked_ownership(
     tmp_path: Path,
     live_config: str,
-    live_only_tool: str,
+    live_only_tools: list[str],
+    alias: str,
+    backend: str,
 ) -> None:
     home = tmp_path / "home"
     home.mkdir()
@@ -368,7 +388,10 @@ def test_mise_sync_does_not_trust_live_aliases_to_claim_tracked_ownership(
     assert completed.returncode == 1
     document = json.loads(completed.stdout)
     assert document["safety"]["apply_blocked"] is True
-    assert document["safety"]["live_only_tools"] == [live_only_tool]
+    assert document["safety"]["live_only_tools"] == live_only_tools
+    assert document["safety"]["live_alias_overrides"] == [
+        {"alias": alias, "backend": backend}
+    ]
 
 
 def test_mise_sync_gives_tool_alias_precedence_over_legacy_alias(
@@ -389,6 +412,7 @@ def test_mise_sync_gives_tool_alias_precedence_over_legacy_alias(
     assert completed.returncode == 0
     document = json.loads(completed.stdout)
     assert document["safety"]["apply_blocked"] is False
+    assert document["safety"]["live_alias_overrides"] == []
     assert document["safety"]["live_only_tools"] == []
 
 
