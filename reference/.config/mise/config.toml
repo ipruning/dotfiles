@@ -4,9 +4,9 @@ min_version = { hard = "2026.7.12" }
 aube = "aqua:jdx/aube"
 pnpm = "aqua:pnpm/pnpm"
 uv = "aqua:astral-sh/uv"
-yarn = "vfox:mise-plugins/vfox-yarn"
 
 [tools]
+"aqua:yarnpkg/berry" = "latest"
 "gem:kamal" = "latest"
 "github:earendil-works/pi" = "latest"
 "github:larksuite/cli" = "latest"
@@ -24,7 +24,6 @@ python = "latest"
 ruby = "latest"
 rust = "stable"
 uv = "latest"
-yarn = "latest"
 zig = "latest"
 
 [settings]
