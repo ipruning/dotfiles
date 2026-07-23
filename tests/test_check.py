@@ -264,6 +264,49 @@ def test_inspect_host_reports_duplicate_mise_and_stale_runtime_binding(
     )
     assert missing_canonical.code == "mise.canonical_missing_or_invalid"
     assert missing_canonical.severity is Severity.WARN
+    stale_runtime = next(
+        finding
+        for finding in missing.findings
+        if finding.check == "runtime.function.mise"
+    )
+    assert stale_runtime.code == "runtime.function.mise_stale"
+    assert stale_runtime.severity is Severity.WARN
+
+
+def test_mise_installation_scan_finds_an_alternate_later_on_path(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    home = tmp_path / "home"
+    canonical = home / ".local/bin/mise"
+    alternate = tmp_path / "package-manager/bin/mise"
+    for executable in (canonical, alternate):
+        executable.parent.mkdir(parents=True)
+        executable.write_text("#!/bin/sh\nexit 0\n")
+        executable.chmod(0o755)
+    monkeypatch.setenv(
+        "PATH",
+        f"{canonical.parent}:{alternate.parent}",
+    )
+    monkeypatch.setattr(check_module, "MISE_COMMON_LOCATIONS", ())
+
+    findings = check_module._mise_installation_findings(
+        home,
+        executable_finder=lambda _command: str(canonical),
+        scan_host_path=True,
+    )
+
+    assert findings[1].code == "mise.installations_multiple"
+    assert findings[1].path == alternate
+
+    alternate.unlink()
+    repaired = check_module._mise_installation_findings(
+        home,
+        executable_finder=lambda _command: str(canonical),
+        scan_host_path=True,
+    )
+    assert repaired[1].code == "mise.installations_single"
+    assert repaired[1].severity is Severity.OK
 
 
 def test_inspect_host_rejects_wasm_with_wrong_checksum(
