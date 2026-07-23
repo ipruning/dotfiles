@@ -106,7 +106,11 @@ def test_global_mise_lock_covers_declared_artifact_platforms() -> None:
     version_only_prefixes = ("cargo:", "gem:", "go:", "npm:", "pipx:")
     missing: list[str] = []
 
-    for tool, entries in lockfile["tools"].items():
+    for tool in config["tools"]:
+        entries = lockfile["tools"].get(tool)
+        if not entries:
+            missing.append(f"{tool}:lock-entry")
+            continue
         for entry in entries:
             backend = entry["backend"]
             if backend in version_only_backends or backend.startswith(
