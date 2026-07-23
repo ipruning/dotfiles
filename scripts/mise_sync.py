@@ -88,19 +88,21 @@ def _tool_declaration(
     tools = document.get("tools", {})
     if not isinstance(tools, dict):
         raise ValueError(f"{config_path} [tools] must be a table")
-    aliases = document.get("tool_alias", {})
-    if not isinstance(aliases, dict):
-        raise ValueError(f"{config_path} [tool_alias] must be a table")
     backend_aliases: dict[str, str] = {}
-    for alias, value in aliases.items():
-        if not isinstance(alias, str):
-            raise ValueError(f"{config_path} [tool_alias] keys must be strings")
-        backend = value.get("backend") if isinstance(value, dict) else value
-        if backend is None:
-            continue
-        if not isinstance(backend, str):
-            raise ValueError(f"{config_path} [tool_alias] backends must be strings")
-        backend_aliases[alias] = backend
+    for section in ("alias", "tool_alias"):
+        aliases = document.get(section, {})
+        if not isinstance(aliases, dict):
+            raise ValueError(f"{config_path} [{section}] must be a table")
+        for alias, value in aliases.items():
+            if not isinstance(alias, str):
+                raise ValueError(f"{config_path} [{section}] keys must be strings")
+            backend_aliases.pop(alias, None)
+            backend = value.get("backend") if isinstance(value, dict) else value
+            if backend is None:
+                continue
+            if not isinstance(backend, str):
+                raise ValueError(f"{config_path} [{section}] backends must be strings")
+            backend_aliases[alias] = backend
     tool_names: set[str] = set()
     for tool in tools:
         if not isinstance(tool, str):
@@ -175,18 +177,31 @@ def _loaded_global_configs(home: Path, executable: str) -> tuple[Path, ...]:
     if not isinstance(document, list):
         raise ValueError("mise config ls --json must return an array")
 
-    config_dir = (home / ".config/mise").absolute()
     paths: list[Path] = []
     for item in document:
         if not isinstance(item, dict) or not isinstance(item.get("path"), str):
             raise ValueError("mise config ls --json returned an invalid config entry")
+        tools = item.get("tools")
+        if not isinstance(tools, list) or not all(
+            isinstance(tool, str) for tool in tools
+        ):
+            raise ValueError("mise config ls --json returned an invalid tools entry")
         config_path = Path(item["path"]).expanduser()
         if not config_path.is_absolute():
             config_path = home / config_path
         config_path = config_path.absolute()
-        if config_path == config_dir or config_dir in config_path.parents:
+        if config_path.suffix == ".toml" or tools:
             paths.append(config_path)
     return tuple(dict.fromkeys(paths))
+
+
+def _same_config_file(left: Path, right: Path) -> bool:
+    if left == right:
+        return True
+    try:
+        return left.samefile(right)
+    except OSError:
+        return False
 
 
 def _mise_tool_safety(
@@ -210,7 +225,9 @@ def _mise_tool_safety(
         config_paths = (
             _loaded_global_configs(home, executable) if executable else (live_config,)
         )
-        if live_config not in config_paths:
+        if not any(
+            _same_config_file(config_path, live_config) for config_path in config_paths
+        ):
             config_paths = (*config_paths, live_config)
         live_tools: set[str] = set()
         live_aliases: dict[str, str] = {}
@@ -224,7 +241,7 @@ def _mise_tool_safety(
         sorted(
             str(config_path)
             for config_path in config_paths
-            if config_path != live_config
+            if not _same_config_file(config_path, live_config)
         )
     )
     reference_identities = set(reference_tools)
@@ -235,8 +252,6 @@ def _mise_tool_safety(
             reference_identities.add(alias)
     live_identities = set(live_tools)
     for alias, backend in live_aliases.items():
-        if alias not in live_tools:
-            continue
         if backend == reference_aliases.get(alias):
             continue
         if backend in trusted_alias_backends.get(alias, frozenset()):

@@ -94,6 +94,28 @@ def test_mise_sync_previews_configuration_tools_and_shims_without_writing(
     assert not (home / ".config/mise/config.toml").is_symlink()
 
 
+def test_mise_sync_recognizes_the_primary_config_through_a_symlinked_home(
+    tmp_path: Path,
+) -> None:
+    real_home = tmp_path / "real-home"
+    real_home.mkdir()
+    home = tmp_path / "home"
+    home.symlink_to(real_home, target_is_directory=True)
+    _write_live_config(home)
+    executable = _write_mise(home, tmp_path / "mise.log")
+    _set_loaded_configs(
+        executable,
+        [real_home / ".config/mise/config.toml"],
+    )
+
+    completed = run_scripts_module("mise_sync", home, "--json")
+
+    assert completed.returncode == 0
+    safety = json.loads(completed.stdout)["safety"]
+    assert safety["apply_blocked"] is False
+    assert safety["additional_global_configs"] == []
+
+
 def test_mise_sync_blocks_live_only_tools_until_ownership_is_resolved(
     tmp_path: Path,
 ) -> None:
@@ -181,6 +203,36 @@ def test_mise_sync_blocks_an_additional_global_config_with_duplicate_tools(
     assert safety["live_only_tools"] == []
 
 
+@pytest.mark.parametrize(
+    "additional_config",
+    [Path(".mise.toml"), Path("/etc/mise/config.toml")],
+)
+def test_mise_sync_blocks_an_active_config_outside_the_standard_directory(
+    tmp_path: Path,
+    additional_config: Path,
+) -> None:
+    home = tmp_path / "home"
+    home.mkdir()
+    _write_live_config(home)
+    config_path = (
+        additional_config
+        if additional_config.is_absolute()
+        else home / additional_config
+    )
+    executable = _write_mise(home, tmp_path / "mise.log")
+    _set_loaded_configs(
+        executable,
+        [home / ".config/mise/config.toml", config_path],
+    )
+
+    completed = run_scripts_module("mise_sync", home, "--json")
+
+    assert completed.returncode == 1
+    safety = json.loads(completed.stdout)["safety"]
+    assert safety["apply_blocked"] is True
+    assert safety["additional_global_configs"] == [str(config_path)]
+
+
 def test_mise_sync_blocks_a_malformed_additional_global_config(
     tmp_path: Path,
 ) -> None:
@@ -204,12 +256,16 @@ def test_mise_sync_blocks_a_malformed_additional_global_config(
     assert not (home / ".config/mise/config.toml").is_symlink()
 
 
-def test_mise_sync_accepts_a_tracked_backend_migration_alias(tmp_path: Path) -> None:
+@pytest.mark.parametrize("alias_section", ["alias", "tool_alias"])
+def test_mise_sync_accepts_a_tracked_backend_migration_alias(
+    tmp_path: Path,
+    alias_section: str,
+) -> None:
     home = tmp_path / "home"
     home.mkdir()
     _write_live_config(home)
     (home / ".config/mise/config.toml").write_text(
-        '[tool_alias]\nyarn = "vfox:mise-plugins/vfox-yarn"\n\n'
+        f'[{alias_section}]\nyarn = "vfox:mise-plugins/vfox-yarn"\n\n'
         '[tools]\nnode = "20"\nyarn = "latest"\n'
     )
     _write_mise(home, tmp_path / "mise.log")
@@ -285,6 +341,15 @@ def test_mise_sync_accepts_a_previous_tracked_backend_without_its_new_alias(
             '[tool_alias]\nnode = "aqua:evil/thing"\n\n[tools]\nnode = "latest"\n',
             "aqua:evil/thing",
         ),
+        (
+            '[alias]\nnode = "aqua:evil/thing"\n\n[tools]\nnode = "latest"\n',
+            "aqua:evil/thing",
+        ),
+        (
+            '[tool_alias]\nnode = "aqua:evil/thing"\n\n'
+            '[tools]\n"aqua:yarnpkg/berry" = "latest"\n',
+            "aqua:evil/thing",
+        ),
     ],
 )
 def test_mise_sync_does_not_trust_live_aliases_to_claim_tracked_ownership(
@@ -304,6 +369,27 @@ def test_mise_sync_does_not_trust_live_aliases_to_claim_tracked_ownership(
     document = json.loads(completed.stdout)
     assert document["safety"]["apply_blocked"] is True
     assert document["safety"]["live_only_tools"] == [live_only_tool]
+
+
+def test_mise_sync_gives_tool_alias_precedence_over_legacy_alias(
+    tmp_path: Path,
+) -> None:
+    home = tmp_path / "home"
+    home.mkdir()
+    _write_live_config(home)
+    (home / ".config/mise/config.toml").write_text(
+        '[alias]\naube = "aqua:evil/thing"\n\n'
+        '[tool_alias]\naube = "aqua:jdx/aube"\n\n'
+        '[tools]\naube = "latest"\n'
+    )
+    _write_mise(home, tmp_path / "mise.log")
+
+    completed = run_scripts_module("mise_sync", home, "--json")
+
+    assert completed.returncode == 0
+    document = json.loads(completed.stdout)
+    assert document["safety"]["apply_blocked"] is False
+    assert document["safety"]["live_only_tools"] == []
 
 
 def test_mise_sync_blocks_when_live_tool_ownership_cannot_be_parsed(
