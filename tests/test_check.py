@@ -359,6 +359,35 @@ def test_linux_systemd_check_reports_global_mise_shim_dependencies(
     assert repaired[0].severity is Severity.OK
 
 
+def test_linux_systemd_check_scans_global_and_data_user_unit_paths(
+    tmp_path: Path,
+) -> None:
+    home = tmp_path / "home"
+    system_units = tmp_path / "systemd/system"
+    system_units.mkdir(parents=True)
+    user_unit_directories = (
+        system_units.parent / "user",
+        home / ".local/share/systemd/user",
+    )
+
+    for unit_directory in user_unit_directories:
+        unit_directory.mkdir(parents=True)
+        unit = unit_directory / "worker.service"
+        unit.write_text(
+            "[Service]\nExecStart=/home/alex/.local/share/mise/shims/worker\n"
+        )
+
+        findings = check_module._mise_systemd_shim_findings(
+            home,
+            system_unit_directory=system_units,
+        )
+
+        assert len(findings) == 1
+        assert findings[0].code == "mise.systemd_shim_dependency"
+        assert findings[0].path == unit
+        unit.unlink()
+
+
 def test_inspect_host_rejects_wasm_with_wrong_checksum(
     tmp_path: Path,
     monkeypatch,

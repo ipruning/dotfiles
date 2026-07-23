@@ -235,7 +235,12 @@ def _mise_systemd_shim_findings(
     *,
     system_unit_directory: Path = Path("/etc/systemd/system"),
 ) -> list[Finding]:
-    unit_directories = (system_unit_directory, home / ".config/systemd/user")
+    unit_directories = (
+        system_unit_directory,
+        system_unit_directory.parent / "user",
+        home / ".config/systemd/user",
+        home / ".local/share/systemd/user",
+    )
     risky_units: list[tuple[Path, str]] = []
     for unit_directory in unit_directories:
         try:
