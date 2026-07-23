@@ -67,6 +67,15 @@ MISE_COMMON_LOCATIONS = tuple(
     )
 )
 MISE_BINDING_PATTERN = re.compile(r"(?<![\w])(/[^\s\"'()]+/mise)(?=[\s\"'();]|$)")
+SYSTEMD_SERVICE_EXEC_DIRECTIVES = {
+    "ExecCondition",
+    "ExecStartPre",
+    "ExecStart",
+    "ExecStartPost",
+    "ExecReload",
+    "ExecStop",
+    "ExecStopPost",
+}
 
 
 def _executable_file(file_path: Path) -> bool:
@@ -248,7 +257,7 @@ def _mise_systemd_shim_findings(
                 key, separator, value = directive.partition("=")
                 if (
                     separator
-                    and key.strip() == "ExecStart"
+                    and key.strip() in SYSTEMD_SERVICE_EXEC_DIRECTIVES
                     and ".local/share/mise/shims/" in value
                 ):
                     risky_units.append((unit_file, directive))

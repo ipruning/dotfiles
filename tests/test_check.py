@@ -331,21 +331,22 @@ def test_linux_systemd_check_reports_global_mise_shim_dependencies(
     worker.write_text("[Service]\nExecStart=/usr/bin/worker\n")
     drop_in = system_units / "worker.service.d/override.conf"
     drop_in.parent.mkdir()
-    drop_in.write_text(
-        "[Service]\nExecStart=\nExecStart = /root/.local/share/mise/shims/pueued\n"
-    )
     safe = user_units / "pueued.service"
     safe.write_text("[Service]\nExecStart=/usr/bin/pueued -vv\n")
 
-    findings = check_module._mise_systemd_shim_findings(
-        home,
-        system_unit_directory=system_units,
-    )
+    for execution_directive in check_module.SYSTEMD_SERVICE_EXEC_DIRECTIVES:
+        drop_in.write_text(
+            f"[Service]\n{execution_directive} = /root/.local/share/mise/shims/pueued\n"
+        )
+        findings = check_module._mise_systemd_shim_findings(
+            home,
+            system_unit_directory=system_units,
+        )
 
-    assert len(findings) == 1
-    assert findings[0].code == "mise.systemd_shim_dependency"
-    assert findings[0].severity is Severity.WARN
-    assert findings[0].path == drop_in
+        assert len(findings) == 1
+        assert findings[0].code == "mise.systemd_shim_dependency"
+        assert findings[0].severity is Severity.WARN
+        assert findings[0].path == drop_in
 
     drop_in.write_text(
         "[Service]\nExecStart=/root/.local/bin/mise -C /root/project exec -- pueued\n"
