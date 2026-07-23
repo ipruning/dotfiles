@@ -221,6 +221,56 @@ def _mise_shim_finding(home: Path) -> Finding | None:
     return None
 
 
+def _mise_systemd_shim_findings(
+    home: Path,
+    *,
+    system_unit_directory: Path = Path("/etc/systemd/system"),
+) -> list[Finding]:
+    unit_directories = (system_unit_directory, home / ".config/systemd/user")
+    risky_units: list[tuple[Path, str]] = []
+    for unit_directory in unit_directories:
+        try:
+            services = sorted(unit_directory.glob("*.service"))
+        except OSError:
+            continue
+        for service in services:
+            try:
+                lines = service.read_text().splitlines()
+            except OSError:
+                continue
+            for line in lines:
+                directive = line.strip()
+                if (
+                    directive.startswith("ExecStart=")
+                    and ".local/share/mise/shims/" in directive
+                ):
+                    risky_units.append((service, directive))
+                    break
+    if not risky_units:
+        return [
+            Finding(
+                "mise.systemd_shims",
+                Severity.OK,
+                "mise.systemd_shims_clean",
+                "No readable custom systemd service directly uses a global Mise shim",
+            ),
+        ]
+    return [
+        Finding(
+            "mise.systemd_shims",
+            Severity.WARN,
+            "mise.systemd_shim_dependency",
+            f"{service.name} directly depends on a global Mise shim: {directive}",
+            service,
+            (
+                "Bind the service to a project config with ~/.local/bin/mise -C "
+                "<project> exec -- <tool>, or use a system package; then reload systemd."
+            ),
+        )
+        for service, directive in risky_units
+    ]
+
+
 def _mise_runtime_binding_finding(
     generated_function: Path,
     home: Path,
@@ -1327,6 +1377,8 @@ def inspect_host(
     )
     if mise_shims := _mise_shim_finding(home):
         findings.append(mise_shims)
+    if active_system == "Linux":
+        findings.extend(_mise_systemd_shim_findings(home))
     findings.extend(_private_git_findings(home))
     skillshare_finding = _check_executable(
         "skillshare",

@@ -4,6 +4,7 @@ min_version = { hard = "2026.7.12" }
 aube = "aqua:jdx/aube"
 pnpm = "aqua:pnpm/pnpm"
 uv = "aqua:astral-sh/uv"
+yarn = "aqua:yarnpkg/berry"
 
 [tools]
 "aqua:yarnpkg/berry" = "latest"

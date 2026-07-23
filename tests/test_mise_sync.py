@@ -69,6 +69,86 @@ def test_mise_sync_previews_configuration_tools_and_shims_without_writing(
     assert not (home / ".config/mise/config.toml").is_symlink()
 
 
+def test_mise_sync_blocks_live_only_tools_until_ownership_is_resolved(
+    tmp_path: Path,
+) -> None:
+    home = tmp_path / "home"
+    home.mkdir()
+    _write_live_config(home)
+    live_config = home / ".config/mise/config.toml"
+    live_config.write_text('[tools]\nnode = "20"\n\n[tools.pueue]\nversion = "4.0.4"\n')
+    log_path = tmp_path / "mise.log"
+    _write_mise(home, log_path)
+
+    preview = run_scripts_module("mise_sync", home, "--json")
+
+    assert preview.returncode == 1
+    preview_document = json.loads(preview.stdout)
+    assert preview_document["ok"] is False
+    assert preview_document["safety"] == {
+        "apply_blocked": True,
+        "configuration_error": None,
+        "live_only_tools": ["pueue"],
+    }
+    assert [step["status"] for step in preview_document["steps"]] == [
+        "skipped",
+        "skipped",
+    ]
+    assert "[mise.safety] FAIL live-only global tools: pueue" in preview.stderr
+
+    applied = run_scripts_module("mise_sync", home, "--apply", "--json")
+
+    assert applied.returncode == 1
+    assert live_config.is_symlink() is False
+    assert "[tools.pueue]" in live_config.read_text()
+    assert not log_path.exists()
+
+    live_config.write_text('[tools]\nnode = "20"\n')
+    resolved = run_scripts_module("mise_sync", home, "--json")
+    assert resolved.returncode == 0
+    assert json.loads(resolved.stdout)["safety"]["apply_blocked"] is False
+
+
+def test_mise_sync_accepts_a_tracked_backend_migration_alias(tmp_path: Path) -> None:
+    home = tmp_path / "home"
+    home.mkdir()
+    _write_live_config(home)
+    (home / ".config/mise/config.toml").write_text(
+        '[tool_alias]\nyarn = "vfox:mise-plugins/vfox-yarn"\n\n'
+        '[tools]\nnode = "20"\nyarn = "latest"\n'
+    )
+    _write_mise(home, tmp_path / "mise.log")
+
+    completed = run_scripts_module("mise_sync", home, "--json")
+
+    assert completed.returncode == 0
+    document = json.loads(completed.stdout)
+    assert document["safety"]["apply_blocked"] is False
+    assert document["safety"]["live_only_tools"] == []
+
+
+def test_mise_sync_blocks_when_live_tool_ownership_cannot_be_parsed(
+    tmp_path: Path,
+) -> None:
+    home = tmp_path / "home"
+    home.mkdir()
+    _write_live_config(home)
+    live_config = home / ".config/mise/config.toml"
+    live_config.write_text("[tools\n")
+    log_path = tmp_path / "mise.log"
+    _write_mise(home, log_path)
+
+    completed = run_scripts_module("mise_sync", home, "--apply", "--json")
+
+    assert completed.returncode == 1
+    document = json.loads(completed.stdout)
+    assert document["safety"]["apply_blocked"] is True
+    assert "cannot be read as TOML" in document["safety"]["configuration_error"]
+    assert live_config.read_text() == "[tools\n"
+    assert not live_config.is_symlink()
+    assert not log_path.exists()
+
+
 def test_mise_sync_apply_links_shared_declaration_and_runs_locked_commands(
     tmp_path: Path,
 ) -> None:

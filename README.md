@@ -191,9 +191,12 @@ paths.
 ## Global mise convergence
 
 The tracked global `config.toml` and multi-platform `mise.lock` are the shared
-declaration for personal macOS and Linux hosts. Installed tools, download
-caches, shims, and generated shell functions remain local runtime state and are
-rebuilt from that declaration rather than synchronized through Git.
+personal interactive baseline for macOS and Linux hosts. They do not own
+systemd services, cron jobs, workers, or project runtimes: those must use a
+system package or invoke the owning project's Mise config explicitly. Installed
+tools, download caches, shims, and generated shell functions remain local
+runtime state and are rebuilt from the shared declaration rather than
+synchronized through Git.
 
 Preview the complete convergence first:
 
@@ -210,6 +213,13 @@ shims with `~/.local/bin` forced to the front of `PATH`:
 mise run mise-sync -- --apply
 ```
 
+Before replacing the live declaration, `mise-sync` compares its `[tools]`
+entries with the tracked baseline. Any live-only tool blocks apply and is named
+in the report. Decide whether to add it to the shared baseline, move it to its
+project or service owner, or remove it explicitly; `mise-sync` never makes that
+destructive choice. An unreadable or invalid live configuration also blocks
+apply because ownership cannot be established safely.
+
 This operation deliberately does not pull Git, self-update mise, update the
 lockfile, remove an alternate package-managed mise, or install tools during
 shell startup. A canonical binary older than the repository's hard minimum
@@ -218,9 +228,12 @@ Backends that support lockfile URLs are artifact-locked; package-manager
 backends such as `gem:`, `go:`, and `npm:` are version-locked but retain their
 upstream package manager's artifact and integrity semantics.
 
-Global tools should be commands wanted on every personal host. Project tools
-belong in that project's mise configuration. A genuinely host-specific tool is
-an explicit exception, not a second global configuration truth.
+Global tools should be interactive commands wanted on every personal host.
+Project tools belong in that project's Mise configuration. Long-running Linux
+services should use the distribution package when appropriate, or an explicit
+`~/.local/bin/mise -C <project> exec -- <tool>` command; they must not depend on
+global shims. A genuinely host-specific tool is an explicit exception, not a
+second global configuration truth.
 
 ## Host health
 

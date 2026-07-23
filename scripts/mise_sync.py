@@ -7,6 +7,7 @@ import json
 import subprocess
 import sys
 import time
+import tomllib
 from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
@@ -55,12 +56,63 @@ class MiseSyncReport:
     apply: bool
     restore: RestoreReport
     results: tuple[MiseSyncResult, ...]
+    live_only_tools: tuple[str, ...] = ()
+    configuration_error: str | None = None
 
     @property
     def ok(self) -> bool:
-        return self.restore.ok and all(
-            result.status is not MiseSyncStatus.FAILED for result in self.results
+        return (
+            self.restore.ok
+            and not self.live_only_tools
+            and self.configuration_error is None
+            and all(
+                result.status is not MiseSyncStatus.FAILED for result in self.results
+            )
         )
+
+
+def _tool_names(config_path: Path, *, required: bool) -> frozenset[str]:
+    try:
+        with config_path.open("rb") as config_file:
+            document = tomllib.load(config_file)
+    except FileNotFoundError:
+        if required:
+            raise ValueError(f"{config_path} is missing") from None
+        return frozenset()
+    except (OSError, tomllib.TOMLDecodeError) as error:
+        raise ValueError(f"{config_path} cannot be read as TOML: {error}") from error
+    tools = document.get("tools", {})
+    if not isinstance(tools, dict):
+        raise ValueError(f"{config_path} [tools] must be a table")
+    aliases = document.get("tool_alias", {})
+    if not isinstance(aliases, dict):
+        raise ValueError(f"{config_path} [tool_alias] must be a table")
+    names: set[str] = set()
+    for tool in tools:
+        if not isinstance(tool, str):
+            raise ValueError(f"{config_path} [tools] keys must be strings")
+        names.add(tool)
+    for alias, backend in aliases.items():
+        if not isinstance(alias, str) or not isinstance(backend, str):
+            raise ValueError(
+                f"{config_path} [tool_alias] entries must map strings to strings"
+            )
+        if backend in tools:
+            names.add(alias)
+    return frozenset(names)
+
+
+def _mise_tool_safety(
+    repo_root: Path, home: Path
+) -> tuple[tuple[str, ...], str | None]:
+    reference_config = repo_root / "reference/.config/mise/config.toml"
+    live_config = home / ".config/mise/config.toml"
+    try:
+        reference_tools = _tool_names(reference_config, required=True)
+        live_tools = _tool_names(live_config, required=False)
+    except ValueError as error:
+        return (), str(error)
+    return tuple(sorted(live_tools - reference_tools)), None
 
 
 def _sync_steps(home: Path) -> tuple[MiseSyncStep, ...]:
@@ -85,13 +137,29 @@ def _sync_steps(home: Path) -> tuple[MiseSyncStep, ...]:
 def plan_mise_sync(repo_root: Path, home: Path) -> MiseSyncReport:
     """Return the configuration changes and locked commands without applying them."""
     restore = plan_restore(repo_root, home, "mise")
+    live_only_tools, configuration_error = _mise_tool_safety(repo_root, home)
     steps = _sync_steps(home)
     if not restore.ok:
+        reason = "mise configuration restore is not safe to apply"
+        results = tuple(
+            MiseSyncResult(step, MiseSyncStatus.SKIPPED, reason=reason)
+            for step in steps
+        )
+    elif configuration_error:
         results = tuple(
             MiseSyncResult(
                 step,
                 MiseSyncStatus.SKIPPED,
-                reason="mise configuration restore is not safe to apply",
+                reason="mise tool ownership cannot be inspected safely",
+            )
+            for step in steps
+        )
+    elif live_only_tools:
+        results = tuple(
+            MiseSyncResult(
+                step,
+                MiseSyncStatus.SKIPPED,
+                reason="live global tools are absent from the shared declaration",
             )
             for step in steps
         )
@@ -107,7 +175,13 @@ def plan_mise_sync(repo_root: Path, home: Path) -> MiseSyncReport:
         )
     else:
         results = tuple(MiseSyncResult(step, MiseSyncStatus.PLANNED) for step in steps)
-    return MiseSyncReport(apply=False, restore=restore, results=results)
+    return MiseSyncReport(
+        apply=False,
+        restore=restore,
+        results=results,
+        live_only_tools=live_only_tools,
+        configuration_error=configuration_error,
+    )
 
 
 def _emit_output(step: MiseSyncStep, output: str) -> None:
@@ -124,7 +198,13 @@ def execute_mise_sync(
     """Restore the shared declaration, install it locked, and rebuild owned shims."""
     plan = plan_mise_sync(repo_root, home)
     if not plan.ok:
-        return MiseSyncReport(apply=True, restore=plan.restore, results=plan.results)
+        return MiseSyncReport(
+            apply=True,
+            restore=plan.restore,
+            results=plan.results,
+            live_only_tools=plan.live_only_tools,
+            configuration_error=plan.configuration_error,
+        )
     restore = apply_restore(repo_root, home, plan.restore)
     if not restore.ok:
         results = tuple(
@@ -135,7 +215,13 @@ def execute_mise_sync(
             )
             for result in plan.results
         )
-        return MiseSyncReport(apply=True, restore=restore, results=results)
+        return MiseSyncReport(
+            apply=True,
+            restore=restore,
+            results=results,
+            live_only_tools=plan.live_only_tools,
+            configuration_error=plan.configuration_error,
+        )
 
     results: list[MiseSyncResult] = []
     for planned in plan.results:
@@ -193,7 +279,13 @@ def execute_mise_sync(
                 ),
             ),
         )
-    return MiseSyncReport(apply=True, restore=restore, results=tuple(results))
+    return MiseSyncReport(
+        apply=True,
+        restore=restore,
+        results=tuple(results),
+        live_only_tools=plan.live_only_tools,
+        configuration_error=plan.configuration_error,
+    )
 
 
 def _summary(report: MiseSyncReport) -> dict[str, int]:
@@ -226,6 +318,11 @@ def _document(report: MiseSyncReport) -> dict[str, object]:
         "operation": "mise-sync",
         "apply": report.apply,
         "ok": report.ok,
+        "safety": {
+            "apply_blocked": bool(report.live_only_tools or report.configuration_error),
+            "configuration_error": report.configuration_error,
+            "live_only_tools": list(report.live_only_tools),
+        },
         "changes": [
             {
                 "reference_path": str(result.drift.reference_path),
@@ -267,6 +364,22 @@ def _display_command(step: MiseSyncStep) -> str:
 
 
 def _render(report: MiseSyncReport) -> None:
+    if report.configuration_error:
+        print(
+            f"BLOCKED   mise ownership inspection: {report.configuration_error}",
+            file=sys.stderr,
+        )
+    if report.live_only_tools:
+        print(
+            "BLOCKED   live-only global mise tools: "
+            + ", ".join(report.live_only_tools),
+            file=sys.stderr,
+        )
+        print(
+            "          Move project/service tools to their owner, add genuinely shared "
+            "tools to reference, or remove them explicitly; then preview again.",
+            file=sys.stderr,
+        )
     for result in report.restore.results:
         stream = sys.stderr if result.status is RestoreStatus.FAILED else sys.stdout
         print(
@@ -330,6 +443,17 @@ def main(argv: list[str] | None = None) -> int:
         return 1
     if args.as_json:
         print(json.dumps(_document(report), indent=2, sort_keys=True))
+        if report.configuration_error:
+            print(
+                f"[mise.safety] FAIL {report.configuration_error}",
+                file=sys.stderr,
+            )
+        if report.live_only_tools:
+            print(
+                "[mise.safety] FAIL live-only global tools: "
+                + ", ".join(report.live_only_tools),
+                file=sys.stderr,
+            )
         for result in report.restore.results:
             if result.status is RestoreStatus.FAILED:
                 print(
