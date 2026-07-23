@@ -265,7 +265,7 @@ def _mise_systemd_shim_findings(
                     and key.strip() in SYSTEMD_SERVICE_EXEC_DIRECTIVES
                     and ".local/share/mise/shims/" in value
                 ):
-                    risky_units.append((unit_file, directive))
+                    risky_units.append((unit_file, key.strip()))
                     break
     if not risky_units:
         return [
@@ -281,14 +281,14 @@ def _mise_systemd_shim_findings(
             "mise.systemd_shims",
             Severity.WARN,
             "mise.systemd_shim_dependency",
-            f"{unit_file.name} directly depends on a global Mise shim: {directive}",
+            f"{unit_file.name} uses a global Mise shim in {directive_name}",
             unit_file,
             (
                 "Bind the service to a project config with ~/.local/bin/mise -C "
                 "<project> exec -- <tool>, or use a system package; then reload systemd."
             ),
         )
-        for unit_file, directive in risky_units
+        for unit_file, directive_name in risky_units
     ]
 
 

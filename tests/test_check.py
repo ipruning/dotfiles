@@ -336,7 +336,8 @@ def test_linux_systemd_check_reports_global_mise_shim_dependencies(
 
     for execution_directive in check_module.SYSTEMD_SERVICE_EXEC_DIRECTIVES:
         drop_in.write_text(
-            f"[Service]\n{execution_directive} = /root/.local/share/mise/shims/pueued\n"
+            f"[Service]\n{execution_directive} = "
+            "/root/.local/share/mise/shims/pueued --token=private\n"
         )
         findings = check_module._mise_systemd_shim_findings(
             home,
@@ -347,6 +348,8 @@ def test_linux_systemd_check_reports_global_mise_shim_dependencies(
         assert findings[0].code == "mise.systemd_shim_dependency"
         assert findings[0].severity is Severity.WARN
         assert findings[0].path == drop_in
+        assert execution_directive in findings[0].message
+        assert "private" not in findings[0].message
 
     drop_in.write_text(
         "[Service]\nExecStart=/root/.local/bin/mise -C /root/project exec -- pueued\n"
