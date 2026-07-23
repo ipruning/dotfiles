@@ -206,6 +206,10 @@ def test_inspect_host_reports_duplicate_mise_and_stale_runtime_binding(
         executable.parent.mkdir(parents=True)
         executable.write_text("#!/bin/sh\nexit 0\n")
         executable.chmod(0o755)
+    shims = home / ".local/share/mise/shims"
+    shims.mkdir(parents=True)
+    python_shim = shims / "python3"
+    python_shim.symlink_to(alternate)
     generated.parent.mkdir(parents=True)
     generated.write_text(f"command {alternate}\n")
 
@@ -224,11 +228,15 @@ def test_inspect_host_reports_duplicate_mise_and_stale_runtime_binding(
     assert findings["mise.canonical"].severity is Severity.OK
     assert findings["mise.installations"].code == "mise.installations_multiple"
     assert findings["mise.installations"].severity is Severity.WARN
+    assert findings["mise.shims"].code == "mise.shims_stale"
+    assert findings["mise.shims"].severity is Severity.WARN
     assert (
         findings["runtime.function.mise_binding"].code
         == "runtime.function.mise_binding_mismatch"
     )
 
+    python_shim.unlink()
+    python_shim.symlink_to(canonical)
     alternate.unlink()
     generated.write_text(f"command {canonical}\n")
     repaired = inspect_host(
@@ -244,6 +252,8 @@ def test_inspect_host_reports_duplicate_mise_and_stale_runtime_binding(
 
     assert findings["mise.installations"].code == "mise.installations_single"
     assert findings["mise.installations"].severity is Severity.OK
+    assert findings["mise.shims"].code == "mise.shims_ready"
+    assert findings["mise.shims"].severity is Severity.OK
     assert (
         findings["runtime.function.mise_binding"].code
         == "runtime.function.mise_binding_ready"

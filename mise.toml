@@ -51,6 +51,10 @@ run = 'python -m scripts.setup "$@"'
 description = "Preview or apply host tool updates without synchronizing configuration"
 run = 'python -m scripts.update "$@"'
 
+[tasks.mise-sync]
+description = "Preview or converge global mise configuration, locked tools, and shims"
+run = 'python -m scripts.mise_sync "$@"'
+
 [tasks.runtime]
 description = "Preview or refresh generated shell runtime and owned plugins"
 run = 'python -m scripts.runtime "$@"'

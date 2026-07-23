@@ -13,7 +13,11 @@ from dataclasses import dataclass, replace
 from enum import StrEnum
 from pathlib import Path
 
-from .mise import canonical_mise_executable, canonical_mise_path
+from .mise import (
+    canonical_mise_environment,
+    canonical_mise_executable,
+    canonical_mise_path,
+)
 from .models import ExecutableFinder
 
 StepCallback = Callable[["UpdateStep"], None]
@@ -33,6 +37,7 @@ class UpdateStep:
     tool: str
     command: tuple[str, ...]
     timeout_seconds: int
+    path_prepend: tuple[Path, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -79,6 +84,7 @@ def _installed_mise_tools(home: Path, mise_executable: str) -> tuple[str, ...]:
             command,
             check=False,
             capture_output=True,
+            env=canonical_mise_environment(home),
             text=True,
             timeout=120,
         )
@@ -117,6 +123,7 @@ def _installed_mise_tools(home: Path, mise_executable: str) -> tuple[str, ...]:
 
 def _update_steps(home: Path) -> tuple[UpdateStep, ...]:
     mise_executable = str(canonical_mise_path(home))
+    mise_path = (canonical_mise_path(home).parent,)
     return (
         UpdateStep("brew.metadata", "brew", ("brew", "update"), 900),
         # Package-mutating steps get transaction-scale timeouts: killing brew or
@@ -128,14 +135,22 @@ def _update_steps(home: Path) -> tuple[UpdateStep, ...]:
             "mise",
             (mise_executable, "self-update", "--yes", "--no-plugins"),
             900,
+            path_prepend=mise_path,
         ),
         UpdateStep(
             "mise.tools",
             "mise",
             (mise_executable, "upgrade", "--bump", "-C", str(home)),
             1800,
+            path_prepend=mise_path,
         ),
-        UpdateStep("mise.shims", "mise", (mise_executable, "reshim"), 120),
+        UpdateStep(
+            "mise.shims",
+            "mise",
+            (mise_executable, "reshim", "-C", str(home)),
+            120,
+            path_prepend=mise_path,
+        ),
         UpdateStep(
             "gh.extensions",
             "gh",
@@ -244,6 +259,11 @@ def execute_updates(
                 check=False,
                 stdin=subprocess.DEVNULL,
                 capture_output=capture_output,
+                env=(
+                    canonical_mise_environment(home)
+                    if planned.step.path_prepend
+                    else None
+                ),
                 text=True,
                 timeout=planned.step.timeout_seconds,
             )
@@ -341,6 +361,11 @@ def _document(report: UpdateReport) -> dict[str, object]:
                 "name": result.step.name,
                 "tool": result.step.tool,
                 "command": list(result.step.command),
+                "environment": {
+                    "PATH_prepend": [
+                        str(directory) for directory in result.step.path_prepend
+                    ],
+                },
                 "status": result.status.value,
                 "exit_code": result.exit_code,
                 "duration_ms": result.duration_ms,
@@ -353,11 +378,19 @@ def _document(report: UpdateReport) -> dict[str, object]:
     }
 
 
+def _display_command(step: UpdateStep) -> str:
+    command = " ".join(step.command)
+    if not step.path_prepend:
+        return command
+    path = ":".join(str(directory) for directory in step.path_prepend)
+    return f"PATH={path}:$PATH {command}"
+
+
 def _render(report: UpdateReport) -> None:
     for result in report.results:
         label = result.status.value.upper()
         if result.status is UpdateStatus.PLANNED:
-            print(f"{label:7} {result.step.name}: {' '.join(result.step.command)}")
+            print(f"{label:7} {result.step.name}: {_display_command(result.step)}")
         elif result.status is UpdateStatus.SUCCEEDED:
             print(f"{label:7} {result.step.name}")
         elif result.status is UpdateStatus.SKIPPED:
@@ -389,7 +422,7 @@ def _render(report: UpdateReport) -> None:
 
 
 def _announce_step(step: UpdateStep) -> None:
-    print(f"RUN {step.name}: {' '.join(step.command)}", flush=True)
+    print(f"RUN {step.name}: {_display_command(step)}", flush=True)
 
 
 def main(argv: list[str] | None = None) -> int:
