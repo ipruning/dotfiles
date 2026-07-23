@@ -36,6 +36,9 @@ semantics live in `README.md`.
   `--json` emit the shared error document from `scripts/render.py`.
 - Compare reference and live configuration by location and metadata. Do not
   expose configuration contents in drift reports.
+- Parse structured data with its real parser: `jq` or a JSON library for JSON,
+  `tomllib` or a TOML-aware CLI for TOML, and `ruamel.yaml` for YAML. Never
+  approximate these formats with grep, regular expressions, or string splits.
 - Never commit secrets. Track templates; keep materialized `*private*` files
   ignored.
 - Run `mise run verify` after changing Python tasks, shell files, mappings, or
