@@ -332,7 +332,7 @@ def test_linux_systemd_check_reports_global_mise_shim_dependencies(
     drop_in = system_units / "worker.service.d/override.conf"
     drop_in.parent.mkdir()
     drop_in.write_text(
-        "[Service]\nExecStart=\nExecStart=/root/.local/share/mise/shims/pueued\n"
+        "[Service]\nExecStart=\nExecStart = /root/.local/share/mise/shims/pueued\n"
     )
     safe = user_units / "pueued.service"
     safe.write_text("[Service]\nExecStart=/usr/bin/pueued -vv\n")

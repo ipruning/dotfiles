@@ -245,9 +245,11 @@ def _mise_systemd_shim_findings(
                 continue
             for line in lines:
                 directive = line.strip()
+                key, separator, value = directive.partition("=")
                 if (
-                    directive.startswith("ExecStart=")
-                    and ".local/share/mise/shims/" in directive
+                    separator
+                    and key.strip() == "ExecStart"
+                    and ".local/share/mise/shims/" in value
                 ):
                     risky_units.append((unit_file, directive))
                     break
