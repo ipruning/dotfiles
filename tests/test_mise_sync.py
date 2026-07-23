@@ -10,8 +10,23 @@ from tests.conftest import REPO_ROOT, run_scripts_module
 def _write_mise(home: Path, log_path: Path, *, install_exit: int = 0) -> Path:
     executable = home / ".local/bin/mise"
     executable.parent.mkdir(parents=True)
+    config_listing = executable.parent / "mise-configs.json"
+    config_listing.write_text(
+        json.dumps(
+            [
+                {
+                    "path": str(home / ".config/mise/config.toml"),
+                    "tools": [],
+                }
+            ]
+        )
+    )
     executable.write_text(
         "#!/bin/sh\n"
+        'if [ "$1" = "config" ] && [ "$2" = "ls" ]; then\n'
+        f"  cat {config_listing}\n"
+        "  exit 0\n"
+        "fi\n"
         f'printf \'%s|%s\\n\' "$*" "$PATH" >> {log_path}\n'
         'if [ "$1" = "install" ]; then\n'
         f"  exit {install_exit}\n"
@@ -20,6 +35,14 @@ def _write_mise(home: Path, log_path: Path, *, install_exit: int = 0) -> Path:
     )
     executable.chmod(0o755)
     return executable
+
+
+def _set_loaded_configs(executable: Path, config_paths: list[Path]) -> None:
+    (executable.parent / "mise-configs.json").write_text(
+        json.dumps(
+            [{"path": str(config_path), "tools": []} for config_path in config_paths]
+        )
+    )
 
 
 def _write_live_config(home: Path) -> None:
@@ -89,6 +112,7 @@ def test_mise_sync_blocks_live_only_tools_until_ownership_is_resolved(
     assert preview_document["ok"] is False
     assert preview_document["safety"] == {
         "apply_blocked": True,
+        "additional_global_configs": [],
         "configuration_error": None,
         "live_only_tools": ["pueue"],
     }
@@ -109,6 +133,75 @@ def test_mise_sync_blocks_live_only_tools_until_ownership_is_resolved(
     resolved = run_scripts_module("mise_sync", home, "--json")
     assert resolved.returncode == 0
     assert json.loads(resolved.stdout)["safety"]["apply_blocked"] is False
+
+
+def test_mise_sync_blocks_an_additional_global_config_with_live_only_tools(
+    tmp_path: Path,
+) -> None:
+    home = tmp_path / "home"
+    home.mkdir()
+    _write_live_config(home)
+    local_config = home / ".config/mise/config.local.toml"
+    local_config.write_text('[tools]\npueue = "4.0.4"\n')
+    executable = _write_mise(home, tmp_path / "mise.log")
+    _set_loaded_configs(
+        executable,
+        [home / ".config/mise/config.toml", local_config],
+    )
+
+    completed = run_scripts_module("mise_sync", home, "--json")
+
+    assert completed.returncode == 1
+    safety = json.loads(completed.stdout)["safety"]
+    assert safety["apply_blocked"] is True
+    assert safety["additional_global_configs"] == [str(local_config)]
+    assert safety["live_only_tools"] == ["pueue"]
+
+
+def test_mise_sync_blocks_an_additional_global_config_with_duplicate_tools(
+    tmp_path: Path,
+) -> None:
+    home = tmp_path / "home"
+    home.mkdir()
+    _write_live_config(home)
+    local_config = home / ".config/mise/config.local.toml"
+    local_config.write_text('[tools]\nnode = "20"\n')
+    executable = _write_mise(home, tmp_path / "mise.log")
+    _set_loaded_configs(
+        executable,
+        [home / ".config/mise/config.toml", local_config],
+    )
+
+    completed = run_scripts_module("mise_sync", home, "--json")
+
+    assert completed.returncode == 1
+    safety = json.loads(completed.stdout)["safety"]
+    assert safety["apply_blocked"] is True
+    assert safety["additional_global_configs"] == [str(local_config)]
+    assert safety["live_only_tools"] == []
+
+
+def test_mise_sync_blocks_a_malformed_additional_global_config(
+    tmp_path: Path,
+) -> None:
+    home = tmp_path / "home"
+    home.mkdir()
+    _write_live_config(home)
+    local_config = home / ".config/mise/config.local.toml"
+    local_config.write_text("[tools\n")
+    executable = _write_mise(home, tmp_path / "mise.log")
+    _set_loaded_configs(
+        executable,
+        [home / ".config/mise/config.toml", local_config],
+    )
+
+    completed = run_scripts_module("mise_sync", home, "--apply", "--json")
+
+    assert completed.returncode == 1
+    safety = json.loads(completed.stdout)["safety"]
+    assert safety["apply_blocked"] is True
+    assert "cannot be read as TOML" in safety["configuration_error"]
+    assert not (home / ".config/mise/config.toml").is_symlink()
 
 
 def test_mise_sync_accepts_a_tracked_backend_migration_alias(tmp_path: Path) -> None:

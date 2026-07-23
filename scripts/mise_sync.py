@@ -57,6 +57,7 @@ class MiseSyncReport:
     restore: RestoreReport
     results: tuple[MiseSyncResult, ...]
     live_only_tools: tuple[str, ...] = ()
+    additional_global_configs: tuple[str, ...] = ()
     configuration_error: str | None = None
 
     @property
@@ -64,6 +65,7 @@ class MiseSyncReport:
         return (
             self.restore.ok
             and not self.live_only_tools
+            and not self.additional_global_configs
             and self.configuration_error is None
             and all(
                 result.status is not MiseSyncStatus.FAILED for result in self.results
@@ -107,25 +109,86 @@ def _tool_declaration(
     return frozenset(tool_names), backend_aliases
 
 
+def _loaded_global_configs(home: Path, executable: str) -> tuple[Path, ...]:
+    command = (executable, "config", "ls", "--json", "--quiet", "-C", str(home))
+    try:
+        completed = subprocess.run(
+            command,
+            check=False,
+            stdin=subprocess.DEVNULL,
+            capture_output=True,
+            env=canonical_mise_environment(home),
+            text=True,
+            timeout=30,
+        )
+    except subprocess.TimeoutExpired:
+        raise ValueError("mise config ls --json timed out after 30s") from None
+    except OSError as error:
+        raise ValueError(f"mise config ls --json failed: {error}") from error
+    if completed.returncode != 0:
+        detail = completed.stderr.strip() or f"command exited {completed.returncode}"
+        raise ValueError(f"mise config ls --json failed: {detail}")
+    try:
+        document = json.loads(completed.stdout)
+    except json.JSONDecodeError as error:
+        raise ValueError(
+            f"mise config ls --json returned invalid JSON: {error}"
+        ) from error
+    if not isinstance(document, list):
+        raise ValueError("mise config ls --json must return an array")
+
+    config_dir = (home / ".config/mise").absolute()
+    paths: list[Path] = []
+    for item in document:
+        if not isinstance(item, dict) or not isinstance(item.get("path"), str):
+            raise ValueError("mise config ls --json returned an invalid config entry")
+        config_path = Path(item["path"]).expanduser()
+        if not config_path.is_absolute():
+            config_path = home / config_path
+        config_path = config_path.absolute()
+        if config_path == config_dir or config_dir in config_path.parents:
+            paths.append(config_path)
+    return tuple(dict.fromkeys(paths))
+
+
 def _mise_tool_safety(
-    repo_root: Path, home: Path
-) -> tuple[tuple[str, ...], str | None]:
+    repo_root: Path, home: Path, executable: str | None
+) -> tuple[tuple[str, ...], tuple[str, ...], str | None]:
     reference_config = repo_root / "reference/.config/mise/config.toml"
-    live_config = home / ".config/mise/config.toml"
+    live_config = (home / ".config/mise/config.toml").absolute()
     try:
         reference_tools, reference_aliases = _tool_declaration(
             reference_config, required=True
         )
-        live_tools, _live_aliases = _tool_declaration(live_config, required=False)
+        config_paths = (
+            _loaded_global_configs(home, executable) if executable else (live_config,)
+        )
+        if live_config not in config_paths:
+            config_paths = (*config_paths, live_config)
+        live_tools: set[str] = set()
+        for config_path in config_paths:
+            tools, _aliases = _tool_declaration(config_path, required=False)
+            live_tools.update(tools)
     except ValueError as error:
-        return (), str(error)
+        return (), (), str(error)
+    additional_configs = tuple(
+        sorted(
+            str(config_path)
+            for config_path in config_paths
+            if config_path != live_config
+        )
+    )
     reference_identities = set(reference_tools)
     for alias, backend in reference_aliases.items():
         if alias in reference_tools:
             reference_identities.add(backend)
         if backend in reference_tools:
             reference_identities.add(alias)
-    return tuple(sorted(live_tools - reference_identities)), None
+    return (
+        tuple(sorted(live_tools - reference_identities)),
+        additional_configs,
+        None,
+    )
 
 
 def _sync_steps(home: Path) -> tuple[MiseSyncStep, ...]:
@@ -150,7 +213,10 @@ def _sync_steps(home: Path) -> tuple[MiseSyncStep, ...]:
 def plan_mise_sync(repo_root: Path, home: Path) -> MiseSyncReport:
     """Return the configuration changes and locked commands without applying them."""
     restore = plan_restore(repo_root, home, "mise")
-    live_only_tools, configuration_error = _mise_tool_safety(repo_root, home)
+    executable = canonical_mise_executable(home)
+    live_only_tools, additional_global_configs, configuration_error = _mise_tool_safety(
+        repo_root, home, executable
+    )
     steps = _sync_steps(home)
     if not restore.ok:
         reason = "mise configuration restore is not safe to apply"
@@ -167,6 +233,15 @@ def plan_mise_sync(repo_root: Path, home: Path) -> MiseSyncReport:
             )
             for step in steps
         )
+    elif additional_global_configs:
+        results = tuple(
+            MiseSyncResult(
+                step,
+                MiseSyncStatus.SKIPPED,
+                reason="additional global mise configs are active",
+            )
+            for step in steps
+        )
     elif live_only_tools:
         results = tuple(
             MiseSyncResult(
@@ -176,7 +251,7 @@ def plan_mise_sync(repo_root: Path, home: Path) -> MiseSyncReport:
             )
             for step in steps
         )
-    elif canonical_mise_executable(home) is None:
+    elif executable is None:
         reason = f"{canonical_mise_path(home)} is missing, symlinked, or not executable"
         results = (
             MiseSyncResult(steps[0], MiseSyncStatus.FAILED, reason=reason),
@@ -193,6 +268,7 @@ def plan_mise_sync(repo_root: Path, home: Path) -> MiseSyncReport:
         restore=restore,
         results=results,
         live_only_tools=live_only_tools,
+        additional_global_configs=additional_global_configs,
         configuration_error=configuration_error,
     )
 
@@ -216,6 +292,7 @@ def execute_mise_sync(
             restore=plan.restore,
             results=plan.results,
             live_only_tools=plan.live_only_tools,
+            additional_global_configs=plan.additional_global_configs,
             configuration_error=plan.configuration_error,
         )
     restore = apply_restore(repo_root, home, plan.restore)
@@ -233,6 +310,7 @@ def execute_mise_sync(
             restore=restore,
             results=results,
             live_only_tools=plan.live_only_tools,
+            additional_global_configs=plan.additional_global_configs,
             configuration_error=plan.configuration_error,
         )
 
@@ -297,6 +375,7 @@ def execute_mise_sync(
         restore=restore,
         results=tuple(results),
         live_only_tools=plan.live_only_tools,
+        additional_global_configs=plan.additional_global_configs,
         configuration_error=plan.configuration_error,
     )
 
@@ -332,7 +411,12 @@ def _document(report: MiseSyncReport) -> dict[str, object]:
         "apply": report.apply,
         "ok": report.ok,
         "safety": {
-            "apply_blocked": bool(report.live_only_tools or report.configuration_error),
+            "apply_blocked": bool(
+                report.live_only_tools
+                or report.additional_global_configs
+                or report.configuration_error
+            ),
+            "additional_global_configs": list(report.additional_global_configs),
             "configuration_error": report.configuration_error,
             "live_only_tools": list(report.live_only_tools),
         },
@@ -380,6 +464,15 @@ def _render(report: MiseSyncReport) -> None:
     if report.configuration_error:
         print(
             f"BLOCKED   mise ownership inspection: {report.configuration_error}",
+            file=sys.stderr,
+        )
+    if report.additional_global_configs:
+        print("BLOCKED   additional global mise configs:", file=sys.stderr)
+        for config_path in report.additional_global_configs:
+            print(f"          {config_path}", file=sys.stderr)
+        print(
+            "          Move shared declarations into the tracked global config and "
+            "remove the additional source explicitly; then preview again.",
             file=sys.stderr,
         )
     if report.live_only_tools:
@@ -459,6 +552,12 @@ def main(argv: list[str] | None = None) -> int:
         if report.configuration_error:
             print(
                 f"[mise.safety] FAIL {report.configuration_error}",
+                file=sys.stderr,
+            )
+        if report.additional_global_configs:
+            print(
+                "[mise.safety] FAIL additional global configs: "
+                + ", ".join(report.additional_global_configs),
                 file=sys.stderr,
             )
         if report.live_only_tools:
