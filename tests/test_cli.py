@@ -94,6 +94,33 @@ def test_mise_python_tasks_never_sync_dependencies_implicitly(tmp_path: Path) ->
     assert not (project / "uv.lock").exists()
 
 
+def test_global_mise_lock_covers_declared_artifact_platforms() -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    config = tomllib.loads(
+        (repo_root / "reference/.config/mise/config.toml").read_text(),
+    )
+    lockfile = tomllib.loads(
+        (repo_root / "reference/.config/mise/mise.lock").read_text(),
+    )
+    version_only_backends = {"core:rust"}
+    version_only_prefixes = ("cargo:", "gem:", "go:", "npm:", "pipx:")
+    missing: list[str] = []
+
+    for tool, entries in lockfile["tools"].items():
+        for entry in entries:
+            backend = entry["backend"]
+            if backend in version_only_backends or backend.startswith(
+                version_only_prefixes,
+            ):
+                continue
+            for platform_name in config["settings"]["lockfile_platforms"]:
+                platform = entry.get(f"platforms.{platform_name}", {})
+                if not platform.get("url"):
+                    missing.append(f"{tool}@{entry['version']}:{platform_name}")
+
+    assert missing == []
+
+
 def test_setup_cli_previews_linux_lite_as_json_without_writing(tmp_path: Path) -> None:
     home = tmp_path / "home"
     home.mkdir()
