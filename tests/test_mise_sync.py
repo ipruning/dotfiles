@@ -204,7 +204,7 @@ def test_mise_sync_blocks_a_malformed_additional_global_config(
     assert not (home / ".config/mise/config.toml").is_symlink()
 
 
-def test_mise_sync_blocks_an_untracked_backend_migration_alias(tmp_path: Path) -> None:
+def test_mise_sync_accepts_a_tracked_backend_migration_alias(tmp_path: Path) -> None:
     home = tmp_path / "home"
     home.mkdir()
     _write_live_config(home)
@@ -214,12 +214,20 @@ def test_mise_sync_blocks_an_untracked_backend_migration_alias(tmp_path: Path) -
     )
     _write_mise(home, tmp_path / "mise.log")
 
-    completed = run_scripts_module("mise_sync", home, "--json")
+    preview = run_scripts_module("mise_sync", home, "--json")
 
-    assert completed.returncode == 1
-    document = json.loads(completed.stdout)
-    assert document["safety"]["apply_blocked"] is True
-    assert document["safety"]["live_only_tools"] == ["vfox:mise-plugins/vfox-yarn"]
+    assert preview.returncode == 0
+    document = json.loads(preview.stdout)
+    assert document["safety"]["apply_blocked"] is False
+    assert document["safety"]["live_only_tools"] == []
+
+    applied = run_scripts_module("mise_sync", home, "--apply", "--json")
+
+    assert applied.returncode == 0
+    assert json.loads(applied.stdout)["ok"] is True
+    live_config = home / ".config/mise/config.toml"
+    assert live_config.is_symlink()
+    assert live_config.resolve() == REPO_ROOT / "reference/.config/mise/config.toml"
 
 
 def test_mise_sync_normalizes_an_explicit_backend_to_its_tracked_alias(

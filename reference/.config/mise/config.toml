@@ -1,5 +1,8 @@
 min_version = { hard = "2026.7.12" }
 
+[_.dotfiles.mise_sync.trusted_alias_backends]
+yarn = ["vfox:mise-plugins/vfox-yarn"]
+
 [tool_alias]
 aube = "aqua:jdx/aube"
 pnpm = "aqua:pnpm/pnpm"

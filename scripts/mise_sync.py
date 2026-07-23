@@ -109,6 +109,44 @@ def _tool_declaration(
     return frozenset(tool_names), backend_aliases
 
 
+def _trusted_alias_backends(config_path: Path) -> dict[str, frozenset[str]]:
+    try:
+        with config_path.open("rb") as config_file:
+            document = tomllib.load(config_file)
+    except (OSError, tomllib.TOMLDecodeError) as error:
+        raise ValueError(f"{config_path} cannot be read as TOML: {error}") from error
+    custom = document.get("_", {})
+    if not isinstance(custom, dict):
+        raise ValueError(f"{config_path} [_] must be a table")
+    dotfiles = custom.get("dotfiles", {})
+    if not isinstance(dotfiles, dict):
+        raise ValueError(f"{config_path} [_.dotfiles] must be a table")
+    mise_sync = dotfiles.get("mise_sync", {})
+    if not isinstance(mise_sync, dict):
+        raise ValueError(f"{config_path} [_.dotfiles.mise_sync] must be a table")
+    aliases = mise_sync.get("trusted_alias_backends", {})
+    if not isinstance(aliases, dict):
+        raise ValueError(
+            f"{config_path} [_.dotfiles.mise_sync.trusted_alias_backends] "
+            "must be a table"
+        )
+    trusted: dict[str, frozenset[str]] = {}
+    for alias, backends in aliases.items():
+        if not isinstance(alias, str) or not isinstance(backends, list):
+            raise ValueError(
+                f"{config_path} trusted alias backends must map strings to "
+                "arrays of strings"
+            )
+        backend_names = [backend for backend in backends if isinstance(backend, str)]
+        if len(backend_names) != len(backends):
+            raise ValueError(
+                f"{config_path} trusted alias backends must map strings to "
+                "arrays of strings"
+            )
+        trusted[alias] = frozenset(backend_names)
+    return trusted
+
+
 def _loaded_global_configs(home: Path, executable: str) -> tuple[Path, ...]:
     command = (executable, "config", "ls", "--json", "--quiet", "-C", str(home))
     try:
@@ -160,6 +198,15 @@ def _mise_tool_safety(
         reference_tools, reference_aliases = _tool_declaration(
             reference_config, required=True
         )
+        trusted_alias_backends = _trusted_alias_backends(reference_config)
+        unknown_trusted_aliases = (
+            trusted_alias_backends.keys() - reference_aliases.keys()
+        )
+        if unknown_trusted_aliases:
+            names = ", ".join(sorted(unknown_trusted_aliases))
+            raise ValueError(
+                f"{reference_config} trusted backends require tracked aliases: {names}"
+            )
         config_paths = (
             _loaded_global_configs(home, executable) if executable else (live_config,)
         )
@@ -188,8 +235,13 @@ def _mise_tool_safety(
             reference_identities.add(alias)
     live_identities = set(live_tools)
     for alias, backend in live_aliases.items():
-        if alias in live_tools:
-            live_identities.add(backend)
+        if alias not in live_tools:
+            continue
+        if backend == reference_aliases.get(alias):
+            continue
+        if backend in trusted_alias_backends.get(alias, frozenset()):
+            continue
+        live_identities.add(backend)
     return (
         tuple(sorted(live_identities - reference_identities)),
         additional_configs,
