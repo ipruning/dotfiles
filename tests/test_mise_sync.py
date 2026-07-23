@@ -83,7 +83,7 @@ def test_mise_sync_previews_configuration_tools_and_shims_without_writing(
             "-C",
             str(home),
         ],
-        [str(executable), "reshim", "-C", str(home)],
+        [str(executable), "reshim", "--force", "-C", str(home)],
     ]
     assert all(
         step["environment"]["PATH_prepend"] == [str(executable.parent)]
@@ -463,7 +463,7 @@ def test_mise_sync_apply_links_shared_declaration_and_runs_locked_commands(
     assert all(Path(change["backup_path"]).is_file() for change in document["changes"])
     invocations = log_path.read_text().splitlines()
     assert invocations[0].split("|", 1)[0] == (f"install --locked --yes -C {home}")
-    assert invocations[1].split("|", 1)[0] == f"reshim -C {home}"
+    assert invocations[1].split("|", 1)[0] == f"reshim --force -C {home}"
     assert all(
         line.split("|", 1)[1].split(os.pathsep)[0] == str(executable.parent)
         for line in invocations
@@ -517,6 +517,6 @@ def test_mise_sync_reports_install_failure_but_still_repairs_shims(
     ]
     assert [line.split("|", 1)[0] for line in log_path.read_text().splitlines()] == [
         f"install --locked --yes -C {home}",
-        f"reshim -C {home}",
+        f"reshim --force -C {home}",
     ]
     assert "[mise.tools] FAIL command exited 7" in completed.stderr

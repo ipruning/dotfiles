@@ -206,8 +206,9 @@ mise run mise-sync -- --json
 ```
 
 An apply backs up and links the live mise configuration to `reference/`, runs
-the canonical executable's `install --locked` against `$HOME`, then rebuilds
-shims with `~/.local/bin` forced to the front of `PATH`:
+the canonical executable's `install --locked` against `$HOME`, then replaces
+all shims with a canonical rebuild while `~/.local/bin` is forced to the front
+of `PATH`:
 
 ```bash
 mise run mise-sync -- --apply

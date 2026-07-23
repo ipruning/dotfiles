@@ -285,7 +285,7 @@ def _sync_steps(home: Path) -> tuple[MiseSyncStep, ...]:
         ),
         MiseSyncStep(
             "mise.shims",
-            (executable, "reshim", "-C", str(home)),
+            (executable, "reshim", "--force", "-C", str(home)),
             120,
             path_prepend,
         ),
