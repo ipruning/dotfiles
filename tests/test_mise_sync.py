@@ -127,6 +127,26 @@ def test_mise_sync_accepts_a_tracked_backend_migration_alias(tmp_path: Path) -> 
     assert document["safety"]["live_only_tools"] == []
 
 
+def test_mise_sync_normalizes_an_explicit_backend_to_its_tracked_alias(
+    tmp_path: Path,
+) -> None:
+    home = tmp_path / "home"
+    home.mkdir()
+    _write_live_config(home)
+    (home / ".config/mise/config.toml").write_text(
+        '[tool_alias]\nuv = "aqua:astral-sh/uv"\n\n'
+        '[tools]\n"aqua:astral-sh/uv" = "latest"\n'
+    )
+    _write_mise(home, tmp_path / "mise.log")
+
+    completed = run_scripts_module("mise_sync", home, "--json")
+
+    assert completed.returncode == 0
+    document = json.loads(completed.stdout)
+    assert document["safety"]["apply_blocked"] is False
+    assert document["safety"]["live_only_tools"] == []
+
+
 def test_mise_sync_blocks_when_live_tool_ownership_cannot_be_parsed(
     tmp_path: Path,
 ) -> None:

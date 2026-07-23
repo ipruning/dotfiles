@@ -87,18 +87,18 @@ def _tool_names(config_path: Path, *, required: bool) -> frozenset[str]:
     aliases = document.get("tool_alias", {})
     if not isinstance(aliases, dict):
         raise ValueError(f"{config_path} [tool_alias] must be a table")
-    names: set[str] = set()
-    for tool in tools:
-        if not isinstance(tool, str):
-            raise ValueError(f"{config_path} [tools] keys must be strings")
-        names.add(tool)
+    aliases_by_backend: dict[str, set[str]] = {}
     for alias, backend in aliases.items():
         if not isinstance(alias, str) or not isinstance(backend, str):
             raise ValueError(
                 f"{config_path} [tool_alias] entries must map strings to strings"
             )
-        if backend in tools:
-            names.add(alias)
+        aliases_by_backend.setdefault(backend, set()).add(alias)
+    names: set[str] = set()
+    for tool in tools:
+        if not isinstance(tool, str):
+            raise ValueError(f"{config_path} [tools] keys must be strings")
+        names.update(aliases_by_backend.get(tool, {tool}))
     return frozenset(names)
 
 

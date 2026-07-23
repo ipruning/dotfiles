@@ -327,8 +327,13 @@ def test_linux_systemd_check_reports_global_mise_shim_dependencies(
     user_units = home / ".config/systemd/user"
     system_units.mkdir()
     user_units.mkdir(parents=True)
-    risky = system_units / "worker.service"
-    risky.write_text("[Service]\nExecStart=/root/.local/share/mise/shims/pueued\n")
+    worker = system_units / "worker.service"
+    worker.write_text("[Service]\nExecStart=/usr/bin/worker\n")
+    drop_in = system_units / "worker.service.d/override.conf"
+    drop_in.parent.mkdir()
+    drop_in.write_text(
+        "[Service]\nExecStart=\nExecStart=/root/.local/share/mise/shims/pueued\n"
+    )
     safe = user_units / "pueued.service"
     safe.write_text("[Service]\nExecStart=/usr/bin/pueued -vv\n")
 
@@ -340,9 +345,9 @@ def test_linux_systemd_check_reports_global_mise_shim_dependencies(
     assert len(findings) == 1
     assert findings[0].code == "mise.systemd_shim_dependency"
     assert findings[0].severity is Severity.WARN
-    assert findings[0].path == risky
+    assert findings[0].path == drop_in
 
-    risky.write_text(
+    drop_in.write_text(
         "[Service]\nExecStart=/root/.local/bin/mise -C /root/project exec -- pueued\n"
     )
     repaired = check_module._mise_systemd_shim_findings(

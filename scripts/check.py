@@ -230,12 +230,17 @@ def _mise_systemd_shim_findings(
     risky_units: list[tuple[Path, str]] = []
     for unit_directory in unit_directories:
         try:
-            services = sorted(unit_directory.glob("*.service"))
+            unit_files = sorted(
+                [
+                    *unit_directory.glob("*.service"),
+                    *unit_directory.glob("*.service.d/*.conf"),
+                ],
+            )
         except OSError:
             continue
-        for service in services:
+        for unit_file in unit_files:
             try:
-                lines = service.read_text().splitlines()
+                lines = unit_file.read_text().splitlines()
             except OSError:
                 continue
             for line in lines:
@@ -244,7 +249,7 @@ def _mise_systemd_shim_findings(
                     directive.startswith("ExecStart=")
                     and ".local/share/mise/shims/" in directive
                 ):
-                    risky_units.append((service, directive))
+                    risky_units.append((unit_file, directive))
                     break
     if not risky_units:
         return [
@@ -260,14 +265,14 @@ def _mise_systemd_shim_findings(
             "mise.systemd_shims",
             Severity.WARN,
             "mise.systemd_shim_dependency",
-            f"{service.name} directly depends on a global Mise shim: {directive}",
-            service,
+            f"{unit_file.name} directly depends on a global Mise shim: {directive}",
+            unit_file,
             (
                 "Bind the service to a project config with ~/.local/bin/mise -C "
                 "<project> exec -- <tool>, or use a system package; then reload systemd."
             ),
         )
-        for service, directive in risky_units
+        for unit_file, directive in risky_units
     ]
 
 
