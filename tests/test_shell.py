@@ -199,6 +199,80 @@ def test_zshenv_exposes_user_and_mise_commands_without_repo_bins_on_linux(
     assert str(generated_bin) not in loaded_path
 
 
+def test_bash_init_loads_starship_only_for_interactive_shells(tmp_path: Path) -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    bash_init = repo_root / "modules/bash/init.bash"
+    home = tmp_path / "home"
+    bin_dir = tmp_path / "bin"
+    home.mkdir()
+    bin_dir.mkdir()
+    invocation_log = tmp_path / "starship.log"
+    starship = bin_dir / "starship"
+    starship.write_text(
+        "#!/bin/sh\n"
+        f"printf '%s\\n' \"$*\" >> {invocation_log}\n"
+        "printf '%s\\n' 'export STARSHIP_READY=1'\n",
+    )
+    starship.chmod(0o755)
+    bash = shutil.which("bash")
+    assert bash is not None
+    environment = {
+        "HOME": str(home),
+        "PATH": f"{bin_dir}:/usr/bin:/bin",
+    }
+
+    noninteractive = subprocess.run(
+        [bash, "--noprofile", "--norc", "-c", f'. "{bash_init}"'],
+        env=environment,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert noninteractive.returncode == 0
+    assert not invocation_log.exists()
+
+    interactive = subprocess.run(
+        [
+            bash,
+            "--noprofile",
+            "--norc",
+            "-ic",
+            f'. "{bash_init}"; test "${{STARSHIP_READY:-}}" = 1',
+        ],
+        env=environment,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert interactive.returncode == 0
+    assert invocation_log.read_text().splitlines() == ["init bash"]
+
+    starship.write_text(
+        "#!/bin/sh\n"
+        "printf '%s\\n' 'stale shim' >&2\n"
+        "printf '%s\\n' 'export STARSHIP_READY=1'\n"
+        "exit 1\n",
+    )
+    failing_shim = subprocess.run(
+        [
+            bash,
+            "--noprofile",
+            "--norc",
+            "-ic",
+            f'. "{bash_init}"; test -z "${{STARSHIP_READY:-}}"',
+        ],
+        env=environment,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert failing_shim.returncode == 0
+    assert "stale shim" not in failing_shim.stderr
+
+
 def test_check_shell_files_requires_missing_tools_explicitly(tmp_path: Path) -> None:
     repo_root = _tracked_repo(
         tmp_path,

@@ -107,14 +107,16 @@ It preserves the existing `~/.bashrc`, adds one marked block that loads
 `modules/bash/init.bash`, and adds `~/.private.gitconfig` to Git's includes. It
 does not create an identity, install optional tools, clone private repositories,
 or synchronize Skillshare extras. The Bash module adds `~/.local/bin` and mise's
-shim directory to `PATH`, then activates mise in interactive shells. It does not
-expose `modules/bin` or `generated/bin` on Linux. The managed block is placed
-before Ubuntu's non-interactive early return, so direct SSH commands also receive
-the user and mise paths without interactive shell initialization.
+shim directory to `PATH`, then activates mise and, when available, Starship in
+interactive shells. It does not expose `modules/bin` or `generated/bin` on
+Linux. The managed block is placed before Ubuntu's non-interactive early return,
+so direct SSH commands also receive the user and mise paths without interactive
+shell initialization.
 
-The Linux Lite drift profile observes Git, mise, and Skillshare configuration.
-Skillshare remains optional: a missing executable, configuration, or source is
-a warning for a human or AI operator to evaluate, not a setup action.
+The Linux Lite drift profile observes Git, Mise, Starship availability, and
+Skillshare configuration. Starship and Skillshare remain soft capabilities: a
+missing executable, configuration, or source is a warning for a human or AI
+operator to evaluate, not a setup action.
 
 ## Linux Zsh contract
 
@@ -135,8 +137,9 @@ there. The contract is a split between experience and commands:
   lockfile contains URLs and checksums for both `macos-arm64` and `linux-x64`,
   so bootstrap uses the same reviewed tool artifacts on both platforms.
 
-What is not promised: optional tools (atuin, starship, tv) are host-managed and
-their integrations degrade silently when the tool is absent. `mise run shell`
+What is not promised: optional tools still degrade silently when absent.
+Starship is declared in the shared global Mise configuration for a consistent
+personal prompt; Atuin and Television remain host-managed. `mise run shell`
 reflects the same asymmetry — it syntax-checks Zsh files only where `zsh` is
 installed and marks them not-applicable elsewhere rather than failing.
 
@@ -253,14 +256,20 @@ mise run check -- --strict
 Warnings do not fail the normal command because different hosts intentionally
 have different capabilities. `--strict` treats warnings as failures.
 
-When Skillshare is present, `check` also runs `skillshare doctor --json`. It
-does not treat the executable, YAML file, and source directory alone as proof
-that synchronization is healthy. Missing or empty generated shell directories
-are likewise reported as not ready. The report also verifies that
-`~/.local/bin/mise` is a real executable rather than a package-manager symlink,
-warns when another mise installation exists on `PATH` or at a common system
-location, verifies that mise-owned shims target the canonical executable, and
-checks that generated Zsh activation names only the canonical executable.
+Skillshare inspection reads its executable location, YAML configuration, source
+directory, and known installation owners. It uses Mise's JSON inventory to
+distinguish an inactive Mise install from the active executable and warns only
+when independent owners coexist. `check` deliberately does not run `skillshare
+doctor`: that command may migrate configuration, update caches, and probe target
+paths with temporary writes. Run it explicitly when deeper Skillshare diagnosis
+is worth those local side effects.
+
+Missing or empty generated shell directories are reported as not ready. The
+report also verifies that `~/.local/bin/mise` is a real executable rather than a
+package-manager symlink, warns when another Mise installation exists on `PATH`
+or at a common system location, verifies that Mise-owned shims target the
+canonical executable, and checks that generated Zsh activation names only the
+canonical executable.
 
 `mise run lint` inspects repository paths, Mackup mappings, and dangling
 symlinks. Its `path.*` findings are host-relative: a machine-specific path
@@ -292,6 +301,11 @@ the current host. Any failed step makes the command exit non-zero. It
 deliberately does not run `brew cleanup`, `brew autoremove`, or `mise prune`;
 removal and pruning require a separate, explicit operation.
 
+An installed Skillshare CLI updates through `skillshare upgrade --cli --force`,
+which delegates to Homebrew when Homebrew owns the binary and otherwise uses
+its native update path. This updates the CLI only; it does not pull or sync skill
+content.
+
 For mise, the preview records the active installed tool versions. An apply
 updates the standalone CLI first, then passes that explicit list to
 `mise upgrade`; a configured but missing mise tool is not installed. Other
@@ -303,12 +317,17 @@ upgrade may refresh the tracked lockfile. Run `update --apply` on a checkout
 where that declaration change will be reviewed and committed. Other hosts use
 `mise-sync --apply` to consume the committed lock without bumping it.
 
+```bash
+git diff -- reference/.config/mise
+```
+
 A hard `min_version` failure happens before mise can launch this repository's
 `update` task. In that bootstrap case, update the canonical binary directly
 with `~/.local/bin/mise self-update`, then run the task normally.
 
-`update` does not pull this repository, run Skillshare, or write live
-configuration back into `reference/`. Inspect the resulting host state
+`update` does not pull this repository, synchronize Skillshare content, or
+converge live configuration from `reference/`. Its Mise step may update the
+tracked global declaration as described above. Inspect the resulting host state
 separately:
 
 ```bash
@@ -406,8 +425,10 @@ lint` reports when that assumption is false.
 
 Global harness prompts and AI skills remain owned by the Skillshare source
 repository. This repository stores only the reference Skillshare configuration
-and reports when its executable, configuration, or source directory is absent.
-It does not install or synchronize Skillshare automatically.
+and reports when its executable, configuration, source directory, or known
+installation ownership is unhealthy. It does not install or synchronize
+Skillshare automatically; `mise run update -- --apply` only refreshes an already
+installed CLI.
 
 The default `skillshare sync` operation synchronizes skills. The stored
 configuration also declares opt-in extras targets under `~/.config/amp`,

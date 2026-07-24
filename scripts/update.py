@@ -1,4 +1,4 @@
-"""Update installed host tools without synchronizing configuration."""
+"""Update installed host tools with explicit preview and apply modes."""
 
 from __future__ import annotations
 
@@ -21,7 +21,14 @@ from .mise import (
 from .models import ExecutableFinder
 
 StepCallback = Callable[["UpdateStep"], None]
-NEXT_COMMANDS = ("mise run runtime",)
+NEXT_COMMANDS = (
+    "git diff -- reference/.config/mise",
+    "mise run runtime",
+)
+MISE_TOOLS_NOTE = (
+    "mise.tools uses --bump and may update tracked reference/.config/mise files "
+    "when the live global config is linked to this checkout."
+)
 
 
 class UpdateStatus(StrEnum):
@@ -130,6 +137,12 @@ def _update_steps(home: Path) -> tuple[UpdateStep, ...]:
         # mise mid-upgrade leaves partial kegs, stale locks, or half-written
         # tool state, which is worse than waiting out a slow upgrade.
         UpdateStep("brew.packages", "brew", ("brew", "upgrade"), 3600),
+        UpdateStep(
+            "skillshare",
+            "skillshare",
+            ("skillshare", "upgrade", "--cli", "--force"),
+            300,
+        ),
         UpdateStep(
             "mise.self",
             "mise",
@@ -350,6 +363,15 @@ def _next_commands(report: UpdateReport) -> tuple[str, ...]:
     return NEXT_COMMANDS
 
 
+def _notes(report: UpdateReport) -> tuple[str, ...]:
+    if any(
+        result.step.name == "mise.tools" and result.status is not UpdateStatus.SKIPPED
+        for result in report.results
+    ):
+        return (MISE_TOOLS_NOTE,)
+    return ()
+
+
 def _document(report: UpdateReport) -> dict[str, object]:
     return {
         "schema_version": 1,
@@ -374,6 +396,7 @@ def _document(report: UpdateReport) -> dict[str, object]:
             for result in report.results
         ],
         "summary": _summary(report),
+        "notes": list(_notes(report)),
         "next": list(_next_commands(report)),
     }
 
@@ -403,6 +426,8 @@ def _render(report: UpdateReport) -> None:
     summary = _summary(report)
     rendered = ", ".join(f"{count} {status}" for status, count in summary.items())
     print(f"Summary: {rendered or 'no steps'}")
+    for note in _notes(report):
+        print(f"Note: {note}")
     if not report.apply:
         if _next_commands(report):
             print("No commands run. Re-run with --apply to update host tools.")
@@ -427,7 +452,7 @@ def _announce_step(step: UpdateStep) -> None:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        description="Update installed tools without synchronizing configuration.",
+        description="Update installed tools with explicit preview and apply modes.",
     )
     parser.add_argument(
         "--apply",

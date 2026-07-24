@@ -27,6 +27,7 @@ pnpm = "latest"
 python = "latest"
 ruby = "latest"
 rust = "stable"
+starship = "latest"
 uv = "latest"
 zig = "latest"
 

@@ -257,6 +257,20 @@ provenance = "github-attestations"
 version = "stable"
 backend = "core:rust"
 
+[[tools.starship]]
+version = "1.26.0"
+backend = "aqua:starship/starship"
+
+[tools.starship."platforms.linux-x64"]
+checksum = "sha256:b7c232b0e8249d8e55a40beb79c5c43a7d370f3f9408bd215deb0170daeaadf3"
+url = "https://github.com/starship/starship/releases/download/v1.26.0/starship-x86_64-unknown-linux-musl.tar.gz"
+url_api = "https://api.github.com/repos/starship/starship/releases/assets/460374630"
+
+[tools.starship."platforms.macos-arm64"]
+checksum = "sha256:c40b27b11f580411e068f2fa6c1be7830a387c0bc47a94d1d37f32b054c5361d"
+url = "https://github.com/starship/starship/releases/download/v1.26.0/starship-aarch64-apple-darwin.tar.gz"
+url_api = "https://api.github.com/repos/starship/starship/releases/assets/460374577"
+
 [[tools.uv]]
 version = "0.11.30"
 backend = "aqua:astral-sh/uv"

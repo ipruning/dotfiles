@@ -19,6 +19,12 @@ case $- in
     if [ -x "$HOME/.local/bin/mise" ] && [ ! -L "$HOME/.local/bin/mise" ]; then
       eval "$("$HOME/.local/bin/mise" activate bash)"
     fi
+    if command -v starship >/dev/null 2>&1; then
+      if _dotfiles_starship_init="$(starship init bash 2>/dev/null)"; then
+        eval "$_dotfiles_starship_init"
+      fi
+      unset _dotfiles_starship_init
+    fi
     ;;
 esac
 
