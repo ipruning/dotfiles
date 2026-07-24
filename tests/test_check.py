@@ -1,6 +1,5 @@
 import json
 import hashlib
-import subprocess
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -450,7 +449,7 @@ def test_inspect_host_reports_symlinked_generated_directories(tmp_path: Path) ->
     assert "Remove the symlink" in finding.action
 
 
-def test_inspect_host_reports_empty_generated_state_and_skillshare_doctor_errors(
+def test_inspect_host_reports_empty_generated_state_without_running_skillshare(
     tmp_path: Path,
 ) -> None:
     repo_root = tmp_path / "repo"
@@ -466,9 +465,9 @@ def test_inspect_host_reports_empty_generated_state_and_skillshare_doctor_errors
         (generated / ".gitkeep").touch()
 
     tool_path = tmp_path / "skillshare"
-    document = {"summary": {"warnings": 1, "errors": 1}}
+    invocation_marker = tmp_path / "skillshare-ran"
     tool_path.write_text(
-        f"#!/bin/sh\nprintf '%s\\n' '{json.dumps(document)}'\nexit 1\n",
+        f"#!/bin/sh\ntouch {invocation_marker}\nexit 1\n",
     )
     tool_path.chmod(0o755)
 
@@ -486,121 +485,152 @@ def test_inspect_host_reports_empty_generated_state_and_skillshare_doctor_errors
     )
     findings = {finding.code: finding for finding in report.findings}
 
-    assert findings["skillshare.doctor_failed"].severity is Severity.WARN
+    assert not invocation_marker.exists()
+    assert not any(finding.check == "skillshare.doctor" for finding in report.findings)
     assert findings["shell.plugins_empty"].severity is Severity.WARN
     assert findings["shell.completions_empty"].severity is Severity.WARN
     assert findings["shell.functions_empty"].severity is Severity.WARN
 
 
-def test_skillshare_doctor_ignores_non_health_warnings(tmp_path: Path) -> None:
-    repo_root = tmp_path / "repo"
-    home = tmp_path / "home"
-    source = home / "skills"
-    source.mkdir(parents=True)
-    grouped_skill = source / "skill-group/example/SKILL.md"
-    grouped_skill.parent.mkdir(parents=True)
-    grouped_skill.write_text("---\nname: example\n---\n")
-    config_path = home / ".config/skillshare/config.yaml"
-    config_path.parent.mkdir(parents=True)
-    config_path.write_text("sources:\n  skills: ~/skills\n")
-    tool_path = tmp_path / "skillshare"
-    document = {
-        "checks": [
-            {"name": "theme", "status": "warning"},
-            {"name": "git_status", "status": "warning"},
-            {
-                "name": "skills_validity",
-                "status": "warning",
-                "details": ["extras", "skill-group"],
-            },
-            {"name": "tracked_repos", "status": "warning"},
-        ],
-        "summary": {"warnings": 4, "errors": 0},
-    }
-    tool_path.write_text(
-        f"#!/bin/sh\nprintf '%s\\n' '{json.dumps(document)}'\n",
-    )
-    tool_path.chmod(0o755)
-
-    report = inspect_host(
-        repo_root,
-        home,
-        executable_finder=lambda command: (
-            str(tool_path) if command == "skillshare" else f"/tools/{command}"
-        ),
-        system_name="Linux",
-    )
-    finding = next(
-        finding for finding in report.findings if finding.check == "skillshare.doctor"
-    )
-
-    assert finding.code == "skillshare.doctor_warnings"
-    assert finding.message == (
-        "Skillshare doctor reports 1 actionable warning(s): tracked_repos"
-    )
-
-
-def test_skillshare_doctor_keeps_real_skill_validity_warning(tmp_path: Path) -> None:
-    repo_root = tmp_path / "repo"
-    home = tmp_path / "home"
-    source = home / "skills"
-    source.mkdir(parents=True)
-    config_path = home / ".config/skillshare/config.yaml"
-    config_path.parent.mkdir(parents=True)
-    config_path.write_text("sources:\n  skills: ~/skills\n")
-    tool_path = tmp_path / "skillshare"
-    document = {
-        "checks": [
-            {
-                "name": "skills_validity",
-                "status": "warning",
-                "details": ["broken-skill"],
-            },
-        ],
-        "summary": {"warnings": 1, "errors": 0},
-    }
-    tool_path.write_text(
-        f"#!/bin/sh\nprintf '%s\\n' '{json.dumps(document)}'\n",
-    )
-    tool_path.chmod(0o755)
-
-    report = inspect_host(
-        repo_root,
-        home,
-        executable_finder=lambda command: (
-            str(tool_path) if command == "skillshare" else f"/tools/{command}"
-        ),
-        system_name="Linux",
-    )
-    finding = next(
-        finding for finding in report.findings if finding.check == "skillshare.doctor"
-    )
-
-    assert finding.code == "skillshare.doctor_warnings"
-    assert finding.message == (
-        "Skillshare doctor reports 1 actionable warning(s): "
-        "skills_validity: broken-skill"
-    )
-
-
-def test_skillshare_doctor_timeout_returns_a_warning(
+def test_skillshare_ownership_reports_independent_mise_and_homebrew_owners(
     tmp_path: Path,
     monkeypatch,
 ) -> None:
-    def time_out(*args: object, **kwargs: object) -> None:
-        assert kwargs["timeout"] == 30
-        raise subprocess.TimeoutExpired(["skillshare", "doctor", "--json"], 30)
-
-    monkeypatch.setattr(check_skillshare_module.subprocess, "run", time_out)
-
-    finding = check_skillshare_module._skillshare_doctor_finding(
-        tmp_path / "skillshare",
-        tmp_path,
+    home = tmp_path / "home"
+    canonical_mise = home / ".local/bin/mise"
+    canonical_mise.parent.mkdir(parents=True)
+    canonical_mise.write_text("#!/bin/sh\nexit 0\n")
+    canonical_mise.chmod(0o755)
+    mise_install = home / ".local/share/mise/installs/skillshare/0.20.20"
+    mise_install.mkdir(parents=True)
+    brew_binary = tmp_path / "Cellar/skillshare/0.20.22/bin/skillshare"
+    brew_binary.parent.mkdir(parents=True)
+    brew_binary.write_text("#!/bin/sh\nexit 0\n")
+    brew_binary.chmod(0o755)
+    brew_link = tmp_path / "homebrew/bin/skillshare"
+    brew_link.parent.mkdir(parents=True)
+    brew_link.symlink_to(brew_binary)
+    shim = home / ".local/share/mise/shims/skillshare"
+    shim.parent.mkdir(parents=True)
+    shim.symlink_to(canonical_mise)
+    inventory = json.dumps(
+        [
+            {
+                "version": "0.20.20",
+                "install_path": str(mise_install),
+                "installed": True,
+                "active": False,
+            },
+        ],
     )
 
+    def fake_run(command, **_kwargs):
+        assert tuple(command) == (
+            str(canonical_mise),
+            "ls",
+            "github:runkids/skillshare",
+            "--installed",
+            "--json",
+        )
+        return check_skillshare_module.subprocess.CompletedProcess(
+            command,
+            0,
+            inventory,
+            "",
+        )
+
+    monkeypatch.setattr(check_skillshare_module.subprocess, "run", fake_run)
+    monkeypatch.setattr(
+        check_skillshare_module,
+        "SKILLSHARE_SYSTEM_PATHS",
+        (brew_link,),
+    )
+    finding = check_skillshare_module._skillshare_ownership_finding(home, shim)
+
+    assert finding is not None
+    assert finding.code == "skillshare.ownership_multiple"
     assert finding.severity is Severity.WARN
-    assert finding.code == "skillshare.doctor_unavailable"
-    assert "timed out" in finding.message
+    assert "Mise 0.20.20 (inactive)" in finding.message
+    assert "Homebrew" in finding.message
+    assert "mise ls" in (finding.action or "")
+    assert "brew list" in (finding.action or "")
+
+
+def test_skillshare_ownership_deduplicates_a_link_to_the_mise_install(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    home = tmp_path / "home"
+    canonical_mise = home / ".local/bin/mise"
+    canonical_mise.parent.mkdir(parents=True)
+    canonical_mise.write_text("#!/bin/sh\nexit 0\n")
+    canonical_mise.chmod(0o755)
+    mise_install = home / ".local/share/mise/installs/skillshare/0.20.20"
+    installed_binary = mise_install / "bin/skillshare"
+    installed_binary.parent.mkdir(parents=True)
+    installed_binary.write_text("#!/bin/sh\nexit 0\n")
+    installed_binary.chmod(0o755)
+    local_link = home / ".local/bin/skillshare"
+    local_link.symlink_to(installed_binary)
+    inventory = json.dumps(
+        [
+            {
+                "version": "0.20.20",
+                "install_path": str(mise_install),
+                "installed": True,
+                "active": True,
+            },
+        ],
+    )
+
+    monkeypatch.setattr(
+        check_skillshare_module.subprocess,
+        "run",
+        lambda command, **_kwargs: check_skillshare_module.subprocess.CompletedProcess(
+            command,
+            0,
+            inventory,
+            "",
+        ),
+    )
+    monkeypatch.setattr(
+        check_skillshare_module,
+        "SKILLSHARE_SYSTEM_PATHS",
+        (),
+    )
+    finding = check_skillshare_module._skillshare_ownership_finding(home, local_link)
+
+    assert finding is not None
+    assert finding.code == "skillshare.ownership_single"
+    assert finding.severity is Severity.OK
+
+
+def test_skillshare_ownership_reports_invalid_mise_inventory(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    home = tmp_path / "home"
+    canonical_mise = home / ".local/bin/mise"
+    canonical_mise.parent.mkdir(parents=True)
+    canonical_mise.write_text("#!/bin/sh\nexit 0\n")
+    canonical_mise.chmod(0o755)
+    monkeypatch.setattr(
+        check_skillshare_module.subprocess,
+        "run",
+        lambda command, **_kwargs: check_skillshare_module.subprocess.CompletedProcess(
+            command,
+            0,
+            "not-json",
+            "",
+        ),
+    )
+
+    finding = check_skillshare_module._skillshare_ownership_finding(home, None)
+
+    assert finding is not None
+    assert finding.severity is Severity.WARN
+    assert finding.code == "skillshare.ownership_unavailable"
+    assert "invalid JSON" in finding.message
 
 
 def test_linux_lite_check_omits_macos_and_optional_desktop_capabilities(

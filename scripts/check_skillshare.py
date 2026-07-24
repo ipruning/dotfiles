@@ -1,4 +1,4 @@
-"""Read-only Skillshare configuration and health checks."""
+"""Read-only Skillshare configuration and ownership checks."""
 
 from __future__ import annotations
 
@@ -10,7 +10,23 @@ from pathlib import Path
 from ruamel.yaml import YAML
 from ruamel.yaml.error import YAMLError
 
+from .mise import (
+    canonical_mise_environment,
+    canonical_mise_executable,
+    canonical_mise_path,
+)
 from .models import Finding, Severity
+
+SKILLSHARE_MISE_TOOL = "github:runkids/skillshare"
+SKILLSHARE_SYSTEM_PATHS = (
+    Path("/opt/homebrew/bin/skillshare"),
+    Path("/home/linuxbrew/.linuxbrew/bin/skillshare"),
+    Path("/usr/local/bin/skillshare"),
+)
+SKILLSHARE_OWNERSHIP_ACTION = (
+    "Inspect with ~/.local/bin/mise ls github:runkids/skillshare --installed "
+    "--json and brew list --versions skillshare, then retain one owner."
+)
 
 
 def _expand_home(value: str, home: Path) -> Path:
@@ -84,136 +100,157 @@ def _skillshare_findings(home: Path) -> list[Finding]:
     ]
 
 
-def _skillshare_resource_containers(details: object, home: Path) -> bool:
-    if not isinstance(details, list) or not details:
-        return False
-    containers: list[str] = []
-    for detail in details:
-        if not isinstance(detail, str):
-            return False
-        containers.append(detail)
-    config_path = home / ".config/skillshare/config.yaml"
+def _path_within(file_path: Path, directory: Path) -> bool:
     try:
-        source = _configured_skillshare_source(config_path, home)
-    except OSError, KeyError, TypeError, YAMLError:
+        return file_path.is_relative_to(directory)
+    except OSError, ValueError:
         return False
-    for detail in containers:
-        if detail == "extras":
-            continue
-        relative = Path(detail)
-        if relative.is_absolute() or ".." in relative.parts:
-            return False
-        container = source / relative
-        try:
-            if not any(
-                (child / "SKILL.md").is_file()
-                for child in container.iterdir()
-                if child.is_dir()
-            ):
-                return False
-        except OSError:
-            return False
-    return True
 
 
-def _skillshare_doctor_finding(executable: Path, home: Path) -> Finding:
-    environment = os.environ.copy()
-    environment["HOME"] = str(home)
+def _mise_skillshare_installations(home: Path) -> list[tuple[str, Path, bool]]:
+    mise = canonical_mise_executable(home)
+    if mise is None:
+        return []
+    command = (
+        mise,
+        "ls",
+        SKILLSHARE_MISE_TOOL,
+        "--installed",
+        "--json",
+    )
     try:
         completed = subprocess.run(
-            [str(executable), "doctor", "--json"],
-            cwd=home,
-            env=environment,
+            command,
             check=False,
             capture_output=True,
+            env=canonical_mise_environment(home),
             text=True,
             timeout=30,
         )
     except (OSError, subprocess.TimeoutExpired) as error:
-        return Finding(
-            "skillshare.doctor",
-            Severity.WARN,
-            "skillshare.doctor_unavailable",
-            f"Skillshare doctor could not run: {error}",
-            action="Run skillshare doctor --json and resolve reported errors.",
-        )
+        raise RuntimeError(
+            f"Mise Skillshare inventory could not run: {error}"
+        ) from error
+    if completed.returncode != 0:
+        detail = completed.stderr.strip() or completed.stdout.strip()
+        reason = f"Mise Skillshare inventory exited {completed.returncode}"
+        raise RuntimeError(f"{reason}: {detail}" if detail else reason)
     try:
         document = json.loads(completed.stdout)
-        summary = document["summary"]
-        warnings = summary["warnings"]
-        errors = summary["errors"]
-        if not isinstance(warnings, int) or not isinstance(errors, int):
-            raise TypeError("summary counts must be integers")
-        raw_checks = document.get("checks")
-        issues: list[str] = []
-        if isinstance(raw_checks, list):
-            ignored_warnings = {"git_status", "theme"}
-            actionable_warnings = 0
-            reported_errors = 0
-            for raw_check in raw_checks:
-                if not isinstance(raw_check, dict):
-                    raise TypeError("checks must contain objects")
-                name = raw_check.get("name")
-                check_status = raw_check.get("status")
-                if not isinstance(name, str) or not isinstance(check_status, str):
-                    raise TypeError("check name and status must be strings")
-                details = raw_check.get("details")
-                raw_message = raw_check.get("message")
-                if raw_message is not None and not isinstance(raw_message, str):
-                    raise TypeError("check message must be a string")
-                known_resource_warning = (
-                    name == "skills_validity"
-                    and _skillshare_resource_containers(details, home)
-                )
-                description = name
-                if raw_message:
-                    description = f"{name}: {' '.join(raw_message.split())}"
-                elif isinstance(details, list) and all(
-                    isinstance(detail, str) for detail in details
-                ):
-                    description = f"{name}: {', '.join(details)}"
-                if check_status == "error":
-                    reported_errors += 1
-                    issues.append(description)
-                elif (
-                    check_status == "warning"
-                    and name not in ignored_warnings
-                    and not known_resource_warning
-                ):
-                    actionable_warnings += 1
-                    issues.append(description)
-            warnings = actionable_warnings
-            errors = reported_errors
-    except (json.JSONDecodeError, KeyError, TypeError) as error:
+    except json.JSONDecodeError as error:
+        raise RuntimeError(
+            f"Mise Skillshare inventory returned invalid JSON: {error}"
+        ) from error
+    if not isinstance(document, list):
+        raise RuntimeError("Mise Skillshare inventory must be a JSON array")
+
+    installations: list[tuple[str, Path, bool]] = []
+    for raw_installation in document:
+        if not isinstance(raw_installation, dict):
+            raise RuntimeError("Mise Skillshare inventory contains a non-object entry")
+        version = raw_installation.get("version")
+        install_path = raw_installation.get("install_path")
+        installed = raw_installation.get("installed")
+        active = raw_installation.get("active")
+        if (
+            not isinstance(version, str)
+            or not version
+            or not isinstance(install_path, str)
+            or not install_path
+            or not isinstance(installed, bool)
+            or not isinstance(active, bool)
+        ):
+            raise RuntimeError("Mise Skillshare inventory contains invalid fields")
+        if installed:
+            installations.append((version, Path(install_path), active))
+    return installations
+
+
+def _candidate_skillshare_owners(
+    home: Path,
+    executable: Path | None,
+    mise_installations: list[tuple[str, Path, bool]],
+) -> dict[str, tuple[str, Path]]:
+    candidates = [home / ".local/bin/skillshare", *SKILLSHARE_SYSTEM_PATHS]
+    if executable is not None:
+        candidates.append(executable)
+    owners: dict[str, tuple[str, Path]] = {}
+    for candidate in candidates:
+        try:
+            if not candidate.is_file() or not os.access(candidate, os.X_OK):
+                continue
+            resolved = candidate.resolve(strict=True)
+        except OSError:
+            continue
+        if resolved == canonical_mise_path(home):
+            # A Mise shim is a dispatcher, not an independent Skillshare owner.
+            continue
+        if any(
+            _path_within(resolved, install_path.resolve())
+            for _version, install_path, _active in mise_installations
+        ):
+            continue
+        identity = str(resolved)
+        if "Cellar/skillshare" in identity:
+            label = f"Homebrew at {candidate} -> {resolved}"
+        elif candidate == home / ".local/bin/skillshare":
+            label = f"standalone at {candidate}"
+        else:
+            label = f"system/PATH at {candidate} -> {resolved}"
+        owners.setdefault(identity, (label, candidate))
+    return owners
+
+
+def _skillshare_ownership_finding(
+    home: Path,
+    executable: Path | None,
+) -> Finding | None:
+    try:
+        mise_installations = _mise_skillshare_installations(home)
+    except RuntimeError as error:
         return Finding(
-            "skillshare.doctor",
+            "skillshare.ownership",
             Severity.WARN,
-            "skillshare.doctor_invalid",
-            f"Skillshare doctor returned invalid JSON: {error}",
-            action="Run skillshare doctor --json and inspect its output.",
+            "skillshare.ownership_unavailable",
+            str(error),
+            canonical_mise_path(home),
+            SKILLSHARE_OWNERSHIP_ACTION,
         )
-    if errors or completed.returncode != 0:
+
+    owners = _candidate_skillshare_owners(home, executable, mise_installations)
+    descriptions = (
+        [
+            "Mise "
+            + ", ".join(
+                f"{version} ({'active' if active else 'inactive'}) at {install_path}"
+                for version, install_path, active in mise_installations
+            )
+        ]
+        if mise_installations
+        else []
+    )
+    descriptions.extend(label for label, _path in owners.values())
+    owner_count = bool(mise_installations) + len(owners)
+    if owner_count == 0:
+        return None
+    path = (
+        next(candidate for _label, candidate in owners.values())
+        if owners
+        else mise_installations[0][1]
+    )
+    if owner_count > 1:
         return Finding(
-            "skillshare.doctor",
+            "skillshare.ownership",
             Severity.WARN,
-            "skillshare.doctor_failed",
-            f"Skillshare doctor reports {errors} error(s) and "
-            f"{warnings} actionable warning(s)"
-            + (f": {'; '.join(issues)}" if issues else ""),
-            action="Resolve doctor errors before treating Skillshare as ready.",
-        )
-    if warnings:
-        return Finding(
-            "skillshare.doctor",
-            Severity.WARN,
-            "skillshare.doctor_warnings",
-            f"Skillshare doctor reports {warnings} actionable warning(s)"
-            + (f": {'; '.join(issues)}" if issues else ""),
-            action="Run skillshare doctor --json and resolve the listed warnings.",
+            "skillshare.ownership_multiple",
+            f"Multiple independent Skillshare owners coexist: {'; '.join(descriptions)}",
+            path,
+            SKILLSHARE_OWNERSHIP_ACTION,
         )
     return Finding(
-        "skillshare.doctor",
+        "skillshare.ownership",
         Severity.OK,
-        "skillshare.doctor_ready",
-        "Skillshare doctor reports no errors or warnings",
+        "skillshare.ownership_single",
+        f"Skillshare has one installation owner: {descriptions[0]}",
+        path,
     )

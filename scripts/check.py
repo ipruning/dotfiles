@@ -22,7 +22,7 @@ from .check_mise import (
     _mise_shim_finding,
     _mise_systemd_shim_findings,
 )
-from .check_skillshare import _skillshare_doctor_finding, _skillshare_findings
+from .check_skillshare import _skillshare_findings, _skillshare_ownership_finding
 from .mise import canonical_mise_executable
 from .models import CheckReport, ExecutableFinder, Finding, Severity
 from .profiles import HostProfile, resolve_profile
@@ -505,8 +505,10 @@ def inspect_host(
     )
     findings.append(skillshare_finding)
     findings.extend(_skillshare_findings(home))
-    if skillshare_finding.path and (home / ".config/skillshare/config.yaml").is_file():
-        findings.append(_skillshare_doctor_finding(skillshare_finding.path, home))
+    if executable_finder is shutil.which:
+        ownership = _skillshare_ownership_finding(home, skillshare_finding.path)
+        if ownership:
+            findings.append(ownership)
     findings.extend(_dangling_repo_link_findings(repo_root, home))
     if active_profile is HostProfile.LINUX_LITE:
         findings.append(_bash_integration_finding(repo_root, home))
