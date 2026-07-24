@@ -48,7 +48,7 @@ description = "Preview or apply an explicit host profile"
 run = 'python -m scripts.setup "$@"'
 
 [tasks.update]
-description = "Preview or apply host tool updates without synchronizing configuration"
+description = "Preview or apply host tool updates"
 run = 'python -m scripts.update "$@"'
 
 [tasks.mise-sync]

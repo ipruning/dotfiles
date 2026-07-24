@@ -49,7 +49,7 @@ def _fake_tool(
 def _run_update(
     tmp_path: Path,
     *arguments: str,
-    tools: tuple[str, ...] = ("brew", "mise", "amp"),
+    tools: tuple[str, ...] = ("brew", "skillshare", "mise", "amp"),
     failing_tool: str | None = None,
     failure_output: bool = True,
 ) -> tuple[subprocess.CompletedProcess[str], Path]:
@@ -100,6 +100,11 @@ def test_update_previews_exact_plan_by_default_without_running_tools(
         ("brew.metadata", "planned", ["brew", "update"]),
         ("brew.packages", "planned", ["brew", "upgrade"]),
         (
+            "skillshare",
+            "planned",
+            ["skillshare", "upgrade", "--cli", "--force"],
+        ),
+        (
             "mise.self",
             "planned",
             [
@@ -133,7 +138,11 @@ def test_update_previews_exact_plan_by_default_without_running_tools(
         ),
         ("amp", "planned", ["amp", "update"]),
     ]
-    assert document["summary"] == {"planned": 6, "skipped": 8}
+    assert document["summary"] == {"planned": 7, "skipped": 8}
+    assert document["notes"] == [
+        "mise.tools uses --bump and may update tracked reference/.config/mise "
+        "files when the live global config is linked to this checkout."
+    ]
     assert document["next"] == ["mise run update -- --apply"]
     steps = {step["name"]: step for step in document["steps"]}
     expected_mise_path = [str(tmp_path / "home/.local/bin")]
@@ -183,7 +192,7 @@ def test_update_runs_available_tools_in_order_and_reports_skips(tmp_path: Path) 
     document = json.loads(completed.stdout)
     assert document["apply"] is True
     assert document["ok"] is True
-    assert document["summary"] == {"skipped": 8, "succeeded": 6}
+    assert document["summary"] == {"skipped": 8, "succeeded": 7}
     assert [
         (step["name"], step["status"], step["exit_code"])
         for step in document["steps"]
@@ -191,6 +200,7 @@ def test_update_runs_available_tools_in_order_and_reports_skips(tmp_path: Path) 
     ] == [
         ("brew.metadata", "succeeded", 0),
         ("brew.packages", "succeeded", 0),
+        ("skillshare", "succeeded", 0),
         ("mise.self", "succeeded", 0),
         ("mise.tools", "succeeded", 0),
         ("mise.shims", "succeeded", 0),
@@ -199,6 +209,7 @@ def test_update_runs_available_tools_in_order_and_reports_skips(tmp_path: Path) 
     assert log_path.read_text().splitlines() == [
         "brew update",
         "brew upgrade",
+        "skillshare upgrade --cli --force",
         "mise self-update --yes --no-plugins",
         f"mise upgrade --bump -C {tmp_path / 'home'} python@3.14.6",
         f"mise reshim -C {tmp_path / 'home'}",
@@ -255,8 +266,10 @@ def test_update_human_output_announces_commands_before_summary(tmp_path: Path) -
     assert completed.returncode == 0
     assert completed.stdout.splitlines()[0] == "RUN brew.metadata: brew update"
     assert "SUCCEEDED brew.metadata" in completed.stdout
-    assert ("Next:\n  mise run runtime\n") in completed.stdout
-    assert "Summary: 6 succeeded, 8 skipped" in completed.stdout
+    assert (
+        "Next:\n  git diff -- reference/.config/mise\n  mise run runtime\n"
+    ) in completed.stdout
+    assert "Summary: 7 succeeded, 8 skipped" in completed.stdout
 
 
 def test_update_failure_is_contextual_and_does_not_hide_later_results(

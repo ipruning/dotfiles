@@ -295,6 +295,11 @@ the current host. Any failed step makes the command exit non-zero. It
 deliberately does not run `brew cleanup`, `brew autoremove`, or `mise prune`;
 removal and pruning require a separate, explicit operation.
 
+An installed Skillshare CLI updates through `skillshare upgrade --cli --force`,
+which delegates to Homebrew when Homebrew owns the binary and otherwise uses
+its native update path. This updates the CLI only; it does not pull or sync skill
+content.
+
 For mise, the preview records the active installed tool versions. An apply
 updates the standalone CLI first, then passes that explicit list to
 `mise upgrade`; a configured but missing mise tool is not installed. Other
@@ -305,6 +310,10 @@ When the live global mise files are linked to `reference/`, the mise tool
 upgrade may refresh the tracked lockfile. Run `update --apply` on a checkout
 where that declaration change will be reviewed and committed. Other hosts use
 `mise-sync --apply` to consume the committed lock without bumping it.
+
+```bash
+git diff -- reference/.config/mise
+```
 
 A hard `min_version` failure happens before mise can launch this repository's
 `update` task. In that bootstrap case, update the canonical binary directly
