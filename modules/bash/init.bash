@@ -20,7 +20,10 @@ case $- in
       eval "$("$HOME/.local/bin/mise" activate bash)"
     fi
     if command -v starship >/dev/null 2>&1; then
-      eval "$(starship init bash)"
+      if _dotfiles_starship_init="$(starship init bash 2>/dev/null)"; then
+        eval "$_dotfiles_starship_init"
+      fi
+      unset _dotfiles_starship_init
     fi
     ;;
 esac

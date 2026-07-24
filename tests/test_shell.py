@@ -249,6 +249,29 @@ def test_bash_init_loads_starship_only_for_interactive_shells(tmp_path: Path) ->
     assert interactive.returncode == 0
     assert invocation_log.read_text().splitlines() == ["init bash"]
 
+    starship.write_text(
+        "#!/bin/sh\n"
+        "printf '%s\\n' 'stale shim' >&2\n"
+        "printf '%s\\n' 'export STARSHIP_READY=1'\n"
+        "exit 1\n",
+    )
+    failing_shim = subprocess.run(
+        [
+            bash,
+            "--noprofile",
+            "--norc",
+            "-ic",
+            f'. "{bash_init}"; test -z "${{STARSHIP_READY:-}}"',
+        ],
+        env=environment,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert failing_shim.returncode == 0
+    assert "stale shim" not in failing_shim.stderr
+
 
 def test_check_shell_files_requires_missing_tools_explicitly(tmp_path: Path) -> None:
     repo_root = _tracked_repo(
