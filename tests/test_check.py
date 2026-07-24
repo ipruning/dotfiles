@@ -5,6 +5,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 import scripts.check as check_module
+import scripts.check_mise as check_mise_module
+import scripts.check_skillshare as check_skillshare_module
 from scripts.check import inspect_host
 from scripts.models import Severity
 
@@ -298,9 +300,9 @@ def test_mise_installation_scan_finds_an_alternate_later_on_path(
         "PATH",
         f"{canonical.parent}:{alternate.parent}",
     )
-    monkeypatch.setattr(check_module, "MISE_COMMON_LOCATIONS", ())
+    monkeypatch.setattr(check_mise_module, "MISE_COMMON_LOCATIONS", ())
 
-    findings = check_module._mise_installation_findings(
+    findings = check_mise_module._mise_installation_findings(
         home,
         executable_finder=lambda _command: str(canonical),
         scan_host_path=True,
@@ -310,7 +312,7 @@ def test_mise_installation_scan_finds_an_alternate_later_on_path(
     assert findings[1].path == alternate
 
     alternate.unlink()
-    repaired = check_module._mise_installation_findings(
+    repaired = check_mise_module._mise_installation_findings(
         home,
         executable_finder=lambda _command: str(canonical),
         scan_host_path=True,
@@ -334,12 +336,12 @@ def test_linux_systemd_check_reports_global_mise_shim_dependencies(
     safe = user_units / "pueued.service"
     safe.write_text("[Service]\nExecStart=/usr/bin/pueued -vv\n")
 
-    for execution_directive in check_module.SYSTEMD_SERVICE_EXEC_DIRECTIVES:
+    for execution_directive in check_mise_module.SYSTEMD_SERVICE_EXEC_DIRECTIVES:
         drop_in.write_text(
             f"[Service]\n{execution_directive} = "
             "/root/.local/share/mise/shims/pueued --token=private\n"
         )
-        findings = check_module._mise_systemd_shim_findings(
+        findings = check_mise_module._mise_systemd_shim_findings(
             home,
             system_unit_directory=system_units,
         )
@@ -354,7 +356,7 @@ def test_linux_systemd_check_reports_global_mise_shim_dependencies(
     drop_in.write_text(
         "[Service]\nExecStart=/root/.local/bin/mise -C /root/project exec -- pueued\n"
     )
-    repaired = check_module._mise_systemd_shim_findings(
+    repaired = check_mise_module._mise_systemd_shim_findings(
         home,
         system_unit_directory=system_units,
     )
@@ -380,7 +382,7 @@ def test_linux_systemd_check_scans_global_and_data_user_unit_paths(
             "[Service]\nExecStart=/home/alex/.local/share/mise/shims/worker\n"
         )
 
-        findings = check_module._mise_systemd_shim_findings(
+        findings = check_mise_module._mise_systemd_shim_findings(
             home,
             system_unit_directory=system_units,
         )
@@ -589,9 +591,9 @@ def test_skillshare_doctor_timeout_returns_a_warning(
         assert kwargs["timeout"] == 30
         raise subprocess.TimeoutExpired(["skillshare", "doctor", "--json"], 30)
 
-    monkeypatch.setattr(check_module.subprocess, "run", time_out)
+    monkeypatch.setattr(check_skillshare_module.subprocess, "run", time_out)
 
-    finding = check_module._skillshare_doctor_finding(
+    finding = check_skillshare_module._skillshare_doctor_finding(
         tmp_path / "skillshare",
         tmp_path,
     )
