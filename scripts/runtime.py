@@ -439,7 +439,7 @@ def plan_runtime(
     completions_dir = generated_root / "completions"
     plugins_dir = generated_root / "plugins"
     results = []
-    buildable_tools: set[str] = set()
+    binary_results: dict[str, RuntimeResult] = {}
     if build:
         build_results = _local_binary_results(
             repo_root,
@@ -447,11 +447,10 @@ def plan_runtime(
             network=network,
         )
         results.extend(build_results)
-        buildable_tools = {
-            result.spec.name.removeprefix("binary.")
+        binary_results = {
+            result.spec.name.removeprefix("binary."): result
             for result in build_results
             if result.spec.name.startswith("binary.")
-            and result.status is RuntimeStatus.PLANNED
         }
     for tool, command, filename in FUNCTION_SPECS:
         generator_finder = executable_finder
@@ -465,7 +464,10 @@ def plan_runtime(
             target=functions_dir / filename,
             command=command,
         )
-        if tool in buildable_tools:
+        binary_result = binary_results.get(tool)
+        if binary_result is not None and (
+            binary_result.status is RuntimeStatus.PLANNED or generator_finder(tool)
+        ):
             results.append(
                 RuntimeResult(
                     replace(spec, depends_on=f"binary.{tool}"),
@@ -733,12 +735,8 @@ def execute_runtime(
     completed_steps: dict[str, RuntimeResult] = {}
     dependency_blocked_steps: set[str] = set()
     for planned in plan.results:
-        if planned.status is not RuntimeStatus.PLANNED:
-            results.append(planned)
-            completed_steps[planned.spec.name] = planned
-            continue
         spec = planned.spec
-        if spec.depends_on:
+        if spec.depends_on and planned.status is not RuntimeStatus.FAILED:
             dependency = completed_steps.get(spec.depends_on)
             dependency_failed = (
                 dependency is not None and dependency.status is RuntimeStatus.FAILED
@@ -760,6 +758,10 @@ def execute_runtime(
                 completed_steps[spec.name] = blocked
                 dependency_blocked_steps.add(spec.name)
                 continue
+        if planned.status is not RuntimeStatus.PLANNED:
+            results.append(planned)
+            completed_steps[spec.name] = planned
+            continue
         if on_start:
             on_start(spec, planned.action)
         exit_code: int | None = None
