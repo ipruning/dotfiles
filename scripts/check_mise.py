@@ -4,9 +4,14 @@ from __future__ import annotations
 
 import os
 import re
+import subprocess
 from pathlib import Path
 
-from .mise import canonical_mise_executable, canonical_mise_path
+from .mise import (
+    canonical_mise_environment,
+    canonical_mise_executable,
+    canonical_mise_path,
+)
 from .models import ExecutableFinder, Finding, Severity
 
 MISE_COMMON_LOCATIONS = tuple(
@@ -181,6 +186,50 @@ def _mise_shim_finding(home: Path) -> Finding | None:
             shims_directory,
         )
     return None
+
+
+def _mise_project_uv_finding(repo_root: Path, home: Path) -> Finding | None:
+    config_path = repo_root / "mise.toml"
+    executable = canonical_mise_executable(home)
+    if not config_path.is_file() or executable is None:
+        return None
+    command = (executable, "which", "uv", "-C", str(repo_root))
+    try:
+        completed = subprocess.run(
+            command,
+            check=False,
+            capture_output=True,
+            env=canonical_mise_environment(home),
+            text=True,
+            timeout=10,
+        )
+    except subprocess.TimeoutExpired:
+        reason = "the read-only lookup timed out after 10s"
+    except OSError as error:
+        reason = f"the read-only lookup could not run: {error}"
+    else:
+        resolved = completed.stdout.strip()
+        if completed.returncode == 0 and resolved:
+            return Finding(
+                "mise.project_uv",
+                Severity.OK,
+                "mise.project_uv_ready",
+                "Canonical Mise resolves the project's locked uv executable",
+                Path(resolved),
+            )
+        reason = f"mise which uv exited {completed.returncode}"
+    return Finding(
+        "mise.project_uv",
+        Severity.WARN,
+        "mise.project_uv_unresolved",
+        f"Canonical Mise cannot resolve the project's locked uv executable: {reason}",
+        config_path,
+        (
+            "Inspect with ~/.local/bin/mise ls uv --installed --json and "
+            "~/.local/bin/mise which uv. Reinstall the exact locked uv version if "
+            "its recorded backend no longer matches its executable layout."
+        ),
+    )
 
 
 def _mise_systemd_shim_findings(

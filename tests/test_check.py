@@ -320,6 +320,41 @@ def test_mise_installation_scan_finds_an_alternate_later_on_path(
     assert repaired[1].severity is Severity.OK
 
 
+def test_mise_project_uv_reports_valid_and_broken_backend_layouts(
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "repo"
+    repo_root.mkdir()
+    (repo_root / "mise.toml").write_text('[tools]\nuv = "0.11.29"\n')
+    home = tmp_path / "home"
+    canonical = home / ".local/bin/mise"
+    canonical.parent.mkdir(parents=True)
+    canonical.write_text(
+        "#!/bin/sh\n"
+        'test "$1" = which\n'
+        'test "$2" = uv\n'
+        "printf '%s\\n' /mise/installs/uv/0.11.29/uv\n",
+    )
+    canonical.chmod(0o755)
+
+    ready = check_mise_module._mise_project_uv_finding(repo_root, home)
+
+    assert ready is not None
+    assert ready.code == "mise.project_uv_ready"
+    assert ready.severity is Severity.OK
+    assert ready.path == Path("/mise/installs/uv/0.11.29/uv")
+
+    canonical.write_text("#!/bin/sh\nexit 1\n")
+    broken = check_mise_module._mise_project_uv_finding(repo_root, home)
+
+    assert broken is not None
+    assert broken.code == "mise.project_uv_unresolved"
+    assert broken.severity is Severity.WARN
+    assert broken.path == repo_root / "mise.toml"
+    assert "mise ls uv --installed --json" in (broken.action or "")
+    assert "Reinstall the exact locked uv version" in (broken.action or "")
+
+
 def test_linux_systemd_check_reports_global_mise_shim_dependencies(
     tmp_path: Path,
 ) -> None:
