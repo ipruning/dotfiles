@@ -605,6 +605,32 @@ def test_skillshare_ownership_deduplicates_a_link_to_the_mise_install(
     assert finding.severity is Severity.OK
 
 
+def test_skillshare_ownership_deduplicates_shim_with_symlinked_home(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    actual_home = tmp_path / "actual-home"
+    actual_home.mkdir()
+    home = tmp_path / "home"
+    home.symlink_to(actual_home, target_is_directory=True)
+    canonical_mise = home / ".local/bin/mise"
+    canonical_mise.parent.mkdir(parents=True)
+    canonical_mise.write_text("#!/bin/sh\nexit 0\n")
+    canonical_mise.chmod(0o755)
+    shim = home / ".local/share/mise/shims/skillshare"
+    shim.parent.mkdir(parents=True)
+    shim.symlink_to(canonical_mise)
+    monkeypatch.setattr(
+        check_skillshare_module,
+        "SKILLSHARE_SYSTEM_PATHS",
+        (),
+    )
+
+    owners = check_skillshare_module._candidate_skillshare_owners(home, shim, [])
+
+    assert owners == {}
+
+
 def test_skillshare_ownership_reports_invalid_mise_inventory(
     tmp_path: Path,
     monkeypatch,

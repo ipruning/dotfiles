@@ -177,6 +177,7 @@ def _candidate_skillshare_owners(
     candidates = [home / ".local/bin/skillshare", *SKILLSHARE_SYSTEM_PATHS]
     if executable is not None:
         candidates.append(executable)
+    canonical_mise = canonical_mise_path(home).resolve()
     owners: dict[str, tuple[str, Path]] = {}
     for candidate in candidates:
         try:
@@ -185,7 +186,7 @@ def _candidate_skillshare_owners(
             resolved = candidate.resolve(strict=True)
         except OSError:
             continue
-        if resolved == canonical_mise_path(home):
+        if resolved == canonical_mise:
             # A Mise shim is a dispatcher, not an independent Skillshare owner.
             continue
         if any(
