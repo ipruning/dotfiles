@@ -28,6 +28,9 @@ semantics live in `README.md`.
   entrypoint for verification.
 - Keep `diff`, `check`, and `lint` read-only. A repair or installation belongs
   in an explicit user-directed operation, not inside an inspection.
+- External commands used by `check` must be proven read-only. A deeper probe
+  that writes caches, migrations, or temporary target files belongs in the
+  finding's suggested action, not in inspection.
 - Mutating tasks preview by default; only `--apply` changes state. Do not add
   `--dry-run` flags or mutate-by-default entrypoints.
 - Keep stdout machine-readable when `--json` is selected and send operational
@@ -39,6 +42,16 @@ semantics live in `README.md`.
 - Parse structured data with its real parser: `jq` or a JSON library for JSON,
   `tomllib` or a TOML-aware CLI for TOML, and `ruamel.yaml` for YAML. Never
   approximate these formats with grep, regular expressions, or string splits.
+- Keep Finding JSON compatible: `check`, `severity`, `applicable`, `code`,
+  `message`, `path`, and `action`. Put concrete facts in `message` and `path`;
+  `action` suggests inspection or an explicit operator command; it never
+  authorizes automatic repair.
+- Add owner checks only for observed conflicts with known candidates; do not
+  build a generic package-manager or PATH ownership framework.
+- Add persistent state only for a real transaction or cross-process recovery
+  requirement. Before growing a production file beyond roughly 800 lines,
+  choose explicitly to split its domain, delete obsolete behavior, or freeze
+  its scope.
 - Never commit secrets. Track templates; keep materialized `*private*` files
   ignored.
 - Run `mise run verify` after changing Python tasks, shell files, mappings, or

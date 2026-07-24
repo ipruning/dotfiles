@@ -256,14 +256,20 @@ mise run check -- --strict
 Warnings do not fail the normal command because different hosts intentionally
 have different capabilities. `--strict` treats warnings as failures.
 
-When Skillshare is present, `check` also runs `skillshare doctor --json`. It
-does not treat the executable, YAML file, and source directory alone as proof
-that synchronization is healthy. Missing or empty generated shell directories
-are likewise reported as not ready. The report also verifies that
-`~/.local/bin/mise` is a real executable rather than a package-manager symlink,
-warns when another mise installation exists on `PATH` or at a common system
-location, verifies that mise-owned shims target the canonical executable, and
-checks that generated Zsh activation names only the canonical executable.
+Skillshare inspection reads its executable location, YAML configuration, source
+directory, and known installation owners. It uses Mise's JSON inventory to
+distinguish an inactive Mise install from the active executable and warns only
+when independent owners coexist. `check` deliberately does not run `skillshare
+doctor`: that command may migrate configuration, update caches, and probe target
+paths with temporary writes. Run it explicitly when deeper Skillshare diagnosis
+is worth those local side effects.
+
+Missing or empty generated shell directories are reported as not ready. The
+report also verifies that `~/.local/bin/mise` is a real executable rather than a
+package-manager symlink, warns when another Mise installation exists on `PATH`
+or at a common system location, verifies that Mise-owned shims target the
+canonical executable, and checks that generated Zsh activation names only the
+canonical executable.
 
 `mise run lint` inspects repository paths, Mackup mappings, and dangling
 symlinks. Its `path.*` findings are host-relative: a machine-specific path
@@ -319,8 +325,9 @@ A hard `min_version` failure happens before mise can launch this repository's
 `update` task. In that bootstrap case, update the canonical binary directly
 with `~/.local/bin/mise self-update`, then run the task normally.
 
-`update` does not pull this repository, run Skillshare, or write live
-configuration back into `reference/`. Inspect the resulting host state
+`update` does not pull this repository, synchronize Skillshare content, or
+converge live configuration from `reference/`. Its Mise step may update the
+tracked global declaration as described above. Inspect the resulting host state
 separately:
 
 ```bash
@@ -418,8 +425,10 @@ lint` reports when that assumption is false.
 
 Global harness prompts and AI skills remain owned by the Skillshare source
 repository. This repository stores only the reference Skillshare configuration
-and reports when its executable, configuration, or source directory is absent.
-It does not install or synchronize Skillshare automatically.
+and reports when its executable, configuration, source directory, or known
+installation ownership is unhealthy. It does not install or synchronize
+Skillshare automatically; `mise run update -- --apply` only refreshes an already
+installed CLI.
 
 The default `skillshare sync` operation synchronizes skills. The stored
 configuration also declares opt-in extras targets under `~/.config/amp`,
