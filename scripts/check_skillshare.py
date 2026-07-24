@@ -18,10 +18,13 @@ from .mise import (
 from .models import Finding, Severity
 
 SKILLSHARE_MISE_TOOL = "github:runkids/skillshare"
-SKILLSHARE_SYSTEM_PATHS = (
-    Path("/opt/homebrew/bin/skillshare"),
-    Path("/home/linuxbrew/.linuxbrew/bin/skillshare"),
-    Path("/usr/local/bin/skillshare"),
+SKILLSHARE_SYSTEM_PATHS = tuple(
+    Path("/").joinpath(*parts)
+    for parts in (
+        ("opt", "homebrew", "bin", "skillshare"),
+        ("home", "linuxbrew", ".linuxbrew", "bin", "skillshare"),
+        ("usr", "local", "bin", "skillshare"),
+    )
 )
 SKILLSHARE_OWNERSHIP_ACTION = (
     "Inspect with ~/.local/bin/mise ls github:runkids/skillshare --installed "
