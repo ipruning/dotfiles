@@ -680,6 +680,7 @@ def test_linux_lite_check_requires_only_git_and_mise_and_reports_legacy_path(
         "executable.git",
         "executable.mise",
         "executable.skillshare",
+        "executable.starship",
     }
     assert findings["shell.repo_commands"].severity is Severity.WARN
     assert findings["shell.repo_commands"].path == legacy_bin

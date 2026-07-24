@@ -107,14 +107,16 @@ It preserves the existing `~/.bashrc`, adds one marked block that loads
 `modules/bash/init.bash`, and adds `~/.private.gitconfig` to Git's includes. It
 does not create an identity, install optional tools, clone private repositories,
 or synchronize Skillshare extras. The Bash module adds `~/.local/bin` and mise's
-shim directory to `PATH`, then activates mise in interactive shells. It does not
-expose `modules/bin` or `generated/bin` on Linux. The managed block is placed
-before Ubuntu's non-interactive early return, so direct SSH commands also receive
-the user and mise paths without interactive shell initialization.
+shim directory to `PATH`, then activates mise and, when available, Starship in
+interactive shells. It does not expose `modules/bin` or `generated/bin` on
+Linux. The managed block is placed before Ubuntu's non-interactive early return,
+so direct SSH commands also receive the user and mise paths without interactive
+shell initialization.
 
-The Linux Lite drift profile observes Git, mise, and Skillshare configuration.
-Skillshare remains optional: a missing executable, configuration, or source is
-a warning for a human or AI operator to evaluate, not a setup action.
+The Linux Lite drift profile observes Git, Mise, Starship availability, and
+Skillshare configuration. Starship and Skillshare remain soft capabilities: a
+missing executable, configuration, or source is a warning for a human or AI
+operator to evaluate, not a setup action.
 
 ## Linux Zsh contract
 
@@ -135,8 +137,9 @@ there. The contract is a split between experience and commands:
   lockfile contains URLs and checksums for both `macos-arm64` and `linux-x64`,
   so bootstrap uses the same reviewed tool artifacts on both platforms.
 
-What is not promised: optional tools (atuin, starship, tv) are host-managed and
-their integrations degrade silently when the tool is absent. `mise run shell`
+What is not promised: optional tools still degrade silently when absent.
+Starship is declared in the shared global Mise configuration for a consistent
+personal prompt; Atuin and Television remain host-managed. `mise run shell`
 reflects the same asymmetry — it syntax-checks Zsh files only where `zsh` is
 installed and marks them not-applicable elsewhere rather than failing.
 

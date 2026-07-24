@@ -509,6 +509,13 @@ def inspect_host(
         ownership = _skillshare_ownership_finding(home, skillshare_finding.path)
         if ownership:
             findings.append(ownership)
+    findings.append(
+        _check_executable(
+            "starship",
+            required=False,
+            executable_finder=executable_finder,
+        ),
+    )
     findings.extend(_dangling_repo_link_findings(repo_root, home))
     if active_profile is HostProfile.LINUX_LITE:
         findings.append(_bash_integration_finding(repo_root, home))

@@ -56,8 +56,9 @@ Three tiers, in decreasing strictness:
 2. Optional host capabilities (atuin, starship, zsh, tv, gum, brightness, ...):
    guard every use (`command -v`, `[[ -d ]]`, `[[ -r ]]`), degrade gracefully
    when absent, and report the gap as a `check` warning with an install hint.
-   Installation belongs to the host's package manager, never to this
-   repository.
+   Shared personal tools may be declared in the global Mise reference;
+   host-specific tools belong to that host's package manager. Neither path may
+   install during inspection or shell startup.
 3. Self-built binaries under `generated/bin` are additive enhancements and must
    never be load-bearing; hosts without them use upstream tools or lose the
    feature.
