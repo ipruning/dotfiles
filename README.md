@@ -381,7 +381,10 @@ mise run runtime -- --build --apply
 This refreshes the sources named by the runtime plan under the ignored
 `generated/sources/`, builds them with their declared commands, and atomically
 installs the artifacts into `generated/bin/`. Any other binary placed there
-must name its own owner; `mise run check` reports unknown binaries.
+must name its own owner; `mise run check` reports unknown binaries. When a
+self-built binary generates shell initialization, the build completes before
+that initialization is refreshed. A failed source refresh or build leaves the
+previous binary and generated initialization together.
 
 ## Host inventory
 

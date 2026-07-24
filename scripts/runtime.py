@@ -275,6 +275,132 @@ def _generator_result(
     )
 
 
+def _local_binary_results(
+    repo_root: Path,
+    *,
+    executable_finder: ExecutableFinder,
+    network: bool,
+) -> list[RuntimeResult]:
+    results = []
+    sources_dir = repo_root / "generated/sources"
+    cargo_available = executable_finder("cargo") is not None
+    git_available = executable_finder("git") is not None
+    for name, source, build_command, artifact_relative in LOCAL_BINARY_SPECS:
+        source_dir = sources_dir / name
+        source_git_directory = source_dir / ".git"
+        source_is_symlink = source_dir.is_symlink()
+        source_git_directory_is_symlink = source_git_directory.is_symlink()
+        source_is_checkout = (
+            not source_is_symlink
+            and not source_git_directory_is_symlink
+            and source_git_directory.is_dir()
+        )
+        source_action = (
+            RuntimeAction.UPDATE if source_is_checkout else RuntimeAction.CLONE
+        )
+        source_spec = RuntimeSpec(
+            name=f"source.{name}",
+            tool="git",
+            target=source_dir,
+            source=source,
+            command=(
+                ("git", "-C", str(source_dir), "pull", "--ff-only")
+                if source_action is RuntimeAction.UPDATE
+                else ("git", "clone", "--depth=1", source, str(source_dir))
+            ),
+        )
+        if source_is_symlink:
+            results.append(
+                RuntimeResult(
+                    source_spec,
+                    RuntimeStatus.FAILED,
+                    source_action,
+                    f"source target is a symlink ({os.readlink(source_dir)}); "
+                    "remove it before building",
+                ),
+            )
+        elif source_git_directory_is_symlink:
+            results.append(
+                RuntimeResult(
+                    source_spec,
+                    RuntimeStatus.FAILED,
+                    source_action,
+                    f"source Git metadata is a symlink "
+                    f"({os.readlink(source_git_directory)}); "
+                    "remove it before building",
+                ),
+            )
+        elif not network:
+            results.append(
+                RuntimeResult(
+                    source_spec,
+                    RuntimeStatus.SKIPPED,
+                    source_action,
+                    "network refresh is disabled",
+                ),
+            )
+        elif source_dir.exists() and source_action is RuntimeAction.CLONE:
+            results.append(
+                RuntimeResult(
+                    source_spec,
+                    RuntimeStatus.FAILED,
+                    source_action,
+                    "source target exists but is not a Git checkout",
+                ),
+            )
+        elif git_available:
+            results.append(
+                RuntimeResult(source_spec, RuntimeStatus.PLANNED, source_action),
+            )
+        else:
+            results.append(
+                RuntimeResult(
+                    source_spec,
+                    RuntimeStatus.SKIPPED,
+                    source_action,
+                    "git is not available on PATH",
+                ),
+            )
+        binary_spec = RuntimeSpec(
+            name=f"binary.{name}",
+            tool="cargo",
+            target=repo_root / "generated/bin" / name,
+            command=((*build_command, "--offline") if not network else build_command),
+            source=source,
+            working_directory=source_dir,
+            artifact=source_dir / artifact_relative,
+            depends_on=f"source.{name}",
+            timeout_seconds=1800,
+        )
+        source_will_exist = (source_is_checkout and (not network or git_available)) or (
+            not source_dir.exists() and network and git_available
+        )
+        if cargo_available and source_will_exist:
+            results.append(
+                RuntimeResult(
+                    binary_spec,
+                    RuntimeStatus.PLANNED,
+                    RuntimeAction.BUILD,
+                ),
+            )
+        else:
+            if not cargo_available:
+                missing = "cargo"
+            elif network and not git_available:
+                missing = "git"
+            else:
+                missing = "build source"
+            results.append(
+                RuntimeResult(
+                    binary_spec,
+                    RuntimeStatus.SKIPPED,
+                    RuntimeAction.BUILD,
+                    f"{missing} is not available",
+                ),
+            )
+    return results
+
+
 def plan_runtime(
     repo_root: Path,
     home: Path,
@@ -313,6 +439,20 @@ def plan_runtime(
     completions_dir = generated_root / "completions"
     plugins_dir = generated_root / "plugins"
     results = []
+    buildable_tools: set[str] = set()
+    if build:
+        build_results = _local_binary_results(
+            repo_root,
+            executable_finder=executable_finder,
+            network=network,
+        )
+        results.extend(build_results)
+        buildable_tools = {
+            result.spec.name.removeprefix("binary.")
+            for result in build_results
+            if result.spec.name.startswith("binary.")
+            and result.status is RuntimeStatus.PLANNED
+        }
     for tool, command, filename in FUNCTION_SPECS:
         generator_finder = executable_finder
         if tool == "mise":
@@ -325,7 +465,16 @@ def plan_runtime(
             target=functions_dir / filename,
             command=command,
         )
-        results.append(_generator_result(spec, executable_finder=generator_finder))
+        if tool in buildable_tools:
+            results.append(
+                RuntimeResult(
+                    replace(spec, depends_on=f"binary.{tool}"),
+                    RuntimeStatus.PLANNED,
+                    RuntimeAction.GENERATE,
+                ),
+            )
+        else:
+            results.append(_generator_result(spec, executable_finder=generator_finder))
     for name, tool, command, filename, environment in COMPLETION_SPECS:
         effective_command = (
             (command[0], "--offline", *command[1:])
@@ -493,124 +642,6 @@ def plan_runtime(
             "no zcompdump files exist",
         ),
     )
-    if build:
-        sources_dir = repo_root / "generated/sources"
-        cargo_available = executable_finder("cargo") is not None
-        for name, source, build_command, artifact_relative in LOCAL_BINARY_SPECS:
-            source_dir = sources_dir / name
-            source_git_directory = source_dir / ".git"
-            source_is_symlink = source_dir.is_symlink()
-            source_git_directory_is_symlink = source_git_directory.is_symlink()
-            source_is_checkout = (
-                not source_is_symlink
-                and not source_git_directory_is_symlink
-                and source_git_directory.is_dir()
-            )
-            source_action = (
-                RuntimeAction.UPDATE if source_is_checkout else RuntimeAction.CLONE
-            )
-            source_spec = RuntimeSpec(
-                name=f"source.{name}",
-                tool="git",
-                target=source_dir,
-                source=source,
-                command=(
-                    ("git", "-C", str(source_dir), "pull", "--ff-only")
-                    if source_action is RuntimeAction.UPDATE
-                    else ("git", "clone", "--depth=1", source, str(source_dir))
-                ),
-            )
-            if source_is_symlink:
-                results.append(
-                    RuntimeResult(
-                        source_spec,
-                        RuntimeStatus.FAILED,
-                        source_action,
-                        f"source target is a symlink ({os.readlink(source_dir)}); "
-                        "remove it before building",
-                    ),
-                )
-            elif source_git_directory_is_symlink:
-                results.append(
-                    RuntimeResult(
-                        source_spec,
-                        RuntimeStatus.FAILED,
-                        source_action,
-                        f"source Git metadata is a symlink "
-                        f"({os.readlink(source_git_directory)}); "
-                        "remove it before building",
-                    ),
-                )
-            elif not network:
-                results.append(
-                    RuntimeResult(
-                        source_spec,
-                        RuntimeStatus.SKIPPED,
-                        source_action,
-                        "network refresh is disabled",
-                    ),
-                )
-            elif source_dir.exists() and source_action is RuntimeAction.CLONE:
-                results.append(
-                    RuntimeResult(
-                        source_spec,
-                        RuntimeStatus.FAILED,
-                        source_action,
-                        "source target exists but is not a Git checkout",
-                    ),
-                )
-            elif git_available:
-                results.append(
-                    RuntimeResult(source_spec, RuntimeStatus.PLANNED, source_action),
-                )
-            else:
-                results.append(
-                    RuntimeResult(
-                        source_spec,
-                        RuntimeStatus.SKIPPED,
-                        source_action,
-                        "git is not available on PATH",
-                    ),
-                )
-            binary_spec = RuntimeSpec(
-                name=f"binary.{name}",
-                tool="cargo",
-                target=repo_root / "generated/bin" / name,
-                command=(
-                    (*build_command, "--offline") if not network else build_command
-                ),
-                source=source,
-                working_directory=source_dir,
-                artifact=source_dir / artifact_relative,
-                depends_on=f"source.{name}",
-                timeout_seconds=1800,
-            )
-            source_will_exist = (
-                source_is_checkout and (not network or git_available)
-            ) or (not source_dir.exists() and network and git_available)
-            if cargo_available and source_will_exist:
-                results.append(
-                    RuntimeResult(
-                        binary_spec,
-                        RuntimeStatus.PLANNED,
-                        RuntimeAction.BUILD,
-                    ),
-                )
-            else:
-                if not cargo_available:
-                    missing = "cargo"
-                elif network and not git_available:
-                    missing = "git"
-                else:
-                    missing = "build source"
-                results.append(
-                    RuntimeResult(
-                        binary_spec,
-                        RuntimeStatus.SKIPPED,
-                        RuntimeAction.BUILD,
-                        f"{missing} is not available",
-                    ),
-                )
     return RuntimeReport(
         apply=False,
         results=tuple(results),
@@ -700,6 +731,7 @@ def execute_runtime(
     """Execute a previously rendered runtime plan."""
     results = []
     completed_steps: dict[str, RuntimeResult] = {}
+    dependency_blocked_steps: set[str] = set()
     for planned in plan.results:
         if planned.status is not RuntimeStatus.PLANNED:
             results.append(planned)
@@ -708,15 +740,25 @@ def execute_runtime(
         spec = planned.spec
         if spec.depends_on:
             dependency = completed_steps.get(spec.depends_on)
-            if dependency and dependency.status is RuntimeStatus.FAILED:
+            dependency_failed = (
+                dependency is not None and dependency.status is RuntimeStatus.FAILED
+            )
+            dependency_blocked = spec.depends_on in dependency_blocked_steps
+            if dependency_failed or dependency_blocked:
+                reason = (
+                    f"{spec.depends_on} failed; refusing to use stale input"
+                    if dependency_failed
+                    else f"{spec.depends_on} was not refreshed; refusing to use stale input"
+                )
                 blocked = RuntimeResult(
                     spec,
                     RuntimeStatus.SKIPPED,
                     planned.action,
-                    f"{spec.depends_on} failed; refusing to use stale input",
+                    reason,
                 )
                 results.append(blocked)
                 completed_steps[spec.name] = blocked
+                dependency_blocked_steps.add(spec.name)
                 continue
         if on_start:
             on_start(spec, planned.action)
