@@ -149,6 +149,46 @@ def test_check_shell_files_gates_restored_reference_startup_dotfiles(
 
 
 @requires_zsh
+def test_zsh_tv_binding_requires_television(tmp_path: Path) -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    home = tmp_path / "home"
+    bin_dir = tmp_path / "bin"
+    home.mkdir()
+    bin_dir.mkdir()
+    (home / "dotfiles").symlink_to(repo_root, target_is_directory=True)
+    environment = {
+        "HOME": str(home),
+        "PATH": f"{bin_dir}:/usr/bin:/bin",
+    }
+    command = f'source "{repo_root / "modules/zsh/env.zsh"}"; bindkey -M emacs "^T"'
+
+    without_tv = subprocess.run(
+        ["zsh", "-dfc", command],
+        env=environment,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert without_tv.returncode == 0
+    assert without_tv.stdout.strip() == '"^T" transpose-chars'
+
+    tv = bin_dir / "tv"
+    tv.write_text("#!/bin/sh\nexit 0\n")
+    tv.chmod(0o755)
+    with_tv = subprocess.run(
+        ["zsh", "-dfc", command],
+        env=environment,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert with_tv.returncode == 0
+    assert with_tv.stdout.strip() == '"^T" tv-search'
+
+
+@requires_zsh
 def test_zshenv_exposes_user_and_mise_commands_without_repo_bins_on_linux(
     tmp_path: Path,
 ) -> None:

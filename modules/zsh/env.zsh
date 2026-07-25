@@ -370,32 +370,34 @@ if command -v zoxide >/dev/null 2>&1; then
 fi
 
 # 👇 tv
-_tv_search() {
-  emulate -L zsh
-  zle -I
+if tv --version >/dev/null 2>&1; then
+  _tv_search() {
+    emulate -L zsh
+    zle -I
 
-  local current_prompt
-  current_prompt=$LBUFFER
+    local current_prompt
+    current_prompt=$LBUFFER
 
-  local output
+    local output
 
-  output=$(tv --autocomplete-prompt "$current_prompt" $*)
+    output=$(tv --autocomplete-prompt "$current_prompt" $*)
 
-  zle reset-prompt
+    zle reset-prompt
 
-  if [[ -n $output ]]; then
-    RBUFFER=""
-    LBUFFER=$current_prompt$output
+    if [[ -n $output ]]; then
+      RBUFFER=""
+      LBUFFER=$current_prompt$output
 
-    # uncomment this to automatically accept the line
-    # (i.e. run the command without having to press enter twice)
-    # zle accept-line
-  fi
-}
+      # uncomment this to automatically accept the line
+      # (i.e. run the command without having to press enter twice)
+      # zle accept-line
+    fi
+  }
 
-zle -N tv-search _tv_search
+  zle -N tv-search _tv_search
 
-bindkey '^T' tv-search
+  bindkey '^T' tv-search
+fi
 
 # 👇 fzf
 export FZF_DEFAULT_COMMAND="fd"
