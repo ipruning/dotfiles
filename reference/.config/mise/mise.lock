@@ -178,6 +178,10 @@ url = "https://nodejs.org/dist/v26.5.0/node-v26.5.0-darwin-arm64.tar.gz"
 version = "0.20.0"
 backend = "npm:agent-device"
 
+[[tools."npm:cf"]]
+version = "0.5.0"
+backend = "npm:cf"
+
 [[tools.pnpm]]
 version = "11.17.0"
 backend = "aqua:pnpm/pnpm"
