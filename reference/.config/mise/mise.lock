@@ -11,19 +11,19 @@ url = "https://repo.yarnpkg.com/4.17.1/packages/yarnpkg-cli/bin/yarn.js"
 url = "https://repo.yarnpkg.com/4.17.1/packages/yarnpkg-cli/bin/yarn.js"
 
 [[tools.aube]]
-version = "1.32.0"
+version = "1.33.1"
 backend = "aqua:jdx/aube"
 
 [tools.aube."platforms.linux-x64"]
-checksum = "sha256:5419e7dbba887a4c1f7ae5675d86dd5d71fa3daa66053d16788e986c66078126"
-url = "https://github.com/jdx/aube/releases/download/v1.32.0/aube-v1.32.0-x86_64-unknown-linux-gnu.tar.gz"
-url_api = "https://api.github.com/repos/jdx/aube/releases/assets/485325644"
+checksum = "sha256:c6e739a72bd3789bf0a1024b76b3290b709ff62ca9aa52771f0c59b644d51a9c"
+url = "https://github.com/jdx/aube/releases/download/v1.33.1/aube-v1.33.1-x86_64-unknown-linux-gnu.tar.gz"
+url_api = "https://api.github.com/repos/jdx/aube/releases/assets/489831452"
 provenance = "github-attestations"
 
 [tools.aube."platforms.macos-arm64"]
-checksum = "sha256:d4c883f6a41f064e587de948645d9128d282b12c3a42eac36920eaf1d63162fe"
-url = "https://github.com/jdx/aube/releases/download/v1.32.0/aube-v1.32.0-aarch64-apple-darwin.tar.gz"
-url_api = "https://api.github.com/repos/jdx/aube/releases/assets/485361741"
+checksum = "sha256:7aa9c39feef648796338ef540fa1af886683d20058691dfb69169fe47aea3d99"
+url = "https://github.com/jdx/aube/releases/download/v1.33.1/aube-v1.33.1-aarch64-apple-darwin.tar.gz"
+url_api = "https://api.github.com/repos/jdx/aube/releases/assets/489860006"
 provenance = "github-attestations"
 
 [[tools.bun]]
@@ -91,18 +91,18 @@ version = "2.12.0"
 backend = "gem:kamal"
 
 [[tools."github:earendil-works/pi"]]
-version = "0.82.0"
+version = "0.82.1"
 backend = "github:earendil-works/pi"
 
 [tools."github:earendil-works/pi"."platforms.linux-x64"]
-checksum = "sha256:791abd8043bf85deb4d090b905c9ebce4eb4f5776f919b4e3d371f69a6b977d0"
-url = "https://github.com/earendil-works/pi/releases/download/v0.82.0/pi-linux-x64.tar.gz"
-url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/488078165"
+checksum = "sha256:884a9dec7e0b75a54c4d1933c93a7d45af1fbb81c32964c1dd45d67fac1f6544"
+url = "https://github.com/earendil-works/pi/releases/download/v0.82.1/pi-linux-x64.tar.gz"
+url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/489434437"
 
 [tools."github:earendil-works/pi"."platforms.macos-arm64"]
-checksum = "sha256:6205debd0071ff56d765e0ee941f087f9a18d1f6c2f7dea17bdc8f97ff3cf9c1"
-url = "https://github.com/earendil-works/pi/releases/download/v0.82.0/pi-darwin-arm64.tar.gz"
-url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/488078170"
+checksum = "sha256:ca5b660ee0dbf2b4169f69753cf60f4e0edddff4a49427cdd34660e41280249f"
+url = "https://github.com/earendil-works/pi/releases/download/v0.82.1/pi-darwin-arm64.tar.gz"
+url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/489434434"
 
 [[tools."github:larksuite/cli"]]
 version = "1.0.77"
