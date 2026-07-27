@@ -58,7 +58,7 @@ def test_inspect_host_reports_capabilities_and_their_invalid_transition(
     (repo_root / "generated/functions/_mise.zsh").write_text(
         f"command {canonical_mise}\n",
     )
-    for binary_name in ("atuin", "op-cache"):
+    for binary_name in ("op-cache",):
         binary_path = repo_root / "generated/bin" / binary_name
         binary_path.parent.mkdir(parents=True, exist_ok=True)
         binary_path.write_bytes(b"binary")
@@ -135,6 +135,7 @@ def test_inspect_host_reports_capabilities_and_their_invalid_transition(
         "starship",
         "herdr",
         "atuin",
+        "zoxide",
         "codex",
         "macos-session-health",
         "bag-mode",
@@ -741,17 +742,20 @@ def test_linux_lite_check_requires_only_git_and_mise_and_reports_legacy_path(
         if finding.check.startswith("executable.")
     }
     assert executable_checks == {
+        "executable.atuin",
         "executable.git",
         "executable.herdr",
         "executable.mise",
         "executable.skillshare",
         "executable.starship",
+        "executable.zoxide",
     }
-    assert findings["executable.herdr"].severity is Severity.WARN
-    assert findings["executable.herdr"].action == (
-        "Preview with mise run mise-sync, then apply with "
-        "mise run mise-sync -- --apply."
-    )
+    for command in ("herdr", "atuin", "zoxide"):
+        assert findings[f"executable.{command}"].severity is Severity.WARN
+        assert findings[f"executable.{command}"].action == (
+            "Preview with mise run mise-sync, then apply with "
+            "mise run mise-sync -- --apply."
+        )
     assert findings["shell.repo_commands"].severity is Severity.WARN
     assert findings["shell.repo_commands"].path == legacy_bin
 
@@ -1435,7 +1439,7 @@ def test_inspect_host_reports_stale_owned_completion_when_tool_is_missing(
     assert finding.path == stale
 
 
-def test_inspect_host_rejects_empty_or_non_executable_owned_binary(
+def test_inspect_host_reports_retired_atuin_and_invalid_owned_binary(
     tmp_path: Path,
 ) -> None:
     repo_root = tmp_path / "repo"
@@ -1456,7 +1460,7 @@ def test_inspect_host_rejects_empty_or_non_executable_owned_binary(
     )
     findings = {finding.code: finding for finding in report.findings}
 
-    assert findings["runtime.binary.atuin_invalid"].severity is Severity.WARN
+    assert findings["runtime.binary.atuin_unowned"].severity is Severity.WARN
     assert findings["runtime.binary.op-cache_invalid"].severity is Severity.WARN
 
 

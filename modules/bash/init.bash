@@ -25,6 +25,21 @@ case $- in
       fi
       unset _dotfiles_starship_init
     fi
+    alias ..='cd ..'
+    alias ...='cd ../..'
+    if command -v atuin >/dev/null 2>&1; then
+      if _dotfiles_atuin_init="$(atuin init bash --disable-up-arrow 2>/dev/null)"; then
+        eval "$_dotfiles_atuin_init"
+      fi
+      unset _dotfiles_atuin_init
+    fi
+    if command -v zoxide >/dev/null 2>&1; then
+      if _dotfiles_zoxide_init="$(zoxide init bash --cmd j 2>/dev/null)"; then
+        eval "$_dotfiles_zoxide_init"
+      fi
+      unset _dotfiles_zoxide_init
+    fi
+    bind '"\C-w": "\e\C-?"'
     # Herdr panes retain SSH_TTY, so HERDR_ENV is the recursion boundary.
     # HERDR_SSH_AUTOSTART=0 leaves an explicit recovery path to the shell.
     if [ -n "${SSH_TTY:-}" ] && [ -z "${HERDR_ENV:-}" ] && \

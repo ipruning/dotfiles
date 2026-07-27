@@ -74,6 +74,15 @@ url = "https://github.com/oven-sh/bun/releases/download/bun-v1.3.14/bun-windows-
 checksum = "sha256:538f9c846355d9e847b2671bc00c47da4229a0befb24df3282b739770f3b475f"
 url = "https://github.com/oven-sh/bun/releases/download/bun-v1.3.14/bun-windows-x64-baseline.zip"
 
+[[tools."cargo:https://github.com/ipruning/atuin"]]
+version = "rev:f12a28548ad2189de3a06be547999493f1614a78"
+backend = "cargo:https://github.com/ipruning/atuin"
+
+[tools."cargo:https://github.com/ipruning/atuin".options]
+bin = "atuin"
+crate = "atuin"
+locked = "true"
+
 [[tools.deno]]
 version = "2.9.4"
 backend = "core:deno"
@@ -131,6 +140,20 @@ url_api = "https://api.github.com/repos/lycorp-jp/sim-use/releases/assets/487844
 checksum = "sha256:4bad411e9c05233391ad06ff35523dbaf74868f42a8005b9de6c4ff6e96f5208"
 url = "https://github.com/lycorp-jp/sim-use/releases/download/v0.11.0/sim-use-v0.11.0.tar.gz"
 url_api = "https://api.github.com/repos/lycorp-jp/sim-use/releases/assets/487844367"
+
+[[tools."github:runkids/skillshare"]]
+version = "0.20.22"
+backend = "github:runkids/skillshare"
+
+[tools."github:runkids/skillshare"."platforms.linux-x64"]
+checksum = "sha256:f4f5a56f911490eca89b6e6cc1365aac389182e44a56b3b6aa6c12f279dd936e"
+url = "https://github.com/runkids/skillshare/releases/download/v0.20.22/skillshare_0.20.22_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/483675047"
+
+[tools."github:runkids/skillshare"."platforms.macos-arm64"]
+checksum = "sha256:9ea63bdba7a8c69b43b8799537e4456e954fd471dc0d7f683c634922e64d53ef"
+url = "https://github.com/runkids/skillshare/releases/download/v0.20.22/skillshare_0.20.22_darwin_arm64.tar.gz"
+url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/483675056"
 
 [[tools."github:schpet/linear-cli"]]
 version = "2.3.0"
@@ -337,3 +360,17 @@ url = "https://ziglang.org/download/0.16.0/zig-x86_64-macos-0.16.0.tar.xz"
 [tools.zig."platforms.windows-x64"]
 checksum = "sha256:68659eb5f1e4eb1437a722f1dd889c5a322c9954607f5edcf337bc3684a75a7e"
 url = "https://ziglang.org/download/0.16.0/zig-x86_64-windows-0.16.0.zip"
+
+[[tools.zoxide]]
+version = "0.10.0"
+backend = "aqua:ajeetdsouza/zoxide"
+
+[tools.zoxide."platforms.linux-x64"]
+checksum = "sha256:2d93385b99f3e82cf2701609a1bffcad863fbeb75aa3fe7eb6be4d29be68b1ae"
+url = "https://github.com/ajeetdsouza/zoxide/releases/download/v0.10.0/zoxide-0.10.0-x86_64-unknown-linux-musl.tar.gz"
+url_api = "https://api.github.com/repos/ajeetdsouza/zoxide/releases/assets/466316293"
+
+[tools.zoxide."platforms.macos-arm64"]
+checksum = "sha256:b55ae6f2f5f23d0a6ccb3bd4eeb2af9c7e0a6556e5255c82100e40305129bbb0"
+url = "https://github.com/ajeetdsouza/zoxide/releases/download/v0.10.0/zoxide-0.10.0-aarch64-apple-darwin.tar.gz"
+url_api = "https://api.github.com/repos/ajeetdsouza/zoxide/releases/assets/466316174"

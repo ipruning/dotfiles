@@ -138,12 +138,6 @@ def _update_steps(home: Path) -> tuple[UpdateStep, ...]:
         # tool state, which is worse than waiting out a slow upgrade.
         UpdateStep("brew.packages", "brew", ("brew", "upgrade"), 3600),
         UpdateStep(
-            "skillshare",
-            "skillshare",
-            ("skillshare", "upgrade", "--cli", "--force"),
-            300,
-        ),
-        UpdateStep(
             "mise.self",
             "mise",
             (mise_executable, "self-update", "--yes", "--no-plugins"),
