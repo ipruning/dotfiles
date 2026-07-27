@@ -44,6 +44,7 @@ def _check_executable(
     *,
     required: bool,
     executable_finder: ExecutableFinder,
+    missing_action: str | None = None,
 ) -> Finding:
     executable = executable_finder(tool)
     if executable:
@@ -60,7 +61,7 @@ def _check_executable(
         severity,
         f"executable.{tool}.missing",
         f"{tool} is not available on PATH",
-        action=f"Install {tool} if this host needs that capability.",
+        action=missing_action or f"Install {tool} if this host needs that capability.",
     )
 
 
@@ -518,6 +519,17 @@ def inspect_host(
             "starship",
             required=False,
             executable_finder=executable_finder,
+        ),
+    )
+    findings.append(
+        _check_executable(
+            "herdr",
+            required=False,
+            executable_finder=executable_finder,
+            missing_action=(
+                "Preview with mise run mise-sync, then apply with "
+                "mise run mise-sync -- --apply."
+            ),
         ),
     )
     findings.extend(_dangling_repo_link_findings(repo_root, home))

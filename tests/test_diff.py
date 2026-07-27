@@ -107,6 +107,17 @@ class MultiApplicationRunner:
                     "error": None,
                 },
                 {
+                    "application": "herdr",
+                    "reference_path": str(
+                        repo_root / "reference/.config/herdr/config.toml"
+                    ),
+                    "live_path": str(home / ".config/herdr/config.toml"),
+                    "kind": "only-reference",
+                    "reference_kind": "file",
+                    "live_kind": None,
+                    "error": None,
+                },
+                {
                     "application": "hushlogin",
                     "reference_path": str(repo_root / "reference/.hushlogin"),
                     "live_path": str(home / ".hushlogin"),
@@ -136,7 +147,7 @@ class MultiApplicationRunner:
                     "error": None,
                 },
             ],
-            "summary": {"modified": 1, "only-reference": 5},
+            "summary": {"modified": 1, "only-reference": 6},
         }
 
 
@@ -174,8 +185,9 @@ def test_linux_lite_profile_excludes_macos_drift_by_default(tmp_path: Path) -> N
         "git",
         "mise",
         "skillshare",
+        "herdr",
     ]
-    assert report.summary == {"modified": 1, "only-reference": 2}
+    assert report.summary == {"modified": 1, "only-reference": 3}
 
     full = inspect_drift(
         tmp_path / "repo",
@@ -189,6 +201,7 @@ def test_linux_lite_profile_excludes_macos_drift_by_default(tmp_path: Path) -> N
         "git",
         "mise",
         "skillshare",
+        "herdr",
         "hushlogin",
         "uv",
         "aerospace",
