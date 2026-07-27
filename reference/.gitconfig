@@ -47,7 +47,7 @@ indentHeuristic = true
 prompt = false
 
 [difftool "hunk"]
-cmd = hunk difftool \"$LOCAL\" \"$REMOTE\"
+cmd = "if command -v hunk >/dev/null 2>&1; then exec hunk difftool \"$LOCAL\" \"$REMOTE\"; else git --no-pager diff --no-ext-diff --no-index -- \"$LOCAL\" \"$REMOTE\"; exit_code=$?; test \"$exit_code\" -le 1; fi"
 
 # git add -p needs a line-for-line colorizer, which hunk does not provide.
 # Delta is optional on Linux hosts; cat preserves the required one-to-one output.

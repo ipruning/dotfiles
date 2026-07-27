@@ -136,6 +136,8 @@ def test_inspect_host_reports_capabilities_and_their_invalid_transition(
         "herdr",
         "atuin",
         "zoxide",
+        "hunk",
+        "delta",
         "codex",
         "macos-session-health",
         "bag-mode",
@@ -716,6 +718,39 @@ def test_linux_lite_check_omits_macos_and_optional_desktop_capabilities(
     assert "macos.launchctl" not in checks
 
 
+def test_git_helper_checks_report_optional_capability_transition(
+    tmp_path: Path,
+) -> None:
+    unavailable: set[str] = set()
+
+    def finder(command: str) -> str | None:
+        return None if command in unavailable else f"/tools/{command}"
+
+    ready = inspect_host(
+        tmp_path / "repo",
+        tmp_path / "home",
+        executable_finder=finder,
+        system_name="Linux",
+    )
+    ready_findings = {finding.check: finding for finding in ready.findings}
+    for command in ("hunk", "delta"):
+        assert ready_findings[f"executable.{command}"].severity is Severity.OK
+
+    unavailable.update(("hunk", "delta"))
+    degraded = inspect_host(
+        tmp_path / "repo",
+        tmp_path / "home",
+        executable_finder=finder,
+        system_name="Linux",
+    )
+    degraded_findings = {finding.check: finding for finding in degraded.findings}
+
+    assert degraded_findings["executable.hunk"].severity is Severity.WARN
+    assert "Install Hunk" in (degraded_findings["executable.hunk"].action or "")
+    assert degraded_findings["executable.delta"].severity is Severity.WARN
+    assert "Install git-delta" in (degraded_findings["executable.delta"].action or "")
+
+
 def test_linux_lite_check_requires_only_git_and_mise_and_reports_legacy_path(
     tmp_path: Path,
     monkeypatch,
@@ -743,8 +778,10 @@ def test_linux_lite_check_requires_only_git_and_mise_and_reports_legacy_path(
     }
     assert executable_checks == {
         "executable.atuin",
+        "executable.delta",
         "executable.git",
         "executable.herdr",
+        "executable.hunk",
         "executable.mise",
         "executable.skillshare",
         "executable.starship",
@@ -756,6 +793,10 @@ def test_linux_lite_check_requires_only_git_and_mise_and_reports_legacy_path(
             "Preview with mise run mise-sync, then apply with "
             "mise run mise-sync -- --apply."
         )
+    assert findings["executable.hunk"].severity is Severity.WARN
+    assert "Install Hunk" in (findings["executable.hunk"].action or "")
+    assert findings["executable.delta"].severity is Severity.WARN
+    assert "Install git-delta" in (findings["executable.delta"].action or "")
     assert findings["shell.repo_commands"].severity is Severity.WARN
     assert findings["shell.repo_commands"].path == legacy_bin
 

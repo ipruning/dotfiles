@@ -544,6 +544,24 @@ def inspect_host(
                 ),
             ),
         )
+    for command, missing_action in (
+        (
+            "hunk",
+            "Install Hunk to enable enhanced Git paging and diffs.",
+        ),
+        (
+            "delta",
+            "Install git-delta to enable syntax-colored interactive staging.",
+        ),
+    ):
+        findings.append(
+            _check_executable(
+                command,
+                required=False,
+                executable_finder=executable_finder,
+                missing_action=missing_action,
+            ),
+        )
     findings.extend(_dangling_repo_link_findings(repo_root, home))
     if active_profile is HostProfile.LINUX_LITE:
         findings.append(_bash_integration_finding(repo_root, home))
