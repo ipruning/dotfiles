@@ -107,18 +107,20 @@ It preserves the existing `~/.bashrc`, adds one marked block that loads
 `modules/bash/init.bash`, and adds `~/.private.gitconfig` to Git's includes. It
 does not create an identity, install optional tools, clone private repositories,
 or synchronize Skillshare extras. The Bash module adds `~/.local/bin` and mise's
-shim directory to `PATH`, then activates mise and, when available, Starship in
-interactive shells. An interactive SSH login starts Herdr when it is installed;
-Herdr-owned panes and `HERDR_SSH_AUTOSTART=0` recovery shells remain ordinary
-shells. It does not expose `modules/bin` or `generated/bin` on Linux. The managed
-block is placed before Ubuntu's non-interactive early return, so direct SSH
-commands also receive the user and mise paths without interactive shell
-initialization.
+shim directory to `PATH`, then activates mise and guarded Starship, Atuin, and
+Zoxide integrations in interactive shells. It provides `..`, `...`, a `Ctrl-W`
+binding that deletes the same path segment as the macOS Zsh configuration, and
+Zoxide's `j` command while leaving the ordinary up arrow to Bash. An interactive
+SSH login starts Herdr when it is installed; Herdr-owned panes and
+`HERDR_SSH_AUTOSTART=0` recovery shells remain ordinary shells. It does not
+expose `modules/bin` or `generated/bin` on Linux. The managed block is placed
+before Ubuntu's non-interactive early return, so direct SSH commands also
+receive the user and mise paths without interactive shell initialization.
 
-The Linux Lite drift profile observes Git, Mise, Starship availability, and
-Skillshare configuration. Starship and Skillshare remain soft capabilities: a
-missing executable, configuration, or source is a warning for a human or AI
-operator to evaluate, not a setup action.
+The Linux Lite drift profile observes Git, Mise, portable Atuin configuration,
+and the availability of Starship, Atuin, Zoxide, Herdr, and Skillshare.
+Optional capabilities remain warnings: inspection never installs a missing
+tool or restores configuration automatically.
 
 ## Linux Zsh contract
 
@@ -140,8 +142,8 @@ there. The contract is a split between experience and commands:
   so bootstrap uses the same reviewed tool artifacts on both platforms.
 
 What is not promised: optional tools still degrade silently when absent.
-Starship is declared in the shared global Mise configuration for a consistent
-personal prompt; Atuin and Television remain host-managed. `mise run shell`
+Starship, Atuin, and Zoxide are declared in the shared global Mise configuration
+for a consistent personal shell; Television remains host-managed. `mise run shell`
 reflects the same asymmetry — it syntax-checks Zsh files only where `zsh` is
 installed and marks them not-applicable elsewhere rather than failing.
 
@@ -248,6 +250,17 @@ and updates; do not combine it with Homebrew, Herdr's direct installer, or
 ```bash
 mise run restore -- herdr
 mise run restore -- herdr --apply
+```
+
+Atuin and Zoxide follow the same Mise ownership rule. Atuin is compiled on each
+host from the custom fork commit pinned in the shared declaration; the lockfile
+records that exact revision. Only `~/.config/atuin/config.toml` is portable and
+restored through Mackup. Atuin history, login and encryption state, and
+Zoxide's database stay local to each host:
+
+```bash
+mise run restore -- atuin
+mise run restore -- atuin --apply
 ```
 
 ## Host health
@@ -392,10 +405,9 @@ mise run runtime -- --build --apply
 This refreshes the sources named by the runtime plan under the ignored
 `generated/sources/`, builds them with their declared commands, and atomically
 installs the artifacts into `generated/bin/`. Any other binary placed there
-must name its own owner; `mise run check` reports unknown binaries. When a
-self-built binary generates shell initialization, the build completes before
-that initialization is refreshed. A failed source refresh or build leaves the
-previous binary and generated initialization together.
+must name its own owner; `mise run check` reports unknown binaries. Atuin and
+Zoxide are not runtime-built binaries; Mise owns them. A failed source refresh
+or build leaves the previous owned binary in place.
 
 ## Host inventory
 

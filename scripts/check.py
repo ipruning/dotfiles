@@ -532,6 +532,18 @@ def inspect_host(
             ),
         ),
     )
+    for command in ("atuin", "zoxide"):
+        findings.append(
+            _check_executable(
+                command,
+                required=False,
+                executable_finder=executable_finder,
+                missing_action=(
+                    "Preview with mise run mise-sync, then apply with "
+                    "mise run mise-sync -- --apply."
+                ),
+            ),
+        )
     findings.extend(_dangling_repo_link_findings(repo_root, home))
     if active_profile is HostProfile.LINUX_LITE:
         findings.append(_bash_integration_finding(repo_root, home))

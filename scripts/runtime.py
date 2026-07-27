@@ -140,12 +140,6 @@ WASM_SPECS = (
 
 LOCAL_BINARY_SPECS = (
     (
-        "atuin",
-        "https://github.com/ipruning/atuin.git",
-        ("cargo", "build", "--release", "-p", "atuin", "--locked"),
-        Path("target/release/atuin"),
-    ),
-    (
         "op-cache",
         "https://github.com/craftzdog/op-cache.git",
         ("cargo", "build", "--release", "--locked"),
@@ -199,13 +193,13 @@ def repo_aware_finder(
     repo_root: Path,
     executable_finder: ExecutableFinder,
 ) -> ExecutableFinder:
-    """Resolve tools from PATH or from the repository's own built binaries.
+    """Resolve tools from PATH or from repository-built binaries.
 
     Task environments do not expose generated/bin, so gating on PATH alone
-    would treat self-built tools (atuin) as absent and remove their owned
-    runtime files. A mise shim only proves a tool was installed at some
-    point; after a configuration change the shim can outlive its tool, so
-    shim hits are validated with `mise which` before they count as present.
+    would treat tools in LOCAL_BINARY_SPECS as absent. A mise shim only proves
+    a tool was installed at some point; after a configuration change the shim
+    can outlive its tool, so shim hits are validated with `mise which` before
+    they count as present.
     """
     shims_dir = _mise_shims_dir()
     shim_health: dict[str, bool] = {}
@@ -668,10 +662,9 @@ def _command_environment(spec: RuntimeSpec, home: Path) -> dict[str, str]:
     environment["HOME"] = str(home)
     owned_root = spec.target if spec.target is not None else spec.working_directory
     if spec.command and owned_root is not None and spec.tool in SELF_BUILT_TOOLS:
-        # Only a self-built tool (atuin) lives under generated/bin and needs it
-        # on PATH. Prepending it for every command would let a stale or unowned
-        # generated/bin/<tool> (e.g. codex, git) shadow the host executable that
-        # plan_runtime actually checked.
+        # Tools in LOCAL_BINARY_SPECS live under generated/bin and need it on
+        # PATH. Prepending it for every command would let a stale or unowned
+        # generated/bin/<tool> shadow the host executable plan_runtime checked.
         owned_bin = owned_root.parent.parent / "bin"
         environment["PATH"] = f"{owned_bin}{os.pathsep}{environment.get('PATH', '')}"
     environment.update(dict(spec.environment))

@@ -11,6 +11,7 @@ yarn = "aqua:yarnpkg/berry"
 
 [tools]
 "aqua:yarnpkg/berry" = "latest"
+"cargo:https://github.com/ipruning/atuin" = { version = "rev:f12a28548ad2189de3a06be547999493f1614a78", crate = "atuin", bin = "atuin", locked = true }
 "gem:kamal" = "latest"
 "github:earendil-works/pi" = "latest"
 "github:larksuite/cli" = "latest"
@@ -32,6 +33,7 @@ rust = "stable"
 starship = "latest"
 uv = "latest"
 zig = "latest"
+zoxide = "latest"
 
 [settings]
 auto_install = false

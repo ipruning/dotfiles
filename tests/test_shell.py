@@ -313,6 +313,85 @@ def test_bash_init_loads_starship_only_for_interactive_shells(tmp_path: Path) ->
     assert "stale shim" not in failing_shim.stderr
 
 
+def test_bash_init_adds_navigation_editing_and_guarded_history_tools(
+    tmp_path: Path,
+) -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    bash_init = repo_root / "modules/bash/init.bash"
+    home = tmp_path / "home"
+    bin_dir = tmp_path / "bin"
+    home.mkdir()
+    bin_dir.mkdir()
+    invocation_log = tmp_path / "shell-tools.log"
+    for tool, output in (
+        ("atuin", "export ATUIN_READY=1"),
+        ("zoxide", "export ZOXIDE_READY=1"),
+    ):
+        executable = bin_dir / tool
+        executable.write_text(
+            "#!/bin/sh\n"
+            f"printf '%s %s\\n' {tool} \"$*\" >> {invocation_log}\n"
+            f"printf '%s\\n' '{output}'\n",
+        )
+        executable.chmod(0o755)
+    bash = shutil.which("bash")
+    assert bash is not None
+    environment = {
+        "HOME": str(home),
+        "PATH": f"{bin_dir}:/usr/bin:/bin",
+    }
+
+    completed = subprocess.run(
+        [
+            bash,
+            "--noprofile",
+            "--norc",
+            "-ic",
+            f'. "{bash_init}"; '
+            "alias ..; alias ...; "
+            "bind -s; "
+            'printf "READY=%s:%s\\n" "$ATUIN_READY" "$ZOXIDE_READY"',
+        ],
+        env=environment,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert completed.returncode == 0
+    assert "alias ..='cd ..'" in completed.stdout
+    assert "alias ...='cd ../..'" in completed.stdout
+    assert '"\\C-w": "\\e\\C-?"' in completed.stdout
+    assert "READY=1:1" in completed.stdout
+    assert invocation_log.read_text().splitlines() == [
+        "atuin init bash --disable-up-arrow",
+        "zoxide init bash --cmd j",
+    ]
+
+    for tool in ("atuin", "zoxide"):
+        executable = bin_dir / tool
+        executable.write_text(
+            "#!/bin/sh\nprintf '%s\\n' 'stale shim' >&2\nexit 1\n",
+        )
+    degraded = subprocess.run(
+        [
+            bash,
+            "--noprofile",
+            "--norc",
+            "-ic",
+            f'. "{bash_init}"; '
+            'test -z "${ATUIN_READY:-}" && test -z "${ZOXIDE_READY:-}"',
+        ],
+        env=environment,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert degraded.returncode == 0
+    assert "stale shim" not in degraded.stderr
+
+
 def test_bash_init_autostarts_herdr_only_for_top_level_interactive_ssh(
     tmp_path: Path,
 ) -> None:
