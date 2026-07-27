@@ -108,10 +108,12 @@ It preserves the existing `~/.bashrc`, adds one marked block that loads
 does not create an identity, install optional tools, clone private repositories,
 or synchronize Skillshare extras. The Bash module adds `~/.local/bin` and mise's
 shim directory to `PATH`, then activates mise and, when available, Starship in
-interactive shells. It does not expose `modules/bin` or `generated/bin` on
-Linux. The managed block is placed before Ubuntu's non-interactive early return,
-so direct SSH commands also receive the user and mise paths without interactive
-shell initialization.
+interactive shells. An interactive SSH login starts Herdr when it is installed;
+Herdr-owned panes and `HERDR_SSH_AUTOSTART=0` recovery shells remain ordinary
+shells. It does not expose `modules/bin` or `generated/bin` on Linux. The managed
+block is placed before Ubuntu's non-interactive early return, so direct SSH
+commands also receive the user and mise paths without interactive shell
+initialization.
 
 The Linux Lite drift profile observes Git, Mise, Starship availability, and
 Skillshare configuration. Starship and Skillshare remain soft capabilities: a
@@ -238,6 +240,15 @@ services should use the distribution package when appropriate, or an explicit
 `~/.local/bin/mise -C <project> exec -- <tool>` command; they must not depend on
 global shims. A genuinely host-specific tool is an explicit exception, not a
 second global configuration truth.
+
+Herdr is part of this shared baseline on macOS and Linux. Mise owns its install
+and updates; do not combine it with Homebrew, Herdr's direct installer, or
+`herdr update`. Its portable configuration is restored independently:
+
+```bash
+mise run restore -- herdr
+mise run restore -- herdr --apply
+```
 
 ## Host health
 

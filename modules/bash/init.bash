@@ -25,6 +25,13 @@ case $- in
       fi
       unset _dotfiles_starship_init
     fi
+    # Herdr panes retain SSH_TTY, so HERDR_ENV is the recursion boundary.
+    # HERDR_SSH_AUTOSTART=0 leaves an explicit recovery path to the shell.
+    if [ -n "${SSH_TTY:-}" ] && [ -z "${HERDR_ENV:-}" ] && \
+      [ "${HERDR_SSH_AUTOSTART:-1}" != 0 ] && \
+      herdr --version >/dev/null 2>&1; then
+      exec herdr
+    fi
     ;;
 esac
 
