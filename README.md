@@ -263,6 +263,12 @@ mise run restore -- atuin
 mise run restore -- atuin --apply
 ```
 
+Skillshare is also part of the shared Mise baseline; `mise upgrade` owns its CLI
+updates on every host. Do not combine that install with Homebrew or
+`skillshare upgrade --cli`. GitHub CLI is intentionally platform-owned instead:
+the official GitHub APT repository owns it on Debian, while Homebrew owns it on
+macOS, so `gh` is not declared in the shared Mise configuration.
+
 ## Host health
 
 `mise run check` reports required executables and optional capabilities
@@ -324,11 +330,6 @@ authoritative list of supported updaters and the exact commands available on
 the current host. Any failed step makes the command exit non-zero. It
 deliberately does not run `brew cleanup`, `brew autoremove`, or `mise prune`;
 removal and pruning require a separate, explicit operation.
-
-An installed Skillshare CLI updates through `skillshare upgrade --cli --force`,
-which delegates to Homebrew when Homebrew owns the binary and otherwise uses
-its native update path. This updates the CLI only; it does not pull or sync skill
-content.
 
 For mise, the preview records the active installed tool versions. An apply
 updates the standalone CLI first, then passes that explicit list to

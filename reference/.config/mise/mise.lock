@@ -141,6 +141,20 @@ checksum = "sha256:4bad411e9c05233391ad06ff35523dbaf74868f42a8005b9de6c4ff6e96f5
 url = "https://github.com/lycorp-jp/sim-use/releases/download/v0.11.0/sim-use-v0.11.0.tar.gz"
 url_api = "https://api.github.com/repos/lycorp-jp/sim-use/releases/assets/487844367"
 
+[[tools."github:runkids/skillshare"]]
+version = "0.20.22"
+backend = "github:runkids/skillshare"
+
+[tools."github:runkids/skillshare"."platforms.linux-x64"]
+checksum = "sha256:f4f5a56f911490eca89b6e6cc1365aac389182e44a56b3b6aa6c12f279dd936e"
+url = "https://github.com/runkids/skillshare/releases/download/v0.20.22/skillshare_0.20.22_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/483675047"
+
+[tools."github:runkids/skillshare"."platforms.macos-arm64"]
+checksum = "sha256:9ea63bdba7a8c69b43b8799537e4456e954fd471dc0d7f683c634922e64d53ef"
+url = "https://github.com/runkids/skillshare/releases/download/v0.20.22/skillshare_0.20.22_darwin_arm64.tar.gz"
+url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/483675056"
+
 [[tools."github:schpet/linear-cli"]]
 version = "2.3.0"
 backend = "github:schpet/linear-cli"
