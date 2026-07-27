@@ -118,9 +118,10 @@ before Ubuntu's non-interactive early return, so direct SSH commands also
 receive the user and mise paths without interactive shell initialization.
 
 The Linux Lite drift profile observes Git, Mise, portable Atuin configuration,
-and the availability of Starship, Atuin, Zoxide, Herdr, and Skillshare.
-Optional capabilities remain warnings: inspection never installs a missing
-tool or restores configuration automatically.
+and the availability of Starship, Atuin, Zoxide, Herdr, Skillshare, Hunk, and
+Delta. Optional capabilities remain warnings: inspection never installs a
+missing tool or restores configuration automatically. `mise run check --
+--strict` treats those warnings as failures.
 
 ## Linux Zsh contract
 
@@ -141,11 +142,13 @@ there. The contract is a split between experience and commands:
   lockfile contains URLs and checksums for both `macos-arm64` and `linux-x64`,
   so bootstrap uses the same reviewed tool artifacts on both platforms.
 
-What is not promised: optional tools still degrade silently when absent.
-Starship, Atuin, and Zoxide are declared in the shared global Mise configuration
-for a consistent personal shell; Television remains host-managed. `mise run shell`
-reflects the same asymmetry — it syntax-checks Zsh files only where `zsh` is
-installed and marks them not-applicable elsewhere rather than failing.
+What is not promised: an identical experience when optional tools are absent.
+Their integrations degrade gracefully, and `mise run check` reports
+profile-scoped missing capabilities. Starship, Atuin, and Zoxide are declared in
+the shared global Mise configuration for a consistent personal shell;
+Television remains host-managed. `mise run shell` reflects the same asymmetry —
+it syntax-checks Zsh files only where `zsh` is installed and marks them
+not-applicable elsewhere rather than failing.
 
 ## Configuration drift
 

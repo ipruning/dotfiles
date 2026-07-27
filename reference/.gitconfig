@@ -1,7 +1,8 @@
 [core]
 excludesfile = ~/.gitignore
 ignorecase = false
-pager = hunk pager
+# Hunk is optional on Linux hosts; retain ordinary paging when it is absent.
+pager = "sh -c 'if command -v hunk >/dev/null 2>&1; then exec hunk pager; elif command -v less >/dev/null 2>&1; then exec less; else exec cat; fi'"
 quotePath = false
 
 [init]
@@ -46,11 +47,12 @@ indentHeuristic = true
 prompt = false
 
 [difftool "hunk"]
-cmd = hunk difftool \"$LOCAL\" \"$REMOTE\"
+cmd = "if command -v hunk >/dev/null 2>&1; then exec hunk difftool \"$LOCAL\" \"$REMOTE\"; else git --no-pager diff --no-ext-diff --no-index -- \"$LOCAL\" \"$REMOTE\"; exit_code=$?; test \"$exit_code\" -le 1; fi"
 
 # git add -p needs a line-for-line colorizer, which hunk does not provide.
+# Delta is optional on Linux hosts; cat preserves the required one-to-one output.
 [interactive]
-diffFilter = delta --color-only
+diffFilter = "sh -c 'if command -v delta >/dev/null 2>&1; then exec delta --color-only; else exec cat; fi'"
 
 [filter "lfs"]
 required = true
