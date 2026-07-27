@@ -133,6 +133,7 @@ def test_inspect_host_reports_capabilities_and_their_invalid_transition(
         "tv",
         "launchctl",
         "starship",
+        "herdr",
         "atuin",
         "codex",
         "macos-session-health",
@@ -705,8 +706,10 @@ def test_linux_lite_check_omits_macos_and_optional_desktop_capabilities(
         profile="auto",
     )
 
-    checks = {finding.check for finding in report.findings}
+    findings = {finding.check: finding for finding in report.findings}
+    checks = set(findings)
     assert "shell.bash" in checks
+    assert findings["executable.herdr"].severity is Severity.OK
     assert "television.config" not in checks
     assert not any(check.startswith("zellij.") for check in checks)
     assert "macos.launchctl" not in checks
@@ -739,10 +742,16 @@ def test_linux_lite_check_requires_only_git_and_mise_and_reports_legacy_path(
     }
     assert executable_checks == {
         "executable.git",
+        "executable.herdr",
         "executable.mise",
         "executable.skillshare",
         "executable.starship",
     }
+    assert findings["executable.herdr"].severity is Severity.WARN
+    assert findings["executable.herdr"].action == (
+        "Preview with mise run mise-sync, then apply with "
+        "mise run mise-sync -- --apply."
+    )
     assert findings["shell.repo_commands"].severity is Severity.WARN
     assert findings["shell.repo_commands"].path == legacy_bin
 

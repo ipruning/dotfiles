@@ -1,0 +1,52 @@
+# Herdr configuration
+# Keep only intentional overrides; omitted values use Herdr defaults.
+
+# Setup is complete, so skip first-run onboarding.
+onboarding = false
+
+[theme]
+# Follow the host terminal's appearance using Herdr's default dark/light pair.
+auto_switch = true
+
+[ui]
+agent_panel_sort = "priority"
+
+[keys]
+# Match the former tmux prefix (C-s).
+prefix = "ctrl+s"
+
+# Direct pane navigation. Herdr intercepts these globally before the focused
+# shell or editor receives them; this is not vim-tmux-navigator passthrough.
+focus_pane_left = "ctrl+h"
+focus_pane_down = "ctrl+j"
+focus_pane_up = "ctrl+k"
+focus_pane_right = "ctrl+l"
+
+# Preserve the tmux split keys: `%` opens side by side, `"` opens stacked.
+split_vertical = "prefix+%"
+split_horizontal = 'prefix+"'
+
+# These plugin actions require the matching plugins to be installed explicitly.
+[[keys.command]]
+key = "prefix+t"
+type = "plugin_action"
+command = "tab-smart-rename.rename-now"
+description = "Smart rename current tab"
+
+[[keys.command]]
+key = "prefix+alt+t"
+type = "plugin_action"
+command = "tab-smart-rename.rename-all"
+description = "Force smart rename all tabs"
+
+[[keys.command]]
+key = "ctrl+shift+a"
+type = "plugin_action"
+command = "termscope.open"
+description = "Pick a visible file"
+
+[[keys.command]]
+key = "ctrl+e"
+type = "plugin_action"
+command = "termscope.open-links"
+description = "Pick a visible link"

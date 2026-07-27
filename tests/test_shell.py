@@ -313,6 +313,85 @@ def test_bash_init_loads_starship_only_for_interactive_shells(tmp_path: Path) ->
     assert "stale shim" not in failing_shim.stderr
 
 
+def test_bash_init_autostarts_herdr_only_for_top_level_interactive_ssh(
+    tmp_path: Path,
+) -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    bash_init = repo_root / "modules/bash/init.bash"
+    home = tmp_path / "home"
+    bin_dir = tmp_path / "bin"
+    home.mkdir()
+    bin_dir.mkdir()
+    herdr = bin_dir / "herdr"
+    herdr.write_text(
+        "#!/bin/sh\n"
+        'if [ "${1:-}" = --version ]; then\n'
+        "  exit 0\n"
+        "fi\n"
+        "printf '%s\\n' HERDR_STARTED\n",
+    )
+    herdr.chmod(0o755)
+    bash = shutil.which("bash")
+    assert bash is not None
+    environment = {
+        "HOME": str(home),
+        "PATH": f"{bin_dir}:/usr/bin:/bin",
+        "SSH_TTY": "/dev/pts/test",
+    }
+
+    started = subprocess.run(
+        [
+            bash,
+            "--noprofile",
+            "--norc",
+            "-ic",
+            f'. "{bash_init}"; printf "%s\\n" SHELL_CONTINUED',
+        ],
+        env=environment,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert started.returncode == 0
+    assert started.stdout.splitlines() == ["HERDR_STARTED"]
+
+    for bypass in ({"HERDR_ENV": "1"}, {"HERDR_SSH_AUTOSTART": "0"}):
+        bypassed = subprocess.run(
+            [
+                bash,
+                "--noprofile",
+                "--norc",
+                "-ic",
+                f'. "{bash_init}"; printf "%s\\n" SHELL_CONTINUED',
+            ],
+            env=environment | bypass,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+
+        assert bypassed.returncode == 0
+        assert bypassed.stdout.splitlines() == ["SHELL_CONTINUED"]
+
+    noninteractive = subprocess.run(
+        [
+            bash,
+            "--noprofile",
+            "--norc",
+            "-c",
+            f'. "{bash_init}"; printf "%s\\n" SHELL_CONTINUED',
+        ],
+        env=environment,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert noninteractive.returncode == 0
+    assert noninteractive.stdout.splitlines() == ["SHELL_CONTINUED"]
+
+
 def test_check_shell_files_requires_missing_tools_explicitly(tmp_path: Path) -> None:
     repo_root = _tracked_repo(
         tmp_path,
