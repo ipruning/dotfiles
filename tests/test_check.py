@@ -1,5 +1,5 @@
-import json
 import hashlib
+import json
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -7,7 +7,7 @@ import scripts.check as check_module
 import scripts.check_mise as check_mise_module
 import scripts.check_skillshare as check_skillshare_module
 from scripts.check import inspect_host
-from scripts.models import Severity
+from scripts.models import Finding, Severity
 
 
 def test_inspect_host_reports_capabilities_and_their_invalid_transition(
@@ -99,7 +99,8 @@ def test_inspect_host_reports_capabilities_and_their_invalid_transition(
             "installed": True,
             "loaded": True,
             "notification_configured": True,
-            "last_snapshot_at": datetime.now(UTC)
+            "last_snapshot_at": datetime
+            .now(UTC)
             .isoformat(timespec="seconds")
             .replace("+00:00", "Z"),
             "consecutive_delivery_failures": 0,
@@ -674,7 +675,7 @@ def test_skillshare_targets_report_ready_local_and_broken_entries(
         target_is_directory=True,
     )
 
-    findings: dict[str, list] = {}
+    findings: dict[str, list[Finding]] = {}
     for finding in check_skillshare_module._skillshare_findings(home):
         findings.setdefault(finding.check, []).append(finding)
 
@@ -707,7 +708,7 @@ def test_skillshare_targets_report_required_path_contract(tmp_path: Path) -> Non
         "      path: ~/.wrong/skills\n",
     )
 
-    findings: dict[str, list] = {}
+    findings: dict[str, list[Finding]] = {}
     for finding in check_skillshare_module._skillshare_findings(home):
         findings.setdefault(finding.check, []).append(finding)
 
@@ -1084,7 +1085,7 @@ def test_unreadable_bashrc_is_not_reported_as_missing(
     assert finding.severity is Severity.WARN
 
 
-def _session_health_stub(tmp_path: Path, record: dict) -> Path:
+def _session_health_stub(tmp_path: Path, record: dict[str, object]) -> Path:
     executable = tmp_path / "bin/macos-session-health"
     executable.parent.mkdir(parents=True, exist_ok=True)
     executable.write_text(
@@ -1094,7 +1095,10 @@ def _session_health_stub(tmp_path: Path, record: dict) -> Path:
     return executable
 
 
-def _session_health_codes(tmp_path: Path, record: dict) -> dict[str, str]:
+def _session_health_codes(
+    tmp_path: Path,
+    record: dict[str, object],
+) -> dict[str, str]:
     executable = _session_health_stub(tmp_path, record)
 
     def finder(command: str) -> str | None:
@@ -1227,7 +1231,12 @@ def _write_module_source(source: Path, body: str) -> None:
     source.write_text(f"#!/bin/bash\n{body}\n")
 
 
-def _bag_mode_stub(tmp_path: Path, record: dict, *, version: str) -> Path:
+def _bag_mode_stub(
+    tmp_path: Path,
+    record: dict[str, object],
+    *,
+    version: str,
+) -> Path:
     executable = tmp_path / "bin/bag-mode"
     executable.parent.mkdir(parents=True, exist_ok=True)
     executable.write_text(
@@ -1239,7 +1248,7 @@ def _bag_mode_stub(tmp_path: Path, record: dict, *, version: str) -> Path:
     return executable
 
 
-def _maxfiles_stub(tmp_path: Path, record: dict) -> Path:
+def _maxfiles_stub(tmp_path: Path, record: dict[str, object]) -> Path:
     executable = tmp_path / "bin/macos-maxfiles"
     executable.parent.mkdir(parents=True, exist_ok=True)
     executable.write_text(
@@ -1249,7 +1258,11 @@ def _maxfiles_stub(tmp_path: Path, record: dict) -> Path:
     return executable
 
 
-def _module_probe_findings(tmp_path: Path, finder, prefix: str) -> dict:
+def _module_probe_findings(
+    tmp_path: Path,
+    finder,
+    prefix: str,
+) -> dict[str, Finding]:
     report = inspect_host(
         tmp_path / "repo",
         tmp_path / "home",
@@ -1296,7 +1309,9 @@ def test_bag_mode_probe_flags_version_drift_and_stalled_controller(
     assert findings["bag_mode.lifecycle"].code == "bag_mode.stalled"
     assert findings["bag_mode.version"].severity is Severity.WARN
     assert findings["bag_mode.version"].code == "bag_mode.version_drift"
-    assert "upgrade" in findings["bag_mode.version"].action
+    action = findings["bag_mode.version"].action
+    assert action is not None
+    assert "upgrade" in action
 
 
 def test_bag_mode_probe_reports_recovery_then_clean_stop(tmp_path: Path) -> None:
@@ -1325,7 +1340,9 @@ def test_bag_mode_probe_reports_recovery_then_clean_stop(tmp_path: Path) -> None
 
     pending = _module_probe_findings(tmp_path, finder, "bag_mode.")
     assert pending["bag_mode.lifecycle"].code == "bag_mode.recovery_pending"
-    assert "bag-mode recover" in pending["bag_mode.lifecycle"].action
+    action = pending["bag_mode.lifecycle"].action
+    assert action is not None
+    assert "bag-mode recover" in action
     assert pending["bag_mode.version"].code == "bag_mode.version_current"
     assert pending["bag_mode.version"].severity is Severity.OK
 
@@ -1440,7 +1457,9 @@ def test_maxfiles_probe_flags_limit_drift_and_unloaded_daemon(
     assert drifted["maxfiles.agent"].code == "maxfiles.agent_ready"
     assert drifted["maxfiles.limits"].severity is Severity.WARN
     assert drifted["maxfiles.limits"].code == "maxfiles.limits_drift"
-    assert "install" in drifted["maxfiles.limits"].action
+    action = drifted["maxfiles.limits"].action
+    assert action is not None
+    assert "install" in action
 
     _maxfiles_stub(
         tmp_path,

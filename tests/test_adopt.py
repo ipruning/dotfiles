@@ -12,7 +12,6 @@ from scripts.adopt import (
     plan_adopt,
 )
 from scripts.models import Drift, DriftKind, FileKind
-
 from tests.conftest import REPO_ROOT, run_scripts_module
 
 

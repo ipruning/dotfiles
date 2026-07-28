@@ -590,9 +590,10 @@ def inspect_host(
     )
     if mise_shims := _mise_shim_finding(home):
         findings.append(mise_shims)
-    if executable_finder is shutil.which:
-        if project_uv := _mise_project_uv_finding(repo_root, home):
-            findings.append(project_uv)
+    if executable_finder is shutil.which and (
+        project_uv := _mise_project_uv_finding(repo_root, home)
+    ):
+        findings.append(project_uv)
     if active_system == "Linux":
         findings.extend(_mise_systemd_shim_findings(home))
     findings.extend(_private_git_findings(home))

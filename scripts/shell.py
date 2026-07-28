@@ -12,7 +12,6 @@ from pathlib import Path
 from .models import ExecutableFinder, Finding, FindingReport, Severity
 from .render import emit_error, finding_document, render_findings
 
-
 BASH_SUFFIXES = {".bash", ".sh"}
 ZSH_SUFFIXES = {".zsh"}
 # Startup dotfiles carry no shell suffix or shebang but are real shell that

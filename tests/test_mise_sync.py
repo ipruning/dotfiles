@@ -12,14 +12,12 @@ def _write_mise(home: Path, log_path: Path, *, install_exit: int = 0) -> Path:
     executable.parent.mkdir(parents=True)
     config_listing = executable.parent / "mise-configs.json"
     config_listing.write_text(
-        json.dumps(
-            [
-                {
-                    "path": str(home / ".config/mise/config.toml"),
-                    "tools": [],
-                }
-            ]
-        )
+        json.dumps([
+            {
+                "path": str(home / ".config/mise/config.toml"),
+                "tools": [],
+            }
+        ])
     )
     executable.write_text(
         "#!/bin/sh\n"
@@ -39,9 +37,9 @@ def _write_mise(home: Path, log_path: Path, *, install_exit: int = 0) -> Path:
 
 def _set_loaded_configs(executable: Path, config_paths: list[Path]) -> None:
     (executable.parent / "mise-configs.json").write_text(
-        json.dumps(
-            [{"path": str(config_path), "tools": []} for config_path in config_paths]
-        )
+        json.dumps([
+            {"path": str(config_path), "tools": []} for config_path in config_paths
+        ])
     )
 
 
@@ -337,8 +335,10 @@ def test_mise_sync_accepts_a_previous_tracked_backend_without_its_new_alias(
             "aqua:yarnpkg/berry",
         ),
         (
-            '[tool_alias]\nnode = "aqua:evil/thing"\n\n'
-            '[tools]\n"aqua:evil/thing" = "latest"\n',
+            (
+                '[tool_alias]\nnode = "aqua:evil/thing"\n\n'
+                '[tools]\n"aqua:evil/thing" = "latest"\n'
+            ),
             ["aqua:evil/thing"],
             "node",
             "aqua:evil/thing",
@@ -356,8 +356,10 @@ def test_mise_sync_accepts_a_previous_tracked_backend_without_its_new_alias(
             "aqua:evil/thing",
         ),
         (
-            '[tool_alias]\nnode = "aqua:evil/thing"\n\n'
-            '[tools]\n"aqua:yarnpkg/berry" = "latest"\n',
+            (
+                '[tool_alias]\nnode = "aqua:evil/thing"\n\n'
+                '[tools]\n"aqua:yarnpkg/berry" = "latest"\n'
+            ),
             [],
             "node",
             "aqua:evil/thing",

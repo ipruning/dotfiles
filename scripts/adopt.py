@@ -229,7 +229,9 @@ def _copy_live_into_reference(live_path: Path, reference_path: Path) -> None:
             shutil.copytree(live_path, staged, symlinks=True)
             _publish_staged_reference(staged, reference_path)
         return
-    descriptor = tempfile.NamedTemporaryFile(
+    # The file must be closed before copy2 replaces it and retained until the
+    # staged reference is published, so a context manager is not appropriate.
+    descriptor = tempfile.NamedTemporaryFile(  # noqa: SIM115
         dir=reference_path.parent,
         prefix=".adopt-",
         delete=False,

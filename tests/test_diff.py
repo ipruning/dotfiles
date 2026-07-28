@@ -2,11 +2,9 @@ import configparser
 import json
 import subprocess
 from pathlib import Path
-from typing import cast
+from typing import cast, override
 
 import pytest
-
-from tests.conftest import mackup_cfg
 
 from scripts.diff import (
     DriftProtocolError,
@@ -16,6 +14,7 @@ from scripts.diff import (
     main,
 )
 from scripts.profiles import HostProfile
+from tests.conftest import mackup_cfg
 
 
 def _drift_document(kind: str, error: str | None = None) -> dict[str, object]:
@@ -242,6 +241,7 @@ def test_inspect_drift_rejects_unknown_schema(tmp_path: Path) -> None:
 
 
 class InvalidFileKindRunner(StubMackupRunner):
+    @override
     def inspect(
         self,
         repo_root: Path,

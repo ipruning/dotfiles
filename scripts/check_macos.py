@@ -111,8 +111,8 @@ def _session_health_findings(
     snapshot_fresh = False
     if last_snapshot_at:
         try:
-            last = dt.datetime.fromisoformat(last_snapshot_at.replace("Z", "+00:00"))
-            current = now or dt.datetime.now(dt.timezone.utc)
+            last = dt.datetime.fromisoformat(last_snapshot_at)
+            current = now or dt.datetime.now(dt.UTC)
             snapshot_fresh = current - last <= SESSION_HEALTH_SNAPSHOT_MAX_AGE
         except ValueError, TypeError:
             snapshot_fresh = False

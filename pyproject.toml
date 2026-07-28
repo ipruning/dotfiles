@@ -23,11 +23,36 @@ indent-width = 4
 pythonpath = ["."]
 testpaths = ["tests"]
 
+[tool.ruff]
+preview = true
+target-version = "py314"
+
+[tool.ruff.lint]
+# Protocol parsers deliberately expose one domain-specific exception type for
+# malformed values as well as malformed shapes.
+ignore = ["TRY004"]
+
+[tool.ruff.lint.per-file-ignores]
+# These integration tests assert the child process return code explicitly.
+"tests/test_modules.py" = ["PLW1510"]
+
+[tool.ty.analysis]
+strict-equality-semantics = true
+
+[tool.ty.environment]
+python-version = "3.14"
+
+[tool.ty.rules]
+all = "error"
+
+[tool.ty.src]
+include = ["scripts", "tests"]
+
 [dependency-groups]
 dev = [
     "pytest>=9.1.1",
-    "ruff>=0.15.21",
-    "ty>=0.0.58",
+    "ruff>=0.16.0",
+    "ty>=0.0.64",
     # Import targets so the editor/ty can resolve the standalone modules/bin
     # scripts. Each is a PEP 723 `uv run --script` with its own inline runtime
     # deps; these entries exist only to type-check them, not to run scripts/.

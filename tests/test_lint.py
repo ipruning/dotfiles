@@ -3,10 +3,9 @@ from pathlib import Path
 
 import pytest
 
-from tests.conftest import mackup_cfg
-
 from scripts.lint import inspect_repository
 from scripts.models import Severity
+from tests.conftest import mackup_cfg
 
 
 @pytest.mark.parametrize(

@@ -1,5 +1,5 @@
-import json
 import hashlib
+import json
 import os
 import shlex
 import shutil
@@ -8,8 +8,8 @@ import sys
 from pathlib import Path
 
 from scripts.runtime import (
-    RuntimeReport,
     RuntimeAction,
+    RuntimeReport,
     RuntimeResult,
     RuntimeSpec,
     RuntimeStatus,

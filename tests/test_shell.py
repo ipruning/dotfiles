@@ -210,10 +210,12 @@ def test_zshenv_exposes_user_and_mise_commands_without_repo_bins_on_linux(
         [
             "zsh",
             "-dfc",
-            f'OSTYPE=linux-gnu; source "{zshenv}"; source "{zshenv}"; '
-            "command -v mise; command -v uv; command -v ss; "
-            'command -v skillshare-source || print -r -- "skillshare-source missing"; '
-            'print -r -- "$PATH"',
+            (
+                f'OSTYPE=linux-gnu; source "{zshenv}"; source "{zshenv}"; '
+                "command -v mise; command -v uv; command -v ss; "
+                'command -v skillshare-source || print -r -- "skillshare-source missing"; '
+                'print -r -- "$PATH"'
+            ),
         ],
         env={
             "HOME": str(home),
@@ -347,10 +349,12 @@ def test_bash_init_adds_navigation_editing_and_guarded_history_tools(
             "--noprofile",
             "--norc",
             "-ic",
-            f'. "{bash_init}"; '
-            "alias ..; alias ...; "
-            "bind -s; "
-            'printf "READY=%s:%s\\n" "$ATUIN_READY" "$ZOXIDE_READY"',
+            (
+                f'. "{bash_init}"; '
+                "alias ..; alias ...; "
+                "bind -s; "
+                'printf "READY=%s:%s\\n" "$ATUIN_READY" "$ZOXIDE_READY"'
+            ),
         ],
         env=environment,
         check=False,
@@ -379,8 +383,10 @@ def test_bash_init_adds_navigation_editing_and_guarded_history_tools(
             "--noprofile",
             "--norc",
             "-ic",
-            f'. "{bash_init}"; '
-            'test -z "${ATUIN_READY:-}" && test -z "${ZOXIDE_READY:-}"',
+            (
+                f'. "{bash_init}"; '
+                'test -z "${ATUIN_READY:-}" && test -z "${ZOXIDE_READY:-}"'
+            ),
         ],
         env=environment,
         check=False,

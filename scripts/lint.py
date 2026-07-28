@@ -9,6 +9,7 @@ import platform
 import re
 import subprocess
 from pathlib import Path
+from typing import override
 
 from ruamel.yaml import YAML
 from ruamel.yaml.error import YAMLError
@@ -349,6 +350,7 @@ def _structured_data_parser_findings(repo_root: Path) -> list[Finding]:
 
 
 class _CaseConfigParser(configparser.ConfigParser):
+    @override
     def optionxform(self, optionstr: str) -> str:
         return optionstr
 

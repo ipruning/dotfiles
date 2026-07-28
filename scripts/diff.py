@@ -10,7 +10,7 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
-from typing import Protocol, cast
+from typing import Protocol, cast, override
 
 from .models import Drift, DriftKind, DriftReport, FileKind
 from .profiles import HostProfile, profile_applications, resolve_profile
@@ -39,6 +39,7 @@ class MackupRunner(Protocol):
 
 
 class _CaseConfigParser(configparser.ConfigParser):
+    @override
     def optionxform(self, optionstr: str) -> str:
         return optionstr
 

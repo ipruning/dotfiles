@@ -135,8 +135,10 @@ def test_update_previews_exact_plan_by_default_without_running_tools(
     ]
     assert document["summary"] == {"planned": 6, "skipped": 8}
     assert document["notes"] == [
-        "mise.tools uses --bump and may update tracked reference/.config/mise "
-        "files when the live global config is linked to this checkout."
+        (
+            "mise.tools uses --bump and may update tracked reference/.config/mise "
+            "files when the live global config is linked to this checkout."
+        )
     ]
     assert document["next"] == ["mise run update -- --apply"]
     steps = {step["name"]: step for step in document["steps"]}

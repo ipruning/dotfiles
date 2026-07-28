@@ -1,12 +1,12 @@
-import subprocess
 import json
+import subprocess
 from pathlib import Path
 
 import pytest
 
 import scripts.setup as setup_script
-from scripts.setup import SetupError, apply_setup, plan_setup
 from scripts.profiles import HostProfile
+from scripts.setup import SetupError, apply_setup, plan_setup
 from tests.conftest import run_scripts_module
 
 
@@ -269,9 +269,11 @@ def test_bash_module_exposes_only_user_and_mise_commands_without_duplicates(
             "--noprofile",
             "--norc",
             "-c",
-            f'. "{module_path}"; . "{module_path}"; '
-            "command -v mise; command -v uv; command -v ss; "
-            'command -v g || printf "g missing\\n"; printf "%s" "$PATH"',
+            (
+                f'. "{module_path}"; . "{module_path}"; '
+                "command -v mise; command -v uv; command -v ss; "
+                'command -v g || printf "g missing\\n"; printf "%s" "$PATH"'
+            ),
         ],
         env=environment,
         check=False,

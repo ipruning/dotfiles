@@ -800,10 +800,14 @@ def execute_runtime(
                 if not completed.stdout:
                     raise RuntimeError("generator produced empty output")
                 assert spec.target is not None
-                _atomic_install(
-                    spec.target,
-                    lambda temporary: temporary.write_text(completed.stdout),
-                )
+
+                def write_generated_output(
+                    temporary: Path,
+                    output: str = completed.stdout,
+                ) -> None:
+                    temporary.write_text(output)
+
+                _atomic_install(spec.target, write_generated_output)
             elif planned.action in {
                 RuntimeAction.CLONE,
                 RuntimeAction.UPDATE,
@@ -861,10 +865,14 @@ def execute_runtime(
                     raise RuntimeError(_command_failure_reason(completed))
                 if not artifact.is_file():
                     raise RuntimeError(f"build artifact is missing: {artifact}")
-                _atomic_install(
-                    spec.target,
-                    lambda temporary: shutil.copy2(artifact, temporary),
-                )
+
+                def copy_artifact(
+                    temporary: Path,
+                    source: Path = artifact,
+                ) -> None:
+                    shutil.copy2(source, temporary)
+
+                _atomic_install(spec.target, copy_artifact)
             elif planned.action is RuntimeAction.DOWNLOAD:
                 assert spec.source is not None
                 assert spec.sha256 is not None
@@ -875,10 +883,14 @@ def execute_runtime(
                     raise RuntimeError(
                         f"checksum mismatch: expected {spec.sha256}, received {digest}",
                     )
-                _atomic_install(
-                    spec.target,
-                    lambda temporary: temporary.write_bytes(content),
-                )
+
+                def write_downloaded_content(
+                    temporary: Path,
+                    downloaded: bytes = content,
+                ) -> None:
+                    temporary.write_bytes(downloaded)
+
+                _atomic_install(spec.target, write_downloaded_content)
                 exit_code = None
             elif planned.action is RuntimeAction.REMOVE:
                 if spec.name == "zsh.compdump":
