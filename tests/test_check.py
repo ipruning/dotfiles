@@ -20,8 +20,18 @@ def test_inspect_host_reports_capabilities_and_their_invalid_transition(
     source.mkdir(parents=True)
     (home / ".config/skillshare").mkdir(parents=True)
     (home / ".config/skillshare/config.yaml").write_text(
-        "sources:\n  skills: ~/Developer/ipruning/skills\n",
+        "sources:\n"
+        "  skills: ~/Developer/ipruning/skills\n"
+        "targets:\n"
+        "  claude:\n"
+        "    skills:\n"
+        "      path: ~/.claude/skills/\n"
+        "  universal:\n"
+        "    skills:\n"
+        "      path: ~/.agents/skills\n",
     )
+    (home / ".claude/skills").mkdir(parents=True)
+    (home / ".agents/skills").mkdir(parents=True)
     (home / ".config/television").mkdir(parents=True)
     (home / ".config/television/config.toml").write_text("[ui]\n")
     (home / ".gitconfig").write_text(
@@ -593,6 +603,91 @@ def test_skillshare_ownership_reports_independent_mise_and_homebrew_owners(
     assert "Homebrew" in finding.message
     assert "mise ls" in (finding.action or "")
     assert "brew list" in (finding.action or "")
+
+
+def test_skillshare_targets_report_ready_local_and_broken_entries(
+    tmp_path: Path,
+) -> None:
+    home = tmp_path / "home"
+    source = home / "Developer/ipruning/skills"
+    source.mkdir(parents=True)
+    config_path = home / ".config/skillshare/config.yaml"
+    config_path.parent.mkdir(parents=True)
+    config_path.write_text(
+        "sources:\n"
+        "  skills: ~/Developer/ipruning/skills\n"
+        "mode: merge\n"
+        "targets:\n"
+        "  claude:\n"
+        "    skills:\n"
+        "      path: ~/.claude/skills/\n"
+        "  universal:\n"
+        "    skills:\n"
+        "      path: ~/.agents/skills\n",
+    )
+    claude = home / ".claude/skills"
+    universal = home / ".agents/skills"
+    claude.mkdir(parents=True)
+    universal.mkdir(parents=True)
+    managed = source / "managed"
+    managed.mkdir()
+    (managed / "SKILL.md").write_text("managed\n")
+    (claude / "managed").symlink_to(managed, target_is_directory=True)
+    external = home / "external"
+    external.mkdir()
+    (external / "SKILL.md").write_text("external\n")
+    (universal / "external-skill").symlink_to(external, target_is_directory=True)
+    local = universal / "local-skill"
+    local.mkdir()
+    (local / "SKILL.md").write_text("local\n")
+    (universal / "broken-skill").symlink_to(
+        source / "missing",
+        target_is_directory=True,
+    )
+
+    findings: dict[str, list] = {}
+    for finding in check_skillshare_module._skillshare_findings(home):
+        findings.setdefault(finding.check, []).append(finding)
+
+    claude_finding = findings["skillshare.target.claude"][0]
+    assert claude_finding.code == "skillshare.target_inspected"
+    assert claude_finding.severity is Severity.OK
+    universal_findings = findings["skillshare.target.universal"]
+    assert {finding.code for finding in universal_findings} == {
+        "skillshare.target_local_skills",
+        "skillshare.target_broken_links",
+        "skillshare.target_external_links",
+    }
+    assert "local-skill" in universal_findings[0].message
+    assert "broken-skill" in universal_findings[1].message
+    assert "external-skill" in universal_findings[2].message
+
+
+def test_skillshare_targets_report_required_path_contract(tmp_path: Path) -> None:
+    home = tmp_path / "home"
+    source = home / "skills"
+    source.mkdir(parents=True)
+    config_path = home / ".config/skillshare/config.yaml"
+    config_path.parent.mkdir(parents=True)
+    config_path.write_text(
+        "sources:\n"
+        "  skills: ~/skills\n"
+        "targets:\n"
+        "  claude:\n"
+        "    skills:\n"
+        "      path: ~/.wrong/skills\n",
+    )
+
+    findings: dict[str, list] = {}
+    for finding in check_skillshare_module._skillshare_findings(home):
+        findings.setdefault(finding.check, []).append(finding)
+
+    assert findings["skillshare.target.claude"][0].code == (
+        "skillshare.target_path_mismatch"
+    )
+    assert findings["skillshare.target.universal"][0].code == (
+        "skillshare.target_missing"
+    )
 
 
 def test_skillshare_ownership_deduplicates_a_link_to_the_mise_install(
