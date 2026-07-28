@@ -9,6 +9,7 @@ import platform
 import shutil
 import stat
 import subprocess
+from dataclasses import dataclass
 from pathlib import Path
 
 from .check_macos import (
@@ -65,7 +66,7 @@ def _check_executable(
     )
 
 
-def _git_config_defines_identity(config_path: Path) -> bool:
+def _git_config_defines_identity(config_path: Path) -> bool | None:
     for key in ("user.name", "user.email"):
         try:
             completed = subprocess.run(
@@ -75,15 +76,20 @@ def _git_config_defines_identity(config_path: Path) -> bool:
                 text=True,
             )
         except OSError:
-            return False
-        if completed.returncode != 0 or not completed.stdout.strip():
+            return None
+        if completed.returncode > 1:
+            return None
+        if completed.returncode == 1 or not completed.stdout.strip():
             return False
     return True
 
 
-def _private_git_identity_ready(private_config: Path, home: Path) -> bool:
-    if _git_config_defines_identity(private_config):
+def _private_git_identity_ready(private_config: Path, home: Path) -> bool | None:
+    direct_identity = _git_config_defines_identity(private_config)
+    if direct_identity is True:
         return True
+    if direct_identity is None:
+        return None
     try:
         completed = subprocess.run(
             [
@@ -100,8 +106,10 @@ def _private_git_identity_ready(private_config: Path, home: Path) -> bool:
             text=True,
         )
     except OSError:
-        return False
-    if completed.returncode != 0:
+        return None
+    if completed.returncode > 1:
+        return None
+    if completed.returncode == 1:
         return False
     identity_configs: list[Path] = []
     for record in completed.stdout.split("\0"):
@@ -117,15 +125,20 @@ def _private_git_identity_ready(private_config: Path, home: Path) -> bool:
             if not config_path.is_absolute():
                 config_path = private_config.parent / config_path
         identity_configs.append(config_path)
-    return bool(identity_configs) and all(
+    if not identity_configs:
+        return False
+    identity_states = [
         _git_config_defines_identity(config_path) for config_path in identity_configs
-    )
+    ]
+    if any(state is None for state in identity_states):
+        return None
+    return all(identity_states)
 
 
 def _private_git_findings(home: Path) -> list[Finding]:
     gitconfig = home / ".gitconfig"
     private_config = home / ".private.gitconfig"
-    include_present = False
+    include_present: bool | None = False
     if gitconfig.is_file():
         try:
             completed = subprocess.run(
@@ -141,11 +154,26 @@ def _private_git_findings(home: Path) -> list[Finding]:
                 capture_output=True,
                 text=True,
             )
-            include_present = "~/.private.gitconfig" in completed.stdout.splitlines()
+            if completed.returncode > 1:
+                include_present = None
+            else:
+                include_present = (
+                    completed.returncode == 0
+                    and "~/.private.gitconfig" in completed.stdout.splitlines()
+                )
         except OSError:
-            include_present = False
-    findings = [
-        Finding(
+            include_present = None
+    if include_present is None:
+        include_finding = Finding(
+            "git.private_include",
+            Severity.WARN,
+            "git.private_include_unavailable",
+            "The private Git include could not be inspected",
+            gitconfig,
+            "Inspect ~/.gitconfig with git config --get-all include.path.",
+        )
+    else:
+        include_finding = Finding(
             "git.private_include",
             Severity.OK if include_present else Severity.WARN,
             (
@@ -160,7 +188,9 @@ def _private_git_findings(home: Path) -> list[Finding]:
             ),
             gitconfig,
             None if include_present else "Add the private include to ~/.gitconfig.",
-        ),
+        )
+    findings = [
+        include_finding,
     ]
     if not private_config.is_file():
         findings.append(
@@ -194,6 +224,18 @@ def _private_git_findings(home: Path) -> list[Finding]:
         ),
     )
     identity_ready = _private_git_identity_ready(private_config, home)
+    if identity_ready is None:
+        findings.append(
+            Finding(
+                "git.private_identity",
+                Severity.WARN,
+                "git.private_identity_unavailable",
+                "Private Git identities could not be inspected",
+                private_config,
+                "Inspect user.name, user.email, and conditional identity includes with git config.",
+            ),
+        )
+        return findings
     findings.append(
         Finding(
             "git.private_identity",
@@ -265,8 +307,15 @@ def _binary_capability(check: str, file_path: Path, label: str) -> Finding:
             and file_path.stat().st_size > 0
             and os.access(file_path, os.X_OK)
         )
-    except OSError:
-        ready = False
+    except OSError as error:
+        return Finding(
+            check,
+            Severity.WARN,
+            f"{check}_unavailable",
+            f"{label} could not be inspected: {error}",
+            file_path,
+            "Inspect the generated binary path before rebuilding it.",
+        )
     if ready:
         return Finding(
             check,
@@ -328,16 +377,24 @@ LIBRARY_LINK_SCAN_DEPTH = 4
 LIBRARY_LINK_SCAN_AREAS = ("Library/Application Support", "Library/Preferences")
 
 
+@dataclass(frozen=True)
+class SymlinkScan:
+    links: tuple[Path, ...]
+    unreadable_paths: tuple[Path, ...]
+
+
 def _collect_symlinks(
     root: Path, depth: int, *, skip_names: frozenset[str]
-) -> list[Path]:
+) -> SymlinkScan:
     links: list[Path] = []
+    unreadable_paths: list[Path] = []
     pending: list[tuple[Path, int]] = [(root, depth)]
     while pending:
         directory, remaining = pending.pop()
         try:
             entries = list(os.scandir(directory))
         except OSError:
+            unreadable_paths.append(directory)
             continue
         for entry in entries:
             entry_path = Path(entry.path)
@@ -351,29 +408,33 @@ def _collect_symlinks(
                     if remaining > 1:
                         pending.append((entry_path, remaining - 1))
             except OSError:
+                unreadable_paths.append(entry_path)
                 continue
-    return links
+    return SymlinkScan(tuple(links), tuple(unreadable_paths))
 
 
 def _dangling_repo_link_findings(repo_root: Path, home: Path) -> list[Finding]:
     """Report $HOME symlinks into the repository whose targets are gone."""
     repository = repo_root.resolve()
-    links = _collect_symlinks(
+    home_scan = _collect_symlinks(
         home, HOME_LINK_SCAN_DEPTH, skip_names=frozenset({"Library"})
     )
+    links = list(home_scan.links)
+    unreadable_paths = list(home_scan.unreadable_paths)
     for area in LIBRARY_LINK_SCAN_AREAS:
         area_root = home / area
         if area_root.is_dir():
-            links.extend(
-                _collect_symlinks(
-                    area_root, LIBRARY_LINK_SCAN_DEPTH, skip_names=frozenset()
-                )
+            area_scan = _collect_symlinks(
+                area_root, LIBRARY_LINK_SCAN_DEPTH, skip_names=frozenset()
             )
+            links.extend(area_scan.links)
+            unreadable_paths.extend(area_scan.unreadable_paths)
     findings = []
     for link in sorted(links):
         try:
             raw_target = os.readlink(link)
         except OSError:
+            unreadable_paths.append(link)
             continue
         target = Path(raw_target)
         if not target.is_absolute():
@@ -390,6 +451,18 @@ def _dangling_repo_link_findings(repo_root: Path, home: Path) -> list[Finding]:
                 link,
                 "Remove the link, or restore its application with "
                 "mise run restore -- <application> --apply.",
+            ),
+        )
+    if unreadable_paths:
+        unique_unreadable_paths = sorted(set(unreadable_paths))
+        findings.append(
+            Finding(
+                "home.repo_links",
+                Severity.WARN,
+                "home.repo_links_inspection_unavailable",
+                f"Repository symlink inspection could not read {len(unique_unreadable_paths)} paths; first unreadable path: {unique_unreadable_paths[0]}",
+                unique_unreadable_paths[0],
+                "Inspect path permissions before relying on the repository symlink result.",
             ),
         )
     if not findings:
@@ -409,8 +482,15 @@ def _bash_integration_finding(repo_root: Path, home: Path) -> Finding:
     module_path = repo_root.resolve() / "modules/bash/init.bash"
     try:
         configured = bashrc.is_file() and str(module_path) in bashrc.read_text()
-    except OSError:
-        configured = False
+    except OSError as error:
+        return Finding(
+            "shell.bash",
+            Severity.WARN,
+            "shell.bash_unavailable",
+            f"Bash integration could not be inspected: {error}",
+            bashrc,
+            "Inspect ~/.bashrc readability before changing Bash integration.",
+        )
     return Finding(
         "shell.bash",
         Severity.OK if configured else Severity.WARN,

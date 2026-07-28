@@ -412,6 +412,35 @@ def test_linux_systemd_check_reports_global_mise_shim_dependencies(
     assert repaired[0].severity is Severity.OK
 
 
+def test_linux_systemd_read_failure_suppresses_clean_finding(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    home = tmp_path / "home"
+    system_units = tmp_path / "systemd"
+    system_units.mkdir()
+    unreadable_unit = system_units / "worker.service"
+    unreadable_unit.write_text("[Service]\nExecStart=/usr/bin/worker\n")
+    original_read_text = Path.read_text
+
+    def read_text(file_path: Path, *args, **kwargs):
+        if file_path == unreadable_unit:
+            raise PermissionError("denied")
+        return original_read_text(file_path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "read_text", read_text)
+
+    findings = check_mise_module._mise_systemd_shim_findings(
+        home,
+        system_unit_directory=system_units,
+    )
+
+    assert [finding.code for finding in findings] == [
+        "mise.systemd_shims_inspection_unavailable"
+    ]
+    assert findings[0].path == unreadable_unit
+
+
 def test_linux_systemd_check_scans_global_and_data_user_unit_paths(
     tmp_path: Path,
 ) -> None:
@@ -1003,6 +1032,56 @@ def test_private_git_identity_accepts_complete_conditional_includes(
         if finding.check == "git.private_identity"
     )
     assert degraded_identity.severity is Severity.WARN
+
+
+def test_private_git_probe_failure_is_not_reported_as_missing(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    home = tmp_path / "home"
+    home.mkdir()
+    (home / ".gitconfig").write_text("[include]\n  path = ~/.private.gitconfig\n")
+    private_config = home / ".private.gitconfig"
+    private_config.write_text(
+        "[user]\n  name = Test User\n  email = test@example.com\n"
+    )
+    private_config.chmod(0o600)
+    monkeypatch.setattr(
+        check_module.subprocess,
+        "run",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(OSError("git unavailable")),
+    )
+
+    findings = check_module._private_git_findings(home)
+    codes = {finding.code for finding in findings}
+
+    assert "git.private_include_unavailable" in codes
+    assert "git.private_identity_unavailable" in codes
+    assert "git.private_include_missing" not in codes
+    assert "git.private_identity_missing" not in codes
+
+
+def test_unreadable_bashrc_is_not_reported_as_missing(
+    tmp_path: Path, monkeypatch
+) -> None:
+    repo_root = tmp_path / "repo"
+    home = tmp_path / "home"
+    bashrc = home / ".bashrc"
+    home.mkdir()
+    bashrc.write_text("configured\n")
+    original_read_text = Path.read_text
+
+    def read_text(file_path: Path, *args, **kwargs):
+        if file_path == bashrc:
+            raise PermissionError("denied")
+        return original_read_text(file_path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "read_text", read_text)
+
+    finding = check_module._bash_integration_finding(repo_root, home)
+
+    assert finding.code == "shell.bash_unavailable"
+    assert finding.severity is Severity.WARN
 
 
 def _session_health_stub(tmp_path: Path, record: dict) -> Path:
@@ -1701,3 +1780,28 @@ def test_home_without_repository_links_reports_clean(tmp_path: Path) -> None:
 
     assert [finding.code for finding in findings] == ["home.repo_links_clean"]
     assert findings[0].severity is Severity.OK
+
+
+def test_repository_link_scan_failure_suppresses_clean_finding(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    repo_root = tmp_path / "dotfiles"
+    repo_root.mkdir()
+    home = tmp_path / "home"
+    home.mkdir()
+    real_scandir = check_module.os.scandir
+
+    def failing_scandir(directory):
+        if Path(directory) == home:
+            raise PermissionError("denied")
+        return real_scandir(directory)
+
+    monkeypatch.setattr(check_module.os, "scandir", failing_scandir)
+
+    findings = check_module._dangling_repo_link_findings(repo_root, home)
+
+    assert [finding.code for finding in findings] == [
+        "home.repo_links_inspection_unavailable"
+    ]
+    assert findings[0].severity is Severity.WARN

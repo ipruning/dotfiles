@@ -244,6 +244,7 @@ def _mise_systemd_shim_findings(
         home / ".local/share/systemd/user",
     )
     risky_units: list[tuple[Path, str]] = []
+    unreadable_paths: list[Path] = []
     for unit_directory in unit_directories:
         try:
             unit_files = sorted(
@@ -253,11 +254,13 @@ def _mise_systemd_shim_findings(
                 ],
             )
         except OSError:
+            unreadable_paths.append(unit_directory)
             continue
         for unit_file in unit_files:
             try:
                 lines = unit_file.read_text().splitlines()
             except OSError:
+                unreadable_paths.append(unit_file)
                 continue
             for line in lines:
                 directive = line.strip()
@@ -269,16 +272,30 @@ def _mise_systemd_shim_findings(
                 ):
                     risky_units.append((unit_file, key.strip()))
                     break
-    if not risky_units:
-        return [
+    findings = (
+        [
+            Finding(
+                "mise.systemd_shims",
+                Severity.WARN,
+                "mise.systemd_shims_inspection_unavailable",
+                f"Mise systemd shim inspection could not read {len(unreadable_paths)} paths; first unreadable path: {unreadable_paths[0]}",
+                unreadable_paths[0],
+                "Inspect systemd unit path permissions before relying on this result.",
+            )
+        ]
+        if unreadable_paths
+        else []
+    )
+    if not risky_units and not unreadable_paths:
+        findings.append(
             Finding(
                 "mise.systemd_shims",
                 Severity.OK,
                 "mise.systemd_shims_clean",
                 "No readable custom systemd service directly uses a global Mise shim",
             ),
-        ]
-    return [
+        )
+    findings.extend(
         Finding(
             "mise.systemd_shims",
             Severity.WARN,
@@ -291,7 +308,8 @@ def _mise_systemd_shim_findings(
             ),
         )
         for unit_file, directive_name in risky_units
-    ]
+    )
+    return findings
 
 
 def _mise_runtime_binding_finding(
