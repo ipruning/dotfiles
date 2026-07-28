@@ -863,14 +863,14 @@ class SkillshareGuardTest(unittest.TestCase):
         self.assertIn("skillshare_unready", self.store.current_brrr_observations)
 
     def test_missing_configuration_signals_with_its_path(self) -> None:
-        signals = self.collect("/opt/homebrew/bin/skillshare")
+        signals = self.collect("/test/bin/skillshare")
 
         self.assertIn("configuration is missing", self.details(signals)[0])
 
     def test_source_status_transitions_between_present_and_missing(self) -> None:
         self.touch_config()
         ready = self.collect(
-            "/opt/homebrew/bin/skillshare",
+            "/test/bin/skillshare",
             status={"path": "/tmp/skills", "exists": True},
         )
         self.assertEqual(self.details(ready), [])
@@ -882,14 +882,14 @@ class SkillshareGuardTest(unittest.TestCase):
         )
 
         broken = self.collect(
-            "/opt/homebrew/bin/skillshare",
+            "/test/bin/skillshare",
             status={"path": "/tmp/skills", "exists": False},
         )
         self.assertIn("source is missing (/tmp/skills)", self.details(broken)[0])
 
     def test_unreadable_status_is_reported_not_silently_ready(self) -> None:
         self.touch_config()
-        signals = self.collect("/opt/homebrew/bin/skillshare", status_returncode=1)
+        signals = self.collect("/test/bin/skillshare", status_returncode=1)
 
         self.assertIn("status could not be read", self.details(signals)[0])
 
