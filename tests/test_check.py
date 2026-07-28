@@ -1805,3 +1805,39 @@ def test_repository_link_scan_failure_suppresses_clean_finding(
         "home.repo_links_inspection_unavailable"
     ]
     assert findings[0].severity is Severity.WARN
+
+
+def test_repository_link_scan_ignores_unowned_visible_home_directories(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    repo_root = tmp_path / "dotfiles"
+    repo_root.mkdir()
+    home = tmp_path / "home"
+    unowned_directory = home / "OrbStack/machine/root"
+    unowned_directory.mkdir(parents=True)
+    (home / ".config").mkdir()
+    real_scandir = check_module.os.scandir
+
+    def failing_scandir(directory):
+        if Path(directory) == unowned_directory:
+            raise PermissionError("denied")
+        return real_scandir(directory)
+
+    monkeypatch.setattr(check_module.os, "scandir", failing_scandir)
+
+    findings = check_module._dangling_repo_link_findings(repo_root, home)
+
+    assert [finding.code for finding in findings] == ["home.repo_links_clean"]
+
+
+def test_repository_link_scan_checks_visible_top_level_symlinks(tmp_path: Path) -> None:
+    repo_root = tmp_path / "dotfiles"
+    repo_root.mkdir()
+    home = tmp_path / "home"
+    home.mkdir()
+    (home / "managed-link").symlink_to(repo_root / "missing")
+
+    findings = check_module._dangling_repo_link_findings(repo_root, home)
+
+    assert [finding.code for finding in findings] == ["home.dangling_repo_link"]

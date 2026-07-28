@@ -384,7 +384,11 @@ class SymlinkScan:
 
 
 def _collect_symlinks(
-    root: Path, depth: int, *, skip_names: frozenset[str]
+    root: Path,
+    depth: int,
+    *,
+    skip_names: frozenset[str],
+    hidden_root_entries_only: bool = False,
 ) -> SymlinkScan:
     links: list[Path] = []
     unreadable_paths: list[Path] = []
@@ -402,6 +406,12 @@ def _collect_symlinks(
                 if entry.is_symlink():
                     links.append(entry_path)
                     continue
+                if (
+                    hidden_root_entries_only
+                    and directory == root
+                    and not entry.name.startswith(".")
+                ):
+                    continue
                 if entry.is_dir(follow_symlinks=False):
                     if directory == root and entry.name in skip_names:
                         continue
@@ -417,7 +427,10 @@ def _dangling_repo_link_findings(repo_root: Path, home: Path) -> list[Finding]:
     """Report $HOME symlinks into the repository whose targets are gone."""
     repository = repo_root.resolve()
     home_scan = _collect_symlinks(
-        home, HOME_LINK_SCAN_DEPTH, skip_names=frozenset({"Library"})
+        home,
+        HOME_LINK_SCAN_DEPTH,
+        skip_names=frozenset({"Library"}),
+        hidden_root_entries_only=True,
     )
     links = list(home_scan.links)
     unreadable_paths = list(home_scan.unreadable_paths)
