@@ -6,6 +6,7 @@ tap "kitlangton/tap"
 tap "longbridge/tap", trusted: true
 tap "mobile-dev-inc/tap"
 tap "modem-dev/tap"
+tap "netbirdio/tap"
 tap "nikitabobko/tap", trusted: true
 tap "nkzw-tech/tap"
 tap "openai/tools", trusted: true
@@ -65,8 +66,6 @@ brew "govulncheck"
 brew "gum"
 # Command-line interface for Hetzner Cloud
 brew "hcloud"
-# Agent multiplexer that lives in your terminal
-brew "herdr"
 # Improved top (interactive process viewer)
 brew "htop"
 # Command-line benchmarking tool
@@ -87,8 +86,6 @@ brew "ls-lint"
 brew "markdownlint-cli2"
 # Create modern online books from Markdown files
 brew "mdbook"
-# Polyglot runtime manager (asdf rust clone)
-brew "mise"
 # Deep clean and optimize your Mac
 brew "mole"
 # Remote terminal application
@@ -111,6 +108,8 @@ brew "pkgconf"
 brew "postgresql@18", link: true
 # Fast Git hook manager written in Rust, drop-in alternative to pre-commit
 brew "prek"
+# CLI for PlanetScale Database
+brew "pscale"
 # Command-line tool for managing long-running shell commands
 brew "pueue", restart_service: :changed
 # Better WHOIS and domain intelligence toolkit
@@ -131,8 +130,6 @@ brew "rush-parallel"
 brew "rust-parallel"
 # Semantic version control CLI with entity-level diffs and blame
 brew "sem-cli"
-# Sync skills across AI CLI tools
-brew "skillshare"
 # SQL linter and auto-formatter for Humans
 brew "sqlfluff"
 # Fast, collaborative live terminal sharing over the web
@@ -167,8 +164,6 @@ brew "yazi"
 brew "yq"
 # Pluggable terminal workspace, with terminal multiplexer as the base feature
 brew "zellij"
-# Shell extension to navigate your filesystem faster
-brew "zoxide"
 # A powerful terminal-based AI assistant for developers, providing intelligent coding assistance directly in your terminal.
 brew "charmbracelet/tap/crush"
 # Non-interactive ssh password auth Files
@@ -181,6 +176,8 @@ brew "kitlangton/tap/ghui", trusted: true
 brew "mobile-dev-inc/tap/maestro", trusted: true
 # Desktop-inspired terminal diff viewer for agent-authored changesets
 brew "modem-dev/tap/hunk", trusted: true
+# Netbird project.
+brew "netbirdio/tap/netbird", trusted: true
 # Uncloud CLI
 brew "psviderski/tap/uncloud"
 # Webhook notifications for Claude Code and Codex

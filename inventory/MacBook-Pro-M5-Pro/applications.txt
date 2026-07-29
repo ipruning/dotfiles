@@ -79,4 +79,5 @@ Xcodes
 YACReader
 YACReaderLibrary
 Zed
+ZeroTier
 Zotero
