@@ -3,11 +3,18 @@ import os
 import shlex
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 import pytest
 
-from scripts.update import UpdateStatus, execute_updates, plan_updates
+from scripts.update import (
+    UpdateStatus,
+    UpdateStep,
+    _run_with_progress,
+    execute_updates,
+    plan_updates,
+)
 
 
 def _fake_tool(
@@ -18,6 +25,7 @@ def _fake_tool(
     exit_code: int = 0,
     failure_output: bool = True,
     mise_inventory: str | None = None,
+    delay_seconds: float = 0,
 ) -> None:
     tool_path = bin_dir / name
     inventory = ""
@@ -37,10 +45,12 @@ def _fake_tool(
         if exit_code
         else ""
     )
+    delay = f"/bin/sleep {delay_seconds}\n" if delay_seconds else ""
     tool_path.write_text(
         "#!/bin/sh\n"
         f"{inventory}"
         f"printf '%s\\n' \"{name} $*\" >> {shlex.quote(str(log_path))}\n"
+        f"{delay}"
         f"{failure}",
     )
     tool_path.chmod(0o755)
@@ -147,7 +157,22 @@ def test_update_previews_exact_plan_by_default_without_running_tools(
     assert steps["mise.tools"]["environment"]["PATH_prepend"] == expected_mise_path
     assert steps["mise.shims"]["environment"]["PATH_prepend"] == expected_mise_path
     assert steps["brew.metadata"]["environment"]["PATH_prepend"] == []
+    assert "sudo" in steps["tigris"]["attention"]
     assert not log_path.exists()
+
+
+def test_update_preview_flags_tigris_interactive_sudo(tmp_path: Path) -> None:
+    completed, _log_path = _run_update(
+        tmp_path,
+        "--json",
+        tools=("tigris",),
+    )
+
+    document = json.loads(completed.stdout)
+    tigris = next(step for step in document["steps"] if step["name"] == "tigris")
+    assert tigris["status"] == "planned"
+    assert "sudo" in tigris["attention"]
+    assert "interactive terminal" in tigris["attention"]
 
 
 def test_update_gives_package_managers_transaction_scale_timeouts(
@@ -267,6 +292,97 @@ def test_update_human_output_announces_commands_before_summary(tmp_path: Path) -
     assert "Summary: 6 succeeded, 8 skipped" in completed.stdout
 
 
+def test_update_json_streams_progress_to_stderr_while_stdout_stays_json(
+    tmp_path: Path,
+    capfd: pytest.CaptureFixture[str],
+) -> None:
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    home = tmp_path / "home"
+    home.mkdir()
+    log_path = tmp_path / "invocations.log"
+    _fake_tool(bin_dir, "amp", log_path, delay_seconds=0.08)
+
+    report = execute_updates(
+        home,
+        executable_finder=lambda tool: str(bin_dir / "amp") if tool == "amp" else None,
+        capture_output=True,
+        progress_interval_seconds=0.02,
+    )
+
+    assert report.ok is True
+    progress = capfd.readouterr().err
+    assert "[amp] RUN amp update" in progress
+    assert "[amp] STILL RUNNING" in progress
+    assert "[amp] DONE exit=0" in progress
+
+
+def test_update_progress_finishes_when_a_descendant_retains_the_output_pipe(
+    tmp_path: Path,
+) -> None:
+    tool_path = tmp_path / "background-tool"
+    tool_path.write_text("#!/bin/sh\n/bin/sleep 2 &\nexit 0\n")
+    tool_path.chmod(0o755)
+    started_at = time.monotonic()
+
+    completed = _run_with_progress(
+        UpdateStep("background", "background", (str(tool_path),), 5),
+        env=None,
+        progress_interval_seconds=1,
+    )
+
+    assert completed.returncode == 0
+    assert time.monotonic() - started_at < 1
+
+
+def test_update_progress_finishes_when_a_descendant_keeps_writing(
+    tmp_path: Path,
+) -> None:
+    tool_path = tmp_path / "background-writer"
+    tool_path.write_text("#!/bin/sh\n/usr/bin/yes background &\nexit 0\n")
+    tool_path.chmod(0o755)
+    started_at = time.monotonic()
+
+    completed = _run_with_progress(
+        UpdateStep("writer", "writer", (str(tool_path),), 5),
+        env=None,
+        progress_interval_seconds=1,
+    )
+
+    assert completed.returncode == 0
+    assert time.monotonic() - started_at < 1
+
+
+def test_update_progress_timeout_kills_the_process_group(tmp_path: Path) -> None:
+    child_pid_path = tmp_path / "child.pid"
+    tool_path = tmp_path / "timeout-tool"
+    tool_path.write_text(
+        "#!/bin/sh\n"
+        "/bin/sleep 30 &\n"
+        f"printf '%s\\n' $! > {shlex.quote(str(child_pid_path))}\n"
+        "wait\n"
+    )
+    tool_path.chmod(0o755)
+
+    with pytest.raises(subprocess.TimeoutExpired):
+        _run_with_progress(
+            UpdateStep("timeout", "timeout", (str(tool_path),), 1),
+            env=None,
+            progress_interval_seconds=1,
+        )
+
+    child_pid = int(child_pid_path.read_text())
+    deadline = time.monotonic() + 1
+    while True:
+        try:
+            os.kill(child_pid, 0)
+        except ProcessLookupError:
+            break
+        if time.monotonic() >= deadline:
+            pytest.fail(f"child process {child_pid} survived the updater timeout")
+        time.sleep(0.01)
+
+
 def test_update_failure_is_contextual_and_does_not_hide_later_results(
     tmp_path: Path,
 ) -> None:
@@ -313,7 +429,7 @@ def test_update_reports_timeout_and_launch_failures_on_stderr(
     def fail_with_timeout(*_args: object, **_kwargs: object) -> None:
         raise subprocess.TimeoutExpired(("amp", "update"), 300)
 
-    monkeypatch.setattr("scripts.update.subprocess.run", fail_with_timeout)
+    monkeypatch.setattr("scripts.update._run_with_progress", fail_with_timeout)
     timeout_report = execute_updates(
         tmp_path,
         executable_finder=lambda tool: "/fake/amp" if tool == "amp" else None,
@@ -329,7 +445,7 @@ def test_update_reports_timeout_and_launch_failures_on_stderr(
     def fail_to_launch(*_args: object, **_kwargs: object) -> None:
         raise OSError("permission denied")
 
-    monkeypatch.setattr("scripts.update.subprocess.run", fail_to_launch)
+    monkeypatch.setattr("scripts.update._run_with_progress", fail_to_launch)
     launch_report = execute_updates(
         tmp_path,
         executable_finder=lambda tool: "/fake/amp" if tool == "amp" else None,

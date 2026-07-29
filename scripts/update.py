@@ -3,8 +3,12 @@
 from __future__ import annotations
 
 import argparse
+import codecs
 import json
+import os
+import selectors
 import shutil
+import signal
 import subprocess
 import sys
 import time
@@ -29,6 +33,11 @@ MISE_TOOLS_NOTE = (
     "mise.tools uses --bump and may update tracked reference/.config/mise files "
     "when the live global config is linked to this checkout."
 )
+PROGRESS_INTERVAL_SECONDS = 30
+TIGRIS_ATTENTION = (
+    "may require sudo to replace /usr/local/bin/tigris; run `tigris update` in "
+    "an interactive terminal before applying the remaining plan"
+)
 
 
 class UpdateStatus(StrEnum):
@@ -45,6 +54,7 @@ class UpdateStep:
     command: tuple[str, ...]
     timeout_seconds: int
     path_prepend: tuple[Path, ...] = ()
+    attention: str | None = None
 
 
 @dataclass(frozen=True)
@@ -66,13 +76,118 @@ class UpdateReport:
         return all(result.status is not UpdateStatus.FAILED for result in self.results)
 
 
-def _emit_command_output(step: UpdateStep, output: str) -> None:
-    for line in output.splitlines():
-        print(f"[{step.name}] {line}", file=sys.stderr)
-
-
 def _emit_failure(step: UpdateStep, reason: str) -> None:
     print(f"[{step.name}] FAIL {reason}", file=sys.stderr)
+
+
+def _run_with_progress(
+    step: UpdateStep,
+    *,
+    env: dict[str, str] | None,
+    progress_interval_seconds: float,
+) -> subprocess.CompletedProcess[str]:
+    """Stream a JSON-mode command to stderr and report quiet elapsed time."""
+    print(f"[{step.name}] RUN {_display_command(step)}", file=sys.stderr, flush=True)
+    started_at = time.monotonic()
+    process = subprocess.Popen(
+        step.command,
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        env=env,
+        process_group=0,
+    )
+    assert process.stdout is not None
+    output = process.stdout
+    selector = selectors.DefaultSelector()
+    selector.register(output, selectors.EVENT_READ)
+    os.set_blocking(output.fileno(), False)
+    decoder = codecs.getincrementaldecoder("utf-8")(errors="replace")
+    pending = ""
+
+    def emit(data: bytes = b"", *, final: bool = False) -> None:
+        nonlocal pending
+        pending += decoder.decode(data, final=final)
+        lines = pending.splitlines(keepends=True)
+        pending = ""
+        if (
+            lines
+            and not final
+            and (not lines[-1].endswith(("\n", "\r")) or lines[-1].endswith("\r"))
+        ):
+            pending = lines.pop()
+        for line in lines:
+            print(
+                f"[{step.name}] {line.removesuffix(chr(10)).removesuffix(chr(13))}",
+                file=sys.stderr,
+                flush=True,
+            )
+
+    def drain() -> None:
+        # Preserve a bounded tail without letting an inherited, continuously
+        # written pipe override the direct updater's completed exit status.
+        for _ in range(16):
+            try:
+                chunk = os.read(output.fileno(), 65536)
+            except BlockingIOError:
+                return
+            if not chunk:
+                return
+            emit(chunk)
+
+    def kill_process_group() -> None:
+        try:
+            os.killpg(process.pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
+        process.wait()
+
+    next_progress_at = started_at + progress_interval_seconds
+    try:
+        while True:
+            now = time.monotonic()
+            remaining = step.timeout_seconds - (now - started_at)
+            if remaining <= 0:
+                kill_process_group()
+                drain()
+                emit(final=True)
+                raise subprocess.TimeoutExpired(step.command, step.timeout_seconds)
+            wait_seconds = min(0.1, remaining, max(0, next_progress_at - now))
+            for key, _mask in selector.select(timeout=wait_seconds):
+                try:
+                    chunk = os.read(key.fd, 65536)
+                except BlockingIOError:
+                    continue
+                if chunk:
+                    emit(chunk)
+                else:
+                    selector.unregister(key.fileobj)
+            exit_code = process.poll()
+            if exit_code is not None:
+                drain()
+                emit(final=True)
+                duration_seconds = round(time.monotonic() - started_at)
+                print(
+                    f"[{step.name}] DONE exit={exit_code} elapsed={duration_seconds}s",
+                    file=sys.stderr,
+                    flush=True,
+                )
+                return subprocess.CompletedProcess(step.command, exit_code, "", "")
+            now = time.monotonic()
+            if now >= next_progress_at:
+                elapsed_seconds = round(now - started_at)
+                print(
+                    f"[{step.name}] STILL RUNNING elapsed={elapsed_seconds}s "
+                    f"timeout={step.timeout_seconds}s",
+                    file=sys.stderr,
+                    flush=True,
+                )
+                next_progress_at = now + progress_interval_seconds
+    finally:
+        if process.poll() is None:
+            kill_process_group()
+        selector.close()
+        output.close()
 
 
 def _installed_mise_tools(home: Path, mise_executable: str) -> tuple[str, ...]:
@@ -175,7 +290,13 @@ def _update_steps(home: Path) -> tuple[UpdateStep, ...]:
         UpdateStep("amp", "amp", ("amp", "update"), 300),
         UpdateStep("claude", "claude", ("claude", "update"), 300),
         UpdateStep("codex", "codex", ("codex", "update"), 300),
-        UpdateStep("tigris", "tigris", ("tigris", "update"), 300),
+        UpdateStep(
+            "tigris",
+            "tigris",
+            ("tigris", "update"),
+            300,
+            attention=TIGRIS_ATTENTION,
+        ),
         UpdateStep(
             "pi.extensions",
             "pi",
@@ -246,6 +367,7 @@ def execute_updates(
     executable_finder: ExecutableFinder = shutil.which,
     capture_output: bool = False,
     on_start: StepCallback | None = None,
+    progress_interval_seconds: float = PROGRESS_INTERVAL_SECONDS,
 ) -> UpdateReport:
     """Run every available updater and retain independent failure results."""
     results = []
@@ -261,18 +383,24 @@ def execute_updates(
             on_start(planned.step)
         started_at = time.monotonic()
         try:
-            completed = subprocess.run(
-                planned.step.command,
-                check=False,
-                stdin=subprocess.DEVNULL,
-                capture_output=capture_output,
-                env=(
-                    canonical_mise_environment(home)
-                    if planned.step.path_prepend
-                    else None
-                ),
-                text=True,
-                timeout=planned.step.timeout_seconds,
+            environment = (
+                canonical_mise_environment(home) if planned.step.path_prepend else None
+            )
+            completed = (
+                _run_with_progress(
+                    planned.step,
+                    env=environment,
+                    progress_interval_seconds=progress_interval_seconds,
+                )
+                if capture_output
+                else subprocess.run(
+                    planned.step.command,
+                    check=False,
+                    stdin=subprocess.DEVNULL,
+                    env=environment,
+                    text=True,
+                    timeout=planned.step.timeout_seconds,
+                )
             )
         except subprocess.TimeoutExpired:
             reason = f"timed out after {planned.step.timeout_seconds}s"
@@ -300,16 +428,11 @@ def execute_updates(
                 ),
             )
             continue
-        if capture_output:
-            if completed.stdout:
-                _emit_command_output(planned.step, completed.stdout)
-            if completed.stderr:
-                _emit_command_output(planned.step, completed.stderr)
-            if completed.returncode != 0:
-                _emit_failure(
-                    planned.step,
-                    f"command exited {completed.returncode}",
-                )
+        if capture_output and completed.returncode != 0:
+            _emit_failure(
+                planned.step,
+                f"command exited {completed.returncode}",
+            )
         results.append(
             UpdateResult(
                 step=planned.step,
@@ -382,6 +505,7 @@ def _document(report: UpdateReport) -> dict[str, object]:
                         str(directory) for directory in result.step.path_prepend
                     ],
                 },
+                "attention": result.step.attention,
                 "status": result.status.value,
                 "exit_code": result.exit_code,
                 "duration_ms": result.duration_ms,
@@ -404,17 +528,26 @@ def _display_command(step: UpdateStep) -> str:
 
 
 def _render(report: UpdateReport) -> None:
+    def duration(result: UpdateResult) -> str:
+        return (
+            f" ({result.duration_ms / 1000:.1f}s)"
+            if result.duration_ms is not None
+            else ""
+        )
+
     for result in report.results:
         label = result.status.value.upper()
         if result.status is UpdateStatus.PLANNED:
             print(f"{label:7} {result.step.name}: {_display_command(result.step)}")
+            if result.step.attention:
+                print(f"ATTENTION {result.step.name}: {result.step.attention}")
         elif result.status is UpdateStatus.SUCCEEDED:
-            print(f"{label:7} {result.step.name}")
+            print(f"{label:7} {result.step.name}{duration(result)}")
         elif result.status is UpdateStatus.SKIPPED:
             print(f"{label:7} {result.step.name}: {result.reason}")
         else:
             print(
-                f"{label:7} {result.step.name}: {result.reason}",
+                f"{label:7} {result.step.name}{duration(result)}: {result.reason}",
                 file=sys.stderr,
             )
     summary = _summary(report)

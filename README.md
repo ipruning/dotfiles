@@ -334,6 +334,14 @@ the current host. Any failed step makes the command exit non-zero. It
 deliberately does not run `brew cleanup`, `brew autoremove`, or `mise prune`;
 removal and pruning require a separate, explicit operation.
 
+Preview output marks updaters that may need operator attention. In particular,
+Tigris may need sudo to replace `/usr/local/bin/tigris`; run its displayed
+interactive command before applying the remaining plan. During a JSON apply,
+stdout remains one machine-readable document while stderr streams command
+output plus `RUN`, 30-second `STILL RUNNING`, and `DONE` progress records. An
+agent can therefore distinguish active work from a stalled command and surface
+an interactive requirement before waiting through unrelated long updates.
+
 For mise, the preview records the active installed tool versions. An apply
 updates the standalone CLI first, then passes that explicit list to
 `mise upgrade`; a configured but missing mise tool is not installed. Other
