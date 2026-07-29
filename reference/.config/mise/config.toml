@@ -1,4 +1,4 @@
-min_version = { hard = "2026.7.12" }
+min_version = { hard = "2026.7.16" }
 
 [_.dotfiles.mise_sync.trusted_alias_backends]
 yarn = ["vfox:mise-plugins/vfox-yarn"]
@@ -19,6 +19,7 @@ yarn = "aqua:yarnpkg/berry"
 "github:runkids/skillshare" = "latest"
 "github:schpet/linear-cli" = "latest"
 "go:github.com/xdevplatform/xurl" = "latest"
+"npm:@openai/codex-security" = "latest"
 "npm:agent-device" = "latest"
 "npm:cf" = "latest"
 aube = "latest"
