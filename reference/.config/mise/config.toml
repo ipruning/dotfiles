@@ -5,6 +5,7 @@ yarn = ["vfox:mise-plugins/vfox-yarn"]
 
 [tool_alias]
 aube = "aqua:jdx/aube"
+herdr = "github:herdrdev/herdr"
 pnpm = "aqua:pnpm/pnpm"
 uv = "aqua:astral-sh/uv"
 yarn = "aqua:yarnpkg/berry"

@@ -188,17 +188,17 @@ backend = "go:github.com/xdevplatform/xurl"
 
 [[tools.herdr]]
 version = "0.7.5"
-backend = "aqua:ogulcancelik/herdr"
+backend = "github:herdrdev/herdr"
 
 [tools.herdr."platforms.linux-x64"]
 checksum = "sha256:3dc83288073e4c2d3c679a30e7be97bcca9141c6fd17dbbb9219142e95c59253"
-url = "https://github.com/ogulcancelik/herdr/releases/download/v0.7.5/herdr-linux-x86_64"
-url_api = "https://api.github.com/repos/ogulcancelik/herdr/releases/assets/484992544"
+url = "https://github.com/herdrdev/herdr/releases/download/v0.7.5/herdr-linux-x86_64"
+url_api = "https://api.github.com/repos/herdrdev/herdr/releases/assets/484992544"
 
 [tools.herdr."platforms.macos-arm64"]
 checksum = "sha256:37350546b0012555943b92eaf962665de4e264395baeb44227b8015e8ff5b0d6"
-url = "https://github.com/ogulcancelik/herdr/releases/download/v0.7.5/herdr-macos-aarch64"
-url_api = "https://api.github.com/repos/ogulcancelik/herdr/releases/assets/484992542"
+url = "https://github.com/herdrdev/herdr/releases/download/v0.7.5/herdr-macos-aarch64"
+url_api = "https://api.github.com/repos/herdrdev/herdr/releases/assets/484992542"
 
 [[tools.node]]
 version = "26.5.1"
