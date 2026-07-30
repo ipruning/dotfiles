@@ -470,6 +470,12 @@ def test_update_mise_step_passes_only_installed_versions(
     inventory = json.dumps(
         {
             "python": [{"version": "3.14.6", "installed": True}],
+            "cargo:https://github.com/ipruning/atuin": [
+                {
+                    "version": "rev:f12a28548ad2189de3a06be547999493f1614a78",
+                    "installed": True,
+                },
+            ],
             "github:larksuite/cli": [
                 {"version": "1.0.72", "installed": True},
             ],

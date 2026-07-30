@@ -33,6 +33,7 @@ MISE_TOOLS_NOTE = (
     "mise.tools uses --bump and may update tracked reference/.config/mise files "
     "when the live global config is linked to this checkout."
 )
+MISE_REF_PREFIXES = ("branch:", "ref:", "rev:", "tag:")
 PROGRESS_INTERVAL_SECONDS = 30
 TIGRIS_ATTENTION = (
     "may require sudo to replace /usr/local/bin/tigris; run `tigris update` in "
@@ -239,6 +240,8 @@ def _installed_mise_tools(home: Path, mise_executable: str) -> tuple[str, ...]:
             version = raw_version.get("version")
             if not isinstance(version, str) or not version:
                 raise RuntimeError(f"mise tool inventory for {name} has no version")
+            if version.startswith(MISE_REF_PREFIXES):
+                continue
             installed.append(f"{name}@{version}")
     return tuple(sorted(set(installed)))
 
