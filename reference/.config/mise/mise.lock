@@ -12,19 +12,19 @@ checksum = "blake3:6b5fe0bc6105452f663d5a15ee03574caab7ac642f0400266273d0b9562c9
 url = "https://repo.yarnpkg.com/4.18.0/packages/yarnpkg-cli/bin/yarn.js"
 
 [[tools.aube]]
-version = "1.35.0"
+version = "1.36.0"
 backend = "aqua:jdx/aube"
 
 [tools.aube."platforms.linux-x64"]
-checksum = "sha256:3af3cc076c8f69de59598fa3f632bdb0891d49df604b61229acbafefb502adf5"
-url = "https://github.com/jdx/aube/releases/download/v1.35.0/aube-v1.35.0-x86_64-unknown-linux-gnu.tar.gz"
-url_api = "https://api.github.com/repos/jdx/aube/releases/assets/493360953"
+checksum = "sha256:0eb721d9ff37e24bf035f9a7cb62107593f59bd740393b2eee5b36a50e7759fb"
+url = "https://github.com/jdx/aube/releases/download/v1.36.0/aube-v1.36.0-x86_64-unknown-linux-gnu.tar.gz"
+url_api = "https://api.github.com/repos/jdx/aube/releases/assets/494405804"
 provenance = "github-attestations"
 
 [tools.aube."platforms.macos-arm64"]
-checksum = "sha256:f01453d888ce4d5220d1c9b87018d087af5ab922f0ab7ddc396f534c66ca6bf5"
-url = "https://github.com/jdx/aube/releases/download/v1.35.0/aube-v1.35.0-aarch64-apple-darwin.tar.gz"
-url_api = "https://api.github.com/repos/jdx/aube/releases/assets/493408275"
+checksum = "sha256:b169f6e78b081595ca738b105ba6a23d0cf87b499b7eca812203cc1615e0e5fe"
+url = "https://github.com/jdx/aube/releases/download/v1.36.0/aube-v1.36.0-aarch64-apple-darwin.tar.gz"
+url_api = "https://api.github.com/repos/jdx/aube/releases/assets/494475875"
 provenance = "github-attestations"
 
 [[tools.bun]]
@@ -101,18 +101,18 @@ version = "2.12.0"
 backend = "gem:kamal"
 
 [[tools."github:earendil-works/pi"]]
-version = "0.82.1"
+version = "0.83.0"
 backend = "github:earendil-works/pi"
 
 [tools."github:earendil-works/pi"."platforms.linux-x64"]
-checksum = "sha256:884a9dec7e0b75a54c4d1933c93a7d45af1fbb81c32964c1dd45d67fac1f6544"
-url = "https://github.com/earendil-works/pi/releases/download/v0.82.1/pi-linux-x64.tar.gz"
-url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/489434437"
+checksum = "sha256:b0625eb623197b0afe20c870d21ef2f34481f1504e5777df3f698a66c7636f5f"
+url = "https://github.com/earendil-works/pi/releases/download/v0.83.0/pi-linux-x64.tar.gz"
+url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/494597980"
 
 [tools."github:earendil-works/pi"."platforms.macos-arm64"]
-checksum = "sha256:ca5b660ee0dbf2b4169f69753cf60f4e0edddff4a49427cdd34660e41280249f"
-url = "https://github.com/earendil-works/pi/releases/download/v0.82.1/pi-darwin-arm64.tar.gz"
-url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/489434434"
+checksum = "sha256:147fc3c451ec543a15102af251ce316079c8fcadfe8ae4d3ffee202346e9bed9"
+url = "https://github.com/earendil-works/pi/releases/download/v0.83.0/pi-darwin-arm64.tar.gz"
+url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/494597981"
 
 [[tools."github:larksuite/cli"]]
 version = "1.0.80"
@@ -213,11 +213,11 @@ checksum = "sha256:f4387df0b46556516d19abf2f2d6806481ac8368aa7f9d96bafed422a56a1
 url = "https://nodejs.org/dist/v26.5.1/node-v26.5.1-darwin-arm64.tar.gz"
 
 [[tools."npm:@openai/codex-security"]]
-version = "0.1.3"
+version = "0.1.4"
 backend = "npm:@openai/codex-security"
 
 [[tools."npm:agent-device"]]
-version = "0.20.2"
+version = "0.20.3"
 backend = "npm:agent-device"
 
 [[tools."npm:cf"]]
