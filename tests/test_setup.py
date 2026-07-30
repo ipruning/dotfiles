@@ -214,6 +214,25 @@ def test_linux_lite_setup_refuses_symlinked_git_config(tmp_path: Path) -> None:
     assert external_target.read_text() == "[init]\n\tdefaultBranch = main\n"
 
 
+def test_linux_lite_setup_accepts_configured_git_symlink(tmp_path: Path) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    (repo_root / "modules/bash").mkdir(parents=True)
+    (repo_root / "modules/bash/init.bash").write_text("export READY=1\n")
+    home.mkdir()
+    external_target = tmp_path / "elsewhere/gitconfig"
+    external_target.parent.mkdir()
+    external_target.write_text("[include]\n\tpath = ~/.private.gitconfig\n")
+    (home / ".gitconfig").symlink_to(external_target)
+
+    first = apply_setup(repo_root, home)
+    second = apply_setup(repo_root, home)
+
+    assert first.changed is True
+    assert second.changed is False
+    assert external_target.read_text() == "[include]\n\tpath = ~/.private.gitconfig\n"
+
+
 def test_linux_lite_loader_runs_before_noninteractive_bash_return(
     tmp_path: Path,
 ) -> None:

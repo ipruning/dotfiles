@@ -153,11 +153,11 @@ def _configure_linux_lite(
     bash_changed = desired_bashrc != current_bashrc
 
     gitconfig = home / ".gitconfig"
-    if gitconfig.is_symlink():
-        raise SetupError(f"Refusing to write through Git config symlink: {gitconfig}")
     if gitconfig.exists() and not gitconfig.is_file():
         raise SetupError(f"Refusing to replace non-file Git config: {gitconfig}")
     git_include_changed = not _git_include_present(gitconfig)
+    if git_include_changed and gitconfig.is_symlink():
+        raise SetupError(f"Refusing to write through Git config symlink: {gitconfig}")
     actions: list[str] = []
     if bash_changed:
         actions.append(f"configure Bash through {module_path}")
