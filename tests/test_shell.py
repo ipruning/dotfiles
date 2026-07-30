@@ -398,6 +398,46 @@ def test_bash_init_adds_navigation_editing_and_guarded_history_tools(
     assert "stale shim" not in degraded.stderr
 
 
+def test_bash_init_activates_mise_after_prompt_tools(tmp_path: Path) -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    bash_init = repo_root / "modules/bash/init.bash"
+    home = tmp_path / "home"
+    local_bin = home / ".local/bin"
+    bin_dir = tmp_path / "bin"
+    local_bin.mkdir(parents=True)
+    bin_dir.mkdir()
+    tools = {
+        local_bin
+        / "mise": "printf '%s\\n' 'PROMPT_COMMAND=\"${PROMPT_COMMAND:+$PROMPT_COMMAND;}mise_hook\"'",
+        bin_dir / "starship": "printf '%s\\n' 'PROMPT_COMMAND=starship_precmd'",
+        bin_dir / "atuin": ":",
+        bin_dir
+        / "zoxide": "printf '%s\\n' 'PROMPT_COMMAND=\"$PROMPT_COMMAND;zoxide_hook\"'",
+    }
+    for executable, command in tools.items():
+        executable.write_text(f"#!/bin/sh\n{command}\n")
+        executable.chmod(0o755)
+    bash = shutil.which("bash")
+    assert bash is not None
+
+    completed = subprocess.run(
+        [
+            bash,
+            "--noprofile",
+            "--norc",
+            "-ic",
+            f'. "{bash_init}"; printf "%s" "$PROMPT_COMMAND"',
+        ],
+        env={"HOME": str(home), "PATH": f"{bin_dir}:/usr/bin:/bin"},
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert completed.returncode == 0
+    assert completed.stdout == "starship_precmd;zoxide_hook;mise_hook"
+
+
 def test_bash_init_autostarts_herdr_only_for_top_level_interactive_ssh(
     tmp_path: Path,
 ) -> None:
