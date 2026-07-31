@@ -57,7 +57,7 @@ position = "top"
 prompt = ">"
 # header = "{}"
 # padding = {"left": 0, "right": 0, "top": 0, "bottom": 0}
-border_type = "rounded"  # https://docs.rs/ratatui/latest/ratatui/widgets/block/enum.BorderType.html#variants
+border_type = "rounded"  # https://docs.rs/ratatui/latest/ratatui/widgets/enum.BorderType.html#variants
 
 [ui.status_bar]
 # Status bar separators (bubble):
