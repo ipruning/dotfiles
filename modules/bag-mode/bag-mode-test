@@ -645,8 +645,8 @@ rm -f "$control_dir/enabled"
 kill -TERM "$controller_pid"
 wait "$controller_pid"
 controller_pid=""
-rg -q -- '--event stopped' "$fake_state/late-notifier-call" || fail 'notifier installed after startup did not receive controller events'
-rg -q 'sleeps normally when the lid closes' "$fake_state/late-notifier-call" || fail 'stopped notification did not warn that lid close now sleeps the Mac'
+[[ ! -e "$fake_state/late-notifier-call" ]] \
+  || fail 'routine lid transitions or clean shutdown sent a notification'
 rm -f "$user_support_dir/notifier"
 
 [[ "$(sed -n '1p' "$fake_state/sleep-disabled")" == 0 ]] || fail 'clean stop did not restore SleepDisabled'

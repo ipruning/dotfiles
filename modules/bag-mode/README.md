@@ -37,6 +37,12 @@ only when the service was enabled before the upgrade. Run
 Do not remove recovery state to silence either condition. It is the material
 the controller needs to restore the host.
 
+## Notifications
+
+Bag mode does not notify for routine start, lid, or clean-stop transitions.
+Notifications are reserved for crashes, unsafe power or recovery states, and
+battery thresholds that may require action.
+
 ## Removal
 
 ```zsh

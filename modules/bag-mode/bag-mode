@@ -5,7 +5,7 @@
 
 set -uo pipefail
 
-VERSION="2.6.0"
+VERSION="2.6.1"
 EXIT_USAGE=2
 EXIT_BRIGHTNESS_PENDING=69
 EXIT_START_FAILED=70
@@ -999,7 +999,6 @@ clean_shutdown() {
       log_line "startup failed; captured settings restored"
     else
       write_status_snapshot stopped || true
-      notify_sync stopped passive "bag-mode stopped safely" "Bag mode stopped after $reason and restored the captured settings. The Mac now sleeps normally when the lid closes; run \`bag-mode start\` to keep it awake again. Current battery: ${CURRENT_BATTERY:-unreadable}." || true
       log_line "stopped"
     fi
     return 0
@@ -1108,8 +1107,6 @@ controller_main() {
   log_line "started session=$SESSION_ID restart_count=$restart_count brightness_target=$BRIGHTNESS_TARGET captured_sleep_disabled=$CAPTURED_SLEEP_DISABLED"
   if (( restarting_after_crash )); then
     notify_async restarted time-sensitive "bag-mode restarted after a crash" "The controller is running again after crash $restart_count in the current window. Lid: $CURRENT_LID. Battery: $CURRENT_BATTERY. Inspect \`bag-mode logs\` if it repeats."
-  else
-    notify_async started passive "bag-mode started" "Bag mode is active. Lid: $CURRENT_LID. Battery: $CURRENT_BATTERY. No action needed."
   fi
 
   interval="$INTERVAL"
@@ -1133,7 +1130,6 @@ controller_main() {
         last_observed_brightness=""
         CURRENT_BATTERY="$(battery_status)"
         write_status_snapshot lid_closed || true
-        notify_async lid_closed time-sensitive "bag-mode lid closed" "The Mac will stay awake with the lid closed. Battery: $CURRENT_BATTERY. No action needed."
       else
         if set_brightness "$BRIGHTNESS_TARGET"; then
           clear_matching_brightness_pending || log_line "could not clear matching pending brightness record"
@@ -1143,7 +1139,6 @@ controller_main() {
         last_observed_brightness="$BRIGHTNESS_TARGET"
         CURRENT_BATTERY="$(battery_status)"
         write_status_snapshot lid_open || true
-        [[ -n "$previous_lid" ]] && notify_async lid_open passive "bag-mode lid open" "Display brightness and captured power settings were restored. Battery: $CURRENT_BATTERY. No action needed."
       fi
       previous_lid="$lid"
     fi
