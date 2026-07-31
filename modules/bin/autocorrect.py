@@ -286,7 +286,7 @@ def _looks_like_apostrophe(text: str, i: int) -> bool:
     prev = text[i - 1] if i > 0 else ""
     nxt = text[i + 1] if i + 1 < len(text) else ""
 
-    # don’t, Alex’s, 1980’s：夹在两个“单词字符”之间
+    # don’t, James’s, 1980’s：夹在两个“单词字符”之间
     if prev and nxt and _is_wordish(prev) and _is_wordish(nxt):
         return True
 

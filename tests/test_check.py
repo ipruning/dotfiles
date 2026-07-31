@@ -456,9 +456,7 @@ def test_linux_systemd_check_scans_global_and_data_user_unit_paths(
     for unit_directory in user_unit_directories:
         unit_directory.mkdir(parents=True)
         unit = unit_directory / "worker.service"
-        unit.write_text(
-            "[Service]\nExecStart=/home/alex/.local/share/mise/shims/worker\n"
-        )
+        unit.write_text("[Service]\nExecStart=/root/.local/share/mise/shims/worker\n")
 
         findings = check_mise_module._mise_systemd_shim_findings(
             home,

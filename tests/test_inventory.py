@@ -445,8 +445,8 @@ def test_inventory_rejects_traversal_and_separator_hosts(tmp_path: Path) -> None
 
 
 def test_inventory_sanitizes_detected_hostnames() -> None:
-    assert sanitize_host("MacBook-Pro-M5-Pro") == "MacBook-Pro-M5-Pro"
-    assert sanitize_host("Alex's Mac") == "Alex-s-Mac"
+    assert sanitize_host("Example-Mac") == "Example-Mac"
+    assert sanitize_host("User's Mac") == "User-s-Mac"
     assert sanitize_host("..") == "unknown-host"
     assert sanitize_host("") == "unknown-host"
 
