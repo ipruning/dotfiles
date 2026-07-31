@@ -18,8 +18,6 @@ tap "steipete/tap", trusted: true
 brew "shellcheck"
 # Static checker for GitHub Actions workflow files
 brew "actionlint"
-# Browser automation CLI for AI agents
-brew "agent-browser"
 # Code searching, linting, rewriting
 brew "ast-grep"
 # Linter and formatter to improve copywriting, correct spaces, words between CJK
@@ -271,4 +269,3 @@ go "cmd/gofmt"
 cargo "cargo-nextest"
 cargo "dotslash"
 cargo "mdbook-mermaid"
-uv "harness", source: "file:///Users/alex/Developer/tries/browser-harness"
