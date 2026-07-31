@@ -112,7 +112,7 @@ test_env=(
   FAKE_STATE="$state"
 )
 installed_bin="$test_root/usr/local/bin/macos-maxfiles"
-plist="$test_root/Library/LaunchDaemons/com.alex.limit.maxfiles.plist"
+plist="$test_root/Library/LaunchDaemons/com.ipruning.limit.maxfiles.plist"
 
 env "${test_env[@]}" "$cli" install --dry-run >"$test_root/dry-run.out"
 [[ ! -e "$installed_bin" && ! -e "$plist" && ! -e "$state/loaded" ]] || fail 'dry-run mutated state'

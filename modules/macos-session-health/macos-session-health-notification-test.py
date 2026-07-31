@@ -589,7 +589,7 @@ class LifecycleRollbackTest(unittest.TestCase):
         root = Path(self.temp_dir.name)
         self.runtime = root / "runtime"
         self.wrapper = root / "bin/macos-session-health"
-        self.plist = root / "LaunchAgents/com.alex.macos-session-health.plist"
+        self.plist = root / "LaunchAgents/com.ipruning.macos-session-health.plist"
         self.runtime.parent.mkdir(parents=True, exist_ok=True)
         self.wrapper.parent.mkdir(parents=True)
         self.plist.parent.mkdir(parents=True)
@@ -931,7 +931,7 @@ class LegacyInstallDetectionTest(unittest.TestCase):
         module_dir.mkdir(parents=True)
         script = module_dir / "macos-session-health"
         script.write_text(
-            '#!/usr/bin/env python3\nLABEL = "com.alex.macos-session-health"\n'
+            '#!/usr/bin/env python3\nLABEL = "com.ipruning.macos-session-health"\n'
         )
         self.user_bin.symlink_to(script)
 

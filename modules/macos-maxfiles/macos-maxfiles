@@ -3,7 +3,7 @@
 set -uo pipefail
 
 VERSION="1.0.0"
-LABEL="com.alex.limit.maxfiles"
+LABEL="com.ipruning.limit.maxfiles"
 SELF_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)/$(basename "${BASH_SOURCE[0]}")"
 TEST_ROOT="${MACOS_MAXFILES_TEST_ROOT:-}"
 INSTALL_BIN="$TEST_ROOT/usr/local/bin/macos-maxfiles"

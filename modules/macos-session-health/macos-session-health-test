@@ -56,7 +56,7 @@ test_env=(
 )
 
 blocked_home="$test_root/blocked-home"
-blocked_plist="$blocked_home/Library/LaunchAgents/com.alex.macos-session-health.plist"
+blocked_plist="$blocked_home/Library/LaunchAgents/com.ipruning.macos-session-health.plist"
 mkdir -p "$blocked_home/.local/bin" "$(dirname "$blocked_plist")"
 printf '#!/bin/sh\nexit 0\n' >"$test_root/unmanaged-command"
 ln -s "$test_root/unmanaged-command" "$blocked_home/.local/bin/macos-session-health"
@@ -94,7 +94,7 @@ rg -q 'ready="True"' "$test_root/install-dry-run.out" || fail 'install dry-run d
 env "${test_env[@]}" "$python_bin" "$health_cli" install >"$test_root/install.out"
 installed_cli="$test_home/.local/bin/macos-session-health"
 runtime_cli="$test_home/Library/Application Support/macos-session-health/macos-session-health"
-plist="$test_home/Library/LaunchAgents/com.alex.macos-session-health.plist"
+plist="$test_home/Library/LaunchAgents/com.ipruning.macos-session-health.plist"
 [[ -x "$installed_cli" && ! -L "$installed_cli" && -x "$runtime_cli" && -f "$plist" ]] \
   || fail 'install did not create its command, runtime, and LaunchAgent'
 plutil -lint "$plist" >/dev/null || fail 'install generated an invalid LaunchAgent'
