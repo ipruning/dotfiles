@@ -12,19 +12,19 @@ checksum = "blake3:6b5fe0bc6105452f663d5a15ee03574caab7ac642f0400266273d0b9562c9
 url = "https://repo.yarnpkg.com/4.18.0/packages/yarnpkg-cli/bin/yarn.js"
 
 [[tools.aube]]
-version = "1.36.0"
+version = "1.37.0"
 backend = "aqua:jdx/aube"
 
 [tools.aube."platforms.linux-x64"]
-checksum = "sha256:0eb721d9ff37e24bf035f9a7cb62107593f59bd740393b2eee5b36a50e7759fb"
-url = "https://github.com/jdx/aube/releases/download/v1.36.0/aube-v1.36.0-x86_64-unknown-linux-gnu.tar.gz"
-url_api = "https://api.github.com/repos/jdx/aube/releases/assets/494405804"
+checksum = "sha256:1775b37c4381bff2314c96635cac3eeb90b02bea0f33371e553a4431dc893546"
+url = "https://github.com/jdx/aube/releases/download/v1.37.0/aube-v1.37.0-x86_64-unknown-linux-gnu.tar.gz"
+url_api = "https://api.github.com/repos/jdx/aube/releases/assets/496796145"
 provenance = "github-attestations"
 
 [tools.aube."platforms.macos-arm64"]
-checksum = "sha256:b169f6e78b081595ca738b105ba6a23d0cf87b499b7eca812203cc1615e0e5fe"
-url = "https://github.com/jdx/aube/releases/download/v1.36.0/aube-v1.36.0-aarch64-apple-darwin.tar.gz"
-url_api = "https://api.github.com/repos/jdx/aube/releases/assets/494475875"
+checksum = "sha256:6fdc27e146e5d6a45abf60ef7cf2e83d5b7284acbba4cecf6237905bd528a916"
+url = "https://github.com/jdx/aube/releases/download/v1.37.0/aube-v1.37.0-aarch64-apple-darwin.tar.gz"
+url_api = "https://api.github.com/repos/jdx/aube/releases/assets/496852124"
 provenance = "github-attestations"
 
 [[tools.bun]]
@@ -115,18 +115,18 @@ url = "https://github.com/earendil-works/pi/releases/download/v0.83.0/pi-darwin-
 url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/494597981"
 
 [[tools."github:larksuite/cli"]]
-version = "1.0.80"
+version = "1.0.81"
 backend = "github:larksuite/cli"
 
 [tools."github:larksuite/cli"."platforms.linux-x64"]
-checksum = "sha256:4295b4b58fb9cc7fc7a71be462977fe53dd916ba0ca25fe134424d34acb52fb1"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.80/lark-cli-1.0.80-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/494147904"
+checksum = "sha256:4c783dc4bb7dd9829184058f09e1953ad5016c2fea6a38b5ae2966b191907a33"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.81/lark-cli-1.0.81-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/496658089"
 
 [tools."github:larksuite/cli"."platforms.macos-arm64"]
-checksum = "sha256:cf8d3e7b8314a6d9a55e2ae05e4dbaf45ef8362ada13dc5973730368b5768189"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.80/lark-cli-1.0.80-darwin-arm64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/494147906"
+checksum = "sha256:0693846b129044a8c1312999f04ff26343b9a2fdb41615343e33fe67cea9dea5"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.81/lark-cli-1.0.81-darwin-arm64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/496658090"
 
 [[tools."github:lycorp-jp/sim-use"]]
 version = "0.12.0"
@@ -213,8 +213,12 @@ checksum = "sha256:f4387df0b46556516d19abf2f2d6806481ac8368aa7f9d96bafed422a56a1
 url = "https://nodejs.org/dist/v26.5.1/node-v26.5.1-darwin-arm64.tar.gz"
 
 [[tools."npm:@openai/codex-security"]]
-version = "0.1.4"
+version = "0.1.5"
 backend = "npm:@openai/codex-security"
+
+[[tools."npm:agent-browser"]]
+version = "0.33.1"
+backend = "npm:agent-browser"
 
 [[tools."npm:agent-device"]]
 version = "0.20.3"
