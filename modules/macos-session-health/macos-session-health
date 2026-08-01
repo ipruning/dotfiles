@@ -1616,12 +1616,16 @@ def collect_audio_registrar_health(
         )
 
 
-def read_plist_value(plist_path: Path, key: str, timeout: float) -> str:
-    code, out, _err, timed_out, _duration_ms = run_command(
-        ["plutil", "-extract", key, "raw", "-o", "-", str(plist_path)],
-        timeout=timeout,
-    )
-    return out.strip() if code == 0 and not timed_out else ""
+def read_plist_value(plist_path: Path, key: str) -> str:
+    try:
+        with plist_path.open("rb") as plist_file:
+            document = plistlib.load(plist_file)
+    except (OSError, plistlib.InvalidFileException):
+        return ""
+    if not isinstance(document, dict):
+        return ""
+    value = document.get(key)
+    return str(value) if isinstance(value, (str, int, float)) else ""
 
 
 def collect_codex_config_snapshot(
@@ -1635,12 +1639,8 @@ def collect_codex_config_snapshot(
     app_version = ""
     app_build = ""
     if info_plist.exists():
-        app_version = read_plist_value(
-            info_plist, "CFBundleShortVersionString", args.command_timeout
-        )
-        app_build = read_plist_value(
-            info_plist, "CFBundleVersion", args.command_timeout
-        )
+        app_version = read_plist_value(info_plist, "CFBundleShortVersionString")
+        app_build = read_plist_value(info_plist, "CFBundleVersion")
 
     data: dict[str, Any] = {}
     parse_error = ""
@@ -2450,6 +2450,7 @@ def collect_process_counts(
     user_counts: dict[str, int] = {}
     command_counts: dict[str, int] = {}
     parent_counts: dict[str, int] = {}
+    pid_commands: dict[str, str] = {}
     zombies: list[tuple[str, str, str, str]] = []
     total = 0
     current_user = getpass.getuser()
@@ -2466,6 +2467,7 @@ def collect_process_counts(
         user_counts[user] = user_counts.get(user, 0) + 1
         command_counts[comm] = command_counts.get(comm, 0) + 1
         parent_counts[ppid] = parent_counts.get(ppid, 0) + 1
+        pid_commands[pid] = comm
         if "Z" in stat:
             zombies.append((stat, ppid, pid, comm))
 
@@ -2508,13 +2510,7 @@ def collect_process_counts(
     for ppid, count in sorted(
         parent_counts.items(), key=lambda item: item[1], reverse=True
     )[:top_n]:
-        parent_comm = ""
-        if ppid != "0":
-            parent_code, parent_out, _, _, _ = run_command(
-                ["ps", "-p", ppid, "-o", "comm="], timeout=1
-            )
-            if parent_code == 0:
-                parent_comm = parent_out.strip()
+        parent_comm = pid_commands.get(ppid, "")
         parent_rows.append({"count": count, "ppid": ppid, "parent_comm": parent_comm})
     store.emit(snapshot_id, "parent_process_count", rows=parent_rows)
 
@@ -2553,16 +2549,30 @@ def collect_fd_top(
         current_count, current_command = counts.get(pid, (0, command))
         counts[pid] = (current_count + 1, current_command)
 
-    fd_rows: list[dict[str, Any]] = []
-    for pid, (count, short_comm) in sorted(
+    top_processes = sorted(
         counts.items(), key=lambda item: item[1][0], reverse=True
-    )[:top_n]:
-        comm = short_comm
+    )[:top_n]
+    full_commands: dict[str, str] = {}
+    if top_processes:
         ps_code, ps_out, _, _, _ = run_command(
-            ["ps", "-p", pid, "-o", "comm="], timeout=1
+            [
+                "ps",
+                "-p",
+                ",".join(pid for pid, _details in top_processes),
+                "-o",
+                "pid=,comm=",
+            ],
+            timeout=timeout,
         )
-        if ps_code == 0 and ps_out.strip():
-            comm = ps_out.strip()
+        if ps_code == 0:
+            for line in ps_out.splitlines():
+                parts = line.strip().split(None, 1)
+                if len(parts) == 2:
+                    full_commands[parts[0]] = parts[1]
+
+    fd_rows: list[dict[str, Any]] = []
+    for pid, (count, short_comm) in top_processes:
+        comm = full_commands.get(pid, short_comm)
         fd_rows.append(
             {
                 "count": count,
@@ -2608,6 +2618,7 @@ def collect_cpu_top(store: Store, snapshot_id: str, top_n: int, timeout: float) 
         return
 
     rows: list[dict[str, Any]] = []
+    pid_commands: dict[str, str] = {}
     for line in out.splitlines():
         parts = line.split(None, 6)
         if len(parts) < 7:
@@ -2617,6 +2628,7 @@ def collect_cpu_top(store: Store, snapshot_id: str, top_n: int, timeout: float) 
         rss_kb = parse_int(rss)
         if cpu_value is None:
             continue
+        pid_commands[pid] = comm
         rows.append(
             {
                 "pid": pid,
@@ -2631,14 +2643,8 @@ def collect_cpu_top(store: Store, snapshot_id: str, top_n: int, timeout: float) 
 
     cpu_rows: list[dict[str, Any]] = []
     for row in sorted(rows, key=lambda item: item["cpu_percent"], reverse=True)[:top_n]:
-        parent_comm = ""
         ppid = str(row["ppid"])
-        if ppid != "0":
-            parent_code, parent_out, _, _, _ = run_command(
-                ["ps", "-p", ppid, "-o", "comm="], timeout=1
-            )
-            if parent_code == 0:
-                parent_comm = parent_out.strip()
+        parent_comm = pid_commands.get(ppid, "")
         cpu_rows.append({**row, "parent_comm": parent_comm})
     store.emit(
         snapshot_id,
@@ -2738,19 +2744,13 @@ def collect_app_assess(
             ok = False
             continue
 
-        exe_code, exe_out, exe_err, exe_timed_out, exe_ms = run_command(
-            [
-                "plutil",
-                "-extract",
-                "CFBundleExecutable",
-                "raw",
-                "-o",
-                "-",
-                str(info_plist),
-            ],
-            timeout=timeout,
-        )
-        executable_name = exe_out.strip()
+        started = time.monotonic()
+        executable_name = read_plist_value(info_plist, "CFBundleExecutable")
+        exe_ms = (time.monotonic() - started) * 1000
+        exe_code = 0 if executable_name else 65
+        exe_out = executable_name
+        exe_err = "" if executable_name else "CFBundleExecutable is missing or invalid"
+        exe_timed_out = False
         executable_path = path / "Contents" / "MacOS" / executable_name
         bundle_ok = exe_code == 0 and bool(executable_name) and executable_path.exists()
         store.emit(
