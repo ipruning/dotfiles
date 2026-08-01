@@ -913,6 +913,97 @@ class SkillshareGuardTest(unittest.TestCase):
         self.assertIn("configuration is missing", incident["message"])
 
 
+class CollectionCommandCountTest(unittest.TestCase):
+    def setUp(self) -> None:
+        self.module = runpy.run_path(str(MODULE_PATH))
+        self.events: list[tuple[str, dict[str, Any]]] = []
+        self.store = SimpleNamespace(
+            emit=lambda _snapshot_id, event, _severity=None, **fields: self.events.append(
+                (event, fields)
+            )
+        )
+
+    def event_fields(self, event: str) -> dict[str, Any]:
+        return next(fields for name, fields in self.events if name == event)
+
+    def test_process_inventories_reuse_their_existing_process_table(self) -> None:
+        user = self.module["getpass"].getuser()
+        process_count_output = "\n".join(
+            [
+                "root 0 1 Ss /sbin/launchd",
+                f"{user} 1 10 S /Applications/Parent",
+                f"{user} 10 11 S /Applications/Child",
+            ]
+        )
+        cpu_output = "\n".join(
+            [
+                "1 0 Ss 0.1 1000 01:00 /sbin/launchd",
+                "10 1 S 2.0 2000 00:30 /Applications/Parent",
+                "11 10 S 9.0 3000 00:10 /Applications/Child",
+            ]
+        )
+        outputs = iter([process_count_output, cpu_output])
+        calls: list[list[str]] = []
+
+        def run(command: list[str], **_kwargs: Any) -> tuple[int, str, str, bool, float]:
+            calls.append(command)
+            return 0, next(outputs), "", False, 1.0
+
+        functions = self.module["collect_process_counts"].__globals__
+        with mock.patch.dict(functions, {"run_command": run}):
+            self.module["collect_process_counts"](self.store, "snapshot", 15, 5)
+            self.module["collect_cpu_top"](self.store, "snapshot", 15, 5)
+
+        self.assertEqual(len(calls), 2)
+        parent_rows = self.event_fields("parent_process_count")["rows"]
+        self.assertIn(
+            {"count": 1, "ppid": "10", "parent_comm": "/Applications/Parent"},
+            parent_rows,
+        )
+        cpu_rows = self.event_fields("process_cpu_top")["rows"]
+        self.assertEqual(cpu_rows[0]["parent_comm"], "/Applications/Parent")
+
+    def test_fd_inventory_resolves_all_full_commands_with_one_ps(self) -> None:
+        calls: list[list[str]] = []
+
+        def run(command: list[str], **_kwargs: Any) -> tuple[int, str, str, bool, float]:
+            calls.append(command)
+            if command[0] == "lsof":
+                return (
+                    0,
+                    "COMMAND PID USER FD TYPE\nshort 10 user 1r REG\nother 20 user 2w REG\n",
+                    "",
+                    False,
+                    1.0,
+                )
+            return 0, "10 /full/command\n20 /other/command\n", "", False, 1.0
+
+        functions = self.module["collect_fd_top"].__globals__
+        with mock.patch.dict(functions, {"run_command": run}):
+            self.module["collect_fd_top"](self.store, "snapshot", 15, 512, 5)
+
+        self.assertEqual(len(calls), 2)
+        self.assertEqual(calls[1][0:3], ["ps", "-p", "10,20"])
+        rows = self.event_fields("fd_top")["rows"]
+        self.assertEqual([row["comm"] for row in rows], ["/full/command", "/other/command"])
+
+    def test_plist_reader_handles_binary_plists_without_external_commands(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            plist_path = Path(temp_dir) / "Info.plist"
+            with plist_path.open("wb") as plist_file:
+                plistlib = self.module["plistlib"]
+                plistlib.dump(
+                    {"CFBundleExecutable": "Example"},
+                    plist_file,
+                    fmt=plistlib.FMT_BINARY,
+                )
+
+            self.assertEqual(
+                self.module["read_plist_value"](plist_path, "CFBundleExecutable"),
+                "Example",
+            )
+
+
 class LegacyInstallDetectionTest(unittest.TestCase):
     def setUp(self) -> None:
         self.module = runpy.run_path(str(MODULE_PATH))
