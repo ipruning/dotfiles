@@ -11,10 +11,6 @@ targets:
     skills:
       path: ~/.agents/skills
 extras:
-- name: amp
-  targets:
-  - path: ~/.config/amp
-    mode: copy
 - name: codex
   targets:
   - path: ~/.codex
