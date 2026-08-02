@@ -346,7 +346,7 @@ url = "https://github.com/jdx/ruby/releases/download/4.0.6-1/ruby-4.0.6.macos.ta
 provenance = "github-attestations"
 
 [[tools.rust]]
-version = "stable"
+version = "1.97.1"
 backend = "core:rust"
 
 [[tools.starship]]
