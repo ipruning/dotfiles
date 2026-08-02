@@ -701,7 +701,7 @@ def inspect_host(
         )
         if finding:
             findings.append(finding)
-    for name, _source, entrypoint in PLUGIN_SPECS:
+    for name, _source, _revision, entrypoint in PLUGIN_SPECS:
         findings.append(
             _file_capability(
                 f"runtime.plugin.{name}",
@@ -711,7 +711,7 @@ def inspect_host(
             ),
         )
     generated_plugins = repo_root / "generated/plugins"
-    owned_plugins = {name for name, _source, _entrypoint in PLUGIN_SPECS} | {
+    owned_plugins = {name for name, _source, _revision, _entrypoint in PLUGIN_SPECS} | {
         f"{name}.wasm" for name, _source, _sha256 in WASM_SPECS
     }
     if generated_plugins.is_dir():
@@ -760,7 +760,9 @@ def inspect_host(
                 ),
             )
     generated_bin = repo_root / "generated/bin"
-    owned_binaries = {name for name, _source, _command, _artifact in LOCAL_BINARY_SPECS}
+    owned_binaries = {
+        name for name, _source, _revision, _command, _artifact in LOCAL_BINARY_SPECS
+    }
     for binary_name in sorted(owned_binaries):
         findings.append(
             _binary_capability(

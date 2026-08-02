@@ -50,6 +50,7 @@ class RuntimeSpec:
     target: Path | None = None
     command: tuple[str, ...] = ()
     source: str | None = None
+    revision: str | None = None
     sha256: str | None = None
     working_directory: Path | None = None
     artifact: Path | None = None
@@ -111,16 +112,19 @@ PLUGIN_SPECS = (
     (
         "fzf-tab",
         "https://github.com/Aloxaf/fzf-tab",
+        "24105b15714bfec37989ed5c5b6e60f572253019",
         "fzf-tab.plugin.zsh",
     ),
     (
         "zsh-autosuggestions",
         "https://github.com/zsh-users/zsh-autosuggestions",
+        "85919cd1ffa7d2d5412f6d3fe437ebdbeeec4fc5",
         "zsh-autosuggestions.zsh",
     ),
     (
         "fast-syntax-highlighting",
         "https://github.com/zdharma-continuum/fast-syntax-highlighting",
+        "3d574ccf48804b10dca52625df13da5edae7f553",
         "fast-syntax-highlighting.plugin.zsh",
     ),
 )
@@ -142,6 +146,7 @@ LOCAL_BINARY_SPECS = (
     (
         "op-cache",
         "https://github.com/craftzdog/op-cache.git",
+        "768cc6bc992da759d5243f7b2249eb85fc19ab15",
         ("cargo", "build", "--release", "--locked"),
         Path("target/release/op-cache"),
     ),
@@ -279,7 +284,7 @@ def _local_binary_results(
     sources_dir = repo_root / "generated/sources"
     cargo_available = executable_finder("cargo") is not None
     git_available = executable_finder("git") is not None
-    for name, source, build_command, artifact_relative in LOCAL_BINARY_SPECS:
+    for name, source, revision, build_command, artifact_relative in LOCAL_BINARY_SPECS:
         source_dir = sources_dir / name
         source_git_directory = source_dir / ".git"
         source_is_symlink = source_dir.is_symlink()
@@ -297,10 +302,26 @@ def _local_binary_results(
             tool="git",
             target=source_dir,
             source=source,
+            revision=revision,
             command=(
-                ("git", "-C", str(source_dir), "pull", "--ff-only")
+                (
+                    "git",
+                    "-C",
+                    str(source_dir),
+                    "fetch",
+                    "--depth=1",
+                    "origin",
+                    revision,
+                )
                 if source_action is RuntimeAction.UPDATE
-                else ("git", "clone", "--depth=1", source, str(source_dir))
+                else (
+                    "git",
+                    "clone",
+                    "--filter=blob:none",
+                    "--no-checkout",
+                    source,
+                    str(source_dir),
+                )
             ),
         )
         if source_is_symlink:
@@ -361,6 +382,7 @@ def _local_binary_results(
             target=repo_root / "generated/bin" / name,
             command=((*build_command, "--offline") if not network else build_command),
             source=source,
+            revision=revision,
             working_directory=source_dir,
             artifact=source_dir / artifact_relative,
             depends_on=f"source.{name}",
@@ -486,7 +508,7 @@ def plan_runtime(
         )
         results.append(_generator_result(spec, executable_finder=executable_finder))
     git_available = executable_finder("git") is not None
-    for name, source, _entrypoint in PLUGIN_SPECS:
+    for name, source, revision, _entrypoint in PLUGIN_SPECS:
         target = plugins_dir / name
         git_directory = target / ".git"
         # A symlink here would point outside repository-owned generated state;
@@ -506,10 +528,26 @@ def plan_runtime(
             tool="git",
             target=target,
             source=source,
+            revision=revision,
             command=(
-                ("git", "-C", str(target), "pull", "--ff-only")
+                (
+                    "git",
+                    "-C",
+                    str(target),
+                    "fetch",
+                    "--depth=1",
+                    "origin",
+                    revision,
+                )
                 if action is RuntimeAction.UPDATE
-                else ("git", "clone", "--depth=1", source, str(target))
+                else (
+                    "git",
+                    "clone",
+                    "--filter=blob:none",
+                    "--no-checkout",
+                    source,
+                    str(target),
+                )
             ),
         )
         if is_symlink:
@@ -709,6 +747,84 @@ def _command_failure_reason(completed: subprocess.CompletedProcess[str]) -> str:
     return f"{reason}: {detail}" if detail else reason
 
 
+def _read_revision(
+    spec: RuntimeSpec,
+    directory: Path,
+    home: Path,
+) -> str:
+    verify_spec = replace(
+        spec,
+        command=("git", "-C", str(directory), "rev-parse", "HEAD"),
+        working_directory=None,
+    )
+    verified = _run_command(verify_spec, home, capture_output=True)
+    if verified.returncode != 0:
+        raise RuntimeError(_command_failure_reason(verified))
+    return verified.stdout.strip()
+
+
+def _set_revision(
+    spec: RuntimeSpec,
+    directory: Path,
+    revision: str,
+    home: Path,
+    *,
+    capture_output: bool,
+) -> None:
+    checkout_spec = replace(
+        spec,
+        command=("git", "-C", str(directory), "checkout", "--detach", revision),
+        working_directory=None,
+    )
+    checkout = _run_command(checkout_spec, home, capture_output=capture_output)
+    if capture_output:
+        _emit_command_output(spec, checkout.stdout)
+        _emit_command_output(spec, checkout.stderr)
+    if checkout.returncode != 0:
+        raise RuntimeError(_command_failure_reason(checkout))
+
+    actual_revision = _read_revision(spec, directory, home)
+    if actual_revision != revision:
+        raise RuntimeError(
+            f"revision mismatch: expected {revision}, received {actual_revision}",
+        )
+
+
+def _checkout_revision(
+    spec: RuntimeSpec,
+    directory: Path,
+    home: Path,
+    *,
+    capture_output: bool,
+    rollback_revision: str | None = None,
+) -> None:
+    assert spec.revision is not None
+    try:
+        _set_revision(
+            spec,
+            directory,
+            spec.revision,
+            home,
+            capture_output=capture_output,
+        )
+    except (OSError, RuntimeError, subprocess.TimeoutExpired) as error:
+        if rollback_revision is None:
+            raise
+        try:
+            _set_revision(
+                spec,
+                directory,
+                rollback_revision,
+                home,
+                capture_output=capture_output,
+            )
+        except (OSError, RuntimeError, subprocess.TimeoutExpired) as rollback_error:
+            raise RuntimeError(
+                f"{error}; rollback to {rollback_revision} failed: {rollback_error}",
+            ) from error
+        raise
+
+
 def _download(source: str, timeout_seconds: int) -> bytes:
     request = urllib.request.Request(source, headers={"User-Agent": "dotfiles-runtime"})
     with urllib.request.urlopen(request, timeout=timeout_seconds) as response:
@@ -791,6 +907,13 @@ def execute_runtime(
                         "runtime command Git metadata is not a directory; refusing "
                         "to execute outside generated state",
                     )
+            rollback_revision = (
+                _read_revision(spec, command_directory, home)
+                if planned.action is RuntimeAction.UPDATE
+                and spec.revision is not None
+                and command_directory is not None
+                else None
+            )
             if planned.action is RuntimeAction.GENERATE:
                 completed = _run_command(spec, home, capture_output=True)
                 exit_code = completed.returncode
@@ -842,6 +965,16 @@ def execute_runtime(
                         _emit_command_output(spec, completed.stderr)
                     if completed.returncode != 0:
                         raise RuntimeError(_command_failure_reason(completed))
+                    if spec.revision is not None:
+                        checkout_directory = staging or target
+                        assert checkout_directory is not None
+                        _checkout_revision(
+                            spec,
+                            checkout_directory,
+                            home,
+                            capture_output=capture_output,
+                            rollback_revision=rollback_revision,
+                        )
                     if staging is not None:
                         assert target is not None
                         staging.rename(target)
@@ -970,6 +1103,7 @@ def _document(report: RuntimeReport) -> dict[str, object]:
                 "target": str(result.spec.target) if result.spec.target else None,
                 "command": list(result.spec.command),
                 "source": result.spec.source,
+                "revision": result.spec.revision,
                 "sha256": result.spec.sha256,
                 "working_directory": (
                     str(result.spec.working_directory)
@@ -1023,12 +1157,13 @@ def _shell_restart_required(report: RuntimeReport) -> bool:
 
 def _step_detail(spec: RuntimeSpec, action: RuntimeAction) -> str:
     command = shlex.join(spec.command) if spec.command else ""
+    revision = f" [revision={spec.revision}]" if spec.revision else ""
     if action is RuntimeAction.GENERATE:
         return f"{command} -> {spec.target}"
     if action is RuntimeAction.BUILD:
-        return f"{command} (in {spec.working_directory}) -> {spec.target}"
+        return f"{command} (in {spec.working_directory}) -> {spec.target}{revision}"
     if command:
-        return command
+        return f"{command}{revision}"
     if action is RuntimeAction.DOWNLOAD:
         return f"download {spec.source} -> {spec.target}"
     if action is RuntimeAction.REMOVE:

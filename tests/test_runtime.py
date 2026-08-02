@@ -111,6 +111,10 @@ def test_runtime_previews_owned_refresh_by_default_without_writing(
     assert steps["completion.codex"]["action"] == "generate"
     assert steps["completion.op"]["status"] == "skipped"
     assert steps["plugin.fzf-tab"]["action"] == "clone"
+    assert (
+        steps["plugin.fzf-tab"]["revision"]
+        == "24105b15714bfec37989ed5c5b6e60f572253019"
+    )
     assert steps["plugin.zsh-autosuggestions"]["action"] == "clone"
     assert steps["plugin.fast-syntax-highlighting"]["action"] == "clone"
     assert steps["wasm.zellij-sessionizer"]["action"] == "download"
@@ -120,6 +124,20 @@ def test_runtime_previews_owned_refresh_by_default_without_writing(
     assert steps["zsh.compdump"]["target"] == str(home / ".zcompdump*")
     assert document["summary"] == {"planned": 10, "skipped": 9}
     assert not (repo_root / "generated").exists()
+
+
+def test_runtime_text_preview_exposes_pinned_revision(tmp_path: Path) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    bin_dir = tmp_path / "bin"
+    home.mkdir()
+    bin_dir.mkdir()
+    _fake_tool(bin_dir, "git")
+
+    completed = _run_runtime(repo_root, home, bin_dir)
+
+    assert completed.returncode == 0
+    assert "revision=24105b15714bfec37989ed5c5b6e60f572253019" in completed.stdout
 
 
 def test_runtime_refuses_symlinked_owned_directories(tmp_path: Path) -> None:
@@ -371,6 +389,10 @@ def test_runtime_build_plan_owns_custom_rust_binaries(tmp_path: Path) -> None:
     step_names = [step["name"] for step in document["steps"]]
     steps = {step["name"]: step for step in document["steps"]}
     assert steps["source.op-cache"]["action"] == "clone"
+    assert (
+        steps["source.op-cache"]["revision"]
+        == "768cc6bc992da759d5243f7b2249eb85fc19ab15"
+    )
     assert steps["binary.op-cache"]["action"] == "build"
     assert steps["binary.op-cache"]["target"] == str(
         repo_root / "generated/bin/op-cache"
@@ -537,9 +559,19 @@ def test_runtime_successful_clone_atomically_publishes_checkout(
     _fake_tool(
         bin_dir,
         "git",
-        "for final_argument do :; done\n"
-        '/bin/mkdir -p "$final_argument/.git"\n'
-        'printf "checkout\\n" >"$final_argument/plugin.zsh"\n',
+        'if [ "$1" = "clone" ]; then\n'
+        "  for final_argument do :; done\n"
+        '  /bin/mkdir -p "$final_argument/.git"\n'
+        'elif [ "$1" = "-C" ] && [ "$3" = "checkout" ] && '
+        '[ "$4" = "--detach" ] && '
+        '[ "$5" = "0123456789abcdef0123456789abcdef01234567" ]; then\n'
+        '  printf "%s\\n" "$5" >"$2/.checked-out-revision"\n'
+        '  printf "checkout\\n" >"$2/plugin.zsh"\n'
+        'elif [ "$3" = "rev-parse" ]; then\n'
+        '  /bin/cat "$2/.checked-out-revision"\n'
+        "else\n"
+        "  exit 9\n"
+        "fi\n",
     )
     monkeypatch.setenv("PATH", str(bin_dir))
     spec = RuntimeSpec(
@@ -547,6 +579,7 @@ def test_runtime_successful_clone_atomically_publishes_checkout(
         tool="git",
         target=target,
         command=("git", "clone", "https://example.invalid/example.git", str(target)),
+        revision="0123456789abcdef0123456789abcdef01234567",
     )
     report = execute_runtime(
         RuntimeReport(
@@ -565,7 +598,76 @@ def test_runtime_successful_clone_atomically_publishes_checkout(
     assert report.ok is True
     assert (target / ".git").is_dir()
     assert (target / "plugin.zsh").read_text() == "checkout\n"
+    assert (target / ".checked-out-revision").read_text().strip() == (
+        "0123456789abcdef0123456789abcdef01234567"
+    )
     assert not list(target.parent.glob(".example.clone-*"))
+
+
+def test_runtime_failed_update_verification_restores_previous_revision(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    home = tmp_path / "home"
+    bin_dir = tmp_path / "bin"
+    target = tmp_path / "generated/plugins/example"
+    old_revision = "1111111111111111111111111111111111111111"
+    new_revision = "2222222222222222222222222222222222222222"
+    home.mkdir()
+    bin_dir.mkdir()
+    (target / ".git").mkdir(parents=True)
+    (target / ".checked-out-revision").write_text(f"{old_revision}\n")
+    _fake_tool(
+        bin_dir,
+        "git",
+        'if [ "$1" = "-C" ] && [ "$3" = "fetch" ]; then\n'
+        "  exit 0\n"
+        'elif [ "$1" = "-C" ] && [ "$3" = "checkout" ]; then\n'
+        '  if [ "$5" = "2222222222222222222222222222222222222222" ]; then\n'
+        '    printf "wrong-revision\\n" >"$2/.checked-out-revision"\n'
+        "  else\n"
+        '    printf "%s\\n" "$5" >"$2/.checked-out-revision"\n'
+        "  fi\n"
+        'elif [ "$1" = "-C" ] && [ "$3" = "rev-parse" ]; then\n'
+        '  /bin/cat "$2/.checked-out-revision"\n'
+        "else\n"
+        "  exit 9\n"
+        "fi\n",
+    )
+    monkeypatch.setenv("PATH", str(bin_dir))
+    spec = RuntimeSpec(
+        name="plugin.example",
+        tool="git",
+        target=target,
+        command=(
+            "git",
+            "-C",
+            str(target),
+            "fetch",
+            "--depth=1",
+            "origin",
+            new_revision,
+        ),
+        revision=new_revision,
+    )
+
+    report = execute_runtime(
+        RuntimeReport(
+            apply=False,
+            results=(
+                RuntimeResult(
+                    spec,
+                    RuntimeStatus.PLANNED,
+                    RuntimeAction.UPDATE,
+                ),
+            ),
+        ),
+        home,
+    )
+
+    assert report.ok is False
+    assert "revision mismatch" in (report.results[0].reason or "")
+    assert (target / ".checked-out-revision").read_text().strip() == old_revision
 
 
 def test_runtime_offline_build_is_locked_and_offline(tmp_path: Path) -> None:
