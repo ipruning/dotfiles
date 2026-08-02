@@ -136,10 +136,10 @@ before Ubuntu's non-interactive early return, so direct SSH commands also
 receive the user and mise paths without interactive shell initialization.
 
 The Linux Lite drift profile observes Git, Mise, portable Atuin configuration,
-and the availability of Starship, Atuin, Zoxide, Herdr, Skillshare, Hunk, and
-Delta. Optional capabilities remain warnings: inspection never installs a
-missing tool or restores configuration automatically. `mise run check --
---strict` treats those warnings as failures.
+and the availability of Starship, Atuin, Zoxide, Herdr, Skillshare, Hunk,
+Lazygit, and Lazydocker. Optional capabilities remain warnings: inspection
+never installs a missing tool or restores configuration automatically. `mise
+run check -- --strict` treats those warnings as failures.
 
 ## Linux Zsh contract
 
@@ -264,9 +264,12 @@ services should use the distribution package when appropriate, or an explicit
 global shims. A genuinely host-specific tool is an explicit exception, not a
 second global configuration truth.
 
-Herdr is part of this shared baseline on macOS and Linux. Mise owns its install
-and updates; do not combine it with Homebrew, Herdr's direct installer, or
-`herdr update`. Its portable configuration is restored independently:
+Herdr, Hunk, Lazygit, and Lazydocker are part of this shared baseline on macOS
+and Linux. Mise owns their installs and updates; do not combine them with
+Homebrew, a platform package, or a direct installer. Hunk supplies Git's pager
+and difftool plus Lazygit's static diff renderer, while Lazygit retains
+responsibility for staging. Herdr's portable configuration is restored
+independently:
 
 ```bash
 mise run restore -- herdr

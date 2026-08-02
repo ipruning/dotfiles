@@ -626,7 +626,7 @@ def inspect_host(
             ),
         ),
     )
-    for command in ("atuin", "zoxide"):
+    for command in ("atuin", "zoxide", "hunk", "lazygit", "lazydocker"):
         findings.append(
             _check_executable(
                 command,
@@ -636,24 +636,6 @@ def inspect_host(
                     "Preview with mise run mise-sync, then apply with "
                     "mise run mise-sync -- --apply."
                 ),
-            ),
-        )
-    for command, missing_action in (
-        (
-            "hunk",
-            "Install Hunk to enable enhanced Git paging and diffs.",
-        ),
-        (
-            "delta",
-            "Install git-delta to enable syntax-colored interactive staging.",
-        ),
-    ):
-        findings.append(
-            _check_executable(
-                command,
-                required=False,
-                executable_finder=executable_finder,
-                missing_action=missing_action,
             ),
         )
     findings.extend(_dangling_repo_link_findings(repo_root, home))

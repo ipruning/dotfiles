@@ -148,7 +148,8 @@ def test_inspect_host_reports_capabilities_and_their_invalid_transition(
         "atuin",
         "zoxide",
         "hunk",
-        "delta",
+        "lazygit",
+        "lazydocker",
         "codex",
         "macos-session-health",
         "bag-mode",
@@ -884,7 +885,7 @@ def test_linux_lite_check_omits_macos_and_optional_desktop_capabilities(
     assert "macos.launchctl" not in checks
 
 
-def test_git_helper_checks_report_optional_capability_transition(
+def test_shared_terminal_tool_checks_report_optional_capability_transition(
     tmp_path: Path,
 ) -> None:
     unavailable: set[str] = set()
@@ -899,10 +900,10 @@ def test_git_helper_checks_report_optional_capability_transition(
         system_name="Linux",
     )
     ready_findings = {finding.check: finding for finding in ready.findings}
-    for command in ("hunk", "delta"):
+    for command in ("hunk", "lazygit", "lazydocker"):
         assert ready_findings[f"executable.{command}"].severity is Severity.OK
 
-    unavailable.update(("hunk", "delta"))
+    unavailable.update(("hunk", "lazygit", "lazydocker"))
     degraded = inspect_host(
         tmp_path / "repo",
         tmp_path / "home",
@@ -911,10 +912,12 @@ def test_git_helper_checks_report_optional_capability_transition(
     )
     degraded_findings = {finding.check: finding for finding in degraded.findings}
 
-    assert degraded_findings["executable.hunk"].severity is Severity.WARN
-    assert "Install Hunk" in (degraded_findings["executable.hunk"].action or "")
-    assert degraded_findings["executable.delta"].severity is Severity.WARN
-    assert "Install git-delta" in (degraded_findings["executable.delta"].action or "")
+    for command in ("hunk", "lazygit", "lazydocker"):
+        assert degraded_findings[f"executable.{command}"].severity is Severity.WARN
+        assert degraded_findings[f"executable.{command}"].action == (
+            "Preview with mise run mise-sync, then apply with "
+            "mise run mise-sync -- --apply."
+        )
 
 
 def test_linux_lite_check_requires_only_git_and_mise_and_reports_legacy_path(
@@ -944,10 +947,11 @@ def test_linux_lite_check_requires_only_git_and_mise_and_reports_legacy_path(
     }
     assert executable_checks == {
         "executable.atuin",
-        "executable.delta",
         "executable.git",
         "executable.herdr",
         "executable.hunk",
+        "executable.lazydocker",
+        "executable.lazygit",
         "executable.mise",
         "executable.skillshare",
         "executable.starship",
@@ -959,10 +963,12 @@ def test_linux_lite_check_requires_only_git_and_mise_and_reports_legacy_path(
             "Preview with mise run mise-sync, then apply with "
             "mise run mise-sync -- --apply."
         )
-    assert findings["executable.hunk"].severity is Severity.WARN
-    assert "Install Hunk" in (findings["executable.hunk"].action or "")
-    assert findings["executable.delta"].severity is Severity.WARN
-    assert "Install git-delta" in (findings["executable.delta"].action or "")
+    for command in ("hunk", "lazygit", "lazydocker"):
+        assert findings[f"executable.{command}"].severity is Severity.WARN
+        assert findings[f"executable.{command}"].action == (
+            "Preview with mise run mise-sync, then apply with "
+            "mise run mise-sync -- --apply."
+        )
     assert findings["shell.repo_commands"].severity is Severity.WARN
     assert findings["shell.repo_commands"].path == legacy_bin
 

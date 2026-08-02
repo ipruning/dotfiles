@@ -2,7 +2,7 @@
 
 set -euo pipefail
 if ! command -v lazydocker >/dev/null 2>&1; then
-  echo "lazydocker not found. Install: brew install lazydocker" >&2
+  echo "lazydocker not found. Preview: mise run mise-sync; apply: mise run mise-sync -- --apply" >&2
   exit 1
 fi
 

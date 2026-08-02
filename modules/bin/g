@@ -2,7 +2,7 @@
 
 set -euo pipefail
 if ! command -v lazygit >/dev/null 2>&1; then
-  echo "lazygit not found. Install: brew install lazygit" >&2
+  echo "lazygit not found. Preview: mise run mise-sync; apply: mise run mise-sync -- --apply" >&2
   exit 1
 fi
 

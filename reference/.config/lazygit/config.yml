@@ -1,0 +1,5 @@
+git:
+  pagers:
+    - name: hunk
+      colorArg: never
+      pager: hunk pager
