@@ -1,4 +1,4 @@
-min_version = { hard = "2026.7.16" }
+min_version = { hard = "2026.8.0" }
 
 [_.dotfiles.mise_sync.trusted_alias_backends]
 yarn = ["vfox:mise-plugins/vfox-yarn"]
