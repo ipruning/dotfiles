@@ -13,7 +13,9 @@ class HostProfile(StrEnum):
     FULL = "full"
 
 
-LINUX_LITE_APPLICATIONS = frozenset({"atuin", "git", "herdr", "mise", "skillshare"})
+LINUX_LITE_APPLICATIONS = frozenset(
+    {"atuin", "btop", "git", "herdr", "mise", "skillshare"},
+)
 
 
 def resolve_profile(

@@ -128,6 +128,17 @@ class MultiApplicationRunner:
                     "error": None,
                 },
                 {
+                    "application": "btop",
+                    "reference_path": str(
+                        repo_root / "reference/.config/btop/btop.conf"
+                    ),
+                    "live_path": str(home / ".config/btop/btop.conf"),
+                    "kind": "only-reference",
+                    "reference_kind": "file",
+                    "live_kind": None,
+                    "error": None,
+                },
+                {
                     "application": "hushlogin",
                     "reference_path": str(repo_root / "reference/.hushlogin"),
                     "live_path": str(home / ".hushlogin"),
@@ -157,7 +168,7 @@ class MultiApplicationRunner:
                     "error": None,
                 },
             ],
-            "summary": {"modified": 1, "only-reference": 7},
+            "summary": {"modified": 1, "only-reference": 8},
         }
 
 
@@ -197,8 +208,9 @@ def test_linux_lite_profile_excludes_macos_drift_by_default(tmp_path: Path) -> N
         "mise",
         "skillshare",
         "herdr",
+        "btop",
     ]
-    assert report.summary == {"modified": 1, "only-reference": 4}
+    assert report.summary == {"modified": 1, "only-reference": 5}
 
     full = inspect_drift(
         tmp_path / "repo",
@@ -214,6 +226,7 @@ def test_linux_lite_profile_excludes_macos_drift_by_default(tmp_path: Path) -> N
         "mise",
         "skillshare",
         "herdr",
+        "btop",
         "hushlogin",
         "uv",
         "aerospace",
