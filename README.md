@@ -492,12 +492,13 @@ Skillshare automatically; `mise run update -- --apply` only refreshes an already
 installed CLI.
 
 The default `skillshare sync` operation synchronizes skills. The stored
-configuration also declares opt-in extras targets under `~/.config/amp`,
-`~/.codex`, and `~/.claude`; an explicit extras sync writes those global
-harness directories. Skill targets use merge mode, so target-local non-symlink
-Skill directories are preserved. In `skillshare diff --json`, an `action` of
-`remove` with `is_sync: false` describes the direction of the difference; it is
-not a planned sync deletion.
+configuration also declares opt-in extras targets under `~/.codex` and
+`~/.claude`; an explicit extras sync writes those global harness directories.
+Amp global guidance is configured in Amp's personal or workspace settings and
+is not synchronized by this repository. Skill targets use merge mode, so
+target-local non-symlink Skill directories are preserved. In `skillshare diff
+--json`, an `action` of `remove` with `is_sync: false` describes the direction
+of the difference; it is not a planned sync deletion.
 
 Before any external write, preview the complete synchronization and inspect each
 target's `local` and `pruned` counts:
