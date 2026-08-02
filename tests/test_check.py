@@ -146,6 +146,7 @@ def test_inspect_host_reports_capabilities_and_their_invalid_transition(
         "starship",
         "herdr",
         "atuin",
+        "btop",
         "zoxide",
         "hunk",
         "lazygit",
@@ -920,6 +921,37 @@ def test_shared_terminal_tool_checks_report_optional_capability_transition(
         )
 
 
+def test_btop_check_reports_platform_owned_install_action(tmp_path: Path) -> None:
+    def finder(command: str) -> str | None:
+        return None if command == "btop" else f"/tools/{command}"
+
+    linux = inspect_host(
+        tmp_path / "repo",
+        tmp_path / "home",
+        executable_finder=finder,
+        system_name="Linux",
+    )
+    linux_finding = next(
+        finding for finding in linux.findings if finding.check == "executable.btop"
+    )
+    assert linux_finding.severity is Severity.WARN
+    assert linux_finding.action == (
+        "Install btop with this host's package manager, such as apt or pacman."
+    )
+
+    macos = inspect_host(
+        tmp_path / "repo",
+        tmp_path / "home",
+        executable_finder=finder,
+        system_name="Darwin",
+    )
+    macos_finding = next(
+        finding for finding in macos.findings if finding.check == "executable.btop"
+    )
+    assert macos_finding.severity is Severity.WARN
+    assert macos_finding.action == "Install btop with Homebrew: brew install btop."
+
+
 def test_linux_lite_check_requires_only_git_and_mise_and_reports_legacy_path(
     tmp_path: Path,
     monkeypatch,
@@ -947,6 +979,7 @@ def test_linux_lite_check_requires_only_git_and_mise_and_reports_legacy_path(
     }
     assert executable_checks == {
         "executable.atuin",
+        "executable.btop",
         "executable.git",
         "executable.herdr",
         "executable.hunk",

@@ -73,7 +73,9 @@ dependencies, including the pinned Mackup fork, before shell activation makes
 uv directly available. Mise auto-install is disabled for task, exec, and
 command-not-found paths: these two commands form the explicit bootstrap
 boundary, and later commands fail instead of quietly downloading a missing
-tool or project dependency.
+tool or project dependency. Do not replace the explicit tool list with a bare
+`mise install --locked`: Mise also loads the global configuration and would
+install host-wide tools during repository bootstrap.
 
 `mise tasks` is the authoritative command list. The main inspection interface
 is:
@@ -135,11 +137,11 @@ expose `modules/bin` or `generated/bin` on Linux. The managed block is placed
 before Ubuntu's non-interactive early return, so direct SSH commands also
 receive the user and mise paths without interactive shell initialization.
 
-The Linux Lite drift profile observes Git, Mise, portable Atuin configuration,
-and the availability of Starship, Atuin, Zoxide, Herdr, Skillshare, Hunk,
-Lazygit, and Lazydocker. Optional capabilities remain warnings: inspection
-never installs a missing tool or restores configuration automatically. `mise
-run check -- --strict` treats those warnings as failures.
+The Linux Lite drift profile observes Git, Mise, portable Atuin and Btop
+configuration, and the availability of Btop, Starship, Atuin, Zoxide, Herdr,
+Skillshare, Hunk, Lazygit, and Lazydocker. Optional capabilities remain
+warnings: inspection never installs a missing tool or restores configuration
+automatically. `mise run check -- --strict` treats those warnings as failures.
 
 ## Linux Zsh contract
 
@@ -233,10 +235,12 @@ mise run mise-sync
 mise run mise-sync -- --json
 ```
 
-An apply backs up and links the live mise configuration to `reference/`, runs
-the canonical executable's `install --locked` against `$HOME`, then replaces
-all shims with a canonical rebuild while `~/.local/bin` is forced to the front
-of `PATH`:
+An apply backs up and links the live mise configuration to `reference/`, first
+installs the locked Go, Node, Ruby, and Rust runtimes, then installs the complete
+locked tool set against `$HOME`. Staging the runtimes prevents package-manager
+backends such as `cargo:` from racing an older compiler already on the host.
+Finally, it replaces all shims with a canonical rebuild while `~/.local/bin` is
+forced to the front of `PATH`:
 
 ```bash
 mise run mise-sync -- --apply
@@ -292,6 +296,12 @@ updates on every host. Do not combine that install with Homebrew or
 `skillshare upgrade --cli`. GitHub CLI is intentionally platform-owned instead:
 the official GitHub APT repository owns it on Debian, while Homebrew owns it on
 macOS, so `gh` is not declared in the shared Mise configuration.
+
+Btop is also platform-owned: Homebrew owns it on macOS, while each Linux
+distribution's package manager owns it. The repository restores only Btop's
+portable configuration and theme; `check` reports a missing binary but never
+installs it. Distribution package versions can therefore differ without
+creating configuration drift.
 
 ## Host health
 

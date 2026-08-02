@@ -34,6 +34,9 @@ class MiseSyncStatus(StrEnum):
     FAILED = "failed"
 
 
+PREREQUISITE_TOOLS = ("go", "node", "ruby", "rust")
+
+
 @dataclass(frozen=True)
 class MiseSyncStep:
     name: str
@@ -278,6 +281,20 @@ def _sync_steps(home: Path) -> tuple[MiseSyncStep, ...]:
     path_prepend = (canonical_mise_path(home).parent,)
     return (
         MiseSyncStep(
+            "mise.runtimes",
+            (
+                executable,
+                "install",
+                "--locked",
+                "--yes",
+                "-C",
+                str(home),
+                *PREREQUISITE_TOOLS,
+            ),
+            3600,
+            path_prepend,
+        ),
+        MiseSyncStep(
             "mise.tools",
             (executable, "install", "--locked", "--yes", "-C", str(home)),
             3600,
@@ -349,10 +366,13 @@ def plan_mise_sync(repo_root: Path, home: Path) -> MiseSyncReport:
         reason = f"{canonical_mise_path(home)} is missing, symlinked, or not executable"
         results = (
             MiseSyncResult(steps[0], MiseSyncStatus.FAILED, reason=reason),
-            MiseSyncResult(
-                steps[1],
-                MiseSyncStatus.SKIPPED,
-                reason="canonical mise is unavailable",
+            *(
+                MiseSyncResult(
+                    step,
+                    MiseSyncStatus.SKIPPED,
+                    reason="canonical mise is unavailable",
+                )
+                for step in steps[1:]
             ),
         )
     else:
@@ -413,6 +433,19 @@ def execute_mise_sync(
 
     results: list[MiseSyncResult] = []
     for planned in plan.results:
+        if planned.step.name == "mise.tools" and any(
+            result.step.name == "mise.runtimes"
+            and result.status is MiseSyncStatus.FAILED
+            for result in results
+        ):
+            results.append(
+                MiseSyncResult(
+                    planned.step,
+                    MiseSyncStatus.SKIPPED,
+                    reason="prerequisite runtime installation failed",
+                ),
+            )
+            continue
         started_at = time.monotonic()
         try:
             completed = subprocess.run(

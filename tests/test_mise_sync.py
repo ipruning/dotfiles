@@ -7,7 +7,13 @@ import pytest
 from tests.conftest import REPO_ROOT, run_scripts_module
 
 
-def _write_mise(home: Path, log_path: Path, *, install_exit: int = 0) -> Path:
+def _write_mise(
+    home: Path,
+    log_path: Path,
+    *,
+    install_exit: int = 0,
+    runtime_install_exit: int = 0,
+) -> Path:
     executable = home / ".local/bin/mise"
     executable.parent.mkdir(parents=True)
     config_listing = executable.parent / "mise-configs.json"
@@ -27,6 +33,9 @@ def _write_mise(home: Path, log_path: Path, *, install_exit: int = 0) -> Path:
         "fi\n"
         f'printf \'%s|%s\\n\' "$*" "$PATH" >> {log_path}\n'
         'if [ "$1" = "install" ]; then\n'
+        '  case "$*" in\n'
+        f'    *" go node ruby rust") exit {runtime_install_exit} ;;\n'
+        "  esac\n"
         f"  exit {install_exit}\n"
         "fi\n"
         "exit 0\n",
@@ -67,12 +76,24 @@ def test_mise_sync_previews_configuration_tools_and_shims_without_writing(
     assert document["operation"] == "mise-sync"
     assert document["apply"] is False
     assert document["ok"] is True
-    assert document["summary"] == {"planned": 4}
+    assert document["summary"] == {"planned": 5}
     assert [change["status"] for change in document["changes"]] == [
         "planned",
         "planned",
     ]
     assert [step["command"] for step in document["steps"]] == [
+        [
+            str(executable),
+            "install",
+            "--locked",
+            "--yes",
+            "-C",
+            str(home),
+            "go",
+            "node",
+            "ruby",
+            "rust",
+        ],
         [
             str(executable),
             "install",
@@ -138,6 +159,7 @@ def test_mise_sync_blocks_live_only_tools_until_ownership_is_resolved(
         "live_only_tools": ["pueue"],
     }
     assert [step["status"] for step in preview_document["steps"]] == [
+        "skipped",
         "skipped",
         "skipped",
     ]
@@ -455,7 +477,7 @@ def test_mise_sync_apply_links_shared_declaration_and_runs_locked_commands(
     document = json.loads(completed.stdout)
     assert document["apply"] is True
     assert document["ok"] is True
-    assert document["summary"] == {"applied": 2, "succeeded": 2}
+    assert document["summary"] == {"applied": 2, "succeeded": 3}
     config = home / ".config/mise/config.toml"
     lockfile = home / ".config/mise/mise.lock"
     assert config.is_symlink()
@@ -464,8 +486,11 @@ def test_mise_sync_apply_links_shared_declaration_and_runs_locked_commands(
     assert lockfile.resolve() == REPO_ROOT / "reference/.config/mise/mise.lock"
     assert all(Path(change["backup_path"]).is_file() for change in document["changes"])
     invocations = log_path.read_text().splitlines()
-    assert invocations[0].split("|", 1)[0] == (f"install --locked --yes -C {home}")
-    assert invocations[1].split("|", 1)[0] == f"reshim --force -C {home}"
+    assert invocations[0].split("|", 1)[0] == (
+        f"install --locked --yes -C {home} go node ruby rust"
+    )
+    assert invocations[1].split("|", 1)[0] == f"install --locked --yes -C {home}"
+    assert invocations[2].split("|", 1)[0] == f"reshim --force -C {home}"
     assert all(
         line.split("|", 1)[1].split(os.pathsep)[0] == str(executable.parent)
         for line in invocations
@@ -476,7 +501,7 @@ def test_mise_sync_apply_links_shared_declaration_and_runs_locked_commands(
     assert converged.returncode == 0
     converged_document = json.loads(converged.stdout)
     assert converged_document["changes"] == []
-    assert converged_document["summary"] == {"succeeded": 2}
+    assert converged_document["summary"] == {"succeeded": 3}
 
 
 def test_mise_sync_fails_before_restore_without_canonical_mise(tmp_path: Path) -> None:
@@ -492,8 +517,9 @@ def test_mise_sync_fails_before_restore_without_canonical_mise(tmp_path: Path) -
     assert document["apply"] is True
     assert document["steps"][0]["status"] == "failed"
     assert document["steps"][1]["status"] == "skipped"
+    assert document["steps"][2]["status"] == "skipped"
     assert "missing, symlinked, or not executable" in document["steps"][0]["reason"]
-    assert "[mise.tools] FAIL" in completed.stderr
+    assert "[mise.runtimes] FAIL" in completed.stderr
     config = home / ".config/mise/config.toml"
     assert config.read_text() == '[tools]\nnode = "20"\n'
     assert not config.is_symlink()
@@ -514,11 +540,40 @@ def test_mise_sync_reports_install_failure_but_still_repairs_shims(
     document = json.loads(completed.stdout)
     assert document["ok"] is False
     assert [step["status"] for step in document["steps"]] == [
+        "succeeded",
         "failed",
         "succeeded",
     ]
     assert [line.split("|", 1)[0] for line in log_path.read_text().splitlines()] == [
+        f"install --locked --yes -C {home} go node ruby rust",
         f"install --locked --yes -C {home}",
         f"reshim --force -C {home}",
     ]
     assert "[mise.tools] FAIL command exited 7" in completed.stderr
+
+
+def test_mise_sync_skips_backend_tools_when_runtime_installation_fails(
+    tmp_path: Path,
+) -> None:
+    home = tmp_path / "home"
+    home.mkdir()
+    _write_live_config(home)
+    log_path = tmp_path / "mise.log"
+    _write_mise(home, log_path, runtime_install_exit=9)
+
+    completed = run_scripts_module("mise_sync", home, "--apply", "--json")
+
+    assert completed.returncode == 1
+    document = json.loads(completed.stdout)
+    assert [step["status"] for step in document["steps"]] == [
+        "failed",
+        "skipped",
+        "succeeded",
+    ]
+    assert document["steps"][1]["reason"] == (
+        "prerequisite runtime installation failed"
+    )
+    assert [line.split("|", 1)[0] for line in log_path.read_text().splitlines()] == [
+        f"install --locked --yes -C {home} go node ruby rust",
+        f"reshim --force -C {home}",
+    ]

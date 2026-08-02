@@ -638,6 +638,21 @@ def inspect_host(
                 ),
             ),
         )
+    findings.append(
+        _check_executable(
+            "btop",
+            required=False,
+            executable_finder=executable_finder,
+            missing_action=(
+                "Install btop with Homebrew: brew install btop."
+                if active_system == "Darwin"
+                else (
+                    "Install btop with this host's package manager, such as apt or "
+                    "pacman."
+                )
+            ),
+        ),
+    )
     findings.extend(_dangling_repo_link_findings(repo_root, home))
     if active_profile is HostProfile.LINUX_LITE:
         findings.append(_bash_integration_finding(repo_root, home))
