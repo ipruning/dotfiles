@@ -31,10 +31,6 @@ SKILLSHARE_OWNERSHIP_ACTION = (
     "Inspect with ~/.local/bin/mise ls github:runkids/skillshare --installed "
     "--json and brew list --versions skillshare, then retain one owner."
 )
-SKILLSHARE_REQUIRED_TARGETS = {
-    "claude": Path(".claude/skills"),
-    "universal": Path(".agents/skills"),
-}
 
 
 def _expand_home(value: str, home: Path) -> Path:
@@ -58,7 +54,7 @@ def _configured_skillshare_target(
     target = cast("dict[str, object]", targets)[name]
     if not isinstance(target, dict):
         raise TypeError(f"targets.{name} must be a mapping")
-    skills = target.get("skills", target)
+    skills = target.get("skills")
     if not isinstance(skills, dict):
         raise TypeError(f"targets.{name}.skills must be a mapping")
     path_value = skills.get("path")
@@ -97,22 +93,37 @@ def _skillshare_target_findings(
     source: Path,
 ) -> list[Finding]:
     findings: list[Finding] = []
-    for name, relative_path in SKILLSHARE_REQUIRED_TARGETS.items():
-        expected_path = home / relative_path
-        try:
-            target_path, mode = _configured_skillshare_target(document, name, home)
-        except KeyError:
+    config_path = home / ".config/skillshare/config.yaml"
+    targets = document.get("targets") if isinstance(document, dict) else None
+    if not isinstance(targets, dict) or not targets:
+        return [
+            Finding(
+                "skillshare.targets",
+                Severity.WARN,
+                "skillshare.targets_missing",
+                "Skillshare configuration declares no Skill targets to inspect",
+                config_path,
+                "Declare host-specific targets before synchronizing Skills.",
+            ),
+        ]
+
+    inspected_paths: dict[Path, str] = {}
+    for raw_name in sorted(targets, key=str):
+        if not isinstance(raw_name, str) or not raw_name:
             findings.append(
                 Finding(
-                    f"skillshare.target.{name}",
+                    "skillshare.targets",
                     Severity.WARN,
-                    "skillshare.target_missing",
-                    f"Required Skillshare target {name} is not configured",
-                    expected_path,
-                    "Inspect the host-specific Skillshare target configuration.",
+                    "skillshare.target_invalid",
+                    "Skillshare target names must be non-empty strings",
+                    config_path,
+                    "Repair the target name before synchronizing Skills.",
                 ),
             )
             continue
+        name = raw_name
+        try:
+            target_path, mode = _configured_skillshare_target(document, name, home)
         except TypeError as error:
             findings.append(
                 Finding(
@@ -120,24 +131,25 @@ def _skillshare_target_findings(
                     Severity.WARN,
                     "skillshare.target_invalid",
                     f"Skillshare target {name} is invalid: {error}",
-                    expected_path,
+                    config_path,
                     "Inspect the host-specific Skillshare target configuration.",
                 ),
             )
             continue
 
-        if target_path != expected_path:
+        if previous_name := inspected_paths.get(target_path):
             findings.append(
                 Finding(
                     f"skillshare.target.{name}",
                     Severity.WARN,
-                    "skillshare.target_path_mismatch",
-                    f"Skillshare target {name} points to {target_path}, expected {expected_path}",
+                    "skillshare.target_duplicate_path",
+                    f"Skillshare targets {previous_name} and {name} point to the same directory",
                     target_path,
-                    "Inspect the target path before changing the host-specific configuration.",
+                    "Give each target a distinct path or remove the duplicate declaration.",
                 ),
             )
             continue
+        inspected_paths[target_path] = name
         if not target_path.is_dir():
             findings.append(
                 Finding(
@@ -176,7 +188,7 @@ def _skillshare_target_findings(
                     "skillshare.target_local_skills",
                     f"Skillshare target {name} has {len(local)} non-symlink Skill entries: {', '.join(local)}",
                     target_path,
-                    "Inspect ownership with skillshare diff --json; keep, collect, or remove entries only through an explicit operation.",
+                    "Preview actual sync behavior with skillshare sync --all --global --dry-run --force --json and report local and pruned separately. local > 0 with pruned == 0 is preserved but still needs Operator ownership; pruned > 0 is planned deletion and requires explicit confirmation. If the preview fails, report that inspection is incomplete.",
                 ),
             )
         if broken_links:
@@ -207,7 +219,7 @@ def _skillshare_target_findings(
                     f"skillshare.target.{name}",
                     Severity.OK,
                     "skillshare.target_inspected",
-                    f"Skillshare target {name} is configured at the expected path in {mode} mode; no target-local Skills, broken links, or links outside the configured source were observed",
+                    f"Skillshare target {name} is configured at {target_path} in {mode} mode; no target-local Skills, broken links, or links outside the configured source were observed",
                     target_path,
                 ),
             )

@@ -689,33 +689,76 @@ def test_skillshare_targets_report_ready_local_and_broken_entries(
     assert "local-skill" in universal_findings[0].message
     assert "broken-skill" in universal_findings[1].message
     assert "external-skill" in universal_findings[2].message
+    assert "skillshare sync --all --global --dry-run --force --json" in (
+        universal_findings[0].action or ""
+    )
+    assert "local > 0 with pruned == 0" in (universal_findings[0].action or "")
 
 
-def test_skillshare_targets_report_required_path_contract(tmp_path: Path) -> None:
+def test_skillshare_targets_follow_configured_names_and_paths(tmp_path: Path) -> None:
     home = tmp_path / "home"
     source = home / "skills"
     source.mkdir(parents=True)
+    custom = home / ".custom/skills"
+    custom.mkdir(parents=True)
     config_path = home / ".config/skillshare/config.yaml"
     config_path.parent.mkdir(parents=True)
     config_path.write_text(
         "sources:\n"
         "  skills: ~/skills\n"
         "targets:\n"
-        "  claude:\n"
+        "  custom:\n"
         "    skills:\n"
-        "      path: ~/.wrong/skills\n",
+        "      path: ~/.custom/skills\n",
     )
 
-    findings: dict[str, list[Finding]] = {}
-    for finding in check_skillshare_module._skillshare_findings(home):
-        findings.setdefault(finding.check, []).append(finding)
+    findings = check_skillshare_module._skillshare_findings(home)
 
-    assert findings["skillshare.target.claude"][0].code == (
-        "skillshare.target_path_mismatch"
+    target_finding = next(
+        finding for finding in findings if finding.check == "skillshare.target.custom"
     )
-    assert findings["skillshare.target.universal"][0].code == (
-        "skillshare.target_missing"
+    assert target_finding.code == "skillshare.target_inspected"
+    assert target_finding.path == custom
+    assert not any(finding.check == "skillshare.target.claude" for finding in findings)
+    assert not any(
+        finding.check == "skillshare.target.universal" for finding in findings
     )
+
+
+def test_skillshare_targets_report_missing_and_duplicate_declarations(
+    tmp_path: Path,
+) -> None:
+    home = tmp_path / "home"
+    source = home / "skills"
+    source.mkdir(parents=True)
+    config_path = home / ".config/skillshare/config.yaml"
+    config_path.parent.mkdir(parents=True)
+    config_path.write_text("sources:\n  skills: ~/skills\n")
+
+    missing = check_skillshare_module._skillshare_findings(home)
+    assert any(finding.code == "skillshare.targets_missing" for finding in missing)
+
+    target = home / ".shared/skills"
+    target.mkdir(parents=True)
+    config_path.write_text(
+        "sources:\n"
+        "  skills: ~/skills\n"
+        "targets:\n"
+        "  first:\n"
+        "    skills:\n"
+        "      path: ~/.shared/skills\n"
+        "  second:\n"
+        "    skills:\n"
+        "      path: ~/.shared/skills\n"
+    )
+    duplicate = check_skillshare_module._skillshare_findings(home)
+    finding = next(
+        finding
+        for finding in duplicate
+        if finding.code == "skillshare.target_duplicate_path"
+    )
+    assert finding.check == "skillshare.target.second"
+    assert "first and second" in finding.message
 
 
 def test_skillshare_ownership_deduplicates_a_link_to_the_mise_install(

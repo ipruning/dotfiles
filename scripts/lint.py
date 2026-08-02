@@ -65,14 +65,6 @@ FULL_HOME_REQUIRED_FILES = {
 }
 OPTIONAL_REFERENCE_SECTION = "dotfiles_optional_reference_files"
 OPTIONAL_PATHS = {
-    (
-        "reference/.config/skillshare/config.yaml",
-        "~/Developer/ipruning/skills",
-    ),
-    (
-        "reference/.config/skillshare/config.yaml",
-        "~/Developer/ipruning/skills/extras",
-    ),
     ("reference/.zshenv", "/usr/local/sbin"),
     ("reference/.zshrc", "/usr/local/Homebrew"),
     ("reference/.zshrc", "/usr/local/Cellar"),
@@ -157,6 +149,23 @@ def _expanded_path_exists(raw: str, home: Path) -> bool:
     return (expanded or Path(normalized)).exists()
 
 
+def _skillshare_source_paths(repo_root: Path) -> set[tuple[str, str]]:
+    relative = "reference/.config/skillshare/config.yaml"
+    config_path = repo_root / relative
+    try:
+        document = YAML(typ="safe").load(config_path)
+    except OSError, YAMLError:
+        return set()
+    sources = document.get("sources") if isinstance(document, dict) else None
+    if not isinstance(sources, dict):
+        return set()
+    return {
+        (relative, value)
+        for value in sources.values()
+        if isinstance(value, str) and value
+    }
+
+
 def _classify_path(
     repo_root: Path,
     home: Path,
@@ -165,7 +174,17 @@ def _classify_path(
     line: int,
     raw: str,
     system_name: str,
+    skillshare_source_paths: set[tuple[str, str]],
 ) -> Finding:
+    if (relative, raw) in skillshare_source_paths:
+        return _located_finding(
+            Severity.OK,
+            "path.external_source",
+            "Skillshare source path is an operator-selected external dependency",
+            source,
+            line=line,
+            value=raw,
+        )
     if system_name == "Linux" and (
         raw.startswith(("/Applications/", "/opt/homebrew"))
         or (raw.startswith("/Users/") and relative.startswith("reference/"))
@@ -293,6 +312,7 @@ def _path_findings(
     system_name: str,
 ) -> list[Finding]:
     findings: list[Finding] = []
+    skillshare_source_paths = _skillshare_source_paths(repo_root)
     for file_path in _iter_text_files(repo_root):
         relative = file_path.relative_to(repo_root).as_posix()
         try:
@@ -314,6 +334,7 @@ def _path_findings(
                         line_number,
                         raw,
                         system_name,
+                        skillshare_source_paths,
                     ),
                 )
     return findings

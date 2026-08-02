@@ -310,10 +310,12 @@ have different capabilities. `--strict` treats warnings as failures.
 Skillshare inspection reads its executable location, YAML configuration, source
 directory, and known installation owners. It uses Mise's JSON inventory to
 distinguish an inactive Mise install from the active executable and warns only
-when independent owners coexist. `check` deliberately does not run `skillshare
-doctor`: that command may migrate configuration, update caches, and probe target
-paths with temporary writes. Run it explicitly when deeper Skillshare diagnosis
-is worth those local side effects.
+when independent owners coexist. Target inspection is derived from every
+`targets.*.skills.path` entry in the live configuration rather than a target
+name or directory list owned by this repository. `check` deliberately does not
+run `skillshare doctor`: that command may migrate configuration, update caches,
+and probe target paths with temporary writes. Run it explicitly when deeper
+Skillshare diagnosis is worth those local side effects.
 
 Missing or empty generated shell directories are reported as not ready. The
 report also verifies that `~/.local/bin/mise` is a real executable rather than a
@@ -489,13 +491,25 @@ installed CLI.
 The default `skillshare sync` operation synchronizes skills. The stored
 configuration also declares opt-in extras targets under `~/.config/amp`,
 `~/.codex`, and `~/.claude`; an explicit extras sync writes those global
-harness directories. Before that external write, inspect the exact affected
-files:
+harness directories. Skill targets use merge mode, so target-local non-symlink
+Skill directories are preserved. In `skillshare diff --json`, an `action` of
+`remove` with `is_sync: false` describes the direction of the difference; it is
+not a planned sync deletion.
+
+Before any external write, preview the complete synchronization and inspect each
+target's `local` and `pruned` counts:
 
 ```bash
-skillshare diff --json
-skillshare sync extras --dry-run --force --json
+skillshare sync --all --global --dry-run --force --json
 ```
+
+`local > 0` with `pruned == 0` means synchronization preserves the local
+entries, although their ownership still needs an Operator decision. Only
+`pruned > 0` means the preview plans deletion; list those entries and request
+explicit confirmation. A failed preview leaves inspection incomplete and must
+not be reported as safe. After reviewing the complete preview, an extras-only
+preview remains available with `skillshare sync extras --dry-run --force
+--json`.
 
 Installing Skillshare, choosing a source repository, and synchronizing skills
 are separate operator decisions. Linux Lite reports the missing capability and

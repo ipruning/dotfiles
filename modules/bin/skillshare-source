@@ -287,7 +287,13 @@ def _default_skillshare_target_dir() -> Path:
                 path = skills.get("path")
                 if isinstance(path, str) and path:
                     return Path(path).expanduser()
-    return Path.home() / ".agents" / "skills"
+    error_console.print(
+        "[red]Skillshare config has no usable targets.universal.skills.path[/red]"
+    )
+    error_console.print(
+        "[dim]Configure that target or pass --target explicitly; no target path was guessed.[/dim]"
+    )
+    raise typer.Exit(1)
 
 
 def _description_from_frontmatter(frontmatter: dict) -> str:

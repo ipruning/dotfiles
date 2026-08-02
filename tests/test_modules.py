@@ -33,6 +33,51 @@ def test_skillshare_source_uses_a_descriptive_non_system_command_name() -> None:
     assert completed.stdout.strip() == "skillshare-source 0.2.0"
 
 
+def test_skillshare_source_stops_guessing_when_default_target_is_removed(
+    tmp_path: Path,
+) -> None:
+    executable = Path(__file__).resolve().parents[1] / "modules/bin/skillshare-source"
+    config = tmp_path / "skillshare/config.yaml"
+    config.parent.mkdir()
+    target = tmp_path / "installed-skills"
+    skill = target / "example"
+    skill.mkdir(parents=True)
+    (skill / "SKILL.md").write_text(
+        "---\nname: example\ndescription: Example skill.\n---\n"
+    )
+    config.write_text(f"targets:\n  universal:\n    skills:\n      path: {target}\n")
+
+    configured = subprocess.run(
+        [str(executable), "descriptions"],
+        env={**os.environ, "SKILLSHARE_CONFIG": str(config)},
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert configured.returncode == 0
+    assert json.loads(configured.stdout) == {
+        "name": "example",
+        "path": "example",
+        "description": "Example skill.",
+    }
+
+    config.write_text(
+        "targets:\n  claude:\n    skills:\n      path: ~/.claude/skills\n"
+    )
+    removed = subprocess.run(
+        [str(executable), "descriptions"],
+        env={**os.environ, "SKILLSHARE_CONFIG": str(config)},
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert removed.returncode == 1
+    assert "no usable targets.universal.skills.path" in removed.stderr
+    assert "no target path was guessed" in removed.stderr
+
+
 def test_zsh_profile_reports_invalid_input_without_optional_gum(
     tmp_path: Path,
 ) -> None:

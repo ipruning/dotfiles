@@ -304,7 +304,7 @@ def test_inspect_repository_checks_paths_under_reference_library(
     assert finding.path == settings
 
 
-def test_linux_lint_treats_skillshare_source_paths_as_optional(
+def test_lint_derives_external_skillshare_source_paths_from_config(
     tmp_path: Path,
 ) -> None:
     repo_root = tmp_path / "dotfiles"
@@ -329,8 +329,7 @@ def test_linux_lint_treats_skillshare_source_paths_as_optional(
 
     assert len(source_findings) == 2
     assert all(
-        finding.code == "path.optional_compatibility"
-        and finding.severity is Severity.OK
+        finding.code == "path.external_source" and finding.severity is Severity.OK
         for finding in source_findings
     )
 
