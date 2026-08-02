@@ -22,6 +22,24 @@ does not automatically overwrite `$HOME` or rebuild an entire machine.
 Agent-specific rules live in `AGENTS.md`. Files under `modules/` also inherit
 `modules/AGENTS.md`.
 
+## Operating model
+
+The human who owns the target host and decides which changes are acceptable is
+the Operator. A person or AI carrying out the delegated task is the Executor.
+
+This repository has two operating modes:
+
+- In authoring mode, the Executor changes this repository, runs `mise run
+  verify`, and presents the result to the Operator for review.
+- In operations mode, the Executor inspects or previews the target host, reports
+  the facts, impact, options, and recommendation, obtains the Operator's
+  decision when needed, applies only the selected operation, and reruns the
+  relevant inspection.
+
+A finding's suggested action is not authorization to mutate the host. Ambiguous
+ownership, unclear scope, destructive effects that were not already authorized,
+or multiple legitimate outcomes require an Operator decision before mutation.
+
 ## Start
 
 Git and mise are the only bootstrap requirements. On a machine without mise,

@@ -60,6 +60,21 @@ semantics live in `README.md`.
   results as `changes`; `execute_*` operations run external commands and
   serialize theirs as `steps`.
 
+## Operator handoff
+
+- The human who owns the target host is the Operator. An agent carrying out a
+  delegated task is the Executor.
+- Before mutating the host, use the operation's public inspection or preview
+  entrypoint.
+- Stop before mutation when inspection exposes ambiguous ownership, unclear
+  scope, destructive effects that were not already authorized, or multiple
+  legitimate outcomes. Report the verified facts, impact, options,
+  recommendation, and exact decision needed from the Operator.
+- A recommendation is not authorization. Approval of one option does not
+  authorize adjacent options or cleanup.
+- Apply only the selected operation, then rerun the relevant inspection and
+  report residual findings.
+
 ## Dependency policy
 
 Three tiers, in decreasing strictness:
