@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import platform
 import subprocess
 import sys
 import time
@@ -43,6 +44,7 @@ class MiseSyncStep:
     command: tuple[str, ...]
     timeout_seconds: int
     path_prepend: tuple[Path, ...]
+    environment: tuple[tuple[str, str], ...] = ()
 
 
 @dataclass(frozen=True)
@@ -276,9 +278,37 @@ def _mise_tool_safety(
     )
 
 
-def _sync_steps(home: Path) -> tuple[MiseSyncStep, ...]:
+def _cargo_build_environment(
+    *,
+    system_name: str | None = None,
+    system_version: str | None = None,
+) -> tuple[tuple[str, str], ...]:
+    active_system = system_name or platform.system()
+    active_version = system_version or platform.mac_ver()[0]
+    try:
+        major_version = int(active_version.split(".", 1)[0])
+    except ValueError:
+        return ()
+    if active_system != "Darwin" or major_version < 27:
+        return ()
+    # TODO: Remove this compatibility override after stable Rust includes LLVM
+    # 22.1.8 or newer. Verify removal by building the locked Atuin revision on
+    # macOS 27 and rerunning mise-sync; rust-lang/rust#157750 tracks the fix.
+    return (("CARGO_PROFILE_RELEASE_STRIP", "none"),)
+
+
+def _sync_steps(
+    home: Path,
+    *,
+    system_name: str | None = None,
+    system_version: str | None = None,
+) -> tuple[MiseSyncStep, ...]:
     executable = str(canonical_mise_path(home))
     path_prepend = (canonical_mise_path(home).parent,)
+    cargo_build_environment = _cargo_build_environment(
+        system_name=system_name,
+        system_version=system_version,
+    )
     return (
         MiseSyncStep(
             "mise.runtimes",
@@ -299,6 +329,7 @@ def _sync_steps(home: Path) -> tuple[MiseSyncStep, ...]:
             (executable, "install", "--locked", "--yes", "-C", str(home)),
             3600,
             path_prepend,
+            cargo_build_environment,
         ),
         MiseSyncStep(
             "mise.shims",
@@ -447,13 +478,15 @@ def execute_mise_sync(
             )
             continue
         started_at = time.monotonic()
+        environment = canonical_mise_environment(home)
+        environment.update(planned.step.environment)
         try:
             completed = subprocess.run(
                 planned.step.command,
                 check=False,
                 stdin=subprocess.DEVNULL,
                 capture_output=capture_output,
-                env=canonical_mise_environment(home),
+                env=environment,
                 text=True,
                 timeout=planned.step.timeout_seconds,
             )
@@ -578,6 +611,7 @@ def _document(report: MiseSyncReport) -> dict[str, object]:
                     "PATH_prepend": [
                         str(directory) for directory in result.step.path_prepend
                     ],
+                    "variables": dict(result.step.environment),
                 },
                 "status": result.status.value,
                 "exit_code": result.exit_code,
@@ -593,7 +627,11 @@ def _document(report: MiseSyncReport) -> dict[str, object]:
 
 def _display_command(step: MiseSyncStep) -> str:
     path = ":".join(str(directory) for directory in step.path_prepend)
-    return f"PATH={path}:$PATH {' '.join(step.command)}"
+    environment = " ".join(f"{key}={value}" for key, value in step.environment)
+    prefix = f"PATH={path}:$PATH"
+    if environment:
+        prefix = f"{prefix} {environment}"
+    return f"{prefix} {' '.join(step.command)}"
 
 
 def _render(report: MiseSyncReport) -> None:

@@ -246,6 +246,11 @@ forced to the front of `PATH`:
 mise run mise-sync -- --apply
 ```
 
+On macOS 27, the complete tool step temporarily disables Cargo release
+stripping. Rust stable currently produces stripped proc-macro libraries that
+macOS 27 refuses to load; the override can be removed after stable Rust carries
+LLVM 22.1.8 or newer and the locked Atuin build passes without it.
+
 Before replacing the live declaration, `mise-sync` compares its `[tools]`
 entries with the tracked baseline. Any live-only tool blocks apply and is named
 in the report. Decide whether to add it to the shared baseline, move it to its
