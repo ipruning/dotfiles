@@ -108,6 +108,12 @@ and recovery deliveries remain eligible for the next run. Notifications never
 execute recovery actions. Use the incident report to see both emitted and
 suppressed decisions.
 
+The Skillshare guard immediately reports a missing executable, configuration,
+or configured source. A command timeout, nonzero exit, or malformed status
+response must occur in two consecutive samples before it becomes an incident;
+the first failure remains visible in the `skillshare_guard` event as a deferred
+alert. A successful status response resets the failure streak.
+
 When a push delivery exhausts its retries or brrr is unconfigured, the CLI uses
 a rate-limited local macOS notification as a last resort. `status --format json`
 is the authoritative delivery-health report; `mise run check` consumes it to

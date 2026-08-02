@@ -60,6 +60,8 @@ BRRR_ENV_FILES = (
 )
 CODEX_CHROME_EXTENSION_ID = "hehggadaopoacecdllhhajmbjkdcmajg"
 BAG_MODE_DIR = Path("/Library/Application Support/bag-mode")
+SKILLSHARE_STATUS_FAILURE_STREAK_STATE = "skillshare_status_failure_streak"
+SKILLSHARE_STATUS_FAILURE_NOTIFY_COUNT = 2
 CODEX_BUNDLED_COMPUTER_USE = (
     CODEX_APP
     / "Contents"
@@ -2031,15 +2033,16 @@ def skillshare_source_status(
     config_path: Path,
     *,
     runner: Any = subprocess.run,
-) -> dict[str, Any] | None:
+) -> tuple[dict[str, Any] | None, str]:
     """Return skillshare's own `.source` object from `status --json`.
 
     skillshare resolves the effective skills source (sources.skills, with the
     legacy `source` fallback and ~ expansion) and reports whether it exists,
     so this authoritative query replaces parsing config.yaml ourselves. `-g`
     forces global mode so a monitor's cwd cannot flip it into project mode;
-    SKILLSHARE_CONFIG selects the same config file the guard validated. Returns
-    None when the command is unavailable, fails, or is unparseable.
+    SKILLSHARE_CONFIG selects the same config file the guard validated. The
+    error string distinguishes transient command and output failures without
+    exposing status output or configuration contents.
     """
     environment = os.environ.copy()
     environment["SKILLSHARE_CONFIG"] = str(config_path)
@@ -2053,16 +2056,20 @@ def skillshare_source_status(
             timeout=30,
             env=environment,
         )
-    except (OSError, subprocess.TimeoutExpired):
-        return None
+    except subprocess.TimeoutExpired:
+        return None, "skillshare status timed out after 30 seconds"
+    except OSError as error:
+        return None, f"skillshare status could not start ({type(error).__name__})"
     if completed.returncode != 0:
-        return None
+        return None, f"skillshare status exited with status {completed.returncode}"
     try:
         document = json.loads(completed.stdout)
     except (json.JSONDecodeError, ValueError):
-        return None
+        return None, "skillshare status returned invalid JSON"
     source = document.get("source")
-    return source if isinstance(source, dict) else None
+    if not isinstance(source, dict):
+        return None, "skillshare status did not return source status"
+    return source, ""
 
 
 def collect_skillshare_guard(
@@ -2079,27 +2086,49 @@ def collect_skillshare_guard(
     executable = executable_finder("skillshare")
     detail = ""
     source_path = ""
+    read_failure = ""
+    failure_streak = 0
     if not executable:
         detail = "skillshare executable is missing from PATH"
     elif not config_path.is_file():
         detail = f"skillshare configuration is missing ({config_path})"
     else:
-        status = skillshare_source_status(
+        status, read_failure = skillshare_source_status(
             Path(executable), config_path, runner=runner
         )
-        if status is None:
-            detail = "skillshare status could not be read"
+        if read_failure:
+            previous_streak = (
+                parse_int(
+                    store.get_state(SKILLSHARE_STATUS_FAILURE_STREAK_STATE) or ""
+                )
+                or 0
+            )
+            failure_streak = previous_streak + 1
+            store.set_state(
+                SKILLSHARE_STATUS_FAILURE_STREAK_STATE, str(failure_streak)
+            )
+            if (
+                store.conn is None
+                or failure_streak >= SKILLSHARE_STATUS_FAILURE_NOTIFY_COUNT
+            ):
+                detail = read_failure
         else:
+            assert status is not None
             source_path = str(status.get("path", ""))
             if not status.get("exists", True):
                 detail = f"configured skillshare source is missing ({source_path})"
+    if not read_failure:
+        store.delete_state(SKILLSHARE_STATUS_FAILURE_STREAK_STATE)
     store.emit(
         snapshot_id,
         "skillshare_guard",
         executable=str(executable or ""),
         config_present=config_path.is_file(),
         source=source_path,
-        ready=not detail,
+        ready=not detail and not read_failure,
+        read_failure=read_failure,
+        failure_streak=failure_streak,
+        alert_deferred=bool(read_failure and not detail),
     )
     if detail:
         store.emit(

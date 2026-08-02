@@ -889,9 +889,47 @@ class SkillshareGuardTest(unittest.TestCase):
 
     def test_unreadable_status_is_reported_not_silently_ready(self) -> None:
         self.touch_config()
-        signals = self.collect("/test/bin/skillshare", status_returncode=1)
+        first = self.collect("/test/bin/skillshare", status_returncode=1)
+        second = self.collect("/test/bin/skillshare", status_returncode=1)
 
-        self.assertIn("status could not be read", self.details(signals)[0])
+        self.assertEqual(self.details(first), [])
+        self.assertIn("exited with status 1", self.details(second)[0])
+        self.assertEqual(
+            self.store.get_state("skillshare_status_failure_streak"), "2"
+        )
+
+    def test_single_status_failure_recovers_without_signaling(self) -> None:
+        self.touch_config()
+        failed = self.collect("/test/bin/skillshare", status_returncode=1)
+        recovered = self.collect(
+            "/test/bin/skillshare",
+            status={"path": "/tmp/skills", "exists": True},
+        )
+
+        self.assertEqual(self.details(failed), [])
+        self.assertEqual(self.details(recovered), [])
+        self.assertIsNone(
+            self.store.get_state("skillshare_status_failure_streak")
+        )
+
+    def test_status_failure_diagnostics_distinguish_failure_modes(self) -> None:
+        status = self.module["skillshare_source_status"]
+
+        def timeout_runner(*_args: Any, **_kwargs: Any) -> SimpleNamespace:
+            raise subprocess.TimeoutExpired("skillshare", 30)
+
+        def invalid_json_runner(*_args: Any, **_kwargs: Any) -> SimpleNamespace:
+            return SimpleNamespace(returncode=0, stdout="not-json")
+
+        _source, timeout_detail = status(
+            Path("/test/bin/skillshare"), self.config_path, runner=timeout_runner
+        )
+        _source, json_detail = status(
+            Path("/test/bin/skillshare"), self.config_path, runner=invalid_json_runner
+        )
+
+        self.assertIn("timed out", timeout_detail)
+        self.assertIn("invalid JSON", json_detail)
 
     def test_incident_mapping_carries_the_detail(self) -> None:
         build = self.module["build_brrr_incident"]
