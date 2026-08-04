@@ -115,19 +115,19 @@ url = "https://github.com/earendil-works/pi/releases/download/v0.83.0/pi-darwin-
 url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/494597981"
 
 [[tools."github:jihuanshe/linear"]]
-version = "0.0.1785814966-g8c7bf61"
+version = "0.0.1785829023-g0540832"
 backend = "github:jihuanshe/linear"
 
 [tools."github:jihuanshe/linear"."platforms.linux-x64"]
-checksum = "sha256:c37c9309a5c3a9d1a4941ff4792e5c8c66484a92948f208cff7c998737dc0d25"
-url = "https://github.com/jihuanshe/linear/releases/download/0.0.1785814966-g8c7bf61/linear-x86_64-unknown-linux-gnu.tar.xz"
-url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/500855257"
+checksum = "sha256:c3346b4a0344c572bd74934b6c389e80075a15d47da43125cb0f244eeac6b813"
+url = "https://github.com/jihuanshe/linear/releases/download/0.0.1785829023-g0540832/linear-x86_64-unknown-linux-gnu.tar.xz"
+url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/501048779"
 provenance = "github-attestations"
 
 [tools."github:jihuanshe/linear"."platforms.macos-arm64"]
-checksum = "sha256:bd898211109e049b675fe082489ed9a9babbd8b75c2f79eb43777a21439058e6"
-url = "https://github.com/jihuanshe/linear/releases/download/0.0.1785814966-g8c7bf61/linear-aarch64-apple-darwin.tar.xz"
-url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/500855234"
+checksum = "sha256:c86e0d146586ba5ee3936d86a55ba60868f9230574ee63bcc3db93777086db93"
+url = "https://github.com/jihuanshe/linear/releases/download/0.0.1785829023-g0540832/linear-aarch64-apple-darwin.tar.xz"
+url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/501048700"
 provenance = "github-attestations"
 provenance_verified = true
 
