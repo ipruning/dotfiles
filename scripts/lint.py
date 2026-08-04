@@ -55,11 +55,6 @@ SKIP_SUFFIXES = {
 # inventory/ snapshots quote live host state (Brewfile source paths, app
 # names); they are data to diff, not path references this repository maintains.
 SKIP_PREFIXES = ("generated/", "inventory/")
-FULL_HOME_REQUIRED_FILES = {
-    "reference/.config/zellij/config.kdl": (
-        "zellij-sessionizer paths do not expand home variables"
-    ),
-}
 OPTIONAL_REFERENCE_SECTION = "dotfiles_optional_reference_files"
 OPTIONAL_PATHS = {
     ("reference/.zshenv", "/usr/local/sbin"),
@@ -155,10 +150,7 @@ def _classify_path(
     raw: str,
     system_name: str,
 ) -> Finding:
-    if system_name == "Linux" and (
-        raw.startswith(("/Applications/", "/opt/homebrew"))
-        or (raw.startswith("/Users/") and relative.startswith("reference/"))
-    ):
+    if system_name == "Linux" and (raw.startswith(("/Applications/", "/opt/homebrew"))):
         return _located_finding(
             None,
             "path.platform_skipped",
@@ -177,18 +169,6 @@ def _classify_path(
             value=raw,
         )
     if raw.startswith(("/Users/", "/home/", "/root/")):
-        if relative in FULL_HOME_REQUIRED_FILES:
-            matches_home = raw == str(home) or raw.startswith(f"{home}/")
-            return _located_finding(
-                Severity.OK
-                if matches_home and _expanded_path_exists(raw, home)
-                else Severity.WARN,
-                "path.full_home_required",
-                FULL_HOME_REQUIRED_FILES[relative],
-                source,
-                line=line,
-                value=raw,
-            )
         if not (raw == str(home) or raw.startswith(f"{home}/")):
             return _located_finding(
                 Severity.ERROR,

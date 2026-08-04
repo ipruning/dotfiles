@@ -304,6 +304,26 @@ def test_inspect_repository_checks_paths_under_reference_library(
     assert finding.path == settings
 
 
+def test_linux_repository_lint_rejects_macos_home_under_reference(
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    settings = repo_root / "reference/.config/example/settings.json"
+    settings.parent.mkdir(parents=True)
+    settings.write_text('{"tool": "/Users/someone/private/tool"}\n')
+    (repo_root / "mackup/applications").mkdir(parents=True)
+    (repo_root / "mackup/mackup.cfg").write_text(mackup_cfg())
+
+    report = inspect_repository(repo_root, home, system_name="Linux")
+    finding = next(
+        finding for finding in report.findings if finding.code == "path.absolute_home"
+    )
+
+    assert finding.severity is Severity.ERROR
+    assert finding.path == settings
+
+
 def test_inspect_repository_rejects_unselected_mackup_mappings(tmp_path: Path) -> None:
     repo_root = tmp_path / "dotfiles"
     home = tmp_path / "home"
@@ -333,29 +353,6 @@ def test_inspect_repository_rejects_unselected_mackup_mappings(tmp_path: Path) -
     clean = inspect_repository(repo_root, home)
 
     assert "mackup.mapping_unused" not in {finding.code for finding in clean.findings}
-
-
-def test_full_home_rule_fires_only_for_its_keyed_zellij_file(tmp_path: Path) -> None:
-    repo_root = tmp_path / "dotfiles"
-    home = tmp_path / "home"
-    keyed = repo_root / "reference/.config/zellij/config.kdl"
-    keyed.parent.mkdir(parents=True)
-    keyed.write_text('session_dir "/Users/stranger/work"\n')
-    other = repo_root / "reference/.config/other.conf"
-    other.write_text('session_dir "/Users/stranger/work"\n')
-    (repo_root / "mackup/applications").mkdir(parents=True)
-    (repo_root / "mackup/mackup.cfg").write_text(mackup_cfg())
-
-    report = inspect_repository(repo_root, home, system_name="Darwin")
-    by_path = {}
-    for finding in report.findings:
-        if finding.code in {"path.full_home_required", "path.absolute_home"}:
-            by_path[finding.path] = finding
-
-    assert by_path[keyed].code == "path.full_home_required"
-    assert by_path[keyed].severity is Severity.WARN
-    assert by_path[other].code == "path.absolute_home"
-    assert by_path[other].severity is Severity.ERROR
 
 
 def test_inspect_repository_reports_git_inventory_failure(
