@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/runkids/skillshare/main/schemas/config.schema.json
 sources:
-  skills: ~/Developer/ipruning/skills
+  skills: /Users/alex/Developer/ipruning/skills
   extras: ~/Developer/ipruning/skills/extras
 mode: merge
 targets:
