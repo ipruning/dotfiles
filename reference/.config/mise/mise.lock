@@ -100,6 +100,20 @@ url = "https://dl.deno.land/release/v2.9.4/deno-aarch64-apple-darwin.zip"
 version = "2.12.0"
 backend = "gem:kamal"
 
+[[tools."github:agavra/tuicr"]]
+version = "0.20.0"
+backend = "github:agavra/tuicr"
+
+[tools."github:agavra/tuicr"."platforms.linux-x64"]
+checksum = "sha256:1835a289ff4ab32269bf466ca03b6a12a61fedf493c4a54302f4cabc65818587"
+url = "https://github.com/agavra/tuicr/releases/download/v0.20.0/tuicr-0.20.0-x86_64-unknown-linux-gnu.tar.gz"
+url_api = "https://api.github.com/repos/agavra/tuicr/releases/assets/499010298"
+
+[tools."github:agavra/tuicr"."platforms.macos-arm64"]
+checksum = "sha256:21fb2ce7af23e316da42402fdfc8815c0db7e1b738d7125eb426564212da8b48"
+url = "https://github.com/agavra/tuicr/releases/download/v0.20.0/tuicr-0.20.0-aarch64-apple-darwin.tar.gz"
+url_api = "https://api.github.com/repos/agavra/tuicr/releases/assets/499009739"
+
 [[tools."github:earendil-works/pi"]]
 version = "0.83.0"
 backend = "github:earendil-works/pi"
@@ -132,18 +146,18 @@ provenance = "github-attestations"
 provenance_verified = true
 
 [[tools."github:larksuite/cli"]]
-version = "1.0.82"
+version = "1.0.83"
 backend = "github:larksuite/cli"
 
 [tools."github:larksuite/cli"."platforms.linux-x64"]
-checksum = "sha256:3ab5f030d66580b9e7908880fc6a21bb0c5cb214816579819b093c7ea1608cab"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.82/lark-cli-1.0.82-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/500233246"
+checksum = "sha256:0f098783b292f0894d8f9fd953c478a1ddd4db29cdebb661262727ed94842ddc"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.83/lark-cli-1.0.83-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/501470208"
 
 [tools."github:larksuite/cli"."platforms.macos-arm64"]
-checksum = "sha256:4aad6d81b1a39a641c04d2a2c386e91a09c67334f027c32712bd65aef8dc6a7a"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.82/lark-cli-1.0.82-darwin-arm64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/500233249"
+checksum = "sha256:81dfa4557152d15c020c1a08de42a093eb7b38622811535e336c34165f1e863a"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.83/lark-cli-1.0.83-darwin-arm64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/501470207"
 
 [[tools."github:lycorp-jp/sim-use"]]
 version = "0.12.0"

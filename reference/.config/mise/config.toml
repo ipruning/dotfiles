@@ -17,6 +17,7 @@ yarn = "aqua:yarnpkg/berry"
 "aqua:yarnpkg/berry" = "latest"
 "cargo:https://github.com/ipruning/atuin" = { version = "rev:f12a28548ad2189de3a06be547999493f1614a78", crate = "atuin", bin = "atuin", locked = true }
 "gem:kamal" = "latest"
+"github:agavra/tuicr" = "latest"
 "github:earendil-works/pi" = "latest"
 "github:jihuanshe/linear" = "latest"
 "github:larksuite/cli" = "latest"
