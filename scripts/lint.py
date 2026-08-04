@@ -11,9 +11,6 @@ import subprocess
 from pathlib import Path
 from typing import override
 
-from ruamel.yaml import YAML
-from ruamel.yaml.error import YAMLError
-
 from .models import Finding, LintReport, Severity
 from .render import finding_document, render_findings
 
@@ -149,23 +146,6 @@ def _expanded_path_exists(raw: str, home: Path) -> bool:
     return (expanded or Path(normalized)).exists()
 
 
-def _skillshare_source_paths(repo_root: Path) -> set[tuple[str, str]]:
-    relative = "reference/.config/skillshare/config.yaml"
-    config_path = repo_root / relative
-    try:
-        document = YAML(typ="safe").load(config_path)
-    except OSError, YAMLError:
-        return set()
-    sources = document.get("sources") if isinstance(document, dict) else None
-    if not isinstance(sources, dict):
-        return set()
-    return {
-        (relative, value)
-        for value in sources.values()
-        if isinstance(value, str) and value
-    }
-
-
 def _classify_path(
     repo_root: Path,
     home: Path,
@@ -174,17 +154,7 @@ def _classify_path(
     line: int,
     raw: str,
     system_name: str,
-    skillshare_source_paths: set[tuple[str, str]],
 ) -> Finding:
-    if (relative, raw) in skillshare_source_paths:
-        return _located_finding(
-            Severity.OK,
-            "path.external_source",
-            "Skillshare source path is an operator-selected external dependency",
-            source,
-            line=line,
-            value=raw,
-        )
     if system_name == "Linux" and (
         raw.startswith(("/Applications/", "/opt/homebrew"))
         or (raw.startswith("/Users/") and relative.startswith("reference/"))
@@ -312,7 +282,6 @@ def _path_findings(
     system_name: str,
 ) -> list[Finding]:
     findings: list[Finding] = []
-    skillshare_source_paths = _skillshare_source_paths(repo_root)
     for file_path in _iter_text_files(repo_root):
         relative = file_path.relative_to(repo_root).as_posix()
         try:
@@ -334,7 +303,6 @@ def _path_findings(
                         line_number,
                         raw,
                         system_name,
-                        skillshare_source_paths,
                     ),
                 )
     return findings
@@ -666,102 +634,6 @@ def _legacy_layout_findings(repo_root: Path) -> list[Finding]:
     ]
 
 
-def _skillshare_config_findings(repo_root: Path) -> list[Finding]:
-    config_path = repo_root / "reference/.config/skillshare/config.yaml"
-    if not config_path.is_file():
-        return []
-    try:
-        document = YAML(typ="safe").load(config_path)
-    except (OSError, YAMLError) as error:
-        return [
-            _located_finding(
-                Severity.ERROR,
-                "skillshare.config_invalid",
-                f"Skillshare config is not valid YAML: {error}",
-                config_path,
-            ),
-        ]
-    if not isinstance(document, dict):
-        return [
-            _located_finding(
-                Severity.ERROR,
-                "skillshare.config_invalid",
-                "Skillshare config must be a mapping",
-                config_path,
-            ),
-        ]
-
-    findings: list[Finding] = []
-    extras = document.get("extras", [])
-    if not isinstance(extras, list):
-        return [
-            _located_finding(
-                Severity.ERROR,
-                "skillshare.config_invalid",
-                "Skillshare extras must be a list",
-                config_path,
-            ),
-        ]
-    for extra in extras:
-        if not isinstance(extra, dict):
-            findings.append(
-                _located_finding(
-                    Severity.ERROR,
-                    "skillshare.config_invalid",
-                    "Skillshare extras entries must be mappings",
-                    config_path,
-                    value=str(extra),
-                ),
-            )
-            continue
-        name = extra.get("name", "<unnamed>")
-        targets = extra.get("targets", [])
-        if not isinstance(targets, list):
-            findings.append(
-                _located_finding(
-                    Severity.ERROR,
-                    "skillshare.config_invalid",
-                    f"extra {name} targets must be a list",
-                    config_path,
-                    value=str(targets),
-                ),
-            )
-            continue
-        for target in targets:
-            if not isinstance(target, dict):
-                findings.append(
-                    _located_finding(
-                        Severity.ERROR,
-                        "skillshare.config_invalid",
-                        f"extra {name} targets must be mappings",
-                        config_path,
-                        value=str(target),
-                    ),
-                )
-                continue
-            target_path = target.get("path", "<missing>")
-            if target.get("mode") != "copy":
-                findings.append(
-                    _located_finding(
-                        Severity.ERROR,
-                        "skillshare.extra_mode_unsafe",
-                        f"extra {name} must use copy mode because its target contains runtime state",
-                        config_path,
-                        value=str(target_path),
-                    ),
-                )
-    if not findings:
-        findings.append(
-            _located_finding(
-                Severity.OK,
-                "skillshare.extra_modes_safe",
-                "all extras targets use non-pruning copy mode",
-                config_path,
-            ),
-        )
-    return findings
-
-
 def inspect_repository(
     repo_root: Path,
     home: Path,
@@ -779,7 +651,6 @@ def inspect_repository(
     findings.extend(_tracked_file_findings(repo_root, tracked_paths))
     findings.extend(_legacy_reference_findings(repo_root, tracked_paths))
     findings.extend(_legacy_layout_findings(repo_root))
-    findings.extend(_skillshare_config_findings(repo_root))
     return LintReport(schema_version=1, findings=tuple(findings))
 
 

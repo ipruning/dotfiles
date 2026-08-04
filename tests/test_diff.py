@@ -106,17 +106,6 @@ class MultiApplicationRunner:
                     "error": None,
                 },
                 {
-                    "application": "skillshare",
-                    "reference_path": str(
-                        repo_root / "reference/.config/skillshare/config.yaml"
-                    ),
-                    "live_path": str(home / ".config/skillshare/config.yaml"),
-                    "kind": "only-reference",
-                    "reference_kind": "file",
-                    "live_kind": None,
-                    "error": None,
-                },
-                {
                     "application": "herdr",
                     "reference_path": str(
                         repo_root / "reference/.config/herdr/config.toml"
@@ -206,11 +195,10 @@ def test_linux_lite_profile_excludes_macos_drift_by_default(tmp_path: Path) -> N
         "git",
         "atuin",
         "mise",
-        "skillshare",
         "herdr",
         "btop",
     ]
-    assert report.summary == {"modified": 1, "only-reference": 5}
+    assert report.summary == {"modified": 1, "only-reference": 4}
 
     full = inspect_drift(
         tmp_path / "repo",
@@ -224,7 +212,6 @@ def test_linux_lite_profile_excludes_macos_drift_by_default(tmp_path: Path) -> N
         "git",
         "atuin",
         "mise",
-        "skillshare",
         "herdr",
         "btop",
         "hushlogin",

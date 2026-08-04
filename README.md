@@ -500,14 +500,21 @@ lint` reports when that assumption is false.
 ## Skillshare
 
 Global harness prompts and AI skills remain owned by the Skillshare source
-repository. This repository stores only the reference Skillshare configuration
-and reports when its executable, configuration, source directory, or known
-installation ownership is unhealthy. It does not install or synchronize
-Skillshare automatically; `mise run update -- --apply` only refreshes an already
-installed CLI.
+repository. Each host owns its materialized `~/.config/skillshare/config.yaml`;
+this repository deliberately does not back up, restore, or symlink that file.
+The host check still reports when the executable, local configuration, source
+directory, targets, or known installation ownership is unhealthy. It does not
+install or synchronize Skillshare automatically; `mise run update -- --apply`
+only refreshes an already installed CLI.
 
-The default `skillshare sync` operation synchronizes skills. The stored
-configuration also declares opt-in extras targets under `~/.codex` and
+Use one authoring host to run `skillshare update --all`, review the resulting
+source changes, and publish them. Consumer hosts pull that reviewed Skillshare
+source, rehydrate missing tracked repositories, and run `skillshare sync`; they
+do not independently update every external Skill. This single-writer boundary
+keeps `.metadata.json` and copied external Skills from diverging by host.
+
+The default `skillshare sync` operation synchronizes skills. A host-local
+configuration may also declare opt-in extras targets under `~/.codex` and
 `~/.claude`; an explicit extras sync writes those global harness directories.
 Amp global guidance is configured in Amp's personal or workspace settings and
 is not synchronized by this repository. Skill targets use merge mode, so

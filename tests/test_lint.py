@@ -304,68 +304,6 @@ def test_inspect_repository_checks_paths_under_reference_library(
     assert finding.path == settings
 
 
-def test_lint_derives_external_skillshare_source_paths_from_config(
-    tmp_path: Path,
-) -> None:
-    repo_root = tmp_path / "dotfiles"
-    home = tmp_path / "home"
-    config = repo_root / "reference/.config/skillshare/config.yaml"
-    config.parent.mkdir(parents=True)
-    config.write_text(
-        "sources:\n"
-        "  skills: ~/Developer/ipruning/skills\n"
-        "  extras: ~/Developer/ipruning/skills/extras\n"
-        "extras: []\n"
-    )
-    (repo_root / "mackup/applications").mkdir(parents=True)
-    (repo_root / "mackup/mackup.cfg").write_text(mackup_cfg())
-
-    report = inspect_repository(repo_root, home, system_name="Linux")
-    source_findings = [
-        finding
-        for finding in report.findings
-        if finding.path == config and finding.code.startswith("path.")
-    ]
-
-    assert len(source_findings) == 2
-    assert all(
-        finding.code == "path.external_source" and finding.severity is Severity.OK
-        for finding in source_findings
-    )
-
-
-def test_inspect_repository_rejects_pruning_skillshare_extra_modes(
-    tmp_path: Path,
-) -> None:
-    repo_root = tmp_path / "dotfiles"
-    home = tmp_path / "home"
-    (repo_root / "reference/.config/skillshare").mkdir(parents=True)
-    (repo_root / "reference/.config/skillshare/config.yaml").write_text(
-        "extras:\n- name: codex\n  targets:\n  - path: ~/.codex\n    mode: merge\n",
-    )
-    (repo_root / "mackup/applications").mkdir(parents=True)
-    (repo_root / "mackup/mackup.cfg").write_text(mackup_cfg())
-
-    unsafe = inspect_repository(repo_root, home)
-    unsafe_finding = next(
-        finding
-        for finding in unsafe.findings
-        if finding.code == "skillshare.extra_mode_unsafe"
-    )
-    assert unsafe_finding.severity is Severity.ERROR
-
-    (repo_root / "reference/.config/skillshare/config.yaml").write_text(
-        "extras:\n- name: codex\n  targets:\n  - path: ~/.codex\n    mode: copy\n",
-    )
-    safe = inspect_repository(repo_root, home)
-    safe_finding = next(
-        finding
-        for finding in safe.findings
-        if finding.code == "skillshare.extra_modes_safe"
-    )
-    assert safe_finding.severity is Severity.OK
-
-
 def test_inspect_repository_rejects_unselected_mackup_mappings(tmp_path: Path) -> None:
     repo_root = tmp_path / "dotfiles"
     home = tmp_path / "home"
@@ -395,33 +333,6 @@ def test_inspect_repository_rejects_unselected_mackup_mappings(tmp_path: Path) -
     clean = inspect_repository(repo_root, home)
 
     assert "mackup.mapping_unused" not in {finding.code for finding in clean.findings}
-
-
-@pytest.mark.parametrize(
-    "extras_yaml",
-    [
-        "extras:\n- codex\n",
-        "extras:\n- name: codex\n  targets: ~/.codex\n",
-        "extras:\n- name: codex\n  targets:\n  - ~/.codex\n",
-    ],
-)
-def test_inspect_repository_rejects_malformed_skillshare_extras_shapes(
-    tmp_path: Path,
-    extras_yaml: str,
-) -> None:
-    repo_root = tmp_path / "dotfiles"
-    home = tmp_path / "home"
-    (repo_root / "reference/.config/skillshare").mkdir(parents=True)
-    (repo_root / "reference/.config/skillshare/config.yaml").write_text(extras_yaml)
-    (repo_root / "mackup/applications").mkdir(parents=True)
-    (repo_root / "mackup/mackup.cfg").write_text(mackup_cfg())
-
-    report = inspect_repository(repo_root, home)
-    codes = {finding.code for finding in report.findings}
-
-    assert "skillshare.config_invalid" in codes
-    assert "skillshare.extra_modes_safe" not in codes
-    assert report.is_ok() is False
 
 
 def test_full_home_rule_fires_only_for_its_keyed_zellij_file(tmp_path: Path) -> None:

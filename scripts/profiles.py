@@ -14,7 +14,7 @@ class HostProfile(StrEnum):
 
 
 LINUX_LITE_APPLICATIONS = frozenset(
-    {"atuin", "btop", "git", "herdr", "mise", "skillshare"},
+    {"atuin", "btop", "git", "herdr", "mise"},
 )
 
 
