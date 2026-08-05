@@ -8,8 +8,8 @@ typeset -U path
 #
 # Why here instead of `.zprofile`: many agents, IDEs, and automations execute
 # non-login zsh commands, so `.zprofile` is never read. Shims are enough for
-# non-interactive mise usage; interactive shells get full `mise activate` from
-# the cached script sourced by `.zshrc`.
+# non-interactive mise usage; interactive shells remove the fallback before
+# loading full `mise activate` from the cached script sourced by `.zshrc`.
 _dotfiles_core_path() {
   if [[ ${OSTYPE:-} == darwin* ]]; then
     # Intel Homebrew, Apple Silicon Homebrew. Add bin and sbin when present so

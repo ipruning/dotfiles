@@ -241,6 +241,47 @@ def test_zshenv_exposes_user_and_mise_commands_without_repo_bins_on_linux(
     assert str(generated_bin) not in loaded_path
 
 
+@requires_zsh
+def test_zsh_mise_activation_replaces_the_noninteractive_shim_fallback(
+    tmp_path: Path,
+) -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    home = tmp_path / "home"
+    local_bin = home / ".local/bin"
+    shims = home / ".local/share/mise/shims"
+    functions = home / "dotfiles/generated/functions"
+    for directory in (local_bin, shims, functions):
+        directory.mkdir(parents=True)
+    mise = local_bin / "mise"
+    mise.write_text("#!/bin/sh\nexit 0\n")
+    mise.chmod(0o755)
+    (functions / "_mise.zsh").write_text("export MISE_TEST_ACTIVATED=1\n")
+
+    completed = subprocess.run(
+        [
+            "zsh",
+            "-dfc",
+            (
+                f'source "{repo_root / "modules/zsh/env.zsh"}"; '
+                'print -r -- "${MISE_TEST_ACTIVATED:-0}"; '
+                'print -r -- "${(j.:.)path}"'
+            ),
+        ],
+        env={
+            "HOME": str(home),
+            "PATH": f"{shims}:/usr/bin:/bin",
+        },
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert completed.returncode == 0
+    activated, loaded_path = completed.stdout.splitlines()
+    assert activated == "1"
+    assert str(shims) not in loaded_path.split(":")
+
+
 def test_bash_init_loads_starship_only_for_interactive_shells(tmp_path: Path) -> None:
     repo_root = Path(__file__).resolve().parents[1]
     bash_init = repo_root / "modules/bash/init.bash"

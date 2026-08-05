@@ -129,35 +129,35 @@ url = "https://github.com/earendil-works/pi/releases/download/v0.83.0/pi-darwin-
 url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/494597981"
 
 [[tools."github:jihuanshe/linear"]]
-version = "0.0.1785850199-gaf9f6ef"
+version = "0.0.1785862573-gbdf94fe"
 backend = "github:jihuanshe/linear"
 
 [tools."github:jihuanshe/linear"."platforms.linux-x64"]
-checksum = "sha256:9a3d3734c311bd70da0369ca0bf9ebd396e985ddf69539083763a4c7e646d5dd"
-url = "https://github.com/jihuanshe/linear/releases/download/0.0.1785850199-gaf9f6ef/linear-x86_64-unknown-linux-gnu.tar.xz"
-url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/501385689"
+checksum = "sha256:613d7bd0eb02aae80d36f707f238161efe453ec3cbf93f604f43aac1c23b1b15"
+url = "https://github.com/jihuanshe/linear/releases/download/0.0.1785862573-gbdf94fe/linear-x86_64-unknown-linux-gnu.tar.xz"
+url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/501594075"
 provenance = "github-attestations"
 
 [tools."github:jihuanshe/linear"."platforms.macos-arm64"]
-checksum = "sha256:bba890730cddd2b55df099a1be144628f5d17bc443b81928248c2aa6f5c3bdc2"
-url = "https://github.com/jihuanshe/linear/releases/download/0.0.1785850199-gaf9f6ef/linear-aarch64-apple-darwin.tar.xz"
-url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/501385506"
+checksum = "sha256:a7779bf13ef5a9a5c5cca4ae62913fb45934c786afe7740b6202fc74cb021755"
+url = "https://github.com/jihuanshe/linear/releases/download/0.0.1785862573-gbdf94fe/linear-aarch64-apple-darwin.tar.xz"
+url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/501593959"
 provenance = "github-attestations"
 provenance_verified = true
 
 [[tools."github:larksuite/cli"]]
-version = "1.0.83"
+version = "1.0.84"
 backend = "github:larksuite/cli"
 
 [tools."github:larksuite/cli"."platforms.linux-x64"]
-checksum = "sha256:0f098783b292f0894d8f9fd953c478a1ddd4db29cdebb661262727ed94842ddc"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.83/lark-cli-1.0.83-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/501470208"
+checksum = "sha256:e2179cf3453406eac6aad4a9d9244424465bfcd16ede2ce56d10bedfdf26d96d"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.84/lark-cli-1.0.84-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/502927382"
 
 [tools."github:larksuite/cli"."platforms.macos-arm64"]
-checksum = "sha256:81dfa4557152d15c020c1a08de42a093eb7b38622811535e336c34165f1e863a"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.83/lark-cli-1.0.83-darwin-arm64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/501470207"
+checksum = "sha256:bc56a15fce5b6fdb065702ac03ef4d051bc71ea511b75f316461008e4a359ba5"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.84/lark-cli-1.0.84-darwin-arm64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/502927383"
 
 [[tools."github:lycorp-jp/sim-use"]]
 version = "0.12.0"
@@ -174,18 +174,18 @@ url = "https://github.com/lycorp-jp/sim-use/releases/download/v0.12.0/sim-use-v0
 url_api = "https://api.github.com/repos/lycorp-jp/sim-use/releases/assets/493634959"
 
 [[tools."github:runkids/skillshare"]]
-version = "0.20.23"
+version = "0.20.24"
 backend = "github:runkids/skillshare"
 
 [tools."github:runkids/skillshare"."platforms.linux-x64"]
-checksum = "sha256:25f2df5af3936bb51974568d76980e7f082426e41ec54568e8f458675e0871d3"
-url = "https://github.com/runkids/skillshare/releases/download/v0.20.23/skillshare_0.20.23_linux_amd64.tar.gz"
-url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/494345643"
+checksum = "sha256:bed077a4556a4e05e7513409fc65d44c0cfbcb28f427f3adf79944c84b4d3ddc"
+url = "https://github.com/runkids/skillshare/releases/download/v0.20.24/skillshare_0.20.24_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/500093153"
 
 [tools."github:runkids/skillshare"."platforms.macos-arm64"]
-checksum = "sha256:19bf580c557ac22da89c1ef27f14c91ad25cdea376f39396645ef85326848d5b"
-url = "https://github.com/runkids/skillshare/releases/download/v0.20.23/skillshare_0.20.23_darwin_arm64.tar.gz"
-url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/494345667"
+checksum = "sha256:dfd8d6eeb83b9cae22fc0f479b2fb7e4c356fae5fe2a4404bbba8ef5b4578eb1"
+url = "https://github.com/runkids/skillshare/releases/download/v0.20.24/skillshare_0.20.24_darwin_arm64.tar.gz"
+url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/500093163"
 
 [[tools."github:schpet/linear-cli"]]
 version = "2.3.0"
@@ -219,7 +219,7 @@ backend = "go:github.com/xdevplatform/xurl"
 
 [[tools.herdr]]
 version = "0.8.0"
-backend = "github:herdrdev/herdr"
+backend = "aqua:herdrdev/herdr"
 
 [tools.herdr."platforms.linux-x64"]
 checksum = "sha256:b872ea7e40fa2cb17e857ac9b62b1bf26db7b403c622f5d2f3f5b35f6e9acd28"
@@ -274,20 +274,23 @@ url = "https://github.com/jesseduffield/lazygit/releases/download/v0.64.0/lazygi
 url_api = "https://api.github.com/repos/jesseduffield/lazygit/releases/assets/501040495"
 
 [[tools.node]]
-version = "26.6.0"
+version = "26.7.0"
 backend = "core:node"
 
 [tools.node."platforms.linux-x64"]
-checksum = "sha256:714f352a7539c5ce09af15e440cbaadbe935bb23ba23fcee66b066d00a063822"
-url = "https://nodejs.org/dist/v26.6.0/node-v26.6.0-linux-x64.tar.gz"
+checksum = "sha256:bd6b6c31e377bad9ad579bed72e5bc11f4c879ac9452ad51d30e646ea3d828df"
+url = "https://nodejs.org/dist/v26.7.0/node-v26.7.0-linux-x64.tar.gz"
 
 [tools.node."platforms.macos-arm64"]
-checksum = "sha256:75480cd43b6fcb35d8e772dd18983fbd9f691b2f03b1c94393206098e9944b5e"
-url = "https://nodejs.org/dist/v26.6.0/node-v26.6.0-darwin-arm64.tar.gz"
+checksum = "sha256:7ee659a7768e641bbfd5360940660b8e8fd0052f77488f365562bac522fc15d4"
+url = "https://nodejs.org/dist/v26.7.0/node-v26.7.0-darwin-arm64.tar.gz"
 
 [[tools."npm:@openai/codex-security"]]
-version = "0.1.5"
+version = "0.1.6"
 backend = "npm:@openai/codex-security"
+
+[tools."npm:@openai/codex-security".options]
+allow_low_downloads = "true"
 
 [[tools."npm:agent-browser"]]
 version = "0.33.2"

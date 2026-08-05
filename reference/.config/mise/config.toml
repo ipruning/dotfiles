@@ -5,7 +5,7 @@ yarn = ["vfox:mise-plugins/vfox-yarn"]
 
 [tool_alias]
 aube = "aqua:jdx/aube"
-herdr = "github:herdrdev/herdr"
+herdr = "aqua:herdrdev/herdr"
 hunk = "aqua:modem-dev/hunk"
 lazydocker = "aqua:jesseduffield/lazydocker"
 lazygit = "aqua:jesseduffield/lazygit"
@@ -24,7 +24,7 @@ yarn = "aqua:yarnpkg/berry"
 "github:lycorp-jp/sim-use" = "latest"
 "github:runkids/skillshare" = "latest"
 "go:github.com/xdevplatform/xurl" = "latest"
-"npm:@openai/codex-security" = "latest"
+"npm:@openai/codex-security" = { version = "latest", allow_low_downloads = true }
 "npm:agent-browser" = "latest"
 "npm:agent-device" = "latest"
 "npm:cf" = "latest"
@@ -51,12 +51,7 @@ auto_install = false
 lockfile = true
 lockfile_platforms = ["macos-arm64", "linux-x64"]
 minimum_release_age = "0s"
-trusted_config_paths = [
-  "~/Desktop",
-  "~/Developer",
-  "~/Documents",
-  "~/Downloads",
-]
+trusted_config_paths = ["~/Developer"]
 
 [settings.ruby]
 compile = false

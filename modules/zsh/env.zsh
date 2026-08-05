@@ -439,6 +439,9 @@ fi
 
 # 👇 mise (will cost 40ms)
 if [[ -x "$HOME/.local/bin/mise" && ! -L "$HOME/.local/bin/mise" && -f "$GENERATED_FUNCTIONS_DIR/_mise.zsh" ]]; then
+  # `.zshenv` exposes shims to non-interactive shells. Full activation owns the
+  # interactive PATH, and auto-install is disabled, so remove that fallback.
+  path=("${(@)path:#$HOME/.local/share/mise/shims}")
   source "$GENERATED_FUNCTIONS_DIR/_mise.zsh"
 fi
 
