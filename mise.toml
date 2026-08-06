@@ -19,10 +19,10 @@ lockfile_platforms = ["macos-arm64", "linux-x64"]
 # every tool in the verify chain must be mise-pinned (see AGENTS.md).
 fd = "10.4.2"
 jq = "1.8.2"
-python = "3.14.6"
+python = "3.14.7"
 ripgrep = "15.2.0"
 shellcheck = "0.11.0"
-uv = "0.12.1"
+uv = "0.12.2"
 
 [env]
 _.python.venv = { path = ".venv" }

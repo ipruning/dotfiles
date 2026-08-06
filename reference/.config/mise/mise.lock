@@ -115,18 +115,18 @@ version = "2.12.0"
 backend = "gem:kamal"
 
 [[tools."github:agavra/tuicr"]]
-version = "0.20.0"
+version = "0.21.0"
 backend = "github:agavra/tuicr"
 
 [tools."github:agavra/tuicr"."platforms.linux-x64"]
-checksum = "sha256:1835a289ff4ab32269bf466ca03b6a12a61fedf493c4a54302f4cabc65818587"
-url = "https://github.com/agavra/tuicr/releases/download/v0.20.0/tuicr-0.20.0-x86_64-unknown-linux-gnu.tar.gz"
-url_api = "https://api.github.com/repos/agavra/tuicr/releases/assets/499010298"
+checksum = "sha256:4c774b981d2f73dff675f509a46ce07ef6aba3ea127e16670aaa8013469f680b"
+url = "https://github.com/agavra/tuicr/releases/download/v0.21.0/tuicr-0.21.0-x86_64-unknown-linux-gnu.tar.gz"
+url_api = "https://api.github.com/repos/agavra/tuicr/releases/assets/503215878"
 
 [tools."github:agavra/tuicr"."platforms.macos-arm64"]
-checksum = "sha256:21fb2ce7af23e316da42402fdfc8815c0db7e1b738d7125eb426564212da8b48"
-url = "https://github.com/agavra/tuicr/releases/download/v0.20.0/tuicr-0.20.0-aarch64-apple-darwin.tar.gz"
-url_api = "https://api.github.com/repos/agavra/tuicr/releases/assets/499009739"
+checksum = "sha256:abea50eef2dec9eb18a19a6ce687c2dce712184edb2852d2cac1abf66ec96ae8"
+url = "https://github.com/agavra/tuicr/releases/download/v0.21.0/tuicr-0.21.0-aarch64-apple-darwin.tar.gz"
+url_api = "https://api.github.com/repos/agavra/tuicr/releases/assets/503216017"
 
 [[tools."github:jihuanshe/linear"]]
 version = "0.0.1785862573-gbdf94fe"
@@ -254,7 +254,7 @@ checksum = "sha256:7ee659a7768e641bbfd5360940660b8e8fd0052f77488f365562bac522fc1
 url = "https://nodejs.org/dist/v26.7.0/node-v26.7.0-darwin-arm64.tar.gz"
 
 [[tools."npm:@openai/codex-security"]]
-version = "0.1.6"
+version = "0.1.7"
 backend = "npm:@openai/codex-security"
 
 [tools."npm:@openai/codex-security".options]
@@ -299,42 +299,17 @@ url_api = "https://api.github.com/repos/pnpm/pnpm/releases/assets/500142373"
 provenance = "github-attestations"
 
 [[tools.python]]
-version = "3.14.6"
+version = "3.14.7"
 backend = "core:python"
 
-[tools.python."platforms.linux-arm64"]
-checksum = "sha256:9124d5c41739d78a446f1f29c1953bf41071abcbf18e6daec201a27608648195"
-url = "https://github.com/astral-sh/python-build-standalone/releases/download/20260610/cpython-3.14.6+20260610-aarch64-unknown-linux-gnu-install_only_stripped.tar.gz"
-provenance = "github-attestations"
-
-[tools.python."platforms.linux-arm64-musl"]
-checksum = "sha256:5c75bea22f425ebc94912c618518a5aa4753eedeea6b5da5939f027d3a9c0fec"
-url = "https://github.com/astral-sh/python-build-standalone/releases/download/20260610/cpython-3.14.6+20260610-aarch64-unknown-linux-musl-install_only_stripped.tar.gz"
-provenance = "github-attestations"
-
 [tools.python."platforms.linux-x64"]
-checksum = "sha256:ba960817e542642021135db330d875f410f4e14c64a62e2ae5faf3697ada08b2"
-url = "https://github.com/astral-sh/python-build-standalone/releases/download/20260804/cpython-3.14.6+20260804-x86_64-unknown-linux-gnu-install_only_stripped.tar.gz"
-provenance = "github-attestations"
-
-[tools.python."platforms.linux-x64-musl"]
-checksum = "sha256:54eca143d09ed3c596ecad5e3bfcb7724387818f8f984f44f3d8c0e9f36681d3"
-url = "https://github.com/astral-sh/python-build-standalone/releases/download/20260610/cpython-3.14.6+20260610-x86_64-unknown-linux-musl-install_only_stripped.tar.gz"
+checksum = "sha256:a3a4e4b81b138960c7c546694df8a77578c0b6aa46d47e96f49b9e10e8f860c9"
+url = "https://github.com/astral-sh/python-build-standalone/releases/download/20260805/cpython-3.14.7+20260805-x86_64-unknown-linux-gnu-install_only_stripped.tar.gz"
 provenance = "github-attestations"
 
 [tools.python."platforms.macos-arm64"]
-checksum = "sha256:e0d4e5066aef3248c22e08a07546bfd5edeaca904c91fadc296be720998ec2ec"
-url = "https://github.com/astral-sh/python-build-standalone/releases/download/20260804/cpython-3.14.6+20260804-aarch64-apple-darwin-install_only_stripped.tar.gz"
-provenance = "github-attestations"
-
-[tools.python."platforms.macos-x64"]
-checksum = "sha256:6f85cbb2a0fef4b90fc63aadcfe383c22db5eb7933066ca6ea384828a6b3f2d2"
-url = "https://github.com/astral-sh/python-build-standalone/releases/download/20260610/cpython-3.14.6+20260610-x86_64-apple-darwin-install_only_stripped.tar.gz"
-provenance = "github-attestations"
-
-[tools.python."platforms.windows-x64"]
-checksum = "sha256:49f0c7e8d1c2eaba70c5516ca6c01b6b766f6ff473f1209a76fd01783e7c75ae"
-url = "https://github.com/astral-sh/python-build-standalone/releases/download/20260610/cpython-3.14.6+20260610-x86_64-pc-windows-msvc-install_only_stripped.tar.gz"
+checksum = "sha256:abbf6e8530a283ed795fa91fd6bcf4501e2b1fa287b2cb1c15b70d3028f3a7c9"
+url = "https://github.com/astral-sh/python-build-standalone/releases/download/20260805/cpython-3.14.7+20260805-aarch64-apple-darwin-install_only_stripped.tar.gz"
 provenance = "github-attestations"
 
 [[tools.ruby]]
@@ -390,19 +365,19 @@ url = "https://github.com/starship/starship/releases/download/v1.26.0/starship-a
 url_api = "https://api.github.com/repos/starship/starship/releases/assets/460374577"
 
 [[tools.uv]]
-version = "0.12.1"
+version = "0.12.2"
 backend = "aqua:astral-sh/uv"
 
 [tools.uv."platforms.linux-x64"]
-checksum = "sha256:47823f814693bab8623308341369190de30b5c621eec5b1ee20352eae8c7982c"
-url = "https://github.com/astral-sh/uv/releases/download/0.12.1/uv-x86_64-unknown-linux-musl.tar.gz"
-url_api = "https://api.github.com/repos/astral-sh/uv/releases/assets/497097157"
+checksum = "sha256:2dbe8209c9592f6d1009b8565f4bf29813427907bee2236023c013101ede343f"
+url = "https://github.com/astral-sh/uv/releases/download/0.12.2/uv-x86_64-unknown-linux-musl.tar.gz"
+url_api = "https://api.github.com/repos/astral-sh/uv/releases/assets/502996593"
 provenance = "github-attestations"
 
 [tools.uv."platforms.macos-arm64"]
-checksum = "sha256:77d2906988e8074fd43f2f329ec452ebbf9b0c257ba1c66451c71de70a6baf42"
-url = "https://github.com/astral-sh/uv/releases/download/0.12.1/uv-aarch64-apple-darwin.tar.gz"
-url_api = "https://api.github.com/repos/astral-sh/uv/releases/assets/497097062"
+checksum = "sha256:fa909fea3bc06f460db79017030a221fdbc43ec4478f089cb554d8335c090817"
+url = "https://github.com/astral-sh/uv/releases/download/0.12.2/uv-aarch64-apple-darwin.tar.gz"
+url_api = "https://api.github.com/repos/astral-sh/uv/releases/assets/502996487"
 provenance = "github-attestations"
 
 [[tools.xurl]]
