@@ -18,10 +18,15 @@ bag-mode status --json
 bag-mode doctor --strict --json
 ```
 
-`install` leaves the service stopped. Use `upgrade`, not another bare install,
-when replacing an existing installation; it restores the prior running state
-only when the service was enabled before the upgrade. Run
+`install` and `upgrade` leave the service stopped. An upgrade never restarts a
+previously enabled service; verify the installation and start it explicitly. Run
 `bag-mode help COMMAND` for the current command options and exit-code contract.
+
+Version 3 uses one atomically published recovery obligation containing both the
+captured values and controller identity. If the legacy `recovery-snapshot` file
+exists, `upgrade` delegates restoration to the installed old controller, removes
+the obsolete snapshot only after restoration succeeds, and remains stopped.
+Direct `install` and `start` refuse to switch schemas.
 
 ## Restoration
 
@@ -41,7 +46,9 @@ the controller needs to restore the host.
 
 Bag mode does not notify for routine start, lid, or clean-stop transitions.
 Notifications are reserved for crashes, unsafe power or recovery states, and
-battery thresholds that may require action.
+the battery minimum that forces a stop. Configure any executable implementing
+the generic notifier contract with `bag-mode notifier set PATH`; upgrades do
+not remove an existing notifier.
 
 ## Removal
 
@@ -57,11 +64,10 @@ notifier configuration.
 
 ## Maintenance
 
-After changing the module, exercise its public lifecycle before reinstalling:
+After changing the module, run the isolated source checks before any operator-
+authorized lifecycle work:
 
 ```zsh
 modules/bag-mode/bag-mode-test
-modules/bag-mode/bag-mode install --dry-run
-bag-mode status --json
-bag-mode doctor --strict --json
+bash -n modules/bag-mode/bag-mode
 ```
