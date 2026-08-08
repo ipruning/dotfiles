@@ -46,8 +46,6 @@ keybind = super+control+shift+alt+arrow_up=resize_split:up,100
 keybind = super+control+shift+alt+arrow_left=resize_split:left,100
 keybind = super+control+shift+alt+arrow_right=resize_split:right,100
 
-# command = /opt/homebrew/bin/nu
-
 # font-family = Berkeley Mono Variable
 # font-style = Regular
 # cursor-opacity = 0.8

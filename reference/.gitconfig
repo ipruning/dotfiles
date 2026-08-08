@@ -65,26 +65,26 @@ aiOpenAIModelName = gpt-5-mini
 aiModelProvider = openai
 
 [alias]
-log-graph = "!sh -c 'git log --graph --decorate --all --date-order --date=format:\"%Y-%m-%d %H:%M:%S\" --pretty=format:\"%C(cyan)%h%Creset %C(black bold)%ad%Creset%C(auto)%d %s\" -n 42'"
-log-graphstat = "!sh -c 'git log --pretty=format:\"%C(auto)%h%d%n%s%n%C(auto)%C(blue)%an <%ae>%C(reset), %C(auto)%C(dim)%ad%n\" --graph --stat'"
+log-graph = "log --graph --decorate --all --date-order --date='format:%Y-%m-%d %H:%M:%S' --pretty='format:%C(cyan)%h%Creset %C(black bold)%ad%Creset%C(auto)%d %s' -n 42"
+log-graphstat = "log --pretty='format:%C(auto)%h%d%n%s%n%C(auto)%C(blue)%an <%ae>%C(reset), %C(auto)%C(dim)%ad%n' --graph --stat"
 
-diff-conflicts = "!sh -c 'git diff --name-only --diff-filter=U'"
+diff-conflicts = "diff --name-only --diff-filter=U"
 diff-unmerged = "!sh -c 'git diff --name-only -z --diff-filter=U | xargs -0 -n1 ${EDITOR:-vi}' -"
 
-blame = "!sh -c 'git blame -w -C -C -C'"
+blame = "blame -w -C -C -C"
 
 view-it = "!sh -c 'git log -p --follow -- \"$1\"' -"
 
-untracked = "!sh -c 'git ls-files --others --exclude-standard'"
-clean-untracked = "!sh -c 'git clean -fd'"
-stage = "!sh -c 'git add -A'"
-unstage = "!sh -c 'git reset HEAD --'"
+untracked = "ls-files --others --exclude-standard"
+stage = "add -A"
+unstage = "reset HEAD --"
 
-pr = "!sh -c 'set -e; if [ $# -lt 2 ]; then \
+pr = "!sh -c 'set -e; if [ $# -ne 2 ]; then \
   echo \"Usage: git pr <number> <branch>\"; exit 2; fi; \
+  case \"$1\" in \"\"|*[!0-9]*|0*) echo \"PR number must be a decimal positive integer\"; exit 2;; esac; \
   git fetch origin --prune; \
-  git fetch origin pull/$1/head:$2; \
-  git switch $2; \
+  git fetch origin \"pull/$1/head:refs/heads/$2\"; \
+  git switch -- \"$2\"; \
   git rebase --autostash origin/main' -"
 
 push-it = "!sh -c 'git push --force-with-lease origin HEAD' -"

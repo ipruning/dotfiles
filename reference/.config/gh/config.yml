@@ -1,4 +1,4 @@
 git_protocol: https
-pager: delta
+pager: "sh -c 'if command -v hunk >/dev/null 2>&1; then exec hunk pager; elif command -v less >/dev/null 2>&1; then exec less; else exec cat; fi'"
 prompt: enabled
 version: "1"

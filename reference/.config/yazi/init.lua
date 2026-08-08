@@ -13,7 +13,3 @@ require("duckdb"):setup({
     row_id = true,
     minmax_column_width = 30
 })
-
--- require("relative-motions"):setup({
---     show_numbers = "relative",
--- })

@@ -337,7 +337,6 @@
     "RF05",
     "RF01"
   ],
-  "sqlfluff.executablePath": "/opt/homebrew/bin/sqlfluff",
   "svelte.enable-ts-plugin": true,
   "terminal.integrated.confirmOnExit": "hasChildProcesses",
   "terminal.integrated.fontSize": 12,

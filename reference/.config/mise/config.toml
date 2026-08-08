@@ -64,7 +64,6 @@ compile = false
 
 [env]
 _.path = [
-  "/opt/homebrew/opt/postgresql@18/bin",
   "~/.bun/bin",
   "~/.local/bin",
   "~/.modular/bin",
