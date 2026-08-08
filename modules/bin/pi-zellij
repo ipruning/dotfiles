@@ -8,10 +8,22 @@ pwd_abs="$(pwd -P)"
 session="$(session_id_for_dir "$pwd_abs")"
 layout="pi"
 
-# zellij list-sessions 的输出可能包含时间/EXITED 信息；取第一列做判断更稳
-if ! zellij list-sessions 2>/dev/null | awk '{print $1}' | grep -qx "$session"; then
-  # 这里会直接进入 zellij；用户 detach 后命令返回
-  zellij --session "$session" --new-session-with-layout "$layout" && exit 0
+set +e
+sessions="$(zellij list-sessions --no-formatting --short 2>&1)"
+list_status=$?
+set -e
+
+if (( list_status == 0 )); then
+  if ! grep -Fxq "$session" <<<"$sessions"; then
+    zellij --session "$session" --new-session-with-layout "$layout"
+    exit 0
+  fi
+elif (( list_status == 1 )) && [[ "$sessions" == *"No active zellij sessions found."* ]]; then
+  zellij --session "$session" --new-session-with-layout "$layout"
+  exit 0
+else
+  printf '%s\n' "$sessions" >&2
+  exit "$list_status"
 fi
 
 exec zellij attach "$session"

@@ -19,21 +19,27 @@ set -euo pipefail
 dir="${1:-$(pwd)}"
 dir="$(cd "$dir" && pwd -P)" || { echo "directory not found: $1" >&2; exit 1; }
 
-# Escape single quotes for safe embedding inside the shell command we paste,
-# which itself is wrapped in single quotes (cd '...').
-dir_q="${dir//\'/\'\\\'\'}"
-
 for cmd in amp lazygit yazi; do
   command -v "$cmd" >/dev/null 2>&1 || { echo "required: $cmd" >&2; exit 1; }
 done
 
-osascript <<APPLESCRIPT
+printf -v dir_q '%q' "$dir"
+amp_command="cd $dir_q && amp"
+lazygit_command="cd $dir_q && lazygit"
+yazi_command="cd $dir_q && yazi"
+
+osascript - "$amp_command" "$lazygit_command" "$yazi_command" <<'APPLESCRIPT'
+on run argv
+set ampCommand to item 1 of argv
+set lazygitCommand to item 2 of argv
+set yaziCommand to item 3 of argv
 try
   set oldClip to the clipboard as text
 on error
   set oldClip to ""
 end try
 
+try
 tell application id "com.mitchellh.ghostty" to activate
 delay 0.05
 
@@ -44,7 +50,7 @@ tell application "System Events"
     delay 0.3
 
     -- Left pane: amp
-    set the clipboard to "cd '${dir_q}' && amp"
+    set the clipboard to ampCommand
     keystroke "v" using {command down}
     delay 0.1
     key code 36
@@ -53,7 +59,7 @@ tell application "System Events"
     -- Split right: lazygit
     keystroke "d" using {command down}
     delay 0.1
-    set the clipboard to "cd '${dir_q}' && lazygit"
+    set the clipboard to lazygitCommand
     keystroke "v" using {command down}
     delay 0.1
     key code 36
@@ -62,7 +68,7 @@ tell application "System Events"
     -- Split bottom-right: yazi
     keystroke "d" using {command down, shift down}
     delay 0.1
-    set the clipboard to "cd '${dir_q}' && yazi"
+    set the clipboard to yaziCommand
     keystroke "v" using {command down}
     delay 0.3
     key code 36
@@ -75,4 +81,9 @@ end tell
 
 delay 0.3
 set the clipboard to oldClip
+on error errorMessage number errorNumber
+  set the clipboard to oldClip
+  error errorMessage number errorNumber
+end try
+end run
 APPLESCRIPT

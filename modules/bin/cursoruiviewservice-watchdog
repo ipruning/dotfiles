@@ -8,15 +8,13 @@ fi
 APP="${1:-CursorUIViewService}"
 OSASCRIPT="${WATCHDOG_OSASCRIPT:-/usr/bin/osascript}"
 PGREP="${WATCHDOG_PGREP:-/usr/bin/pgrep}"
-KILL="${WATCHDOG_KILL:-/bin/kill}"
-SLEEP="${WATCHDOG_SLEEP:-/bin/sleep}"
 
 set +e
-is_hung=$("$OSASCRIPT" - "$APP" <<'AS'
+ax_result=$("$OSASCRIPT" - "$APP" <<'AS'
 on run argv
   set pname to item 1 of argv
   tell application "System Events"
-    if not (exists process pname) then return false
+    if not (exists process pname) then return "not-running"
   end tell
   try
     with timeout of 1 seconds
@@ -24,55 +22,26 @@ on run argv
         set _ to value of attribute "AXFocusedUIElement" of process pname
       end tell
     end timeout
-    return false
+    return "ok"
   on error errMsg number errNum
     if errNum is -1712 then
-      return true
+      return "timeout"
     else
-      return "probe-failed"
+      return "error:" & errNum & ":" & errMsg
     end if
   end try
 end run
 AS
 )
 probe_status=$?
+pids=$("$PGREP" -x "$APP")
+pgrep_status=$?
 set -e
 
-time_now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-if (( probe_status != 0 )) || [[ "$is_hung" != true && "$is_hung" != false ]]; then
-  echo "$time_now - $APP accessibility probe failed" >&2
+printf 'process=%s\nax_probe=%s\npids=%s\n' "$APP" "${ax_result:-error:empty-result}" "${pids//$'\n'/,}"
+
+if (( probe_status != 0 )) || (( pgrep_status > 1 )) || \
+    [[ "$ax_result" != "ok" && "$ax_result" != "not-running" ]]; then
+  echo "cursoruiviewservice-watchdog: read-only probe is abnormal; inspect the listed PIDs and restart the owning application if appropriate" >&2
   exit 1
-fi
-
-collect_pids() {
-  pids=()
-  while IFS= read -r pid; do
-    [[ -n "$pid" ]] && pids+=("$pid")
-  done < <("$PGREP" -x "$APP" || true)
-}
-
-if [[ "$is_hung" = "true" ]]; then
-  echo "$time_now - $APP is hung"
-
-  collect_pids
-
-  if (( ${#pids[@]} )); then
-    "$KILL" -TERM "${pids[@]}" 2>/dev/null || true
-    "$SLEEP" 2
-    collect_pids
-    if (( ${#pids[@]} )); then
-      "$KILL" -KILL "${pids[@]}" 2>/dev/null || true
-      "$SLEEP" 1
-      collect_pids
-    fi
-    if (( ${#pids[@]} )); then
-      echo "$time_now - $APP remains after KILL (PIDs: ${pids[*]})" >&2
-      exit 1
-    fi
-    echo "$time_now - $APP is terminated"
-  else
-    echo "$time_now - no matching $APP process remains"
-  fi
-else
-  echo "$time_now - $APP is not hung"
 fi

@@ -7,17 +7,11 @@ session_id_sanitize() {
 }
 
 session_id_short_hash() {
-  if command -v shasum >/dev/null 2>&1; then
-    printf '%s' "$1" | shasum -a 256 | awk '{print substr($1,1,8)}'
-  elif command -v sha256sum >/dev/null 2>&1; then
-    printf '%s' "$1" | sha256sum | awk '{print substr($1,1,8)}'
-  elif command -v md5 >/dev/null 2>&1; then
-    printf '%s' "$1" | md5 -q | cut -c1-8
-  elif command -v md5sum >/dev/null 2>&1; then
-    printf '%s' "$1" | md5sum | awk '{print substr($1,1,8)}'
-  else
-    date +%s
+  if ! command -v git >/dev/null 2>&1; then
+    printf '%s\n' 'session-id: git is required to derive a stable session ID' >&2
+    return 127
   fi
+  printf '%s' "$1" | git hash-object --stdin | cut -c1-8
 }
 
 # Derive "<basename>-<hash>" session id from an absolute path.

@@ -11,8 +11,6 @@ import os
 import re
 import subprocess
 import sys
-import tempfile
-import time
 
 from loguru import logger
 from rich.console import Console
@@ -42,7 +40,7 @@ RESET = "\033[0m"
 USAGE = """\
 Usage: link.py
 
-Extract URLs, paths, UUIDs, and resume commands from stdin, Zellij, or the frontmost terminal.
+Extract URLs, paths, UUIDs, and resume commands from stdin or a Zellij screen dump.
 """
 
 
@@ -143,92 +141,13 @@ def get_zellij_screen() -> str:
     if not os.environ.get("ZELLIJ"):
         return ""
 
-    text = ""
-
-    with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
-        temp_filename = tmp_file.name
-    subprocess.run(["zellij", "action", "dump-screen", temp_filename], check=True)
-    with open(temp_filename, encoding="utf-8") as f:
-        text = f.read()
-    os.remove(temp_filename)
-
-    return text
-
-
-def _read_clipboard_text() -> str:
-    try:
-        result = subprocess.run(
-            ["pbpaste", "-Prefer", "txt"], capture_output=True, check=True, text=True
-        )
-        return result.stdout
-    except Exception:
-        return ""
-
-
-def _write_clipboard_text(content: str) -> None:
-    try:
-        subprocess.run(["pbcopy"], input=content, text=True, check=True)
-    except Exception:
-        pass
-
-
-def get_frontmost_terminal_text() -> str:
-    """
-    macOS-only fallback: copy visible text from the frontmost app (assumed terminal)
-    by sending Cmd+A, Cmd+C via AppleScript, then read from the clipboard.
-
-    Immediately restores the previous clipboard content to avoid clobbering it.
-    """
-    if sys.platform != "darwin":
-        return ""
-
-    prev_clipboard = _read_clipboard_text()
-
-    # AppleScript to select-all and copy in the frontmost application. Falls back to
-    # Edit menu clicks if keystrokes fail.
-    applescript = """
-tell application "System Events"
-    set frontProc to first application process whose frontmost is true
-    try
-        keystroke "a" using {command down}
-        delay 0.05
-        keystroke "c" using {command down}
-    on error
-        try
-            tell frontProc
-                click menu item "Select All" of menu "Edit" of menu bar 1
-                delay 0.05
-                click menu item "Copy" of menu "Edit" of menu bar 1
-            end tell
-        end try
-    end try
-end tell
-"""
-
-    script_file = None
-    try:
-        with tempfile.NamedTemporaryFile(
-            "w", suffix=".applescript", delete=False
-        ) as tf:
-            tf.write(applescript)
-            script_file = tf.name
-
-        subprocess.run(["osascript", script_file], check=True)
-        time.sleep(0.2)  # allow clipboard to update
-        captured = _read_clipboard_text()
-    except Exception as e:
-        logger.error(f"AppleScript capture failed: {e}")
-        captured = ""
-    finally:
-        if script_file and os.path.exists(script_file):
-            try:
-                os.remove(script_file)
-            except Exception:
-                pass
-        # Restore previous clipboard to avoid side-effects
-        _write_clipboard_text(prev_clipboard)
-
-    return captured
+    result = subprocess.run(
+        ["zellij", "action", "dump-screen"],
+        capture_output=True,
+        check=True,
+        text=True,
+    )
+    return result.stdout
 
 
 def extract_items(text: str) -> dict[str, str]:
@@ -362,16 +281,9 @@ def fuzzy_select_items(items_dict: dict[str, str]) -> None:
     # Remove ANSI codes
     selected_clean = ANSI_ESCAPE_RE.sub("", selected_line)
 
-    # Attempt direct exact match
     if selected_clean in items_dict:
         open_item(selected_clean, items_dict[selected_clean])
         return
-
-    # If not found, attempt partial
-    for itm, kind in items_dict.items():
-        if itm in selected_clean or selected_clean in itm:
-            open_item(itm, kind)
-            return
 
     logger.error(f"No matching item found for selection: '{selected_clean}'")
 
@@ -387,13 +299,14 @@ def main(argv: list[str] | None = None) -> None:
 
     zellij_text = get_zellij_screen()
     stdin_text = "" if sys.stdin.isatty() else sys.stdin.read()
-    terminal_text = ""
     if not zellij_text and not stdin_text:
-        captured = get_frontmost_terminal_text()
-        if captured:
-            terminal_text = ANSI_ESCAPE_RE.sub("", captured)
+        print(
+            "link.py: no input; pipe text on stdin or run inside Zellij so its screen can be dumped",
+            file=sys.stderr,
+        )
+        sys.exit(1)
 
-    combined_text = f"{zellij_text}\n{stdin_text}\n{terminal_text}"
+    combined_text = f"{zellij_text}\n{stdin_text}"
 
     items_dict = extract_items(combined_text)
     fuzzy_select_items(items_dict)

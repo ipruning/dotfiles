@@ -30,7 +30,29 @@ def test_skillshare_source_uses_a_descriptive_non_system_command_name() -> None:
     )
 
     assert completed.returncode == 0
-    assert completed.stdout.strip() == "skillshare-source 0.2.0"
+    assert completed.stdout.strip() == "skillshare-source 0.3.0"
+
+
+def test_skillshare_source_removed_commands_are_unknown() -> None:
+    executable = Path(__file__).resolve().parents[1] / "modules/bin/skillshare-source"
+
+    help_result = subprocess.run(
+        [str(executable), "--help"],
+        capture_output=True,
+        text=True,
+    )
+    assert help_result.returncode == 0
+    assert "budget" not in help_result.stdout
+    assert "rename" not in help_result.stdout
+
+    for command in ("budget", "rename"):
+        completed = subprocess.run(
+            [str(executable), command],
+            capture_output=True,
+            text=True,
+        )
+        assert completed.returncode == 2
+        assert f"No such command '{command}'" in completed.stderr
 
 
 def test_skillshare_source_stops_guessing_when_default_target_is_removed(
@@ -159,8 +181,8 @@ def test_pi_session_export_requires_an_explicit_command(tmp_path: Path) -> None:
     )
 
     assert completed.returncode == 2
-    assert "No such command" in completed.stderr
-    assert "COMMAND [ARGS]" in completed.stderr
+    assert "invalid choice" in completed.stderr
+    assert "convert" in completed.stderr
 
 
 def test_watchdog_reports_probe_failure_as_unknown(tmp_path: Path) -> None:
@@ -168,7 +190,7 @@ def test_watchdog_reports_probe_failure_as_unknown(tmp_path: Path) -> None:
         Path(__file__).resolve().parents[1] / "modules/bin/cursoruiviewservice-watchdog"
     )
     probe = tmp_path / "probe"
-    for probe_output in ("probe-failed", "unexpected-output"):
+    for probe_output in ("error:-1:probe-failed", "unexpected-output"):
         _write_executable(probe, f"#!/bin/sh\necho {probe_output}\n")
         completed = subprocess.run(
             [str(watchdog)],
@@ -177,37 +199,32 @@ def test_watchdog_reports_probe_failure_as_unknown(tmp_path: Path) -> None:
             text=True,
         )
         assert completed.returncode == 1
-        assert completed.stdout == ""
-        assert "accessibility probe failed" in completed.stderr
-        assert "not hung" not in completed.stderr
+        assert "process=CursorUIViewService" in completed.stdout
+        assert f"ax_probe={probe_output}" in completed.stdout
+        assert "read-only probe is abnormal" in completed.stderr
 
 
-def test_watchdog_does_not_claim_termination_when_pid_remains(tmp_path: Path) -> None:
+def test_watchdog_reports_timeout_and_pid_without_signalling(tmp_path: Path) -> None:
     watchdog = (
         Path(__file__).resolve().parents[1] / "modules/bin/cursoruiviewservice-watchdog"
     )
-    probe, pgrep, kill, sleep = (
-        tmp_path / name for name in ("probe", "pgrep", "kill", "sleep")
-    )
-    _write_executable(probe, "#!/bin/sh\necho true\n")
+    probe, pgrep = (tmp_path / name for name in ("probe", "pgrep"))
+    _write_executable(probe, "#!/bin/sh\necho timeout\n")
     _write_executable(pgrep, "#!/bin/sh\necho 123\n")
-    _write_executable(kill, "#!/bin/sh\nexit 0\n")
-    _write_executable(sleep, "#!/bin/sh\nexit 0\n")
     completed = subprocess.run(
         [str(watchdog)],
         env={
             **os.environ,
             "WATCHDOG_OSASCRIPT": str(probe),
             "WATCHDOG_PGREP": str(pgrep),
-            "WATCHDOG_KILL": str(kill),
-            "WATCHDOG_SLEEP": str(sleep),
         },
         capture_output=True,
         text=True,
     )
     assert completed.returncode == 1
-    assert "remains after KILL" in completed.stderr
-    assert "is terminated" not in completed.stdout
+    assert "ax_probe=timeout" in completed.stdout
+    assert "pids=123" in completed.stdout
+    assert "restart the owning application" in completed.stderr
 
 
 def test_watchdog_rejects_extra_arguments_before_probing(tmp_path: Path) -> None:

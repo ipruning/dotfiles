@@ -26,16 +26,13 @@ timestamp="$(date +"%Y-%m-%d-%H-%M-%S")"
 filename="${ZED_STEM}__${timestamp}.png"
 filepath="${PASTE_IMAGE_SAVE_PATH}/${filename}"
 
-# Escape backslash and double-quote for safe interpolation into the
-# AppleScript string literal below.
-filepath_q="${filepath//\\/\\\\}"
-filepath_q="${filepath_q//\"/\\\"}"
-
 osascript_result="$(
-osascript <<EOF
+osascript - "$filepath" <<'APPLESCRIPT'
+on run argv
+set imagePath to item 1 of argv
 try
     set theImage to the clipboard as «class PNGf»
-    set theFile to POSIX file "$filepath_q"
+    set theFile to POSIX file imagePath
     set outFile to open for access theFile with write permission
     set eof outFile to 0
     write theImage to outFile
@@ -43,11 +40,12 @@ try
     return "ok"
 on error
     try
-        close access POSIX file "$filepath_q"
+        close access POSIX file imagePath
     end try
     return "no_image"
 end try
-EOF
+end run
+APPLESCRIPT
 )"
 
 if [[ "$osascript_result" != "ok" || ! -f "$filepath" ]]; then
@@ -55,9 +53,11 @@ if [[ "$osascript_result" != "ok" || ! -f "$filepath" ]]; then
   exit 2
 fi
 
-RELATIVE_PATH="$(python3 - <<PY
+RELATIVE_PATH="$(python3 - "$PASTE_IMAGE_SAVE_PATH" "$ZED_DIRNAME" <<'PY'
 import os
-print(os.path.relpath(r'''$PASTE_IMAGE_SAVE_PATH''', r'''$ZED_DIRNAME'''))
+import sys
+
+print(os.path.relpath(sys.argv[1], sys.argv[2]))
 PY
 )"
 
