@@ -375,10 +375,10 @@ removal and pruning require a separate, explicit operation.
 Preview output marks updaters that may need operator attention. In particular,
 Tigris may need sudo to replace `/usr/local/bin/tigris`; run its displayed
 interactive command before applying the remaining plan. During a JSON apply,
-stdout remains one machine-readable document while stderr streams command
-output plus `RUN`, 30-second `STILL RUNNING`, and `DONE` progress records. An
-agent can therefore distinguish active work from a stalled command and surface
-an interactive requirement before waiting through unrelated long updates.
+stdout remains one machine-readable document while stderr reports `RUN`,
+30-second `STILL RUNNING`, `DONE`, and contextual failure records. Child output
+is discarded so it cannot corrupt JSON or hold the task open through inherited
+pipes. An agent can still distinguish active work from a stalled command.
 
 For mise, the preview records the active installed tool versions. An apply
 updates the standalone CLI first, then passes that explicit list to
@@ -408,9 +408,9 @@ separately:
 mise run runtime
 ```
 
-Review the runtime preview and apply it only when it plans relevant Zsh changes.
-If the apply reports refreshed Zsh state, open a new Zsh or run `exec zsh` to
-load the new functions, completions, and plugins:
+Review the runtime preview and apply it only when it plans relevant shell
+changes. Restart each affected shell to load generated integrations; for Zsh,
+open a new shell or run `exec zsh`:
 
 ```bash
 mise run runtime -- --apply

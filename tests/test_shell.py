@@ -1,6 +1,8 @@
 import shutil
 import subprocess
+import tomllib
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -14,6 +16,10 @@ requires_shellcheck = pytest.mark.skipif(
 requires_zsh = pytest.mark.skipif(
     shutil.which("zsh") is None,
     reason="zsh is not installed",
+)
+requires_nu = pytest.mark.skipif(
+    shutil.which("nu") is None,
+    reason="nushell is not installed",
 )
 
 
@@ -150,7 +156,11 @@ def test_check_shell_files_gates_restored_reference_startup_dotfiles(
 
 @requires_zsh
 def test_zsh_tv_binding_requires_television(tmp_path: Path) -> None:
-    repo_root = Path(__file__).resolve().parents[1]
+    source_root = Path(__file__).resolve().parents[1]
+    repo_root = tmp_path / "repo"
+    env_file = repo_root / "modules/zsh/env.zsh"
+    env_file.parent.mkdir(parents=True)
+    shutil.copy2(source_root / "modules/zsh/env.zsh", env_file)
     home = tmp_path / "home"
     bin_dir = tmp_path / "bin"
     home.mkdir()
@@ -160,7 +170,7 @@ def test_zsh_tv_binding_requires_television(tmp_path: Path) -> None:
         "HOME": str(home),
         "PATH": f"{bin_dir}:/usr/bin:/bin",
     }
-    command = f'source "{repo_root / "modules/zsh/env.zsh"}"; bindkey -M emacs "^T"'
+    command = f'source "{env_file}"; bindkey -M emacs "^T"; bindkey -M emacs "^R"'
 
     without_tv = subprocess.run(
         ["zsh", "-dfc", command],
@@ -171,11 +181,41 @@ def test_zsh_tv_binding_requires_television(tmp_path: Path) -> None:
     )
 
     assert without_tv.returncode == 0
-    assert without_tv.stdout.strip() == '"^T" transpose-chars'
+    assert without_tv.stdout.splitlines()[0] == '"^T" transpose-chars'
 
     tv = bin_dir / "tv"
-    tv.write_text("#!/bin/sh\nexit 0\n")
+    tv.write_text(
+        """#!/bin/sh
+if [ "$1" = "--version" ]; then
+  exit 0
+fi
+if [ "$1" = "init" ] && [ "$2" = "zsh" ]; then
+  cat <<'EOF'
+_tv_smart_autocomplete() { :; }
+zle -N tv-smart-autocomplete _tv_smart_autocomplete
+bindkey '^T' tv-smart-autocomplete
+EOF
+  exit 0
+fi
+exit 1
+"""
+    )
     tv.chmod(0o755)
+    atuin = bin_dir / "atuin"
+    atuin.write_text("#!/bin/sh\nexit 99\n")
+    atuin.chmod(0o755)
+    generated_tv = repo_root / "generated/functions/_tv.zsh"
+    generated_tv.parent.mkdir(parents=True)
+    generated_tv.write_text(
+        "_tv_smart_autocomplete() { :; }\n"
+        "zle -N tv-smart-autocomplete _tv_smart_autocomplete\n"
+        "bindkey '^T' tv-smart-autocomplete\n"
+    )
+    (generated_tv.parent / "_atuin.zsh").write_text(
+        "_atuin_search() { :; }\n"
+        "zle -N atuin-search _atuin_search\n"
+        "bindkey '^R' atuin-search\n"
+    )
     with_tv = subprocess.run(
         ["zsh", "-dfc", command],
         env=environment,
@@ -185,7 +225,137 @@ def test_zsh_tv_binding_requires_television(tmp_path: Path) -> None:
     )
 
     assert with_tv.returncode == 0
-    assert with_tv.stdout.strip() == '"^T" tv-search'
+    assert with_tv.stdout.splitlines() == [
+        '"^T" tv-smart-autocomplete',
+        '"^R" atuin-search',
+    ]
+
+
+def _television_channel(name: str) -> dict[str, Any]:
+    repo_root = Path(__file__).resolve().parents[1]
+    path = repo_root / f"reference/.config/television/cable/{name}.toml"
+    with path.open("rb") as file:
+        return tomllib.load(file)
+
+
+def test_television_channel_triggers_are_unambiguous_and_exist() -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    config_path = repo_root / "reference/.config/television/config.toml"
+    with config_path.open("rb") as file:
+        config = tomllib.load(file)
+
+    triggers = config["shell_integration"]["channel_triggers"]
+    cable_names = {
+        path.stem
+        for path in (repo_root / "reference/.config/television/cable").glob("*.toml")
+    }
+    commands: dict[str, str] = {}
+    duplicates: dict[str, tuple[str, str]] = {}
+    for channel, channel_commands in triggers.items():
+        assert channel in cable_names
+        for command in channel_commands:
+            if previous := commands.get(command):
+                duplicates[command] = (previous, channel)
+            commands[command] = channel
+
+    assert duplicates == {}
+
+
+def test_television_ssh_channels_parse_aliases_and_known_hosts(
+    tmp_path: Path,
+) -> None:
+    home = tmp_path / "home"
+    ssh_dir = home / ".ssh"
+    ssh_dir.mkdir(parents=True)
+    (ssh_dir / "config").write_text(
+        "Host alpha beta\nHost alpha\nHost *.internal !blocked.internal wildcard?\n"
+    )
+    (ssh_dir / "known_hosts").write_text(
+        "one.example,two.example ssh-ed25519 key\n"
+        "one.example ssh-ed25519 key\n"
+        "@cert-authority marker.example ssh-ed25519 key\n"
+        "|1|hash|hash ssh-ed25519 key\n"
+        "# comment\n"
+    )
+    environment = {"HOME": str(home), "PATH": "/usr/bin:/bin"}
+
+    hosts = subprocess.run(
+        _television_channel("hosts")["source"]["command"],
+        shell=True,
+        check=True,
+        capture_output=True,
+        text=True,
+        env=environment,
+    )
+    known_hosts = subprocess.run(
+        _television_channel("known-hosts")["source"]["command"],
+        shell=True,
+        check=True,
+        capture_output=True,
+        text=True,
+        env=environment,
+    )
+
+    assert hosts.stdout.splitlines() == ["alpha", "beta"]
+    assert known_hosts.stdout.splitlines() == [
+        "one.example",
+        "two.example",
+        "marker.example",
+    ]
+
+
+def test_television_channels_use_safe_current_sources() -> None:
+    dirs = _television_channel("dirs")
+    gists = _television_channel("gists")
+    hosts = _television_channel("hosts")
+
+    assert dirs["source"]["command"] == "fd -t d --hidden"
+    assert "curl" in gists["metadata"]["requirements"]
+    assert 'select(type == "string" and length > 0)' in gists["source"]["command"]
+    assert "curl -fsSL -o \"$tmp\" -- '{}'" in gists["preview"]["command"]
+    assert "television/gists" not in gists["preview"]["command"]
+    assert hosts["keybindings"]["enter"] == "actions:connect"
+    assert hosts["actions"]["connect"] == {
+        "command": "ssh -- '{}'",
+        "mode": "execute",
+    }
+
+
+@requires_nu
+def test_nushell_skips_stale_cached_integrations_when_tools_are_missing(
+    tmp_path: Path,
+) -> None:
+    nu = shutil.which("nu")
+    assert nu is not None
+    repo_root = tmp_path / "dotfiles"
+    config_path = repo_root / "reference/.config/nushell/config.nu"
+    config_path.parent.mkdir(parents=True)
+    config_path.write_text(
+        (
+            Path(__file__).resolve().parents[1] / config_path.relative_to(repo_root)
+        ).read_text()
+    )
+    functions = repo_root / "generated/functions"
+    functions.mkdir(parents=True)
+    (functions / "_mise.nu").write_text(
+        'error make { msg: "stale mise cache loaded" }\n'
+    )
+    (functions / "_zoxide.nu").write_text(
+        'error make { msg: "stale zoxide cache loaded" }\n'
+    )
+    home = tmp_path / "home"
+    home.mkdir()
+
+    completed = subprocess.run(
+        [nu, "--config", str(config_path), "--commands", 'print "nu-ready"'],
+        check=False,
+        capture_output=True,
+        text=True,
+        env={"HOME": str(home), "PATH": ""},
+    )
+
+    assert completed.returncode == 0, completed.stderr
+    assert completed.stdout.strip() == "nu-ready"
 
 
 @requires_zsh
@@ -245,11 +415,15 @@ def test_zshenv_exposes_user_and_mise_commands_without_repo_bins_on_linux(
 def test_zsh_mise_activation_replaces_the_noninteractive_shim_fallback(
     tmp_path: Path,
 ) -> None:
-    repo_root = Path(__file__).resolve().parents[1]
+    source_root = Path(__file__).resolve().parents[1]
+    repo_root = tmp_path / "repo"
+    env_file = repo_root / "modules/zsh/env.zsh"
+    env_file.parent.mkdir(parents=True)
+    shutil.copy2(source_root / "modules/zsh/env.zsh", env_file)
     home = tmp_path / "home"
     local_bin = home / ".local/bin"
     shims = home / ".local/share/mise/shims"
-    functions = home / "dotfiles/generated/functions"
+    functions = repo_root / "generated/functions"
     for directory in (local_bin, shims, functions):
         directory.mkdir(parents=True)
     mise = local_bin / "mise"
@@ -262,7 +436,7 @@ def test_zsh_mise_activation_replaces_the_noninteractive_shim_fallback(
             "zsh",
             "-dfc",
             (
-                f'source "{repo_root / "modules/zsh/env.zsh"}"; '
+                f'source "{env_file}"; '
                 'print -r -- "${MISE_TEST_ACTIVATED:-0}"; '
                 'print -r -- "${(j.:.)path}"'
             ),
@@ -283,8 +457,11 @@ def test_zsh_mise_activation_replaces_the_noninteractive_shim_fallback(
 
 
 def test_bash_init_loads_starship_only_for_interactive_shells(tmp_path: Path) -> None:
-    repo_root = Path(__file__).resolve().parents[1]
+    source_root = Path(__file__).resolve().parents[1]
+    repo_root = tmp_path / "repo"
     bash_init = repo_root / "modules/bash/init.bash"
+    bash_init.parent.mkdir(parents=True)
+    shutil.copy2(source_root / "modules/bash/init.bash", bash_init)
     home = tmp_path / "home"
     bin_dir = tmp_path / "bin"
     home.mkdir()
@@ -297,6 +474,9 @@ def test_bash_init_loads_starship_only_for_interactive_shells(tmp_path: Path) ->
         "printf '%s\\n' 'export STARSHIP_READY=1'\n",
     )
     starship.chmod(0o755)
+    generated = repo_root / "generated/functions/_starship.bash"
+    generated.parent.mkdir(parents=True)
+    generated.write_text("export STARSHIP_READY=1\n")
     bash = shutil.which("bash")
     assert bash is not None
     environment = {
@@ -330,7 +510,7 @@ def test_bash_init_loads_starship_only_for_interactive_shells(tmp_path: Path) ->
     )
 
     assert interactive.returncode == 0
-    assert invocation_log.read_text().splitlines() == ["init bash"]
+    assert not invocation_log.exists()
 
     starship.write_text(
         "#!/bin/sh\n"
@@ -344,7 +524,7 @@ def test_bash_init_loads_starship_only_for_interactive_shells(tmp_path: Path) ->
             "--noprofile",
             "--norc",
             "-ic",
-            f'. "{bash_init}"; test -z "${{STARSHIP_READY:-}}"',
+            f'. "{bash_init}"; test "${{STARSHIP_READY:-}}" = 1',
         ],
         env=environment,
         check=False,
@@ -359,8 +539,11 @@ def test_bash_init_loads_starship_only_for_interactive_shells(tmp_path: Path) ->
 def test_bash_init_adds_navigation_editing_and_guarded_history_tools(
     tmp_path: Path,
 ) -> None:
-    repo_root = Path(__file__).resolve().parents[1]
+    source_root = Path(__file__).resolve().parents[1]
+    repo_root = tmp_path / "repo"
     bash_init = repo_root / "modules/bash/init.bash"
+    bash_init.parent.mkdir(parents=True)
+    shutil.copy2(source_root / "modules/bash/init.bash", bash_init)
     home = tmp_path / "home"
     bin_dir = tmp_path / "bin"
     home.mkdir()
@@ -377,6 +560,10 @@ def test_bash_init_adds_navigation_editing_and_guarded_history_tools(
             f"printf '%s\\n' '{output}'\n",
         )
         executable.chmod(0o755)
+    functions = repo_root / "generated/functions"
+    functions.mkdir(parents=True)
+    (functions / "_atuin.bash").write_text("export ATUIN_READY=1\n")
+    (functions / "_zoxide.bash").write_text("export ZOXIDE_READY=1\n")
     bash = shutil.which("bash")
     assert bash is not None
     environment = {
@@ -408,16 +595,11 @@ def test_bash_init_adds_navigation_editing_and_guarded_history_tools(
     assert "alias ...='cd ../..'" in completed.stdout
     assert '"\\C-w": "\\e\\C-?"' in completed.stdout
     assert "READY=1:1" in completed.stdout
-    assert invocation_log.read_text().splitlines() == [
-        "atuin init bash --disable-up-arrow",
-        "zoxide init bash --cmd j",
-    ]
+    assert not invocation_log.exists()
 
     for tool in ("atuin", "zoxide"):
         executable = bin_dir / tool
-        executable.write_text(
-            "#!/bin/sh\nprintf '%s\\n' 'stale shim' >&2\nexit 1\n",
-        )
+        executable.unlink()
     degraded = subprocess.run(
         [
             bash,
@@ -440,8 +622,11 @@ def test_bash_init_adds_navigation_editing_and_guarded_history_tools(
 
 
 def test_bash_init_activates_mise_after_prompt_tools(tmp_path: Path) -> None:
-    repo_root = Path(__file__).resolve().parents[1]
+    source_root = Path(__file__).resolve().parents[1]
+    repo_root = tmp_path / "repo"
     bash_init = repo_root / "modules/bash/init.bash"
+    bash_init.parent.mkdir(parents=True)
+    shutil.copy2(source_root / "modules/bash/init.bash", bash_init)
     home = tmp_path / "home"
     local_bin = home / ".local/bin"
     bin_dir = tmp_path / "bin"
@@ -458,6 +643,16 @@ def test_bash_init_activates_mise_after_prompt_tools(tmp_path: Path) -> None:
     for executable, command in tools.items():
         executable.write_text(f"#!/bin/sh\n{command}\n")
         executable.chmod(0o755)
+    functions = repo_root / "generated/functions"
+    functions.mkdir(parents=True)
+    (functions / "_starship.bash").write_text("PROMPT_COMMAND=starship_precmd\n")
+    (functions / "_atuin.bash").write_text(":\n")
+    (functions / "_zoxide.bash").write_text(
+        'PROMPT_COMMAND="$PROMPT_COMMAND;zoxide_hook"\n'
+    )
+    (functions / "_mise.bash").write_text(
+        'PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND;}mise_hook"\n'
+    )
     bash = shutil.which("bash")
     assert bash is not None
 
@@ -604,3 +799,59 @@ def test_check_shell_files_skips_zsh_loudly_when_zsh_is_absent(
     assert skipped[0].severity is None
     assert skipped[0].applicable is False
     assert "zsh is not installed" in skipped[0].message
+
+
+@requires_zsh
+def test_zsh_env_derives_root_and_rejects_invalid_override(tmp_path: Path) -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    env_file = repo_root / "modules/zsh/env.zsh"
+    environment = {"HOME": str(tmp_path), "PATH": "/usr/bin:/bin"}
+
+    derived = subprocess.run(
+        ["zsh", "-dfc", f'source "{env_file}"; print -r -- "$DOTFILES_ROOT"'],
+        env=environment,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    invalid = subprocess.run(
+        ["zsh", "-dfc", f'source "{env_file}"'],
+        env={**environment, "DOTFILES_ROOT": str(tmp_path / "missing")},
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert derived.returncode == 0
+    assert derived.stdout.strip() == str(repo_root)
+    assert invalid.returncode != 0
+    assert "DOTFILES_ROOT is invalid" in invalid.stderr
+
+
+@requires_zsh
+def test_openv_uses_one_selected_op_without_signin_retry(tmp_path: Path) -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    env_file = repo_root / "modules/zsh/env.zsh"
+    fake_op = tmp_path / "op"
+    log = tmp_path / "op.log"
+    fake_op.write_text(
+        "#!/bin/sh\nprintf '%s\\n' \"$*\" >>\"$OP_LOG\"\nprintf 'auth failed\\n' >&2\nexit 7\n"
+    )
+    fake_op.chmod(0o755)
+
+    completed = subprocess.run(
+        ["zsh", "-dfc", f'source "{env_file}"; openv example'],
+        env={
+            "HOME": str(tmp_path),
+            "PATH": "/usr/bin:/bin",
+            "OPENV_OP_ENV_BIN": str(fake_op),
+            "OP_LOG": str(log),
+        },
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert completed.returncode == 1
+    assert log.read_text().splitlines() == ["environment read example"]
+    assert "auth failed" in completed.stderr

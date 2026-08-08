@@ -1,6 +1,0 @@
-[metadata]
-name = "channels"
-description = "List available TV channels"
-
-[source]
-command = "tv list-channels | grep -v 'channels:' | sed '/^[[:space:]]*$/d' | sed 's/^[[:space:]]*//'"

@@ -1,10 +1,18 @@
 [metadata]
 name = "known-hosts"
 description = "List known SSH hosts"
-requirements = ["awk", "dig"]
+requirements = ["awk", "ssh-keygen"]
 
 [source]
-command = "cat ~/.ssh/known_hosts | awk '{print $1}' | sort -u"
+command = '''awk '
+$1 !~ /^#/ && NF {
+  field = ($1 ~ /^@/ ? $2 : $1)
+  if (field ~ /^\|/) next
+  count = split(field, hosts, ",")
+  for (i = 1; i <= count; i++)
+    if (hosts[i] != "" && !seen[hosts[i]]++) print hosts[i]
+}
+' "$HOME/.ssh/known_hosts"'''
 
 [preview]
-command = "dig '{}'"
+command = "ssh-keygen -F '{}'"

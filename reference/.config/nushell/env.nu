@@ -1,18 +1,6 @@
-# env.nu
-#
-# Installed by:
-# version = "0.109.1"
-#
-# Previously, environment variables were typically configured in `env.nu`.
-# In general, most configuration can and should be performed in `config.nu`
-# or one of the autoload directories.
-#
-# This file is generated for backwards compatibility for now.
-# It is loaded before config.nu and login.nu
-#
-# See https://www.nushell.sh/book/configuration.html
-#
-# Also see `help config env` for more options.
-#
-# You can remove these comments if you want or leave
-# them for future reference.
+# 👇 Private Environment Variables (optional; a fresh restore may not have it)
+# source is a parse-time keyword, so `if (path exists) { source }` still fails
+# to parse a missing file. Sourcing `null` is a documented no-op, so resolve to
+# the path only when it exists — the nushell equivalent of the guarded Zsh env.
+const private_env = "~/.config/nushell/env.private.nu"
+source (if ($private_env | path exists) { $private_env } else { null })

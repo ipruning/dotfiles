@@ -8,6 +8,17 @@ fi
 typeset -U path
 typeset -U fpath
 
+if [[ -n ${DOTFILES_ROOT:-} ]]; then
+  if [[ ! -d $DOTFILES_ROOT || ! -r $DOTFILES_ROOT/modules/zsh/env.zsh ]]; then
+    print -u2 -- "DOTFILES_ROOT is invalid: $DOTFILES_ROOT (expected modules/zsh/env.zsh)"
+    return 1
+  fi
+  DOTFILES_ROOT=${DOTFILES_ROOT:A}
+else
+  DOTFILES_ROOT=${${(%):-%N}:A:h:h}
+fi
+typeset -gx DOTFILES_ROOT
+
 # .zshrc is interactive-only. Base PATH belongs in `.zshenv`; do not call
 # path_helper here because it can reorder PATH after our non-interactive-safe
 # setup. Keep Homebrew metadata and completion paths here for interactive use.
@@ -39,19 +50,20 @@ if [[ $OSTYPE == linux* ]]; then
   fi
 fi
 
-GENERATED_COMPLETIONS_DIR="$HOME/dotfiles/generated/completions"
+GENERATED_COMPLETIONS_DIR="$DOTFILES_ROOT/generated/completions"
 
 completion_paths=()
 [[ -d "$GENERATED_COMPLETIONS_DIR" ]] && completion_paths+=("$GENERATED_COMPLETIONS_DIR")
 completion_paths+=("${fpath[@]}")
 fpath=("${completion_paths[@]}")
 autoload -Uz compinit
-for dump in ~/.zcompdump(N.mh+24); do
+if [[ ! -s ~/.zcompdump || -n ~/.zcompdump(N.mh+24) ]]; then
   compinit -i
-done
-compinit -i -C
+else
+  compinit -i -C
+fi
 
-ZSH_MODULES_DIR="$HOME/dotfiles/modules/zsh"
+ZSH_MODULES_DIR="$DOTFILES_ROOT/modules/zsh"
 
 [[ -d "$ZSH_MODULES_DIR" ]] && {
   config_files=(

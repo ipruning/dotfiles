@@ -1,6 +1,17 @@
-GENERATED_COMPLETIONS_DIR="$HOME/dotfiles/generated/completions"
-GENERATED_FUNCTIONS_DIR="$HOME/dotfiles/generated/functions"
-PLUGINS_DIR="$HOME/dotfiles/generated/plugins"
+if [[ -n ${DOTFILES_ROOT:-} ]]; then
+  if [[ ! -d $DOTFILES_ROOT || ! -r $DOTFILES_ROOT/modules/zsh/env.zsh ]]; then
+    print -u2 -- "DOTFILES_ROOT is invalid: $DOTFILES_ROOT (expected modules/zsh/env.zsh)"
+    return 1
+  fi
+  DOTFILES_ROOT=${DOTFILES_ROOT:A}
+else
+  DOTFILES_ROOT=${${(%):-%N}:A:h:h:h}
+fi
+typeset -gx DOTFILES_ROOT
+
+GENERATED_COMPLETIONS_DIR="$DOTFILES_ROOT/generated/completions"
+GENERATED_FUNCTIONS_DIR="$DOTFILES_ROOT/generated/functions"
+PLUGINS_DIR="$DOTFILES_ROOT/generated/plugins"
 
 # 👇 XDG Config Home
 export XDG_CONFIG_HOME="$HOME/.config"
@@ -240,38 +251,35 @@ if [[ ( "$TERM_PROGRAM" == "zed" || "$TERM_PROGRAM" == "ghostty" ) && -n ${comma
 fi
 
 # 👇 Functions
-source "$HOME/dotfiles/modules/zsh/macos.zsh"
-source "$HOME/dotfiles/modules/zsh/surge.zsh"
+if [[ "$OSTYPE" == darwin* ]]; then
+  source "$DOTFILES_ROOT/modules/zsh/macos.zsh"
+  source "$DOTFILES_ROOT/modules/zsh/surge.zsh"
+fi
 
 # 👇 1Password Environment Loader
 _openv_resolve_op_env_bin() {
   local override="${OPENV_OP_ENV_BIN:-}"
-  if [[ -n "$override" && -x "$override" ]]; then
+  if [[ -n "$override" ]]; then
+    if [[ ! -x "$override" ]]; then
+      echo "OPENV_OP_ENV_BIN is not executable: $override" >&2
+      return 1
+    fi
     echo "$override"
-    return 0
-  fi
-
-  local preferred="/usr/local/bin/op"
-  if [[ -x "$preferred" ]] && "$preferred" environment read --help >/dev/null 2>&1; then
-    echo "$preferred"
-    return 0
+    return
   fi
 
   if command -v op >/dev/null 2>&1; then
-    local current
-    current="$(command -v op)"
-    if "$current" environment read --help >/dev/null 2>&1; then
-      echo "$current"
-      return 0
-    fi
+    command -v op
+    return
   fi
 
+  echo "op CLI not found in PATH" >&2
   return 1
 }
 
 openv() {
   local id="${1:-}"
-  local op_env_bin op_auth_bin op_account output session
+  local op_env_bin output
 
   if [[ -z "$id" ]]; then
     echo "Usage: openv <1password-environment-id>" >&2
@@ -279,55 +287,10 @@ openv() {
   fi
 
   if ! op_env_bin="$(_openv_resolve_op_env_bin)"; then
-    echo "No op CLI with 'environment' command found (need op >= 2.33)." >&2
     return 1
   fi
 
   if output="$("$op_env_bin" environment read "$id" 2>&1)"; then
-    while IFS= read -r line; do
-      [[ -n "$line" ]] && export "$line"
-    done <<< "$output"
-    return 0
-  fi
-
-  if [[ "$output" == *"connecting to desktop app"* || "$output" == *"connection reset"* || "$output" == *"PipeAuthError"* ]]; then
-    op_auth_bin="${OPENV_OP_AUTH_BIN:-/usr/bin/op}"
-    op_account="${OPENV_OP_ACCOUNT:-}"
-
-    if [[ ! -x "$op_auth_bin" ]]; then
-      echo "$output" >&2
-      echo "Fallback auth op not found: $op_auth_bin" >&2
-      return 1
-    fi
-
-    if [[ -n "$op_account" ]]; then
-      session="$("$op_auth_bin" signin --raw --account "$op_account" 2>/dev/null)" || {
-        echo "Failed to get session token from $op_auth_bin (approve the 1Password sign-in prompt and retry)." >&2
-        return 1
-      }
-    else
-      session="$("$op_auth_bin" signin --raw 2>/dev/null)" || {
-        echo "Failed to get session token from $op_auth_bin (approve the 1Password sign-in prompt and retry)." >&2
-        return 1
-      }
-    fi
-
-    if [[ -z "$session" ]]; then
-      echo "Could not obtain a session token from $op_auth_bin (empty output)." >&2
-      echo "Install op >= 2.33 to /usr/local/bin with group 'onepassword-cli' and mode 2755, then retry." >&2
-      return 1
-    fi
-
-    if ! output="$(OP_LOAD_DESKTOP_APP_SETTINGS=false "$op_env_bin" --session "$session" environment read "$id" 2>&1)"; then
-      if [[ "$output" == *"No accounts configured"* ]]; then
-        echo "No CLI account is configured for $op_env_bin." >&2
-        echo "Install a properly privileged op >= 2.33 (root:onepassword-cli, mode 2755) and retry." >&2
-      else
-        echo "$output" >&2
-      fi
-      return 1
-    fi
-
     while IFS= read -r line; do
       [[ -n "$line" ]] && export "$line"
     done <<< "$output"
@@ -365,42 +328,21 @@ if [[ -f "$HOME/.orbstack/shell/init.zsh" ]]; then
 fi
 
 # 👇 zoxide
-if command -v zoxide >/dev/null 2>&1; then
-  eval "$(zoxide init zsh --cmd j)"
+if command -v zoxide >/dev/null 2>&1 && [[ -f "$GENERATED_FUNCTIONS_DIR/_zoxide.zsh" ]]; then
+  source "$GENERATED_FUNCTIONS_DIR/_zoxide.zsh"
 fi
 
 # 👇 tv
-if tv --version >/dev/null 2>&1; then
-  _tv_search() {
-    emulate -L zsh
-    zle -I
-
-    local current_prompt
-    current_prompt=$LBUFFER
-
-    local output
-
-    output=$(tv --autocomplete-prompt "$current_prompt" $*)
-
-    zle reset-prompt
-
-    if [[ -n $output ]]; then
-      RBUFFER=""
-      LBUFFER=$current_prompt$output
-
-      # uncomment this to automatically accept the line
-      # (i.e. run the command without having to press enter twice)
-      # zle accept-line
-    fi
-  }
-
-  zle -N tv-search _tv_search
-
-  bindkey '^T' tv-search
+if command -v tv >/dev/null 2>&1 && [[ -f "$GENERATED_FUNCTIONS_DIR/_tv.zsh" ]]; then
+  source "$GENERATED_FUNCTIONS_DIR/_tv.zsh"
 fi
 
 # 👇 fzf
-export FZF_DEFAULT_COMMAND="fd"
+if command -v fd >/dev/null 2>&1; then
+  export FZF_DEFAULT_COMMAND="fd"
+else
+  unset FZF_DEFAULT_COMMAND
+fi
 
 export FZF_DEFAULT_OPTS=" \
 --multi \
@@ -432,9 +374,8 @@ if [[ -n ${HOMEBREW_PREFIX:-} && -d "$HOMEBREW_PREFIX/opt/mysql-client/lib/pkgco
 fi
 
 # 👇 try-rs
-unset TRY_PATH TRY_CONFIG_DIR
-if command -v try-rs >/dev/null 2>&1; then
-  source "$HOME/dotfiles/modules/zsh/try-rs.zsh"
+if command -v try-rs >/dev/null 2>&1 && [[ -f "$GENERATED_FUNCTIONS_DIR/_try-rs.zsh" ]]; then
+  source "$GENERATED_FUNCTIONS_DIR/_try-rs.zsh"
 fi
 
 # 👇 mise (will cost 40ms)

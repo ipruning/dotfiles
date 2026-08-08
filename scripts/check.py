@@ -693,16 +693,17 @@ def inspect_host(
     if mise_binding:
         findings.append(mise_binding)
     owned_tool_finder = repo_aware_finder(repo_root, executable_finder)
-    for tool, _command, filename in FUNCTION_SPECS:
+    for function_spec in FUNCTION_SPECS:
+        tool = function_spec.tool
         tool_available = (
             canonical_mise_executable(home) is not None
             if tool == "mise"
             else owned_tool_finder(tool) is not None
         )
         finding = _owned_generated_capability(
-            f"runtime.function.{tool}",
-            repo_root / "generated/functions" / filename,
-            f"Generated {tool} Zsh initialization",
+            f"runtime.function.{function_spec.name}",
+            repo_root / "generated/functions" / function_spec.filename,
+            f"Generated {tool} {function_spec.shell} initialization",
             tool_available=tool_available,
         )
         if finding:

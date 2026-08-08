@@ -60,6 +60,15 @@ class RuntimeSpec:
 
 
 @dataclass(frozen=True)
+class ShellInitSpec:
+    name: str
+    tool: str
+    shell: str
+    command: tuple[str, ...]
+    filename: str
+
+
+@dataclass(frozen=True)
 class RuntimeResult:
     spec: RuntimeSpec
     status: RuntimeStatus
@@ -85,9 +94,64 @@ class RuntimeReport:
 
 
 FUNCTION_SPECS = (
-    ("mise", ("mise", "activate", "zsh"), "_mise.zsh"),
-    ("starship", ("starship", "init", "zsh"), "_starship.zsh"),
-    ("atuin", ("atuin", "init", "zsh", "--disable-up-arrow"), "_atuin.zsh"),
+    ShellInitSpec("mise", "mise", "zsh", ("mise", "activate", "zsh"), "_mise.zsh"),
+    ShellInitSpec(
+        "starship", "starship", "zsh", ("starship", "init", "zsh"), "_starship.zsh"
+    ),
+    ShellInitSpec(
+        "atuin",
+        "atuin",
+        "zsh",
+        ("atuin", "init", "zsh", "--disable-up-arrow"),
+        "_atuin.zsh",
+    ),
+    ShellInitSpec(
+        "zoxide",
+        "zoxide",
+        "zsh",
+        ("zoxide", "init", "zsh", "--cmd", "j"),
+        "_zoxide.zsh",
+    ),
+    ShellInitSpec("tv", "tv", "zsh", ("tv", "init", "zsh"), "_tv.zsh"),
+    ShellInitSpec(
+        "try-rs",
+        "try-rs",
+        "zsh",
+        ("try-rs", "--setup-stdout", "zsh"),
+        "_try-rs.zsh",
+    ),
+    ShellInitSpec(
+        "starship-bash",
+        "starship",
+        "bash",
+        ("starship", "init", "bash"),
+        "_starship.bash",
+    ),
+    ShellInitSpec(
+        "atuin-bash",
+        "atuin",
+        "bash",
+        ("atuin", "init", "bash", "--disable-up-arrow"),
+        "_atuin.bash",
+    ),
+    ShellInitSpec(
+        "zoxide-bash",
+        "zoxide",
+        "bash",
+        ("zoxide", "init", "bash", "--cmd", "j"),
+        "_zoxide.bash",
+    ),
+    ShellInitSpec(
+        "mise-bash", "mise", "bash", ("mise", "activate", "bash"), "_mise.bash"
+    ),
+    ShellInitSpec("mise-nu", "mise", "nu", ("mise", "activate", "nu"), "_mise.nu"),
+    ShellInitSpec(
+        "zoxide-nu",
+        "zoxide",
+        "nu",
+        ("zoxide", "init", "nushell"),
+        "_zoxide.nu",
+    ),
 )
 
 COMPLETION_SPECS = (
@@ -468,16 +532,18 @@ def plan_runtime(
             for result in build_results
             if result.spec.name.startswith("binary.")
         }
-    for tool, command, filename in FUNCTION_SPECS:
+    for function_spec in FUNCTION_SPECS:
+        tool = function_spec.tool
+        command = function_spec.command
         generator_finder = executable_finder
         if tool == "mise":
             mise_executable = canonical_mise_executable(home)
             command = (str(canonical_mise_path(home)), *command[1:])
             generator_finder = {tool: mise_executable}.get
         spec = RuntimeSpec(
-            name=f"function.{tool}",
+            name=f"function.{function_spec.name}",
             tool=tool,
-            target=functions_dir / filename,
+            target=functions_dir / function_spec.filename,
             command=command,
         )
         binary_result = binary_results.get(tool)
@@ -706,7 +772,7 @@ def _command_environment(spec: RuntimeSpec, home: Path) -> dict[str, str]:
         owned_bin = owned_root.parent.parent / "bin"
         environment["PATH"] = f"{owned_bin}{os.pathsep}{environment.get('PATH', '')}"
     environment.update(dict(spec.environment))
-    if spec.name == "function.mise":
+    if spec.tool == "mise" and spec.name.startswith("function."):
         for name in (
             "__MISE_DIFF",
             "__MISE_SESSION",
@@ -796,33 +862,15 @@ def _checkout_revision(
     home: Path,
     *,
     capture_output: bool,
-    rollback_revision: str | None = None,
 ) -> None:
     assert spec.revision is not None
-    try:
-        _set_revision(
-            spec,
-            directory,
-            spec.revision,
-            home,
-            capture_output=capture_output,
-        )
-    except (OSError, RuntimeError, subprocess.TimeoutExpired) as error:
-        if rollback_revision is None:
-            raise
-        try:
-            _set_revision(
-                spec,
-                directory,
-                rollback_revision,
-                home,
-                capture_output=capture_output,
-            )
-        except (OSError, RuntimeError, subprocess.TimeoutExpired) as rollback_error:
-            raise RuntimeError(
-                f"{error}; rollback to {rollback_revision} failed: {rollback_error}",
-            ) from error
-        raise
+    _set_revision(
+        spec,
+        directory,
+        spec.revision,
+        home,
+        capture_output=capture_output,
+    )
 
 
 def _download(source: str, timeout_seconds: int) -> bytes:
@@ -907,13 +955,6 @@ def execute_runtime(
                         "runtime command Git metadata is not a directory; refusing "
                         "to execute outside generated state",
                     )
-            rollback_revision = (
-                _read_revision(spec, command_directory, home)
-                if planned.action is RuntimeAction.UPDATE
-                and spec.revision is not None
-                and command_directory is not None
-                else None
-            )
             if planned.action is RuntimeAction.GENERATE:
                 completed = _run_command(spec, home, capture_output=True)
                 exit_code = completed.returncode
@@ -973,7 +1014,6 @@ def execute_runtime(
                             checkout_directory,
                             home,
                             capture_output=capture_output,
-                            rollback_revision=rollback_revision,
                         )
                     if staging is not None:
                         assert target is not None
@@ -1046,6 +1086,21 @@ def execute_runtime(
                 if isinstance(error, subprocess.TimeoutExpired)
                 else str(error)
             )
+            if (
+                planned.action is RuntimeAction.UPDATE
+                and spec.name.startswith("plugin.")
+                and spec.revision is not None
+                and spec.target is not None
+            ):
+                try:
+                    actual_revision = _read_revision(spec, spec.target, home)
+                except OSError, RuntimeError, subprocess.TimeoutExpired:
+                    actual_revision = "unavailable"
+                reason = (
+                    f"{reason}; target revision: {spec.revision}; actual revision: "
+                    f"{actual_revision}; path: {spec.target}; action: inspect the plugin "
+                    "checkout and rerun the runtime update"
+                )
             failed = RuntimeResult(
                 spec,
                 RuntimeStatus.FAILED,
@@ -1200,8 +1255,10 @@ def _render(report: RuntimeReport) -> None:
             print("No runtime refresh steps are available on this host.")
         return
     if _shell_restart_required(report):
-        print("Refreshed Zsh runtime is not active in the current shell.")
-        print("Open a new Zsh or run `exec zsh` to load it.")
+        print("Refreshed shell runtime is not active in existing shells.")
+        print(
+            "Restart the affected shell; for Zsh, open a new shell or run `exec zsh`."
+        )
     if not report.ok:
         return
     if _next_commands(report):

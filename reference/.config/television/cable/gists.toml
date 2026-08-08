@@ -1,19 +1,16 @@
 [metadata]
 name = "gists"
 description = "List GitHub gists"
-requirements = ["bat", "gh", "jq"]
+requirements = ["bat", "curl", "gh", "jq"]
 
 [source]
-command = "gh api --paginate /gists | jq -r '.[] .files[] | .raw_url'"
+command = "gh api --paginate /gists | jq -r '.[] | .files[] | .raw_url? | select(type == \"string\" and length > 0)' | sort -u"
 display = "{split:/:-1}"
 
 [preview]
 command = """
-filename=$(basename '{}')
-url=$(echo '{}')
-cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/television/gists"
-mkdir -p "$cache_dir"
-cache_file="$cache_dir/$filename"
-curl --silent "$url" -o "$cache_file"
-bat -n --color=always "$cache_file"
+tmp=$(mktemp) || exit
+trap 'rm -f "$tmp"' EXIT
+curl -fsSL -o "$tmp" -- '{}' || exit
+bat -n --color=always "$tmp"
 """
