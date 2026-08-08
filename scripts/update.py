@@ -3,10 +3,8 @@
 from __future__ import annotations
 
 import argparse
-import codecs
 import json
 import os
-import selectors
 import shutil
 import signal
 import subprocess
@@ -81,67 +79,63 @@ def _emit_failure(step: UpdateStep, reason: str) -> None:
     print(f"[{step.name}] FAIL {reason}", file=sys.stderr)
 
 
+def _kill_process_group(
+    process: subprocess.Popen[bytes] | subprocess.Popen[str],
+) -> None:
+    try:
+        os.killpg(process.pid, signal.SIGKILL)
+    except ProcessLookupError:
+        pass
+    process.wait()
+
+
+def _run_process_group(
+    command: tuple[str, ...],
+    *,
+    env: dict[str, str] | None,
+    timeout_seconds: float,
+    capture_output: bool = False,
+) -> subprocess.CompletedProcess[str]:
+    process = subprocess.Popen(
+        command,
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.PIPE if capture_output else None,
+        stderr=subprocess.PIPE if capture_output else None,
+        env=env,
+        process_group=0,
+        text=True,
+    )
+    try:
+        stdout, stderr = process.communicate(timeout=timeout_seconds)
+    except subprocess.TimeoutExpired as error:
+        _kill_process_group(process)
+        stdout, stderr = process.communicate()
+        raise subprocess.TimeoutExpired(
+            command,
+            timeout_seconds,
+            output=stdout,
+            stderr=stderr,
+        ) from error
+    return subprocess.CompletedProcess(command, process.returncode, stdout, stderr)
+
+
 def _run_with_progress(
     step: UpdateStep,
     *,
     env: dict[str, str] | None,
     progress_interval_seconds: float,
 ) -> subprocess.CompletedProcess[str]:
-    """Stream a JSON-mode command to stderr and report quiet elapsed time."""
+    """Run a quiet JSON-mode command with progress and process-group timeout."""
     print(f"[{step.name}] RUN {_display_command(step)}", file=sys.stderr, flush=True)
     started_at = time.monotonic()
     process = subprocess.Popen(
         step.command,
         stdin=subprocess.DEVNULL,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
         env=env,
         process_group=0,
     )
-    assert process.stdout is not None
-    output = process.stdout
-    selector = selectors.DefaultSelector()
-    selector.register(output, selectors.EVENT_READ)
-    os.set_blocking(output.fileno(), False)
-    decoder = codecs.getincrementaldecoder("utf-8")(errors="replace")
-    pending = ""
-
-    def emit(data: bytes = b"", *, final: bool = False) -> None:
-        nonlocal pending
-        pending += decoder.decode(data, final=final)
-        lines = pending.splitlines(keepends=True)
-        pending = ""
-        if (
-            lines
-            and not final
-            and (not lines[-1].endswith(("\n", "\r")) or lines[-1].endswith("\r"))
-        ):
-            pending = lines.pop()
-        for line in lines:
-            print(
-                f"[{step.name}] {line.removesuffix(chr(10)).removesuffix(chr(13))}",
-                file=sys.stderr,
-                flush=True,
-            )
-
-    def drain() -> None:
-        # Preserve a bounded tail without letting an inherited, continuously
-        # written pipe override the direct updater's completed exit status.
-        for _ in range(16):
-            try:
-                chunk = os.read(output.fileno(), 65536)
-            except BlockingIOError:
-                return
-            if not chunk:
-                return
-            emit(chunk)
-
-    def kill_process_group() -> None:
-        try:
-            os.killpg(process.pid, signal.SIGKILL)
-        except ProcessLookupError:
-            pass
-        process.wait()
 
     next_progress_at = started_at + progress_interval_seconds
     try:
@@ -149,24 +143,10 @@ def _run_with_progress(
             now = time.monotonic()
             remaining = step.timeout_seconds - (now - started_at)
             if remaining <= 0:
-                kill_process_group()
-                drain()
-                emit(final=True)
+                _kill_process_group(process)
                 raise subprocess.TimeoutExpired(step.command, step.timeout_seconds)
-            wait_seconds = min(0.1, remaining, max(0, next_progress_at - now))
-            for key, _mask in selector.select(timeout=wait_seconds):
-                try:
-                    chunk = os.read(key.fd, 65536)
-                except BlockingIOError:
-                    continue
-                if chunk:
-                    emit(chunk)
-                else:
-                    selector.unregister(key.fileobj)
             exit_code = process.poll()
             if exit_code is not None:
-                drain()
-                emit(final=True)
                 duration_seconds = round(time.monotonic() - started_at)
                 print(
                     f"[{step.name}] DONE exit={exit_code} elapsed={duration_seconds}s",
@@ -184,11 +164,10 @@ def _run_with_progress(
                     flush=True,
                 )
                 next_progress_at = now + progress_interval_seconds
+            time.sleep(min(0.1, remaining, max(0, next_progress_at - now)))
     finally:
         if process.poll() is None:
-            kill_process_group()
-        selector.close()
-        output.close()
+            _kill_process_group(process)
 
 
 def _installed_mise_tools(home: Path, mise_executable: str) -> tuple[str, ...]:
@@ -203,13 +182,11 @@ def _installed_mise_tools(home: Path, mise_executable: str) -> tuple[str, ...]:
         str(home),
     )
     try:
-        completed = subprocess.run(
+        completed = _run_process_group(
             command,
-            check=False,
-            capture_output=True,
             env=canonical_mise_environment(home),
-            text=True,
-            timeout=120,
+            timeout_seconds=120,
+            capture_output=True,
         )
     except subprocess.TimeoutExpired as error:
         raise RuntimeError("mise tool inventory timed out after 120s") from error
@@ -396,13 +373,10 @@ def execute_updates(
                     progress_interval_seconds=progress_interval_seconds,
                 )
                 if capture_output
-                else subprocess.run(
+                else _run_process_group(
                     planned.step.command,
-                    check=False,
-                    stdin=subprocess.DEVNULL,
                     env=environment,
-                    text=True,
-                    timeout=planned.step.timeout_seconds,
+                    timeout_seconds=planned.step.timeout_seconds,
                 )
             )
         except subprocess.TimeoutExpired:
@@ -476,9 +450,7 @@ def _next_commands(report: UpdateReport) -> tuple[str, ...]:
             if any(result.status is UpdateStatus.PLANNED for result in report.results)
             else ()
         )
-    if not report.ok or not any(
-        result.status is UpdateStatus.SUCCEEDED for result in report.results
-    ):
+    if not any(result.status is UpdateStatus.SUCCEEDED for result in report.results):
         return ()
     return NEXT_COMMANDS
 
@@ -565,11 +537,13 @@ def _render(report: UpdateReport) -> None:
             print("No update commands are available on this host.")
         return
     if not report.ok:
-        print("Update incomplete. Resolve failed steps before refreshing runtime.")
-        return
+        print(
+            "Update incomplete. Refresh runtime for completed steps, then resolve failures."
+        )
     next_commands = _next_commands(report)
     if not next_commands:
-        print("No update commands ran.")
+        if report.ok:
+            print("No update commands ran.")
         return
     print("Next:")
     for command in next_commands:

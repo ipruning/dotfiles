@@ -166,15 +166,8 @@ def _configure_linux_lite(
 
     if apply:
         home.mkdir(parents=True, exist_ok=True)
-        gitconfig_existed = False
-        gitconfig_before = b""
-        gitconfig_mode = 0o644
         if git_include_changed:
-            gitconfig_existed = gitconfig.is_file()
             try:
-                if gitconfig_existed:
-                    gitconfig_before = gitconfig.read_bytes()
-                    gitconfig_mode = gitconfig.stat().st_mode & 0o777
                 completed = subprocess.run(
                     [
                         "git",
@@ -202,24 +195,9 @@ def _configure_linux_lite(
                 _write_bashrc(bashrc, desired_bashrc)
             except OSError as error:
                 if git_include_changed:
-                    try:
-                        if gitconfig_existed:
-                            _write_file(
-                                gitconfig,
-                                gitconfig_before,
-                                gitconfig_mode,
-                            )
-                        else:
-                            gitconfig.unlink(missing_ok=True)
-                    except OSError as rollback_error:
-                        raise SetupError(
-                            f"could not update Bash config {bashrc}: {error}; "
-                            "Git include was added and rollback failed: "
-                            f"{rollback_error}"
-                        ) from error
                     raise SetupError(
                         f"could not update Bash config {bashrc}: {error}; "
-                        "rolled back the Git include update",
+                        "Git include was completed; re-run setup to continue convergence",
                     ) from error
                 raise SetupError(
                     f"could not update Bash config {bashrc}: {error}"

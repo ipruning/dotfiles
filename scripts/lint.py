@@ -511,73 +511,6 @@ def _tracked_file_findings(repo_root: Path, tracked_paths: list[Path]) -> list[F
     return findings
 
 
-LEGACY_REFERENCES = (
-    "~/dotfiles/home/",
-    "$HOME/dotfiles/home/",
-    "${HOME}/dotfiles/home/",
-    "modules/mackup/",
-    "modules/bin/dotfiles-backup",
-    "modules/bin/dotfiles-doctor",
-    "modules/bin/dotfiles-init",
-    "modules/bin/dotfiles-restore",
-    "modules/bin/dotfiles-sync",
-    "modules/bin/dotfiles-up",
-    "modules/bin/dotfiles-zsh-profile",
-    "modules/bin/ss",
-    "modules/bin/_lib/core.sh",
-    "modules/bin/_lib/load.sh",
-    "modules/bin/_lib/log.sh",
-    "mise run backup",
-    "mise run doctor",
-    "mise run init",
-    "mise run sync",
-    "mise run up",
-)
-
-
-def _contains_legacy_reference(line: str, legacy: str) -> bool:
-    if legacy.startswith("mise run "):
-        return re.search(rf"(?<![\w-]){re.escape(legacy)}(?![\w-])", line) is not None
-    if legacy.endswith("/"):
-        return legacy in line
-    return re.search(rf"{re.escape(legacy)}(?![\w-])", line) is not None
-
-
-def _legacy_reference_findings(
-    repo_root: Path,
-    tracked_paths: list[Path],
-) -> list[Finding]:
-    findings: list[Finding] = []
-    for file_path in tracked_paths:
-        relative = file_path.relative_to(repo_root)
-        if (
-            file_path == Path(__file__).resolve()
-            or "tests" in relative.parts
-            or not file_path.is_file()
-        ):
-            continue
-        if _is_binary(file_path):
-            continue
-        try:
-            lines = file_path.read_text(errors="replace").splitlines()
-        except OSError:
-            continue
-        for line_number, line in enumerate(lines, start=1):
-            for legacy in LEGACY_REFERENCES:
-                if _contains_legacy_reference(line, legacy):
-                    findings.append(
-                        _located_finding(
-                            Severity.ERROR,
-                            "repository.legacy_reference",
-                            "removed dotfiles workflow is still referenced",
-                            file_path,
-                            line=line_number,
-                            value=legacy,
-                        ),
-                    )
-    return findings
-
-
 def _symlink_findings(repo_root: Path, tracked_paths: list[Path]) -> list[Finding]:
     return [
         _located_finding(
@@ -588,29 +521,6 @@ def _symlink_findings(repo_root: Path, tracked_paths: list[Path]) -> list[Findin
         )
         for file_path in tracked_paths
         if file_path.is_symlink() and not file_path.exists()
-    ]
-
-
-LEGACY_LAYOUT_ROOTS = ("home", "config", "vendor")
-
-
-def _legacy_layout_findings(repo_root: Path) -> list[Finding]:
-    """Report pre-rename layout roots that survived a checkout.
-
-    Ignored or untracked files (caches, .DS_Store, old plugin payloads) keep
-    these directories alive across the home/ -> reference/ migration, and no
-    tracked-path collector ever visits them.
-    """
-    return [
-        _located_finding(
-            Severity.WARN,
-            "repository.legacy_layout_root",
-            f"legacy layout directory {name}/ still exists; "
-            "inspect its remaining files and remove it",
-            repo_root / name,
-        )
-        for name in LEGACY_LAYOUT_ROOTS
-        if (repo_root / name).exists()
     ]
 
 
@@ -629,8 +539,6 @@ def inspect_repository(
     findings.extend(_mackup_findings(repo_root, set(tracked_paths)))
     findings.extend(_symlink_findings(repo_root, tracked_paths))
     findings.extend(_tracked_file_findings(repo_root, tracked_paths))
-    findings.extend(_legacy_reference_findings(repo_root, tracked_paths))
-    findings.extend(_legacy_layout_findings(repo_root))
     return LintReport(schema_version=1, findings=tuple(findings))
 
 

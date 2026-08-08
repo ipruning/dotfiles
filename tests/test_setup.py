@@ -170,7 +170,7 @@ def test_linux_lite_setup_preserves_bash_when_git_update_fails(
     assert bashrc.read_text() == "# unchanged\n"
 
 
-def test_linux_lite_setup_rolls_back_git_when_bash_update_fails(
+def test_linux_lite_setup_converges_after_bash_update_fails(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -182,19 +182,30 @@ def test_linux_lite_setup_rolls_back_git_when_bash_update_fails(
     bashrc = home / ".bashrc"
     bashrc.write_text("# unchanged\n")
     gitconfig = home / ".gitconfig"
-    original_gitconfig = "[init]\n\tdefaultBranch = main\n"
-    gitconfig.write_text(original_gitconfig)
+    gitconfig.write_text("[init]\n\tdefaultBranch = main\n")
 
     def refuse_bash_update(_bashrc: Path, _content: str) -> None:
         raise OSError("disk refused write")
 
     monkeypatch.setattr(setup_script, "_write_bashrc", refuse_bash_update)
 
-    with pytest.raises(SetupError, match="rolled back the Git include update"):
+    with pytest.raises(
+        SetupError,
+        match="Git include was completed; re-run setup to continue convergence",
+    ):
         apply_setup(repo_root, home)
 
     assert bashrc.read_text() == "# unchanged\n"
-    assert gitconfig.read_text() == original_gitconfig
+    assert "~/.private.gitconfig" in gitconfig.read_text()
+
+    monkeypatch.undo()
+    converged = apply_setup(repo_root, home)
+    settled = apply_setup(repo_root, home)
+
+    assert converged.changed is True
+    assert settled.changed is False
+    assert bashrc.read_text().startswith("# >>> dotfiles linux-lite >>>\n")
+    assert gitconfig.read_text().count("~/.private.gitconfig") == 1
 
 
 def test_linux_lite_setup_refuses_symlinked_git_config(tmp_path: Path) -> None:

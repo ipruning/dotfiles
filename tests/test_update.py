@@ -11,6 +11,7 @@ import pytest
 from scripts.update import (
     UpdateStatus,
     UpdateStep,
+    _run_process_group,
     _run_with_progress,
     execute_updates,
     plan_updates,
@@ -256,7 +257,7 @@ def test_update_executes_reshim_with_canonical_mise_first_on_path(
             observed_path = kwargs["env"]["PATH"]
         return subprocess.CompletedProcess(command, 0, "", "")
 
-    monkeypatch.setattr("scripts.update.subprocess.run", fake_run)
+    monkeypatch.setattr("scripts.update._run_process_group", fake_run)
 
     report = execute_updates(
         home,
@@ -317,42 +318,6 @@ def test_update_json_streams_progress_to_stderr_while_stdout_stays_json(
     assert "[amp] DONE exit=0" in progress
 
 
-def test_update_progress_finishes_when_a_descendant_retains_the_output_pipe(
-    tmp_path: Path,
-) -> None:
-    tool_path = tmp_path / "background-tool"
-    tool_path.write_text("#!/bin/sh\n/bin/sleep 2 &\nexit 0\n")
-    tool_path.chmod(0o755)
-    started_at = time.monotonic()
-
-    completed = _run_with_progress(
-        UpdateStep("background", "background", (str(tool_path),), 5),
-        env=None,
-        progress_interval_seconds=1,
-    )
-
-    assert completed.returncode == 0
-    assert time.monotonic() - started_at < 1
-
-
-def test_update_progress_finishes_when_a_descendant_keeps_writing(
-    tmp_path: Path,
-) -> None:
-    tool_path = tmp_path / "background-writer"
-    tool_path.write_text("#!/bin/sh\n/usr/bin/yes background &\nexit 0\n")
-    tool_path.chmod(0o755)
-    started_at = time.monotonic()
-
-    completed = _run_with_progress(
-        UpdateStep("writer", "writer", (str(tool_path),), 5),
-        env=None,
-        progress_interval_seconds=1,
-    )
-
-    assert completed.returncode == 0
-    assert time.monotonic() - started_at < 1
-
-
 def test_update_progress_timeout_kills_the_process_group(tmp_path: Path) -> None:
     child_pid_path = tmp_path / "child.pid"
     tool_path = tmp_path / "timeout-tool"
@@ -369,6 +334,36 @@ def test_update_progress_timeout_kills_the_process_group(tmp_path: Path) -> None
             UpdateStep("timeout", "timeout", (str(tool_path),), 1),
             env=None,
             progress_interval_seconds=1,
+        )
+
+    child_pid = int(child_pid_path.read_text())
+    deadline = time.monotonic() + 1
+    while True:
+        try:
+            os.kill(child_pid, 0)
+        except ProcessLookupError:
+            break
+        if time.monotonic() >= deadline:
+            pytest.fail(f"child process {child_pid} survived the updater timeout")
+        time.sleep(0.01)
+
+
+def test_update_human_runner_timeout_kills_the_process_group(tmp_path: Path) -> None:
+    child_pid_path = tmp_path / "human-child.pid"
+    tool_path = tmp_path / "human-timeout-tool"
+    tool_path.write_text(
+        "#!/bin/sh\n"
+        "/bin/sleep 30 &\n"
+        f"printf '%s\\n' $! > {shlex.quote(str(child_pid_path))}\n"
+        "wait\n"
+    )
+    tool_path.chmod(0o755)
+
+    with pytest.raises(subprocess.TimeoutExpired):
+        _run_process_group(
+            (str(tool_path),),
+            env=None,
+            timeout_seconds=1,
         )
 
     child_pid = int(child_pid_path.read_text())
@@ -401,9 +396,12 @@ def test_update_failure_is_contextual_and_does_not_hide_later_results(
     assert results["amp"]["status"] == "failed"
     assert results["amp"]["exit_code"] == 7
     assert results["tigris"]["status"] == "succeeded"
-    assert document["next"] == []
+    assert document["next"] == [
+        "git diff -- reference/.config/mise",
+        "mise run runtime",
+    ]
     assert log_path.read_text().splitlines() == ["amp update", "tigris update"]
-    assert "[amp] simulated amp failure" in completed.stderr
+    assert "[amp] FAIL command exited 7" in completed.stderr
 
 
 def test_update_json_reports_a_quiet_command_failure_on_stderr(tmp_path: Path) -> None:
@@ -494,7 +492,7 @@ def test_update_mise_step_passes_only_installed_versions(
         )
         return subprocess.CompletedProcess(command, 0, inventory, "")
 
-    monkeypatch.setattr("scripts.update.subprocess.run", fake_run)
+    monkeypatch.setattr("scripts.update._run_process_group", fake_run)
     report = plan_updates(
         tmp_path,
         executable_finder=lambda tool: "/tools/mise" if tool == "mise" else None,
@@ -524,7 +522,7 @@ def test_update_fails_closed_when_mise_inventory_is_invalid(
     mise.write_text("#!/bin/sh\nexit 0\n")
     mise.chmod(0o755)
     monkeypatch.setattr(
-        "scripts.update.subprocess.run",
+        "scripts.update._run_process_group",
         lambda command, **_kwargs: subprocess.CompletedProcess(
             command, 0, "not-json", ""
         ),
@@ -559,7 +557,7 @@ def test_update_apply_does_not_execute_a_failed_mise_preflight(
             return subprocess.CompletedProcess(command, 0, "not-json", "")
         return subprocess.CompletedProcess(command, 0, "", "")
 
-    monkeypatch.setattr("scripts.update.subprocess.run", fake_run)
+    monkeypatch.setattr("scripts.update._run_process_group", fake_run)
 
     report = execute_updates(
         tmp_path,

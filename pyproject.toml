@@ -38,6 +38,7 @@ ignore = ["TRY004"]
 
 [tool.ty.analysis]
 strict-equality-semantics = true
+strict-generic-narrowing = true
 
 [tool.ty.environment]
 python-version = "3.14"
