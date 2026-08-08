@@ -56,6 +56,14 @@ def test_inspect_host_reports_capabilities_and_their_invalid_transition(
         "generated/functions/_mise.zsh",
         "generated/functions/_starship.zsh",
         "generated/functions/_atuin.zsh",
+        "generated/functions/_zoxide.zsh",
+        "generated/functions/_tv.zsh",
+        "generated/functions/_starship.bash",
+        "generated/functions/_atuin.bash",
+        "generated/functions/_zoxide.bash",
+        "generated/functions/_mise.bash",
+        "generated/functions/_mise.nu",
+        "generated/functions/_zoxide.nu",
         "generated/completions/_codex",
         "generated/plugins/fzf-tab/fzf-tab.plugin.zsh",
         "generated/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh",
@@ -1221,7 +1229,7 @@ def test_session_health_probe_reports_healthy_agent(tmp_path: Path) -> None:
     assert codes["session_health.notifications"] == "session_health.notifications_ready"
 
 
-def test_session_health_probe_reports_silent_death_modes(tmp_path: Path) -> None:
+def test_session_health_probe_uses_direct_status_facts(tmp_path: Path) -> None:
     (tmp_path / "home").mkdir()
     codes = _session_health_codes(
         tmp_path,
@@ -1230,14 +1238,16 @@ def test_session_health_probe_reports_silent_death_modes(tmp_path: Path) -> None
             "loaded": False,
             "notification_configured": True,
             "last_snapshot_at": "2026-01-01T00:00:00Z",
-            "consecutive_delivery_failures": 5,
+            "last_delivery_at": "2026-01-01T00:00:00Z",
+            "last_delivery_sent": False,
+            "last_delivery_error": "HTTP 503",
         },
     )
 
     assert codes["session_health.agent"] == "session_health.agent_down"
     assert codes["session_health.snapshot"] == "session_health.snapshot_stale"
     assert (
-        codes["session_health.notifications"] == "session_health.notifications_failing"
+        codes["session_health.notifications"] == "session_health.last_delivery_failed"
     )
 
 

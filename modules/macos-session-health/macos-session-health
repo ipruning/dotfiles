@@ -13,7 +13,6 @@ import argparse
 import datetime as dt
 import getpass
 import glob
-import hashlib
 import json
 import os
 import platform
@@ -35,7 +34,7 @@ from pathlib import Path
 from typing import Any
 
 
-VERSION = "0.9.0"
+VERSION = "1.0.0"
 LABEL = "com.ipruning.macos-session-health"
 USER_BIN = Path.home() / ".local" / "bin" / "macos-session-health"
 LAUNCH_AGENT = Path.home() / "Library" / "LaunchAgents" / f"{LABEL}.plist"
@@ -60,8 +59,6 @@ BRRR_ENV_FILES = (
 )
 CODEX_CHROME_EXTENSION_ID = "hehggadaopoacecdllhhajmbjkdcmajg"
 BAG_MODE_DIR = Path("/Library/Application Support/bag-mode")
-SKILLSHARE_STATUS_FAILURE_STREAK_STATE = "skillshare_status_failure_streak"
-SKILLSHARE_STATUS_FAILURE_NOTIFY_COUNT = 2
 CODEX_BUNDLED_COMPUTER_USE = (
     CODEX_APP
     / "Contents"
@@ -291,33 +288,6 @@ def replaceable_install() -> bool:
     return managed_wrapper() or legacy_symlink_install()
 
 
-def backup_path(file_path: Path) -> dict[str, Any]:
-    if file_path.is_symlink():
-        return {"kind": "symlink", "target": os.readlink(file_path)}
-    if file_path.is_file():
-        return {
-            "kind": "file",
-            "content": file_path.read_bytes(),
-            "mode": file_path.stat().st_mode & 0o777,
-        }
-    return {"kind": "missing"}
-
-
-def restore_path(file_path: Path, backup: dict[str, Any]) -> None:
-    temporary = file_path.with_name(f".{file_path.name}.{os.getpid()}.rollback")
-    temporary.unlink(missing_ok=True)
-    kind = backup["kind"]
-    if kind == "missing":
-        file_path.unlink(missing_ok=True)
-        return
-    if kind == "symlink":
-        temporary.symlink_to(str(backup["target"]))
-    else:
-        temporary.write_bytes(backup["content"])
-        temporary.chmod(int(backup["mode"]))
-    os.replace(temporary, file_path)
-
-
 def launch_agent_payload(python_bin: Path) -> dict[str, Any]:
     launch_path = ":".join(
         [
@@ -382,16 +352,14 @@ def install_launch_agent(*, dry_run: bool = False) -> int:
     LAUNCH_AGENT.parent.mkdir(parents=True, exist_ok=True)
     LOG_DIR.mkdir(parents=True, exist_ok=True)
     DEFAULT_DB.parent.mkdir(parents=True, exist_ok=True)
-    managed_paths = (RUNTIME_CLI, USER_BIN, LAUNCH_AGENT)
-    backups = {file_path: backup_path(file_path) for file_path in managed_paths}
-    was_loaded = launchd_job().returncode == 0
-
     bootout_launch_agent()
+    completed: list[str] = []
     try:
         runtime_tmp = RUNTIME_CLI.with_name(f".{RUNTIME_CLI.name}.{os.getpid()}.tmp")
         runtime_tmp.write_bytes(source.read_bytes())
         runtime_tmp.chmod(0o755)
         os.replace(runtime_tmp, RUNTIME_CLI)
+        completed.append("runtime")
 
         wrapper_tmp = USER_BIN.with_name(f".{USER_BIN.name}.{os.getpid()}.tmp")
         wrapper_tmp.write_text(
@@ -401,6 +369,7 @@ def install_launch_agent(*, dry_run: bool = False) -> int:
         )
         wrapper_tmp.chmod(0o755)
         os.replace(wrapper_tmp, USER_BIN)
+        completed.append("executable")
 
         temporary_plist = LAUNCH_AGENT.with_name(f".{LAUNCH_AGENT.name}.{os.getpid()}.tmp")
         temporary_plist.write_bytes(
@@ -408,21 +377,28 @@ def install_launch_agent(*, dry_run: bool = False) -> int:
         )
         temporary_plist.chmod(0o644)
         os.replace(temporary_plist, LAUNCH_AGENT)
+        completed.append("plist")
 
         bootstrap_launch_agent()
+        completed.append("bootstrap")
     except (CliError, OSError) as install_error:
+        unload_error = ""
         try:
-            if launchd_job().returncode == 0:
-                bootout_launch_agent()
-            for file_path in managed_paths:
-                restore_path(file_path, backups[file_path])
-            if was_loaded:
-                bootstrap_launch_agent()
-        except (CliError, OSError) as rollback_error:
-            raise CliError(f"{install_error}; rollback failed: {rollback_error}") from install_error
-        if isinstance(install_error, CliError):
-            raise
-        raise CliError(str(install_error)) from install_error
+            bootout_launch_agent()
+        except (CliError, OSError) as error:
+            unload_error = str(error)
+        try:
+            loaded = launchd_job().returncode == 0
+        except OSError as error:
+            loaded = None
+            unload_error = unload_error or str(error)
+        progress = ",".join(completed) or "none"
+        launchd_state = "loaded" if loaded else "unloaded" if loaded is False else "unknown"
+        raise CliError(
+            f"install failed after completed={progress}; LaunchAgent state={launchd_state}; "
+            f"unload_error={unload_error or 'none'}; inspect with `macos-session-health status`, "
+            f"then rerun install: {install_error}"
+        ) from install_error
 
     print_records(
         [
@@ -446,30 +422,21 @@ def uninstall_launch_agent() -> int:
     if USER_BIN.exists() or USER_BIN.is_symlink():
         if not replaceable_install():
             raise CliError(f"refusing to remove unmanaged executable: {USER_BIN}")
-    managed_paths = (RUNTIME_CLI, USER_BIN, LAUNCH_AGENT)
-    try:
-        backups = {file_path: backup_path(file_path) for file_path in managed_paths}
-    except OSError as error:
-        raise CliError(f"could not back up installed lifecycle files: {error}") from error
-    was_loaded = launchd_job().returncode == 0
     bootout_launch_agent()
+    removed: list[str] = []
     try:
         LAUNCH_AGENT.unlink(missing_ok=True)
+        removed.append("plist")
         if replaceable_install():
             USER_BIN.unlink()
+        removed.append("executable")
         RUNTIME_CLI.unlink(missing_ok=True)
+        removed.append("runtime")
     except OSError as uninstall_error:
-        try:
-            for file_path in managed_paths:
-                restore_path(file_path, backups[file_path])
-            if was_loaded:
-                bootstrap_launch_agent()
-        except (CliError, OSError) as rollback_error:
-            raise CliError(
-                f"{uninstall_error}; rollback failed: {rollback_error}",
-            ) from uninstall_error
+        progress = ",".join(removed) or "none"
         raise CliError(
-            f"{uninstall_error}; installed files and LaunchAgent state restored",
+            f"uninstall failed after removed={progress}; LaunchAgent is unloaded; "
+            f"rerun uninstall: {uninstall_error}",
         ) from uninstall_error
 
     print_records(
@@ -483,7 +450,9 @@ def runtime_status_health(db_path: Path) -> dict[str, Any]:
     record: dict[str, Any] = {
         "last_snapshot_at": "",
         "last_snapshot_status": "",
-        "consecutive_delivery_failures": 0,
+        "last_delivery_at": "",
+        "last_delivery_sent": None,
+        "last_delivery_error": "",
     }
     if not db_path.is_file():
         return record
@@ -500,7 +469,7 @@ def runtime_status_health(db_path: Path) -> dict[str, Any]:
         if row:
             record["last_snapshot_at"] = row["ended_at"] or row["started_at"]
             record["last_snapshot_status"] = row["status"] or ""
-        record["consecutive_delivery_failures"] = delivery_failure_streak(conn)
+        record.update(latest_brrr_delivery(conn))
     except sqlite3.Error:
         pass
     finally:
@@ -508,27 +477,26 @@ def runtime_status_health(db_path: Path) -> dict[str, Any]:
     return record
 
 
-def delivery_failure_streak(conn: sqlite3.Connection) -> int:
-    """Count trailing failed deliveries within the last 24 hours."""
-    failures = 0
-    cutoff = (
-        (dt.datetime.now(dt.timezone.utc) - dt.timedelta(hours=24))
-        .isoformat(timespec="seconds")
-        .replace("+00:00", "Z")
-    )
+def latest_brrr_delivery(conn: sqlite3.Connection) -> dict[str, Any]:
+    """Return the last recorded delivery facts without deriving channel state."""
     try:
-        for event_row in conn.execute(
-            "SELECT data_json FROM events WHERE event = 'brrr_notification'"
-            " AND ts >= ? ORDER BY ts DESC, id DESC LIMIT 10",
-            (cutoff,),
-        ):
-            data = json.loads(event_row[0])
-            if data.get("sent"):
-                break
-            failures += 1
+        row = conn.execute(
+            "SELECT ts, data_json FROM events WHERE event = 'brrr_notification'"
+            " ORDER BY ts DESC, id DESC LIMIT 1"
+        ).fetchone()
     except (sqlite3.Error, json.JSONDecodeError):
-        return 0
-    return failures
+        return {}
+    if row is None:
+        return {}
+    try:
+        data = json.loads(row[1])
+    except json.JSONDecodeError:
+        return {}
+    return {
+        "last_delivery_at": str(row[0]),
+        "last_delivery_sent": bool(data.get("sent")),
+        "last_delivery_error": str(data.get("error") or ""),
+    }
 
 
 def launch_agent_status(output_format: str) -> int:
@@ -555,9 +523,9 @@ def launch_agent_status(output_format: str) -> int:
 def compact_database(db_path: Path, output_format: str) -> int:
     if not db_path.is_file():
         raise CliError(f"database does not exist: {db_path}")
-    was_loaded = db_path == DEFAULT_DB and launchd_job().returncode == 0
+    service_loaded = db_path == DEFAULT_DB and launchd_job().returncode == 0
     before_size = db_path.stat().st_size
-    if was_loaded:
+    if service_loaded:
         bootout_launch_agent()
     try:
         conn = sqlite3.connect(db_path, timeout=30)
@@ -572,7 +540,7 @@ def compact_database(db_path: Path, output_format: str) -> int:
     except sqlite3.Error as exc:
         raise CliError(f"database compaction failed: {exc}") from exc
     finally:
-        if was_loaded:
+        if service_loaded:
             bootstrap_launch_agent()
     after_size = db_path.stat().st_size
     print_records(
@@ -583,7 +551,7 @@ def compact_database(db_path: Path, output_format: str) -> int:
                 "before_bytes": before_size,
                 "after_bytes": after_size,
                 "reclaimed_bytes": max(before_size - after_size, 0),
-                "service_restarted": was_loaded,
+                "service_restarted": service_loaded,
             }
         ],
         output_format,
@@ -653,29 +621,12 @@ def run_command(
         return 127, "", f"{type(exc).__name__}: {exc}", False, duration_ms
 
 
-def run_interactive_command(
-    args: list[str], *, timeout: float
-) -> tuple[int, bool, float, str]:
-    started = time.monotonic()
-    try:
-        completed = subprocess.run(args, timeout=timeout, check=False)
-        duration_ms = (time.monotonic() - started) * 1000
-        return completed.returncode, False, duration_ms, ""
-    except subprocess.TimeoutExpired:
-        duration_ms = (time.monotonic() - started) * 1000
-        return 124, True, duration_ms, "command timed out"
-    except OSError as exc:
-        duration_ms = (time.monotonic() - started) * 1000
-        return 127, False, duration_ms, f"{type(exc).__name__}: {exc}"
-
-
 class Store:
     def __init__(self, db_path: Path | None, emit_stdout: bool = True) -> None:
         self.db_path = db_path
         self.emit_stdout = emit_stdout
         self.conn: sqlite3.Connection | None = None
         self.current_signals: list[dict[str, Any]] = []
-        self.current_brrr_observations: set[str] = set()
         if db_path is not None:
             db_path.parent.mkdir(parents=True, exist_ok=True)
             self.conn = sqlite3.connect(db_path)
@@ -744,7 +695,6 @@ class Store:
             )
             self.conn.commit()
         self.current_signals = []
-        self.current_brrr_observations = set()
         return snapshot_id
 
     def finish_snapshot(self, snapshot_id: str, status: str) -> None:
@@ -793,9 +743,6 @@ class Store:
         if self.conn is None or not keys:
             return
         self.conn.executemany("DELETE FROM state WHERE key = ?", ((key,) for key in keys))
-
-    def observe_brrr_incident(self, incident_kind: str) -> None:
-        self.current_brrr_observations.add(incident_kind)
 
     def emit(
         self, snapshot_id: str, event: str, severity: str | None = None, **data: Any
@@ -978,186 +925,6 @@ def codex_process_role(command: str) -> str:
     ):
         return "codex_chrome_extension_host"
     return ""
-
-
-def syspolicyd_status(timeout: float) -> dict[str, Any]:
-    pgrep_code, pgrep_out, pgrep_err, pgrep_timed_out, pgrep_ms = run_command(
-        ["pgrep", "-x", "syspolicyd"],
-        timeout=timeout,
-    )
-    pids = [line.strip() for line in pgrep_out.splitlines() if line.strip()]
-    pid = pids[0] if pids else ""
-    status: dict[str, Any] = {
-        "pid": pid,
-        "pids": pids,
-        "pgrep_exit": pgrep_code,
-        "pgrep_timeout": pgrep_timed_out,
-        "pgrep_duration_ms": round(pgrep_ms, 1),
-        "pgrep_error": pgrep_err.strip(),
-    }
-    if not pid:
-        return status
-
-    ps_code, ps_out, ps_err, ps_timed_out, ps_ms = run_command(
-        ["ps", "-p", pid, "-o", "pid=,ppid=,stat=,%cpu=,rss=,etime=,comm="],
-        timeout=timeout,
-    )
-    status.update(
-        {
-            "ps_exit": ps_code,
-            "ps_timeout": ps_timed_out,
-            "ps_duration_ms": round(ps_ms, 1),
-            "ps_error": ps_err.strip(),
-        }
-    )
-    parts = ps_out.strip().split(None, 6)
-    if len(parts) >= 7:
-        parsed_pid, ppid, stat, cpu, rss, etime, comm = parts
-        rss_kb = parse_int(rss)
-        status.update(
-            {
-                "pid": parsed_pid,
-                "ppid": ppid,
-                "stat": stat,
-                "cpu_percent": parse_float(cpu),
-                "rss_kb": rss_kb,
-                "rss_mb": round(rss_kb / 1024, 1) if rss_kb is not None else None,
-                "etime": etime,
-                "comm": comm,
-            }
-        )
-    elif ps_out.strip():
-        status["ps_row"] = ps_out.strip()
-    return status
-
-
-def render_recovery_markdown(report: dict[str, Any]) -> str:
-    before = report.get("before") or {}
-    after = report.get("after") or {}
-    commands = report.get("manual_commands") or []
-    lines = [
-        "# macos-session-health Recovery Plan",
-        "",
-        f"- generated_at: `{report['generated_at']}`",
-        f"- action: `{report['action']}`",
-        f"- execute: `{report['execute']}`",
-        f"- confirmed_codex_desktop_closed: `{report['confirmed_codex_desktop_closed']}`",
-        f"- replacement_verified: `{report['replacement_verified']}`",
-        "",
-        "## syspolicyd Before",
-        "",
-        (
-            f"- pid={before.get('pid', '')} cpu_percent={before.get('cpu_percent', '')} "
-            f"rss_mb={before.get('rss_mb', '')} etime={before.get('etime', '')} "
-            f"stat={before.get('stat', '')}"
-        ),
-    ]
-    if after:
-        lines.extend(
-            [
-                "",
-                "## syspolicyd After",
-                "",
-                (
-                    f"- pid={after.get('pid', '')} cpu_percent={after.get('cpu_percent', '')} "
-                    f"rss_mb={after.get('rss_mb', '')} etime={after.get('etime', '')} "
-                    f"stat={after.get('stat', '')}"
-                ),
-            ]
-        )
-    if report.get("error"):
-        lines.extend(["", "## Error", "", f"- {report['error']}"])
-    if commands:
-        lines.extend(["", "## Manual Commands", ""])
-        lines.append("```zsh")
-        lines.extend(commands)
-        lines.append("```")
-    if report.get("notes"):
-        lines.extend(["", "## Notes", ""])
-        lines.extend(f"- {note}" for note in report["notes"])
-    return "\n".join(lines)
-
-
-def recover_syspolicyd(args: argparse.Namespace) -> int:
-    before = syspolicyd_status(args.command_timeout)
-    commands = [
-        "pkill -TERM -f '^/Applications/ChatGPT\\.app/Contents/MacOS/ChatGPT$'",
-        "sleep 5",
-        'old="$(pgrep -x syspolicyd)"',
-        'sudo kill -TERM "$old"',
-        "sleep 5",
-        "pgrep -x syspolicyd | xargs ps -o pid,ppid,stat,%cpu,rss,etime,comm= -p",
-    ]
-    report: dict[str, Any] = {
-        "generated_at": utc_now(),
-        "action": "restart_syspolicyd",
-        "execute": args.execute,
-        "confirmed_codex_desktop_closed": args.assume_codex_desktop_closed,
-        "replacement_verified": False,
-        "before": before,
-        "manual_commands": commands,
-        "notes": [
-            "Close Codex Desktop before restarting syspolicyd; otherwise Codex can refill the failure state.",
-            "This command never closes Codex Desktop itself.",
-            "Use --execute only after confirming Codex Desktop is closed or safe to close.",
-        ],
-    }
-
-    if not before.get("pid"):
-        report["error"] = "syspolicyd pid not found"
-        print_recovery_report(report, args.format)
-        return 1
-
-    if not args.execute:
-        print_recovery_report(report, args.format)
-        return 0
-
-    if not args.assume_codex_desktop_closed:
-        report["error"] = "refusing to execute without --assume-codex-desktop-closed"
-        print_recovery_report(report, args.format)
-        return 2
-
-    pid = str(before["pid"])
-    code, timed_out, duration_ms, error = run_interactive_command(
-        ["sudo", "kill", f"-{args.signal}", pid],
-        timeout=args.command_timeout,
-    )
-    report["kill"] = {
-        "signal": args.signal,
-        "pid": pid,
-        "exit": code,
-        "timeout": timed_out,
-        "duration_ms": round(duration_ms, 1),
-        "error": error,
-    }
-    time.sleep(args.wait_seconds)
-    report["after"] = syspolicyd_status(args.command_timeout)
-    after_pid = str(report["after"].get("pid") or "")
-    after_pids = [str(item) for item in report["after"].get("pids") or []]
-    replacement_verified = (
-        code == 0
-        and not timed_out
-        and bool(after_pid)
-        and after_pid != pid
-        and pid not in after_pids
-    )
-    report["replacement_verified"] = replacement_verified
-    if not replacement_verified:
-        if code == 0 and not timed_out:
-            report["error"] = "signal sent but syspolicyd replacement not verified"
-        elif timed_out:
-            report["error"] = "signal command timed out; syspolicyd replacement not verified"
-        else:
-            report["error"] = error or f"signal command failed with exit {code}; syspolicyd replacement not verified"
-    print_recovery_report(report, args.format)
-    return 0 if replacement_verified else 1
-
-
-def print_recovery_report(report: dict[str, Any], output_format: str) -> None:
-    if output_format == "json":
-        print(json.dumps(report, ensure_ascii=False))
-        return
-    print(render_recovery_markdown(report))
 
 
 def collect_launch_service(
@@ -1402,18 +1169,10 @@ def collect_process_resource_delta(
                     value=rss_growth_mb_per_minute,
                     detail="process RSS is growing quickly",
                 )
-            if (
-                same_pid
-                and rss_growth_warn_mb_per_minute is not None
-                and role == "syspolicyd"
-            ):
-                store.observe_brrr_incident("syspolicyd_rss_growth")
         except (KeyError, TypeError, ValueError, json.JSONDecodeError):
             pass
 
     if rss_error_mb is not None:
-        if role == "syspolicyd":
-            store.observe_brrr_incident("syspolicyd_rss_error")
         if rss_mb >= rss_error_mb:
             store.emit(
                 snapshot_id,
@@ -1931,7 +1690,6 @@ def collect_bag_mode_guard(
 ) -> None:
     root_dir: Path = args.bag_mode_dir
     if not root_dir.is_dir():
-        store.observe_brrr_incident("bag_mode_unprotected")
         return
     enabled = (root_dir / "enabled").exists()
     app_servers = parse_int(str(codex_summary.get("codex_app_server_count", ""))) or 0
@@ -1949,7 +1707,6 @@ def collect_bag_mode_guard(
         node_repl_count=node_repls,
     )
     if enabled:
-        store.observe_brrr_incident("bag_mode_unprotected")
         if controller_alive is False:
             store.emit(
                 snapshot_id,
@@ -1962,7 +1719,6 @@ def collect_bag_mode_guard(
         return
     if not codex_summary:
         return
-    store.observe_brrr_incident("bag_mode_unprotected")
     if ai_processes >= args.bag_mode_guard_min_processes:
         store.emit(
             snapshot_id,
@@ -1977,29 +1733,22 @@ def collect_bag_mode_guard(
         )
 
 
-NOTIFICATION_FAILURE_STREAK = 3
-
-
 def collect_notification_channel_guard(
     store: Store,
     snapshot_id: str,
     _args: argparse.Namespace,
 ) -> None:
-    """Alert while the alert channel itself cannot deliver.
-
-    An unconfigured or persistently failing push channel can only announce
-    itself through the native banner fallback; the signal repeats every
-    sample and the shared fallback cooldown paces the banners.
-    """
-    store.observe_brrr_incident("notification_channel_unhealthy")
+    """Expose delivery readiness without trying to alert through that channel."""
     configuration = brrr_configuration()
-    failures = delivery_failure_streak(store.conn) if store.conn is not None else 0
+    delivery = latest_brrr_delivery(store.conn) if store.conn is not None else {}
     store.emit(
         snapshot_id,
         "notification_channel",
         configured=configuration["configured"],
         auth_mode=configuration["auth_mode"],
-        failure_streak=failures,
+        last_delivery_at=delivery.get("last_delivery_at", ""),
+        last_delivery_sent=delivery.get("last_delivery_sent"),
+        last_delivery_error=delivery.get("last_delivery_error", ""),
     )
     if not configuration["configured"]:
         store.emit(
@@ -2014,16 +1763,16 @@ def collect_notification_channel_guard(
             ),
         )
         return
-    if failures >= NOTIFICATION_FAILURE_STREAK:
+    if delivery.get("last_delivery_sent") is False:
         store.emit(
             snapshot_id,
             "health_signal",
             "warning",
-            signal="notification_channel_failing",
-            value=failures,
+            signal="notification_channel_last_delivery_failed",
+            value=delivery.get("last_delivery_at", ""),
             detail=(
-                f"the last {failures} push deliveries failed; "
-                "alerts may not be reaching you"
+                "the last recorded push delivery failed: "
+                f"{delivery.get('last_delivery_error') or 'no error detail'}"
             ),
         )
 
@@ -2081,13 +1830,11 @@ def collect_skillshare_guard(
     runner: Any = subprocess.run,
 ) -> None:
     """Warn while the AI skill-sync surface is missing on this host."""
-    store.observe_brrr_incident("skillshare_unready")
     config_path: Path = args.skillshare_config
     executable = executable_finder("skillshare")
     detail = ""
     source_path = ""
     read_failure = ""
-    failure_streak = 0
     if not executable:
         detail = "skillshare executable is missing from PATH"
     elif not config_path.is_file():
@@ -2097,28 +1844,12 @@ def collect_skillshare_guard(
             Path(executable), config_path, runner=runner
         )
         if read_failure:
-            previous_streak = (
-                parse_int(
-                    store.get_state(SKILLSHARE_STATUS_FAILURE_STREAK_STATE) or ""
-                )
-                or 0
-            )
-            failure_streak = previous_streak + 1
-            store.set_state(
-                SKILLSHARE_STATUS_FAILURE_STREAK_STATE, str(failure_streak)
-            )
-            if (
-                store.conn is None
-                or failure_streak >= SKILLSHARE_STATUS_FAILURE_NOTIFY_COUNT
-            ):
-                detail = read_failure
+            detail = read_failure
         else:
             assert status is not None
             source_path = str(status.get("path", ""))
             if not status.get("exists", True):
                 detail = f"configured skillshare source is missing ({source_path})"
-    if not read_failure:
-        store.delete_state(SKILLSHARE_STATUS_FAILURE_STREAK_STATE)
     store.emit(
         snapshot_id,
         "skillshare_guard",
@@ -2127,8 +1858,6 @@ def collect_skillshare_guard(
         source=source_path,
         ready=not detail and not read_failure,
         read_failure=read_failure,
-        failure_streak=failure_streak,
-        alert_deferred=bool(read_failure and not detail),
     )
     if detail:
         store.emit(
@@ -2198,7 +1927,6 @@ def collect_code_sign_clone_status(
     args: argparse.Namespace,
 ) -> None:
     paths = list(candidate_code_sign_clone_paths())
-    growth_observed = bool(paths)
     for path in paths:
         exists = path.exists()
         status: dict[str, Any] = {
@@ -2206,7 +1934,6 @@ def collect_code_sign_clone_status(
             "exists": exists,
         }
         if not exists:
-            growth_observed = False
             store.emit(snapshot_id, "code_sign_clone_status", **status)
             continue
 
@@ -2228,7 +1955,6 @@ def collect_code_sign_clone_status(
         store.emit(snapshot_id, "code_sign_clone_status", **status)
 
         if timed_out:
-            growth_observed = False
             store.emit(
                 snapshot_id,
                 "health_signal",
@@ -2240,7 +1966,6 @@ def collect_code_sign_clone_status(
             continue
 
         if not isinstance(size_mb, float):
-            growth_observed = False
             continue
         if size_mb >= args.code_sign_clone_warn_mb:
             store.emit(
@@ -2253,7 +1978,6 @@ def collect_code_sign_clone_status(
             )
 
         if store.conn is None:
-            growth_observed = False
             continue
         state_key = f"last_code_sign_clone_status:{path}"
         previous_raw = store.get_state(state_key)
@@ -2289,12 +2013,8 @@ def collect_code_sign_clone_status(
                         detail="Codex code_sign_clone is growing quickly",
                     )
             except (KeyError, TypeError, ValueError, json.JSONDecodeError):
-                growth_observed = False
-        else:
-            growth_observed = False
+                pass
         store.set_state(state_key, json.dumps(current, sort_keys=True))
-    if growth_observed:
-        store.observe_brrr_incident("code_sign_clone_growth")
 
 
 def process_table_pressure_signals(
@@ -2405,7 +2125,6 @@ def collect_limits(
         current_user = getpass.getuser()
         process_total = len(users)
         user_process_total = sum(1 for user in users if user == current_user)
-        store.observe_brrr_incident("process_table_high")
     for signal_name, signal_value, signal_detail in process_table_pressure_signals(
         process_total,
         user_process_total,
@@ -2716,7 +2435,6 @@ def collect_spawn_check(store: Store, snapshot_id: str, timeout: float) -> bool:
                 timeout=timed_out,
                 detail=err.strip() or out.strip() or "spawn check failed",
             )
-    store.observe_brrr_incident("spawn_failed")
     return ok
 
 
@@ -3114,202 +2832,7 @@ def collect_passive_log_signals(
             value=count,
             detail=detail,
         )
-    if code == 0 and not timed_out:
-        store.observe_brrr_incident("syspolicyd_assessment_failure")
     return ok
-
-
-def signal_fingerprint(signals: list[dict[str, Any]]) -> str:
-    normalized = []
-    for signal in signals:
-        normalized.append(
-            {
-                "severity": signal.get("severity"),
-                "signal": signal.get("signal"),
-                "value": signal.get("value"),
-                "name": signal.get("name"),
-                "pid": signal.get("pid"),
-                "comm": signal.get("comm"),
-                "app": signal.get("app"),
-            }
-        )
-    encoded = json.dumps(
-        sorted(normalized, key=lambda item: json.dumps(item, sort_keys=True)),
-        sort_keys=True,
-    )
-    return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
-
-
-def strongest_signal(
-    signals: list[dict[str, Any]], signal_name: str, *, role: str = ""
-) -> dict[str, Any] | None:
-    matches = [
-        signal
-        for signal in signals
-        if signal.get("signal") == signal_name
-        and (not role or signal.get("role") == role)
-    ]
-    if not matches:
-        return None
-    return max(matches, key=lambda item: parse_float(str(item.get("value") or "")) or 0)
-
-
-def build_brrr_incident(
-    signals: list[dict[str, Any]],
-    _snapshot_id: str,
-    _status: str,
-    syspolicyd_assessment_failure_notify_count: int,
-) -> dict[str, Any] | None:
-    spawn_failed = strongest_signal(signals, "spawn_failed")
-    syspolicyd_assessment_failure = strongest_signal(
-        signals, "syspolicyd_assessment_failure"
-    )
-    syspolicyd_rss_error = strongest_signal(
-        signals, "process_rss_error", role="syspolicyd"
-    )
-    syspolicyd_rss_growth = strongest_signal(
-        signals, "process_rss_growth_high", role="syspolicyd"
-    )
-    code_sign_clone_growth = strongest_signal(signals, "code_sign_clone_growth_high")
-    process_table = strongest_signal(signals, "process_table_high")
-    user_process_table = strongest_signal(signals, "user_process_table_high")
-    bag_mode_stalled = strongest_signal(signals, "bag_mode_stalled")
-    bag_mode_unarmed = strongest_signal(signals, "bag_mode_unarmed")
-    collector_exception = strongest_signal(signals, "collector_exception")
-    channel_unconfigured = strongest_signal(signals, "notification_channel_unconfigured")
-    channel_failing = strongest_signal(signals, "notification_channel_failing")
-    skillshare_unready = strongest_signal(signals, "skillshare_unready")
-
-    if spawn_failed:
-        title = "macOS 无法正常启动进程"
-        summary = "简单 spawn 检查失败，新的 app 或 shell 命令可能无法启动。"
-        primary = spawn_failed
-        kind = "spawn_failed"
-    elif (
-        syspolicyd_assessment_failure
-        and (parse_float(str(syspolicyd_assessment_failure.get("value") or "")) or 0)
-        >= syspolicyd_assessment_failure_notify_count
-    ):
-        count = syspolicyd_assessment_failure.get("value", "")
-        title = "Gatekeeper 正在大量失败"
-        summary = (
-            f"最近日志里有 {count} 条 syspolicyd assessment 失败，app 启动可能受影响。"
-        )
-        primary = syspolicyd_assessment_failure
-        kind = "syspolicyd_assessment_failure"
-    elif syspolicyd_rss_error:
-        rss = syspolicyd_rss_error.get("value", "")
-        title = "syspolicyd 内存异常增长"
-        summary = f"syspolicyd RSS 已到 {rss} MiB，Gatekeeper 评估可能开始拖慢或失败。"
-        primary = syspolicyd_rss_error
-        kind = "syspolicyd_rss_error"
-    elif syspolicyd_rss_growth:
-        growth = syspolicyd_rss_growth.get("value", "")
-        title = "syspolicyd 正在快速涨 RSS"
-        summary = (
-            f"syspolicyd RSS 增速约 {growth} MiB/min，可能正在进入 Gatekeeper 风暴。"
-        )
-        primary = syspolicyd_rss_growth
-        kind = "syspolicyd_rss_growth"
-    elif code_sign_clone_growth:
-        growth = code_sign_clone_growth.get("value", "")
-        title = "Codex code_sign_clone 正在快速增长"
-        summary = f"Codex code_sign_clone 增速约 {growth} MiB/min，可能会放大 syspolicyd 评估压力。"
-        primary = code_sign_clone_growth
-        kind = "code_sign_clone_growth"
-    elif process_table or user_process_table:
-        primary = process_table or user_process_table
-        summary = (
-            f"进程数已接近上限（{primary.get('detail', '')}），"
-            "继续增长会开始出现 fork 失败。"
-        )
-        title = "进程表接近耗尽"
-        kind = "process_table_high"
-    elif bag_mode_stalled:
-        title = "bag-mode 控制器已停摆"
-        summary = (
-            "bag mode 处于启用状态但控制器进程不在运行，合盖保护可能已失效。"
-            "运行 `bag-mode status` 和 `bag-mode logs` 检查。"
-        )
-        primary = bag_mode_stalled
-        kind = "bag_mode_unprotected"
-    elif bag_mode_unarmed:
-        count = bag_mode_unarmed.get("value", "")
-        title = "AI 会话未受 bag-mode 保护"
-        summary = (
-            f"检测到 {count} 个 Codex 会话进程在运行，但 bag mode 未启用；"
-            "现在合盖会让 Mac 休眠并中断这些会话。需要时运行 `bag-mode start`。"
-        )
-        primary = bag_mode_unarmed
-        kind = "bag_mode_unprotected"
-    elif collector_exception:
-        title = "macOS 采集器异常"
-        summary = "macos-session-health 采集器自身失败，需要查看本机日志。"
-        primary = collector_exception
-        kind = "collector_exception"
-    elif channel_unconfigured:
-        title = "通知渠道未配置"
-        summary = (
-            "session-health 无法推送告警：BRRR 凭据未配置。"
-            "在 `~/.config/brrr/env` 配置 BRRR_SECRET 后推送才能离开本机；"
-            "在此之前告警只会以本机横幅出现。"
-        )
-        primary = channel_unconfigured
-        kind = "notification_channel_unhealthy"
-    elif channel_failing:
-        count = channel_failing.get("value", "")
-        title = "通知推送持续失败"
-        summary = (
-            f"最近 {count} 次推送投递失败，告警可能送不到你手上。"
-            "检查网络与 BRRR 凭据。"
-        )
-        primary = channel_failing
-        kind = "notification_channel_unhealthy"
-    elif skillshare_unready:
-        title = "Skillshare 未就绪"
-        summary = (
-            f"{skillshare_unready.get('detail', '')}；"
-            "AI 会话缺少全局技能同步。运行 `skillshare doctor` 检查。"
-        )
-        primary = skillshare_unready
-        kind = "skillshare_unready"
-    else:
-        return None
-
-    context: list[str] = []
-    if syspolicyd_assessment_failure and syspolicyd_assessment_failure is not primary:
-        context.append(
-            f"同时观察到 {syspolicyd_assessment_failure.get('value', '')} 条 Gatekeeper 评估失败"
-        )
-    if syspolicyd_rss_error and syspolicyd_rss_error is not primary:
-        context.append(
-            f"syspolicyd RSS 约 {syspolicyd_rss_error.get('value', '')} MiB"
-        )
-    if syspolicyd_rss_growth and syspolicyd_rss_growth is not primary:
-        context.append(
-            f"syspolicyd RSS 每分钟增长约 {syspolicyd_rss_growth.get('value', '')} MiB"
-        )
-    if code_sign_clone_growth and code_sign_clone_growth is not primary:
-        context.append(
-            f"Codex code_sign_clone 每分钟增长约 {code_sign_clone_growth.get('value', '')} MiB"
-        )
-    if spawn_failed and spawn_failed is not primary:
-        context.append("新的 app 或 shell 命令已经无法正常启动")
-
-    message_lines = [summary]
-    if context:
-        message_lines.append("；".join(context) + "。")
-    message_lines.append(
-        "运行 `macos-session-health incident --hours 6 --format markdown` 查看诊断后再处理。"
-    )
-    return {
-        "kind": kind,
-        "title": f"{socket.gethostname()}: {title}",
-        "subtitle": "macOS session health",
-        "message": " ".join(message_lines),
-        "primary_signal": primary.get("signal", ""),
-        "primary_value": primary.get("value", ""),
-    }
 
 
 def signal_meets_min_severity(signal: dict[str, Any], min_severity: str) -> bool:
@@ -3382,64 +2905,11 @@ def brrr_configuration(*, include_environment: bool = True) -> dict[str, Any]:
     }
 
 
-NATIVE_FALLBACK_COOLDOWN_MINUTES = 240
-
-
-def native_fallback_due(store: "Store") -> bool:
-    """Allow the local banner once per cooldown, not once per snapshot retry."""
-    if store.conn is None:
-        return True
-    last = store.get_state("last_brrr_native_fallback_at")
-    if not last:
-        return True
-    try:
-        parsed = dt.datetime.fromisoformat(last.replace("Z", "+00:00"))
-    except ValueError:
-        return True
-    return dt.datetime.now(dt.timezone.utc) - parsed >= dt.timedelta(
-        minutes=NATIVE_FALLBACK_COOLDOWN_MINUTES
-    )
-
-
-def deliver_native_notification(
-    payload: dict[str, Any],
-    timeout: float,
-    *,
-    runner: Any = subprocess.run,
-) -> bool:
-    """Post a local macOS notification; the push channel already failed."""
-    if sys.platform != "darwin":
-        return False
-    try:
-        completed = runner(
-            [
-                "/usr/bin/osascript",
-                "-e",
-                "on run argv",
-                "-e",
-                "display notification (item 2 of argv) with title (item 1 of argv)",
-                "-e",
-                "end run",
-                "--",
-                str(payload.get("title", "")),
-                str(payload.get("message", "")),
-            ],
-            check=False,
-            capture_output=True,
-            text=True,
-            timeout=timeout,
-        )
-    except (OSError, subprocess.TimeoutExpired):
-        return False
-    return completed.returncode == 0
-
-
 def deliver_brrr(
     payload: dict[str, Any],
     timeout: float,
     *,
     dry_run: bool = False,
-    native_fallback: bool = False,
 ) -> dict[str, Any]:
     config = brrr_configuration()
     public_config = {key: value for key, value in config.items() if key != "secret"}
@@ -3455,8 +2925,6 @@ def deliver_brrr(
             "exit": 3,
             "timeout": False,
             "error": "brrr is not configured",
-            "native_fallback": native_fallback
-            and deliver_native_notification(payload, timeout),
         }
 
     body = json.dumps(payload, ensure_ascii=False, separators=(",", ":")).encode(
@@ -3467,52 +2935,36 @@ def deliver_brrr(
         headers["Authorization"] = f"Bearer {config['secret']}"
 
     started = time.monotonic()
-    last_error = ""
-    timed_out = False
-    attempts = 0
-    for attempt in range(3):
-        attempts = attempt + 1
-        request = urllib.request.Request(
-            str(config["endpoint"]),
-            data=body,
-            headers=headers,
-            method="POST",
+    request = urllib.request.Request(
+        str(config["endpoint"]), data=body, headers=headers, method="POST"
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=timeout) as response:
+            status_code = int(response.status)
+        return {
+            **public_config,
+            "exit": 0 if 200 <= status_code < 300 else 1,
+            "http_status": status_code,
+            "timeout": False,
+            "duration_ms": round((time.monotonic() - started) * 1000, 1),
+        }
+    except urllib.error.HTTPError as exc:
+        last_error = f"HTTP {exc.code}"
+        timed_out = False
+        http_status: int | str = exc.code
+    except (TimeoutError, urllib.error.URLError) as exc:
+        timed_out = isinstance(exc, TimeoutError) or isinstance(
+            getattr(exc, "reason", None), TimeoutError
         )
-        try:
-            with urllib.request.urlopen(request, timeout=timeout) as response:
-                status_code = int(response.status)
-            return {
-                **public_config,
-                "exit": 0 if 200 <= status_code < 300 else 1,
-                "http_status": status_code,
-                "timeout": False,
-                "duration_ms": round((time.monotonic() - started) * 1000, 1),
-                "attempts": attempts,
-            }
-        except urllib.error.HTTPError as exc:
-            last_error = f"HTTP {exc.code}"
-            if exc.code < 500:
-                break
-        except (TimeoutError, urllib.error.URLError) as exc:
-            timed_out = (
-                timed_out
-                or isinstance(exc, TimeoutError)
-                or isinstance(getattr(exc, "reason", None), TimeoutError)
-            )
-            last_error = str(
-                exc.reason if isinstance(exc, urllib.error.URLError) else exc
-            )
-        if attempt < 2:
-            time.sleep(0.25 * (attempt + 1))
+        last_error = str(exc.reason if isinstance(exc, urllib.error.URLError) else exc)
+        http_status = ""
     return {
         **public_config,
         "exit": 1,
         "timeout": timed_out,
         "duration_ms": round((time.monotonic() - started) * 1000, 1),
-        "attempts": attempts,
+        "http_status": http_status,
         "error": last_error,
-        "native_fallback": native_fallback
-        and deliver_native_notification(payload, timeout),
     }
 
 
@@ -3523,7 +2975,7 @@ def brrr_cooldown_elapsed(
     if store.conn is None:
         return True
 
-    last_sent_at = store.get_state("last_brrr_recovery_sent_at")
+    last_sent_at = store.get_state("last_brrr_notification_sent_at")
     now = dt.datetime.now(dt.timezone.utc)
     cooldown_elapsed = True
 
@@ -3544,11 +2996,8 @@ def record_brrr_delivery(
     status: str,
     delivery: dict[str, Any],
     *,
-    notification_kind: str,
-    incident_kind: str,
     title: str,
-    primary_signal: Any = "",
-    primary_value: Any = "",
+    signals: list[str],
 ) -> bool:
     sent = delivery["exit"] == 0 and not delivery.get("timeout", False)
     store.emit(
@@ -3562,18 +3011,15 @@ def record_brrr_delivery(
         auth_mode=delivery["auth_mode"],
         credential_source=delivery["credential_source"],
         status=status,
-        notification_kind=notification_kind,
         title=title,
-        incident_kind=incident_kind,
-        primary_signal=primary_signal,
-        primary_value=primary_value,
+        signals=signals,
+        endpoint=delivery.get("endpoint", ""),
         thread_id=args.brrr_thread_id,
         interruption_level=args.brrr_interruption_level,
         sent=sent,
         http_status=delivery.get("http_status", ""),
-        attempts=delivery.get("attempts", 0),
         error=delivery.get("error", ""),
-        native_fallback=delivery.get("native_fallback", False),
+        check="macos-session-health notify-test --dry-run; macos-session-health incident --hours 6 --format markdown",
     )
     return sent
 
@@ -3584,106 +3030,51 @@ def maybe_send_brrr_notification(
     args: argparse.Namespace,
     status: str,
 ) -> None:
-    incident = build_brrr_incident(
-        store.current_signals,
-        snapshot_id,
-        status,
-        args.brrr_syspolicyd_assessment_failure_count,
-    )
-    active_kind = store.get_state("active_brrr_incident_kind")
-    if incident is None:
-        if not active_kind:
-            return
-        if active_kind not in store.current_brrr_observations:
-            store.emit(
-                snapshot_id,
-                "brrr_notification_skipped",
-                reason="incident_unobserved",
-                incident_kind=active_kind,
-            )
-            return
-        title = f"{socket.gethostname()}: 此前异常已恢复"
-        payload = {
-            "title": title,
-            "subtitle": "macOS session health",
-            "message": "此前报告的异常已不再出现。当前无需针对该异常操作。",
-            "thread_id": args.brrr_thread_id,
-            "interruption_level": args.brrr_interruption_level,
+    signals = sorted(
+        {
+            str(signal.get("signal") or "")
+            for signal in store.current_signals
+            if signal_meets_min_severity(signal, "warning")
+            and not str(signal.get("signal") or "").startswith("notification_channel_")
         }
-        if args.brrr_open_url:
-            payload["open_url"] = args.brrr_open_url
-        delivery = deliver_brrr(
-            payload,
-            args.brrr_timeout,
-            native_fallback=native_fallback_due(store),
-        )
-        if delivery.get("native_fallback"):
-            store.set_state("last_brrr_native_fallback_at", utc_now())
-        if record_brrr_delivery(
-            store,
-            snapshot_id,
-            args,
-            status,
-            delivery,
-            notification_kind="recovery",
-            incident_kind=active_kind,
-            title=title,
-        ):
-            store.delete_state("active_brrr_incident_kind")
-            store.set_state("last_brrr_recovery_sent_at", utc_now())
+        - {""}
+    )
+    if not signals:
         return
-
-    incident_kind = str(incident["kind"])
-    if active_kind == incident_kind:
-        store.emit(
-            snapshot_id,
-            "brrr_notification_skipped",
-            reason="incident_unchanged",
-            incident_kind=incident_kind,
-        )
-        return
-    if not active_kind and not brrr_cooldown_elapsed(
-        store, args.brrr_notify_cooldown_minutes
-    ):
+    if not brrr_cooldown_elapsed(store, args.brrr_notify_cooldown_minutes):
         store.emit(
             snapshot_id,
             "brrr_notification_skipped",
             reason="cooldown_active",
             cooldown_minutes=args.brrr_notify_cooldown_minutes,
-            last_sent_at=store.get_state("last_brrr_recovery_sent_at") or "",
-            incident_kind=incident_kind,
+            last_sent_at=store.get_state("last_brrr_notification_sent_at") or "",
+            signals=signals,
         )
         return
 
     payload = {
-        "title": str(incident["title"]),
-        "subtitle": str(incident["subtitle"]),
-        "message": str(incident["message"]),
+        "title": f"{socket.gethostname()}: macOS session health signals",
+        "subtitle": "macOS session health",
+        "message": (
+            f"status={status}; signals={','.join(signals)}. "
+            "Run `macos-session-health incident --hours 6 --format markdown` to inspect facts."
+        ),
         "thread_id": args.brrr_thread_id,
         "interruption_level": args.brrr_interruption_level,
     }
     if args.brrr_open_url:
         payload["open_url"] = args.brrr_open_url
-    delivery = deliver_brrr(
-        payload,
-        args.brrr_timeout,
-        native_fallback=native_fallback_due(store),
-    )
-    if delivery.get("native_fallback"):
-        store.set_state("last_brrr_native_fallback_at", utc_now())
+    delivery = deliver_brrr(payload, args.brrr_timeout)
     if record_brrr_delivery(
         store,
         snapshot_id,
         args,
         status,
         delivery,
-        notification_kind="onset" if not active_kind else "change",
-        incident_kind=incident_kind,
-        title=str(incident["title"]),
-        primary_signal=incident["primary_signal"],
-        primary_value=incident["primary_value"],
+        title=str(payload["title"]),
+        signals=signals,
     ):
-        store.set_state("active_brrr_incident_kind", incident_kind)
+        store.set_state("last_brrr_notification_sent_at", utc_now())
 
 
 def should_collect_log_excerpt(
@@ -3694,42 +3085,30 @@ def should_collect_log_excerpt(
     if store.conn is None:
         return True
 
-    fingerprint = signal_fingerprint(store.current_signals)
-    last_fingerprint = store.get_state("last_log_excerpt_signal_fingerprint")
     last_collected_at = store.get_state("last_log_excerpt_collected_at")
     now = dt.datetime.now(dt.timezone.utc)
-    cooldown_elapsed = True
 
     if last_collected_at:
         try:
             last = dt.datetime.fromisoformat(last_collected_at.replace("Z", "+00:00"))
-            cooldown_elapsed = now - last >= dt.timedelta(minutes=cooldown_minutes)
+            if now - last < dt.timedelta(minutes=cooldown_minutes):
+                store.emit(
+                    snapshot_id,
+                    "log_excerpt_skipped",
+                    reason="interval_active",
+                    interval_minutes=cooldown_minutes,
+                    last_collected_at=last_collected_at,
+                )
+                return False
         except ValueError:
-            cooldown_elapsed = True
+            pass
 
-    if fingerprint != last_fingerprint:
-        reason = "signal_fingerprint_changed"
-    elif cooldown_elapsed:
-        reason = "cooldown_elapsed"
-    else:
-        store.emit(
-            snapshot_id,
-            "log_excerpt_skipped",
-            reason="cooldown_active",
-            cooldown_minutes=cooldown_minutes,
-            signal_fingerprint=fingerprint,
-            last_collected_at=last_collected_at or "",
-        )
-        return False
-
-    store.set_state("last_log_excerpt_signal_fingerprint", fingerprint)
     store.set_state("last_log_excerpt_collected_at", utc_now())
     store.emit(
         snapshot_id,
         "log_excerpt_collecting",
-        reason=reason,
-        cooldown_minutes=cooldown_minutes,
-        signal_fingerprint=fingerprint,
+        reason="interval_elapsed",
+        interval_minutes=cooldown_minutes,
     )
     return True
 
@@ -3910,7 +3289,6 @@ def snapshot(args: argparse.Namespace, store: Store, mode: str) -> str:
                     args.log_timeout,
                     args.log_lines,
                 )
-        store.observe_brrr_incident("collector_exception")
         maybe_send_brrr_notification(store, snapshot_id, args, status)
         store.emit(snapshot_id, "snapshot_end", sid=snapshot_id, status=status)
     except Exception as exc:
@@ -3936,8 +3314,6 @@ def snapshot(args: argparse.Namespace, store: Store, mode: str) -> str:
                     "warning",
                     exit=1,
                     sent=False,
-                    notification_kind="onset",
-                    incident_kind="collector_exception",
                     error=f"{type(notification_exc).__name__}: {notification_exc}",
                 )
             except Exception:
@@ -4422,9 +3798,7 @@ def render_incident_markdown(report: dict[str, Any]) -> str:
                     "sent",
                     "reason",
                     "status",
-                    "incident_kind",
-                    "primary_signal",
-                    "primary_value",
+                    "signals",
                     "last_sent_at",
                 ],
             )
@@ -4452,13 +3826,6 @@ def render_incident_markdown(report: dict[str, Any]) -> str:
     if not report["latest_fd_top"]:
         lines.append("No FD top samples.")
 
-    lines.extend(["", "## Triage Rules", ""])
-    lines.extend(report["triage_rules"])
-
-    lines.extend(["", "## Findings", ""])
-    if not report["findings"]:
-        lines.append("No derived findings.")
-    lines.extend(report["findings"])
     lines.append("")
     return "\n".join(lines)
 
@@ -4610,38 +3977,6 @@ def incident_report(db_path: Path, hours: float, limit: int, output_format: str)
         "unhealthy": int(summary_row["unhealthy"] or 0),
         "error": int(summary_row["error"] or 0),
     }
-    syspolicyd_assessment_failure_rows = [
-        row for row in signal_counts if row["signal"] == "syspolicyd_assessment_failure"
-    ]
-    rss_error_rows = [
-        row for row in signal_counts if row["signal"] == "process_rss_error"
-    ]
-    triage_rules = [
-        "- Treat `syspolicyd_assessment_failure` as the strongest sign that Gatekeeper/static-code checks are failing.",
-        "- Treat `maxfiles_soft_low` as context, not proof of cause.",
-        "- Keep `spctl` and `codesign` probes disabled during an active incident.",
-    ]
-    findings = []
-    if syspolicyd_assessment_failure_rows:
-        total_assessment_failures = sum(
-            int(row["count"] or 0) for row in syspolicyd_assessment_failure_rows
-        )
-        max_assessment_failures = max(
-            parse_float(str(row["max_value"] or "")) or 0
-            for row in syspolicyd_assessment_failure_rows
-        )
-        findings.append(
-            f"- Window contains `{total_assessment_failures}` syspolicyd assessment failure signal(s); "
-            f"max_value=`{round(max_assessment_failures, 1)}`."
-        )
-    if rss_error_rows:
-        total_rss_error = sum(int(row["count"] or 0) for row in rss_error_rows)
-        max_rss_error = max(
-            parse_float(str(row["max_value"] or "")) or 0 for row in rss_error_rows
-        )
-        findings.append(
-            f"- Window contains `{total_rss_error}` RSS error signal(s); max_value=`{round(max_rss_error, 1)}` MiB."
-        )
     latest_codex_config = (
         latest_codex_config_records[0] if latest_codex_config_records else {}
     )
@@ -4661,61 +3996,6 @@ def incident_report(db_path: Path, hours: float, limit: int, output_format: str)
         if str(record.get("signal") or "").startswith(codex_diagnostic_signal_prefixes)
         or str(record.get("role") or "").startswith("trustd")
     ][:limit]
-
-    if latest_codex_process_summary:
-        sky_count = (
-            parse_int(
-                str(latest_codex_process_summary.get("sky_computer_use_count") or "0")
-            )
-            or 0
-        )
-        chrome_host_count = (
-            parse_int(
-                str(
-                    latest_codex_process_summary.get("chrome_extension_host_count")
-                    or "0"
-                )
-            )
-            or 0
-        )
-        node_repl_count = (
-            parse_int(str(latest_codex_process_summary.get("node_repl_count") or "0"))
-            or 0
-        )
-        if sky_count:
-            findings.append(
-                f"- Latest Codex process snapshot: SkyComputerUseClient count=`{sky_count}`."
-            )
-        if chrome_host_count:
-            findings.append(
-                f"- Latest Codex process snapshot: Chrome extension host count=`{chrome_host_count}`."
-            )
-        if node_repl_count:
-            findings.append(
-                f"- Latest Codex process snapshot: node_repl child count=`{node_repl_count}`."
-            )
-    if latest_codex_config:
-        if latest_codex_config.get(
-            "plugin_computer_use_enabled"
-        ) is False and latest_codex_config.get("notify_uses_sky_computer_use"):
-            path_kind = latest_codex_config.get("notify_sky_path_kind") or "unknown"
-            findings.append(
-                f"- Codex config disables the bundled computer-use plugin, but notify still points to SkyComputerUseClient; path_kind=`{path_kind}`."
-            )
-        if latest_codex_config.get(
-            "plugin_chrome_enabled"
-        ) is False and latest_codex_config.get("chrome_native_extension_id_present"):
-            findings.append(
-                "- Codex config disables the bundled chrome plugin, but the Chrome native-host registry still references the Codex extension."
-            )
-    if code_sign_clone_status:
-        largest_clone = max(
-            code_sign_clone_status,
-            key=lambda item: parse_float(str(item.get("size_mb") or "")) or 0,
-        )
-        size = largest_clone.get("size_mb")
-        if size not in (None, ""):
-            findings.append(f"- Latest code_sign_clone size is `{size}` MiB.")
 
     report = {
         "generated_at": utc_now(),
@@ -4747,8 +4027,6 @@ def incident_report(db_path: Path, hours: float, limit: int, output_format: str)
         "brrr_events": brrr_events,
         "latest_cpu_top": latest_cpu_top,
         "latest_fd_top": latest_fd_top,
-        "triage_rules": triage_rules,
-        "findings": findings,
     }
 
     if output_format == "json":
@@ -4768,7 +4046,6 @@ def build_parser() -> argparse.ArgumentParser:
   macos-session-health query --format json --event health_signal --limit 5
   macos-session-health trend --hours 6 --event fd_top --limit 20
   macos-session-health incident --hours 6 --format markdown
-  macos-session-health recover
   macos-session-health events --format json
 
 Run `macos-session-health install` to install or refresh the user LaunchAgent.
@@ -5086,17 +4363,7 @@ Run `macos-session-health install` to install or refresh the user LaunchAgent.
         "--brrr-notify-cooldown-minutes",
         type=int,
         default=int(os.getenv("MACOS_SESSION_HEALTH_BRRR_COOLDOWN_MINUTES", "10")),
-        help="Suppress a new onset for this many minutes after the previous incident recovered.",
-    )
-    parser.add_argument(
-        "--brrr-syspolicyd-assessment-failure-count",
-        type=int,
-        default=int(
-            os.getenv(
-                "MACOS_SESSION_HEALTH_BRRR_SYSPOLICYD_ASSESSMENT_FAILURE_COUNT", "1000"
-            )
-        ),
-        help="Send syspolicyd_assessment_failure notifications only at or above this match count.",
+        help="Minimum interval between successful observation-summary notifications.",
     )
     parser.add_argument(
         "--brrr-thread-id",
@@ -5212,36 +4479,6 @@ Run `macos-session-health install` to install or refresh the user LaunchAgent.
         "--format", choices=["markdown", "json"], default="markdown"
     )
 
-    recover_parser = subparsers.add_parser(
-        "recover",
-        help="Print or execute the guarded syspolicyd recovery plan.",
-    )
-    recover_parser.add_argument(
-        "--format", choices=["markdown", "json"], default="markdown"
-    )
-    recover_parser.add_argument(
-        "--execute",
-        action="store_true",
-        help="Restart syspolicyd with sudo kill. Refuses to run without --assume-codex-desktop-closed.",
-    )
-    recover_parser.add_argument(
-        "--assume-codex-desktop-closed",
-        action="store_true",
-        help="Confirm Codex Desktop is closed or safe to leave closed during recovery.",
-    )
-    recover_parser.add_argument(
-        "--signal",
-        choices=["TERM", "KILL"],
-        default="TERM",
-        help="Unix signal used with sudo kill when --execute is set.",
-    )
-    recover_parser.add_argument(
-        "--wait-seconds",
-        type=float,
-        default=5,
-        help="Seconds to wait after signaling syspolicyd before reading the new status.",
-    )
-
     return parser
 
 
@@ -5302,9 +4539,6 @@ def main() -> int:
         except CliError as exc:
             print_error(str(exc), db=args.db)
             return 1
-
-    if args.command == "recover":
-        return recover_syspolicyd(args)
 
     store = Store(None if args.no_db else args.db, emit_stdout=not args.quiet)
     try:

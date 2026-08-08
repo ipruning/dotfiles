@@ -112,83 +112,20 @@ jq -e --arg source "$test_home/.config/brrr/env" \
   '.[0] | select(.installed == true and .loaded == true and .pid == 4242 and .notification_backend == "builtin" and .notification_configured == true and .notification_credential_source == $source)' \
   "$test_root/status.json" >/dev/null || fail 'status did not expose the self-contained notification backend'
 
-before_hashes="$(shasum -a 256 "$installed_cli" "$runtime_cli" "$plist")"
 : >"$test_root/bootstrap-fail-once"
 exit_code=0
 env "${test_env[@]}" "$python_bin" "$health_cli" install \
   >"$test_root/install-failed.out" 2>"$test_root/install-failed.err" || exit_code=$?
 [[ "$exit_code" == 1 ]] || fail 'failed upgrade returned success'
-[[ "$before_hashes" == "$(shasum -a 256 "$installed_cli" "$runtime_cli" "$plist")" ]] \
-  || fail 'failed upgrade did not restore managed files'
-[[ -f "$test_root/launchd-loaded" ]] || fail 'failed upgrade did not restore the previous LaunchAgent'
+[[ ! -f "$test_root/launchd-loaded" ]] || fail 'failed upgrade did not remain unloaded'
+rg -q 'completed=runtime,executable,plist.*state=unloaded.*inspect with.*rerun install' "$test_root/install-failed.err" \
+  || fail 'failed upgrade did not report progress and rerun command'
+env "${test_env[@]}" "$python_bin" "$health_cli" install >"$test_root/install-rerun.out"
+[[ -f "$test_root/launchd-loaded" ]] || fail 'rerun install did not converge'
 
 env "${test_env[@]}" "$installed_cli" notify-test --dry-run >"$test_root/notify.json"
 jq -e 'select(.exit == 0 and .auth_mode == "bearer" and .payload.thread_id == "macos-session-health")' \
   "$test_root/notify.json" >/dev/null || fail 'built-in notification dry-run failed'
-
-cat >"$fake_bin/pgrep" <<'EOF'
-#!/bin/bash
-if [[ ! -f "$FAKE_SYSPOLICYD_SIGNALED" ]]; then
-  echo 111
-elif [[ "$FAKE_SYSPOLICYD_RESULT" == replaced || "$FAKE_SYSPOLICYD_RESULT" == kill-failed ]]; then
-  echo 222
-elif [[ "$FAKE_SYSPOLICYD_RESULT" == same ]]; then
-  echo 111
-fi
-EOF
-cat >"$fake_bin/ps" <<'EOF'
-#!/bin/bash
-pid=''
-while (($#)); do
-  [[ "$1" == -p ]] && { pid="$2"; break; }
-  shift
-done
-printf '%s 1 S 0.0 1024 00:01 /usr/libexec/syspolicyd\n' "$pid"
-EOF
-cat >"$fake_bin/sudo" <<'EOF'
-#!/bin/bash
-: >"$FAKE_SYSPOLICYD_SIGNALED"
-[[ "$FAKE_SYSPOLICYD_RESULT" == kill-failed ]] && exit 7
-exit 0
-EOF
-chmod +x "$fake_bin/pgrep" "$fake_bin/ps" "$fake_bin/sudo"
-for recovery_result in replaced same missing kill-failed; do
-  rm -f "$test_root/syspolicyd-signaled"
-  exit_code=0
-  env "${test_env[@]}" FAKE_SYSPOLICYD_SIGNALED="$test_root/syspolicyd-signaled" \
-    FAKE_SYSPOLICYD_RESULT="$recovery_result" "$installed_cli" recover --execute \
-    --assume-codex-desktop-closed --wait-seconds 0 --format json \
-    >"$test_root/recover-$recovery_result.json" || exit_code=$?
-  if [[ "$recovery_result" == replaced ]]; then
-    [[ "$exit_code" == 0 ]] || fail 'verified syspolicyd replacement returned failure'
-    jq -e 'select(.replacement_verified == true and .before.pid == "111" and .after.pid == "222" and (.error | not))' \
-      "$test_root/recover-$recovery_result.json" >/dev/null \
-      || fail 'verified syspolicyd replacement report was not truthful'
-  else
-    [[ "$exit_code" == 1 ]] || fail "unverified syspolicyd $recovery_result result returned success"
-    if [[ "$recovery_result" == kill-failed ]]; then
-      jq -e 'select(.replacement_verified == false and .after.pid == "222" and (.error | contains("signal command failed with exit 7")))' \
-        "$test_root/recover-$recovery_result.json" >/dev/null \
-        || fail 'failed signal command with a replacement returned an untruthful report'
-    else
-      jq -e 'select(.replacement_verified == false and .error == "signal sent but syspolicyd replacement not verified")' \
-        "$test_root/recover-$recovery_result.json" >/dev/null \
-        || fail "unverified syspolicyd $recovery_result report was not truthful"
-    fi
-  fi
-done
-
-rm -f "$test_root/syspolicyd-signaled"
-exit_code=0
-env "${test_env[@]}" FAKE_SYSPOLICYD_SIGNALED="$test_root/syspolicyd-signaled" \
-  FAKE_SYSPOLICYD_RESULT=same "$installed_cli" recover --execute \
-  --assume-codex-desktop-closed --wait-seconds 0 --format markdown \
-  >"$test_root/recover-same.md" || exit_code=$?
-[[ "$exit_code" == 1 ]] || fail 'unverified markdown recovery returned success'
-rg -q 'replacement_verified: `False`' "$test_root/recover-same.md" \
-  || fail 'markdown recovery omitted replacement verification'
-rg -q 'signal sent but syspolicyd replacement not verified' "$test_root/recover-same.md" \
-  || fail 'markdown recovery omitted verification error'
 
 query_db="$test_root/query.sqlite3"
 "$python_bin" - "$query_db" <<'PY'

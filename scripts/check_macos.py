@@ -10,7 +10,6 @@ from pathlib import Path
 from .models import ExecutableFinder, Finding, Severity
 
 SESSION_HEALTH_SNAPSHOT_MAX_AGE = dt.timedelta(minutes=30)
-SESSION_HEALTH_FAILURE_STREAK = 3
 
 
 def _session_health_findings(
@@ -66,8 +65,10 @@ def _session_health_findings(
         installed = bool(record["installed"])
         loaded = bool(record["loaded"])
         last_snapshot_at = str(record.get("last_snapshot_at") or "")
-        failures = int(record.get("consecutive_delivery_failures") or 0)
         configured = bool(record.get("notification_configured"))
+        last_delivery_at = str(record.get("last_delivery_at") or "")
+        last_delivery_sent = record.get("last_delivery_sent")
+        last_delivery_error = str(record.get("last_delivery_error") or "")
     except (json.JSONDecodeError, LookupError, TypeError, ValueError) as error:
         return [
             Finding(
@@ -144,14 +145,14 @@ def _session_health_findings(
                 action="Provide BRRR_SECRET via ~/.config/brrr/env.",
             ),
         )
-    elif failures >= SESSION_HEALTH_FAILURE_STREAK:
+    elif last_delivery_at and last_delivery_sent is False:
         findings.append(
             Finding(
                 "session_health.notifications",
                 Severity.WARN,
-                "session_health.notifications_failing",
-                f"last {failures} notification deliveries failed",
-                action="Run macos-session-health notify-test --dry-run.",
+                "session_health.last_delivery_failed",
+                f"last delivery at {last_delivery_at} failed: {last_delivery_error or 'no error detail'}",
+                action="Run macos-session-health notify-test to send a current test notification.",
             ),
         )
     else:
@@ -160,7 +161,7 @@ def _session_health_findings(
                 "session_health.notifications",
                 Severity.OK,
                 "session_health.notifications_ready",
-                "notification delivery is configured and recently healthy",
+                "notification delivery is configured",
             ),
         )
     return findings
