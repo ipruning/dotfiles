@@ -26,19 +26,19 @@ checksum = "blake3:6b5fe0bc6105452f663d5a15ee03574caab7ac642f0400266273d0b9562c9
 url = "https://repo.yarnpkg.com/4.18.0/packages/yarnpkg-cli/bin/yarn.js"
 
 [[tools.aube]]
-version = "1.37.0"
+version = "1.38.0"
 backend = "aqua:jdx/aube"
 
 [tools.aube."platforms.linux-x64"]
-checksum = "sha256:1775b37c4381bff2314c96635cac3eeb90b02bea0f33371e553a4431dc893546"
-url = "https://github.com/jdx/aube/releases/download/v1.37.0/aube-v1.37.0-x86_64-unknown-linux-gnu.tar.gz"
-url_api = "https://api.github.com/repos/jdx/aube/releases/assets/496796145"
+checksum = "sha256:3e027b1e3acb071b76f4ccb4c0714c28a0caedcb1b3c4417f9c150c5445f9832"
+url = "https://github.com/jdx/aube/releases/download/v1.38.0/aube-v1.38.0-x86_64-unknown-linux-gnu.tar.gz"
+url_api = "https://api.github.com/repos/jdx/aube/releases/assets/505365949"
 provenance = "github-attestations"
 
 [tools.aube."platforms.macos-arm64"]
-checksum = "sha256:6fdc27e146e5d6a45abf60ef7cf2e83d5b7284acbba4cecf6237905bd528a916"
-url = "https://github.com/jdx/aube/releases/download/v1.37.0/aube-v1.37.0-aarch64-apple-darwin.tar.gz"
-url_api = "https://api.github.com/repos/jdx/aube/releases/assets/496852124"
+checksum = "sha256:d1a2d56a3958ac4783c1f91d99421c9d4960fc61adfd7c7bff620d4c97258741"
+url = "https://github.com/jdx/aube/releases/download/v1.38.0/aube-v1.38.0-aarch64-apple-darwin.tar.gz"
+url_api = "https://api.github.com/repos/jdx/aube/releases/assets/505460266"
 provenance = "github-attestations"
 
 [[tools.bun]]
@@ -99,16 +99,16 @@ crate = "atuin"
 locked = "true"
 
 [[tools.deno]]
-version = "2.9.4"
+version = "2.9.5"
 backend = "core:deno"
 
 [tools.deno."platforms.linux-x64"]
-checksum = "sha256:c24f955d9fbfe0ea5ae2b501c8e71ae76e31e4c9782390a54a284b3364fda725"
-url = "https://dl.deno.land/release/v2.9.4/deno-x86_64-unknown-linux-gnu.zip"
+checksum = "sha256:8b010a3b1a4a0188a67cdb8a7a27348b2a501af78aec7fc74f2ace167368d530"
+url = "https://dl.deno.land/release/v2.9.5/deno-x86_64-unknown-linux-gnu.zip"
 
 [tools.deno."platforms.macos-arm64"]
-checksum = "sha256:6d17647fdbf9c587a581dba205054c4ccf732dae0a196cc1e9b44c07589db412"
-url = "https://dl.deno.land/release/v2.9.4/deno-aarch64-apple-darwin.zip"
+checksum = "sha256:b796aadd131f6930560c1ee040cf0d6f53933fbb987464e9ff46bd7ea4830615"
+url = "https://dl.deno.land/release/v2.9.5/deno-aarch64-apple-darwin.zip"
 
 [[tools."gem:kamal"]]
 version = "2.12.0"
@@ -146,32 +146,32 @@ provenance = "github-attestations"
 provenance_verified = true
 
 [[tools."github:larksuite/cli"]]
-version = "1.0.84"
+version = "1.0.85"
 backend = "github:larksuite/cli"
 
 [tools."github:larksuite/cli"."platforms.linux-x64"]
-checksum = "sha256:e2179cf3453406eac6aad4a9d9244424465bfcd16ede2ce56d10bedfdf26d96d"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.84/lark-cli-1.0.84-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/502927382"
+checksum = "sha256:78767460e6c8bb9811d9f28e8df7cd2721b14fdceb5b65ba42bf43e448c4bb78"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.85/lark-cli-1.0.85-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/505203464"
 
 [tools."github:larksuite/cli"."platforms.macos-arm64"]
-checksum = "sha256:bc56a15fce5b6fdb065702ac03ef4d051bc71ea511b75f316461008e4a359ba5"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.84/lark-cli-1.0.84-darwin-arm64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/502927383"
+checksum = "sha256:1c07f259de7201f3f7c88311bd63ec67cd2e9c5a3b1f7e497bf3c92f1a12b0f9"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.85/lark-cli-1.0.85-darwin-arm64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/505203465"
 
 [[tools."github:lycorp-jp/sim-use"]]
-version = "0.12.0"
+version = "0.13.0"
 backend = "github:lycorp-jp/sim-use"
 
 [tools."github:lycorp-jp/sim-use"."platforms.linux-x64"]
-checksum = "sha256:fb452afe7ff56fba314c693dcd7c149ebd2831dd93f6590b9fa30f6f695cdaa4"
-url = "https://github.com/lycorp-jp/sim-use/releases/download/v0.12.0/sim-use-v0.12.0.tar.gz"
-url_api = "https://api.github.com/repos/lycorp-jp/sim-use/releases/assets/493634959"
+checksum = "sha256:f3da237663199faf4c7f6796c3ede6ce7583da872dc27d92eb3b7eb051725081"
+url = "https://github.com/lycorp-jp/sim-use/releases/download/v0.13.0/sim-use-v0.13.0.tar.gz"
+url_api = "https://api.github.com/repos/lycorp-jp/sim-use/releases/assets/503792087"
 
 [tools."github:lycorp-jp/sim-use"."platforms.macos-arm64"]
-checksum = "sha256:fb452afe7ff56fba314c693dcd7c149ebd2831dd93f6590b9fa30f6f695cdaa4"
-url = "https://github.com/lycorp-jp/sim-use/releases/download/v0.12.0/sim-use-v0.12.0.tar.gz"
-url_api = "https://api.github.com/repos/lycorp-jp/sim-use/releases/assets/493634959"
+checksum = "sha256:f3da237663199faf4c7f6796c3ede6ce7583da872dc27d92eb3b7eb051725081"
+url = "https://github.com/lycorp-jp/sim-use/releases/download/v0.13.0/sim-use-v0.13.0.tar.gz"
+url_api = "https://api.github.com/repos/lycorp-jp/sim-use/releases/assets/503792087"
 
 [[tools.go]]
 version = "1.26.5"
@@ -261,7 +261,7 @@ backend = "npm:@openai/codex-security"
 allow_low_downloads = "true"
 
 [[tools."npm:agent-device"]]
-version = "0.20.5"
+version = "0.20.6"
 backend = "npm:agent-device"
 
 [[tools."npm:cf"]]
@@ -269,18 +269,18 @@ version = "0.6.0"
 backend = "npm:cf"
 
 [[tools.pi]]
-version = "0.83.0"
+version = "0.84.1"
 backend = "aqua:earendil-works/pi"
 
 [tools.pi."platforms.linux-x64"]
-checksum = "sha256:b0625eb623197b0afe20c870d21ef2f34481f1504e5777df3f698a66c7636f5f"
-url = "https://github.com/earendil-works/pi/releases/download/v0.83.0/pi-linux-x64.tar.gz"
-url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/494597980"
+checksum = "sha256:5634d7ebd18274b63af3371e942f342d74bea012389575c1d1ff15ce6ca80c2f"
+url = "https://github.com/earendil-works/pi/releases/download/v0.84.1/pi-linux-x64.tar.gz"
+url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/504727598"
 
 [tools.pi."platforms.macos-arm64"]
-checksum = "sha256:147fc3c451ec543a15102af251ce316079c8fcadfe8ae4d3ffee202346e9bed9"
-url = "https://github.com/earendil-works/pi/releases/download/v0.83.0/pi-darwin-arm64.tar.gz"
-url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/494597981"
+checksum = "sha256:683c84261f40b870b4a7ccf181a48ad6ecd71853b0112d1bb617539530c6121d"
+url = "https://github.com/earendil-works/pi/releases/download/v0.84.1/pi-darwin-arm64.tar.gz"
+url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/504727600"
 
 [[tools.pnpm]]
 version = "11.20.0"
@@ -365,19 +365,19 @@ url = "https://github.com/starship/starship/releases/download/v1.26.0/starship-a
 url_api = "https://api.github.com/repos/starship/starship/releases/assets/460374577"
 
 [[tools.uv]]
-version = "0.12.2"
+version = "0.12.3"
 backend = "aqua:astral-sh/uv"
 
 [tools.uv."platforms.linux-x64"]
-checksum = "sha256:2dbe8209c9592f6d1009b8565f4bf29813427907bee2236023c013101ede343f"
-url = "https://github.com/astral-sh/uv/releases/download/0.12.2/uv-x86_64-unknown-linux-musl.tar.gz"
-url_api = "https://api.github.com/repos/astral-sh/uv/releases/assets/502996593"
+checksum = "sha256:0643b9fb8c9fb27458e709ce6ff939695013c41975ff7b02d3f3b138d8d4bdb3"
+url = "https://github.com/astral-sh/uv/releases/download/0.12.3/uv-x86_64-unknown-linux-musl.tar.gz"
+url_api = "https://api.github.com/repos/astral-sh/uv/releases/assets/505387821"
 provenance = "github-attestations"
 
 [tools.uv."platforms.macos-arm64"]
-checksum = "sha256:fa909fea3bc06f460db79017030a221fdbc43ec4478f089cb554d8335c090817"
-url = "https://github.com/astral-sh/uv/releases/download/0.12.2/uv-aarch64-apple-darwin.tar.gz"
-url_api = "https://api.github.com/repos/astral-sh/uv/releases/assets/502996487"
+checksum = "sha256:546f7f8a6c70ff13a3a9d2bc958db3427298cebf3e0cb756f9177133b7068843"
+url = "https://github.com/astral-sh/uv/releases/download/0.12.3/uv-aarch64-apple-darwin.tar.gz"
+url_api = "https://api.github.com/repos/astral-sh/uv/releases/assets/505387707"
 provenance = "github-attestations"
 
 [[tools.xurl]]
