@@ -566,9 +566,12 @@ def test_bash_init_adds_navigation_editing_and_guarded_history_tools(
     (functions / "_zoxide.bash").write_text("export ZOXIDE_READY=1\n")
     bash = shutil.which("bash")
     assert bash is not None
+    dirname = shutil.which("dirname")
+    assert dirname is not None
+    (bin_dir / "dirname").symlink_to(dirname)
     environment = {
         "HOME": str(home),
-        "PATH": f"{bin_dir}:/usr/bin:/bin",
+        "PATH": str(bin_dir),
     }
 
     completed = subprocess.run(

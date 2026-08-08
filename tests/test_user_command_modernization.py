@@ -279,8 +279,8 @@ def test_amp_ghostty_passes_quoted_commands_as_argv(
         executed = subprocess.run(
             ["bash", "-c", command], env=env, check=True, capture_output=True, text=True
         )
-        assert executed.stdout.rstrip("\n") == str(directory)
+        assert executed.stdout.rstrip("\n") == str(directory.resolve())
     script = script_log.read_text()
-    assert str(directory) not in script
+    assert str(directory.resolve()) not in script
     assert "set the clipboard to oldClip" in script
     assert "on error errorMessage number errorNumber" in script
