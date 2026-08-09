@@ -386,6 +386,15 @@ if [[ -x "$HOME/.local/bin/mise" && ! -L "$HOME/.local/bin/mise" && -f "$GENERAT
   source "$GENERATED_FUNCTIONS_DIR/_mise.zsh"
 fi
 
+# 👇 Herdr (temporarily disabled for terminal launch debugging)
+# TODO: Re-enable this block after debugging no longer requires a raw Ghostty
+# shell. HERDR_ENV remains the recursion boundary when restored.
+# if [[ "$TERM_PROGRAM" == "ghostty" && -z ${SSH_TTY:-} && -z ${HERDR_ENV:-} && \
+#   ${HERDR_GHOSTTY_AUTOSTART:-1} != 0 ]] && \
+#   herdr --version >/dev/null 2>&1; then
+#   exec herdr
+# fi
+
 # 👇 atuin
 if command -v atuin >/dev/null 2>&1 && [[ -f "$GENERATED_FUNCTIONS_DIR/_atuin.zsh" ]]; then
   source "$GENERATED_FUNCTIONS_DIR/_atuin.zsh"
