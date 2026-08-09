@@ -119,19 +119,19 @@ url = "https://github.com/agavra/tuicr/releases/download/v0.21.0/tuicr-0.21.0-aa
 url_api = "https://api.github.com/repos/agavra/tuicr/releases/assets/503216017"
 
 [[tools."github:jihuanshe/linear"]]
-version = "0.0.1785862573-gbdf94fe"
+version = "0.0.1786305756-g786afcf"
 backend = "github:jihuanshe/linear"
 
 [tools."github:jihuanshe/linear"."platforms.linux-x64"]
-checksum = "sha256:613d7bd0eb02aae80d36f707f238161efe453ec3cbf93f604f43aac1c23b1b15"
-url = "https://github.com/jihuanshe/linear/releases/download/0.0.1785862573-gbdf94fe/linear-x86_64-unknown-linux-gnu.tar.xz"
-url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/501594075"
+checksum = "sha256:c61585cfe46e40daf7771e8ec340e84ed87eb716c65a9dcbdde42cb782584889"
+url = "https://github.com/jihuanshe/linear/releases/download/0.0.1786305756-g786afcf/linear-x86_64-unknown-linux-gnu.tar.xz"
+url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/507858176"
 provenance = "github-attestations"
 
 [tools."github:jihuanshe/linear"."platforms.macos-arm64"]
-checksum = "sha256:a7779bf13ef5a9a5c5cca4ae62913fb45934c786afe7740b6202fc74cb021755"
-url = "https://github.com/jihuanshe/linear/releases/download/0.0.1785862573-gbdf94fe/linear-aarch64-apple-darwin.tar.xz"
-url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/501593959"
+checksum = "sha256:539efb91782cbfcd630aab32ff242718929b613b73f739ff7f267e2a4577028a"
+url = "https://github.com/jihuanshe/linear/releases/download/0.0.1786305756-g786afcf/linear-aarch64-apple-darwin.tar.xz"
+url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/507857970"
 provenance = "github-attestations"
 provenance_verified = true
 
@@ -273,19 +273,19 @@ url = "https://github.com/earendil-works/pi/releases/download/v0.84.1/pi-darwin-
 url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/504727600"
 
 [[tools.pnpm]]
-version = "11.20.0"
+version = "11.21.0"
 backend = "aqua:pnpm/pnpm"
 
 [tools.pnpm."platforms.linux-x64"]
-checksum = "sha256:b4ad6ad2b21db2f8cd50af416c3aa148ba704c31c84893f465a770a01c2c4572"
-url = "https://github.com/pnpm/pnpm/releases/download/v11.20.0/pnpm-linux-x64.tar.gz"
-url_api = "https://api.github.com/repos/pnpm/pnpm/releases/assets/500142376"
+checksum = "sha256:aadc489ce4473c2af0fec06a5c19e113b5793d404eac49853c8153bf4b0d8263"
+url = "https://github.com/pnpm/pnpm/releases/download/v11.21.0/pnpm-linux-x64.tar.gz"
+url_api = "https://api.github.com/repos/pnpm/pnpm/releases/assets/507585503"
 provenance = "github-attestations"
 
 [tools.pnpm."platforms.macos-arm64"]
-checksum = "sha256:4bc97fea72e5c92eec1fefc8d410c35d01e0d0d52f3160c59f38c32db58b5cd2"
-url = "https://github.com/pnpm/pnpm/releases/download/v11.20.0/pnpm-darwin-arm64.tar.gz"
-url_api = "https://api.github.com/repos/pnpm/pnpm/releases/assets/500142373"
+checksum = "sha256:860a96978a79ca5132bdc247375f94150a3c98edbecbee36e9f8e0c9e2f7f056"
+url = "https://github.com/pnpm/pnpm/releases/download/v11.21.0/pnpm-darwin-arm64.tar.gz"
+url_api = "https://api.github.com/repos/pnpm/pnpm/releases/assets/507585526"
 provenance = "github-attestations"
 
 [[tools.python]]
