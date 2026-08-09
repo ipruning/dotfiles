@@ -2,17 +2,7 @@
 
 [[tools.agent-browser]]
 version = "0.33.2"
-backend = "github:vercel-labs/agent-browser"
-
-[tools.agent-browser."platforms.linux-x64"]
-checksum = "sha256:b7bc3dfcf0a7326c1f5a60423163259ba2349eebfa5bd2e70e111af743da4a49"
-url = "https://github.com/vercel-labs/agent-browser/releases/download/v0.33.2/agent-browser-linux-x64"
-url_api = "https://api.github.com/repos/vercel-labs/agent-browser/releases/assets/498513424"
-
-[tools.agent-browser."platforms.macos-arm64"]
-checksum = "sha256:cbb517902bcaa3b7a6384fd9f25dd274da3df2bb6a3ba9c3e85806d78213c26b"
-url = "https://github.com/vercel-labs/agent-browser/releases/download/v0.33.2/agent-browser-darwin-arm64"
-url_api = "https://api.github.com/repos/vercel-labs/agent-browser/releases/assets/498513404"
+backend = "npm:agent-browser"
 
 [[tools."aqua:yarnpkg/berry"]]
 version = "4.18.0"

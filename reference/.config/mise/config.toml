@@ -4,7 +4,7 @@ min_version = { hard = "2026.8.0" }
 yarn = ["vfox:mise-plugins/vfox-yarn"]
 
 [tool_alias]
-agent-browser = "github:vercel-labs/agent-browser"
+agent-browser = "npm:agent-browser"
 aube = "aqua:jdx/aube"
 herdr = "aqua:herdrdev/herdr"
 hunk = "aqua:modem-dev/hunk"
