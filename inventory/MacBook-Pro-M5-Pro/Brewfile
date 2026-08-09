@@ -5,13 +5,14 @@ tap "entireio/tap", trusted: true
 tap "kitlangton/tap"
 tap "longbridge/tap", trusted: true
 tap "mobile-dev-inc/tap"
-tap "modem-dev/tap"
 tap "netbirdio/tap"
 tap "nikitabobko/tap", trusted: true
 tap "nkzw-tech/tap"
 tap "openai/tools", trusted: true
 tap "parallel-web/tap"
 tap "psviderski/tap", trusted: true
+tap "rjyo/moshi", trusted: true
+tap "s2-streamstore/s2"
 tap "simonbs/brrr-cli", "https://github.com/simonbs/brrr-cli.git", trusted: true
 tap "steipete/tap", trusted: true
 # Static analysis and lint tool, for (ba)sh scripts
@@ -28,8 +29,6 @@ brew "bash"
 brew "bat"
 # Toolchain of the web
 brew "biome"
-# New way to see and navigate directory trees
-brew "broot"
 # Resource monitor. C++ version and continuation of bashtop and bpytop
 brew "btop"
 # Vector graphics library with cross-device output support
@@ -50,8 +49,6 @@ brew "ffmpeg"
 brew "fzf"
 # GitHub command-line tool
 brew "gh"
-# Syntax-highlighting pager for git and diff output
-brew "git-delta"
 # Git extension for versioning large files
 brew "git-lfs"
 # TUI Git client inspired by Magit
@@ -64,8 +61,6 @@ brew "govulncheck"
 brew "gum"
 # Command-line interface for Hetzner Cloud
 brew "hcloud"
-# Improved top (interactive process viewer)
-brew "htop"
 # Command-line benchmarking tool
 brew "hyperfine"
 # Lightweight and flexible command-line JSON processor
@@ -74,10 +69,6 @@ brew "jq"
 brew "just"
 # Modern load testing tool, using Go and JavaScript
 brew "k6"
-# Lazier way to manage everything docker
-brew "lazydocker"
-# Simple terminal UI for git commands
-brew "lazygit"
 # Extremely fast file and directory name linter
 brew "ls-lint"
 # Fast, flexible, config-based cli for linting Markdown/CommonMark files
@@ -122,18 +113,12 @@ brew "ripgrep"
 brew "ripsecrets"
 # CLI proxy to minimize LLM token consumption
 brew "rtk"
-# Cross-platform command-line tool for executing jobs in parallel
-brew "rush-parallel"
-# Run commands in parallel with Rust's Tokio framework
-brew "rust-parallel"
 # Semantic version control CLI with entity-level diffs and blame
 brew "sem-cli"
 # SQL linter and auto-formatter for Humans
 brew "sqlfluff"
 # Fast, collaborative live terminal sharing over the web
 brew "sshx"
-# Cross-shell prompt for astronauts
-brew "starship"
 # General purpose fuzzy finder TUI
 brew "television"
 # Terminal multiplexer
@@ -148,8 +133,6 @@ brew "try-rs"
 brew "typos-cli"
 # Markup-based typesetting system
 brew "typst"
-# Extremely fast Python package installer and resolver, written in Rust
-brew "uv"
 # Modern watch command
 brew "viddy"
 # Command-line tool to install and switch between multiple versions of Xcode
@@ -172,12 +155,14 @@ brew "cirruslabs/cli/tart", trusted: true
 brew "kitlangton/tap/ghui", trusted: true
 # The easiest way to automate UI testing for your mobile app
 brew "mobile-dev-inc/tap/maestro", trusted: true
-# Desktop-inspired terminal diff viewer for agent-authored changesets
-brew "modem-dev/tap/hunk", trusted: true
 # Netbird project.
 brew "netbirdio/tap/netbird", trusted: true
 # Uncloud CLI
 brew "psviderski/tap/uncloud"
+# Portable daemon + CLI that bridges AI coding agents to the Moshi mobile app
+brew "rjyo/moshi/moshi-hook"
+# CLI for S2
+brew "s2-streamstore/s2/s2", trusted: true
 # Webhook notifications for Claude Code and Codex
 brew "simonbs/brrr-cli/brrr"
 # Command-line ElevenLabs TTS with mac-style flags
@@ -215,8 +200,6 @@ cask "orbstack"
 cask "parallel-web/tap/parallel-cli", trusted: true
 # Control your tools with a few keystrokes
 cask "raycast"
-# Move and resize windows using keyboard shortcuts or snap areas
-cask "rectangle"
 # A mobile-friendly, web-based, multi-modal coding agent
 cask "boldsoftware/tap/shelley"
 # Rime input method engine

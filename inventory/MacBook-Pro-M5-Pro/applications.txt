@@ -2,6 +2,7 @@
 1Password
 1Password for Safari
 AeroSpace
+BetterDisplay
 brrr
 calibre
 Capture One
@@ -49,7 +50,6 @@ Pixelmator Pro Creator Studio
 qBittorrent
 QQ
 Raycast Beta
-Rectangle
 Repo Prompt
 RepoPrompt CE
 Roam Research
