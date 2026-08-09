@@ -3,14 +3,13 @@ theme = Catppuccin Mocha
 font-family = MonoLisaCode
 font-family = Maple Mono NF CN
 
-font-size = 12
+font-size = 10
 font-style = Medium
 
 confirm-close-surface = false
 cursor-style = block
 cursor-style-blink = false
 macos-option-as-alt = right
-maximize = true
 notify-on-command-finish = unfocused
 notify-on-command-finish-action = no-bell,notify
 notify-on-command-finish-after = 30s

@@ -13,20 +13,20 @@ start-at-login = true
 # TODO: When `aerospace list-apps` reports a stable bundle ID for a running
 # MDPro3, replace this title-only predicate; titles may initialize too late.
 on-window-detected = [
-  { if = 'test "%{window-title}" ~= "MDPro3"', run = "layout floating" },
-  { if = "test %{app-bundle-id} = com.valvesoftware.steam", run = "layout floating" },
-  { if = "test %{app-bundle-id} = uk.co.powdertoy.tpt", run = "layout floating" },
-  { if = "test %{app-bundle-id} = com.xfge.LifeEasy", run = "layout floating" },
-  { if = "test %{app-bundle-id} = com.xingin.discover", run = "layout floating" },
-  { if = "test %{app-bundle-id} = com.apple.audio.AudioMIDISetup", run = "layout floating" },
-  { if = "test %{app-bundle-id} = com.apple.ScreenSharing", run = "layout floating" },
-  { if = "test %{app-bundle-id} = org.pqrs.Karabiner-Elements.Settings", run = "layout floating" },
-  { if = "test %{app-bundle-id} = org.pqrs.Karabiner-EventViewer", run = "layout floating" },
-  { if = "test %{app-bundle-id} = codes.rambo.VirtualBuddy", run = "layout floating" },
-  { if = "test %{app-bundle-id} = com.hypergryph.arknights", run = "layout floating" },
-  { if = "test %{app-bundle-id} = com.rogueamoeba.audiohijack", run = "layout floating" },
-  { if = "test %{app-bundle-id} = ai.tcgcard.app", run = "layout floating" },
-  { if = "test %{app-bundle-id} = com.sleeplessmind.Wooshy", run = "layout floating" },
+    { if = 'test "%{window-title}" ~= "MDPro3"', run = "layout floating" },
+    { if = "test %{app-bundle-id} = com.valvesoftware.steam", run = "layout floating" },
+    { if = "test %{app-bundle-id} = uk.co.powdertoy.tpt", run = "layout floating" },
+    { if = "test %{app-bundle-id} = com.xfge.LifeEasy", run = "layout floating" },
+    { if = "test %{app-bundle-id} = com.xingin.discover", run = "layout floating" },
+    { if = "test %{app-bundle-id} = com.apple.audio.AudioMIDISetup", run = "layout floating" },
+    { if = "test %{app-bundle-id} = com.apple.ScreenSharing", run = "layout floating" },
+    { if = "test %{app-bundle-id} = org.pqrs.Karabiner-Elements.Settings", run = "layout floating" },
+    { if = "test %{app-bundle-id} = org.pqrs.Karabiner-EventViewer", run = "layout floating" },
+    { if = "test %{app-bundle-id} = codes.rambo.VirtualBuddy", run = "layout floating" },
+    { if = "test %{app-bundle-id} = com.hypergryph.arknights", run = "layout floating" },
+    { if = "test %{app-bundle-id} = com.rogueamoeba.audiohijack", run = "layout floating" },
+    { if = "test %{app-bundle-id} = ai.tcgcard.app", run = "layout floating" },
+    { if = "test %{app-bundle-id} = com.sleeplessmind.Wooshy", run = "layout floating" },
 ]
 
 [key-mapping]
@@ -94,13 +94,13 @@ alt-shift-j = ["move down", "mode main"]
 alt-shift-k = ["move up", "mode main"]
 alt-shift-l = ["move right", "mode main"]
 
-alt-b = "exec-and-forget ${HOME}/dotfiles/modules/bin/newwin chrome"
-alt-c = "exec-and-forget open -a /Applications/ChatGPT.app"
-alt-g = '''exec-and-forget window_id="$(aerospace list-windows --monitor all --app-bundle-id com.mitchellh.ghostty --format $'%{window-id}\t%{window-title}' | awk -F '\t' '$2 != "Scratch Shell" { print $1; exit }')"; if [[ -n "$window_id" ]]; then aerospace focus --window-id "$window_id"; else open -a Ghostty; fi'''
-alt-enter = "exec-and-forget open -na Ghostty.app --args --title='Scratch Shell' -e /usr/bin/env HERDR_GHOSTTY_AUTOSTART=0 /bin/zsh -il"
-alt-p = 'exec-and-forget open -a /Applications/Repo\ Prompt.app'
+alt-a = 'exec-and-forget open -a ${HOME}/Applications/Chrome\ Apps.localized/Amp.app'
+alt-b = 'exec-and-forget open -a /Applications/Google\ Chrome.app'
+alt-c = "exec-and-forget open -a /Applications/Claude.app"
+alt-g = 'exec-and-forget open -a /Applications/Ghostty.app'
+alt-enter = '''exec-and-forget osascript -e 'tell application id "com.mitchellh.ghostty" to new window' '''
 alt-r = 'exec-and-forget open -a /Applications/Roam\ Research.app'
-alt-z = "exec-and-forget ${HOME}/dotfiles/modules/bin/newwin zed"
+alt-z = "exec-and-forget open -a /Applications/Zed.app"
 
 cmd-m = []
 cmd-h = []
