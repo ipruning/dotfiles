@@ -190,18 +190,18 @@ url = "https://github.com/herdrdev/herdr/releases/download/v0.8.0/herdr-macos-aa
 url_api = "https://api.github.com/repos/herdrdev/herdr/releases/assets/500422629"
 
 [[tools.hunk]]
-version = "0.17.7"
+version = "0.18.0"
 backend = "aqua:modem-dev/hunk"
 
 [tools.hunk."platforms.linux-x64"]
-checksum = "sha256:69d4788ce57d4872c812b7f22b2e2ddfff287117339c336e9556dca8260e4c4f"
-url = "https://github.com/modem-dev/hunk/releases/download/v0.17.7/hunkdiff-linux-x64.tar.gz"
-url_api = "https://api.github.com/repos/modem-dev/hunk/releases/assets/493434277"
+checksum = "sha256:233f68bb6d098d67115ac161ca4f58b63964335fd15e45b4f2c26aeaaa7a5e01"
+url = "https://github.com/modem-dev/hunk/releases/download/v0.18.0/hunkdiff-linux-x64.tar.gz"
+url_api = "https://api.github.com/repos/modem-dev/hunk/releases/assets/506451301"
 
 [tools.hunk."platforms.macos-arm64"]
-checksum = "sha256:7bf5ab4e625a51a8d9e7b92c703ff2c412a434ba136c2d447626173195083f81"
-url = "https://github.com/modem-dev/hunk/releases/download/v0.17.7/hunkdiff-darwin-arm64.tar.gz"
-url_api = "https://api.github.com/repos/modem-dev/hunk/releases/assets/493434271"
+checksum = "sha256:053671c9243e612a434f688c812fd86ec87973644c0a7a3815e0e842213fa41e"
+url = "https://github.com/modem-dev/hunk/releases/download/v0.18.0/hunkdiff-darwin-arm64.tar.gz"
+url_api = "https://api.github.com/repos/modem-dev/hunk/releases/assets/506451300"
 
 [[tools.lazydocker]]
 version = "0.25.2"
@@ -244,7 +244,7 @@ checksum = "sha256:7ee659a7768e641bbfd5360940660b8e8fd0052f77488f365562bac522fc1
 url = "https://nodejs.org/dist/v26.7.0/node-v26.7.0-darwin-arm64.tar.gz"
 
 [[tools."npm:@openai/codex-security"]]
-version = "0.1.7"
+version = "0.1.8"
 backend = "npm:@openai/codex-security"
 
 [tools."npm:@openai/codex-security".options]
