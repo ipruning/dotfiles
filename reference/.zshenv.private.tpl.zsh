@@ -1,4 +1,5 @@
 export BRRR_SECRET="op://Private/brrr/BRRR_SECRET"
+export BRRR_WEBHOOK_URL="op://Private/brrr/BRRR_WEBHOOK_URL"
 export ELEVENLABS_API_KEY="op://Private/uxgejvcwody773xhc5xzuwfak4/ELEVENLABS_API_KEY"
 export HCLOUD_TOKEN="op://ipruning/Hetzner/HCLOUD_TOKEN"
 export MISE_GITHUB_TOKEN="op://jihuanshe/GitHub/MISE_GITHUB_TOKEN"
