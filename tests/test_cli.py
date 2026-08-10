@@ -47,7 +47,7 @@ def test_mise_python_tasks_never_sync_dependencies_implicitly(tmp_path: Path) ->
         "macos-arm64",
         "linux-x64",
     ]
-    assert config["min_version"]["hard"] == "2026.8.0"
+    assert config["min_version"]["hard"] == "2026.8.3"
     assert config["tool_alias"] == {
         "fd": "aqua:sharkdp/fd",
         "jq": "aqua:jqlang/jq",
@@ -99,6 +99,10 @@ def test_global_mise_lock_covers_declared_artifact_platforms() -> None:
     config = tomllib.loads(
         (repo_root / "reference/.config/mise/config.toml").read_text(),
     )
+    assert config["min_version"]["hard"] == "2026.8.3"
+    assert config["settings"]["auto_install"] is False
+    assert "exec_auto_install" not in config["settings"]
+    assert "task" not in config["settings"]
     lockfile = tomllib.loads(
         (repo_root / "reference/.config/mise/mise.lock").read_text(),
     )

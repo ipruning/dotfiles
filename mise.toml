@@ -1,4 +1,4 @@
-min_version = { hard = "2026.8.0" }
+min_version = { hard = "2026.8.3" }
 
 [tool_alias]
 fd = "aqua:sharkdp/fd"
