@@ -43,3 +43,7 @@
 # type = "plugin_action"
 # command = "termscope.open-links"
 # description = "Pick a visible link"
+
+[theme]
+name = "catppuccin"
+auto_switch = false
