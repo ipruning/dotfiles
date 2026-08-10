@@ -512,12 +512,14 @@ lint` reports when that assumption is false.
 ## Skillshare
 
 Global harness prompts and AI skills remain owned by the Skillshare source
-repository. Each host owns its materialized `~/.config/skillshare/config.yaml`;
-this repository deliberately does not back up, restore, or symlink that file.
-The host check still reports when the executable, local configuration, source
-directory, targets, or known installation ownership is unhealthy. It does not
-install or synchronize Skillshare automatically; `mise run update -- --apply`
-only refreshes an already installed CLI.
+repository. This repository stores only the portable Skillshare configuration;
+its source and default extras directories live under `~/.config/skillshare/`,
+while their contents remain untracked here. Adopt or restore that configuration
+explicitly with `mise run adopt -- skillshare --apply` or `mise run restore --
+skillshare --apply`. The host check reports when the executable, configuration,
+source directory, targets, or known installation ownership is unhealthy. This
+repository does not install or synchronize Skillshare automatically; `mise run
+update -- --apply` only refreshes an already installed CLI.
 
 Use one authoring host to run `skillshare update --all`, review the resulting
 source changes, and publish them. Consumer hosts pull that reviewed Skillshare
@@ -525,14 +527,14 @@ source, rehydrate missing tracked repositories, and run `skillshare sync`; they
 do not independently update every external Skill. This single-writer boundary
 keeps `.metadata.json` and copied external Skills from diverging by host.
 
-The default `skillshare sync` operation synchronizes skills. A host-local
-configuration may also declare opt-in extras targets under `~/.codex` and
-`~/.claude`; an explicit extras sync writes those global harness directories.
-Amp global guidance is configured in Amp's personal or workspace settings and
-is not synchronized by this repository. Skill targets use merge mode, so
-target-local non-symlink Skill directories are preserved. In `skillshare diff
---json`, an `action` of `remove` with `is_sync: false` describes the direction
-of the difference; it is not a planned sync deletion.
+The default `skillshare sync` operation synchronizes skills. The tracked
+configuration also declares opt-in extras targets under `~/.codex` and
+`~/.claude`; only an explicit extras sync writes those global harness
+directories. Amp global guidance is configured in Amp's personal or workspace
+settings and is not synchronized by this repository. Skill targets use merge
+mode, so target-local non-symlink Skill directories are preserved. In
+`skillshare diff --json`, an `action` of `remove` with `is_sync: false`
+describes the direction of the difference; it is not a planned sync deletion.
 
 Before any external write, preview the complete synchronization and inspect each
 target's `local` and `pruned` counts:
