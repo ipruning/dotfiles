@@ -43,7 +43,8 @@ or multiple legitimate outcomes require an Operator decision before mutation.
 ## Start
 
 Git and mise are the only bootstrap requirements. On a machine without mise,
-install it first and expose its user binary to the current bootstrap process:
+install the latest release from the official installer and expose its user
+binary to the current bootstrap process:
 
 ```bash
 curl -fsSL https://mise.run | sh
@@ -65,15 +66,23 @@ update owner and may leave generated shell activation bound to the wrong
 binary. The upstream installer uses this standalone path by default, and this
 installation supports `mise self-update`.
 
+The installer intentionally has no version argument: host and Orb bootstrap
+take the latest mise release available from `https://mise.run` rather than
+pinning the mise binary. The hard `min_version` in both project and global
+configuration is only the compatibility floor (currently 2026.8.3), not the
+version bootstrap should install.
+
 `mise trust` is required because this repository declares a project virtual
 environment. The explicit `mise install --locked ...` command requires every
 project tool to have a URL and checksum for the current platform in
 `mise.lock`. `mise exec -- uv sync --locked` then materializes the locked Python
 dependencies, including the pinned Mackup fork, before shell activation makes
-uv directly available. Mise auto-install is disabled for task, exec, and
-command-not-found paths: these two commands form the explicit bootstrap
-boundary, and later commands fail instead of quietly downloading a missing
-tool or project dependency. Do not replace the explicit tool list with a bare
+uv directly available. Mise auto-install is disabled by the master
+`settings.auto_install = false` gate, covering task, exec, and command-not-found
+paths: these two commands form the explicit bootstrap boundary, and later
+commands fail instead of quietly downloading a missing tool or project
+dependency. Do not split the master gate into narrower task or exec settings.
+Do not replace the explicit tool list with a bare
 `mise install --locked`: Mise also loads the global configuration and would
 install host-wide tools during repository bootstrap.
 
@@ -261,7 +270,9 @@ apply because ownership cannot be established safely.
 This operation deliberately does not pull Git, self-update mise, update the
 lockfile, remove an alternate package-managed mise, or install tools during
 shell startup. A canonical binary older than the repository's hard minimum
-must still be updated directly before any repository task can launch.
+must still be updated directly before any repository task can launch. That
+minimum is a compatibility floor; bootstrap and self-update continue to select
+the latest official release rather than pinning mise to the floor.
 Backends that support lockfile URLs are artifact-locked; package-manager
 backends such as `gem:`, `go:`, and `npm:` are version-locked but retain their
 upstream package manager's artifact and integrity semantics.
@@ -397,7 +408,8 @@ git diff -- reference/.config/mise
 
 A hard `min_version` failure happens before mise can launch this repository's
 `update` task. In that bootstrap case, update the canonical binary directly
-with `~/.local/bin/mise self-update`, then run the task normally.
+with `~/.local/bin/mise self-update`, then run the task normally. The hard
+minimum is only the oldest compatible release, not a mise binary pin.
 
 `update` does not pull this repository, synchronize Skillshare content, or
 converge live configuration from `reference/`. Its Mise step may update the
