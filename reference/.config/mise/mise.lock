@@ -16,19 +16,19 @@ checksum = "blake3:6b5fe0bc6105452f663d5a15ee03574caab7ac642f0400266273d0b9562c9
 url = "https://repo.yarnpkg.com/4.18.0/packages/yarnpkg-cli/bin/yarn.js"
 
 [[tools.aube]]
-version = "1.38.0"
+version = "1.38.1"
 backend = "aqua:jdx/aube"
 
 [tools.aube."platforms.linux-x64"]
-checksum = "sha256:3e027b1e3acb071b76f4ccb4c0714c28a0caedcb1b3c4417f9c150c5445f9832"
-url = "https://github.com/jdx/aube/releases/download/v1.38.0/aube-v1.38.0-x86_64-unknown-linux-gnu.tar.gz"
-url_api = "https://api.github.com/repos/jdx/aube/releases/assets/505365949"
+checksum = "sha256:1f10a0a7bd38d94b348b52f785a7496dab6985775b3dfc2ba74914d1c739fba9"
+url = "https://github.com/jdx/aube/releases/download/v1.38.1/aube-v1.38.1-x86_64-unknown-linux-gnu.tar.gz"
+url_api = "https://api.github.com/repos/jdx/aube/releases/assets/508095865"
 provenance = "github-attestations"
 
 [tools.aube."platforms.macos-arm64"]
-checksum = "sha256:d1a2d56a3958ac4783c1f91d99421c9d4960fc61adfd7c7bff620d4c97258741"
-url = "https://github.com/jdx/aube/releases/download/v1.38.0/aube-v1.38.0-aarch64-apple-darwin.tar.gz"
-url_api = "https://api.github.com/repos/jdx/aube/releases/assets/505460266"
+checksum = "sha256:120989b5613a48333424c0aa4c3518573baec74836ba700d8d791900b974004b"
+url = "https://github.com/jdx/aube/releases/download/v1.38.1/aube-v1.38.1-aarch64-apple-darwin.tar.gz"
+url_api = "https://api.github.com/repos/jdx/aube/releases/assets/508129180"
 provenance = "github-attestations"
 
 [[tools.bun]]
@@ -119,19 +119,19 @@ url = "https://github.com/agavra/tuicr/releases/download/v0.21.0/tuicr-0.21.0-aa
 url_api = "https://api.github.com/repos/agavra/tuicr/releases/assets/503216017"
 
 [[tools."github:jihuanshe/linear"]]
-version = "0.0.1786305756-g786afcf"
+version = "0.0.1786361070-g484b146"
 backend = "github:jihuanshe/linear"
 
 [tools."github:jihuanshe/linear"."platforms.linux-x64"]
-checksum = "sha256:c61585cfe46e40daf7771e8ec340e84ed87eb716c65a9dcbdde42cb782584889"
-url = "https://github.com/jihuanshe/linear/releases/download/0.0.1786305756-g786afcf/linear-x86_64-unknown-linux-gnu.tar.xz"
-url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/507858176"
+checksum = "sha256:2678c22b27f311ffa2267774027e03b440afc62d613f038f53a6cfef1814fffa"
+url = "https://github.com/jihuanshe/linear/releases/download/0.0.1786361070-g484b146/linear-x86_64-unknown-linux-gnu.tar.xz"
+url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/508671894"
 provenance = "github-attestations"
 
 [tools."github:jihuanshe/linear"."platforms.macos-arm64"]
-checksum = "sha256:539efb91782cbfcd630aab32ff242718929b613b73f739ff7f267e2a4577028a"
-url = "https://github.com/jihuanshe/linear/releases/download/0.0.1786305756-g786afcf/linear-aarch64-apple-darwin.tar.xz"
-url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/507857970"
+checksum = "sha256:92263aee9f3e3048209011f3f69eecb317d4a2a4963ab931949e840f56884bbc"
+url = "https://github.com/jihuanshe/linear/releases/download/0.0.1786361070-g484b146/linear-aarch64-apple-darwin.tar.xz"
+url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/508671803"
 provenance = "github-attestations"
 provenance_verified = true
 
@@ -327,18 +327,18 @@ version = "1.97.1"
 backend = "core:rust"
 
 [[tools.skillshare]]
-version = "0.20.24"
+version = "0.20.25"
 backend = "aqua:runkids/skillshare"
 
 [tools.skillshare."platforms.linux-x64"]
-checksum = "sha256:bed077a4556a4e05e7513409fc65d44c0cfbcb28f427f3adf79944c84b4d3ddc"
-url = "https://github.com/runkids/skillshare/releases/download/v0.20.24/skillshare_0.20.24_linux_amd64.tar.gz"
-url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/500093153"
+checksum = "sha256:23235a9b1a673294d0b4336e70cb4a6369a7c9697b557dd095bcc7fa654686b5"
+url = "https://github.com/runkids/skillshare/releases/download/v0.20.25/skillshare_0.20.25_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/508164671"
 
 [tools.skillshare."platforms.macos-arm64"]
-checksum = "sha256:dfd8d6eeb83b9cae22fc0f479b2fb7e4c356fae5fe2a4404bbba8ef5b4578eb1"
-url = "https://github.com/runkids/skillshare/releases/download/v0.20.24/skillshare_0.20.24_darwin_arm64.tar.gz"
-url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/500093163"
+checksum = "sha256:631d9313a0638a6d1b7b90a5fc081a8efdfe5d2d87d880bdca04b97448ed304c"
+url = "https://github.com/runkids/skillshare/releases/download/v0.20.25/skillshare_0.20.25_darwin_arm64.tar.gz"
+url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/508164681"
 
 [[tools.starship]]
 version = "1.26.0"
