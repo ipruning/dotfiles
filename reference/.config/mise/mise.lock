@@ -251,7 +251,7 @@ backend = "npm:@openai/codex-security"
 allow_low_downloads = "true"
 
 [[tools."npm:agent-device"]]
-version = "0.20.6"
+version = "0.20.7"
 backend = "npm:agent-device"
 
 [[tools."npm:cf"]]
