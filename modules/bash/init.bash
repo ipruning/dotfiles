@@ -38,13 +38,12 @@ case $- in
       . "$_dotfiles_functions_dir/_mise.bash"
     fi
     bind '"\C-w": "\e\C-?"'
-    # Herdr panes retain SSH_TTY, so HERDR_ENV is the recursion boundary.
-    # HERDR_SSH_AUTOSTART=0 leaves an explicit recovery path to the shell.
-    if [ -n "${SSH_TTY:-}" ] && [ -z "${HERDR_ENV:-}" ] && \
-      [ "${HERDR_SSH_AUTOSTART:-1}" != 0 ] && \
-      herdr --version >/dev/null 2>&1; then
-      exec herdr
-    fi
+    # SSH logins intentionally open an ordinary shell; start Herdr explicitly.
+    # if [ -n "${SSH_TTY:-}" ] && [ -z "${HERDR_ENV:-}" ] && \
+    #   [ "${HERDR_SSH_AUTOSTART:-1}" != 0 ] && \
+    #   herdr --version >/dev/null 2>&1; then
+    #   exec herdr
+    # fi
     ;;
 esac
 

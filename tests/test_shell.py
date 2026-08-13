@@ -677,7 +677,7 @@ def test_bash_init_activates_mise_after_prompt_tools(tmp_path: Path) -> None:
     assert completed.stdout == "starship_precmd;zoxide_hook;mise_hook"
 
 
-def test_bash_init_autostarts_herdr_only_for_top_level_interactive_ssh(
+def test_bash_init_does_not_autostart_herdr_for_interactive_ssh(
     tmp_path: Path,
 ) -> None:
     repo_root = Path(__file__).resolve().parents[1]
@@ -703,7 +703,7 @@ def test_bash_init_autostarts_herdr_only_for_top_level_interactive_ssh(
         "SSH_TTY": "/dev/pts/test",
     }
 
-    started = subprocess.run(
+    completed = subprocess.run(
         [
             bash,
             "--noprofile",
@@ -717,26 +717,8 @@ def test_bash_init_autostarts_herdr_only_for_top_level_interactive_ssh(
         text=True,
     )
 
-    assert started.returncode == 0
-    assert started.stdout.splitlines() == ["HERDR_STARTED"]
-
-    for bypass in ({"HERDR_ENV": "1"}, {"HERDR_SSH_AUTOSTART": "0"}):
-        bypassed = subprocess.run(
-            [
-                bash,
-                "--noprofile",
-                "--norc",
-                "-ic",
-                f'. "{bash_init}"; printf "%s\\n" SHELL_CONTINUED',
-            ],
-            env=environment | bypass,
-            check=False,
-            capture_output=True,
-            text=True,
-        )
-
-        assert bypassed.returncode == 0
-        assert bypassed.stdout.splitlines() == ["SHELL_CONTINUED"]
+    assert completed.returncode == 0
+    assert completed.stdout.splitlines() == ["SHELL_CONTINUED"]
 
     noninteractive = subprocess.run(
         [
