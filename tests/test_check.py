@@ -692,17 +692,20 @@ def test_skillshare_targets_report_ready_local_and_broken_entries(
     assert claude_finding.severity is Severity.OK
     universal_findings = findings["skillshare.target.universal"]
     assert {finding.code for finding in universal_findings} == {
-        "skillshare.target_local_skills",
+        "skillshare.target_local_skills_preserved",
         "skillshare.target_broken_links",
         "skillshare.target_external_links",
     }
-    assert "local-skill" in universal_findings[0].message
-    assert "broken-skill" in universal_findings[1].message
-    assert "external-skill" in universal_findings[2].message
-    assert "skillshare sync --all --global --dry-run --force --json" in (
-        universal_findings[0].action or ""
+    local_finding = next(
+        finding
+        for finding in universal_findings
+        if finding.code == "skillshare.target_local_skills_preserved"
     )
-    assert "local > 0 with pruned == 0" in (universal_findings[0].action or "")
+    assert local_finding.severity is Severity.OK
+    assert "local-skill" in local_finding.message
+    assert local_finding.action is None
+    assert any("broken-skill" in finding.message for finding in universal_findings)
+    assert any("external-skill" in finding.message for finding in universal_findings)
 
 
 def test_skillshare_targets_follow_configured_names_and_paths(tmp_path: Path) -> None:

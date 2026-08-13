@@ -181,14 +181,25 @@ def _skillshare_target_findings(
             )
             continue
         if local:
+            preserved = mode == "merge"
             findings.append(
                 Finding(
                     f"skillshare.target.{name}",
-                    Severity.WARN,
-                    "skillshare.target_local_skills",
-                    f"Skillshare target {name} has {len(local)} non-symlink Skill entries: {', '.join(local)}",
+                    Severity.OK if preserved else Severity.WARN,
+                    (
+                        "skillshare.target_local_skills_preserved"
+                        if preserved
+                        else "skillshare.target_local_skills"
+                    ),
+                    (
+                        f"Skillshare target {name} has {len(local)} non-symlink Skill entries preserved by merge mode: {', '.join(local)}"
+                        if preserved
+                        else f"Skillshare target {name} has {len(local)} non-symlink Skill entries under {mode} mode: {', '.join(local)}"
+                    ),
                     target_path,
-                    "Preview actual sync behavior with skillshare sync --all --global --dry-run --force --json and report local and pruned separately. local > 0 with pruned == 0 is preserved but still needs Operator ownership; pruned > 0 is planned deletion and requires explicit confirmation. If the preview fails, report that inspection is incomplete.",
+                    None
+                    if preserved
+                    else "Inspect target-local Skill ownership before synchronizing.",
                 ),
             )
         if broken_links:

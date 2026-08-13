@@ -378,17 +378,17 @@ steps after a failure. Mise is the exception: its self-update, tool upgrade,
 and reshim steps always invoke `~/.local/bin/mise` explicitly. The self-update
 runs without the unrelated plugin update side effect. The preview is the
 authoritative list of supported updaters and the exact commands available on
-the current host. Any failed step makes the command exit non-zero. It
+the current host. `PLANNED` means the updater command is available; the updater
+determines whether a newer version exists during apply. Any failed step makes
+the command exit non-zero. It
 deliberately does not run `brew cleanup`, `brew autoremove`, or `mise prune`;
 removal and pruning require a separate, explicit operation.
 
-Preview output marks updaters that may need operator attention. In particular,
-Tigris may need sudo to replace `/usr/local/bin/tigris`; run its displayed
-interactive command before applying the remaining plan. During a JSON apply,
-stdout remains one machine-readable document while stderr reports `RUN`,
-30-second `STILL RUNNING`, `DONE`, and contextual failure records. Child output
-is discarded so it cannot corrupt JSON or hold the task open through inherited
-pipes. An agent can still distinguish active work from a stalled command.
+During a JSON apply, stdout remains one machine-readable document while stderr
+reports `RUN`, 30-second `STILL RUNNING`, `DONE`, and contextual failure
+records. Child output is discarded so it cannot corrupt JSON or hold the task
+open through inherited pipes. An agent can still distinguish active work from
+a stalled command.
 
 For mise, the preview records the active installed tool versions. An apply
 updates the standalone CLI first, then passes that explicit list to
@@ -419,9 +419,9 @@ separately:
 mise run runtime
 ```
 
-Review the runtime preview and apply it only when it plans relevant shell
-changes. Restart each affected shell to load generated integrations; for Zsh,
-open a new shell or run `exec zsh`:
+After updating tools, refresh the generated runtime. Restart each affected
+shell to load generated integrations; for Zsh, open a new shell or run
+`exec zsh`:
 
 ```bash
 mise run runtime -- --apply
@@ -531,7 +531,8 @@ configuration also declares opt-in extras targets under `~/.codex` and
 `~/.claude`; only an explicit extras sync writes those global harness
 directories. Amp global guidance is configured in Amp's personal or workspace
 settings and is not synchronized by this repository. Skill targets use merge
-mode, so target-local non-symlink Skill directories are preserved. In
+mode, so target-local non-symlink Skill directories are healthy and preserved.
+In
 `skillshare diff --json`, an `action` of `remove` with `is_sync: false`
 describes the direction of the difference; it is not a planned sync deletion.
 
@@ -543,12 +544,11 @@ skillshare sync --all --global --dry-run --force --json
 ```
 
 `local > 0` with `pruned == 0` means synchronization preserves the local
-entries, although their ownership still needs an Operator decision. Only
-`pruned > 0` means the preview plans deletion; list those entries and request
-explicit confirmation. A failed preview leaves inspection incomplete and must
-not be reported as safe. After reviewing the complete preview, an extras-only
-preview remains available with `skillshare sync extras --dry-run --force
---json`.
+entries. Only `pruned > 0` means the preview plans deletion; list those entries
+and request explicit confirmation. A failed preview leaves inspection
+incomplete and must not be reported as safe. After reviewing the complete
+preview, an extras-only preview remains available with `skillshare sync extras
+--dry-run --force --json`.
 
 Installing Skillshare, choosing a source repository, and synchronizing skills
 are separate operator decisions. Linux Lite reports the missing capability and

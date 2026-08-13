@@ -31,12 +31,12 @@ MISE_TOOLS_NOTE = (
     "mise.tools uses --bump and may update tracked reference/.config/mise files "
     "when the live global config is linked to this checkout."
 )
+PREVIEW_NOTE = (
+    "planned means the updater command is available; each updater determines "
+    "whether an update exists during apply."
+)
 MISE_REF_PREFIXES = ("branch:", "ref:", "rev:", "tag:")
 PROGRESS_INTERVAL_SECONDS = 30
-TIGRIS_ATTENTION = (
-    "may require sudo to replace /usr/local/bin/tigris; run `tigris update` in "
-    "an interactive terminal before applying the remaining plan"
-)
 
 
 class UpdateStatus(StrEnum):
@@ -53,7 +53,6 @@ class UpdateStep:
     command: tuple[str, ...]
     timeout_seconds: int
     path_prepend: tuple[Path, ...] = ()
-    attention: str | None = None
 
 
 @dataclass(frozen=True)
@@ -270,13 +269,7 @@ def _update_steps(home: Path) -> tuple[UpdateStep, ...]:
         UpdateStep("amp", "amp", ("amp", "update"), 300),
         UpdateStep("claude", "claude", ("claude", "update"), 300),
         UpdateStep("codex", "codex", ("codex", "update"), 300),
-        UpdateStep(
-            "tigris",
-            "tigris",
-            ("tigris", "update"),
-            300,
-            attention=TIGRIS_ATTENTION,
-        ),
+        UpdateStep("tigris", "tigris", ("tigris", "update"), 300),
         UpdateStep(
             "pi.extensions",
             "pi",
@@ -456,12 +449,15 @@ def _next_commands(report: UpdateReport) -> tuple[str, ...]:
 
 
 def _notes(report: UpdateReport) -> tuple[str, ...]:
+    notes = []
+    if not report.apply:
+        notes.append(PREVIEW_NOTE)
     if any(
         result.step.name == "mise.tools" and result.status is not UpdateStatus.SKIPPED
         for result in report.results
     ):
-        return (MISE_TOOLS_NOTE,)
-    return ()
+        notes.append(MISE_TOOLS_NOTE)
+    return tuple(notes)
 
 
 def _document(report: UpdateReport) -> dict[str, object]:
@@ -480,7 +476,7 @@ def _document(report: UpdateReport) -> dict[str, object]:
                         str(directory) for directory in result.step.path_prepend
                     ],
                 },
-                "attention": result.step.attention,
+                "attention": None,
                 "status": result.status.value,
                 "exit_code": result.exit_code,
                 "duration_ms": result.duration_ms,
@@ -514,8 +510,6 @@ def _render(report: UpdateReport) -> None:
         label = result.status.value.upper()
         if result.status is UpdateStatus.PLANNED:
             print(f"{label:7} {result.step.name}: {_display_command(result.step)}")
-            if result.step.attention:
-                print(f"ATTENTION {result.step.name}: {result.step.attention}")
         elif result.status is UpdateStatus.SUCCEEDED:
             print(f"{label:7} {result.step.name}{duration(result)}")
         elif result.status is UpdateStatus.SKIPPED:

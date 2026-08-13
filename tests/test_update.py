@@ -147,9 +147,13 @@ def test_update_previews_exact_plan_by_default_without_running_tools(
     assert document["summary"] == {"planned": 6, "skipped": 8}
     assert document["notes"] == [
         (
+            "planned means the updater command is available; each updater "
+            "determines whether an update exists during apply."
+        ),
+        (
             "mise.tools uses --bump and may update tracked reference/.config/mise "
             "files when the live global config is linked to this checkout."
-        )
+        ),
     ]
     assert document["next"] == ["mise run update -- --apply"]
     steps = {step["name"]: step for step in document["steps"]}
@@ -158,11 +162,11 @@ def test_update_previews_exact_plan_by_default_without_running_tools(
     assert steps["mise.tools"]["environment"]["PATH_prepend"] == expected_mise_path
     assert steps["mise.shims"]["environment"]["PATH_prepend"] == expected_mise_path
     assert steps["brew.metadata"]["environment"]["PATH_prepend"] == []
-    assert "sudo" in steps["tigris"]["attention"]
+    assert steps["tigris"]["attention"] is None
     assert not log_path.exists()
 
 
-def test_update_preview_flags_tigris_interactive_sudo(tmp_path: Path) -> None:
+def test_update_preview_treats_tigris_like_other_updaters(tmp_path: Path) -> None:
     completed, _log_path = _run_update(
         tmp_path,
         "--json",
@@ -172,8 +176,7 @@ def test_update_preview_flags_tigris_interactive_sudo(tmp_path: Path) -> None:
     document = json.loads(completed.stdout)
     tigris = next(step for step in document["steps"] if step["name"] == "tigris")
     assert tigris["status"] == "planned"
-    assert "sudo" in tigris["attention"]
-    assert "interactive terminal" in tigris["attention"]
+    assert tigris["attention"] is None
 
 
 def test_update_gives_package_managers_transaction_scale_timeouts(
