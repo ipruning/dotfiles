@@ -163,10 +163,12 @@ COMPLETION_SPECS = (
     ("linear", "linear", ("linear", "completions", "zsh"), "_linear", ()),
     ("sesh", "sesh", ("sesh", "completion", "zsh"), "_sesh", ()),
     ("op", "op", ("op", "completion", "zsh"), "_op", ()),
+    # TODO: Remove the explicit httpx dependency once `uvx llm` can render
+    # `_LLM_COMPLETE=zsh_source` from its published dependencies alone.
     (
         "llm",
         "uvx",
-        ("uvx", "llm"),
+        ("uvx", "--with", "httpx", "llm"),
         "_llm",
         (("_LLM_COMPLETE", "zsh_source"),),
     ),

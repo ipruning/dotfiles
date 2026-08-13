@@ -313,7 +313,9 @@ def test_runtime_generates_llm_completion_through_uvx(tmp_path: Path) -> None:
         bin_dir,
         "uvx",
         'test "$1" = --offline || exit 9\n'
-        'test "$2" = llm || exit 7\n'
+        'test "$2" = --with || exit 7\n'
+        'test "$3" = httpx || exit 6\n'
+        'test "$4" = llm || exit 5\n'
         'test "$_LLM_COMPLETE" = zsh_source || exit 8\n'
         "printf 'llm completion\\n'\n",
     )
@@ -323,7 +325,13 @@ def test_runtime_generates_llm_completion_through_uvx(tmp_path: Path) -> None:
     assert completed.returncode == 0
     steps = {step["name"]: step for step in json.loads(completed.stdout)["steps"]}
     assert steps["completion.llm"]["status"] == "succeeded"
-    assert steps["completion.llm"]["command"] == ["uvx", "--offline", "llm"]
+    assert steps["completion.llm"]["command"] == [
+        "uvx",
+        "--offline",
+        "--with",
+        "httpx",
+        "llm",
+    ]
     assert completion.read_text() == "llm completion\n"
 
 
