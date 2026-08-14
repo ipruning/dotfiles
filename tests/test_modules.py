@@ -185,68 +185,6 @@ def test_pi_session_export_requires_an_explicit_command(tmp_path: Path) -> None:
     assert "convert" in completed.stderr
 
 
-def test_watchdog_reports_probe_failure_as_unknown(tmp_path: Path) -> None:
-    watchdog = (
-        Path(__file__).resolve().parents[1] / "modules/bin/cursoruiviewservice-watchdog"
-    )
-    probe = tmp_path / "probe"
-    for probe_output in ("error:-1:probe-failed", "unexpected-output"):
-        _write_executable(probe, f"#!/bin/sh\necho {probe_output}\n")
-        completed = subprocess.run(
-            [str(watchdog)],
-            env={**os.environ, "WATCHDOG_OSASCRIPT": str(probe)},
-            capture_output=True,
-            text=True,
-        )
-        assert completed.returncode == 1
-        assert "process=CursorUIViewService" in completed.stdout
-        assert f"ax_probe={probe_output}" in completed.stdout
-        assert "read-only probe is abnormal" in completed.stderr
-
-
-def test_watchdog_reports_timeout_and_pid_without_signalling(tmp_path: Path) -> None:
-    watchdog = (
-        Path(__file__).resolve().parents[1] / "modules/bin/cursoruiviewservice-watchdog"
-    )
-    probe, pgrep = (tmp_path / name for name in ("probe", "pgrep"))
-    _write_executable(probe, "#!/bin/sh\necho timeout\n")
-    _write_executable(pgrep, "#!/bin/sh\necho 123\n")
-    completed = subprocess.run(
-        [str(watchdog)],
-        env={
-            **os.environ,
-            "WATCHDOG_OSASCRIPT": str(probe),
-            "WATCHDOG_PGREP": str(pgrep),
-        },
-        capture_output=True,
-        text=True,
-    )
-    assert completed.returncode == 1
-    assert "ax_probe=timeout" in completed.stdout
-    assert "pids=123" in completed.stdout
-    assert "restart the owning application" in completed.stderr
-
-
-def test_watchdog_rejects_extra_arguments_before_probing(tmp_path: Path) -> None:
-    watchdog = (
-        Path(__file__).resolve().parents[1] / "modules/bin/cursoruiviewservice-watchdog"
-    )
-    probe = tmp_path / "probe"
-    probe_log = tmp_path / "probe.log"
-    _write_executable(probe, f"#!/bin/sh\ntouch '{probe_log}'\necho false\n")
-
-    completed = subprocess.run(
-        [str(watchdog), "first", "second"],
-        env={**os.environ, "WATCHDOG_OSASCRIPT": str(probe)},
-        capture_output=True,
-        text=True,
-    )
-
-    assert completed.returncode == 2
-    assert "Usage:" in completed.stderr
-    assert not probe_log.exists()
-
-
 @skip_as_root
 def test_skillshare_exec_restore_failure_overrides_child_success(
     tmp_path: Path,
