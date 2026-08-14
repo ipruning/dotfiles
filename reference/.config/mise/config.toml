@@ -51,6 +51,9 @@ uv = "latest"
 xurl = "latest"
 zig = "latest"
 zoxide = "latest"
+codex = "latest"
+gh = "latest"
+"aqua:modem-dev/hunk" = "latest"
 
 [settings]
 auto_install = false
