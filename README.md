@@ -138,12 +138,13 @@ does not create an identity, install optional tools, clone private repositories,
 or synchronize Skillshare extras. The Bash module adds `~/.local/bin` and mise's
 shim directory to `PATH`, then activates mise and guarded Starship, Atuin, and
 Zoxide integrations in interactive shells. It provides `..`, `...`, a `Ctrl-W`
-binding that deletes the same path segment as the macOS Zsh configuration, and
+binding that deletes the same path segment as the macOS Zsh configuration,
+reserves `Ctrl-R` for Atuin when later startup files initialize FZF, and provides
 Zoxide's `j` command while leaving the ordinary up arrow to Bash. Interactive
 SSH logins remain ordinary shells; start Herdr explicitly when needed. It does
-not expose `modules/bin` or `generated/bin` on Linux. The managed block is
-placed before Ubuntu's non-interactive early return, so direct SSH commands
-also receive the user and mise paths without interactive shell initialization.
+not expose `modules/bin` or `generated/bin` on Linux. The managed block is placed
+before Ubuntu's non-interactive early return, so direct SSH commands also receive
+the user and mise paths without interactive shell initialization.
 
 The Linux Lite drift profile observes Git, Mise, portable Atuin and Btop
 configuration, and the availability of Btop, Starship, Atuin, Zoxide, Herdr,

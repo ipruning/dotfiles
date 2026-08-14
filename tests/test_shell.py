@@ -582,6 +582,8 @@ def test_bash_init_adds_navigation_editing_and_guarded_history_tools(
             "-ic",
             (
                 f'. "{bash_init}"; '
+                'test "${FZF_CTRL_R_COMMAND+x}" = x; '
+                'test -z "$FZF_CTRL_R_COMMAND"; '
                 "alias ..; alias ...; "
                 "bind -s; "
                 'printf "READY=%s:%s\\n" "$ATUIN_READY" "$ZOXIDE_READY"'
@@ -611,7 +613,8 @@ def test_bash_init_adds_navigation_editing_and_guarded_history_tools(
             "-ic",
             (
                 f'. "{bash_init}"; '
-                'test -z "${ATUIN_READY:-}" && test -z "${ZOXIDE_READY:-}"'
+                'test -z "${ATUIN_READY:-}" && test -z "${ZOXIDE_READY:-}" && '
+                'test -z "${FZF_CTRL_R_COMMAND+x}"'
             ),
         ],
         env=environment,

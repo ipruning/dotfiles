@@ -27,6 +27,9 @@ case $- in
     alias ...='cd ../..'
     if command -v atuin >/dev/null 2>&1 && [ -f "$_dotfiles_functions_dir/_atuin.bash" ]; then
       . "$_dotfiles_functions_dir/_atuin.bash"
+      # Later startup files such as Omarchy may initialize FZF. Its empty
+      # history command keeps Ctrl-R with Atuin while retaining other bindings.
+      export FZF_CTRL_R_COMMAND=
     fi
     if command -v zoxide >/dev/null 2>&1 && [ -f "$_dotfiles_functions_dir/_zoxide.bash" ]; then
       . "$_dotfiles_functions_dir/_zoxide.bash"
