@@ -3,6 +3,12 @@ settings.digitForRepeat = false;
 settings.focusAfterClosed = "right";
 settings.focusFirstCandidate = true;
 settings.tabsThreshold = 0;
+settings.blocklistPattern = /^https?:\/\/jetkvm\.mastodon-beta\.ts\.net(?::\d+)?(?:[/?#]|$)/i;
+
+function siteUrlPattern(domains) {
+  const alternatives = domains.map((domain) => domain.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|");
+  return new RegExp(`^https?://(?:[^./:?#]+\\.)*(?:${alternatives})(?::\\d+)?(?:[/?#]|$)`, "i");
+}
 
 api.Hints.style(`
   font-family: MonoLisaCode;
@@ -20,17 +26,29 @@ api.addSearchAlias("k", "kagi", SEARCH_ENGINE, "s");
 settings.defaultSearchEngine = "k";
 
 // URL and clipboard operations
-api.mapkey("ym", "Copy current page URL as Markdown link", () =>
+api.mapkey("ymd", "Copy current page URL as Markdown link", () =>
   api.Clipboard.write(`[${document.title}](${window.location.href})`),
 );
 
-// URL validation pattern
-// Matches: domain.com, sub.domain.com, http(s)://domain.com, with optional path; allow longer TLDs
-const URL_PATTERN = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,63})([\/\w .-]*)*\/?$/i;
+function parseHttpUrl(text) {
+  const hasHttpScheme = /^https?:\/\//i.test(text);
+  const candidate = hasHttpScheme ? text : `https://${text}`;
+
+  try {
+    const url = new URL(candidate);
+    const isLikelyHost =
+      hasHttpScheme ||
+      (!(url.username || url.password) &&
+        (url.hostname === "localhost" || url.hostname.includes(".") || url.hostname.startsWith("[")));
+    return ["http:", "https:"].includes(url.protocol) && isLikelyHost ? url.href : null;
+  } catch {
+    return null;
+  }
+}
 
 // Error handling for clipboard operations
 function handleClipboardError(error) {
-  api.Front.showBanner(`Failed to access clipboard: ${error.message}`, 3000);
+  api.Front.showBanner(`Failed to access clipboard: ${error?.message ?? String(error)}`, 3000);
 }
 
 /**
@@ -49,13 +67,8 @@ function processClipboardText(clipText, openInNewTab = false) {
       },
     };
 
-    // If text is a valid URL, open it directly (adding https:// if needed)
-    // Otherwise, use it as a search query
-    if (URL_PATTERN.test(clipText)) {
-      markInfo.url = clipText.startsWith("http") ? clipText : `https://${clipText}`;
-    } else {
-      markInfo.url = `${SEARCH_ENGINE}${encodeURIComponent(clipText)}`;
-    }
+    const url = parseHttpUrl(clipText);
+    markInfo.url = url ?? `${SEARCH_ENGINE}${encodeURIComponent(clipText)}`;
 
     api.RUNTIME("openLink", markInfo);
   } catch (error) {
@@ -64,25 +77,23 @@ function processClipboardText(clipText, openInNewTab = false) {
 }
 
 // Clipboard URL opening mappings
-api.mapkey("go", "Open URL in clipboard", () =>
-  api.Clipboard.read((response) => {
-    if (response?.data) {
-      processClipboardText(response.data.trim(), false);
-    } else {
-      handleClipboardError(new Error("No content in clipboard"));
-    }
-  }),
-);
+function openClipboardText(openInNewTab) {
+  try {
+    api.Clipboard.read((response) => {
+      const clipText = response?.data?.trim();
+      if (clipText) {
+        processClipboardText(clipText, openInNewTab);
+      } else {
+        handleClipboardError(new Error("No content in clipboard"));
+      }
+    });
+  } catch (error) {
+    handleClipboardError(error);
+  }
+}
 
-api.mapkey("gO", "Open URL in clipboard in new tab", () =>
-  api.Clipboard.read((response) => {
-    if (response?.data) {
-      processClipboardText(response.data.trim(), true);
-    } else {
-      handleClipboardError(new Error("No content in clipboard"));
-    }
-  }),
-);
+api.mapkey("go", "Open URL in clipboard", () => openClipboardText(false));
+api.mapkey("gO", "Open URL in clipboard in new tab", () => openClipboardText(true));
 
 // Timeout durations for PassThrough mode
 const TIMEOUT_SHORT_MS = 1500;
@@ -90,78 +101,42 @@ const TIMEOUT_LONG_MS = 300000;
 
 api.mapkey("p", "Enter PassThrough mode", () => {
   const seconds = TIMEOUT_SHORT_MS / 1000;
-  api.Front.showBanner(`Entering PassThrough mode for ${seconds}s, press ESC to exit early`, 1600);
+  api.Front.showBanner(`PassThrough exits after ${seconds}s without a keypress, or when ESC is pressed`, 1600);
   api.Normal.passThrough(TIMEOUT_SHORT_MS);
 });
 
 api.mapkey("P", "Enter PassThrough mode", () => {
   const seconds = TIMEOUT_LONG_MS / 1000;
-  api.Front.showBanner(`Entering PassThrough mode for ${seconds}s, press ESC to exit early`, 1600);
+  api.Front.showBanner(`PassThrough exits after ${seconds}s without a keypress, or when ESC is pressed`, 1600);
   api.Normal.passThrough(TIMEOUT_LONG_MS);
 });
 
 api.map("<Ctrl-u>", "e");
 api.map("<Ctrl-d>", "d");
 
-api.unmap("?", /\b(kagi\.com)\b/i);
-api.unmap("h", /\b(kagi\.com)\b/i); // Navigation
-api.unmap("j", /\b(kagi\.com)\b/i); // Navigation
-api.unmap("k", /\b(kagi\.com)\b/i); // Navigation
-api.unmap("l", /\b(kagi\.com)\b/i); // Navigation
-api.unmap("/", /\b(kagi\.com)\b/i); // Search
-api.unmap("q", /\b(kagi\.com)\b/i); // Open quick answer
-api.unmap("s", /\b(kagi\.com)\b/i); // Open site info modal on the currently highlighted result if applicable, or close it if already open
+const KAGI_RE = siteUrlPattern(["kagi.com"]);
+api.unmap("?", KAGI_RE);
+api.unmap("h", KAGI_RE); // Navigation
+api.unmap("j", KAGI_RE); // Navigation
+api.unmap("k", KAGI_RE); // Navigation
+api.unmap("l", KAGI_RE); // Navigation
+api.unmap("/", KAGI_RE); // Search
+api.unmap("q", KAGI_RE); // Open quick answer
+api.unmap("s", KAGI_RE); // Site info; also removes Surfingkeys mappings prefixed with s
 
-api.unmap("?", /\b(x\.com)\b/i);
-api.unmap("j", /\b(x\.com)\b/i); // Navigation
-api.unmap("k", /\b(x\.com)\b/i); // Navigation
-api.unmap("g", /\b(x\.com)\b/i); // Navigation
-api.unmap("/", /\b(x\.com)\b/i); // Search
-api.unmap(".", /\b(x\.com)\b/i); // Refresh
-api.unmap("n", /\b(x\.com)\b/i); // New post
-api.unmap("m", /\b(x\.com)\b/i); // New direct message
-api.unmap("l", /\b(x\.com)\b/i); // Like
-api.unmap("r", /\b(x\.com)\b/i); // Reply
-api.unmap("s", /\b(x\.com)\b/i); // Share post
-api.unmap("u", /\b(x\.com)\b/i); // Mute account
-
-// const BLOCK_DOMAINS = [
-//   "boot.dev",
-//   "excalidraw.com",
-//   "feishu.cn",
-//   "figma.com",
-//   "linear.app",
-//   "motherduck.com",
-//   "notion.so",
-//   "photos.google.com",
-//   "roamresearch.com",
-//   "sshx.io",
-// ];
-
-// const blocklistRe = new RegExp(
-//   BLOCK_DOMAINS.map(d => d.replace(/\./g, "\\.")).join("|"),
-//   "i",
-// );
-
-// settings.blocklistPattern = blocklistRe;
-
-// api.unmapAllExcept(
-//   [
-//     "e",
-//     "d",
-//     "E",
-//     "R",
-//     "B",
-//     "F",
-//     "S",
-//     "D",
-//     "t",
-//     "T",
-//     "p",
-//     "P",
-//   ],
-//   /boot.dev|feishu.cn|motherduck.com|notion.so|photos.google.com|roamresearch.com|sshx.io|/,
-// );
+const X_RE = siteUrlPattern(["x.com"]);
+api.unmap("?", X_RE);
+api.unmap("j", X_RE); // Navigation
+api.unmap("k", X_RE); // Navigation
+api.unmap("g", X_RE); // Navigation; also removes Surfingkeys mappings prefixed with g
+api.unmap("/", X_RE); // Search
+api.unmap(".", X_RE); // Refresh
+api.unmap("n", X_RE); // New post
+api.unmap("m", X_RE); // New direct message
+api.unmap("l", X_RE); // Like
+api.unmap("r", X_RE); // Reply
+api.unmap("s", X_RE); // Share post; also removes Surfingkeys mappings prefixed with s
+api.unmap("u", X_RE); // Mute account
 
 const LIMITED_DOMAINS = [
   "app.graphite.com",
@@ -170,7 +145,6 @@ const LIMITED_DOMAINS = [
   "exe.dev",
   "feishu.cn",
   "figma.com",
-  "jetkvm.mastodon-beta.ts.net",
   "linear.app",
   "motherduck.com",
   "notion.so",
@@ -179,8 +153,10 @@ const LIMITED_DOMAINS = [
   "sshx.io",
 ];
 
-const limitedRe = new RegExp(LIMITED_DOMAINS.map((d) => d.replace(/\./g, "\\.")).join("|"), "i");
+const LIMITED_RE = siteUrlPattern(LIMITED_DOMAINS);
 
 const KEEP_KEYS = ["e", "d", "E", "R", "B", "F", "S", "D", "t", "T", "p", "P"];
 
-api.unmapAllExcept(KEEP_KEYS, limitedRe);
+api.unmapAllExcept(KEEP_KEYS, LIMITED_RE);
+api.map("<Ctrl-u>", "e", LIMITED_RE);
+api.map("<Ctrl-d>", "d", LIMITED_RE);
