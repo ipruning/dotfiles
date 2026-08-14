@@ -20,6 +20,7 @@ yarn = "aqua:yarnpkg/berry"
 zoxide = "aqua:ajeetdsouza/zoxide"
 
 [tools]
+"aqua:modem-dev/hunk" = "latest"
 "aqua:yarnpkg/berry" = "latest"
 "cargo:https://github.com/ipruning/atuin" = { version = "rev:38e9d788024cf36898b42fa46e7c13d8c774eede", crate = "atuin", bin = "atuin", locked = true }
 "gem:kamal" = "latest"
@@ -33,7 +34,9 @@ zoxide = "aqua:ajeetdsouza/zoxide"
 agent-browser = "latest"
 aube = "latest"
 bun = "latest"
+codex = "latest"
 deno = "latest"
+gh = "latest"
 go = "latest"
 herdr = "latest"
 hunk = "latest"
@@ -51,9 +54,6 @@ uv = "latest"
 xurl = "latest"
 zig = "latest"
 zoxide = "latest"
-codex = "latest"
-gh = "latest"
-"aqua:modem-dev/hunk" = "latest"
 
 [settings]
 auto_install = false
