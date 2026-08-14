@@ -17,15 +17,14 @@ official fix.
 
 ## Safety model
 
-The installed LaunchAgent runs one short check every two minutes; it is not a
+The installed LaunchAgent runs one short check every 30 seconds; it is not a
 resident `KeepAlive` daemon. It monitors only unless installation explicitly
 opts into automatic recycling. An automatic recycle requires all of these
 conditions:
 
 - the exact Apple executable has one process owned by the current user;
-- `/usr/bin/footprint` reports at least 512 MiB for three consecutive checks;
-- keyboard and pointer input have been idle for at least 60 seconds; and
-- no recycle has been attempted in the previous two hours.
+- `/usr/bin/footprint` reports at least 512 MiB in one check; and
+- no recycle has been attempted in the previous five minutes.
 
 Recovery uses the launchd-owned service target:
 
@@ -33,17 +32,18 @@ Recovery uses the launchd-owned service target:
 user/<uid>/com.apple.TextInputUI.xpc.CursorUIViewService
 ```
 
-It confirms launchd still owns the measured PID and repeats the footprint and
-idle checks immediately before calling `launchctl kickstart -kp`. It then
-verifies a different PID, the exact Apple executable path, and the replacement
-footprint. Failure is logged and enters the same cooldown; it never falls back
-to a name-based PID loop or raw `SIGKILL`.
+It confirms launchd still owns the measured PID and repeats the footprint check
+immediately before sending `SIGKILL` to that exact PID. It then verifies that
+the old PID disappeared. If launchd starts a replacement immediately, it also
+verifies the exact Apple executable path and replacement footprint. Failure is
+logged and enters the same cooldown; it never uses a name-based PID loop.
 
-Automatic recycling is opt-in because `kickstart -k` still terminates an Apple
-UI service and cannot atomically assert an expected PID. A community report
-warns that terminating this service may freeze the UI; the extra gates narrow
-that risk but cannot prove it absent. The undocumented global FeatureFlags
-override is not used.
+Direct `SIGKILL` is necessary because macOS rejects `launchctl kickstart -k`
+for this Apple XPC service while System Integrity Protection is enabled.
+Automatic recycling remains opt-in because terminating the service may still
+briefly disrupt or freeze the UI, and PID identity cannot be asserted
+atomically between inspection and signaling. The undocumented global
+FeatureFlags override is not used.
 
 The Accessibility timeout probe from the legacy command remains deliberately
 removed: one timeout is not sufficient authorization to recycle a service, and
@@ -67,8 +67,8 @@ modules/cursoruiviewservice-watchdog/cursoruiviewservice-watchdog install --auto
 cursoruiviewservice-watchdog status --json
 ```
 
-Manual recycling previews by default and bypasses the automatic threshold,
-idle, and cooldown gates only with explicit application:
+Manual recycling previews by default and bypasses the automatic threshold and
+cooldown gates only with explicit application:
 
 ```zsh
 cursoruiviewservice-watchdog recycle --json

@@ -26,7 +26,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-VERSION = "1.0.0"
+VERSION = "1.1.0"
 SCHEMA_VERSION = 1
 LABEL = "com.ipruning.cursoruiviewservice-watchdog"
 SERVICE_LABEL = "com.apple.TextInputUI.xpc.CursorUIViewService"
@@ -35,10 +35,8 @@ EXPECTED_EXECUTABLE = Path(
     "XPCServices/CursorUIViewService.xpc/Contents/MacOS/CursorUIViewService"
 )
 FOOTPRINT_THRESHOLD_BYTES = 512 * 1024**2
-REQUIRED_HIGH_SAMPLES = 3
-MINIMUM_IDLE_SECONDS = 60
-COOLDOWN_SECONDS = 2 * 60 * 60
-CHECK_INTERVAL_SECONDS = 2 * 60
+COOLDOWN_SECONDS = 5 * 60
+CHECK_INTERVAL_SECONDS = 30
 WRAPPER_MARKER = "# managed by cursoruiviewservice-watchdog"
 
 TEST_ROOT = os.getenv("CURSORUIVIEW_WATCHDOG_TEST_ROOT", "")
@@ -61,7 +59,7 @@ def test_binary(name: str, default: str) -> str:
 LAUNCHCTL_BIN = test_binary("LAUNCHCTL", "/bin/launchctl")
 FOOTPRINT_BIN = test_binary("FOOTPRINT", "/usr/bin/footprint")
 PS_BIN = test_binary("PS", "/bin/ps")
-IOREG_BIN = test_binary("IOREG", "/usr/sbin/ioreg")
+KILL_BIN = test_binary("KILL", "/bin/kill")
 UNAME_BIN = test_binary("UNAME", "/usr/bin/uname")
 
 
@@ -75,7 +73,6 @@ class ServiceSnapshot:
     pid: int | None
     footprint_bytes: int | None
     swapped_bytes: int | None
-    idle_seconds: float | None
 
 
 def utc_now() -> str:
@@ -316,7 +313,7 @@ def operation_lock() -> Any:
         yield
 
 
-def find_service_pid() -> int | None:
+def launchd_service_pid() -> int | None:
     result = run_command([LAUNCHCTL_BIN, "print", service_target()])
     if result.returncode != 0:
         detail = result.stderr.strip() or "launchctl could not inspect the service"
@@ -326,7 +323,13 @@ def find_service_pid() -> int | None:
         return None
     if len(pids) != 1:
         raise CliError(f"launchctl reported {len(pids)} service PIDs")
-    pid = int(pids[0])
+    return int(pids[0])
+
+
+def find_service_pid() -> int | None:
+    pid = launchd_service_pid()
+    if pid is None:
+        return None
     process = run_command([PS_BIN, "-p", str(pid), "-o", "comm="])
     if process.returncode != 0:
         raise CliError(f"service PID {pid} exited during inspection")
@@ -384,32 +387,12 @@ def measure_footprint(pid: int) -> tuple[int, int]:
             output.unlink()
 
 
-def read_idle_seconds() -> float:
-    result = run_command([
-        IOREG_BIN,
-        "-c",
-        "IOHIDSystem",
-        "-d",
-        "4",
-        "-r",
-        "-k",
-        "HIDIdleTime",
-    ])
-    if result.returncode != 0:
-        detail = result.stderr.strip() or "ioreg failed"
-        raise CliError(detail)
-    match = re.search(r'"HIDIdleTime"\s*=\s*(\d+)', result.stdout)
-    if match is None:
-        raise CliError("ioreg did not report HIDIdleTime")
-    return int(match.group(1)) / 1_000_000_000
-
-
 def inspect_service() -> ServiceSnapshot:
     pid = find_service_pid()
     if pid is None:
-        return ServiceSnapshot(False, None, None, None, read_idle_seconds())
+        return ServiceSnapshot(False, None, None, None)
     footprint, swapped = measure_footprint(pid)
-    return ServiceSnapshot(True, pid, footprint, swapped, read_idle_seconds())
+    return ServiceSnapshot(True, pid, footprint, swapped)
 
 
 def snapshot_record(snapshot: ServiceSnapshot) -> dict[str, Any]:
@@ -418,9 +401,6 @@ def snapshot_record(snapshot: ServiceSnapshot) -> dict[str, Any]:
         "pid": snapshot.pid,
         "footprint_bytes": snapshot.footprint_bytes,
         "swapped_bytes": snapshot.swapped_bytes,
-        "idle_seconds": round(snapshot.idle_seconds, 3)
-        if snapshot.idle_seconds is not None
-        else None,
         "threshold_bytes": FOOTPRINT_THRESHOLD_BYTES,
     }
 
@@ -443,35 +423,45 @@ def check_mode(output_json: bool) -> int:
     return 1 if high else 0
 
 
-def kickstart_service(old_pid: int) -> tuple[int, int]:
+def kill_service(old_pid: int) -> tuple[int | None, int | None]:
     if find_service_pid() != old_pid:
-        raise CliError("service PID changed before recycle; refusing to restart it")
-    result = run_command(
-        [LAUNCHCTL_BIN, "kickstart", "-kp", service_target()], timeout=15
-    )
+        raise CliError("service PID changed before recycle; refusing to kill it")
+    result = run_command([KILL_BIN, "-KILL", str(old_pid)])
     if result.returncode != 0:
-        detail = (
-            result.stderr.strip()
-            or result.stdout.strip()
-            or "launchctl kickstart failed"
-        )
+        detail = result.stderr.strip() or result.stdout.strip() or "kill failed"
         raise CliError(detail)
-    pid_match = re.fullmatch(r"\s*(\d+)\s*", result.stdout)
-    if pid_match is None:
-        raise CliError("launchctl kickstart did not report the replacement PID")
-    reported_pid = int(pid_match.group(1))
+
     deadline = time.monotonic() + 5
+    stopped = False
     while time.monotonic() < deadline:
-        new_pid = find_service_pid()
-        if new_pid is not None and new_pid != old_pid and new_pid == reported_pid:
+        new_pid = launchd_service_pid()
+        if new_pid is None:
+            stopped = True
+        elif new_pid != old_pid:
+            process = run_command([PS_BIN, "-p", str(new_pid), "-o", "comm="])
+            if process.returncode != 0:
+                stopped = True
+                time.sleep(0.1)
+                continue
+            if process.stdout.strip() != str(EXPECTED_EXECUTABLE):
+                raise CliError(f"replacement PID {new_pid} has an unexpected executable")
             footprint, _ = measure_footprint(new_pid)
             if footprint >= FOOTPRINT_THRESHOLD_BYTES:
                 raise CliError(
                     f"replacement service footprint remains high: {footprint} bytes"
                 )
             return new_pid, footprint
+        else:
+            process = run_command([PS_BIN, "-p", str(old_pid), "-o", "comm="])
+            if (
+                process.returncode != 0
+                or process.stdout.strip() != str(EXPECTED_EXECUTABLE)
+            ):
+                stopped = True
         time.sleep(0.1)
-    raise CliError("replacement service did not pass PID and executable verification")
+    if stopped:
+        return None, None
+    raise CliError("service PID remained alive after SIGKILL")
 
 
 def run_mode(apply: bool, output_json: bool) -> int:
@@ -506,52 +496,29 @@ def run_mode(apply: bool, output_json: bool) -> int:
         }
         if not snapshot.running:
             state.update({
-                "high_pid": None,
-                "high_streak": 0,
                 "last_check_at": utc_now(),
                 "last_result": "not-running",
             })
             save_state(state)
-            emit({**base, "result": "not-running", "high_streak": 0}, output_json)
+            emit({**base, "result": "not-running"}, output_json)
             return 0
 
         assert snapshot.pid is not None and snapshot.footprint_bytes is not None
         if snapshot.footprint_bytes < FOOTPRINT_THRESHOLD_BYTES:
             state.update({
-                "high_pid": None,
-                "high_streak": 0,
                 "last_check_at": utc_now(),
+                "last_error": "",
                 "last_result": "healthy",
                 "last_footprint_bytes": snapshot.footprint_bytes,
             })
             save_state(state)
-            emit({**base, "result": "healthy", "high_streak": 0}, output_json)
+            emit({**base, "result": "healthy"}, output_json)
             return 0
 
-        streak = 1
-        if state.get("high_pid") == snapshot.pid:
-            streak = int(state.get("high_streak", 0)) + 1
         state.update({
-            "high_pid": snapshot.pid,
-            "high_streak": streak,
             "last_check_at": utc_now(),
             "last_footprint_bytes": snapshot.footprint_bytes,
         })
-        if streak < REQUIRED_HIGH_SAMPLES:
-            state["last_result"] = "confirming"
-            save_state(state)
-            emit({**base, "result": "confirming", "high_streak": streak}, output_json)
-            return 0
-
-        assert snapshot.idle_seconds is not None
-        if snapshot.idle_seconds < MINIMUM_IDLE_SECONDS:
-            state["last_result"] = "deferred-active-user"
-            save_state(state)
-            emit(
-                {**base, "result": "deferred-active-user", "high_streak": streak},
-                output_json,
-            )
-            return 0
 
         last_attempt = int(state.get("last_recycle_attempt_epoch", 0))
         if now - last_attempt < COOLDOWN_SECONDS:
@@ -562,7 +529,6 @@ def run_mode(apply: bool, output_json: bool) -> int:
                 {
                     **base,
                     "result": "deferred-cooldown",
-                    "high_streak": streak,
                     "cooldown_remaining_seconds": remaining,
                 },
                 output_json,
@@ -576,8 +542,6 @@ def run_mode(apply: bool, output_json: bool) -> int:
             or confirmation.footprint_bytes < FOOTPRINT_THRESHOLD_BYTES
         ):
             state.update({
-                "high_pid": None,
-                "high_streak": 0,
                 "last_result": "deferred-service-changed",
             })
             save_state(state)
@@ -585,18 +549,8 @@ def run_mode(apply: bool, output_json: bool) -> int:
                 {
                     **base,
                     "result": "deferred-service-changed",
-                    "high_streak": 0,
                     "current_pid": confirmation.pid,
                 },
-                output_json,
-            )
-            return 0
-        assert confirmation.idle_seconds is not None
-        if confirmation.idle_seconds < MINIMUM_IDLE_SECONDS:
-            state["last_result"] = "deferred-active-user"
-            save_state(state)
-            emit(
-                {**base, "result": "deferred-active-user", "high_streak": streak},
                 output_json,
             )
             return 0
@@ -608,14 +562,12 @@ def run_mode(apply: bool, output_json: bool) -> int:
         })
         save_state(state)
         try:
-            new_pid, new_footprint = kickstart_service(snapshot.pid)
+            new_pid, new_footprint = kill_service(snapshot.pid)
         except CliError as error:
             state.update({"last_result": "recycle-failed", "last_error": str(error)})
             save_state(state)
             raise
         state.update({
-            "high_pid": None,
-            "high_streak": 0,
             "last_result": "recycled",
             "last_error": "",
             "last_recycled_at": utc_now(),
@@ -631,7 +583,6 @@ def run_mode(apply: bool, output_json: bool) -> int:
                 "old_pid": snapshot.pid,
                 "new_pid": new_pid,
                 "new_footprint_bytes": new_footprint,
-                "high_streak": 0,
             },
             output_json,
         )
@@ -656,16 +607,14 @@ def recycle_mode(apply: bool, output_json: bool) -> int:
                     **record,
                     "result": "preview",
                     "target": service_target(),
-                    "action": "launchctl kickstart -kp",
+                    "action": "kill -KILL",
                 },
                 output_json,
             )
             return 0
-        new_pid, new_footprint = kickstart_service(snapshot.pid)
+        new_pid, new_footprint = kill_service(snapshot.pid)
         state = load_state()
         state.update({
-            "high_pid": None,
-            "high_streak": 0,
             "last_recycle_attempt_at": utc_now(),
             "last_recycle_attempt_epoch": int(time.time()),
             "last_result": "recycled-manually",
@@ -709,8 +658,7 @@ def status_mode(output_json: bool) -> int:
         "plist": str(LAUNCH_AGENT),
         "service_target": service_target(),
         "threshold_bytes": FOOTPRINT_THRESHOLD_BYTES,
-        "required_high_samples": REQUIRED_HIGH_SAMPLES,
-        "minimum_idle_seconds": MINIMUM_IDLE_SECONDS,
+        "interval_seconds": CHECK_INTERVAL_SECONDS,
         "cooldown_seconds": COOLDOWN_SECONDS,
         "last_result": state.get("last_result"),
         "last_check_at": state.get("last_check_at"),
