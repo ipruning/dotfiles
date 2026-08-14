@@ -170,6 +170,7 @@ const LIMITED_DOMAINS = [
   "exe.dev",
   "feishu.cn",
   "figma.com",
+  "jetkvm.mastodon-beta.ts.net",
   "linear.app",
   "motherduck.com",
   "notion.so",
@@ -178,24 +179,8 @@ const LIMITED_DOMAINS = [
   "sshx.io",
 ];
 
-const limitedRe = new RegExp(
-  LIMITED_DOMAINS.map(d => d.replace(/\./g, "\\.")).join("|"),
-  "i",
-);
+const limitedRe = new RegExp(LIMITED_DOMAINS.map((d) => d.replace(/\./g, "\\.")).join("|"), "i");
 
-const KEEP_KEYS = [
-  "e",
-  "d",
-  "E",
-  "R",
-  "B",
-  "F",
-  "S",
-  "D",
-  "t",
-  "T",
-  "p",
-  "P",
-];
+const KEEP_KEYS = ["e", "d", "E", "R", "B", "F", "S", "D", "t", "T", "p", "P"];
 
 api.unmapAllExcept(KEEP_KEYS, limitedRe);
