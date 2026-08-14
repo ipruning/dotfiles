@@ -1,0 +1,864 @@
+#!/bin/sh
+""":"
+python_bin="$HOME/.local/share/mise/installs/python/latest/bin/python3"
+if [ ! -x "$python_bin" ]; then
+  python_bin="$(command -v python3)"
+fi
+exec "$python_bin" "$0" "$@"
+":"""
+
+from __future__ import annotations
+
+import argparse
+import contextlib
+import datetime as dt
+import fcntl
+import json
+import os
+import plistlib
+import re
+import shlex
+import subprocess
+import sys
+import tempfile
+import time
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
+
+VERSION = "1.0.0"
+SCHEMA_VERSION = 1
+LABEL = "com.ipruning.cursoruiviewservice-watchdog"
+SERVICE_LABEL = "com.apple.TextInputUI.xpc.CursorUIViewService"
+EXPECTED_EXECUTABLE = Path(
+    "/System/Library/PrivateFrameworks/TextInputUIMacHelper.framework/Versions/A/"
+    "XPCServices/CursorUIViewService.xpc/Contents/MacOS/CursorUIViewService"
+)
+FOOTPRINT_THRESHOLD_BYTES = 512 * 1024**2
+REQUIRED_HIGH_SAMPLES = 3
+MINIMUM_IDLE_SECONDS = 60
+COOLDOWN_SECONDS = 2 * 60 * 60
+CHECK_INTERVAL_SECONDS = 2 * 60
+WRAPPER_MARKER = "# managed by cursoruiviewservice-watchdog"
+
+TEST_ROOT = os.getenv("CURSORUIVIEW_WATCHDOG_TEST_ROOT", "")
+HOME = Path(TEST_ROOT) / "home" if TEST_ROOT else Path.home()
+USER_BIN = HOME / ".local" / "bin" / "cursoruiviewservice-watchdog"
+SUPPORT_DIR = HOME / "Library" / "Application Support" / "cursoruiviewservice-watchdog"
+RUNTIME_CLI = SUPPORT_DIR / "cursoruiviewservice-watchdog"
+STATE_FILE = SUPPORT_DIR / "state.json"
+LOCK_FILE = SUPPORT_DIR / "watchdog.lock"
+LOG_DIR = HOME / "Library" / "Logs" / "cursoruiviewservice-watchdog"
+LAUNCH_AGENT = HOME / "Library" / "LaunchAgents" / f"{LABEL}.plist"
+
+
+def test_binary(name: str, default: str) -> str:
+    if not TEST_ROOT:
+        return default
+    return os.getenv(f"CURSORUIVIEW_WATCHDOG_{name}_BIN", default)
+
+
+LAUNCHCTL_BIN = test_binary("LAUNCHCTL", "/bin/launchctl")
+FOOTPRINT_BIN = test_binary("FOOTPRINT", "/usr/bin/footprint")
+PS_BIN = test_binary("PS", "/bin/ps")
+IOREG_BIN = test_binary("IOREG", "/usr/sbin/ioreg")
+UNAME_BIN = test_binary("UNAME", "/usr/bin/uname")
+
+
+class CliError(Exception):
+    pass
+
+
+@dataclass(frozen=True)
+class ServiceSnapshot:
+    running: bool
+    pid: int | None
+    footprint_bytes: int | None
+    swapped_bytes: int | None
+    idle_seconds: float | None
+
+
+def utc_now() -> str:
+    return dt.datetime.now(dt.UTC).isoformat(timespec="seconds").replace("+00:00", "Z")
+
+
+def logfmt_quote(value: Any) -> str:
+    if isinstance(value, bool):
+        text = "true" if value else "false"
+    elif value is None:
+        text = ""
+    else:
+        text = str(value)
+    text = text.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n")
+    return f'"{text}"'
+
+
+def emit(record: dict[str, Any], output_json: bool) -> None:
+    document = {
+        "schema_version": SCHEMA_VERSION,
+        **record,
+    }
+    if output_json:
+        print(json.dumps(document, ensure_ascii=False, sort_keys=True))
+        return
+    print(" ".join(f"{key}={logfmt_quote(value)}" for key, value in document.items()))
+
+
+def run_command(
+    command: list[str], *, timeout: float = 10
+) -> subprocess.CompletedProcess[str]:
+    try:
+        return subprocess.run(
+            command,
+            text=True,
+            capture_output=True,
+            check=False,
+            timeout=timeout,
+        )
+    except (OSError, subprocess.TimeoutExpired) as error:
+        raise CliError(f"could not run {command[0]}: {error}") from error
+
+
+def agent_target() -> str:
+    return f"gui/{os.getuid()}/{LABEL}"
+
+
+def service_target() -> str:
+    return f"user/{os.getuid()}/{SERVICE_LABEL}"
+
+
+def launch_agent_loaded() -> bool:
+    return run_command([LAUNCHCTL_BIN, "print", agent_target()]).returncode == 0
+
+
+def service_available() -> bool:
+    return run_command([LAUNCHCTL_BIN, "print", service_target()]).returncode == 0
+
+
+def bootout_launch_agent() -> None:
+    if not launch_agent_loaded():
+        return
+    result = run_command([LAUNCHCTL_BIN, "bootout", agent_target()])
+    if result.returncode != 0:
+        detail = (
+            result.stderr.strip() or result.stdout.strip() or "launchctl bootout failed"
+        )
+        raise CliError(detail)
+    deadline = time.monotonic() + 3
+    while launch_agent_loaded():
+        if time.monotonic() >= deadline:
+            raise CliError(f"LaunchAgent is still loaded: {agent_target()}")
+        time.sleep(0.1)
+
+
+def bootstrap_launch_agent() -> None:
+    result = run_command([
+        LAUNCHCTL_BIN,
+        "bootstrap",
+        f"gui/{os.getuid()}",
+        str(LAUNCH_AGENT),
+    ])
+    if result.returncode != 0:
+        detail = (
+            result.stderr.strip()
+            or result.stdout.strip()
+            or "launchctl bootstrap failed"
+        )
+        raise CliError(detail)
+    if not launch_agent_loaded():
+        raise CliError(f"LaunchAgent did not load: {agent_target()}")
+
+
+def runtime_python() -> Path:
+    if TEST_ROOT:
+        return Path(sys.executable).resolve()
+    mise_python = (
+        Path.home()
+        / ".local"
+        / "share"
+        / "mise"
+        / "installs"
+        / "python"
+        / "latest"
+        / "bin"
+        / "python3"
+    )
+    if mise_python.is_file() and os.access(mise_python, os.X_OK):
+        return mise_python
+    return Path(sys.executable).resolve()
+
+
+def managed_wrapper() -> bool:
+    if not USER_BIN.is_file() or USER_BIN.is_symlink():
+        return False
+    try:
+        return WRAPPER_MARKER in USER_BIN.read_text().splitlines()[:2]
+    except OSError, UnicodeError:
+        return False
+
+
+def launch_agent_payload(python_bin: Path, auto_recycle: bool) -> dict[str, Any]:
+    arguments = [str(python_bin), str(RUNTIME_CLI), "run"]
+    if auto_recycle:
+        arguments.append("--apply")
+    arguments.append("--json")
+    return {
+        "Label": LABEL,
+        "ProgramArguments": arguments,
+        "RunAtLoad": True,
+        "StartInterval": CHECK_INTERVAL_SECONDS,
+        "ProcessType": "Background",
+        "LowPriorityIO": True,
+        "StandardOutPath": str(LOG_DIR / "agent.out.log"),
+        "StandardErrorPath": str(LOG_DIR / "agent.err.log"),
+    }
+
+
+def atomic_write(path: Path, contents: bytes, mode: int) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    try:
+        temporary.write_bytes(contents)
+        temporary.chmod(mode)
+        os.replace(temporary, path)
+    finally:
+        with contextlib.suppress(FileNotFoundError):
+            temporary.unlink()
+
+
+def install_mode(apply: bool, auto_recycle: bool, output_json: bool) -> int:
+    if run_command([UNAME_BIN, "-s"]).stdout.strip() != "Darwin":
+        raise CliError("install is supported only on macOS")
+    if not service_available():
+        raise CliError(f"Apple XPC service is unavailable: {service_target()}")
+    python_bin = runtime_python()
+    if (USER_BIN.exists() or USER_BIN.is_symlink()) and not managed_wrapper():
+        raise CliError(f"refusing to replace unmanaged executable: {USER_BIN}")
+
+    payload = launch_agent_payload(python_bin, auto_recycle)
+    plist_bytes = plistlib.dumps(payload, fmt=plistlib.FMT_XML, sort_keys=False)
+    plistlib.loads(plist_bytes)
+    record = {
+        "operation": "install",
+        "ok": True,
+        "apply": apply,
+        "executable": str(USER_BIN),
+        "runtime": str(RUNTIME_CLI),
+        "plist": str(LAUNCH_AGENT),
+        "auto_recycle": auto_recycle,
+        "interval_seconds": CHECK_INTERVAL_SECONDS,
+        "threshold_bytes": FOOTPRINT_THRESHOLD_BYTES,
+    }
+    if not apply:
+        emit(record, output_json)
+        return 0
+
+    USER_BIN.parent.mkdir(parents=True, exist_ok=True)
+    SUPPORT_DIR.mkdir(parents=True, exist_ok=True)
+    LOG_DIR.mkdir(parents=True, exist_ok=True)
+    LAUNCH_AGENT.parent.mkdir(parents=True, exist_ok=True)
+    bootout_launch_agent()
+    completed: list[str] = []
+    try:
+        source = Path(__file__).resolve().read_bytes()
+        atomic_write(RUNTIME_CLI, source, 0o755)
+        completed.append("runtime")
+        wrapper = (
+            "#!/bin/sh\n"
+            f"{WRAPPER_MARKER}\n"
+            f'exec {shlex.quote(str(python_bin))} {shlex.quote(str(RUNTIME_CLI))} "$@"\n'
+        ).encode()
+        atomic_write(USER_BIN, wrapper, 0o755)
+        completed.append("executable")
+        atomic_write(LAUNCH_AGENT, plist_bytes, 0o644)
+        completed.append("plist")
+        bootstrap_launch_agent()
+        completed.append("bootstrap")
+    except (CliError, OSError) as install_error:
+        with contextlib.suppress(CliError):
+            bootout_launch_agent()
+        progress = ",".join(completed) or "none"
+        raise CliError(
+            f"install failed after completed={progress}; LaunchAgent was left unloaded; "
+            f"inspect with `cursoruiviewservice-watchdog status`, then rerun install: {install_error}"
+        ) from install_error
+
+    emit(record, output_json)
+    return 0
+
+
+def load_state() -> dict[str, Any]:
+    if not STATE_FILE.is_file():
+        return {}
+    try:
+        state = json.loads(STATE_FILE.read_text())
+    except (OSError, json.JSONDecodeError) as error:
+        raise CliError(f"invalid watchdog state at {STATE_FILE}: {error}") from error
+    if not isinstance(state, dict) or state.get("schema_version") != SCHEMA_VERSION:
+        raise CliError(f"unsupported watchdog state at {STATE_FILE}")
+    return state
+
+
+def save_state(state: dict[str, Any]) -> None:
+    state = {"schema_version": SCHEMA_VERSION, **state}
+    atomic_write(
+        STATE_FILE,
+        (json.dumps(state, indent=2, sort_keys=True) + "\n").encode(),
+        0o600,
+    )
+
+
+@contextlib.contextmanager
+def operation_lock() -> Any:
+    SUPPORT_DIR.mkdir(parents=True, exist_ok=True)
+    with LOCK_FILE.open("a+") as lock:
+        fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
+        yield
+
+
+def find_service_pid() -> int | None:
+    result = run_command([LAUNCHCTL_BIN, "print", service_target()])
+    if result.returncode != 0:
+        detail = result.stderr.strip() or "launchctl could not inspect the service"
+        raise CliError(detail)
+    pids = re.findall(r"^\s*pid = (\d+)\s*$", result.stdout, flags=re.MULTILINE)
+    if not pids:
+        return None
+    if len(pids) != 1:
+        raise CliError(f"launchctl reported {len(pids)} service PIDs")
+    pid = int(pids[0])
+    process = run_command([PS_BIN, "-p", str(pid), "-o", "comm="])
+    if process.returncode != 0:
+        raise CliError(f"service PID {pid} exited during inspection")
+    if process.stdout.strip() != str(EXPECTED_EXECUTABLE):
+        raise CliError(f"service PID {pid} has an unexpected executable")
+    return pid
+
+
+def measure_footprint(pid: int) -> tuple[int, int]:
+    fd, output_name = tempfile.mkstemp(
+        prefix="cursoruiviewservice-footprint.", suffix=".json"
+    )
+    os.close(fd)
+    output = Path(output_name)
+    output.unlink()
+    try:
+        result = run_command(
+            [
+                FOOTPRINT_BIN,
+                "--pid",
+                str(pid),
+                "--noCategories",
+                "--format",
+                "bytes",
+                "--json",
+                str(output),
+            ],
+            timeout=15,
+        )
+        if result.returncode != 0:
+            detail = (
+                result.stderr.strip() or result.stdout.strip() or "footprint failed"
+            )
+            raise CliError(detail)
+        try:
+            document = json.loads(output.read_text())
+            processes = document["processes"]
+            process = next(item for item in processes if item["pid"] == pid)
+            footprint = int(process["auxiliary"]["phys_footprint"])
+            swapped = int(document["summary"]["total"]["swapped"])
+        except (
+            OSError,
+            KeyError,
+            StopIteration,
+            TypeError,
+            ValueError,
+            json.JSONDecodeError,
+        ) as error:
+            raise CliError("footprint returned an invalid JSON document") from error
+        if document.get("errors"):
+            raise CliError(f"footprint reported errors: {document['errors']}")
+        return footprint, swapped
+    finally:
+        with contextlib.suppress(FileNotFoundError):
+            output.unlink()
+
+
+def read_idle_seconds() -> float:
+    result = run_command([
+        IOREG_BIN,
+        "-c",
+        "IOHIDSystem",
+        "-d",
+        "4",
+        "-r",
+        "-k",
+        "HIDIdleTime",
+    ])
+    if result.returncode != 0:
+        detail = result.stderr.strip() or "ioreg failed"
+        raise CliError(detail)
+    match = re.search(r'"HIDIdleTime"\s*=\s*(\d+)', result.stdout)
+    if match is None:
+        raise CliError("ioreg did not report HIDIdleTime")
+    return int(match.group(1)) / 1_000_000_000
+
+
+def inspect_service() -> ServiceSnapshot:
+    pid = find_service_pid()
+    if pid is None:
+        return ServiceSnapshot(False, None, None, None, read_idle_seconds())
+    footprint, swapped = measure_footprint(pid)
+    return ServiceSnapshot(True, pid, footprint, swapped, read_idle_seconds())
+
+
+def snapshot_record(snapshot: ServiceSnapshot) -> dict[str, Any]:
+    return {
+        "running": snapshot.running,
+        "pid": snapshot.pid,
+        "footprint_bytes": snapshot.footprint_bytes,
+        "swapped_bytes": snapshot.swapped_bytes,
+        "idle_seconds": round(snapshot.idle_seconds, 3)
+        if snapshot.idle_seconds is not None
+        else None,
+        "threshold_bytes": FOOTPRINT_THRESHOLD_BYTES,
+    }
+
+
+def check_mode(output_json: bool) -> int:
+    snapshot = inspect_service()
+    high = bool(
+        snapshot.footprint_bytes is not None
+        and snapshot.footprint_bytes >= FOOTPRINT_THRESHOLD_BYTES
+    )
+    emit(
+        {
+            "operation": "check",
+            "ok": True,
+            **snapshot_record(snapshot),
+            "high": high,
+        },
+        output_json,
+    )
+    return 1 if high else 0
+
+
+def kickstart_service(old_pid: int) -> tuple[int, int]:
+    if find_service_pid() != old_pid:
+        raise CliError("service PID changed before recycle; refusing to restart it")
+    result = run_command(
+        [LAUNCHCTL_BIN, "kickstart", "-kp", service_target()], timeout=15
+    )
+    if result.returncode != 0:
+        detail = (
+            result.stderr.strip()
+            or result.stdout.strip()
+            or "launchctl kickstart failed"
+        )
+        raise CliError(detail)
+    pid_match = re.fullmatch(r"\s*(\d+)\s*", result.stdout)
+    if pid_match is None:
+        raise CliError("launchctl kickstart did not report the replacement PID")
+    reported_pid = int(pid_match.group(1))
+    deadline = time.monotonic() + 5
+    while time.monotonic() < deadline:
+        new_pid = find_service_pid()
+        if new_pid is not None and new_pid != old_pid and new_pid == reported_pid:
+            footprint, _ = measure_footprint(new_pid)
+            if footprint >= FOOTPRINT_THRESHOLD_BYTES:
+                raise CliError(
+                    f"replacement service footprint remains high: {footprint} bytes"
+                )
+            return new_pid, footprint
+        time.sleep(0.1)
+    raise CliError("replacement service did not pass PID and executable verification")
+
+
+def run_mode(apply: bool, output_json: bool) -> int:
+    if not apply:
+        snapshot = inspect_service()
+        high = bool(
+            snapshot.footprint_bytes is not None
+            and snapshot.footprint_bytes >= FOOTPRINT_THRESHOLD_BYTES
+        )
+        emit(
+            {
+                "operation": "run",
+                "ok": True,
+                "apply": False,
+                **snapshot_record(snapshot),
+                "high": high,
+                "result": "preview",
+            },
+            output_json,
+        )
+        return 0
+
+    with operation_lock():
+        snapshot = inspect_service()
+        state = load_state()
+        now = int(time.time())
+        base = {
+            "operation": "run",
+            "ok": True,
+            "apply": True,
+            **snapshot_record(snapshot),
+        }
+        if not snapshot.running:
+            state.update({
+                "high_pid": None,
+                "high_streak": 0,
+                "last_check_at": utc_now(),
+                "last_result": "not-running",
+            })
+            save_state(state)
+            emit({**base, "result": "not-running", "high_streak": 0}, output_json)
+            return 0
+
+        assert snapshot.pid is not None and snapshot.footprint_bytes is not None
+        if snapshot.footprint_bytes < FOOTPRINT_THRESHOLD_BYTES:
+            state.update({
+                "high_pid": None,
+                "high_streak": 0,
+                "last_check_at": utc_now(),
+                "last_result": "healthy",
+                "last_footprint_bytes": snapshot.footprint_bytes,
+            })
+            save_state(state)
+            emit({**base, "result": "healthy", "high_streak": 0}, output_json)
+            return 0
+
+        streak = 1
+        if state.get("high_pid") == snapshot.pid:
+            streak = int(state.get("high_streak", 0)) + 1
+        state.update({
+            "high_pid": snapshot.pid,
+            "high_streak": streak,
+            "last_check_at": utc_now(),
+            "last_footprint_bytes": snapshot.footprint_bytes,
+        })
+        if streak < REQUIRED_HIGH_SAMPLES:
+            state["last_result"] = "confirming"
+            save_state(state)
+            emit({**base, "result": "confirming", "high_streak": streak}, output_json)
+            return 0
+
+        assert snapshot.idle_seconds is not None
+        if snapshot.idle_seconds < MINIMUM_IDLE_SECONDS:
+            state["last_result"] = "deferred-active-user"
+            save_state(state)
+            emit(
+                {**base, "result": "deferred-active-user", "high_streak": streak},
+                output_json,
+            )
+            return 0
+
+        last_attempt = int(state.get("last_recycle_attempt_epoch", 0))
+        if now - last_attempt < COOLDOWN_SECONDS:
+            remaining = COOLDOWN_SECONDS - (now - last_attempt)
+            state["last_result"] = "deferred-cooldown"
+            save_state(state)
+            emit(
+                {
+                    **base,
+                    "result": "deferred-cooldown",
+                    "high_streak": streak,
+                    "cooldown_remaining_seconds": remaining,
+                },
+                output_json,
+            )
+            return 0
+
+        confirmation = inspect_service()
+        if (
+            confirmation.pid != snapshot.pid
+            or confirmation.footprint_bytes is None
+            or confirmation.footprint_bytes < FOOTPRINT_THRESHOLD_BYTES
+        ):
+            state.update({
+                "high_pid": None,
+                "high_streak": 0,
+                "last_result": "deferred-service-changed",
+            })
+            save_state(state)
+            emit(
+                {
+                    **base,
+                    "result": "deferred-service-changed",
+                    "high_streak": 0,
+                    "current_pid": confirmation.pid,
+                },
+                output_json,
+            )
+            return 0
+        assert confirmation.idle_seconds is not None
+        if confirmation.idle_seconds < MINIMUM_IDLE_SECONDS:
+            state["last_result"] = "deferred-active-user"
+            save_state(state)
+            emit(
+                {**base, "result": "deferred-active-user", "high_streak": streak},
+                output_json,
+            )
+            return 0
+
+        state.update({
+            "last_recycle_attempt_at": utc_now(),
+            "last_recycle_attempt_epoch": now,
+            "last_result": "recycling",
+        })
+        save_state(state)
+        try:
+            new_pid, new_footprint = kickstart_service(snapshot.pid)
+        except CliError as error:
+            state.update({"last_result": "recycle-failed", "last_error": str(error)})
+            save_state(state)
+            raise
+        state.update({
+            "high_pid": None,
+            "high_streak": 0,
+            "last_result": "recycled",
+            "last_error": "",
+            "last_recycled_at": utc_now(),
+            "last_old_pid": snapshot.pid,
+            "last_new_pid": new_pid,
+            "last_new_footprint_bytes": new_footprint,
+        })
+        save_state(state)
+        emit(
+            {
+                **base,
+                "result": "recycled",
+                "old_pid": snapshot.pid,
+                "new_pid": new_pid,
+                "new_footprint_bytes": new_footprint,
+                "high_streak": 0,
+            },
+            output_json,
+        )
+        return 0
+
+
+def recycle_mode(apply: bool, output_json: bool) -> int:
+    with operation_lock() if apply else contextlib.nullcontext():
+        snapshot = inspect_service()
+        record = {
+            "operation": "recycle",
+            "ok": True,
+            "apply": apply,
+            **snapshot_record(snapshot),
+        }
+        if not snapshot.running or snapshot.pid is None:
+            emit({**record, "result": "not-running"}, output_json)
+            return 0
+        if not apply:
+            emit(
+                {
+                    **record,
+                    "result": "preview",
+                    "target": service_target(),
+                    "action": "launchctl kickstart -kp",
+                },
+                output_json,
+            )
+            return 0
+        new_pid, new_footprint = kickstart_service(snapshot.pid)
+        state = load_state()
+        state.update({
+            "high_pid": None,
+            "high_streak": 0,
+            "last_recycle_attempt_at": utc_now(),
+            "last_recycle_attempt_epoch": int(time.time()),
+            "last_result": "recycled-manually",
+            "last_recycled_at": utc_now(),
+            "last_old_pid": snapshot.pid,
+            "last_new_pid": new_pid,
+            "last_new_footprint_bytes": new_footprint,
+        })
+        save_state(state)
+        emit(
+            {
+                **record,
+                "result": "recycled",
+                "old_pid": snapshot.pid,
+                "new_pid": new_pid,
+                "new_footprint_bytes": new_footprint,
+            },
+            output_json,
+        )
+        return 0
+
+
+def status_mode(output_json: bool) -> int:
+    state_error = ""
+    try:
+        state = load_state()
+    except CliError as error:
+        state = {}
+        state_error = str(error)
+    record = {
+        "operation": "status",
+        "ok": not state_error,
+        "installed": managed_wrapper()
+        and RUNTIME_CLI.is_file()
+        and LAUNCH_AGENT.is_file(),
+        "loaded": launch_agent_loaded(),
+        "service_available": service_available(),
+        "auto_recycle": installed_auto_recycle(),
+        "executable": str(USER_BIN),
+        "runtime": str(RUNTIME_CLI),
+        "plist": str(LAUNCH_AGENT),
+        "service_target": service_target(),
+        "threshold_bytes": FOOTPRINT_THRESHOLD_BYTES,
+        "required_high_samples": REQUIRED_HIGH_SAMPLES,
+        "minimum_idle_seconds": MINIMUM_IDLE_SECONDS,
+        "cooldown_seconds": COOLDOWN_SECONDS,
+        "last_result": state.get("last_result"),
+        "last_check_at": state.get("last_check_at"),
+        "last_recycled_at": state.get("last_recycled_at"),
+        "last_error": state_error or state.get("last_error", ""),
+    }
+    emit(record, output_json)
+    return (
+        0
+        if record["installed"]
+        and record["loaded"]
+        and record["service_available"]
+        and record["ok"]
+        else 1
+    )
+
+
+def installed_auto_recycle() -> bool | None:
+    if not LAUNCH_AGENT.is_file():
+        return None
+    try:
+        payload = plistlib.loads(LAUNCH_AGENT.read_bytes())
+        return "--apply" in payload["ProgramArguments"]
+    except OSError, KeyError, TypeError, plistlib.InvalidFileException:
+        return None
+
+
+def uninstall_mode(apply: bool, output_json: bool) -> int:
+    if USER_BIN.exists() and not managed_wrapper():
+        raise CliError(f"refusing to remove unmanaged executable: {USER_BIN}")
+    if not apply:
+        emit(
+            {
+                "operation": "uninstall",
+                "ok": True,
+                "apply": False,
+                "result": "preview",
+                "loaded": launch_agent_loaded(),
+                "state_preserved": str(STATE_FILE),
+            },
+            output_json,
+        )
+        return 0
+    bootout_launch_agent()
+    for path in (LAUNCH_AGENT, USER_BIN, RUNTIME_CLI):
+        with contextlib.suppress(FileNotFoundError):
+            path.unlink()
+    if launch_agent_loaded() or any(
+        path.exists() for path in (LAUNCH_AGENT, USER_BIN, RUNTIME_CLI)
+    ):
+        raise CliError("uninstall verification failed")
+    emit(
+        {
+            "operation": "uninstall",
+            "ok": True,
+            "apply": True,
+            "installed": False,
+            "loaded": False,
+            "state_preserved": str(STATE_FILE),
+        },
+        output_json,
+    )
+    return 0
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        description="Recycle a leaking macOS CursorUIViewService without a PID kill loop."
+    )
+    subparsers = parser.add_subparsers(dest="command", required=True)
+
+    install = subparsers.add_parser(
+        "install", help="Preview or install the LaunchAgent."
+    )
+    install.add_argument("--apply", action="store_true")
+    install.add_argument(
+        "--auto-recycle",
+        action="store_true",
+        help="Opt in to guarded automatic recycling.",
+    )
+    install.add_argument("--json", action="store_true")
+
+    status = subparsers.add_parser(
+        "status", help="Show installation and last-run state."
+    )
+    status.add_argument("--json", action="store_true")
+
+    check = subparsers.add_parser(
+        "check", help="Inspect the service without changing state."
+    )
+    check.add_argument("--json", action="store_true")
+
+    run = subparsers.add_parser("run", help="Preview or run one automatic check.")
+    run.add_argument("--apply", action="store_true")
+    run.add_argument("--json", action="store_true")
+
+    recycle = subparsers.add_parser(
+        "recycle", help="Preview or explicitly recycle the service."
+    )
+    recycle.add_argument("--apply", action="store_true")
+    recycle.add_argument("--json", action="store_true")
+
+    uninstall = subparsers.add_parser(
+        "uninstall", help="Preview or remove installed files."
+    )
+    uninstall.add_argument("--apply", action="store_true")
+    uninstall.add_argument("--json", action="store_true")
+
+    subparsers.add_parser("version", help="Show the CLI version.")
+    return parser
+
+
+def main() -> int:
+    parser = build_parser()
+    args = parser.parse_args()
+    try:
+        if args.command == "install":
+            return install_mode(args.apply, args.auto_recycle, args.json)
+        if args.command == "status":
+            return status_mode(args.json)
+        if args.command == "check":
+            return check_mode(args.json)
+        if args.command == "run":
+            return run_mode(args.apply, args.json)
+        if args.command == "recycle":
+            return recycle_mode(args.apply, args.json)
+        if args.command == "uninstall":
+            return uninstall_mode(args.apply, args.json)
+        if args.command == "version":
+            print(f"cursoruiviewservice-watchdog {VERSION}")
+            return 0
+        raise CliError(f"unknown command: {args.command}")
+    except CliError as error:
+        output_json = bool(getattr(args, "json", False))
+        if output_json:
+            document: dict[str, Any] = {
+                "schema_version": SCHEMA_VERSION,
+                "operation": args.command,
+                "ok": False,
+                "error": str(error),
+            }
+            if args.command in {"install", "run", "recycle", "uninstall"}:
+                document["apply"] = bool(getattr(args, "apply", False))
+            print(json.dumps(document, ensure_ascii=False, sort_keys=True))
+        else:
+            print(f"cursoruiviewservice-watchdog: {error}", file=sys.stderr)
+        return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
