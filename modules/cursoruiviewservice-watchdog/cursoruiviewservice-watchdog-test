@@ -1,0 +1,279 @@
+#!/bin/bash
+set -euo pipefail
+
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+cli="$script_dir/cursoruiviewservice-watchdog"
+test_root="$(mktemp -d -t cursoruiviewservice-watchdog-test)"
+fake_bin="$test_root/fake-bin"
+state="$test_root/fake-state"
+expected_executable='/System/Library/PrivateFrameworks/TextInputUIMacHelper.framework/Versions/A/XPCServices/CursorUIViewService.xpc/Contents/MacOS/CursorUIViewService'
+
+cleanup() { rm -rf "$test_root"; }
+trap cleanup EXIT
+fail() { printf 'FAIL: %s\n' "$*" >&2; exit 1; }
+
+mkdir -p "$fake_bin" "$state"
+printf '123\n' >"$state/service-pid"
+printf '%s\n' "$((5 * 1024 * 1024 * 1024))" >"$state/footprint"
+printf '%s\n' "$((4 * 1024 * 1024 * 1024))" >"$state/swapped"
+printf '%s\n' "$((120 * 1000000000))" >"$state/idle-ns"
+: >"$state/service-running"
+
+cat >"$fake_bin/uname" <<'EOF'
+#!/bin/bash
+echo Darwin
+EOF
+
+cat >"$fake_bin/ps" <<'EOF'
+#!/bin/bash
+if [[ -e "$FAKE_STATE/bad-process-path" ]]; then
+  echo /tmp/not-the-apple-service
+else
+  echo "$EXPECTED_EXECUTABLE"
+fi
+EOF
+
+cat >"$fake_bin/ioreg" <<'EOF'
+#!/bin/bash
+printf '  |   "HIDIdleTime" = %s\n' "$(cat "$FAKE_STATE/idle-ns")"
+EOF
+
+cat >"$fake_bin/footprint" <<'EOF'
+#!/bin/bash
+pid="" destination=""
+while (( $# )); do
+  case "$1" in
+    --pid) pid="$2"; shift 2 ;;
+    --json) destination="$2"; shift 2 ;;
+    *) shift ;;
+  esac
+done
+[[ -n "$pid" && -n "$destination" ]] || exit 2
+if [[ -e "$FAKE_STATE/fail-footprint" ]]; then
+  echo 'injected footprint failure' >&2
+  exit 9
+fi
+footprint="$(cat "$FAKE_STATE/footprint")"
+swapped="$(cat "$FAKE_STATE/swapped")"
+cat >"$destination" <<JSON
+{"processes":[{"pid":$pid,"auxiliary":{"phys_footprint":$footprint}}],"summary":{"total":{"swapped":$swapped}},"errors":[]}
+JSON
+if [[ -e "$FAKE_STATE/replace-after-footprint" ]]; then
+  rm "$FAKE_STATE/replace-after-footprint"
+  old_pid="$(cat "$FAKE_STATE/service-pid")"
+  printf '%s\n' "$((old_pid + 1))" >"$FAKE_STATE/service-pid"
+fi
+EOF
+
+cat >"$fake_bin/launchctl" <<'EOF'
+#!/bin/bash
+case "${1:-}" in
+  print)
+    if [[ "$2" == user/*/com.apple.TextInputUI.xpc.CursorUIViewService ]]; then
+      if [[ -e "$FAKE_STATE/service-running" ]]; then
+        printf '\tstate = running\n\tpid = %s\n' "$(cat "$FAKE_STATE/service-pid")"
+      else
+        printf '\tstate = not running\n'
+      fi
+      exit 0
+    fi
+    [[ -e "$FAKE_STATE/agent-loaded" ]]
+    ;;
+  bootout)
+    rm -f "$FAKE_STATE/agent-loaded"
+    ;;
+  bootstrap)
+    if [[ -e "$FAKE_STATE/fail-bootstrap" ]]; then
+      echo 'injected bootstrap failure' >&2
+      exit 8
+    fi
+    : >"$FAKE_STATE/agent-loaded"
+    ;;
+  kickstart)
+    printf '%s\n' "$*" >>"$FAKE_STATE/launchctl-calls"
+    if [[ -e "$FAKE_STATE/fail-kickstart" ]]; then
+      echo 'injected kickstart failure' >&2
+      exit 7
+    fi
+    old_pid="$(cat "$FAKE_STATE/service-pid")"
+    new_pid=$((old_pid + 1))
+    printf '%s\n' "$new_pid" >"$FAKE_STATE/service-pid"
+    printf '%s\n' "$((128 * 1024 * 1024))" >"$FAKE_STATE/footprint"
+    printf '%s\n' "$new_pid"
+    ;;
+  *) exit 2 ;;
+esac
+EOF
+chmod +x "$fake_bin"/*
+
+test_env=(
+  CURSORUIVIEW_WATCHDOG_TEST_ROOT="$test_root"
+  CURSORUIVIEW_WATCHDOG_LAUNCHCTL_BIN="$fake_bin/launchctl"
+  CURSORUIVIEW_WATCHDOG_FOOTPRINT_BIN="$fake_bin/footprint"
+  CURSORUIVIEW_WATCHDOG_PS_BIN="$fake_bin/ps"
+  CURSORUIVIEW_WATCHDOG_IOREG_BIN="$fake_bin/ioreg"
+  CURSORUIVIEW_WATCHDOG_UNAME_BIN="$fake_bin/uname"
+  FAKE_STATE="$state"
+  EXPECTED_EXECUTABLE="$expected_executable"
+)
+home="$test_root/home"
+installed_bin="$home/.local/bin/cursoruiviewservice-watchdog"
+runtime="$home/Library/Application Support/cursoruiviewservice-watchdog/cursoruiviewservice-watchdog"
+state_file="$home/Library/Application Support/cursoruiviewservice-watchdog/state.json"
+plist="$home/Library/LaunchAgents/com.ipruning.cursoruiviewservice-watchdog.plist"
+
+env "${test_env[@]}" "$cli" install --json >"$test_root/install-preview.json"
+mise exec -- jq -e '
+  .schema_version == 1 and .operation == "install" and .ok == true and
+  .apply == false and .auto_recycle == false and .interval_seconds == 120 and
+  .threshold_bytes == 536870912
+' "$test_root/install-preview.json" >/dev/null || fail 'install preview contract is invalid'
+[[ ! -e "$installed_bin" && ! -e "$runtime" && ! -e "$plist" && ! -e "$state/agent-loaded" ]] \
+  || fail 'install preview mutated installation state'
+
+env "${test_env[@]}" "$cli" recycle --json >"$test_root/uninstalled-recycle-preview.json"
+[[ ! -e "$home" ]] || fail 'recycle preview created runtime state'
+
+env "${test_env[@]}" "$cli" install --apply --json >"$test_root/install-monitor.json"
+plutil -extract ProgramArguments json -o - "$plist" | mise exec -- jq -e '
+  .[-2:] == ["run", "--json"] and (contains(["--apply"]) | not)
+' >/dev/null || fail 'default installation is not monitor-only'
+
+env "${test_env[@]}" "$cli" install --auto-recycle --apply --json >"$test_root/install.json"
+[[ -x "$installed_bin" && -x "$runtime" && -f "$plist" && -e "$state/agent-loaded" ]] \
+  || fail 'install did not complete the user LaunchAgent lifecycle'
+[[ "$(plutil -extract StartInterval raw -o - "$plist")" == 120 ]] \
+  || fail 'LaunchAgent interval is wrong'
+[[ "$(plutil -extract ProcessType raw -o - "$plist")" == Background ]] \
+  || fail 'LaunchAgent is not background-classified'
+if plutil -extract KeepAlive raw -o - "$plist" >/dev/null 2>&1; then
+  fail 'LaunchAgent incorrectly keeps a resident watchdog alive'
+fi
+plutil -extract ProgramArguments json -o - "$plist" | mise exec -- jq -e '
+  .[-3:] == ["run", "--apply", "--json"]
+' >/dev/null || fail 'LaunchAgent does not invoke the guarded run command'
+
+env "${test_env[@]}" "$cli" status --json >"$test_root/status.json"
+mise exec -- jq -e '
+  .schema_version == 1 and .operation == "status" and .ok == true and
+  .installed == true and .loaded == true and .service_available == true and
+  .auto_recycle == true and
+  .required_high_samples == 3 and .minimum_idle_seconds == 60 and
+  .cooldown_seconds == 7200
+' "$test_root/status.json" >/dev/null || fail 'installed status is invalid'
+
+exit_code=0
+env "${test_env[@]}" "$cli" check --json >"$test_root/check-high.json" || exit_code=$?
+[[ "$exit_code" == 1 && ! -e "$state_file" ]] \
+  || fail 'read-only high-footprint check mutated state or returned the wrong status'
+mise exec -- jq -e '
+  .operation == "check" and .ok == true and .high == true and
+  .footprint_bytes == 5368709120 and .swapped_bytes == 4294967296
+' "$test_root/check-high.json" >/dev/null || fail 'check did not report measured footprint'
+
+env "${test_env[@]}" "$cli" run --json >"$test_root/run-preview.json"
+mise exec -- jq -e '.apply == false and .result == "preview" and .high == true' \
+  "$test_root/run-preview.json" >/dev/null || fail 'automatic run did not preview by default'
+[[ ! -e "$state_file" && ! -e "$state/launchctl-calls" ]] \
+  || fail 'automatic preview mutated watchdog state'
+
+env "${test_env[@]}" "$cli" run --apply --json >"$test_root/run-confirming.json"
+mise exec -- jq -e '.result == "confirming" and .high_streak == 1' \
+  "$test_root/run-confirming.json" >/dev/null || fail 'first high sample did not require confirmation'
+[[ ! -e "$state/launchctl-calls" ]] || fail 'first high sample recycled the service'
+
+printf '%s\n' "$((10 * 1000000000))" >"$state/idle-ns"
+env "${test_env[@]}" "$cli" run --apply --json >"$test_root/run-confirming-again.json"
+mise exec -- jq -e '.result == "confirming" and .high_streak == 2' \
+  "$test_root/run-confirming-again.json" >/dev/null || fail 'second high sample recycled too early'
+env "${test_env[@]}" "$cli" run --apply --json >"$test_root/run-active.json"
+mise exec -- jq -e '.result == "deferred-active-user" and .high_streak == 3' \
+  "$test_root/run-active.json" >/dev/null || fail 'active-user gate did not defer recycling'
+[[ ! -e "$state/launchctl-calls" ]] || fail 'active-user gate recycled the service'
+
+printf '%s\n' "$((120 * 1000000000))" >"$state/idle-ns"
+: >"$state/replace-after-footprint"
+env "${test_env[@]}" "$cli" run --apply --json >"$test_root/run-race.json"
+mise exec -- jq -e '
+  .result == "deferred-service-changed" and .current_pid == 124 and .high_streak == 0
+' "$test_root/run-race.json" >/dev/null || fail 'service replacement race was not deferred'
+[[ ! -e "$state/launchctl-calls" ]] || fail 'service replacement race killed the healthy replacement'
+
+env "${test_env[@]}" "$cli" run --apply --json >/dev/null
+env "${test_env[@]}" "$cli" run --apply --json >/dev/null
+env "${test_env[@]}" "$cli" run --apply --json >"$test_root/run-recycled.json"
+mise exec -- jq -e '
+  .result == "recycled" and .old_pid == 124 and .new_pid == 125 and
+  .new_footprint_bytes == 134217728 and .high_streak == 0
+' "$test_root/run-recycled.json" >/dev/null || fail 'guarded recycle was not verified'
+[[ "$(wc -l <"$state/launchctl-calls" | tr -d ' ')" == 1 ]] \
+  || fail 'guarded recycle called launchctl more than once'
+rg -q '^kickstart -kp user/[0-9]+/com\.apple\.TextInputUI\.xpc\.CursorUIViewService$' \
+  "$state/launchctl-calls" || fail 'recycle did not use the exact launchd service target'
+
+printf '%s\n' "$((5 * 1024 * 1024 * 1024))" >"$state/footprint"
+env "${test_env[@]}" "$cli" run --apply --json >/dev/null
+env "${test_env[@]}" "$cli" run --apply --json >/dev/null
+env "${test_env[@]}" "$cli" run --apply --json >"$test_root/run-cooldown.json"
+mise exec -- jq -e '.result == "deferred-cooldown" and .cooldown_remaining_seconds > 0' \
+  "$test_root/run-cooldown.json" >/dev/null || fail 'cooldown did not suppress repeat recycling'
+[[ "$(wc -l <"$state/launchctl-calls" | tr -d ' ')" == 1 ]] \
+  || fail 'cooldown allowed a repeat launchctl call'
+
+env "${test_env[@]}" "$cli" recycle --json >"$test_root/recycle-preview.json"
+mise exec -- jq -e '
+  .operation == "recycle" and .apply == false and .result == "preview" and
+  .action == "launchctl kickstart -kp"
+' "$test_root/recycle-preview.json" >/dev/null || fail 'manual recycle did not preview by default'
+[[ "$(wc -l <"$state/launchctl-calls" | tr -d ' ')" == 1 ]] \
+  || fail 'manual preview changed the service'
+
+env "${test_env[@]}" "$cli" recycle --apply --json >"$test_root/recycle-applied.json"
+mise exec -- jq -e '.apply == true and .result == "recycled" and .new_pid == 126' \
+  "$test_root/recycle-applied.json" >/dev/null || fail 'explicit manual recycle was not verified'
+
+rm -f "$state_file"
+printf '%s\n' "$((5 * 1024 * 1024 * 1024))" >"$state/footprint"
+env "${test_env[@]}" "$cli" run --apply --json >/dev/null
+env "${test_env[@]}" "$cli" run --apply --json >/dev/null
+: >"$state/fail-kickstart"
+exit_code=0
+env "${test_env[@]}" "$cli" run --apply --json >"$test_root/recycle-failed.json" || exit_code=$?
+[[ "$exit_code" == 1 ]] || fail 'launchctl failure returned success'
+mise exec -- jq -e '
+  .operation == "run" and .ok == false and .apply == true and
+  (.error | contains("injected kickstart failure"))
+' "$test_root/recycle-failed.json" >/dev/null || fail 'launchctl failure lost its JSON error contract'
+if rg -q '(^| )kill( |$)|SIGKILL' "$state/launchctl-calls"; then
+  fail 'failure path escalated to a raw kill'
+fi
+rm -f "$state/fail-kickstart"
+
+: >"$state/bad-process-path"
+exit_code=0
+env "${test_env[@]}" "$cli" check --json >"$test_root/bad-identity.json" || exit_code=$?
+[[ "$exit_code" == 1 ]] || fail 'unexpected executable identity returned success'
+mise exec -- jq -e '.ok == false and (.error | contains("unexpected executable"))' \
+  "$test_root/bad-identity.json" >/dev/null || fail 'identity failure was not diagnosed'
+rm -f "$state/bad-process-path"
+
+rm -f "$state/service-running"
+env "${test_env[@]}" "$cli" check --json >"$test_root/not-running.json"
+mise exec -- jq -e '.ok == true and .running == false and .high == false' \
+  "$test_root/not-running.json" >/dev/null || fail 'on-demand stopped state was treated as unhealthy'
+: >"$state/service-running"
+
+env "${test_env[@]}" "$cli" uninstall --json >"$test_root/uninstall-preview.json"
+mise exec -- jq -e '.apply == false and .result == "preview" and .loaded == true' \
+  "$test_root/uninstall-preview.json" >/dev/null || fail 'uninstall did not preview by default'
+[[ -x "$installed_bin" && -x "$runtime" && -f "$plist" && -e "$state/agent-loaded" ]] \
+  || fail 'uninstall preview changed installation state'
+
+env "${test_env[@]}" "$cli" uninstall --apply --json >"$test_root/uninstall.json"
+[[ ! -e "$installed_bin" && ! -e "$runtime" && ! -e "$plist" && ! -e "$state/agent-loaded" ]] \
+  || fail 'uninstall left managed installation state'
+[[ -f "$state_file" ]] || fail 'uninstall discarded watchdog history'
+mise exec -- jq -e '.operation == "uninstall" and .apply == true and .installed == false' \
+  "$test_root/uninstall.json" >/dev/null || fail 'uninstall output is invalid'
+
+echo 'cursoruiviewservice-watchdog tests passed'
