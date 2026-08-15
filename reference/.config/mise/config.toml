@@ -56,7 +56,6 @@ zoxide = "latest"
 auto_install = false
 lockfile = true
 lockfile_platforms = ["macos-arm64", "linux-x64"]
-minimum_release_age = "0s"
 trusted_config_paths = ["~/Developer"]
 
 [settings.ruby]
