@@ -190,18 +190,18 @@ url = "https://github.com/herdrdev/herdr/releases/download/v0.8.0/herdr-macos-aa
 url_api = "https://api.github.com/repos/herdrdev/herdr/releases/assets/500422629"
 
 [[tools.hunk]]
-version = "0.18.1"
+version = "0.18.2"
 backend = "aqua:modem-dev/hunk"
 
 [tools.hunk."platforms.linux-x64"]
-checksum = "sha256:b3bf7a8a8d1ddf110e19e71edfb76d1a4414b3b0fc560d5facc2b55237b2061c"
-url = "https://github.com/modem-dev/hunk/releases/download/v0.18.1/hunkdiff-linux-x64.tar.gz"
-url_api = "https://api.github.com/repos/modem-dev/hunk/releases/assets/510397450"
+checksum = "sha256:6b728e399b59e76c9b7f1b736bc9d31a98425c56088e316245ca025e3b0d2b1d"
+url = "https://github.com/modem-dev/hunk/releases/download/v0.18.2/hunkdiff-linux-x64.tar.gz"
+url_api = "https://api.github.com/repos/modem-dev/hunk/releases/assets/514969295"
 
 [tools.hunk."platforms.macos-arm64"]
-checksum = "sha256:26c71e50c5894a879cc68ebb3dea961e963bc023111ae3cb3fb2ca4a42bc9f75"
-url = "https://github.com/modem-dev/hunk/releases/download/v0.18.1/hunkdiff-darwin-arm64.tar.gz"
-url_api = "https://api.github.com/repos/modem-dev/hunk/releases/assets/510397447"
+checksum = "sha256:e825f4d3c21016de5c756a132b6b6d66b02a16ddf13f53e15fc758fbdcd3a052"
+url = "https://github.com/modem-dev/hunk/releases/download/v0.18.2/hunkdiff-darwin-arm64.tar.gz"
+url_api = "https://api.github.com/repos/modem-dev/hunk/releases/assets/514969293"
 
 [[tools.lazydocker]]
 version = "0.25.2"
@@ -244,7 +244,7 @@ checksum = "sha256:7ee659a7768e641bbfd5360940660b8e8fd0052f77488f365562bac522fc1
 url = "https://nodejs.org/dist/v26.7.0/node-v26.7.0-darwin-arm64.tar.gz"
 
 [[tools."npm:@openai/codex-security"]]
-version = "0.1.11"
+version = "0.1.12"
 backend = "npm:@openai/codex-security"
 
 [tools."npm:@openai/codex-security".options]
@@ -355,19 +355,19 @@ url = "https://github.com/starship/starship/releases/download/v1.26.0/starship-a
 url_api = "https://api.github.com/repos/starship/starship/releases/assets/460374577"
 
 [[tools.uv]]
-version = "0.12.4"
+version = "0.12.5"
 backend = "aqua:astral-sh/uv"
 
 [tools.uv."platforms.linux-x64"]
-checksum = "sha256:7aef04898775585d636424e52053e5328f2b1779175d5cb47665ff9d7524e8e7"
-url = "https://github.com/astral-sh/uv/releases/download/0.12.4/uv-x86_64-unknown-linux-musl.tar.gz"
-url_api = "https://api.github.com/repos/astral-sh/uv/releases/assets/513521278"
+checksum = "sha256:a4742988791c9aeae68c78150d6cba762062ad2a47e53738c2779d2b596bfcdb"
+url = "https://github.com/astral-sh/uv/releases/download/0.12.5/uv-x86_64-unknown-linux-musl.tar.gz"
+url_api = "https://api.github.com/repos/astral-sh/uv/releases/assets/514851105"
 provenance = "github-attestations"
 
 [tools.uv."platforms.macos-arm64"]
-checksum = "sha256:99a913b606194867b43086404412c1afe079547fee72ecfb6af7e7b0dd54b0c6"
-url = "https://github.com/astral-sh/uv/releases/download/0.12.4/uv-aarch64-apple-darwin.tar.gz"
-url_api = "https://api.github.com/repos/astral-sh/uv/releases/assets/513521194"
+checksum = "sha256:5bb0e5fe008a773c3dbcb97ff79cd89e1241464fe9d2f986d52ad8f1b037bd62"
+url = "https://github.com/astral-sh/uv/releases/download/0.12.5/uv-aarch64-apple-darwin.tar.gz"
+url_api = "https://api.github.com/repos/astral-sh/uv/releases/assets/514850968"
 provenance = "github-attestations"
 
 [[tools.xurl]]
