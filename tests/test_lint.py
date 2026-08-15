@@ -187,7 +187,7 @@ def test_inspect_repository_rejects_duplicate_mise_alias_identity(
     config = repo_root / "reference/.config/mise/config.toml"
     config.parent.mkdir(parents=True)
     config.write_text(
-        '[alias]\nhunk = "aqua:modem-dev/hunk"\n\n'
+        '[tool_alias]\nhunk = "aqua:modem-dev/hunk"\n\n'
         '[tools]\nhunk = "latest"\n"aqua:modem-dev/hunk" = "latest"\n',
     )
     (repo_root / "mackup/applications").mkdir(parents=True)

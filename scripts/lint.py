@@ -529,16 +529,43 @@ def _mise_alias_findings(repo_root: Path) -> list[Finding]:
         ]
 
     tools = config.get("tools", {})
-    aliases = config.get("alias", {})
-    if not isinstance(tools, dict) or not isinstance(aliases, dict):
+    if not isinstance(tools, dict):
         return [
             _located_finding(
                 Severity.ERROR,
                 "mise.config_invalid",
-                "shared Mise [tools] and [alias] sections must be tables",
+                "shared Mise [tools] section must be a table",
                 config_path,
             ),
         ]
+
+    aliases: dict[str, str] = {}
+    for section in ("alias", "tool_alias"):
+        section_aliases = config.get(section, {})
+        if not isinstance(section_aliases, dict):
+            return [
+                _located_finding(
+                    Severity.ERROR,
+                    "mise.config_invalid",
+                    f"shared Mise [{section}] section must be a table",
+                    config_path,
+                ),
+            ]
+        for alias, value in section_aliases.items():
+            aliases.pop(alias, None)
+            backend = value.get("backend") if isinstance(value, dict) else value
+            if backend is None:
+                continue
+            if not isinstance(backend, str):
+                return [
+                    _located_finding(
+                        Severity.ERROR,
+                        "mise.config_invalid",
+                        f"shared Mise [{section}] backends must be strings",
+                        config_path,
+                    ),
+                ]
+            aliases[alias] = backend
 
     findings = [
         _located_finding(
@@ -548,7 +575,7 @@ def _mise_alias_findings(repo_root: Path) -> list[Finding]:
             config_path,
         )
         for alias, backend in aliases.items()
-        if isinstance(backend, str) and alias in tools and backend in tools
+        if alias in tools and backend in tools
     ]
     if findings:
         return findings

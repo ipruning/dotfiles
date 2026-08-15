@@ -378,16 +378,14 @@ mise run check -- --strict
 Warnings do not fail the normal command because different hosts intentionally
 have different capabilities. `--strict` treats warnings as failures.
 
-Skillshare inspection asks `skillshare status --global --json` for accepted
-configuration, source, tracked-repository, and target health instead of
-reimplementing Skillshare's YAML or merge-mode semantics. It validates the
-command result and JSON shape before trusting those fields. Installation
-ownership remains a separate check: Mise's JSON inventory distinguishes an
-inactive Mise install from the active executable and warns only when independent
-owners coexist. `check` deliberately does not run `skillshare doctor`: that
-command may migrate configuration, update caches, and probe target paths with
-temporary writes. Run it explicitly when deeper diagnosis is worth those local
-side effects.
+Skillshare inspection parses the global YAML configuration and checks its source
+and target locations without invoking the Skillshare CLI. Installation ownership
+remains a separate check: Mise's JSON inventory distinguishes an inactive Mise
+install from the active executable and warns only when independent owners
+coexist. Run `skillshare status --global --json` or `skillshare doctor`
+explicitly when tracked-repository, synchronization, or deeper target health is
+needed: those commands may migrate legacy configuration or write diagnostic
+state and therefore do not belong in read-only `check`.
 
 Missing or empty generated shell directories are reported as not ready. The
 report also verifies that the host's canonical Mise path is a real executable,

@@ -92,19 +92,7 @@ def test_inspect_host_reports_capabilities_and_their_invalid_transition(
     tools = tmp_path / "tools"
     tools.mkdir()
     skillshare = tools / "skillshare"
-    skillshare.write_text(
-        "#!/bin/sh\n"
-        'if [ -d "$HOME/Developer/ipruning/skills" ]; then exists=true; '
-        "else exists=false; fi\n"
-        'printf \'{"source":{"path":"%s","exists":%s},'
-        '"tracked_repos":[],"targets":['
-        '{"name":"claude","path":"%s","mode":"merge",'
-        '"status":"merged","synced_count":1},'
-        '{"name":"universal","path":"%s","mode":"merge",'
-        '"status":"merged","synced_count":1}]}\\n\' '
-        '"$HOME/Developer/ipruning/skills" "$exists" '
-        '"$HOME/.claude/skills" "$HOME/.agents/skills"\n',
-    )
+    skillshare.write_text("#!/bin/sh\nexit 0\n")
     skillshare.chmod(0o755)
     session_health = _session_health_stub(
         tmp_path,
@@ -541,7 +529,7 @@ def test_inspect_host_reports_symlinked_generated_directories(tmp_path: Path) ->
     assert "Remove the symlink" in finding.action
 
 
-def test_inspect_host_reports_empty_generated_state_and_skillshare_status_failure(
+def test_inspect_host_reports_empty_generated_state_without_running_skillshare(
     tmp_path: Path,
 ) -> None:
     repo_root = tmp_path / "repo"
@@ -577,8 +565,9 @@ def test_inspect_host_reports_empty_generated_state_and_skillshare_status_failur
     )
     findings = {finding.code: finding for finding in report.findings}
 
-    assert invocation_marker.exists()
-    assert findings["skillshare.status_unavailable"].severity is Severity.WARN
+    assert not invocation_marker.exists()
+    assert findings["skillshare.config_ready"].severity is Severity.OK
+    assert findings["skillshare.source_ready"].severity is Severity.OK
     assert findings["shell.plugins_empty"].severity is Severity.WARN
     assert findings["shell.completions_empty"].severity is Severity.WARN
     assert findings["shell.functions_empty"].severity is Severity.WARN
@@ -648,125 +637,75 @@ def test_skillshare_ownership_reports_independent_mise_and_homebrew_owners(
     assert "brew list" in (finding.action or "")
 
 
-def test_skillshare_health_uses_official_global_status_json(
+def test_skillshare_health_reads_configuration_without_running_the_cli(
     tmp_path: Path,
     monkeypatch,
 ) -> None:
     home = tmp_path / "home"
-    executable = tmp_path / "skillshare"
     source = home / "skills"
     target = home / ".agents/skills"
-    status = {
-        "source": {"path": str(source), "exists": True},
-        "tracked_repos": [
-            {"name": "company-skills", "skill_count": 12, "dirty": False},
-        ],
-        "targets": [
-            {
-                "name": "universal",
-                "path": str(target),
-                "mode": "merge",
-                "status": "merged",
-                "synced_count": 15,
-            },
-        ],
-    }
+    source.mkdir(parents=True)
+    target.mkdir(parents=True)
+    config = home / ".config/skillshare/config.yaml"
+    config.parent.mkdir(parents=True)
+    config.write_text(
+        "sources:\n"
+        "  skills: ~/skills\n"
+        "targets:\n"
+        "  universal:\n"
+        "    skills:\n"
+        "      path: ~/.agents/skills\n"
+        "      mode: merge\n",
+    )
 
-    def fake_run(command, **kwargs):
-        assert tuple(command) == (
-            str(executable),
-            "status",
-            "--global",
-            "--json",
-        )
-        assert kwargs["stdin"] is check_skillshare_module.subprocess.DEVNULL
-        assert kwargs["env"]["HOME"] == str(home)
-        return check_skillshare_module.subprocess.CompletedProcess(
-            command,
-            0,
-            json.dumps(status),
-            "",
-        )
+    def fail_run(*_args, **_kwargs):
+        raise AssertionError("read-only Skillshare inspection must not run its CLI")
 
-    monkeypatch.setattr(check_skillshare_module.subprocess, "run", fake_run)
+    monkeypatch.setattr(check_skillshare_module.subprocess, "run", fail_run)
 
-    findings = check_skillshare_module._skillshare_findings(home, executable)
+    findings = check_skillshare_module._skillshare_findings(home)
     by_code = {finding.code: finding for finding in findings}
 
     assert by_code["skillshare.config_ready"].severity is Severity.OK
     assert by_code["skillshare.source_ready"].path == source
-    assert by_code["skillshare.tracked_repos_clean"].severity is Severity.OK
     assert by_code["skillshare.target_ready"].path == target
-    assert "15 synced Skills" in by_code["skillshare.target_ready"].message
+    assert "merge mode" in by_code["skillshare.target_ready"].message
 
 
-def test_skillshare_health_reports_official_dirty_and_drift_state(
-    tmp_path: Path,
-    monkeypatch,
-) -> None:
+def test_skillshare_health_reports_missing_source_and_target(tmp_path: Path) -> None:
     home = tmp_path / "home"
-    executable = tmp_path / "skillshare"
-    status = {
-        "source": {"path": str(home / "missing"), "exists": False},
-        "tracked_repos": [
-            {"name": "company-skills", "skill_count": 12, "dirty": True},
-        ],
-        "targets": [
-            {
-                "name": "universal",
-                "path": str(home / ".agents/skills"),
-                "mode": "copy",
-                "status": "drift",
-                "synced_count": 12,
-            },
-        ],
-    }
-    monkeypatch.setattr(
-        check_skillshare_module.subprocess,
-        "run",
-        lambda command, **_kwargs: check_skillshare_module.subprocess.CompletedProcess(
-            command,
-            0,
-            json.dumps(status),
-            "",
-        ),
+    config = home / ".config/skillshare/config.yaml"
+    config.parent.mkdir(parents=True)
+    config.write_text(
+        "sources:\n"
+        "  skills: ~/missing\n"
+        "targets:\n"
+        "  universal:\n"
+        "    skills:\n"
+        "      path: ~/.agents/skills\n"
+        "      mode: copy\n",
     )
 
-    findings = check_skillshare_module._skillshare_findings(home, executable)
+    findings = check_skillshare_module._skillshare_findings(home)
     by_code = {finding.code: finding for finding in findings}
 
     assert by_code["skillshare.source_missing"].severity is Severity.WARN
-    assert by_code["skillshare.tracked_repos_dirty"].severity is Severity.WARN
-    assert "company-skills" in by_code["skillshare.tracked_repos_dirty"].message
-    assert by_code["skillshare.target_unhealthy"].severity is Severity.WARN
+    assert by_code["skillshare.target_directory_missing"].severity is Severity.WARN
+    assert "copy mode" in by_code["skillshare.target_directory_missing"].message
 
 
-def test_skillshare_health_rejects_invalid_official_status_shape(
-    tmp_path: Path,
-    monkeypatch,
-) -> None:
+def test_skillshare_health_rejects_invalid_configuration_shape(tmp_path: Path) -> None:
     home = tmp_path / "home"
-    executable = tmp_path / "skillshare"
-    status = {
-        "source": {"path": str(home / "skills"), "exists": True},
-        "tracked_repos": [],
-        "targets": [{"name": "universal", "path": 42}],
-    }
-    monkeypatch.setattr(
-        check_skillshare_module.subprocess,
-        "run",
-        lambda command, **_kwargs: check_skillshare_module.subprocess.CompletedProcess(
-            command,
-            0,
-            json.dumps(status),
-            "",
-        ),
+    config = home / ".config/skillshare/config.yaml"
+    config.parent.mkdir(parents=True)
+    config.write_text(
+        "sources:\n  skills: ~/skills\ntargets:\n  - universal\n",
     )
 
-    findings = check_skillshare_module._skillshare_findings(home, executable)
+    findings = check_skillshare_module._skillshare_findings(home)
 
     assert len(findings) == 1
-    assert findings[0].code == "skillshare.status_invalid"
+    assert findings[0].code == "skillshare.config_invalid"
     assert findings[0].severity is Severity.WARN
 
 
@@ -1666,7 +1605,7 @@ def test_private_git_identity_accepts_conditional_include_sections_with_spaces(
     assert degraded_identity.severity is Severity.WARN
 
 
-def test_inspect_host_leaves_skillshare_config_validation_to_missing_cli(
+def test_inspect_host_validates_skillshare_config_when_cli_is_missing(
     tmp_path: Path,
 ) -> None:
     repo_root = tmp_path / "repo"
@@ -1684,7 +1623,7 @@ def test_inspect_host_leaves_skillshare_config_validation_to_missing_cli(
 
     findings = {finding.code: finding for finding in report.findings}
     assert findings["executable.skillshare.missing"].severity is Severity.WARN
-    assert not any(finding.check == "skillshare.config" for finding in report.findings)
+    assert findings["skillshare.config_invalid"].severity is Severity.WARN
     assert findings["shell.bash_missing"].severity is Severity.WARN
     assert "macos.launchctl_skipped" not in findings
 

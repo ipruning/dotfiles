@@ -661,7 +661,7 @@ def inspect_host(
         executable_finder=executable_finder,
     )
     findings.append(skillshare_finding)
-    findings.extend(_skillshare_findings(home, skillshare_finding.path))
+    findings.extend(_skillshare_findings(home))
     if policy_valid and executable_finder is shutil.which:
         ownership = _skillshare_ownership_finding(home, skillshare_finding.path)
         if ownership:
