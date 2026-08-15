@@ -18,7 +18,9 @@ from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
 
+from .host_policy import HostPolicyError, mutation_allowed, require_mutation_allowed
 from .models import ExecutableFinder
+from .render import emit_error
 
 StepCallback = Callable[["InventorySpec"], None]
 HOST_NAME_RE = re.compile(r"[^A-Za-z0-9._-]")
@@ -225,10 +227,12 @@ def _collect(spec: InventorySpec) -> tuple[str, int | None]:
 
 def execute_inventory(
     plan: InventoryReport,
+    home: Path,
     *,
     on_start: StepCallback | None = None,
 ) -> InventoryReport:
     """Run every planned collector and retain independent failure results."""
+    require_mutation_allowed(home)
     results = []
     for planned in plan.results:
         if planned.status is not InventoryStatus.PLANNED:
@@ -322,9 +326,13 @@ def _summary(report: InventoryReport) -> dict[str, int]:
     }
 
 
-def _next_commands(report: InventoryReport) -> tuple[str, ...]:
+def _next_commands(
+    report: InventoryReport,
+    *,
+    apply_allowed: bool = True,
+) -> tuple[str, ...]:
     if not report.apply:
-        if not any(
+        if not apply_allowed or not any(
             result.status is InventoryStatus.PLANNED for result in report.results
         ):
             return ()
@@ -344,7 +352,12 @@ def _next_commands(report: InventoryReport) -> tuple[str, ...]:
     )
 
 
-def _document(report: InventoryReport, repo_root: Path) -> dict[str, object]:
+def _document(
+    report: InventoryReport,
+    repo_root: Path,
+    *,
+    apply_allowed: bool = True,
+) -> dict[str, object]:
     return {
         "schema_version": 1,
         "operation": "inventory",
@@ -368,11 +381,16 @@ def _document(report: InventoryReport, repo_root: Path) -> dict[str, object]:
             for result in report.results
         ],
         "summary": _summary(report),
-        "next": list(_next_commands(report)),
+        "next": list(_next_commands(report, apply_allowed=apply_allowed)),
     }
 
 
-def _render(report: InventoryReport, repo_root: Path) -> None:
+def _render(
+    report: InventoryReport,
+    repo_root: Path,
+    *,
+    apply_allowed: bool = True,
+) -> None:
     for result in report.results:
         target = result.target.relative_to(repo_root)
         label = result.status.value.upper()
@@ -398,7 +416,11 @@ def _render(report: InventoryReport, repo_root: Path) -> None:
     rendered = ", ".join(f"{count} {status}" for status, count in summary.items())
     print(f"Summary: {rendered or 'no steps'}")
     if not report.apply:
-        if _next_commands(report):
+        if not apply_allowed and any(
+            result.status is InventoryStatus.PLANNED for result in report.results
+        ):
+            print("No snapshots written. Host policy disables inventory apply.")
+        elif _next_commands(report):
             print("No snapshots written. Re-run with --apply to snapshot this host.")
             print("Next:")
             for command in _next_commands(report):
@@ -455,6 +477,20 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if args.host is not None and sanitize_host(args.host) != args.host:
         parser.error("--host must use only [A-Za-z0-9._-] and must not be '.' or '..'")
+    home = Path.home()
+    try:
+        apply_allowed = mutation_allowed(home)
+        if args.apply:
+            require_mutation_allowed(home)
+    except HostPolicyError as error:
+        emit_error(
+            "inventory",
+            str(error),
+            as_json=args.as_json,
+            apply=args.apply,
+            code=error.code,
+        )
+        return 1
     host = args.host if args.host is not None else detect_host()
     report = plan_inventory(
         args.repo_root,
@@ -464,12 +500,23 @@ def main(argv: list[str] | None = None) -> int:
     if args.apply:
         report = execute_inventory(
             report,
+            home,
             on_start=None if args.as_json else _announce_step,
         )
     if args.as_json:
-        print(json.dumps(_document(report, args.repo_root), indent=2, sort_keys=True))
+        print(
+            json.dumps(
+                _document(
+                    report,
+                    args.repo_root,
+                    apply_allowed=apply_allowed,
+                ),
+                indent=2,
+                sort_keys=True,
+            ),
+        )
     else:
-        _render(report, args.repo_root)
+        _render(report, args.repo_root, apply_allowed=apply_allowed)
     return 0 if report.ok else 1
 
 

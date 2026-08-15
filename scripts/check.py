@@ -25,6 +25,12 @@ from .check_mise import (
     _mise_systemd_shim_findings,
 )
 from .check_skillshare import _skillshare_findings, _skillshare_ownership_finding
+from .host_policy import (
+    HostPolicy,
+    HostPolicyError,
+    host_policy_path,
+    load_host_policy,
+)
 from .mise import canonical_mise_executable
 from .models import CheckReport, ExecutableFinder, Finding, Severity
 from .profiles import HostProfile, resolve_profile
@@ -32,12 +38,46 @@ from .render import finding_document, render_findings
 from .runtime import (
     COMPLETION_SPECS,
     FUNCTION_SPECS,
-    LOCAL_BINARY_SPECS,
     PLUGIN_SPECS,
     WASM_SPECS,
     file_sha256,
-    repo_aware_finder,
+    shim_aware_finder,
 )
+
+AUDIT_ONLY_NON_APPLICABLE_CHECKS = frozenset(
+    {
+        "shell.bash",
+        "shell.plugins",
+        "shell.completions",
+        "shell.functions",
+        "executable.starship",
+        "executable.herdr",
+        "executable.atuin",
+        "executable.zoxide",
+        "executable.hunk",
+        "executable.lazygit",
+        "executable.lazydocker",
+    },
+)
+AUDIT_ONLY_NON_APPLICABLE_PREFIXES = ("runtime.", "zellij.")
+
+
+def _apply_audit_only_applicability(findings: list[Finding]) -> list[Finding]:
+    return [
+        (
+            Finding(
+                finding.check,
+                None,
+                finding.code,
+                finding.message,
+                finding.path,
+            )
+            if finding.check in AUDIT_ONLY_NON_APPLICABLE_CHECKS
+            or finding.check.startswith(AUDIT_ONLY_NON_APPLICABLE_PREFIXES)
+            else finding
+        )
+        for finding in findings
+    ]
 
 
 def _check_executable(
@@ -63,6 +103,47 @@ def _check_executable(
         f"executable.{tool}.missing",
         f"{tool} is not available on PATH",
         action=missing_action or f"Install {tool} if this host needs that capability.",
+    )
+
+
+def _host_policy_finding(home: Path) -> tuple[Finding | None, HostPolicy | None]:
+    path = host_policy_path(home)
+    if not path.exists() and not path.is_symlink():
+        return None, HostPolicy()
+    try:
+        policy = load_host_policy(home)
+    except HostPolicyError as error:
+        return (
+            Finding(
+                "host.policy",
+                Severity.ERROR,
+                "host.policy_invalid",
+                str(error),
+                path,
+                "Fix or remove the invalid host policy before using dotfiles operations.",
+            ),
+            None,
+        )
+    if policy.audit_only:
+        return (
+            Finding(
+                "host.policy",
+                Severity.OK,
+                "host.policy_audit_only",
+                "Host policy permits inspection but disables mutating dotfiles operations",
+                path,
+            ),
+            policy,
+        )
+    return (
+        Finding(
+            "host.policy",
+            Severity.OK,
+            "host.policy_managed",
+            "Host policy permits managed dotfiles operations",
+            path if path.is_file() else None,
+        ),
+        policy,
     )
 
 
@@ -300,40 +381,6 @@ def _owned_generated_capability(
     return None
 
 
-def _binary_capability(check: str, file_path: Path, label: str) -> Finding:
-    try:
-        ready = (
-            file_path.is_file()
-            and file_path.stat().st_size > 0
-            and os.access(file_path, os.X_OK)
-        )
-    except OSError as error:
-        return Finding(
-            check,
-            Severity.WARN,
-            f"{check}_unavailable",
-            f"{label} could not be inspected: {error}",
-            file_path,
-            "Inspect the generated binary path before rebuilding it.",
-        )
-    if ready:
-        return Finding(
-            check,
-            Severity.OK,
-            f"{check}_ready",
-            f"{label} is present and executable",
-            file_path,
-        )
-    return Finding(
-        check,
-        Severity.WARN,
-        f"{check}_invalid",
-        f"{label} is missing, empty, or not executable",
-        file_path,
-        "Run mise run runtime -- --build, then mise run runtime -- --build --apply.",
-    )
-
-
 def _generated_directory_finding(directory_path: Path, label: str) -> Finding:
     if directory_path.is_symlink():
         return Finding(
@@ -490,7 +537,12 @@ def _dangling_repo_link_findings(repo_root: Path, home: Path) -> list[Finding]:
     return findings
 
 
-def _bash_integration_finding(repo_root: Path, home: Path) -> Finding:
+def _bash_integration_finding(
+    repo_root: Path,
+    home: Path,
+    *,
+    mutation_allowed: bool = True,
+) -> Finding:
     bashrc = home / ".bashrc"
     module_path = repo_root.resolve() / "modules/bash/init.bash"
     try:
@@ -517,15 +569,14 @@ def _bash_integration_finding(repo_root: Path, home: Path) -> Finding:
         else (
             "Preview with mise run setup -- --profile linux-lite, then apply with "
             "mise run setup -- --profile linux-lite --apply."
+            if mutation_allowed
+            else "Host policy disables dotfiles setup; keep Bash with its host owner."
         ),
     )
 
 
 def _legacy_repo_path_finding(repo_root: Path) -> Finding:
-    legacy_directories = (
-        (repo_root / "modules/bin").resolve(),
-        (repo_root / "generated/bin").resolve(),
-    )
+    legacy_directories = ((repo_root / "modules/bin").resolve(),)
     active_directories = {
         Path(entry).expanduser().resolve()
         for entry in os.environ.get("PATH", "").split(os.pathsep)
@@ -550,7 +601,7 @@ def _legacy_repo_path_finding(repo_root: Path) -> Finding:
         ),
         exposed,
         (
-            "Remove dotfiles modules/bin and generated/bin from Bash or global mise PATH configuration."
+            "Remove dotfiles modules/bin from Bash or global mise PATH configuration."
             if exposed
             else None
         ),
@@ -573,28 +624,35 @@ def inspect_host(
         if active_profile is HostProfile.LINUX_LITE
         else ("git", "python", "uv", "mise")
     )
-    findings = [
+    policy_finding, host_policy = _host_policy_finding(home)
+    policy_valid = host_policy is not None
+    findings = [policy_finding] if policy_finding else []
+    findings.extend(
         _check_executable(
             command,
             required=True,
             executable_finder=executable_finder,
         )
         for command in required_commands
-    ]
-    findings.extend(
-        _mise_installation_findings(
-            home,
-            executable_finder=executable_finder,
-            scan_host_path=executable_finder is shutil.which,
-        ),
     )
-    if mise_shims := _mise_shim_finding(home):
-        findings.append(mise_shims)
-    if executable_finder is shutil.which and (
-        project_uv := _mise_project_uv_finding(repo_root, home)
-    ):
-        findings.append(project_uv)
-    if active_system == "Linux":
+    if policy_valid:
+        findings.extend(
+            _mise_installation_findings(
+                home,
+                executable_finder=executable_finder,
+                scan_host_path=executable_finder is shutil.which,
+            ),
+        )
+        if mise_shims := _mise_shim_finding(
+            home,
+            dotfiles_managed=not host_policy.audit_only,
+        ):
+            findings.append(mise_shims)
+        if executable_finder is shutil.which and (
+            project_uv := _mise_project_uv_finding(repo_root, home)
+        ):
+            findings.append(project_uv)
+    if policy_valid and active_system == "Linux":
         findings.extend(_mise_systemd_shim_findings(home))
     findings.extend(_private_git_findings(home))
     skillshare_finding = _check_executable(
@@ -604,7 +662,7 @@ def inspect_host(
     )
     findings.append(skillshare_finding)
     findings.extend(_skillshare_findings(home))
-    if executable_finder is shutil.which:
+    if policy_valid and executable_finder is shutil.which:
         ownership = _skillshare_ownership_finding(home, skillshare_finding.path)
         if ownership:
             findings.append(ownership)
@@ -655,8 +713,16 @@ def inspect_host(
     )
     findings.extend(_dangling_repo_link_findings(repo_root, home))
     if active_profile is HostProfile.LINUX_LITE:
-        findings.append(_bash_integration_finding(repo_root, home))
+        findings.append(
+            _bash_integration_finding(
+                repo_root,
+                home,
+                mutation_allowed=bool(host_policy and not host_policy.audit_only),
+            ),
+        )
         findings.append(_legacy_repo_path_finding(repo_root))
+        if host_policy and host_policy.audit_only:
+            findings = _apply_audit_only_applicability(findings)
         return CheckReport(
             schema_version=1,
             findings=tuple(findings),
@@ -686,17 +752,18 @@ def inspect_host(
                 repo_root / "generated" / directory, directory
             ),
         )
-    mise_binding = _mise_runtime_binding_finding(
-        repo_root / "generated/functions/_mise.zsh",
-        home,
-    )
-    if mise_binding:
-        findings.append(mise_binding)
-    owned_tool_finder = repo_aware_finder(repo_root, executable_finder)
+    if policy_valid:
+        mise_binding = _mise_runtime_binding_finding(
+            repo_root / "generated/functions/_mise.zsh",
+            home,
+        )
+        if mise_binding:
+            findings.append(mise_binding)
+    owned_tool_finder = shim_aware_finder(executable_finder)
     for function_spec in FUNCTION_SPECS:
         tool = function_spec.tool
         tool_available = (
-            canonical_mise_executable(home) is not None
+            policy_valid and canonical_mise_executable(home) is not None
             if tool == "mise"
             else owned_tool_finder(tool) is not None
         )
@@ -775,36 +842,6 @@ def inspect_host(
                     "Run mise run runtime, then mise run runtime -- --apply.",
                 ),
             )
-    generated_bin = repo_root / "generated/bin"
-    owned_binaries = {
-        name for name, _source, _revision, _command, _artifact in LOCAL_BINARY_SPECS
-    }
-    for binary_name in sorted(owned_binaries):
-        findings.append(
-            _binary_capability(
-                f"runtime.binary.{binary_name}",
-                generated_bin / binary_name,
-                f"Generated binary {binary_name}",
-            ),
-        )
-    if generated_bin.is_dir():
-        for file_path in sorted(generated_bin.iterdir()):
-            if (
-                file_path.name in owned_binaries
-                or file_path.name == ".gitkeep"
-                or not (file_path.is_file() or file_path.is_symlink())
-            ):
-                continue
-            findings.append(
-                Finding(
-                    f"runtime.binary.{file_path.name}",
-                    Severity.WARN,
-                    f"runtime.binary.{file_path.name}_unowned",
-                    f"Generated binary {file_path.name} has no repository owner",
-                    file_path,
-                    "Define its build or install owner before treating it as reproducible.",
-                ),
-            )
     if active_system == "Darwin":
         findings.append(
             _check_executable(
@@ -822,6 +859,8 @@ def inspect_host(
                 f"launchctl is not applicable on {active_system}",
             ),
         )
+    if host_policy and host_policy.audit_only:
+        findings = _apply_audit_only_applicability(findings)
     return CheckReport(
         schema_version=1,
         findings=tuple(findings),

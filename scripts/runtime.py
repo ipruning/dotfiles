@@ -18,8 +18,10 @@ from dataclasses import dataclass, replace
 from enum import StrEnum
 from pathlib import Path
 
+from .host_policy import HostPolicyError, mutation_allowed, require_mutation_allowed
 from .mise import canonical_mise_executable, canonical_mise_path
 from .models import ExecutableFinder
+from .render import emit_error
 
 Downloader = Callable[[str, int], bytes]
 AtomicWriter = Callable[[Path], object]
@@ -39,7 +41,6 @@ class RuntimeAction(StrEnum):
     RUN = "run"
     DOWNLOAD = "download"
     REMOVE = "remove"
-    BUILD = "build"
     VALIDATE = "validate"
 
 
@@ -52,9 +53,6 @@ class RuntimeSpec:
     source: str | None = None
     revision: str | None = None
     sha256: str | None = None
-    working_directory: Path | None = None
-    artifact: Path | None = None
-    depends_on: str | None = None
     environment: tuple[tuple[str, str], ...] = ()
     timeout_seconds: int = 120
 
@@ -86,7 +84,6 @@ class RuntimeReport:
     results: tuple[RuntimeResult, ...]
     generated_root: Path | None = None
     network: bool = True
-    build: bool = False
 
     @property
     def ok(self) -> bool:
@@ -208,20 +205,7 @@ WASM_SPECS = (
     ),
 )
 
-LOCAL_BINARY_SPECS = (
-    (
-        "op-cache",
-        "https://github.com/craftzdog/op-cache.git",
-        "768cc6bc992da759d5243f7b2249eb85fc19ab15",
-        ("cargo", "build", "--release", "--locked"),
-        Path("target/release/op-cache"),
-    ),
-)
-
-# Tools that live only under generated/bin and may legitimately need it on a
-# command's PATH; every other tool must resolve from the host PATH.
-SELF_BUILT_TOOLS = frozenset(name for name, *_rest in LOCAL_BINARY_SPECS)
-OWNED_GENERATED_DIRECTORIES = ("functions", "completions", "plugins", "bin", "sources")
+OWNED_GENERATED_DIRECTORIES = ("functions", "completions", "plugins")
 
 
 def _symlinked_generated_directory(generated_root: Path) -> Path | None:
@@ -260,18 +244,8 @@ def _mise_shims_dir() -> Path:
     return base / "shims"
 
 
-def repo_aware_finder(
-    repo_root: Path,
-    executable_finder: ExecutableFinder,
-) -> ExecutableFinder:
-    """Resolve tools from PATH or from repository-built binaries.
-
-    Task environments do not expose generated/bin, so gating on PATH alone
-    would treat tools in LOCAL_BINARY_SPECS as absent. A mise shim only proves
-    a tool was installed at some point; after a configuration change the shim
-    can outlive its tool, so shim hits are validated with `mise which` before
-    they count as present.
-    """
+def shim_aware_finder(executable_finder: ExecutableFinder) -> ExecutableFinder:
+    """Resolve tools from PATH while rejecting stale Mise shims."""
     shims_dir = _mise_shims_dir()
     shim_health: dict[str, bool] = {}
 
@@ -302,15 +276,6 @@ def repo_aware_finder(
             found = None
         if found:
             return found
-        # Only self-built tools live under generated/bin. Falling back there
-        # for a host-managed tool (codex, git) would let a stale, unowned
-        # leftover mark it available in plan_runtime while the apply path,
-        # which only exposes generated/bin for SELF_BUILT_TOOLS, cannot run it.
-        if tool not in SELF_BUILT_TOOLS:
-            return None
-        owned = repo_root / "generated/bin" / tool
-        if owned.is_file() and os.access(owned, os.X_OK):
-            return str(owned)
         return None
 
     return find
@@ -340,156 +305,12 @@ def _generator_result(
     )
 
 
-def _local_binary_results(
-    repo_root: Path,
-    *,
-    executable_finder: ExecutableFinder,
-    network: bool,
-) -> list[RuntimeResult]:
-    results = []
-    sources_dir = repo_root / "generated/sources"
-    cargo_available = executable_finder("cargo") is not None
-    git_available = executable_finder("git") is not None
-    for name, source, revision, build_command, artifact_relative in LOCAL_BINARY_SPECS:
-        source_dir = sources_dir / name
-        source_git_directory = source_dir / ".git"
-        source_is_symlink = source_dir.is_symlink()
-        source_git_directory_is_symlink = source_git_directory.is_symlink()
-        source_is_checkout = (
-            not source_is_symlink
-            and not source_git_directory_is_symlink
-            and source_git_directory.is_dir()
-        )
-        source_action = (
-            RuntimeAction.UPDATE if source_is_checkout else RuntimeAction.CLONE
-        )
-        source_spec = RuntimeSpec(
-            name=f"source.{name}",
-            tool="git",
-            target=source_dir,
-            source=source,
-            revision=revision,
-            command=(
-                (
-                    "git",
-                    "-C",
-                    str(source_dir),
-                    "fetch",
-                    "--depth=1",
-                    "origin",
-                    revision,
-                )
-                if source_action is RuntimeAction.UPDATE
-                else (
-                    "git",
-                    "clone",
-                    "--filter=blob:none",
-                    "--no-checkout",
-                    source,
-                    str(source_dir),
-                )
-            ),
-        )
-        if source_is_symlink:
-            results.append(
-                RuntimeResult(
-                    source_spec,
-                    RuntimeStatus.FAILED,
-                    source_action,
-                    f"source target is a symlink ({os.readlink(source_dir)}); "
-                    "remove it before building",
-                ),
-            )
-        elif source_git_directory_is_symlink:
-            results.append(
-                RuntimeResult(
-                    source_spec,
-                    RuntimeStatus.FAILED,
-                    source_action,
-                    f"source Git metadata is a symlink "
-                    f"({os.readlink(source_git_directory)}); "
-                    "remove it before building",
-                ),
-            )
-        elif not network:
-            results.append(
-                RuntimeResult(
-                    source_spec,
-                    RuntimeStatus.SKIPPED,
-                    source_action,
-                    "network refresh is disabled",
-                ),
-            )
-        elif source_dir.exists() and source_action is RuntimeAction.CLONE:
-            results.append(
-                RuntimeResult(
-                    source_spec,
-                    RuntimeStatus.FAILED,
-                    source_action,
-                    "source target exists but is not a Git checkout",
-                ),
-            )
-        elif git_available:
-            results.append(
-                RuntimeResult(source_spec, RuntimeStatus.PLANNED, source_action),
-            )
-        else:
-            results.append(
-                RuntimeResult(
-                    source_spec,
-                    RuntimeStatus.SKIPPED,
-                    source_action,
-                    "git is not available on PATH",
-                ),
-            )
-        binary_spec = RuntimeSpec(
-            name=f"binary.{name}",
-            tool="cargo",
-            target=repo_root / "generated/bin" / name,
-            command=((*build_command, "--offline") if not network else build_command),
-            source=source,
-            revision=revision,
-            working_directory=source_dir,
-            artifact=source_dir / artifact_relative,
-            depends_on=f"source.{name}",
-            timeout_seconds=1800,
-        )
-        source_will_exist = (source_is_checkout and (not network or git_available)) or (
-            not source_dir.exists() and network and git_available
-        )
-        if cargo_available and source_will_exist:
-            results.append(
-                RuntimeResult(
-                    binary_spec,
-                    RuntimeStatus.PLANNED,
-                    RuntimeAction.BUILD,
-                ),
-            )
-        else:
-            if not cargo_available:
-                missing = "cargo"
-            elif network and not git_available:
-                missing = "git"
-            else:
-                missing = "build source"
-            results.append(
-                RuntimeResult(
-                    binary_spec,
-                    RuntimeStatus.SKIPPED,
-                    RuntimeAction.BUILD,
-                    f"{missing} is not available",
-                ),
-            )
-    return results
-
-
 def plan_runtime(
     repo_root: Path,
     home: Path,
     *,
     executable_finder: ExecutableFinder = shutil.which,
     network: bool = True,
-    build: bool = False,
 ) -> RuntimeReport:
     """Return the exact generated runtime refresh without changing files."""
     generated_root = repo_root / "generated"
@@ -514,26 +335,12 @@ def plan_runtime(
             ),
             generated_root=generated_root,
             network=network,
-            build=build,
         )
-    executable_finder = repo_aware_finder(repo_root, executable_finder)
+    executable_finder = shim_aware_finder(executable_finder)
     functions_dir = generated_root / "functions"
     completions_dir = generated_root / "completions"
     plugins_dir = generated_root / "plugins"
     results = []
-    binary_results: dict[str, RuntimeResult] = {}
-    if build:
-        build_results = _local_binary_results(
-            repo_root,
-            executable_finder=executable_finder,
-            network=network,
-        )
-        results.extend(build_results)
-        binary_results = {
-            result.spec.name.removeprefix("binary."): result
-            for result in build_results
-            if result.spec.name.startswith("binary.")
-        }
     for function_spec in FUNCTION_SPECS:
         tool = function_spec.tool
         command = function_spec.command
@@ -548,19 +355,7 @@ def plan_runtime(
             target=functions_dir / function_spec.filename,
             command=command,
         )
-        binary_result = binary_results.get(tool)
-        if binary_result is not None and (
-            binary_result.status is RuntimeStatus.PLANNED or generator_finder(tool)
-        ):
-            results.append(
-                RuntimeResult(
-                    replace(spec, depends_on=f"binary.{tool}"),
-                    RuntimeStatus.PLANNED,
-                    RuntimeAction.GENERATE,
-                ),
-            )
-        else:
-            results.append(_generator_result(spec, executable_finder=generator_finder))
+        results.append(_generator_result(spec, executable_finder=generator_finder))
     for name, tool, command, filename, environment in COMPLETION_SPECS:
         effective_command = (
             (command[0], "--offline", *command[1:])
@@ -714,20 +509,6 @@ def plan_runtime(
             "bat is not available on PATH",
         ),
     )
-    legacy_try_rs = completions_dir / "_try-rs"
-    legacy_try_rs_spec = RuntimeSpec(
-        name="completion.try-rs-legacy",
-        tool=None,
-        target=legacy_try_rs,
-    )
-    if legacy_try_rs.exists() or legacy_try_rs.is_symlink():
-        results.append(
-            RuntimeResult(
-                legacy_try_rs_spec,
-                RuntimeStatus.PLANNED,
-                RuntimeAction.REMOVE,
-            ),
-        )
     compdumps = tuple(sorted(home.glob(".zcompdump*")))
     compdump_spec = RuntimeSpec(
         name="zsh.compdump",
@@ -749,7 +530,6 @@ def plan_runtime(
         results=tuple(results),
         generated_root=generated_root,
         network=network,
-        build=build,
     )
 
 
@@ -766,13 +546,6 @@ def _atomic_install(target: Path, writer: AtomicWriter) -> None:
 def _command_environment(spec: RuntimeSpec, home: Path) -> dict[str, str]:
     environment = os.environ.copy()
     environment["HOME"] = str(home)
-    owned_root = spec.target if spec.target is not None else spec.working_directory
-    if spec.command and owned_root is not None and spec.tool in SELF_BUILT_TOOLS:
-        # Tools in LOCAL_BINARY_SPECS live under generated/bin and need it on
-        # PATH. Prepending it for every command would let a stale or unowned
-        # generated/bin/<tool> shadow the host executable plan_runtime checked.
-        owned_bin = owned_root.parent.parent / "bin"
-        environment["PATH"] = f"{owned_bin}{os.pathsep}{environment.get('PATH', '')}"
     environment.update(dict(spec.environment))
     if spec.tool == "mise" and spec.name.startswith("function."):
         for name in (
@@ -794,7 +567,7 @@ def _run_command(
 ) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         spec.command,
-        cwd=spec.working_directory or home,
+        cwd=home,
         check=False,
         stdin=subprocess.DEVNULL,
         capture_output=capture_output,
@@ -823,7 +596,6 @@ def _read_revision(
     verify_spec = replace(
         spec,
         command=("git", "-C", str(directory), "rev-parse", "HEAD"),
-        working_directory=None,
     )
     verified = _run_command(verify_spec, home, capture_output=True)
     if verified.returncode != 0:
@@ -842,7 +614,6 @@ def _set_revision(
     checkout_spec = replace(
         spec,
         command=("git", "-C", str(directory), "checkout", "--detach", revision),
-        working_directory=None,
     )
     checkout = _run_command(checkout_spec, home, capture_output=capture_output)
     if capture_output:
@@ -890,36 +661,12 @@ def execute_runtime(
     capture_output: bool = True,
 ) -> RuntimeReport:
     """Execute a previously rendered runtime plan."""
+    require_mutation_allowed(home)
     results = []
-    completed_steps: dict[str, RuntimeResult] = {}
-    dependency_blocked_steps: set[str] = set()
     for planned in plan.results:
         spec = planned.spec
-        if spec.depends_on and planned.status is not RuntimeStatus.FAILED:
-            dependency = completed_steps.get(spec.depends_on)
-            dependency_failed = (
-                dependency is not None and dependency.status is RuntimeStatus.FAILED
-            )
-            dependency_blocked = spec.depends_on in dependency_blocked_steps
-            if dependency_failed or dependency_blocked:
-                reason = (
-                    f"{spec.depends_on} failed; refusing to use stale input"
-                    if dependency_failed
-                    else f"{spec.depends_on} was not refreshed; refusing to use stale input"
-                )
-                blocked = RuntimeResult(
-                    spec,
-                    RuntimeStatus.SKIPPED,
-                    planned.action,
-                    reason,
-                )
-                results.append(blocked)
-                completed_steps[spec.name] = blocked
-                dependency_blocked_steps.add(spec.name)
-                continue
         if planned.status is not RuntimeStatus.PLANNED:
             results.append(planned)
-            completed_steps[spec.name] = planned
             continue
         if on_start:
             on_start(spec, planned.action)
@@ -932,11 +679,7 @@ def execute_runtime(
             ):
                 raise RuntimeError(_symlinked_directory_reason(symlinked_directory))
             command_directory = (
-                spec.working_directory
-                if planned.action is RuntimeAction.BUILD
-                else spec.target
-                if planned.action is RuntimeAction.UPDATE
-                else None
+                spec.target if planned.action is RuntimeAction.UPDATE else None
             )
             if command_directory is not None and command_directory.is_symlink():
                 raise RuntimeError(
@@ -1023,31 +766,6 @@ def execute_runtime(
                 finally:
                     if staging is not None:
                         shutil.rmtree(staging, ignore_errors=True)
-            elif planned.action is RuntimeAction.BUILD:
-                artifact = spec.artifact
-                assert artifact is not None
-                assert spec.target is not None
-                completed = _run_command(
-                    spec,
-                    home,
-                    capture_output=capture_output,
-                )
-                exit_code = completed.returncode
-                if capture_output:
-                    _emit_command_output(spec, completed.stdout)
-                    _emit_command_output(spec, completed.stderr)
-                if completed.returncode != 0:
-                    raise RuntimeError(_command_failure_reason(completed))
-                if not artifact.is_file():
-                    raise RuntimeError(f"build artifact is missing: {artifact}")
-
-                def copy_artifact(
-                    temporary: Path,
-                    source: Path = artifact,
-                ) -> None:
-                    shutil.copy2(source, temporary)
-
-                _atomic_install(spec.target, copy_artifact)
             elif planned.action is RuntimeAction.DOWNLOAD:
                 assert spec.source is not None
                 assert spec.sha256 is not None
@@ -1111,7 +829,6 @@ def execute_runtime(
                 exit_code,
             )
             results.append(failed)
-            completed_steps[spec.name] = failed
             continue
         succeeded = RuntimeResult(
             spec,
@@ -1120,13 +837,11 @@ def execute_runtime(
             exit_code=exit_code,
         )
         results.append(succeeded)
-        completed_steps[spec.name] = succeeded
     return RuntimeReport(
         apply=True,
         results=tuple(results),
         generated_root=plan.generated_root,
         network=plan.network,
-        build=plan.build,
     )
 
 
@@ -1143,13 +858,17 @@ def _summary(report: RuntimeReport) -> dict[str, int]:
     }
 
 
-def _document(report: RuntimeReport) -> dict[str, object]:
+def _document(
+    report: RuntimeReport,
+    *,
+    apply_allowed: bool = True,
+) -> dict[str, object]:
     return {
         "schema_version": 1,
         "operation": "runtime",
         "apply": report.apply,
         "ok": report.ok,
-        "next": list(_next_commands(report)),
+        "next": list(_next_commands(report, apply_allowed=apply_allowed)),
         "shell_restart_required": _shell_restart_required(report),
         "steps": [
             {
@@ -1162,14 +881,6 @@ def _document(report: RuntimeReport) -> dict[str, object]:
                 "source": result.spec.source,
                 "revision": result.spec.revision,
                 "sha256": result.spec.sha256,
-                "working_directory": (
-                    str(result.spec.working_directory)
-                    if result.spec.working_directory
-                    else None
-                ),
-                "artifact": (
-                    str(result.spec.artifact) if result.spec.artifact else None
-                ),
                 "reason": result.reason,
                 "exit_code": result.exit_code,
             }
@@ -1179,10 +890,18 @@ def _document(report: RuntimeReport) -> dict[str, object]:
     }
 
 
-def _next_commands(report: RuntimeReport) -> tuple[str, ...]:
+def _next_commands(
+    report: RuntimeReport,
+    *,
+    apply_allowed: bool = True,
+) -> tuple[str, ...]:
     if not report.apply:
-        if not report.ok or not any(
-            result.status is RuntimeStatus.PLANNED for result in report.results
+        if (
+            not apply_allowed
+            or not report.ok
+            or not any(
+                result.status is RuntimeStatus.PLANNED for result in report.results
+            )
         ):
             return ()
         arguments = ["mise", "run", "runtime", "--"]
@@ -1190,8 +909,6 @@ def _next_commands(report: RuntimeReport) -> tuple[str, ...]:
             arguments.extend(("--repo-root", str(report.generated_root.parent)))
         if not report.network:
             arguments.append("--offline")
-        if report.build:
-            arguments.append("--build")
         arguments.append("--apply")
         return (shlex.join(arguments),)
     if not report.ok:
@@ -1217,8 +934,6 @@ def _step_detail(spec: RuntimeSpec, action: RuntimeAction) -> str:
     revision = f" [revision={spec.revision}]" if spec.revision else ""
     if action is RuntimeAction.GENERATE:
         return f"{command} -> {spec.target}"
-    if action is RuntimeAction.BUILD:
-        return f"{command} (in {spec.working_directory}) -> {spec.target}{revision}"
     if command:
         return f"{command}{revision}"
     if action is RuntimeAction.DOWNLOAD:
@@ -1228,7 +943,7 @@ def _step_detail(spec: RuntimeSpec, action: RuntimeAction) -> str:
     return str(spec.target or action)
 
 
-def _render(report: RuntimeReport) -> None:
+def _render(report: RuntimeReport, *, apply_allowed: bool = True) -> None:
     for result in report.results:
         if result.status is RuntimeStatus.FAILED:
             print(
@@ -1249,10 +964,13 @@ def _render(report: RuntimeReport) -> None:
     print(f"Summary: {rendered or 'no steps'}")
     if not report.apply:
         if summary.get(RuntimeStatus.PLANNED.value, 0):
-            print("No files changed. Re-run with --apply to refresh the runtime.")
-            print("Next:")
-            for command in _next_commands(report):
-                print(f"  {command}")
+            if apply_allowed:
+                print("No files changed. Re-run with --apply to refresh the runtime.")
+                print("Next:")
+                for command in _next_commands(report):
+                    print(f"  {command}")
+            else:
+                print("No files changed. Host policy disables runtime apply.")
         else:
             print("No runtime refresh steps are available on this host.")
         return
@@ -1288,11 +1006,6 @@ def main(argv: list[str] | None = None) -> int:
         help="skip steps that need network access",
     )
     parser.add_argument(
-        "--build",
-        action="store_true",
-        help="include self-built tool steps",
-    )
-    parser.add_argument(
         "--json",
         action="store_true",
         dest="as_json",
@@ -1305,21 +1018,40 @@ def main(argv: list[str] | None = None) -> int:
         help="repository root that owns the runtime (default: this checkout)",
     )
     args = parser.parse_args(argv)
-    report = plan_runtime(
-        args.repo_root,
-        Path.home(),
-        network=not args.offline,
-        build=args.build,
-    )
-    if args.apply:
-        report = execute_runtime(
-            report,
-            Path.home(),
-            on_start=None if args.as_json else _announce_step,
-            capture_output=args.as_json,
+    home = Path.home()
+    try:
+        apply_allowed = mutation_allowed(home)
+        if args.apply:
+            require_mutation_allowed(home)
+        report = plan_runtime(
+            args.repo_root,
+            home,
+            network=not args.offline,
         )
+        if args.apply:
+            report = execute_runtime(
+                report,
+                home,
+                on_start=None if args.as_json else _announce_step,
+                capture_output=args.as_json,
+            )
+    except HostPolicyError as error:
+        emit_error(
+            "runtime",
+            str(error),
+            as_json=args.as_json,
+            apply=args.apply,
+            code=error.code,
+        )
+        return 1
     if args.as_json:
-        print(json.dumps(_document(report), indent=2, sort_keys=True))
+        print(
+            json.dumps(
+                _document(report, apply_allowed=apply_allowed),
+                indent=2,
+                sort_keys=True,
+            ),
+        )
         for result in report.results:
             if result.status is RuntimeStatus.FAILED:
                 print(
@@ -1327,7 +1059,7 @@ def main(argv: list[str] | None = None) -> int:
                     file=sys.stderr,
                 )
     else:
-        _render(report)
+        _render(report, apply_allowed=apply_allowed)
     return 0 if report.ok else 1
 
 

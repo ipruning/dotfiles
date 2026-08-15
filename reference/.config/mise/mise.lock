@@ -4,20 +4,6 @@
 version = "0.34.0"
 backend = "npm:agent-browser"
 
-[[tools."aqua:modem-dev/hunk"]]
-version = "0.18.1"
-backend = "aqua:modem-dev/hunk"
-
-[tools."aqua:modem-dev/hunk"."platforms.linux-x64"]
-checksum = "sha256:b3bf7a8a8d1ddf110e19e71edfb76d1a4414b3b0fc560d5facc2b55237b2061c"
-url = "https://github.com/modem-dev/hunk/releases/download/v0.18.1/hunkdiff-linux-x64.tar.gz"
-url_api = "https://api.github.com/repos/modem-dev/hunk/releases/assets/510397450"
-
-[tools."aqua:modem-dev/hunk"."platforms.macos-arm64"]
-checksum = "sha256:26c71e50c5894a879cc68ebb3dea961e963bc023111ae3cb3fb2ca4a42bc9f75"
-url = "https://github.com/modem-dev/hunk/releases/download/v0.18.1/hunkdiff-darwin-arm64.tar.gz"
-url_api = "https://api.github.com/repos/modem-dev/hunk/releases/assets/510397447"
-
 [[tools."aqua:yarnpkg/berry"]]
 version = "4.18.0"
 backend = "aqua:yarnpkg/berry"
@@ -102,20 +88,6 @@ bin = "atuin"
 crate = "atuin"
 locked = "true"
 
-[[tools.codex]]
-version = "0.147.0"
-backend = "aqua:openai/codex"
-
-[tools.codex."platforms.linux-x64"]
-checksum = "sha256:bd758d53d56e41dc65e045f4589df79a038ed197a011adcb52a258e6ad64cfda"
-url = "https://github.com/openai/codex/releases/download/rust-v0.147.0/codex-package-x86_64-unknown-linux-musl.tar.gz"
-url_api = "https://api.github.com/repos/openai/codex/releases/assets/504450439"
-
-[tools.codex."platforms.macos-arm64"]
-checksum = "sha256:17b2984eb22b607e3d0c25728252fc90f510e476bad39a6d9f45cdb1aa685432"
-url = "https://github.com/openai/codex/releases/download/rust-v0.147.0/codex-package-aarch64-apple-darwin.tar.gz"
-url_api = "https://api.github.com/repos/openai/codex/releases/assets/504450535"
-
 [[tools.deno]]
 version = "2.9.5"
 backend = "core:deno"
@@ -131,22 +103,6 @@ url = "https://dl.deno.land/release/v2.9.5/deno-aarch64-apple-darwin.zip"
 [[tools."gem:kamal"]]
 version = "2.12.0"
 backend = "gem:kamal"
-
-[[tools.gh]]
-version = "2.97.0"
-backend = "aqua:cli/cli"
-
-[tools.gh."platforms.linux-x64"]
-checksum = "sha256:a2c9b8497e1f85b1ad0dfcb78b5a622e098801b8e461e459e88e1ee12f018112"
-url = "https://github.com/cli/cli/releases/download/v2.97.0/gh_2.97.0_linux_amd64.tar.gz"
-url_api = "https://api.github.com/repos/cli/cli/releases/assets/496108269"
-provenance = "github-attestations"
-
-[tools.gh."platforms.macos-arm64"]
-checksum = "sha256:a58b8fd77b417a38f47a0b54d1370c59b0fcdb324ccc9ca002b0998f7c4c999e"
-url = "https://github.com/cli/cli/releases/download/v2.97.0/gh_2.97.0_macOS_arm64.zip"
-url_api = "https://api.github.com/repos/cli/cli/releases/assets/496108298"
-provenance = "github-attestations"
 
 [[tools."github:agavra/tuicr"]]
 version = "0.22.0"

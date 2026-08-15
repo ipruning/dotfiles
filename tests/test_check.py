@@ -76,11 +76,6 @@ def test_inspect_host_reports_capabilities_and_their_invalid_transition(
     (repo_root / "generated/functions/_mise.zsh").write_text(
         f"command {canonical_mise}\n",
     )
-    for binary_name in ("op-cache",):
-        binary_path = repo_root / "generated/bin" / binary_name
-        binary_path.parent.mkdir(parents=True, exist_ok=True)
-        binary_path.write_bytes(b"binary")
-        binary_path.chmod(0o755)
     zellij_plugins = repo_root / "generated/plugins"
     wasm_digest = hashlib.sha256(b"wasm").hexdigest()
     monkeypatch.setattr(
@@ -97,9 +92,7 @@ def test_inspect_host_reports_capabilities_and_their_invalid_transition(
     tools = tmp_path / "tools"
     tools.mkdir()
     skillshare = tools / "skillshare"
-    skillshare.write_text(
-        '#!/bin/sh\nprintf \'%s\\n\' \'{"summary":{"warnings":0,"errors":0}}\'\n',
-    )
+    skillshare.write_text("#!/bin/sh\nexit 0\n")
     skillshare.chmod(0o755)
     session_health = _session_health_stub(
         tmp_path,
@@ -573,7 +566,8 @@ def test_inspect_host_reports_empty_generated_state_without_running_skillshare(
     findings = {finding.code: finding for finding in report.findings}
 
     assert not invocation_marker.exists()
-    assert not any(finding.check == "skillshare.doctor" for finding in report.findings)
+    assert findings["skillshare.config_ready"].severity is Severity.OK
+    assert findings["skillshare.source_ready"].severity is Severity.OK
     assert findings["shell.plugins_empty"].severity is Severity.WARN
     assert findings["shell.completions_empty"].severity is Severity.WARN
     assert findings["shell.functions_empty"].severity is Severity.WARN
@@ -643,135 +637,76 @@ def test_skillshare_ownership_reports_independent_mise_and_homebrew_owners(
     assert "brew list" in (finding.action or "")
 
 
-def test_skillshare_targets_report_ready_local_and_broken_entries(
+def test_skillshare_health_reads_configuration_without_running_the_cli(
     tmp_path: Path,
+    monkeypatch,
 ) -> None:
     home = tmp_path / "home"
-    source = home / "Developer/ipruning/skills"
-    source.mkdir(parents=True)
-    config_path = home / ".config/skillshare/config.yaml"
-    config_path.parent.mkdir(parents=True)
-    config_path.write_text(
-        "sources:\n"
-        "  skills: ~/Developer/ipruning/skills\n"
-        "mode: merge\n"
-        "targets:\n"
-        "  claude:\n"
-        "    skills:\n"
-        "      path: ~/.claude/skills/\n"
-        "  universal:\n"
-        "    skills:\n"
-        "      path: ~/.agents/skills\n",
-    )
-    claude = home / ".claude/skills"
-    universal = home / ".agents/skills"
-    claude.mkdir(parents=True)
-    universal.mkdir(parents=True)
-    managed = source / "managed"
-    managed.mkdir()
-    (managed / "SKILL.md").write_text("managed\n")
-    (claude / "managed").symlink_to(managed, target_is_directory=True)
-    external = home / "external"
-    external.mkdir()
-    (external / "SKILL.md").write_text("external\n")
-    (universal / "external-skill").symlink_to(external, target_is_directory=True)
-    local = universal / "local-skill"
-    local.mkdir()
-    (local / "SKILL.md").write_text("local\n")
-    (universal / "broken-skill").symlink_to(
-        source / "missing",
-        target_is_directory=True,
-    )
-
-    findings: dict[str, list[Finding]] = {}
-    for finding in check_skillshare_module._skillshare_findings(home):
-        findings.setdefault(finding.check, []).append(finding)
-
-    claude_finding = findings["skillshare.target.claude"][0]
-    assert claude_finding.code == "skillshare.target_inspected"
-    assert claude_finding.severity is Severity.OK
-    universal_findings = findings["skillshare.target.universal"]
-    assert {finding.code for finding in universal_findings} == {
-        "skillshare.target_local_skills_preserved",
-        "skillshare.target_broken_links",
-        "skillshare.target_external_links",
-    }
-    local_finding = next(
-        finding
-        for finding in universal_findings
-        if finding.code == "skillshare.target_local_skills_preserved"
-    )
-    assert local_finding.severity is Severity.OK
-    assert "local-skill" in local_finding.message
-    assert local_finding.action is None
-    assert any("broken-skill" in finding.message for finding in universal_findings)
-    assert any("external-skill" in finding.message for finding in universal_findings)
-
-
-def test_skillshare_targets_follow_configured_names_and_paths(tmp_path: Path) -> None:
-    home = tmp_path / "home"
     source = home / "skills"
+    target = home / ".agents/skills"
     source.mkdir(parents=True)
-    custom = home / ".custom/skills"
-    custom.mkdir(parents=True)
-    config_path = home / ".config/skillshare/config.yaml"
-    config_path.parent.mkdir(parents=True)
-    config_path.write_text(
+    target.mkdir(parents=True)
+    config = home / ".config/skillshare/config.yaml"
+    config.parent.mkdir(parents=True)
+    config.write_text(
         "sources:\n"
         "  skills: ~/skills\n"
         "targets:\n"
-        "  custom:\n"
+        "  universal:\n"
         "    skills:\n"
-        "      path: ~/.custom/skills\n",
+        "      path: ~/.agents/skills\n"
+        "      mode: merge\n",
+    )
+
+    def fail_run(*_args, **_kwargs):
+        raise AssertionError("read-only Skillshare inspection must not run its CLI")
+
+    monkeypatch.setattr(check_skillshare_module.subprocess, "run", fail_run)
+
+    findings = check_skillshare_module._skillshare_findings(home)
+    by_code = {finding.code: finding for finding in findings}
+
+    assert by_code["skillshare.config_ready"].severity is Severity.OK
+    assert by_code["skillshare.source_ready"].path == source
+    assert by_code["skillshare.target_ready"].path == target
+    assert "merge mode" in by_code["skillshare.target_ready"].message
+
+
+def test_skillshare_health_reports_missing_source_and_target(tmp_path: Path) -> None:
+    home = tmp_path / "home"
+    config = home / ".config/skillshare/config.yaml"
+    config.parent.mkdir(parents=True)
+    config.write_text(
+        "sources:\n"
+        "  skills: ~/missing\n"
+        "targets:\n"
+        "  universal:\n"
+        "    skills:\n"
+        "      path: ~/.agents/skills\n"
+        "      mode: copy\n",
+    )
+
+    findings = check_skillshare_module._skillshare_findings(home)
+    by_code = {finding.code: finding for finding in findings}
+
+    assert by_code["skillshare.source_missing"].severity is Severity.WARN
+    assert by_code["skillshare.target_directory_missing"].severity is Severity.WARN
+    assert "copy mode" in by_code["skillshare.target_directory_missing"].message
+
+
+def test_skillshare_health_rejects_invalid_configuration_shape(tmp_path: Path) -> None:
+    home = tmp_path / "home"
+    config = home / ".config/skillshare/config.yaml"
+    config.parent.mkdir(parents=True)
+    config.write_text(
+        "sources:\n  skills: ~/skills\ntargets:\n  - universal\n",
     )
 
     findings = check_skillshare_module._skillshare_findings(home)
 
-    target_finding = next(
-        finding for finding in findings if finding.check == "skillshare.target.custom"
-    )
-    assert target_finding.code == "skillshare.target_inspected"
-    assert target_finding.path == custom
-    assert not any(finding.check == "skillshare.target.claude" for finding in findings)
-    assert not any(
-        finding.check == "skillshare.target.universal" for finding in findings
-    )
-
-
-def test_skillshare_targets_report_missing_and_duplicate_declarations(
-    tmp_path: Path,
-) -> None:
-    home = tmp_path / "home"
-    source = home / "skills"
-    source.mkdir(parents=True)
-    config_path = home / ".config/skillshare/config.yaml"
-    config_path.parent.mkdir(parents=True)
-    config_path.write_text("sources:\n  skills: ~/skills\n")
-
-    missing = check_skillshare_module._skillshare_findings(home)
-    assert any(finding.code == "skillshare.targets_missing" for finding in missing)
-
-    target = home / ".shared/skills"
-    target.mkdir(parents=True)
-    config_path.write_text(
-        "sources:\n"
-        "  skills: ~/skills\n"
-        "targets:\n"
-        "  first:\n"
-        "    skills:\n"
-        "      path: ~/.shared/skills\n"
-        "  second:\n"
-        "    skills:\n"
-        "      path: ~/.shared/skills\n"
-    )
-    duplicate = check_skillshare_module._skillshare_findings(home)
-    finding = next(
-        finding
-        for finding in duplicate
-        if finding.code == "skillshare.target_duplicate_path"
-    )
-    assert finding.check == "skillshare.target.second"
-    assert "first and second" in finding.message
+    assert len(findings) == 1
+    assert findings[0].code == "skillshare.config_invalid"
+    assert findings[0].severity is Severity.WARN
 
 
 def test_skillshare_ownership_deduplicates_a_link_to_the_mise_install(
@@ -1670,7 +1605,9 @@ def test_private_git_identity_accepts_conditional_include_sections_with_spaces(
     assert degraded_identity.severity is Severity.WARN
 
 
-def test_inspect_host_reports_invalid_skillshare_yaml(tmp_path: Path) -> None:
+def test_inspect_host_validates_skillshare_config_when_cli_is_missing(
+    tmp_path: Path,
+) -> None:
     repo_root = tmp_path / "repo"
     home = tmp_path / "home"
     config_path = home / ".config/skillshare/config.yaml"
@@ -1685,36 +1622,10 @@ def test_inspect_host_reports_invalid_skillshare_yaml(tmp_path: Path) -> None:
     )
 
     findings = {finding.code: finding for finding in report.findings}
+    assert findings["executable.skillshare.missing"].severity is Severity.WARN
     assert findings["skillshare.config_invalid"].severity is Severity.WARN
     assert findings["shell.bash_missing"].severity is Severity.WARN
     assert "macos.launchctl_skipped" not in findings
-
-
-def test_inspect_host_reports_generated_binaries_without_an_owner(
-    tmp_path: Path,
-) -> None:
-    repo_root = tmp_path / "repo"
-    home = tmp_path / "home"
-    generated_bin = repo_root / "generated/bin"
-    generated_bin.mkdir(parents=True)
-    (generated_bin / ".gitkeep").touch()
-    custom_binary = generated_bin / "custom-tool"
-    custom_binary.write_bytes(b"binary")
-
-    report = inspect_host(
-        repo_root,
-        home,
-        executable_finder=lambda _command: None,
-        system_name="Darwin",
-        profile="full",
-    )
-    findings = {finding.code: finding for finding in report.findings}
-
-    finding = findings["runtime.binary.custom-tool_unowned"]
-    assert finding.severity is Severity.WARN
-    assert finding.path == custom_binary
-    assert finding.action is not None
-    assert "build or install owner" in finding.action
 
 
 def test_inspect_host_reports_generated_plugins_without_an_owner(
@@ -1764,31 +1675,6 @@ def test_inspect_host_reports_stale_owned_completion_when_tool_is_missing(
     finding = findings["runtime.completion.bootdev_stale"]
     assert finding.severity is Severity.WARN
     assert finding.path == stale
-
-
-def test_inspect_host_reports_retired_atuin_and_invalid_owned_binary(
-    tmp_path: Path,
-) -> None:
-    repo_root = tmp_path / "repo"
-    home = tmp_path / "home"
-    generated_bin = repo_root / "generated/bin"
-    generated_bin.mkdir(parents=True)
-    (generated_bin / "atuin").touch()
-    op_cache = generated_bin / "op-cache"
-    op_cache.write_text("binary\n")
-    op_cache.chmod(0o644)
-
-    report = inspect_host(
-        repo_root,
-        home,
-        executable_finder=lambda _command: None,
-        system_name="Darwin",
-        profile="full",
-    )
-    findings = {finding.code: finding for finding in report.findings}
-
-    assert findings["runtime.binary.atuin_unowned"].severity is Severity.WARN
-    assert findings["runtime.binary.op-cache_invalid"].severity is Severity.WARN
 
 
 def test_session_health_probe_reports_unconfigured_and_invalid_status(

@@ -27,10 +27,6 @@ SKILLSHARE_SYSTEM_PATHS = tuple(
         ("usr", "local", "bin", "skillshare"),
     )
 )
-SKILLSHARE_OWNERSHIP_ACTION = (
-    "Inspect with ~/.local/bin/mise ls github:runkids/skillshare --installed "
-    "--json and brew list --versions skillshare, then retain one owner."
-)
 
 
 def _expand_home(value: str, home: Path) -> Path:
@@ -61,51 +57,90 @@ def _configured_skillshare_target(
     if not isinstance(path_value, str) or not path_value:
         raise TypeError(f"targets.{name}.skills.path must be a string")
     mode = skills.get("mode", document.get("mode", "merge"))
-    if not isinstance(mode, str):
-        raise TypeError(f"targets.{name}.skills.mode must be a string")
-    return _expand_home(path_value, home), mode or "merge"
+    if not isinstance(mode, str) or not mode:
+        raise TypeError(f"targets.{name}.skills.mode must be a non-empty string")
+    return _expand_home(path_value, home), mode
 
 
-def _target_skill_entries(
-    target_path: Path,
-    source: Path,
-) -> tuple[list[str], list[str], list[str]]:
-    local: list[str] = []
-    broken_links: list[str] = []
-    external_links: list[str] = []
-    for entry in sorted(target_path.iterdir(), key=lambda item: item.name):
-        if entry.name.startswith("."):
-            continue
-        if entry.is_symlink():
-            if not entry.exists():
-                broken_links.append(entry.name)
-            elif not _path_within(entry.resolve(), source.resolve()):
-                external_links.append(entry.name)
-            continue
-        if entry.is_dir() and (entry / "SKILL.md").is_file():
-            local.append(entry.name)
-    return local, broken_links, external_links
-
-
-def _skillshare_target_findings(
-    document: object,
-    home: Path,
-    source: Path,
-) -> list[Finding]:
-    findings: list[Finding] = []
+def _skillshare_findings(home: Path) -> list[Finding]:
     config_path = home / ".config/skillshare/config.yaml"
-    targets = document.get("targets") if isinstance(document, dict) else None
-    if not isinstance(targets, dict) or not targets:
+    if not config_path.is_file():
         return [
+            Finding(
+                "skillshare.config",
+                Severity.WARN,
+                "skillshare.config_missing",
+                "Skillshare configuration is missing",
+                config_path,
+                "Create a host-specific Skillshare configuration.",
+            ),
+        ]
+    try:
+        document = YAML(typ="safe").load(config_path)
+        if not isinstance(document, dict):
+            raise TypeError("configuration must be a mapping")
+        sources = document.get("sources")
+        if not isinstance(sources, dict):
+            raise TypeError("sources must be a mapping")
+        source_value = sources.get("skills")
+        if not isinstance(source_value, str) or not source_value:
+            raise TypeError("sources.skills must be a non-empty string")
+        source_path = _expand_home(source_value, home)
+        targets = document.get("targets")
+        if targets is not None and not isinstance(targets, dict):
+            raise TypeError("targets must be a mapping")
+    except (OSError, TypeError, YAMLError) as error:
+        return [
+            Finding(
+                "skillshare.config",
+                Severity.WARN,
+                "skillshare.config_invalid",
+                f"Skillshare configuration is unreadable or invalid: {error}",
+                config_path,
+                "Repair the host-specific Skillshare configuration.",
+            ),
+        ]
+
+    findings = [
+        Finding(
+            "skillshare.config",
+            Severity.OK,
+            "skillshare.config_ready",
+            "Skillshare configuration is structurally readable",
+            config_path,
+        ),
+        Finding(
+            "skillshare.source",
+            Severity.OK if source_path.is_dir() else Severity.WARN,
+            (
+                "skillshare.source_ready"
+                if source_path.is_dir()
+                else "skillshare.source_missing"
+            ),
+            (
+                "Configured Skillshare source directory exists"
+                if source_path.is_dir()
+                else "Configured Skillshare source directory is missing"
+            ),
+            source_path,
+            None
+            if source_path.is_dir()
+            else "Restore the configured Skillshare source directory.",
+        ),
+    ]
+
+    if not targets:
+        findings.append(
             Finding(
                 "skillshare.targets",
                 Severity.WARN,
                 "skillshare.targets_missing",
-                "Skillshare configuration declares no Skill targets to inspect",
+                "Skillshare configuration declares no Skill targets",
                 config_path,
                 "Declare host-specific targets before synchronizing Skills.",
             ),
-        ]
+        )
+        return findings
 
     inspected_paths: dict[Path, str] = {}
     for raw_name in sorted(targets, key=str):
@@ -124,7 +159,7 @@ def _skillshare_target_findings(
         name = raw_name
         try:
             target_path, mode = _configured_skillshare_target(document, name, home)
-        except TypeError as error:
+        except (KeyError, TypeError) as error:
             findings.append(
                 Finding(
                     f"skillshare.target.{name}",
@@ -132,11 +167,10 @@ def _skillshare_target_findings(
                     "skillshare.target_invalid",
                     f"Skillshare target {name} is invalid: {error}",
                     config_path,
-                    "Inspect the host-specific Skillshare target configuration.",
+                    "Repair the host-specific Skillshare target configuration.",
                 ),
             )
             continue
-
         if previous_name := inspected_paths.get(target_path):
             findings.append(
                 Finding(
@@ -150,151 +184,27 @@ def _skillshare_target_findings(
             )
             continue
         inspected_paths[target_path] = name
-        if not target_path.is_dir():
-            findings.append(
-                Finding(
-                    f"skillshare.target.{name}",
-                    Severity.WARN,
-                    "skillshare.target_directory_missing",
-                    f"Skillshare target {name} directory is missing",
-                    target_path,
-                    "Inspect with skillshare target list --json.",
+        target_exists = target_path.is_dir()
+        findings.append(
+            Finding(
+                f"skillshare.target.{name}",
+                Severity.OK if target_exists else Severity.WARN,
+                (
+                    "skillshare.target_ready"
+                    if target_exists
+                    else "skillshare.target_directory_missing"
                 ),
-            )
-            continue
-
-        try:
-            local, broken_links, external_links = _target_skill_entries(
+                (
+                    f"Configured Skillshare target {name} directory exists in {mode} mode"
+                    if target_exists
+                    else f"Configured Skillshare target {name} directory is missing in {mode} mode"
+                ),
                 target_path,
-                source,
-            )
-        except OSError as error:
-            findings.append(
-                Finding(
-                    f"skillshare.target.{name}",
-                    Severity.WARN,
-                    "skillshare.target_inspection_unavailable",
-                    f"Skillshare target {name} could not be inspected: {error}",
-                    target_path,
-                    "Inspect the target directory permissions and accessibility.",
-                ),
-            )
-            continue
-        if local:
-            preserved = mode == "merge"
-            findings.append(
-                Finding(
-                    f"skillshare.target.{name}",
-                    Severity.OK if preserved else Severity.WARN,
-                    (
-                        "skillshare.target_local_skills_preserved"
-                        if preserved
-                        else "skillshare.target_local_skills"
-                    ),
-                    (
-                        f"Skillshare target {name} has {len(local)} non-symlink Skill entries preserved by merge mode: {', '.join(local)}"
-                        if preserved
-                        else f"Skillshare target {name} has {len(local)} non-symlink Skill entries under {mode} mode: {', '.join(local)}"
-                    ),
-                    target_path,
-                    None
-                    if preserved
-                    else "Inspect target-local Skill ownership before synchronizing.",
-                ),
-            )
-        if broken_links:
-            findings.append(
-                Finding(
-                    f"skillshare.target.{name}",
-                    Severity.WARN,
-                    "skillshare.target_broken_links",
-                    f"Skillshare target {name} has {len(broken_links)} broken Skill links: {', '.join(broken_links)}",
-                    target_path,
-                    "Inspect the configured source and target before an explicit synchronization.",
-                ),
-            )
-        if external_links:
-            findings.append(
-                Finding(
-                    f"skillshare.target.{name}",
-                    Severity.WARN,
-                    "skillshare.target_external_links",
-                    f"Skillshare target {name} has {len(external_links)} Skill links outside the configured source: {', '.join(external_links)}",
-                    target_path,
-                    "Inspect link ownership before an explicit synchronization.",
-                ),
-            )
-        if not local and not broken_links and not external_links:
-            findings.append(
-                Finding(
-                    f"skillshare.target.{name}",
-                    Severity.OK,
-                    "skillshare.target_inspected",
-                    f"Skillshare target {name} is configured at {target_path} in {mode} mode; no target-local Skills, broken links, or links outside the configured source were observed",
-                    target_path,
-                ),
-            )
-    return findings
-
-
-def _skillshare_findings(home: Path) -> list[Finding]:
-    config_path = home / ".config/skillshare/config.yaml"
-    if not config_path.is_file():
-        return [
-            Finding(
-                "skillshare.config",
-                Severity.WARN,
-                "skillshare.config_missing",
-                "Skillshare configuration is missing",
-                config_path,
-                "Create a host-specific Skillshare config; do not copy harness extras blindly.",
+                None
+                if target_exists
+                else "Create or synchronize this target with an explicit Skillshare operation.",
             ),
-        ]
-    try:
-        document = YAML(typ="safe").load(config_path)
-        source_value = document["sources"]["skills"]
-        if not isinstance(source_value, str):
-            raise TypeError("sources.skills must be a string")
-        source = _expand_home(source_value, home)
-    except (OSError, KeyError, TypeError, YAMLError) as error:
-        return [
-            Finding(
-                "skillshare.config",
-                Severity.WARN,
-                "skillshare.config_invalid",
-                f"Skillshare configuration cannot identify sources.skills: {error}",
-                config_path,
-                "Repair sources.skills in the host-specific Skillshare config.",
-            ),
-        ]
-    findings = [
-        Finding(
-            "skillshare.config",
-            Severity.OK,
-            "skillshare.config_ready",
-            "Skillshare configuration is readable",
-            config_path,
-        ),
-        Finding(
-            "skillshare.source",
-            Severity.OK if source.is_dir() else Severity.WARN,
-            (
-                "skillshare.source_ready"
-                if source.is_dir()
-                else "skillshare.source_missing"
-            ),
-            (
-                "Skillshare source directory exists"
-                if source.is_dir()
-                else "Skillshare source directory is missing"
-            ),
-            source,
-            None
-            if source.is_dir()
-            else "Clone or restore the configured skills source.",
-        ),
-    ]
-    findings.extend(_skillshare_target_findings(document, home, source))
+        )
     return findings
 
 
@@ -404,6 +314,10 @@ def _skillshare_ownership_finding(
     home: Path,
     executable: Path | None,
 ) -> Finding | None:
+    ownership_action = (
+        f"Inspect with {canonical_mise_path(home)} ls {SKILLSHARE_MISE_TOOL} "
+        "--installed --json and brew list --versions skillshare, then retain one owner."
+    )
     try:
         mise_installations = _mise_skillshare_installations(home)
     except RuntimeError as error:
@@ -413,7 +327,7 @@ def _skillshare_ownership_finding(
             "skillshare.ownership_unavailable",
             str(error),
             canonical_mise_path(home),
-            SKILLSHARE_OWNERSHIP_ACTION,
+            ownership_action,
         )
 
     owners = _candidate_skillshare_owners(home, executable, mise_installations)
@@ -444,7 +358,7 @@ def _skillshare_ownership_finding(
             "skillshare.ownership_multiple",
             f"Multiple independent Skillshare owners coexist: {'; '.join(descriptions)}",
             path,
-            SKILLSHARE_OWNERSHIP_ACTION,
+            ownership_action,
         )
     return Finding(
         "skillshare.ownership",

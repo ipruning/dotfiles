@@ -144,7 +144,7 @@ def test_update_previews_exact_plan_by_default_without_running_tools(
         ),
         ("amp", "planned", ["amp", "update"]),
     ]
-    assert document["summary"] == {"planned": 6, "skipped": 8}
+    assert document["summary"] == {"planned": 6, "skipped": 7}
     assert document["notes"] == [
         (
             "planned means the updater command is available; each updater "
@@ -196,6 +196,30 @@ def test_update_gives_package_managers_transaction_scale_timeouts(
     assert steps["mise.tools"].timeout_seconds >= 1800
 
 
+def test_update_leaves_host_selected_mise_self_update_to_its_owner(
+    tmp_path: Path,
+) -> None:
+    home = tmp_path / "home"
+    mise = tmp_path / "system/bin/mise"
+    mise.parent.mkdir(parents=True)
+    mise.write_text("#!/bin/sh\nexit 0\n")
+    mise.chmod(0o755)
+    policy = home / ".config/dotfiles/policy.toml"
+    policy.parent.mkdir(parents=True)
+    policy.write_text(f'mode = "managed"\nmise_path = "{mise}"\n')
+
+    report = plan_updates(
+        home,
+        executable_finder=lambda tool: str(mise) if tool == "mise" else None,
+    )
+    results = {result.step.name: result for result in report.results}
+
+    assert results["mise.self"].status is UpdateStatus.SKIPPED
+    assert results["mise.self"].reason == (
+        "host-selected mise is updated by its host owner"
+    )
+
+
 def test_update_installs_sprite_updates_instead_of_only_checking(
     tmp_path: Path,
 ) -> None:
@@ -218,7 +242,7 @@ def test_update_runs_available_tools_in_order_and_reports_skips(tmp_path: Path) 
     document = json.loads(completed.stdout)
     assert document["apply"] is True
     assert document["ok"] is True
-    assert document["summary"] == {"skipped": 8, "succeeded": 6}
+    assert document["summary"] == {"skipped": 7, "succeeded": 6}
     assert [
         (step["name"], step["status"], step["exit_code"])
         for step in document["steps"]
@@ -293,7 +317,7 @@ def test_update_human_output_announces_commands_before_summary(tmp_path: Path) -
     assert (
         "Next:\n  git diff -- reference/.config/mise\n  mise run runtime\n"
     ) in completed.stdout
-    assert "Summary: 6 succeeded, 8 skipped" in completed.stdout
+    assert "Summary: 6 succeeded, 7 skipped" in completed.stdout
 
 
 def test_update_json_streams_progress_to_stderr_while_stdout_stays_json(

@@ -5,15 +5,17 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
+from .host_policy import configured_mise_path
+
 MISE_RELATIVE_PATH = Path(".local/bin/mise")
 
 
 def canonical_mise_path(home: Path) -> Path:
-    return home / MISE_RELATIVE_PATH
+    return configured_mise_path(home) or home / MISE_RELATIVE_PATH
 
 
 def canonical_mise_executable(home: Path) -> str | None:
-    """Return the standalone mise binary only when it can self-update in place."""
+    """Return the owner-selected Mise binary when it is an executable file."""
     executable = canonical_mise_path(home)
     try:
         if executable.is_symlink() or not executable.is_file():

@@ -13,6 +13,7 @@ from enum import StrEnum
 from pathlib import Path
 
 from .diff import DriftProtocolError, MackupCommandError, inspect_drift
+from .host_policy import HostPolicyError, mutation_allowed, require_mutation_allowed
 from .models import Drift, DriftKind
 from .render import emit_error
 
@@ -48,9 +49,14 @@ class RestoreReport:
         return all(result.status is not RestoreStatus.FAILED for result in self.results)
 
 
-def _next_commands(report: RestoreReport) -> tuple[str, ...]:
+def _next_commands(
+    report: RestoreReport,
+    *,
+    apply_allowed: bool = True,
+) -> tuple[str, ...]:
     if (
-        not report.apply
+        apply_allowed
+        and not report.apply
         and report.ok
         and any(result.status is RestoreStatus.PLANNED for result in report.results)
     ):
@@ -130,6 +136,7 @@ def _validate_live_parent(live_path: Path, home: Path) -> None:
 
 def apply_restore(repo_root: Path, home: Path, plan: RestoreReport) -> RestoreReport:
     """Back up changed live paths and link them to their reference paths."""
+    require_mutation_allowed(home)
     reference_root = repo_root / "reference"
     backup_root = (
         home
@@ -208,7 +215,11 @@ def apply_restore(repo_root: Path, home: Path, plan: RestoreReport) -> RestoreRe
     )
 
 
-def _document(report: RestoreReport) -> dict[str, object]:
+def _document(
+    report: RestoreReport,
+    *,
+    apply_allowed: bool = True,
+) -> dict[str, object]:
     summary = {
         status.value: sum(result.status is status for result in report.results)
         for status in RestoreStatus
@@ -220,7 +231,7 @@ def _document(report: RestoreReport) -> dict[str, object]:
         "application": report.application,
         "apply": report.apply,
         "ok": report.ok,
-        "next": list(_next_commands(report)),
+        "next": list(_next_commands(report, apply_allowed=apply_allowed)),
         "changes": [
             {
                 "reference_path": str(result.drift.reference_path),
@@ -239,7 +250,7 @@ def _document(report: RestoreReport) -> dict[str, object]:
     }
 
 
-def _render(report: RestoreReport) -> None:
+def _render(report: RestoreReport, *, apply_allowed: bool = True) -> None:
     for result in report.results:
         label = result.status.value.upper()
         print(f"{label:7} {result.drift.live_path}")
@@ -260,10 +271,13 @@ def _render(report: RestoreReport) -> None:
     rendered = ", ".join(f"{count} {status}" for status, count in summary.items())
     print(f"Summary: {rendered or 'no changes'}")
     if not report.apply and summary.get(RestoreStatus.PLANNED.value, 0):
-        print("No files changed. Re-run with --apply to restore this application.")
-        print("Next:")
-        for command in _next_commands(report):
-            print(f"  {command}")
+        if apply_allowed:
+            print("No files changed. Re-run with --apply to restore this application.")
+            print("Next:")
+            for command in _next_commands(report):
+                print(f"  {command}")
+        else:
+            print("No files changed. Host policy disables restore apply.")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -287,15 +301,34 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
     repo_root = Path(__file__).resolve().parents[1]
+    home = Path.home()
     try:
-        report = plan_restore(repo_root, Path.home(), args.application)
+        apply_allowed = mutation_allowed(home)
+        if args.apply:
+            require_mutation_allowed(home)
+        report = plan_restore(repo_root, home, args.application)
+    except HostPolicyError as error:
+        emit_error(
+            "restore",
+            str(error),
+            as_json=args.as_json,
+            apply=args.apply,
+            code=error.code,
+        )
+        return 1
     except (DriftProtocolError, MackupCommandError) as error:
         emit_error("restore", str(error), as_json=args.as_json, apply=args.apply)
         return 1
     if args.apply:
-        report = apply_restore(repo_root, Path.home(), report)
+        report = apply_restore(repo_root, home, report)
     if args.as_json:
-        print(json.dumps(_document(report), indent=2, sort_keys=True))
+        print(
+            json.dumps(
+                _document(report, apply_allowed=apply_allowed),
+                indent=2,
+                sort_keys=True,
+            ),
+        )
         for result in report.results:
             if result.status is RestoreStatus.FAILED:
                 print(
@@ -303,7 +336,7 @@ def main(argv: list[str] | None = None) -> int:
                     file=sys.stderr,
                 )
     else:
-        _render(report)
+        _render(report, apply_allowed=apply_allowed)
     return 0 if report.ok else 1
 
 

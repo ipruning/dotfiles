@@ -15,6 +15,7 @@ from enum import StrEnum
 from pathlib import Path
 
 from .diff import DriftProtocolError, MackupCommandError, inspect_drift
+from .host_policy import HostPolicyError, mutation_allowed, require_mutation_allowed
 from .models import Drift, DriftKind
 from .render import emit_error
 
@@ -48,9 +49,14 @@ class AdoptReport:
         return all(result.status is not AdoptStatus.FAILED for result in self.results)
 
 
-def _next_commands(report: AdoptReport) -> tuple[str, ...]:
+def _next_commands(
+    report: AdoptReport,
+    *,
+    apply_allowed: bool = True,
+) -> tuple[str, ...]:
     if (
-        not report.apply
+        apply_allowed
+        and not report.apply
         and report.ok
         and any(result.status is AdoptStatus.PLANNED for result in report.results)
     ):
@@ -252,6 +258,7 @@ def _copy_live_into_reference(live_path: Path, reference_path: Path) -> None:
 
 def apply_adopt(repo_root: Path, home: Path, plan: AdoptReport) -> AdoptReport:
     """Copy live truth into the reference; git history protects the old state."""
+    require_mutation_allowed(home)
     reference_root = repo_root / "reference"
     try:
         dirty = _dirty_reference_paths(repo_root, plan)
@@ -331,7 +338,11 @@ def apply_adopt(repo_root: Path, home: Path, plan: AdoptReport) -> AdoptReport:
     return AdoptReport(application=plan.application, apply=True, results=tuple(results))
 
 
-def _document(report: AdoptReport) -> dict[str, object]:
+def _document(
+    report: AdoptReport,
+    *,
+    apply_allowed: bool = True,
+) -> dict[str, object]:
     summary = {
         status.value: sum(result.status is status for result in report.results)
         for status in AdoptStatus
@@ -343,7 +354,7 @@ def _document(report: AdoptReport) -> dict[str, object]:
         "application": report.application,
         "apply": report.apply,
         "ok": report.ok,
-        "next": list(_next_commands(report)),
+        "next": list(_next_commands(report, apply_allowed=apply_allowed)),
         "changes": [
             {
                 "reference_path": str(result.drift.reference_path),
@@ -359,7 +370,7 @@ def _document(report: AdoptReport) -> dict[str, object]:
     }
 
 
-def _render(report: AdoptReport) -> None:
+def _render(report: AdoptReport, *, apply_allowed: bool = True) -> None:
     for result in report.results:
         label = result.status.value.upper()
         print(f"{label:7} {result.drift.reference_path}")
@@ -376,13 +387,16 @@ def _render(report: AdoptReport) -> None:
     rendered = ", ".join(f"{count} {status}" for status, count in summary.items())
     print(f"Summary: {rendered or 'no changes'}")
     if not report.apply and summary.get(AdoptStatus.PLANNED.value, 0):
-        print(
-            "No files changed. Re-run with --apply to adopt this application's"
-            " live configuration.",
-        )
-        print("Next:")
-        for command in _next_commands(report):
-            print(f"  {command}")
+        if apply_allowed:
+            print(
+                "No files changed. Re-run with --apply to adopt this application's"
+                " live configuration.",
+            )
+            print("Next:")
+            for command in _next_commands(report):
+                print(f"  {command}")
+        else:
+            print("No files changed. Host policy disables adopt apply.")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -406,15 +420,34 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
     repo_root = Path(__file__).resolve().parents[1]
+    home = Path.home()
     try:
-        report = plan_adopt(repo_root, Path.home(), args.application)
+        apply_allowed = mutation_allowed(home)
+        if args.apply:
+            require_mutation_allowed(home)
+        report = plan_adopt(repo_root, home, args.application)
+    except HostPolicyError as error:
+        emit_error(
+            "adopt",
+            str(error),
+            as_json=args.as_json,
+            apply=args.apply,
+            code=error.code,
+        )
+        return 1
     except (DriftProtocolError, MackupCommandError) as error:
         emit_error("adopt", str(error), as_json=args.as_json, apply=args.apply)
         return 1
     if args.apply:
-        report = apply_adopt(repo_root, Path.home(), report)
+        report = apply_adopt(repo_root, home, report)
     if args.as_json:
-        print(json.dumps(_document(report), indent=2, sort_keys=True))
+        print(
+            json.dumps(
+                _document(report, apply_allowed=apply_allowed),
+                indent=2,
+                sort_keys=True,
+            ),
+        )
         for result in report.results:
             if result.status is AdoptStatus.FAILED:
                 print(
@@ -422,7 +455,7 @@ def main(argv: list[str] | None = None) -> int:
                     file=sys.stderr,
                 )
     else:
-        _render(report)
+        _render(report, apply_allowed=apply_allowed)
     return 0 if report.ok else 1
 
 

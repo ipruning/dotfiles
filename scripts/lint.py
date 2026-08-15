@@ -8,6 +8,7 @@ import json
 import platform
 import re
 import subprocess
+import tomllib
 from pathlib import Path
 from typing import override
 
@@ -511,6 +512,83 @@ def _tracked_file_findings(repo_root: Path, tracked_paths: list[Path]) -> list[F
     return findings
 
 
+def _mise_alias_findings(repo_root: Path) -> list[Finding]:
+    config_path = repo_root / "reference/.config/mise/config.toml"
+    if not config_path.is_file():
+        return []
+    try:
+        config = tomllib.loads(config_path.read_text())
+    except (OSError, tomllib.TOMLDecodeError) as error:
+        return [
+            _located_finding(
+                Severity.ERROR,
+                "mise.config_invalid",
+                f"shared Mise config is unreadable or invalid: {error}",
+                config_path,
+            ),
+        ]
+
+    tools = config.get("tools", {})
+    if not isinstance(tools, dict):
+        return [
+            _located_finding(
+                Severity.ERROR,
+                "mise.config_invalid",
+                "shared Mise [tools] section must be a table",
+                config_path,
+            ),
+        ]
+
+    aliases: dict[str, str] = {}
+    for section in ("alias", "tool_alias"):
+        section_aliases = config.get(section, {})
+        if not isinstance(section_aliases, dict):
+            return [
+                _located_finding(
+                    Severity.ERROR,
+                    "mise.config_invalid",
+                    f"shared Mise [{section}] section must be a table",
+                    config_path,
+                ),
+            ]
+        for alias, value in section_aliases.items():
+            aliases.pop(alias, None)
+            backend = value.get("backend") if isinstance(value, dict) else value
+            if backend is None:
+                continue
+            if not isinstance(backend, str):
+                return [
+                    _located_finding(
+                        Severity.ERROR,
+                        "mise.config_invalid",
+                        f"shared Mise [{section}] backends must be strings",
+                        config_path,
+                    ),
+                ]
+            aliases[alias] = backend
+
+    findings = [
+        _located_finding(
+            Severity.ERROR,
+            "mise.alias_duplicate_identity",
+            f"declare {alias}, not both {alias} and its backend identity {backend}",
+            config_path,
+        )
+        for alias, backend in aliases.items()
+        if alias in tools and backend in tools
+    ]
+    if findings:
+        return findings
+    return [
+        _located_finding(
+            Severity.OK,
+            "mise.alias_identities_unique",
+            "shared Mise tools use one identity per alias",
+            config_path,
+        ),
+    ]
+
+
 def _symlink_findings(repo_root: Path, tracked_paths: list[Path]) -> list[Finding]:
     return [
         _located_finding(
@@ -539,6 +617,7 @@ def inspect_repository(
     findings.extend(_mackup_findings(repo_root, set(tracked_paths)))
     findings.extend(_symlink_findings(repo_root, tracked_paths))
     findings.extend(_tracked_file_findings(repo_root, tracked_paths))
+    findings.extend(_mise_alias_findings(repo_root))
     return LintReport(schema_version=1, findings=tuple(findings))
 
 

@@ -323,4 +323,3 @@ def test_bash_module_exposes_only_user_and_mise_commands_without_duplicates(
     assert loaded_path.count(str(local_bin)) == 1
     assert loaded_path.count(str(shims)) == 1
     assert str(repo_root / "modules/bin") not in loaded_path
-    assert str(repo_root / "generated/bin") not in loaded_path

@@ -15,12 +15,19 @@ from dataclasses import dataclass, replace
 from enum import StrEnum
 from pathlib import Path
 
+from .host_policy import (
+    HostPolicyError,
+    configured_mise_path,
+    mutation_allowed,
+    require_mutation_allowed,
+)
 from .mise import (
     canonical_mise_environment,
     canonical_mise_executable,
     canonical_mise_path,
 )
 from .models import ExecutableFinder
+from .render import emit_error
 
 StepCallback = Callable[["UpdateStep"], None]
 NEXT_COMMANDS = (
@@ -268,7 +275,6 @@ def _update_steps(home: Path) -> tuple[UpdateStep, ...]:
         ),
         UpdateStep("amp", "amp", ("amp", "update"), 300),
         UpdateStep("claude", "claude", ("claude", "update"), 300),
-        UpdateStep("codex", "codex", ("codex", "update"), 300),
         UpdateStep("tigris", "tigris", ("tigris", "update"), 300),
         UpdateStep(
             "pi.extensions",
@@ -288,6 +294,15 @@ def plan_updates(
     results = []
     mise_executable = canonical_mise_executable(home)
     for step in _update_steps(home):
+        if step.name == "mise.self" and configured_mise_path(home) is not None:
+            results.append(
+                UpdateResult(
+                    step=step,
+                    status=UpdateStatus.SKIPPED,
+                    reason="host-selected mise is updated by its host owner",
+                ),
+            )
+            continue
         available = (
             mise_executable is not None
             if step.tool == "mise"
@@ -343,6 +358,7 @@ def execute_updates(
     progress_interval_seconds: float = PROGRESS_INTERVAL_SECONDS,
 ) -> UpdateReport:
     """Run every available updater and retain independent failure results."""
+    require_mutation_allowed(home)
     results = []
     for planned in plan_updates(home, executable_finder=executable_finder).results:
         # Carry through anything the preflight already resolved (SKIPPED, or a
@@ -436,11 +452,16 @@ def _summary(report: UpdateReport) -> dict[str, int]:
     }
 
 
-def _next_commands(report: UpdateReport) -> tuple[str, ...]:
+def _next_commands(
+    report: UpdateReport,
+    *,
+    apply_allowed: bool = True,
+) -> tuple[str, ...]:
     if not report.apply:
         return (
             ("mise run update -- --apply",)
-            if any(result.status is UpdateStatus.PLANNED for result in report.results)
+            if apply_allowed
+            and any(result.status is UpdateStatus.PLANNED for result in report.results)
             else ()
         )
     if not any(result.status is UpdateStatus.SUCCEEDED for result in report.results):
@@ -460,7 +481,11 @@ def _notes(report: UpdateReport) -> tuple[str, ...]:
     return tuple(notes)
 
 
-def _document(report: UpdateReport) -> dict[str, object]:
+def _document(
+    report: UpdateReport,
+    *,
+    apply_allowed: bool = True,
+) -> dict[str, object]:
     return {
         "schema_version": 1,
         "operation": "update",
@@ -486,7 +511,7 @@ def _document(report: UpdateReport) -> dict[str, object]:
         ],
         "summary": _summary(report),
         "notes": list(_notes(report)),
-        "next": list(_next_commands(report)),
+        "next": list(_next_commands(report, apply_allowed=apply_allowed)),
     }
 
 
@@ -498,7 +523,7 @@ def _display_command(step: UpdateStep) -> str:
     return f"PATH={path}:$PATH {command}"
 
 
-def _render(report: UpdateReport) -> None:
+def _render(report: UpdateReport, *, apply_allowed: bool = True) -> None:
     def duration(result: UpdateResult) -> str:
         return (
             f" ({result.duration_ms / 1000:.1f}s)"
@@ -525,7 +550,11 @@ def _render(report: UpdateReport) -> None:
     for note in _notes(report):
         print(f"Note: {note}")
     if not report.apply:
-        if _next_commands(report):
+        if not apply_allowed and any(
+            result.status is UpdateStatus.PLANNED for result in report.results
+        ):
+            print("No commands run. Host policy disables update apply.")
+        elif _next_commands(report):
             print("No commands run. Re-run with --apply to update host tools.")
         else:
             print("No update commands are available on this host.")
@@ -564,19 +593,37 @@ def main(argv: list[str] | None = None) -> int:
         help="emit the report as JSON on stdout",
     )
     args = parser.parse_args(argv)
-    report = (
-        execute_updates(
-            Path.home(),
-            capture_output=args.as_json,
-            on_start=None if args.as_json else _announce_step,
+    home = Path.home()
+    try:
+        apply_allowed = mutation_allowed(home)
+        report = (
+            execute_updates(
+                home,
+                capture_output=args.as_json,
+                on_start=None if args.as_json else _announce_step,
+            )
+            if args.apply
+            else plan_updates(home)
         )
-        if args.apply
-        else plan_updates(Path.home())
-    )
+    except HostPolicyError as error:
+        emit_error(
+            "update",
+            str(error),
+            as_json=args.as_json,
+            apply=args.apply,
+            code=error.code,
+        )
+        return 1
     if args.as_json:
-        print(json.dumps(_document(report), indent=2, sort_keys=True))
+        print(
+            json.dumps(
+                _document(report, apply_allowed=apply_allowed),
+                indent=2,
+                sort_keys=True,
+            ),
+        )
     else:
-        _render(report)
+        _render(report, apply_allowed=apply_allowed)
     return 0 if report.ok else 1
 
 

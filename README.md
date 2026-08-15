@@ -43,8 +43,13 @@ or multiple legitimate outcomes require an Operator decision before mutation.
 ## Start
 
 Git and mise are the only bootstrap requirements. On a machine without mise,
-install the latest release from the official installer and expose its user
-binary to the current bootstrap process:
+install the latest release from the official installer only when Dotfiles will
+manage that host. If the operating system or another platform already owns
+Mise or global configuration, retain that owner, create the
+[audit-only policy](#host-local-ownership-policy) before running any Dotfiles
+operation, and skip `mise-sync --apply`.
+
+The managed-host bootstrap is:
 
 ```bash
 curl -fsSL https://mise.run | sh
@@ -59,12 +64,41 @@ mise run mise-sync
 mise run mise-sync -- --apply
 ```
 
-This repository deliberately standardizes both macOS and Linux on the
-standalone executable at `~/.local/bin/mise`. Do not install a second copy with
-Homebrew, apt, or another package manager: package-managed mise has a different
-update owner and may leave generated shell activation bound to the wrong
-binary. The upstream installer uses this standalone path by default, and this
+Managed hosts default to the standalone executable at `~/.local/bin/mise`. Do
+not install a second copy with Homebrew, apt, or another package manager:
+multiple owners may leave generated shell activation bound to the wrong binary.
+The upstream installer uses this standalone path by default, and this
 installation supports `mise self-update`.
+
+### Host-local ownership policy
+
+A host whose operating system owns configuration or Mise can opt out of
+repository mutation without changing the shared reference. Create the
+untracked host-local file `~/.config/dotfiles/policy.toml`:
+
+```toml
+mode = "audit-only"
+mise_path = "/usr/bin/mise"
+```
+
+`audit-only` keeps previews plus `diff`, `check`, `lint`, and verification
+available, but rejects every `--apply` operation before it writes files or runs
+updaters. Previews still show the counterfactual managed-host plan, but omit an
+inapplicable `--apply` next step. Apply-safety differences such as host-only
+global Mise tools remain visible facts and do not fail an audit-only preview;
+an incomplete inspection, unreadable configuration, or failed command probe
+still fails. The same mutation guard protects the underlying `apply_*` and
+`execute_*` Python operations. `mise_path` selects the host's canonical Mise
+owner, so a package-managed binary such as Omarchy's `/usr/bin/mise` is not
+treated as an extra installation. An absent policy preserves the managed
+default above. An invalid policy, including unknown fields, fails closed and is
+diagnosed by `mise run check`; it never falls back silently to the standalone
+owner.
+
+Under this policy, `check` marks Dotfiles-owned shell integration, shared Mise
+capabilities, and generated runtime readiness as not applicable. Canonical Mise
+health, duplicate owners, Skillshare health, permissions, and other host-owned
+problems remain applicable and continue to gate strict inspection.
 
 The installer intentionally has no version argument: host and Orb bootstrap
 take the latest mise release available from `https://mise.run` rather than
@@ -142,9 +176,9 @@ binding that deletes the same path segment as the macOS Zsh configuration,
 reserves `Ctrl-R` for Atuin when later startup files initialize FZF, and provides
 Zoxide's `j` command while leaving the ordinary up arrow to Bash. Interactive
 SSH logins remain ordinary shells; start Herdr explicitly when needed. It does
-not expose `modules/bin` or `generated/bin` on Linux. The managed block is placed
-before Ubuntu's non-interactive early return, so direct SSH commands also receive
-the user and mise paths without interactive shell initialization.
+not expose `modules/bin` on Linux. The managed block is placed before Ubuntu's
+non-interactive early return, so direct SSH commands also receive the user and
+mise paths without interactive shell initialization.
 
 The Linux Lite drift profile observes Git, Mise, portable Atuin and Btop
 configuration, and the availability of Btop, Starship, Atuin, Zoxide, Herdr,
@@ -163,10 +197,10 @@ there. The contract is a split between experience and commands:
   regardless of platform; the Homebrew block is macOS-only and the clash block
   is Linux-only.
 - The user bin and mise shim directories load on every platform. The repository
-  *command directories* do not: `.zshenv` prepends `modules/bin` and
-  `generated/bin` to `PATH` only under `darwin*`, so a Linux host never gains
-  repository commands and can never shadow a system tool — most importantly
-  iproute2 `ss`, whose repository namesake is `skillshare-source`.
+  command directory does not: `.zshenv` prepends `modules/bin` to `PATH` only
+  under `darwin*`, so a Linux host never gains repository commands and can
+  never shadow a system tool — most importantly iproute2 `ss`, whose repository
+  namesake is `skillshare-source`.
 - The repository mise configuration carries no repository bins. Its committed
   lockfile contains URLs and checksums for both `macos-arm64` and `linux-x64`,
   so bootstrap uses the same reviewed tool artifacts on both platforms.
@@ -237,6 +271,11 @@ tools, download caches, shims, and generated shell functions remain local
 runtime state and are rebuilt from the shared declaration rather than
 synchronized through Git.
 
+This convergence operation belongs to managed hosts. On an audit-only host its
+preview is a counterfactual comparison, not a health verdict: host-owned tools
+and alias differences remain in the safety report, but do not fail the preview
+or produce an apply handoff.
+
 Preview the complete convergence first:
 
 ```bash
@@ -280,7 +319,7 @@ upstream package manager's artifact and integrity semantics.
 Global tools should be interactive commands wanted on every personal host.
 Project tools belong in that project's Mise configuration. Long-running Linux
 services should use the distribution package when appropriate, or an explicit
-`~/.local/bin/mise -C <project> exec -- <tool>` command; they must not depend on
+`<canonical-mise> -C <project> exec -- <tool>` command; they must not depend on
 global shims. A genuinely host-specific tool is an explicit exception, not a
 second global configuration truth.
 
@@ -309,9 +348,12 @@ mise run restore -- atuin --apply
 
 Skillshare is also part of the shared Mise baseline; `mise upgrade` owns its CLI
 updates on every host. Do not combine that install with Homebrew or
-`skillshare upgrade --cli`. GitHub CLI is intentionally platform-owned instead:
-the official GitHub APT repository owns it on Debian, while Homebrew owns it on
-macOS, so `gh` is not declared in the shared Mise configuration.
+`skillshare upgrade --cli`. GitHub CLI and Codex are host-owned instead of part
+of the shared baseline. The capability is shared, but its installer is not:
+Omarchy provisions both through its own Mise wrappers, Debian can use the
+official APT package, and macOS can use Homebrew. The shared Mise configuration
+therefore declares neither `gh` nor Codex, and version differences between
+those host owners are not Dotfiles drift.
 
 Btop is also platform-owned: Homebrew owns it on macOS, while each Linux
 distribution's package manager owns it. The repository restores only Btop's
@@ -336,22 +378,20 @@ mise run check -- --strict
 Warnings do not fail the normal command because different hosts intentionally
 have different capabilities. `--strict` treats warnings as failures.
 
-Skillshare inspection reads its executable location, YAML configuration, source
-directory, and known installation owners. It uses Mise's JSON inventory to
-distinguish an inactive Mise install from the active executable and warns only
-when independent owners coexist. Target inspection is derived from every
-`targets.*.skills.path` entry in the live configuration rather than a target
-name or directory list owned by this repository. `check` deliberately does not
-run `skillshare doctor`: that command may migrate configuration, update caches,
-and probe target paths with temporary writes. Run it explicitly when deeper
-Skillshare diagnosis is worth those local side effects.
+Skillshare inspection parses the global YAML configuration and checks its source
+and target locations without invoking the Skillshare CLI. Installation ownership
+remains a separate check: Mise's JSON inventory distinguishes an inactive Mise
+install from the active executable and warns only when independent owners
+coexist. Run `skillshare status --global --json` or `skillshare doctor`
+explicitly when tracked-repository, synchronization, or deeper target health is
+needed: those commands may migrate legacy configuration or write diagnostic
+state and therefore do not belong in read-only `check`.
 
 Missing or empty generated shell directories are reported as not ready. The
-report also verifies that `~/.local/bin/mise` is a real executable rather than a
-package-manager symlink, warns when another Mise installation exists on `PATH`
-or at a common system location, verifies that Mise-owned shims target the
-canonical executable, and checks that generated Zsh activation names only the
-canonical executable.
+report also verifies that the host's canonical Mise path is a real executable,
+warns when another Mise installation exists on `PATH` or at a common system
+location, verifies that Mise-owned shims target the canonical executable, and
+checks that generated Zsh activation names only the canonical executable.
 
 `mise run lint` inspects repository paths, Mackup mappings, and dangling
 symlinks. Its `path.*` findings are host-relative: a machine-specific path
@@ -375,13 +415,14 @@ mise run update -- --apply
 
 The task discovers most supported updaters on `PATH`, reports missing tools as
 skipped, applies available updates in a stable order, and continues independent
-steps after a failure. Mise is the exception: its self-update, tool upgrade,
-and reshim steps always invoke `~/.local/bin/mise` explicitly. The self-update
-runs without the unrelated plugin update side effect. The preview is the
-authoritative list of supported updaters and the exact commands available on
-the current host. `PLANNED` means the updater command is available; the updater
-determines whether a newer version exists during apply. Any failed step makes
-the command exit non-zero. It
+steps after a failure. Mise is the exception: its tool upgrade and reshim steps
+always invoke the canonical Mise path explicitly. The standalone canonical
+Mise install also self-updates without the unrelated plugin update side effect;
+a host-selected Mise path is updated by its host owner instead. The preview is
+the authoritative list of supported updaters and the exact commands available
+on the current host. `PLANNED` means the updater command is available; the
+updater determines whether a newer version exists during apply. Any failed
+step makes the command exit non-zero. It
 deliberately does not run `brew cleanup`, `brew autoremove`, or `mise prune`;
 removal and pruning require a separate, explicit operation.
 
@@ -392,10 +433,11 @@ open through inherited pipes. An agent can still distinguish active work from
 a stalled command.
 
 For mise, the preview records the active installed tool versions. An apply
-updates the standalone CLI first, then passes that explicit list to
-`mise upgrade`; a configured but missing mise tool is not installed. Other
-missing CLIs are skipped rather than bootstrapped. Package managers may still
-replace package dependencies as part of an ordinary upgrade.
+updates a standalone Mise CLI first; a host-selected Mise binary is left to its
+host owner. It then passes the explicit installed-tool list to `mise upgrade`;
+a configured but missing mise tool is not installed. Other missing CLIs are
+skipped rather than bootstrapped. Package managers may still replace package
+dependencies as part of an ordinary upgrade.
 
 When the live global mise files are linked to `reference/`, the mise tool
 upgrade may refresh the tracked lockfile. Run `update --apply` on a checkout
@@ -408,8 +450,9 @@ git diff -- reference/.config/mise
 
 A hard `min_version` failure happens before mise can launch this repository's
 `update` task. In that bootstrap case, update the canonical binary directly
-with `~/.local/bin/mise self-update`, then run the task normally. The hard
-minimum is only the oldest compatible release, not a mise binary pin.
+with `<canonical-mise> self-update` when its owner supports that operation, then
+run the task normally. The hard minimum is only the oldest compatible release,
+not a mise binary pin.
 
 `update` does not pull this repository, synchronize Skillshare content, or
 converge live configuration from `reference/`. Its Mise step may update the
@@ -453,23 +496,8 @@ planned operations on the current host. `--offline` limits an apply to local
 generation and cache maintenance. It never runs Skillshare or writes host
 inventory; snapshots have their own explicit task (see Host inventory).
 Generated files are a cache: shell startup sources them but does not regenerate
-them. The mise generator always invokes `~/.local/bin/mise` by absolute path, so
-the cached activation remains stable across self-updates and across macOS and
-Linux hosts.
-
-Repository-owned source builds are an explicit, slower sub-operation:
-
-```bash
-mise run runtime -- --build
-mise run runtime -- --build --apply
-```
-
-This refreshes the sources named by the runtime plan under the ignored
-`generated/sources/`, builds them with their declared commands, and atomically
-installs the artifacts into `generated/bin/`. Any other binary placed there
-must name its own owner; `mise run check` reports unknown binaries. Atuin and
-Zoxide are not runtime-built binaries; Mise owns them. A failed source refresh
-or build leaves the previous owned binary in place.
+them. The Mise generator always invokes the host's canonical Mise binary by
+absolute path, so cached activation remains bound to the selected owner.
 
 ## Host inventory
 
