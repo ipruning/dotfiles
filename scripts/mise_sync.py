@@ -395,7 +395,7 @@ def plan_mise_sync(repo_root: Path, home: Path) -> MiseSyncReport:
             for step in steps
         )
     elif executable is None:
-        reason = f"{canonical_mise_path(home)} is missing, symlinked, or not executable"
+        reason = f"{canonical_mise_path(home)} is missing, broken, or not executable"
         results = (
             MiseSyncResult(steps[0], MiseSyncStatus.FAILED, reason=reason),
             *(

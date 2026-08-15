@@ -551,7 +551,7 @@ def test_mise_sync_fails_before_restore_without_canonical_mise(tmp_path: Path) -
     assert document["steps"][0]["status"] == "failed"
     assert document["steps"][1]["status"] == "skipped"
     assert document["steps"][2]["status"] == "skipped"
-    assert "missing, symlinked, or not executable" in document["steps"][0]["reason"]
+    assert "missing, broken, or not executable" in document["steps"][0]["reason"]
     assert "[mise.runtimes] FAIL" in completed.stderr
     config = home / ".config/mise/config.toml"
     assert config.read_text() == '[tools]\nnode = "20"\n'

@@ -339,7 +339,7 @@ def plan_updates(
                     None
                     if available
                     else (
-                        f"{canonical_mise_path(home)} is missing, symlinked, or not executable"
+                        f"{canonical_mise_path(home)} is missing, broken, or not executable"
                         if step.tool == "mise"
                         else f"{step.tool} is not available on PATH"
                     )

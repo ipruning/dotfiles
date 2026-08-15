@@ -97,9 +97,9 @@ def _mise_installation_findings(
             Severity.WARN,
             f"mise.canonical_{state}",
             (
-                "The host-selected Mise executable is missing, symlinked, or not executable"
+                "The host-selected Mise executable is missing, broken, or not executable"
                 if host_selected
-                else "The canonical standalone Mise executable is missing, symlinked, or not executable"
+                else "The canonical standalone Mise executable is missing, broken, or not executable"
             ),
             canonical,
             (

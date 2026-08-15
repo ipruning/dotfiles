@@ -12,7 +12,7 @@ from scripts.host_policy import (
     load_host_policy,
 )
 from scripts.inventory import InventoryReport, execute_inventory
-from scripts.mise import canonical_mise_path
+from scripts.mise import canonical_mise_executable, canonical_mise_path
 from scripts.mise_sync import execute_mise_sync
 from scripts.models import Severity
 from scripts.restore import RestoreReport, apply_restore
@@ -186,10 +186,13 @@ def test_audit_only_policy_guards_direct_mutation_apis(tmp_path: Path) -> None:
 def test_valid_policy_selects_mise_and_is_visible_to_check(tmp_path: Path) -> None:
     repo_root = tmp_path / "repo"
     home = tmp_path / "home"
-    mise = tmp_path / "system/bin/mise"
+    installed_mise = tmp_path / "homebrew/Cellar/mise/2026.8.5/bin/mise"
+    installed_mise.parent.mkdir(parents=True)
+    installed_mise.write_text("#!/bin/sh\nexit 0\n")
+    installed_mise.chmod(0o755)
+    mise = tmp_path / "homebrew/bin/mise"
     mise.parent.mkdir(parents=True)
-    mise.write_text("#!/bin/sh\nexit 0\n")
-    mise.chmod(0o755)
+    mise.symlink_to(Path("../Cellar/mise/2026.8.5/bin/mise"))
     stale_mise = tmp_path / "old/bin/mise"
     stale_mise.parent.mkdir(parents=True)
     stale_mise.write_text("#!/bin/sh\nexit 0\n")
@@ -214,6 +217,7 @@ def test_valid_policy_selects_mise_and_is_visible_to_check(tmp_path: Path) -> No
     findings = {finding.check: finding for finding in report.findings}
 
     assert canonical_mise_path(home) == mise
+    assert canonical_mise_executable(home) == str(mise)
     assert findings["host.policy"].code == "host.policy_audit_only"
     assert findings["host.policy"].path == policy
     assert findings["mise.canonical"].path == mise
@@ -234,6 +238,22 @@ def test_valid_policy_selects_mise_and_is_visible_to_check(tmp_path: Path) -> No
         assert finding.severity is None
         assert finding.action is None
     assert findings["executable.skillshare"].applicable is True
+
+
+def test_canonical_mise_rejects_broken_package_manager_symlink(
+    tmp_path: Path,
+) -> None:
+    home = tmp_path / "home"
+    mise = tmp_path / "homebrew/bin/mise"
+    mise.parent.mkdir(parents=True)
+    mise.symlink_to(Path("../Cellar/mise/missing/bin/mise"))
+    _write_policy(
+        home,
+        f'mode = "audit-only"\nmise_path = "{mise}"\n',
+    )
+
+    assert canonical_mise_path(home) == mise
+    assert canonical_mise_executable(home) is None
 
 
 def test_audit_only_full_check_skips_repository_runtime_readiness(

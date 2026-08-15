@@ -18,7 +18,7 @@ def canonical_mise_executable(home: Path) -> str | None:
     """Return the owner-selected Mise binary when it is an executable file."""
     executable = canonical_mise_path(home)
     try:
-        if executable.is_symlink() or not executable.is_file():
+        if not executable.is_file():
             return None
         if not os.access(executable, os.X_OK):
             return None
