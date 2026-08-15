@@ -58,14 +58,15 @@ def emit_error(
     *,
     as_json: bool,
     apply: bool | None = None,
+    code: str | None = None,
 ) -> None:
     """Report a failed operation on both streams: prose to stderr, JSON to stdout."""
-    code = f"{operation}_failed"
-    print(f"ERROR {code} {message}", file=sys.stderr)
+    error_code = code or f"{operation}_failed"
+    print(f"ERROR {error_code} {message}", file=sys.stderr)
     if as_json:
         print(
             json.dumps(
-                error_document(operation, code, message, apply=apply),
+                error_document(operation, error_code, message, apply=apply),
                 indent=2,
                 sort_keys=True,
             ),

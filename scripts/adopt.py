@@ -15,6 +15,7 @@ from enum import StrEnum
 from pathlib import Path
 
 from .diff import DriftProtocolError, MackupCommandError, inspect_drift
+from .host_policy import HostPolicyError, require_mutation_allowed
 from .models import Drift, DriftKind
 from .render import emit_error
 
@@ -252,6 +253,7 @@ def _copy_live_into_reference(live_path: Path, reference_path: Path) -> None:
 
 def apply_adopt(repo_root: Path, home: Path, plan: AdoptReport) -> AdoptReport:
     """Copy live truth into the reference; git history protects the old state."""
+    require_mutation_allowed(home)
     reference_root = repo_root / "reference"
     try:
         dirty = _dirty_reference_paths(repo_root, plan)
@@ -406,13 +408,25 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
     repo_root = Path(__file__).resolve().parents[1]
+    home = Path.home()
     try:
-        report = plan_adopt(repo_root, Path.home(), args.application)
+        if args.apply:
+            require_mutation_allowed(home)
+        report = plan_adopt(repo_root, home, args.application)
+    except HostPolicyError as error:
+        emit_error(
+            "adopt",
+            str(error),
+            as_json=args.as_json,
+            apply=args.apply,
+            code=error.code,
+        )
+        return 1
     except (DriftProtocolError, MackupCommandError) as error:
         emit_error("adopt", str(error), as_json=args.as_json, apply=args.apply)
         return 1
     if args.apply:
-        report = apply_adopt(repo_root, Path.home(), report)
+        report = apply_adopt(repo_root, home, report)
     if args.as_json:
         print(json.dumps(_document(report), indent=2, sort_keys=True))
         for result in report.results:

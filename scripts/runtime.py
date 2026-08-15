@@ -18,8 +18,10 @@ from dataclasses import dataclass, replace
 from enum import StrEnum
 from pathlib import Path
 
+from .host_policy import HostPolicyError, require_mutation_allowed
 from .mise import canonical_mise_executable, canonical_mise_path
 from .models import ExecutableFinder
+from .render import emit_error
 
 Downloader = Callable[[str, int], bytes]
 AtomicWriter = Callable[[Path], object]
@@ -890,6 +892,7 @@ def execute_runtime(
     capture_output: bool = True,
 ) -> RuntimeReport:
     """Execute a previously rendered runtime plan."""
+    require_mutation_allowed(home)
     results = []
     completed_steps: dict[str, RuntimeResult] = {}
     dependency_blocked_steps: set[str] = set()
@@ -1305,19 +1308,32 @@ def main(argv: list[str] | None = None) -> int:
         help="repository root that owns the runtime (default: this checkout)",
     )
     args = parser.parse_args(argv)
-    report = plan_runtime(
-        args.repo_root,
-        Path.home(),
-        network=not args.offline,
-        build=args.build,
-    )
-    if args.apply:
-        report = execute_runtime(
-            report,
-            Path.home(),
-            on_start=None if args.as_json else _announce_step,
-            capture_output=args.as_json,
+    home = Path.home()
+    try:
+        if args.apply:
+            require_mutation_allowed(home)
+        report = plan_runtime(
+            args.repo_root,
+            home,
+            network=not args.offline,
+            build=args.build,
         )
+        if args.apply:
+            report = execute_runtime(
+                report,
+                home,
+                on_start=None if args.as_json else _announce_step,
+                capture_output=args.as_json,
+            )
+    except HostPolicyError as error:
+        emit_error(
+            "runtime",
+            str(error),
+            as_json=args.as_json,
+            apply=args.apply,
+            code=error.code,
+        )
+        return 1
     if args.as_json:
         print(json.dumps(_document(report), indent=2, sort_keys=True))
         for result in report.results:

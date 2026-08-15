@@ -15,12 +15,14 @@ from dataclasses import dataclass, replace
 from enum import StrEnum
 from pathlib import Path
 
+from .host_policy import HostPolicyError, require_mutation_allowed
 from .mise import (
     canonical_mise_environment,
     canonical_mise_executable,
     canonical_mise_path,
 )
 from .models import ExecutableFinder
+from .render import emit_error
 
 StepCallback = Callable[["UpdateStep"], None]
 NEXT_COMMANDS = (
@@ -343,6 +345,7 @@ def execute_updates(
     progress_interval_seconds: float = PROGRESS_INTERVAL_SECONDS,
 ) -> UpdateReport:
     """Run every available updater and retain independent failure results."""
+    require_mutation_allowed(home)
     results = []
     for planned in plan_updates(home, executable_finder=executable_finder).results:
         # Carry through anything the preflight already resolved (SKIPPED, or a
@@ -564,15 +567,28 @@ def main(argv: list[str] | None = None) -> int:
         help="emit the report as JSON on stdout",
     )
     args = parser.parse_args(argv)
-    report = (
-        execute_updates(
-            Path.home(),
-            capture_output=args.as_json,
-            on_start=None if args.as_json else _announce_step,
+    home = Path.home()
+    try:
+        if args.apply:
+            require_mutation_allowed(home)
+        report = (
+            execute_updates(
+                home,
+                capture_output=args.as_json,
+                on_start=None if args.as_json else _announce_step,
+            )
+            if args.apply
+            else plan_updates(home)
         )
-        if args.apply
-        else plan_updates(Path.home())
-    )
+    except HostPolicyError as error:
+        emit_error(
+            "update",
+            str(error),
+            as_json=args.as_json,
+            apply=args.apply,
+            code=error.code,
+        )
+        return 1
     if args.as_json:
         print(json.dumps(_document(report), indent=2, sort_keys=True))
     else:

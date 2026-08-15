@@ -59,12 +59,31 @@ mise run mise-sync
 mise run mise-sync -- --apply
 ```
 
-This repository deliberately standardizes both macOS and Linux on the
-standalone executable at `~/.local/bin/mise`. Do not install a second copy with
-Homebrew, apt, or another package manager: package-managed mise has a different
-update owner and may leave generated shell activation bound to the wrong
-binary. The upstream installer uses this standalone path by default, and this
+Managed hosts default to the standalone executable at `~/.local/bin/mise`. Do
+not install a second copy with Homebrew, apt, or another package manager:
+multiple owners may leave generated shell activation bound to the wrong binary.
+The upstream installer uses this standalone path by default, and this
 installation supports `mise self-update`.
+
+### Host-local ownership policy
+
+A host whose operating system owns configuration or Mise can opt out of
+repository mutation without changing the shared reference. Create the
+untracked host-local file `~/.config/dotfiles/policy.toml`:
+
+```toml
+mode = "audit-only"
+mise_path = "/usr/bin/mise"
+```
+
+`audit-only` keeps previews plus `diff`, `check`, `lint`, and verification
+available, but rejects every `--apply` operation before it writes files or runs
+updaters. The same guard protects the underlying `apply_*` and `execute_*`
+Python operations. `mise_path` selects the host's canonical Mise owner, so a
+package-managed binary such as Omarchy's `/usr/bin/mise` is not treated as an
+extra installation. An absent policy preserves the managed default above. An
+invalid policy, including unknown fields, fails closed and is diagnosed by
+`mise run check`; it never falls back silently to the standalone owner.
 
 The installer intentionally has no version argument: host and Orb bootstrap
 take the latest mise release available from `https://mise.run` rather than
@@ -280,7 +299,7 @@ upstream package manager's artifact and integrity semantics.
 Global tools should be interactive commands wanted on every personal host.
 Project tools belong in that project's Mise configuration. Long-running Linux
 services should use the distribution package when appropriate, or an explicit
-`~/.local/bin/mise -C <project> exec -- <tool>` command; they must not depend on
+`<canonical-mise> -C <project> exec -- <tool>` command; they must not depend on
 global shims. A genuinely host-specific tool is an explicit exception, not a
 second global configuration truth.
 
@@ -347,11 +366,10 @@ and probe target paths with temporary writes. Run it explicitly when deeper
 Skillshare diagnosis is worth those local side effects.
 
 Missing or empty generated shell directories are reported as not ready. The
-report also verifies that `~/.local/bin/mise` is a real executable rather than a
-package-manager symlink, warns when another Mise installation exists on `PATH`
-or at a common system location, verifies that Mise-owned shims target the
-canonical executable, and checks that generated Zsh activation names only the
-canonical executable.
+report also verifies that the host's canonical Mise path is a real executable,
+warns when another Mise installation exists on `PATH` or at a common system
+location, verifies that Mise-owned shims target the canonical executable, and
+checks that generated Zsh activation names only the canonical executable.
 
 `mise run lint` inspects repository paths, Mackup mappings, and dangling
 symlinks. Its `path.*` findings are host-relative: a machine-specific path
@@ -376,12 +394,12 @@ mise run update -- --apply
 The task discovers most supported updaters on `PATH`, reports missing tools as
 skipped, applies available updates in a stable order, and continues independent
 steps after a failure. Mise is the exception: its self-update, tool upgrade,
-and reshim steps always invoke `~/.local/bin/mise` explicitly. The self-update
-runs without the unrelated plugin update side effect. The preview is the
-authoritative list of supported updaters and the exact commands available on
-the current host. `PLANNED` means the updater command is available; the updater
-determines whether a newer version exists during apply. Any failed step makes
-the command exit non-zero. It
+and reshim steps always invoke the canonical Mise path explicitly. The
+self-update runs without the unrelated plugin update side effect. The preview
+is the authoritative list of supported updaters and the exact commands
+available on the current host. `PLANNED` means the updater command is available;
+the updater determines whether a newer version exists during apply. Any failed
+step makes the command exit non-zero. It
 deliberately does not run `brew cleanup`, `brew autoremove`, or `mise prune`;
 removal and pruning require a separate, explicit operation.
 
@@ -408,8 +426,9 @@ git diff -- reference/.config/mise
 
 A hard `min_version` failure happens before mise can launch this repository's
 `update` task. In that bootstrap case, update the canonical binary directly
-with `~/.local/bin/mise self-update`, then run the task normally. The hard
-minimum is only the oldest compatible release, not a mise binary pin.
+with `<canonical-mise> self-update` when its owner supports that operation, then
+run the task normally. The hard minimum is only the oldest compatible release,
+not a mise binary pin.
 
 `update` does not pull this repository, synchronize Skillshare content, or
 converge live configuration from `reference/`. Its Mise step may update the
@@ -453,9 +472,8 @@ planned operations on the current host. `--offline` limits an apply to local
 generation and cache maintenance. It never runs Skillshare or writes host
 inventory; snapshots have their own explicit task (see Host inventory).
 Generated files are a cache: shell startup sources them but does not regenerate
-them. The mise generator always invokes `~/.local/bin/mise` by absolute path, so
-the cached activation remains stable across self-updates and across macOS and
-Linux hosts.
+them. The Mise generator always invokes the host's canonical Mise binary by
+absolute path, so cached activation remains bound to the selected owner.
 
 Repository-owned source builds are an explicit, slower sub-operation:
 

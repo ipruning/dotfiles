@@ -25,6 +25,12 @@ from .check_mise import (
     _mise_systemd_shim_findings,
 )
 from .check_skillshare import _skillshare_findings, _skillshare_ownership_finding
+from .host_policy import (
+    HostPolicy,
+    HostPolicyError,
+    host_policy_path,
+    load_host_policy,
+)
 from .mise import canonical_mise_executable
 from .models import CheckReport, ExecutableFinder, Finding, Severity
 from .profiles import HostProfile, resolve_profile
@@ -63,6 +69,47 @@ def _check_executable(
         f"executable.{tool}.missing",
         f"{tool} is not available on PATH",
         action=missing_action or f"Install {tool} if this host needs that capability.",
+    )
+
+
+def _host_policy_finding(home: Path) -> tuple[Finding | None, HostPolicy | None]:
+    path = host_policy_path(home)
+    if not path.exists() and not path.is_symlink():
+        return None, HostPolicy()
+    try:
+        policy = load_host_policy(home)
+    except HostPolicyError as error:
+        return (
+            Finding(
+                "host.policy",
+                Severity.ERROR,
+                "host.policy_invalid",
+                str(error),
+                path,
+                "Fix or remove the invalid host policy before using dotfiles operations.",
+            ),
+            None,
+        )
+    if policy.audit_only:
+        return (
+            Finding(
+                "host.policy",
+                Severity.OK,
+                "host.policy_audit_only",
+                "Host policy permits inspection but disables mutating dotfiles operations",
+                path,
+            ),
+            policy,
+        )
+    return (
+        Finding(
+            "host.policy",
+            Severity.OK,
+            "host.policy_managed",
+            "Host policy permits managed dotfiles operations",
+            path if path.is_file() else None,
+        ),
+        policy,
     )
 
 
@@ -490,7 +537,12 @@ def _dangling_repo_link_findings(repo_root: Path, home: Path) -> list[Finding]:
     return findings
 
 
-def _bash_integration_finding(repo_root: Path, home: Path) -> Finding:
+def _bash_integration_finding(
+    repo_root: Path,
+    home: Path,
+    *,
+    mutation_allowed: bool = True,
+) -> Finding:
     bashrc = home / ".bashrc"
     module_path = repo_root.resolve() / "modules/bash/init.bash"
     try:
@@ -517,6 +569,8 @@ def _bash_integration_finding(repo_root: Path, home: Path) -> Finding:
         else (
             "Preview with mise run setup -- --profile linux-lite, then apply with "
             "mise run setup -- --profile linux-lite --apply."
+            if mutation_allowed
+            else "Host policy disables dotfiles setup; keep Bash with its host owner."
         ),
     )
 
@@ -573,28 +627,32 @@ def inspect_host(
         if active_profile is HostProfile.LINUX_LITE
         else ("git", "python", "uv", "mise")
     )
-    findings = [
+    policy_finding, host_policy = _host_policy_finding(home)
+    policy_valid = host_policy is not None
+    findings = [policy_finding] if policy_finding else []
+    findings.extend(
         _check_executable(
             command,
             required=True,
             executable_finder=executable_finder,
         )
         for command in required_commands
-    ]
-    findings.extend(
-        _mise_installation_findings(
-            home,
-            executable_finder=executable_finder,
-            scan_host_path=executable_finder is shutil.which,
-        ),
     )
-    if mise_shims := _mise_shim_finding(home):
-        findings.append(mise_shims)
-    if executable_finder is shutil.which and (
-        project_uv := _mise_project_uv_finding(repo_root, home)
-    ):
-        findings.append(project_uv)
-    if active_system == "Linux":
+    if policy_valid:
+        findings.extend(
+            _mise_installation_findings(
+                home,
+                executable_finder=executable_finder,
+                scan_host_path=executable_finder is shutil.which,
+            ),
+        )
+        if mise_shims := _mise_shim_finding(home):
+            findings.append(mise_shims)
+        if executable_finder is shutil.which and (
+            project_uv := _mise_project_uv_finding(repo_root, home)
+        ):
+            findings.append(project_uv)
+    if policy_valid and active_system == "Linux":
         findings.extend(_mise_systemd_shim_findings(home))
     findings.extend(_private_git_findings(home))
     skillshare_finding = _check_executable(
@@ -604,7 +662,7 @@ def inspect_host(
     )
     findings.append(skillshare_finding)
     findings.extend(_skillshare_findings(home))
-    if executable_finder is shutil.which:
+    if policy_valid and executable_finder is shutil.which:
         ownership = _skillshare_ownership_finding(home, skillshare_finding.path)
         if ownership:
             findings.append(ownership)
@@ -655,7 +713,13 @@ def inspect_host(
     )
     findings.extend(_dangling_repo_link_findings(repo_root, home))
     if active_profile is HostProfile.LINUX_LITE:
-        findings.append(_bash_integration_finding(repo_root, home))
+        findings.append(
+            _bash_integration_finding(
+                repo_root,
+                home,
+                mutation_allowed=bool(host_policy and not host_policy.audit_only),
+            ),
+        )
         findings.append(_legacy_repo_path_finding(repo_root))
         return CheckReport(
             schema_version=1,
@@ -686,17 +750,18 @@ def inspect_host(
                 repo_root / "generated" / directory, directory
             ),
         )
-    mise_binding = _mise_runtime_binding_finding(
-        repo_root / "generated/functions/_mise.zsh",
-        home,
-    )
-    if mise_binding:
-        findings.append(mise_binding)
+    if policy_valid:
+        mise_binding = _mise_runtime_binding_finding(
+            repo_root / "generated/functions/_mise.zsh",
+            home,
+        )
+        if mise_binding:
+            findings.append(mise_binding)
     owned_tool_finder = repo_aware_finder(repo_root, executable_finder)
     for function_spec in FUNCTION_SPECS:
         tool = function_spec.tool
         tool_available = (
-            canonical_mise_executable(home) is not None
+            policy_valid and canonical_mise_executable(home) is not None
             if tool == "mise"
             else owned_tool_finder(tool) is not None
         )

@@ -12,6 +12,7 @@ from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
 
+from .host_policy import HostPolicyError, require_mutation_allowed
 from .profiles import HostProfile
 from .render import emit_error
 
@@ -131,6 +132,7 @@ def plan_setup(repo_root: Path, home: Path) -> SetupReport:
 
 def apply_setup(repo_root: Path, home: Path) -> SetupReport:
     """Connect Bash and the private Git include without inventing host identity."""
+    require_mutation_allowed(home)
     return _configure_linux_lite(repo_root, home, apply=True)
 
 
@@ -231,9 +233,21 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
     repo_root = Path(__file__).resolve().parents[1]
+    home = Path.home()
     setup = apply_setup if args.apply else plan_setup
     try:
-        report = setup(repo_root, Path.home())
+        if args.apply:
+            require_mutation_allowed(home)
+        report = setup(repo_root, home)
+    except HostPolicyError as error:
+        emit_error(
+            "setup",
+            str(error),
+            as_json=args.as_json,
+            apply=args.apply,
+            code=error.code,
+        )
+        return 1
     except SetupError as error:
         emit_error("setup", str(error), as_json=args.as_json, apply=args.apply)
         return 1

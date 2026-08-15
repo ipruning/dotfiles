@@ -7,6 +7,7 @@ import re
 import subprocess
 from pathlib import Path
 
+from .host_policy import configured_mise_path
 from .mise import (
     canonical_mise_environment,
     canonical_mise_executable,
@@ -76,12 +77,17 @@ def _mise_installation_findings(
 ) -> list[Finding]:
     canonical = canonical_mise_path(home)
     canonical_ready = canonical_mise_executable(home) is not None
+    host_selected = configured_mise_path(home) is not None
     if canonical_ready:
         canonical_finding = Finding(
             "mise.canonical",
             Severity.OK,
             "mise.canonical_ready",
-            "The standalone mise executable is ready at its canonical location",
+            (
+                "The host-selected Mise executable is ready"
+                if host_selected
+                else "The standalone Mise executable is ready at its canonical location"
+            ),
             canonical,
         )
     else:
@@ -90,9 +96,17 @@ def _mise_installation_findings(
             "mise.canonical",
             Severity.WARN,
             f"mise.canonical_{state}",
-            "The canonical standalone mise executable is missing, symlinked, or not executable",
+            (
+                "The host-selected Mise executable is missing, symlinked, or not executable"
+                if host_selected
+                else "The canonical standalone Mise executable is missing, symlinked, or not executable"
+            ),
             canonical,
-            "Install standalone mise at ~/.local/bin/mise with https://mise.run.",
+            (
+                f"Restore {canonical} with the host owner that selected it."
+                if host_selected
+                else "Install standalone Mise at ~/.local/bin/mise with https://mise.run."
+            ),
         )
 
     alternatives: dict[str, Path] = {}
@@ -118,7 +132,7 @@ def _mise_installation_findings(
             "mise.installations_multiple",
             f"Additional mise executable installations exist outside the canonical path: {paths}",
             next(iter(alternatives.values())),
-            "Remove package-managed mise copies after ~/.local/bin/mise is ready.",
+            f"Remove additional Mise copies after {canonical} is ready.",
         )
     else:
         installations_finding = Finding(
@@ -174,7 +188,7 @@ def _mise_shim_finding(home: Path) -> Finding | None:
             (
                 "Run mise run mise-sync, then mise run mise-sync -- --apply."
                 if canonical_ready
-                else "Install standalone mise at ~/.local/bin/mise before rebuilding shims."
+                else f"Restore the canonical Mise executable at {canonical} before rebuilding shims."
             ),
         )
     if canonical_count:
@@ -225,8 +239,8 @@ def _mise_project_uv_finding(repo_root: Path, home: Path) -> Finding | None:
         f"Canonical Mise cannot resolve the project's locked uv executable: {reason}",
         config_path,
         (
-            "Inspect with ~/.local/bin/mise ls uv --installed --json and "
-            "~/.local/bin/mise which uv. Reinstall the exact locked uv version if "
+            f"Inspect with {canonical_mise_path(home)} ls uv --installed --json and "
+            f"{canonical_mise_path(home)} which uv. Reinstall the exact locked uv version if "
             "its recorded backend no longer matches its executable layout."
         ),
     )
@@ -303,7 +317,7 @@ def _mise_systemd_shim_findings(
             f"{unit_file.name} uses a global Mise shim in {directive_name}",
             unit_file,
             (
-                "Bind the service to a project config with ~/.local/bin/mise -C "
+                f"Bind the service to a project config with {canonical_mise_path(home)} -C "
                 "<project> exec -- <tool>, or use a system package; then reload systemd."
             ),
         )

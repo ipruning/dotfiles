@@ -86,7 +86,11 @@ def _run_inventory(
     }
     for name, options in (tools if tools is not None else defaults).items():
         _fake_tool(bin_dir, name, log_path, **options)
+    home = tmp_path / "home"
+    home.mkdir(exist_ok=True)
     environment = os.environ.copy()
+    environment["HOME"] = str(home)
+    environment["XDG_CONFIG_HOME"] = str(home / ".config")
     environment["PATH"] = str(bin_dir)
     completed = subprocess.run(
         [
@@ -288,6 +292,7 @@ def test_inventory_executes_only_planned_results(tmp_path: Path) -> None:
 
     report = execute_inventory(
         InventoryReport("TestHost", False, terminal_results),
+        tmp_path / "home",
         on_start=started.append,
     )
 
@@ -388,7 +393,7 @@ def test_inventory_failed_atomic_publish_keeps_previous_snapshot(
         return original_replace(source, destination)
 
     monkeypatch.setattr(Path, "replace", fail_publish)
-    report = execute_inventory(plan)
+    report = execute_inventory(plan, tmp_path / "home")
 
     application = next(
         result for result in report.results if result.spec.name == "applications"
@@ -497,7 +502,7 @@ def test_inventory_reports_timeout_on_stderr_and_keeps_going(
         executable_finder=lambda tool: f"/fake/{tool}",
     )
 
-    report = execute_inventory(plan)
+    report = execute_inventory(plan, tmp_path / "home")
 
     results = {result.spec.name: result for result in report.results}
     assert results["brew.bundle"].status is InventoryStatus.FAILED

@@ -27,10 +27,6 @@ SKILLSHARE_SYSTEM_PATHS = tuple(
         ("usr", "local", "bin", "skillshare"),
     )
 )
-SKILLSHARE_OWNERSHIP_ACTION = (
-    "Inspect with ~/.local/bin/mise ls github:runkids/skillshare --installed "
-    "--json and brew list --versions skillshare, then retain one owner."
-)
 
 
 def _expand_home(value: str, home: Path) -> Path:
@@ -404,6 +400,10 @@ def _skillshare_ownership_finding(
     home: Path,
     executable: Path | None,
 ) -> Finding | None:
+    ownership_action = (
+        f"Inspect with {canonical_mise_path(home)} ls {SKILLSHARE_MISE_TOOL} "
+        "--installed --json and brew list --versions skillshare, then retain one owner."
+    )
     try:
         mise_installations = _mise_skillshare_installations(home)
     except RuntimeError as error:
@@ -413,7 +413,7 @@ def _skillshare_ownership_finding(
             "skillshare.ownership_unavailable",
             str(error),
             canonical_mise_path(home),
-            SKILLSHARE_OWNERSHIP_ACTION,
+            ownership_action,
         )
 
     owners = _candidate_skillshare_owners(home, executable, mise_installations)
@@ -444,7 +444,7 @@ def _skillshare_ownership_finding(
             "skillshare.ownership_multiple",
             f"Multiple independent Skillshare owners coexist: {'; '.join(descriptions)}",
             path,
-            SKILLSHARE_OWNERSHIP_ACTION,
+            ownership_action,
         )
     return Finding(
         "skillshare.ownership",

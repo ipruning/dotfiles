@@ -18,7 +18,9 @@ from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
 
+from .host_policy import HostPolicyError, require_mutation_allowed
 from .models import ExecutableFinder
+from .render import emit_error
 
 StepCallback = Callable[["InventorySpec"], None]
 HOST_NAME_RE = re.compile(r"[^A-Za-z0-9._-]")
@@ -225,10 +227,12 @@ def _collect(spec: InventorySpec) -> tuple[str, int | None]:
 
 def execute_inventory(
     plan: InventoryReport,
+    home: Path,
     *,
     on_start: StepCallback | None = None,
 ) -> InventoryReport:
     """Run every planned collector and retain independent failure results."""
+    require_mutation_allowed(home)
     results = []
     for planned in plan.results:
         if planned.status is not InventoryStatus.PLANNED:
@@ -455,6 +459,19 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if args.host is not None and sanitize_host(args.host) != args.host:
         parser.error("--host must use only [A-Za-z0-9._-] and must not be '.' or '..'")
+    home = Path.home()
+    try:
+        if args.apply:
+            require_mutation_allowed(home)
+    except HostPolicyError as error:
+        emit_error(
+            "inventory",
+            str(error),
+            as_json=args.as_json,
+            apply=args.apply,
+            code=error.code,
+        )
+        return 1
     host = args.host if args.host is not None else detect_host()
     report = plan_inventory(
         args.repo_root,
@@ -464,6 +481,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.apply:
         report = execute_inventory(
             report,
+            home,
             on_start=None if args.as_json else _announce_step,
         )
     if args.as_json:

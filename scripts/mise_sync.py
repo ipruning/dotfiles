@@ -14,6 +14,7 @@ from enum import StrEnum
 from pathlib import Path
 
 from .diff import DriftProtocolError, MackupCommandError
+from .host_policy import HostPolicyError, require_mutation_allowed
 from .mise import (
     canonical_mise_environment,
     canonical_mise_executable,
@@ -431,6 +432,7 @@ def execute_mise_sync(
     capture_output: bool = False,
 ) -> MiseSyncReport:
     """Restore the shared declaration, install it locked, and rebuild owned shims."""
+    require_mutation_allowed(home)
     plan = plan_mise_sync(repo_root, home)
     if not plan.ok:
         return MiseSyncReport(
@@ -721,12 +723,24 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
     repo_root = Path(__file__).resolve().parents[1]
+    home = Path.home()
     try:
+        if args.apply:
+            require_mutation_allowed(home)
         report = (
-            execute_mise_sync(repo_root, Path.home(), capture_output=args.as_json)
+            execute_mise_sync(repo_root, home, capture_output=args.as_json)
             if args.apply
-            else plan_mise_sync(repo_root, Path.home())
+            else plan_mise_sync(repo_root, home)
         )
+    except HostPolicyError as error:
+        emit_error(
+            "mise-sync",
+            str(error),
+            as_json=args.as_json,
+            apply=args.apply,
+            code=error.code,
+        )
+        return 1
     except (DriftProtocolError, MackupCommandError) as error:
         emit_error("mise-sync", str(error), as_json=args.as_json, apply=args.apply)
         return 1
