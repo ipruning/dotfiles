@@ -140,6 +140,30 @@ def test_audit_only_policy_keeps_cli_previews_available(
     assert document["next"] == []
 
 
+def test_audit_only_mise_preview_observes_live_only_tools_without_failing(
+    tmp_path: Path,
+) -> None:
+    home = tmp_path / "home"
+    mise = _write_mise(home)
+    config = home / ".config/mise/config.toml"
+    config.parent.mkdir(parents=True)
+    config.write_text('[tools]\nhost-only = "latest"\n')
+    _write_policy(
+        home,
+        f'mode = "audit-only"\nmise_path = "{mise}"\n',
+    )
+
+    completed = run_scripts_module("mise_sync", home, "--json")
+
+    assert completed.returncode == 0
+    document = json.loads(completed.stdout)
+    assert document["ok"] is True
+    assert document["safety"]["apply_blocked"] is True
+    assert document["safety"]["live_only_tools"] == ["host-only"]
+    assert document["next"] == []
+    assert "FAIL live-only global tools" not in completed.stderr
+
+
 def test_audit_only_policy_guards_direct_mutation_apis(tmp_path: Path) -> None:
     repo_root = tmp_path / "repo"
     home = tmp_path / "home"

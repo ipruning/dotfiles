@@ -43,8 +43,13 @@ or multiple legitimate outcomes require an Operator decision before mutation.
 ## Start
 
 Git and mise are the only bootstrap requirements. On a machine without mise,
-install the latest release from the official installer and expose its user
-binary to the current bootstrap process:
+install the latest release from the official installer only when Dotfiles will
+manage that host. If the operating system or another platform already owns
+Mise or global configuration, retain that owner, create the
+[audit-only policy](#host-local-ownership-policy) before running any Dotfiles
+operation, and skip `mise-sync --apply`.
+
+The managed-host bootstrap is:
 
 ```bash
 curl -fsSL https://mise.run | sh
@@ -78,14 +83,17 @@ mise_path = "/usr/bin/mise"
 
 `audit-only` keeps previews plus `diff`, `check`, `lint`, and verification
 available, but rejects every `--apply` operation before it writes files or runs
-updaters. Previews still show what a managed host would do, but omit an
-inapplicable `--apply` next step. The same guard protects the underlying
-`apply_*` and `execute_*` Python operations. `mise_path` selects the host's
-canonical Mise owner, so a package-managed binary such as Omarchy's
-`/usr/bin/mise` is not treated as an extra installation. An absent policy
-preserves the managed default above. An invalid policy, including unknown
-fields, fails closed and is diagnosed by `mise run check`; it never falls back
-silently to the standalone owner.
+updaters. Previews still show the counterfactual managed-host plan, but omit an
+inapplicable `--apply` next step. Apply-safety differences such as host-only
+global Mise tools remain visible facts and do not fail an audit-only preview;
+an incomplete inspection, unreadable configuration, or failed command probe
+still fails. The same mutation guard protects the underlying `apply_*` and
+`execute_*` Python operations. `mise_path` selects the host's canonical Mise
+owner, so a package-managed binary such as Omarchy's `/usr/bin/mise` is not
+treated as an extra installation. An absent policy preserves the managed
+default above. An invalid policy, including unknown fields, fails closed and is
+diagnosed by `mise run check`; it never falls back silently to the standalone
+owner.
 
 Under this policy, `check` marks Dotfiles-owned shell integration, shared Mise
 capabilities, and generated runtime readiness as not applicable. Canonical Mise
@@ -263,6 +271,11 @@ tools, download caches, shims, and generated shell functions remain local
 runtime state and are rebuilt from the shared declaration rather than
 synchronized through Git.
 
+This convergence operation belongs to managed hosts. On an audit-only host its
+preview is a counterfactual comparison, not a health verdict: host-owned tools
+and alias differences remain in the safety report, but do not fail the preview
+or produce an apply handoff.
+
 Preview the complete convergence first:
 
 ```bash
@@ -336,9 +349,11 @@ mise run restore -- atuin --apply
 Skillshare is also part of the shared Mise baseline; `mise upgrade` owns its CLI
 updates on every host. Do not combine that install with Homebrew or
 `skillshare upgrade --cli`. GitHub CLI and Codex are host-owned instead of part
-of the shared baseline. Omarchy provisions both through its own Mise wrappers;
-managed Debian and macOS hosts retain their platform or application owner. The
-shared Mise configuration therefore declares neither `gh` nor Codex.
+of the shared baseline. The capability is shared, but its installer is not:
+Omarchy provisions both through its own Mise wrappers, Debian can use the
+official APT package, and macOS can use Homebrew. The shared Mise configuration
+therefore declares neither `gh` nor Codex, and version differences between
+those host owners are not Dotfiles drift.
 
 Btop is also platform-owned: Homebrew owns it on macOS, while each Linux
 distribution's package manager owns it. The repository restores only Btop's
@@ -420,10 +435,11 @@ open through inherited pipes. An agent can still distinguish active work from
 a stalled command.
 
 For mise, the preview records the active installed tool versions. An apply
-updates the standalone CLI first, then passes that explicit list to
-`mise upgrade`; a configured but missing mise tool is not installed. Other
-missing CLIs are skipped rather than bootstrapped. Package managers may still
-replace package dependencies as part of an ordinary upgrade.
+updates a standalone Mise CLI first; a host-selected Mise binary is left to its
+host owner. It then passes the explicit installed-tool list to `mise upgrade`;
+a configured but missing mise tool is not installed. Other missing CLIs are
+skipped rather than bootstrapped. Package managers may still replace package
+dependencies as part of an ordinary upgrade.
 
 When the live global mise files are linked to `reference/`, the mise tool
 upgrade may refresh the tracked lockfile. Run `update --apply` on a checkout

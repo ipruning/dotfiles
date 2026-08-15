@@ -596,8 +596,6 @@ def main(argv: list[str] | None = None) -> int:
     home = Path.home()
     try:
         apply_allowed = mutation_allowed(home)
-        if args.apply:
-            require_mutation_allowed(home)
         report = (
             execute_updates(
                 home,

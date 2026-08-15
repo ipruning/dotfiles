@@ -562,6 +562,20 @@ def _summary(report: MiseSyncReport) -> dict[str, int]:
     }
 
 
+def _operation_ok(
+    report: MiseSyncReport,
+    *,
+    apply_allowed: bool = True,
+) -> bool:
+    if apply_allowed:
+        return report.ok
+    return (
+        report.restore.ok
+        and report.configuration_error is None
+        and all(result.status is not MiseSyncStatus.FAILED for result in report.results)
+    )
+
+
 def _next_commands(
     report: MiseSyncReport,
     *,
@@ -583,7 +597,7 @@ def _document(
         "schema_version": 1,
         "operation": "mise-sync",
         "apply": report.apply,
-        "ok": report.ok,
+        "ok": _operation_ok(report, apply_allowed=apply_allowed),
         "safety": {
             "apply_blocked": bool(
                 report.live_only_tools
@@ -651,34 +665,43 @@ def _render(report: MiseSyncReport, *, apply_allowed: bool = True) -> None:
             file=sys.stderr,
         )
     if report.additional_global_configs:
-        print("BLOCKED   additional global mise configs:", file=sys.stderr)
+        label = "BLOCKED" if apply_allowed else "OBSERVED"
+        stream = sys.stderr if apply_allowed else sys.stdout
+        print(f"{label:9} additional global mise configs:", file=stream)
         for config_path in report.additional_global_configs:
-            print(f"          {config_path}", file=sys.stderr)
-        print(
-            "          Move shared declarations into the tracked global config and "
-            "remove the additional source explicitly; then preview again.",
-            file=sys.stderr,
-        )
+            print(f"          {config_path}", file=stream)
+        if apply_allowed:
+            print(
+                "          Move shared declarations into the tracked global config and "
+                "remove the additional source explicitly; then preview again.",
+                file=sys.stderr,
+            )
     if report.live_only_tools:
+        label = "BLOCKED" if apply_allowed else "OBSERVED"
+        stream = sys.stderr if apply_allowed else sys.stdout
         print(
-            "BLOCKED   live-only global mise tools: "
+            f"{label:9} live-only global mise tools: "
             + ", ".join(report.live_only_tools),
-            file=sys.stderr,
+            file=stream,
         )
-        print(
-            "          Move project/service tools to their owner, add genuinely shared "
-            "tools to reference, or remove them explicitly; then preview again.",
-            file=sys.stderr,
-        )
+        if apply_allowed:
+            print(
+                "          Move project/service tools to their owner, add genuinely shared "
+                "tools to reference, or remove them explicitly; then preview again.",
+                file=sys.stderr,
+            )
     if report.live_alias_overrides:
-        print("BLOCKED   untracked global mise alias backends:", file=sys.stderr)
+        label = "BLOCKED" if apply_allowed else "OBSERVED"
+        stream = sys.stderr if apply_allowed else sys.stdout
+        print(f"{label:9} untracked global mise alias backends:", file=stream)
         for alias, backend in report.live_alias_overrides:
-            print(f"          {alias} -> {backend}", file=sys.stderr)
-        print(
-            "          Track the alias or its historical backend explicitly, or "
-            "remove the live override; then preview again.",
-            file=sys.stderr,
-        )
+            print(f"          {alias} -> {backend}", file=stream)
+        if apply_allowed:
+            print(
+                "          Track the alias or its historical backend explicitly, or "
+                "remove the live override; then preview again.",
+                file=sys.stderr,
+            )
     for result in report.restore.results:
         stream = sys.stderr if result.status is RestoreStatus.FAILED else sys.stdout
         print(
@@ -704,7 +727,7 @@ def _render(report: MiseSyncReport, *, apply_allowed: bool = True) -> None:
     summary = _summary(report)
     rendered = ", ".join(f"{count} {status}" for status, count in summary.items())
     print(f"Summary: {rendered or 'no changes'}")
-    if not report.apply and report.ok:
+    if not report.apply and _operation_ok(report, apply_allowed=apply_allowed):
         if apply_allowed:
             print(
                 "No files changed and no commands ran. Re-run with --apply to converge mise."
@@ -737,8 +760,6 @@ def main(argv: list[str] | None = None) -> int:
     home = Path.home()
     try:
         apply_allowed = mutation_allowed(home)
-        if args.apply:
-            require_mutation_allowed(home)
         report = (
             execute_mise_sync(repo_root, home, capture_output=args.as_json)
             if args.apply
@@ -769,19 +790,19 @@ def main(argv: list[str] | None = None) -> int:
                 f"[mise.safety] FAIL {report.configuration_error}",
                 file=sys.stderr,
             )
-        if report.additional_global_configs:
+        if apply_allowed and report.additional_global_configs:
             print(
                 "[mise.safety] FAIL additional global configs: "
                 + ", ".join(report.additional_global_configs),
                 file=sys.stderr,
             )
-        if report.live_only_tools:
+        if apply_allowed and report.live_only_tools:
             print(
                 "[mise.safety] FAIL live-only global tools: "
                 + ", ".join(report.live_only_tools),
                 file=sys.stderr,
             )
-        if report.live_alias_overrides:
+        if apply_allowed and report.live_alias_overrides:
             print(
                 "[mise.safety] FAIL untracked alias backends: "
                 + ", ".join(
@@ -804,7 +825,7 @@ def main(argv: list[str] | None = None) -> int:
                 )
     else:
         _render(report, apply_allowed=apply_allowed)
-    return 0 if report.ok else 1
+    return 0 if _operation_ok(report, apply_allowed=apply_allowed) else 1
 
 
 if __name__ == "__main__":
