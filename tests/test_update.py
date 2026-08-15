@@ -162,6 +162,11 @@ def test_update_previews_exact_plan_by_default_without_running_tools(
     assert steps["mise.tools"]["environment"]["PATH_prepend"] == expected_mise_path
     assert steps["mise.shims"]["environment"]["PATH_prepend"] == expected_mise_path
     assert steps["brew.metadata"]["environment"]["PATH_prepend"] == []
+    assert steps["brew.metadata"]["environment"]["variables"] == {}
+    assert steps["brew.packages"]["environment"]["variables"] == {
+        "HOMEBREW_NO_INSTALL_CLEANUP": "1",
+    }
+    assert steps["sprite.version"]["stdin"] == "y\n"
     assert steps["tigris"]["attention"] is None
     assert not log_path.exists()
 
@@ -194,6 +199,7 @@ def test_update_gives_package_managers_transaction_scale_timeouts(
 
     assert steps["brew.packages"].timeout_seconds >= 3600
     assert steps["mise.tools"].timeout_seconds >= 1800
+    assert steps["claude"].timeout_seconds >= 1800
 
 
 def test_update_leaves_host_selected_mise_self_update_to_its_owner(
@@ -233,6 +239,93 @@ def test_update_installs_sprite_updates_instead_of_only_checking(
     )
 
     assert sprite.step.command == ("sprite", "upgrade")
+    assert sprite.step.stdin_text == "y\n"
+
+
+@pytest.mark.parametrize("capture_output", [False, True])
+def test_update_confirms_sprite_in_noninteractive_apply(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capture_output: bool,
+) -> None:
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    home = tmp_path / "home"
+    home.mkdir()
+    result_path = tmp_path / "sprite-result"
+    sprite = bin_dir / "sprite"
+    sprite.write_text(
+        "#!/bin/sh\n"
+        'if IFS= read -r answer && [ "$answer" = y ]; then\n'
+        f"  printf upgraded > {shlex.quote(str(result_path))}\n"
+        "else\n"
+        f"  printf cancelled > {shlex.quote(str(result_path))}\n"
+        "fi\n"
+    )
+    sprite.chmod(0o755)
+    monkeypatch.setenv("PATH", str(bin_dir))
+
+    report = execute_updates(
+        home,
+        executable_finder=lambda tool: str(sprite) if tool == "sprite" else None,
+        capture_output=capture_output,
+        progress_interval_seconds=1,
+    )
+
+    sprite_result = next(
+        result for result in report.results if result.step.name == "sprite.version"
+    )
+    assert sprite_result.status is UpdateStatus.SUCCEEDED
+    assert result_path.read_text() == "upgraded"
+
+
+def test_update_disables_homebrew_automatic_cleanup(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    home = tmp_path / "home"
+    home.mkdir()
+    log_path = tmp_path / "brew.log"
+    brew = bin_dir / "brew"
+    brew.write_text(
+        "#!/bin/sh\n"
+        'if [ "$1" = upgrade ]; then\n'
+        '  printf "%s\\n" "$HOMEBREW_NO_INSTALL_CLEANUP" '
+        f"> {shlex.quote(str(log_path))}\n"
+        "fi\n"
+    )
+    brew.chmod(0o755)
+    monkeypatch.setenv("PATH", str(bin_dir))
+
+    report = execute_updates(
+        home,
+        executable_finder=lambda tool: str(brew) if tool == "brew" else None,
+    )
+
+    assert report.ok is True
+    assert log_path.read_text().strip() == "1"
+
+
+def test_update_reports_claude_failure_recovery_without_cleaning(
+    tmp_path: Path,
+) -> None:
+    completed, _log_path = _run_update(
+        tmp_path,
+        "--apply",
+        "--json",
+        tools=("claude",),
+        failing_tool="claude",
+    )
+
+    assert completed.returncode == 1
+    document = json.loads(completed.stdout)
+    claude = next(step for step in document["steps"] if step["name"] == "claude")
+    assert claude["status"] == "failed"
+    assert "retry `claude update`" in claude["reason"]
+    assert ".cache/claude/staging" in claude["reason"]
+    assert "not cleaned automatically" in claude["reason"]
 
 
 def test_update_runs_available_tools_in_order_and_reports_skips(tmp_path: Path) -> None:

@@ -422,9 +422,16 @@ a host-selected Mise path is updated by its host owner instead. The preview is
 the authoritative list of supported updaters and the exact commands available
 on the current host. `PLANNED` means the updater command is available; the
 updater determines whether a newer version exists during apply. Any failed
-step makes the command exit non-zero. It
-deliberately does not run `brew cleanup`, `brew autoremove`, or `mise prune`;
-removal and pruning require a separate, explicit operation.
+step makes the command exit non-zero. It deliberately does not run `brew
+cleanup`, `brew autoremove`, or `mise prune`;
+the Homebrew package step also sets `HOMEBREW_NO_INSTALL_CLEANUP=1` so
+`brew upgrade` cannot trigger cleanup implicitly. Removal and pruning require a
+separate, explicit operation. Because Sprite's updater treats a closed upgrade
+prompt as a successful no-op, `--apply` supplies its affirmative response;
+preview output and JSON expose that stdin behavior. Claude receives a 30-minute
+outer timeout so its updater can report its own download failure. A failed
+Claude update is not cleaned automatically: retry `claude update`, then inspect
+its staging and versions directories before any explicit cleanup.
 
 During a JSON apply, stdout remains one machine-readable document while stderr
 reports `RUN`, 30-second `STILL RUNNING`, `DONE`, and contextual failure

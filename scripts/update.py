@@ -60,6 +60,9 @@ class UpdateStep:
     command: tuple[str, ...]
     timeout_seconds: int
     path_prepend: tuple[Path, ...] = ()
+    environment: tuple[tuple[str, str], ...] = ()
+    stdin_text: str | None = None
+    failure_note: str | None = None
 
 
 @dataclass(frozen=True)
@@ -85,6 +88,10 @@ def _emit_failure(step: UpdateStep, reason: str) -> None:
     print(f"[{step.name}] FAIL {reason}", file=sys.stderr)
 
 
+def _failure_reason(step: UpdateStep, reason: str) -> str:
+    return f"{reason}; {step.failure_note}" if step.failure_note else reason
+
+
 def _kill_process_group(
     process: subprocess.Popen[bytes] | subprocess.Popen[str],
 ) -> None:
@@ -101,10 +108,11 @@ def _run_process_group(
     env: dict[str, str] | None,
     timeout_seconds: float,
     capture_output: bool = False,
+    stdin_text: str | None = None,
 ) -> subprocess.CompletedProcess[str]:
     process = subprocess.Popen(
         command,
-        stdin=subprocess.DEVNULL,
+        stdin=subprocess.PIPE if stdin_text is not None else subprocess.DEVNULL,
         stdout=subprocess.PIPE if capture_output else None,
         stderr=subprocess.PIPE if capture_output else None,
         env=env,
@@ -112,7 +120,10 @@ def _run_process_group(
         text=True,
     )
     try:
-        stdout, stderr = process.communicate(timeout=timeout_seconds)
+        stdout, stderr = process.communicate(
+            input=stdin_text,
+            timeout=timeout_seconds,
+        )
     except subprocess.TimeoutExpired as error:
         _kill_process_group(process)
         stdout, stderr = process.communicate()
@@ -136,12 +147,22 @@ def _run_with_progress(
     started_at = time.monotonic()
     process = subprocess.Popen(
         step.command,
-        stdin=subprocess.DEVNULL,
+        stdin=(subprocess.PIPE if step.stdin_text is not None else subprocess.DEVNULL),
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
         env=env,
         process_group=0,
+        text=True,
     )
+    if step.stdin_text is not None:
+        assert process.stdin is not None
+        try:
+            process.stdin.write(step.stdin_text)
+            process.stdin.flush()
+        except BrokenPipeError:
+            pass
+        finally:
+            process.stdin.close()
 
     next_progress_at = started_at + progress_interval_seconds
     try:
@@ -237,7 +258,13 @@ def _update_steps(home: Path) -> tuple[UpdateStep, ...]:
         # Package-mutating steps get transaction-scale timeouts: killing brew or
         # mise mid-upgrade leaves partial kegs, stale locks, or half-written
         # tool state, which is worse than waiting out a slow upgrade.
-        UpdateStep("brew.packages", "brew", ("brew", "upgrade"), 3600),
+        UpdateStep(
+            "brew.packages",
+            "brew",
+            ("brew", "upgrade"),
+            3600,
+            environment=(("HOMEBREW_NO_INSTALL_CLEANUP", "1"),),
+        ),
         UpdateStep(
             "mise.self",
             "mise",
@@ -272,9 +299,26 @@ def _update_steps(home: Path) -> tuple[UpdateStep, ...]:
             "sprite",
             ("sprite", "upgrade"),
             300,
+            # `sprite upgrade` treats a declined/closed prompt as exit 0. An
+            # explicit update --apply is the operator's confirmation, so feed
+            # the affirmative response instead of reporting a no-op as success.
+            stdin_text="y\n",
         ),
         UpdateStep("amp", "amp", ("amp", "update"), 300),
-        UpdateStep("claude", "claude", ("claude", "update"), 300),
+        UpdateStep(
+            "claude",
+            "claude",
+            ("claude", "update"),
+            # Let Claude's updater own its download deadline and report its
+            # actual error instead of killing a valid slow download at 5m.
+            1800,
+            failure_note=(
+                "retry `claude update`; failed downloads may remain under "
+                f"{home}/.cache/claude/staging and "
+                f"{home}/.local/share/claude/versions and are not cleaned "
+                "automatically"
+            ),
+        ),
         UpdateStep("tigris", "tigris", ("tigris", "update"), 300),
         UpdateStep(
             "pi.extensions",
@@ -372,9 +416,13 @@ def execute_updates(
             on_start(planned.step)
         started_at = time.monotonic()
         try:
-            environment = (
-                canonical_mise_environment(home) if planned.step.path_prepend else None
-            )
+            environment = None
+            if planned.step.path_prepend:
+                environment = canonical_mise_environment(home)
+            elif planned.step.environment:
+                environment = os.environ.copy()
+            if environment is not None:
+                environment.update(planned.step.environment)
             completed = (
                 _run_with_progress(
                     planned.step,
@@ -386,10 +434,14 @@ def execute_updates(
                     planned.step.command,
                     env=environment,
                     timeout_seconds=planned.step.timeout_seconds,
+                    stdin_text=planned.step.stdin_text,
                 )
             )
         except subprocess.TimeoutExpired:
-            reason = f"timed out after {planned.step.timeout_seconds}s"
+            reason = _failure_reason(
+                planned.step,
+                f"timed out after {planned.step.timeout_seconds}s",
+            )
             if capture_output:
                 _emit_failure(planned.step, reason)
             results.append(
@@ -402,7 +454,7 @@ def execute_updates(
             )
             continue
         except OSError as error:
-            reason = str(error)
+            reason = _failure_reason(planned.step, str(error))
             if capture_output:
                 _emit_failure(planned.step, reason)
             results.append(
@@ -414,10 +466,14 @@ def execute_updates(
                 ),
             )
             continue
+        failure_reason = _failure_reason(
+            planned.step,
+            f"command exited {completed.returncode}",
+        )
         if capture_output and completed.returncode != 0:
             _emit_failure(
                 planned.step,
-                f"command exited {completed.returncode}",
+                failure_reason,
             )
         results.append(
             UpdateResult(
@@ -429,11 +485,7 @@ def execute_updates(
                 ),
                 exit_code=completed.returncode,
                 duration_ms=round((time.monotonic() - started_at) * 1000),
-                reason=(
-                    None
-                    if completed.returncode == 0
-                    else f"command exited {completed.returncode}"
-                ),
+                reason=(None if completed.returncode == 0 else failure_reason),
             ),
         )
     return UpdateReport(apply=True, results=tuple(results))
@@ -500,7 +552,9 @@ def _document(
                     "PATH_prepend": [
                         str(directory) for directory in result.step.path_prepend
                     ],
+                    "variables": dict(result.step.environment),
                 },
+                "stdin": result.step.stdin_text,
                 "attention": None,
                 "status": result.status.value,
                 "exit_code": result.exit_code,
@@ -517,10 +571,15 @@ def _document(
 
 def _display_command(step: UpdateStep) -> str:
     command = " ".join(step.command)
-    if not step.path_prepend:
-        return command
-    path = ":".join(str(directory) for directory in step.path_prepend)
-    return f"PATH={path}:$PATH {command}"
+    if step.stdin_text is not None:
+        escaped_input = step.stdin_text.encode("unicode_escape").decode("ascii")
+        command = f"printf '{escaped_input}' | {command}"
+    prefixes = []
+    if step.path_prepend:
+        path = ":".join(str(directory) for directory in step.path_prepend)
+        prefixes.append(f"PATH={path}:$PATH")
+    prefixes.extend(f"{key}={value}" for key, value in step.environment)
+    return " ".join((*prefixes, command))
 
 
 def _render(report: UpdateReport, *, apply_allowed: bool = True) -> None:
