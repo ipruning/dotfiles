@@ -145,7 +145,11 @@ def _mise_installation_findings(
     return [canonical_finding, installations_finding]
 
 
-def _mise_shim_finding(home: Path) -> Finding | None:
+def _mise_shim_finding(
+    home: Path,
+    *,
+    dotfiles_managed: bool = True,
+) -> Finding | None:
     shims_directory = home / ".local/share/mise/shims"
     if not shims_directory.exists():
         return None
@@ -187,8 +191,12 @@ def _mise_shim_finding(home: Path) -> Finding | None:
             stale[0][0],
             (
                 "Run mise run mise-sync, then mise run mise-sync -- --apply."
-                if canonical_ready
-                else f"Restore the canonical Mise executable at {canonical} before rebuilding shims."
+                if canonical_ready and dotfiles_managed
+                else (
+                    "Rebuild the shims with the host owner that selected the canonical Mise executable."
+                    if canonical_ready
+                    else f"Restore the canonical Mise executable at {canonical} before rebuilding shims."
+                )
             ),
         )
     if canonical_count:

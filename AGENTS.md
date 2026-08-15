@@ -77,7 +77,7 @@ semantics live in `README.md`.
 
 ## Dependency policy
 
-Three tiers, in decreasing strictness:
+Two tiers, in decreasing strictness:
 
 1. Hard floor: Git and mise bootstrap the repository; mise pins every tool the
    repository itself needs (Python, uv, ShellCheck). Nothing else is required.
@@ -87,9 +87,6 @@ Three tiers, in decreasing strictness:
    Shared personal tools may be declared in the global Mise reference;
    host-specific tools belong to that host's package manager. Neither path may
    install during inspection or shell startup.
-3. Self-built binaries under `generated/bin` are additive enhancements and must
-   never be load-bearing; hosts without them use upstream tools or lose the
-   feature.
 
 Adjudication when adding a dependency: if a tool participates in `mise run
 verify`, it must be pinnable through mise. If it is not pinnable, the gate must

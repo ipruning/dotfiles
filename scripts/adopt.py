@@ -15,7 +15,7 @@ from enum import StrEnum
 from pathlib import Path
 
 from .diff import DriftProtocolError, MackupCommandError, inspect_drift
-from .host_policy import HostPolicyError, require_mutation_allowed
+from .host_policy import HostPolicyError, mutation_allowed, require_mutation_allowed
 from .models import Drift, DriftKind
 from .render import emit_error
 
@@ -49,9 +49,14 @@ class AdoptReport:
         return all(result.status is not AdoptStatus.FAILED for result in self.results)
 
 
-def _next_commands(report: AdoptReport) -> tuple[str, ...]:
+def _next_commands(
+    report: AdoptReport,
+    *,
+    apply_allowed: bool = True,
+) -> tuple[str, ...]:
     if (
-        not report.apply
+        apply_allowed
+        and not report.apply
         and report.ok
         and any(result.status is AdoptStatus.PLANNED for result in report.results)
     ):
@@ -333,7 +338,11 @@ def apply_adopt(repo_root: Path, home: Path, plan: AdoptReport) -> AdoptReport:
     return AdoptReport(application=plan.application, apply=True, results=tuple(results))
 
 
-def _document(report: AdoptReport) -> dict[str, object]:
+def _document(
+    report: AdoptReport,
+    *,
+    apply_allowed: bool = True,
+) -> dict[str, object]:
     summary = {
         status.value: sum(result.status is status for result in report.results)
         for status in AdoptStatus
@@ -345,7 +354,7 @@ def _document(report: AdoptReport) -> dict[str, object]:
         "application": report.application,
         "apply": report.apply,
         "ok": report.ok,
-        "next": list(_next_commands(report)),
+        "next": list(_next_commands(report, apply_allowed=apply_allowed)),
         "changes": [
             {
                 "reference_path": str(result.drift.reference_path),
@@ -361,7 +370,7 @@ def _document(report: AdoptReport) -> dict[str, object]:
     }
 
 
-def _render(report: AdoptReport) -> None:
+def _render(report: AdoptReport, *, apply_allowed: bool = True) -> None:
     for result in report.results:
         label = result.status.value.upper()
         print(f"{label:7} {result.drift.reference_path}")
@@ -378,13 +387,16 @@ def _render(report: AdoptReport) -> None:
     rendered = ", ".join(f"{count} {status}" for status, count in summary.items())
     print(f"Summary: {rendered or 'no changes'}")
     if not report.apply and summary.get(AdoptStatus.PLANNED.value, 0):
-        print(
-            "No files changed. Re-run with --apply to adopt this application's"
-            " live configuration.",
-        )
-        print("Next:")
-        for command in _next_commands(report):
-            print(f"  {command}")
+        if apply_allowed:
+            print(
+                "No files changed. Re-run with --apply to adopt this application's"
+                " live configuration.",
+            )
+            print("Next:")
+            for command in _next_commands(report):
+                print(f"  {command}")
+        else:
+            print("No files changed. Host policy disables adopt apply.")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -410,6 +422,7 @@ def main(argv: list[str] | None = None) -> int:
     repo_root = Path(__file__).resolve().parents[1]
     home = Path.home()
     try:
+        apply_allowed = mutation_allowed(home)
         if args.apply:
             require_mutation_allowed(home)
         report = plan_adopt(repo_root, home, args.application)
@@ -428,7 +441,13 @@ def main(argv: list[str] | None = None) -> int:
     if args.apply:
         report = apply_adopt(repo_root, home, report)
     if args.as_json:
-        print(json.dumps(_document(report), indent=2, sort_keys=True))
+        print(
+            json.dumps(
+                _document(report, apply_allowed=apply_allowed),
+                indent=2,
+                sort_keys=True,
+            ),
+        )
         for result in report.results:
             if result.status is AdoptStatus.FAILED:
                 print(
@@ -436,7 +455,7 @@ def main(argv: list[str] | None = None) -> int:
                     file=sys.stderr,
                 )
     else:
-        _render(report)
+        _render(report, apply_allowed=apply_allowed)
     return 0 if report.ok else 1
 
 

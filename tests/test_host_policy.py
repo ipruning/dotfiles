@@ -14,6 +14,7 @@ from scripts.host_policy import (
 from scripts.inventory import InventoryReport, execute_inventory
 from scripts.mise import canonical_mise_path
 from scripts.mise_sync import execute_mise_sync
+from scripts.models import Severity
 from scripts.restore import RestoreReport, apply_restore
 from scripts.runtime import RuntimeReport, execute_runtime
 from scripts.setup import apply_setup
@@ -134,7 +135,9 @@ def test_audit_only_policy_keeps_cli_previews_available(
     )
 
     assert completed.returncode == 0
-    assert json.loads(completed.stdout)["apply"] is False
+    document = json.loads(completed.stdout)
+    assert document["apply"] is False
+    assert document["next"] == []
 
 
 def test_audit_only_policy_guards_direct_mutation_apis(tmp_path: Path) -> None:
@@ -163,6 +166,13 @@ def test_valid_policy_selects_mise_and_is_visible_to_check(tmp_path: Path) -> No
     mise.parent.mkdir(parents=True)
     mise.write_text("#!/bin/sh\nexit 0\n")
     mise.chmod(0o755)
+    stale_mise = tmp_path / "old/bin/mise"
+    stale_mise.parent.mkdir(parents=True)
+    stale_mise.write_text("#!/bin/sh\nexit 0\n")
+    stale_mise.chmod(0o755)
+    stale_shim = home / ".local/share/mise/shims/example"
+    stale_shim.parent.mkdir(parents=True)
+    stale_shim.symlink_to(stale_mise)
     policy = _write_policy(
         home,
         f'mode = "audit-only"\nmise_path = "{mise}"\n',
@@ -188,9 +198,56 @@ def test_valid_policy_selects_mise_and_is_visible_to_check(tmp_path: Path) -> No
         == "The host-selected Mise executable is ready"
     )
     assert findings["mise.installations"].code == "mise.installations_single"
-    assert findings["shell.bash"].action == (
-        "Host policy disables dotfiles setup; keep Bash with its host owner."
+    assert findings["mise.shims"].severity is Severity.WARN
+    assert findings["mise.shims"].action == (
+        "Rebuild the shims with the host owner that selected the canonical Mise executable."
     )
+    assert findings["shell.bash"].severity is None
+    assert findings["shell.bash"].applicable is False
+    assert findings["shell.bash"].action is None
+    for command in ("starship", "herdr", "atuin", "zoxide", "hunk", "lazygit"):
+        finding = findings[f"executable.{command}"]
+        assert finding.severity is None
+        assert finding.action is None
+    assert findings["executable.skillshare"].applicable is True
+
+
+def test_audit_only_full_check_skips_repository_runtime_readiness(
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "repo"
+    home = tmp_path / "home"
+    mise = _write_mise(home)
+    _write_policy(home, f'mode = "audit-only"\nmise_path = "{mise}"\n')
+
+    def finder(command: str) -> str | None:
+        if command == "mise":
+            return str(mise)
+        if command in {"skillshare", "btop"}:
+            return None
+        return f"/tools/{command}"
+
+    report = inspect_host(
+        repo_root,
+        home,
+        executable_finder=finder,
+        system_name="Linux",
+        profile="full",
+    )
+    findings = {finding.check: finding for finding in report.findings}
+
+    for check in (
+        "shell.plugins",
+        "shell.completions",
+        "shell.functions",
+        "runtime.function.mise",
+        "runtime.plugin.fzf-tab",
+        "zellij.zjstatus.wasm",
+    ):
+        assert findings[check].applicable is False
+        assert findings[check].action is None
+    assert findings["executable.skillshare"].severity is Severity.WARN
+    assert findings["executable.btop"].severity is Severity.WARN
 
 
 def test_invalid_policy_is_diagnosed_without_mise_owner_fallback(

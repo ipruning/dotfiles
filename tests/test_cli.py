@@ -103,6 +103,7 @@ def test_global_mise_lock_covers_declared_artifact_platforms() -> None:
     assert config["settings"]["auto_install"] is False
     assert "exec_auto_install" not in config["settings"]
     assert "task" not in config["settings"]
+    assert {"codex", "gh"}.isdisjoint(config["tools"])
     lockfile = tomllib.loads(
         (repo_root / "reference/.config/mise/mise.lock").read_text(),
     )
@@ -184,7 +185,7 @@ def test_check_cli_reports_optional_linux_lite_gaps_as_json(tmp_path: Path) -> N
     assert document["profile"] == "linux-lite"
     assert sum(document["summary"].values()) == len(document["findings"])
     assert "git.private_include_missing" in codes
-    assert "skillshare.config_missing" in codes
+    assert "executable.skillshare.missing" in codes
     assert "shell.bash_missing" in codes
     assert "shell.repo_commands_isolated" in codes
 

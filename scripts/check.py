@@ -38,12 +38,46 @@ from .render import finding_document, render_findings
 from .runtime import (
     COMPLETION_SPECS,
     FUNCTION_SPECS,
-    LOCAL_BINARY_SPECS,
     PLUGIN_SPECS,
     WASM_SPECS,
     file_sha256,
-    repo_aware_finder,
+    shim_aware_finder,
 )
+
+AUDIT_ONLY_NON_APPLICABLE_CHECKS = frozenset(
+    {
+        "shell.bash",
+        "shell.plugins",
+        "shell.completions",
+        "shell.functions",
+        "executable.starship",
+        "executable.herdr",
+        "executable.atuin",
+        "executable.zoxide",
+        "executable.hunk",
+        "executable.lazygit",
+        "executable.lazydocker",
+    },
+)
+AUDIT_ONLY_NON_APPLICABLE_PREFIXES = ("runtime.", "zellij.")
+
+
+def _apply_audit_only_applicability(findings: list[Finding]) -> list[Finding]:
+    return [
+        (
+            Finding(
+                finding.check,
+                None,
+                finding.code,
+                finding.message,
+                finding.path,
+            )
+            if finding.check in AUDIT_ONLY_NON_APPLICABLE_CHECKS
+            or finding.check.startswith(AUDIT_ONLY_NON_APPLICABLE_PREFIXES)
+            else finding
+        )
+        for finding in findings
+    ]
 
 
 def _check_executable(
@@ -347,40 +381,6 @@ def _owned_generated_capability(
     return None
 
 
-def _binary_capability(check: str, file_path: Path, label: str) -> Finding:
-    try:
-        ready = (
-            file_path.is_file()
-            and file_path.stat().st_size > 0
-            and os.access(file_path, os.X_OK)
-        )
-    except OSError as error:
-        return Finding(
-            check,
-            Severity.WARN,
-            f"{check}_unavailable",
-            f"{label} could not be inspected: {error}",
-            file_path,
-            "Inspect the generated binary path before rebuilding it.",
-        )
-    if ready:
-        return Finding(
-            check,
-            Severity.OK,
-            f"{check}_ready",
-            f"{label} is present and executable",
-            file_path,
-        )
-    return Finding(
-        check,
-        Severity.WARN,
-        f"{check}_invalid",
-        f"{label} is missing, empty, or not executable",
-        file_path,
-        "Run mise run runtime -- --build, then mise run runtime -- --build --apply.",
-    )
-
-
 def _generated_directory_finding(directory_path: Path, label: str) -> Finding:
     if directory_path.is_symlink():
         return Finding(
@@ -576,10 +576,7 @@ def _bash_integration_finding(
 
 
 def _legacy_repo_path_finding(repo_root: Path) -> Finding:
-    legacy_directories = (
-        (repo_root / "modules/bin").resolve(),
-        (repo_root / "generated/bin").resolve(),
-    )
+    legacy_directories = ((repo_root / "modules/bin").resolve(),)
     active_directories = {
         Path(entry).expanduser().resolve()
         for entry in os.environ.get("PATH", "").split(os.pathsep)
@@ -604,7 +601,7 @@ def _legacy_repo_path_finding(repo_root: Path) -> Finding:
         ),
         exposed,
         (
-            "Remove dotfiles modules/bin and generated/bin from Bash or global mise PATH configuration."
+            "Remove dotfiles modules/bin from Bash or global mise PATH configuration."
             if exposed
             else None
         ),
@@ -646,7 +643,10 @@ def inspect_host(
                 scan_host_path=executable_finder is shutil.which,
             ),
         )
-        if mise_shims := _mise_shim_finding(home):
+        if mise_shims := _mise_shim_finding(
+            home,
+            dotfiles_managed=not host_policy.audit_only,
+        ):
             findings.append(mise_shims)
         if executable_finder is shutil.which and (
             project_uv := _mise_project_uv_finding(repo_root, home)
@@ -661,7 +661,7 @@ def inspect_host(
         executable_finder=executable_finder,
     )
     findings.append(skillshare_finding)
-    findings.extend(_skillshare_findings(home))
+    findings.extend(_skillshare_findings(home, skillshare_finding.path))
     if policy_valid and executable_finder is shutil.which:
         ownership = _skillshare_ownership_finding(home, skillshare_finding.path)
         if ownership:
@@ -721,6 +721,8 @@ def inspect_host(
             ),
         )
         findings.append(_legacy_repo_path_finding(repo_root))
+        if host_policy and host_policy.audit_only:
+            findings = _apply_audit_only_applicability(findings)
         return CheckReport(
             schema_version=1,
             findings=tuple(findings),
@@ -757,7 +759,7 @@ def inspect_host(
         )
         if mise_binding:
             findings.append(mise_binding)
-    owned_tool_finder = repo_aware_finder(repo_root, executable_finder)
+    owned_tool_finder = shim_aware_finder(executable_finder)
     for function_spec in FUNCTION_SPECS:
         tool = function_spec.tool
         tool_available = (
@@ -840,36 +842,6 @@ def inspect_host(
                     "Run mise run runtime, then mise run runtime -- --apply.",
                 ),
             )
-    generated_bin = repo_root / "generated/bin"
-    owned_binaries = {
-        name for name, _source, _revision, _command, _artifact in LOCAL_BINARY_SPECS
-    }
-    for binary_name in sorted(owned_binaries):
-        findings.append(
-            _binary_capability(
-                f"runtime.binary.{binary_name}",
-                generated_bin / binary_name,
-                f"Generated binary {binary_name}",
-            ),
-        )
-    if generated_bin.is_dir():
-        for file_path in sorted(generated_bin.iterdir()):
-            if (
-                file_path.name in owned_binaries
-                or file_path.name == ".gitkeep"
-                or not (file_path.is_file() or file_path.is_symlink())
-            ):
-                continue
-            findings.append(
-                Finding(
-                    f"runtime.binary.{file_path.name}",
-                    Severity.WARN,
-                    f"runtime.binary.{file_path.name}_unowned",
-                    f"Generated binary {file_path.name} has no repository owner",
-                    file_path,
-                    "Define its build or install owner before treating it as reproducible.",
-                ),
-            )
     if active_system == "Darwin":
         findings.append(
             _check_executable(
@@ -887,6 +859,8 @@ def inspect_host(
                 f"launchctl is not applicable on {active_system}",
             ),
         )
+    if host_policy and host_policy.audit_only:
+        findings = _apply_audit_only_applicability(findings)
     return CheckReport(
         schema_version=1,
         findings=tuple(findings),

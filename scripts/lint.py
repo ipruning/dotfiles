@@ -8,6 +8,7 @@ import json
 import platform
 import re
 import subprocess
+import tomllib
 from pathlib import Path
 from typing import override
 
@@ -511,6 +512,56 @@ def _tracked_file_findings(repo_root: Path, tracked_paths: list[Path]) -> list[F
     return findings
 
 
+def _mise_alias_findings(repo_root: Path) -> list[Finding]:
+    config_path = repo_root / "reference/.config/mise/config.toml"
+    if not config_path.is_file():
+        return []
+    try:
+        config = tomllib.loads(config_path.read_text())
+    except (OSError, tomllib.TOMLDecodeError) as error:
+        return [
+            _located_finding(
+                Severity.ERROR,
+                "mise.config_invalid",
+                f"shared Mise config is unreadable or invalid: {error}",
+                config_path,
+            ),
+        ]
+
+    tools = config.get("tools", {})
+    aliases = config.get("alias", {})
+    if not isinstance(tools, dict) or not isinstance(aliases, dict):
+        return [
+            _located_finding(
+                Severity.ERROR,
+                "mise.config_invalid",
+                "shared Mise [tools] and [alias] sections must be tables",
+                config_path,
+            ),
+        ]
+
+    findings = [
+        _located_finding(
+            Severity.ERROR,
+            "mise.alias_duplicate_identity",
+            f"declare {alias}, not both {alias} and its backend identity {backend}",
+            config_path,
+        )
+        for alias, backend in aliases.items()
+        if isinstance(backend, str) and alias in tools and backend in tools
+    ]
+    if findings:
+        return findings
+    return [
+        _located_finding(
+            Severity.OK,
+            "mise.alias_identities_unique",
+            "shared Mise tools use one identity per alias",
+            config_path,
+        ),
+    ]
+
+
 def _symlink_findings(repo_root: Path, tracked_paths: list[Path]) -> list[Finding]:
     return [
         _located_finding(
@@ -539,6 +590,7 @@ def inspect_repository(
     findings.extend(_mackup_findings(repo_root, set(tracked_paths)))
     findings.extend(_symlink_findings(repo_root, tracked_paths))
     findings.extend(_tracked_file_findings(repo_root, tracked_paths))
+    findings.extend(_mise_alias_findings(repo_root))
     return LintReport(schema_version=1, findings=tuple(findings))
 
 

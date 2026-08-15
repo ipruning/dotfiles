@@ -22,7 +22,6 @@ _dotfiles_core_path() {
     # out of the cross-platform mise [env] config means restoring that config
     # on Linux can never shadow system tools again (iproute2 ss).
     [[ -d "$HOME/dotfiles/modules/bin" ]] && path=("$HOME/dotfiles/modules/bin" $path)
-    [[ -d "$HOME/dotfiles/generated/bin" ]] && path=("$HOME/dotfiles/generated/bin" $path)
   fi
 
   # mise's installer and other per-user executables use this cross-platform

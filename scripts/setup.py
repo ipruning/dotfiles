@@ -12,7 +12,7 @@ from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
 
-from .host_policy import HostPolicyError, require_mutation_allowed
+from .host_policy import HostPolicyError, mutation_allowed, require_mutation_allowed
 from .profiles import HostProfile
 from .render import emit_error
 
@@ -47,8 +47,17 @@ class SetupReport:
         return bool(self.changes)
 
 
-def _next_commands(report: SetupReport) -> tuple[str, ...]:
-    if not report.apply and report.profile is HostProfile.LINUX_LITE and report.changed:
+def _next_commands(
+    report: SetupReport,
+    *,
+    apply_allowed: bool = True,
+) -> tuple[str, ...]:
+    if (
+        apply_allowed
+        and not report.apply
+        and report.profile is HostProfile.LINUX_LITE
+        and report.changed
+    ):
         return ("mise run setup -- --profile linux-lite --apply",)
     return ()
 
@@ -236,6 +245,7 @@ def main(argv: list[str] | None = None) -> int:
     home = Path.home()
     setup = apply_setup if args.apply else plan_setup
     try:
+        apply_allowed = mutation_allowed(home)
         if args.apply:
             require_mutation_allowed(home)
         report = setup(repo_root, home)
@@ -261,7 +271,7 @@ def main(argv: list[str] | None = None) -> int:
         "operation": "setup",
         "apply": report.apply,
         "ok": True,
-        "next": list(_next_commands(report)),
+        "next": list(_next_commands(report, apply_allowed=apply_allowed)),
         "shell_restart_required": _shell_restart_required(report),
         "profile": report.profile.value,
         "changes": [
@@ -281,10 +291,13 @@ def main(argv: list[str] | None = None) -> int:
     if not report.changes:
         print("No changes required.")
     elif not report.apply:
-        print("No files changed. Re-run with --apply to configure this host.")
-        print("Next:")
-        for command in _next_commands(report):
-            print(f"  {command}")
+        if apply_allowed:
+            print("No files changed. Re-run with --apply to configure this host.")
+            print("Next:")
+            for command in _next_commands(report):
+                print(f"  {command}")
+        else:
+            print("No files changed. Host policy disables setup apply.")
     elif _shell_restart_required(report):
         print("Updated Bash startup configuration is not active in this shell.")
         print("Open a new Bash or run `exec bash` to load it.")

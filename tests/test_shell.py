@@ -368,9 +368,8 @@ def test_zshenv_exposes_user_and_mise_commands_without_repo_bins_on_linux(
     local_bin = home / ".local/bin"
     shims = home / ".local/share/mise/shims"
     modules_bin = home / "dotfiles/modules/bin"
-    generated_bin = home / "dotfiles/generated/bin"
     system_bin = tmp_path / "system-bin"
-    for directory in (local_bin, shims, modules_bin, generated_bin, system_bin):
+    for directory in (local_bin, shims, modules_bin, system_bin):
         directory.mkdir(parents=True)
     for executable in (local_bin / "mise", shims / "uv", system_bin / "ss"):
         executable.write_text("#!/bin/sh\nexit 0\n")
@@ -408,7 +407,6 @@ def test_zshenv_exposes_user_and_mise_commands_without_repo_bins_on_linux(
     assert loaded_path.count(str(local_bin)) == 1
     assert loaded_path.count(str(shims)) == 1
     assert str(modules_bin) not in loaded_path
-    assert str(generated_bin) not in loaded_path
 
 
 @requires_zsh

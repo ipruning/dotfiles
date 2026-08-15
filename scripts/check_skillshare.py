@@ -6,10 +6,6 @@ import json
 import os
 import subprocess
 from pathlib import Path
-from typing import cast
-
-from ruamel.yaml import YAML
-from ruamel.yaml.error import YAMLError
 
 from .mise import (
     canonical_mise_environment,
@@ -29,269 +25,195 @@ SKILLSHARE_SYSTEM_PATHS = tuple(
 )
 
 
-def _expand_home(value: str, home: Path) -> Path:
-    if value == "~":
-        return home
-    if value.startswith("~/"):
-        return home / value[2:]
-    return Path(value)
-
-
-def _configured_skillshare_target(
-    document: object,
-    name: str,
-    home: Path,
-) -> tuple[Path, str]:
-    if not isinstance(document, dict):
-        raise TypeError("configuration must be a mapping")
-    targets = document.get("targets")
-    if not isinstance(targets, dict) or name not in targets:
-        raise KeyError(name)
-    target = cast("dict[str, object]", targets)[name]
-    if not isinstance(target, dict):
-        raise TypeError(f"targets.{name} must be a mapping")
-    skills = target.get("skills")
-    if not isinstance(skills, dict):
-        raise TypeError(f"targets.{name}.skills must be a mapping")
-    path_value = skills.get("path")
-    if not isinstance(path_value, str) or not path_value:
-        raise TypeError(f"targets.{name}.skills.path must be a string")
-    mode = skills.get("mode", document.get("mode", "merge"))
-    if not isinstance(mode, str):
-        raise TypeError(f"targets.{name}.skills.mode must be a string")
-    return _expand_home(path_value, home), mode or "merge"
-
-
-def _target_skill_entries(
-    target_path: Path,
-    source: Path,
-) -> tuple[list[str], list[str], list[str]]:
-    local: list[str] = []
-    broken_links: list[str] = []
-    external_links: list[str] = []
-    for entry in sorted(target_path.iterdir(), key=lambda item: item.name):
-        if entry.name.startswith("."):
-            continue
-        if entry.is_symlink():
-            if not entry.exists():
-                broken_links.append(entry.name)
-            elif not _path_within(entry.resolve(), source.resolve()):
-                external_links.append(entry.name)
-            continue
-        if entry.is_dir() and (entry / "SKILL.md").is_file():
-            local.append(entry.name)
-    return local, broken_links, external_links
-
-
-def _skillshare_target_findings(
-    document: object,
-    home: Path,
-    source: Path,
-) -> list[Finding]:
-    findings: list[Finding] = []
-    config_path = home / ".config/skillshare/config.yaml"
-    targets = document.get("targets") if isinstance(document, dict) else None
-    if not isinstance(targets, dict) or not targets:
-        return [
-            Finding(
-                "skillshare.targets",
-                Severity.WARN,
-                "skillshare.targets_missing",
-                "Skillshare configuration declares no Skill targets to inspect",
-                config_path,
-                "Declare host-specific targets before synchronizing Skills.",
-            ),
-        ]
-
-    inspected_paths: dict[Path, str] = {}
-    for raw_name in sorted(targets, key=str):
-        if not isinstance(raw_name, str) or not raw_name:
-            findings.append(
-                Finding(
-                    "skillshare.targets",
-                    Severity.WARN,
-                    "skillshare.target_invalid",
-                    "Skillshare target names must be non-empty strings",
-                    config_path,
-                    "Repair the target name before synchronizing Skills.",
-                ),
-            )
-            continue
-        name = raw_name
-        try:
-            target_path, mode = _configured_skillshare_target(document, name, home)
-        except TypeError as error:
-            findings.append(
-                Finding(
-                    f"skillshare.target.{name}",
-                    Severity.WARN,
-                    "skillshare.target_invalid",
-                    f"Skillshare target {name} is invalid: {error}",
-                    config_path,
-                    "Inspect the host-specific Skillshare target configuration.",
-                ),
-            )
-            continue
-
-        if previous_name := inspected_paths.get(target_path):
-            findings.append(
-                Finding(
-                    f"skillshare.target.{name}",
-                    Severity.WARN,
-                    "skillshare.target_duplicate_path",
-                    f"Skillshare targets {previous_name} and {name} point to the same directory",
-                    target_path,
-                    "Give each target a distinct path or remove the duplicate declaration.",
-                ),
-            )
-            continue
-        inspected_paths[target_path] = name
-        if not target_path.is_dir():
-            findings.append(
-                Finding(
-                    f"skillshare.target.{name}",
-                    Severity.WARN,
-                    "skillshare.target_directory_missing",
-                    f"Skillshare target {name} directory is missing",
-                    target_path,
-                    "Inspect with skillshare target list --json.",
-                ),
-            )
-            continue
-
-        try:
-            local, broken_links, external_links = _target_skill_entries(
-                target_path,
-                source,
-            )
-        except OSError as error:
-            findings.append(
-                Finding(
-                    f"skillshare.target.{name}",
-                    Severity.WARN,
-                    "skillshare.target_inspection_unavailable",
-                    f"Skillshare target {name} could not be inspected: {error}",
-                    target_path,
-                    "Inspect the target directory permissions and accessibility.",
-                ),
-            )
-            continue
-        if local:
-            preserved = mode == "merge"
-            findings.append(
-                Finding(
-                    f"skillshare.target.{name}",
-                    Severity.OK if preserved else Severity.WARN,
-                    (
-                        "skillshare.target_local_skills_preserved"
-                        if preserved
-                        else "skillshare.target_local_skills"
-                    ),
-                    (
-                        f"Skillshare target {name} has {len(local)} non-symlink Skill entries preserved by merge mode: {', '.join(local)}"
-                        if preserved
-                        else f"Skillshare target {name} has {len(local)} non-symlink Skill entries under {mode} mode: {', '.join(local)}"
-                    ),
-                    target_path,
-                    None
-                    if preserved
-                    else "Inspect target-local Skill ownership before synchronizing.",
-                ),
-            )
-        if broken_links:
-            findings.append(
-                Finding(
-                    f"skillshare.target.{name}",
-                    Severity.WARN,
-                    "skillshare.target_broken_links",
-                    f"Skillshare target {name} has {len(broken_links)} broken Skill links: {', '.join(broken_links)}",
-                    target_path,
-                    "Inspect the configured source and target before an explicit synchronization.",
-                ),
-            )
-        if external_links:
-            findings.append(
-                Finding(
-                    f"skillshare.target.{name}",
-                    Severity.WARN,
-                    "skillshare.target_external_links",
-                    f"Skillshare target {name} has {len(external_links)} Skill links outside the configured source: {', '.join(external_links)}",
-                    target_path,
-                    "Inspect link ownership before an explicit synchronization.",
-                ),
-            )
-        if not local and not broken_links and not external_links:
-            findings.append(
-                Finding(
-                    f"skillshare.target.{name}",
-                    Severity.OK,
-                    "skillshare.target_inspected",
-                    f"Skillshare target {name} is configured at {target_path} in {mode} mode; no target-local Skills, broken links, or links outside the configured source were observed",
-                    target_path,
-                ),
-            )
-    return findings
-
-
-def _skillshare_findings(home: Path) -> list[Finding]:
-    config_path = home / ".config/skillshare/config.yaml"
-    if not config_path.is_file():
-        return [
-            Finding(
-                "skillshare.config",
-                Severity.WARN,
-                "skillshare.config_missing",
-                "Skillshare configuration is missing",
-                config_path,
-                "Create a host-specific Skillshare config; do not copy harness extras blindly.",
-            ),
-        ]
+def _skillshare_status(executable: Path, home: Path) -> dict[str, object]:
+    command = (str(executable), "status", "--global", "--json")
+    environment = os.environ.copy()
+    environment["HOME"] = str(home)
     try:
-        document = YAML(typ="safe").load(config_path)
-        source_value = document["sources"]["skills"]
-        if not isinstance(source_value, str):
-            raise TypeError("sources.skills must be a string")
-        source = _expand_home(source_value, home)
-    except (OSError, KeyError, TypeError, YAMLError) as error:
+        completed = subprocess.run(
+            command,
+            check=False,
+            stdin=subprocess.DEVNULL,
+            capture_output=True,
+            env=environment,
+            text=True,
+            timeout=30,
+        )
+    except (OSError, subprocess.TimeoutExpired) as error:
+        raise RuntimeError(f"Skillshare status could not run: {error}") from error
+    if completed.returncode != 0:
+        detail = completed.stderr.strip() or completed.stdout.strip()
+        reason = f"Skillshare status exited {completed.returncode}"
+        raise RuntimeError(f"{reason}: {detail}" if detail else reason)
+    try:
+        document = json.loads(completed.stdout)
+    except json.JSONDecodeError as error:
+        raise RuntimeError(
+            f"Skillshare status returned invalid JSON: {error}"
+        ) from error
+    if not isinstance(document, dict):
+        raise RuntimeError("Skillshare status must be a JSON object")
+    return document
+
+
+def _skillshare_findings(home: Path, executable: Path | None) -> list[Finding]:
+    if executable is None:
+        return []
+    config_path = home / ".config/skillshare/config.yaml"
+    try:
+        document = _skillshare_status(executable, home)
+        source = document.get("source")
+        targets = document.get("targets")
+        tracked_repos = document.get("tracked_repos")
+        if not isinstance(source, dict):
+            raise RuntimeError("Skillshare status source must be an object")
+        source_path = source.get("path")
+        source_exists = source.get("exists")
+        if not isinstance(source_path, str) or not source_path:
+            raise RuntimeError("Skillshare status source.path must be a string")
+        if not isinstance(source_exists, bool):
+            raise RuntimeError("Skillshare status source.exists must be a boolean")
+        if not isinstance(targets, list):
+            raise RuntimeError("Skillshare status targets must be an array")
+        if not isinstance(tracked_repos, list):
+            raise RuntimeError("Skillshare status tracked_repos must be an array")
+    except RuntimeError as error:
         return [
             Finding(
-                "skillshare.config",
+                "skillshare.status",
                 Severity.WARN,
-                "skillshare.config_invalid",
-                f"Skillshare configuration cannot identify sources.skills: {error}",
-                config_path,
-                "Repair sources.skills in the host-specific Skillshare config.",
+                "skillshare.status_unavailable",
+                str(error),
+                executable,
+                f"Inspect with {executable} status --global --json.",
             ),
         ]
+
     findings = [
         Finding(
             "skillshare.config",
             Severity.OK,
             "skillshare.config_ready",
-            "Skillshare configuration is readable",
+            "Skillshare accepted the global configuration",
             config_path,
         ),
         Finding(
             "skillshare.source",
-            Severity.OK if source.is_dir() else Severity.WARN,
+            Severity.OK if source_exists else Severity.WARN,
+            "skillshare.source_ready" if source_exists else "skillshare.source_missing",
             (
-                "skillshare.source_ready"
-                if source.is_dir()
-                else "skillshare.source_missing"
+                "Skillshare reports that the configured source exists"
+                if source_exists
+                else "Skillshare reports that the configured source is missing"
             ),
-            (
-                "Skillshare source directory exists"
-                if source.is_dir()
-                else "Skillshare source directory is missing"
-            ),
-            source,
-            None
-            if source.is_dir()
-            else "Clone or restore the configured skills source.",
+            Path(source_path),
+            None if source_exists else "Restore the source reported by Skillshare.",
         ),
     ]
-    findings.extend(_skillshare_target_findings(document, home, source))
+
+    dirty_repos: list[str] = []
+    for entry in tracked_repos:
+        if not isinstance(entry, dict):
+            return [
+                _invalid_skillshare_status(executable, "tracked repo is not an object")
+            ]
+        name = entry.get("name")
+        dirty = entry.get("dirty")
+        skill_count = entry.get("skill_count")
+        if (
+            not isinstance(name, str)
+            or not name
+            or not isinstance(dirty, bool)
+            or type(skill_count) is not int
+            or skill_count < 0
+        ):
+            return [
+                _invalid_skillshare_status(
+                    executable, "tracked repo has invalid fields"
+                )
+            ]
+        if dirty:
+            dirty_repos.append(name)
+    findings.append(
+        Finding(
+            "skillshare.tracked_repos",
+            Severity.WARN if dirty_repos else Severity.OK,
+            (
+                "skillshare.tracked_repos_dirty"
+                if dirty_repos
+                else "skillshare.tracked_repos_clean"
+            ),
+            (
+                f"Skillshare reports dirty tracked repositories: {', '.join(dirty_repos)}"
+                if dirty_repos
+                else f"Skillshare reports {len(tracked_repos)} clean tracked repositories"
+            ),
+            Path(source_path),
+            (
+                "Inspect the tracked repositories before updating or synchronizing."
+                if dirty_repos
+                else None
+            ),
+        ),
+    )
+
+    if not targets:
+        findings.append(
+            Finding(
+                "skillshare.targets",
+                Severity.WARN,
+                "skillshare.targets_missing",
+                "Skillshare reports no configured Skill targets",
+                config_path,
+                "Declare host-specific targets before synchronizing Skills.",
+            ),
+        )
+    for entry in targets:
+        if not isinstance(entry, dict):
+            return [_invalid_skillshare_status(executable, "target is not an object")]
+        name = entry.get("name")
+        path = entry.get("path")
+        mode = entry.get("mode")
+        status = entry.get("status")
+        synced_count = entry.get("synced_count")
+        if (
+            not isinstance(name, str)
+            or not name
+            or not isinstance(path, str)
+            or not path
+            or not isinstance(mode, str)
+            or not mode
+            or not isinstance(status, str)
+            or not status
+            or type(synced_count) is not int
+            or synced_count < 0
+        ):
+            return [_invalid_skillshare_status(executable, "target has invalid fields")]
+        ready = status in {"linked", "merged", "synced"}
+        findings.append(
+            Finding(
+                f"skillshare.target.{name}",
+                Severity.OK if ready else Severity.WARN,
+                "skillshare.target_ready" if ready else "skillshare.target_unhealthy",
+                f"Skillshare target {name} is {status} in {mode} mode with {synced_count} synced Skills",
+                Path(path),
+                None
+                if ready
+                else "Inspect with skillshare target list --global --json before synchronizing.",
+            ),
+        )
     return findings
+
+
+def _invalid_skillshare_status(executable: Path, detail: str) -> Finding:
+    return Finding(
+        "skillshare.status",
+        Severity.WARN,
+        "skillshare.status_invalid",
+        f"Skillshare status contains invalid fields: {detail}",
+        executable,
+        f"Inspect with {executable} status --global --json.",
+    )
 
 
 def _path_within(file_path: Path, directory: Path) -> bool:

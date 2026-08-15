@@ -14,7 +14,7 @@ from enum import StrEnum
 from pathlib import Path
 
 from .diff import DriftProtocolError, MackupCommandError
-from .host_policy import HostPolicyError, require_mutation_allowed
+from .host_policy import HostPolicyError, mutation_allowed, require_mutation_allowed
 from .mise import (
     canonical_mise_environment,
     canonical_mise_executable,
@@ -562,15 +562,23 @@ def _summary(report: MiseSyncReport) -> dict[str, int]:
     }
 
 
-def _next_commands(report: MiseSyncReport) -> tuple[str, ...]:
-    if not report.apply and report.ok:
+def _next_commands(
+    report: MiseSyncReport,
+    *,
+    apply_allowed: bool = True,
+) -> tuple[str, ...]:
+    if not report.apply and report.ok and apply_allowed:
         return ("mise run mise-sync -- --apply",)
     if report.apply and report.ok:
         return ("mise run check", "mise run diff")
     return ()
 
 
-def _document(report: MiseSyncReport) -> dict[str, object]:
+def _document(
+    report: MiseSyncReport,
+    *,
+    apply_allowed: bool = True,
+) -> dict[str, object]:
     return {
         "schema_version": 1,
         "operation": "mise-sync",
@@ -623,7 +631,7 @@ def _document(report: MiseSyncReport) -> dict[str, object]:
             for result in report.results
         ],
         "summary": _summary(report),
-        "next": list(_next_commands(report)),
+        "next": list(_next_commands(report, apply_allowed=apply_allowed)),
     }
 
 
@@ -636,7 +644,7 @@ def _display_command(step: MiseSyncStep) -> str:
     return f"{prefix} {' '.join(step.command)}"
 
 
-def _render(report: MiseSyncReport) -> None:
+def _render(report: MiseSyncReport, *, apply_allowed: bool = True) -> None:
     if report.configuration_error:
         print(
             f"BLOCKED   mise ownership inspection: {report.configuration_error}",
@@ -697,10 +705,13 @@ def _render(report: MiseSyncReport) -> None:
     rendered = ", ".join(f"{count} {status}" for status, count in summary.items())
     print(f"Summary: {rendered or 'no changes'}")
     if not report.apply and report.ok:
-        print(
-            "No files changed and no commands ran. Re-run with --apply to converge mise."
-        )
-    if next_commands := _next_commands(report):
+        if apply_allowed:
+            print(
+                "No files changed and no commands ran. Re-run with --apply to converge mise."
+            )
+        else:
+            print("No files changed or commands run. Host policy disables mise apply.")
+    if next_commands := _next_commands(report, apply_allowed=apply_allowed):
         print("Next:")
         for command in next_commands:
             print(f"  {command}")
@@ -725,6 +736,7 @@ def main(argv: list[str] | None = None) -> int:
     repo_root = Path(__file__).resolve().parents[1]
     home = Path.home()
     try:
+        apply_allowed = mutation_allowed(home)
         if args.apply:
             require_mutation_allowed(home)
         report = (
@@ -745,7 +757,13 @@ def main(argv: list[str] | None = None) -> int:
         emit_error("mise-sync", str(error), as_json=args.as_json, apply=args.apply)
         return 1
     if args.as_json:
-        print(json.dumps(_document(report), indent=2, sort_keys=True))
+        print(
+            json.dumps(
+                _document(report, apply_allowed=apply_allowed),
+                indent=2,
+                sort_keys=True,
+            ),
+        )
         if report.configuration_error:
             print(
                 f"[mise.safety] FAIL {report.configuration_error}",
@@ -785,7 +803,7 @@ def main(argv: list[str] | None = None) -> int:
                     file=sys.stderr,
                 )
     else:
-        _render(report)
+        _render(report, apply_allowed=apply_allowed)
     return 0 if report.ok else 1
 
 

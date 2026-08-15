@@ -78,12 +78,19 @@ mise_path = "/usr/bin/mise"
 
 `audit-only` keeps previews plus `diff`, `check`, `lint`, and verification
 available, but rejects every `--apply` operation before it writes files or runs
-updaters. The same guard protects the underlying `apply_*` and `execute_*`
-Python operations. `mise_path` selects the host's canonical Mise owner, so a
-package-managed binary such as Omarchy's `/usr/bin/mise` is not treated as an
-extra installation. An absent policy preserves the managed default above. An
-invalid policy, including unknown fields, fails closed and is diagnosed by
-`mise run check`; it never falls back silently to the standalone owner.
+updaters. Previews still show what a managed host would do, but omit an
+inapplicable `--apply` next step. The same guard protects the underlying
+`apply_*` and `execute_*` Python operations. `mise_path` selects the host's
+canonical Mise owner, so a package-managed binary such as Omarchy's
+`/usr/bin/mise` is not treated as an extra installation. An absent policy
+preserves the managed default above. An invalid policy, including unknown
+fields, fails closed and is diagnosed by `mise run check`; it never falls back
+silently to the standalone owner.
+
+Under this policy, `check` marks Dotfiles-owned shell integration, shared Mise
+capabilities, and generated runtime readiness as not applicable. Canonical Mise
+health, duplicate owners, Skillshare health, permissions, and other host-owned
+problems remain applicable and continue to gate strict inspection.
 
 The installer intentionally has no version argument: host and Orb bootstrap
 take the latest mise release available from `https://mise.run` rather than
@@ -161,9 +168,9 @@ binding that deletes the same path segment as the macOS Zsh configuration,
 reserves `Ctrl-R` for Atuin when later startup files initialize FZF, and provides
 Zoxide's `j` command while leaving the ordinary up arrow to Bash. Interactive
 SSH logins remain ordinary shells; start Herdr explicitly when needed. It does
-not expose `modules/bin` or `generated/bin` on Linux. The managed block is placed
-before Ubuntu's non-interactive early return, so direct SSH commands also receive
-the user and mise paths without interactive shell initialization.
+not expose `modules/bin` on Linux. The managed block is placed before Ubuntu's
+non-interactive early return, so direct SSH commands also receive the user and
+mise paths without interactive shell initialization.
 
 The Linux Lite drift profile observes Git, Mise, portable Atuin and Btop
 configuration, and the availability of Btop, Starship, Atuin, Zoxide, Herdr,
@@ -182,10 +189,10 @@ there. The contract is a split between experience and commands:
   regardless of platform; the Homebrew block is macOS-only and the clash block
   is Linux-only.
 - The user bin and mise shim directories load on every platform. The repository
-  *command directories* do not: `.zshenv` prepends `modules/bin` and
-  `generated/bin` to `PATH` only under `darwin*`, so a Linux host never gains
-  repository commands and can never shadow a system tool — most importantly
-  iproute2 `ss`, whose repository namesake is `skillshare-source`.
+  command directory does not: `.zshenv` prepends `modules/bin` to `PATH` only
+  under `darwin*`, so a Linux host never gains repository commands and can
+  never shadow a system tool — most importantly iproute2 `ss`, whose repository
+  namesake is `skillshare-source`.
 - The repository mise configuration carries no repository bins. Its committed
   lockfile contains URLs and checksums for both `macos-arm64` and `linux-x64`,
   so bootstrap uses the same reviewed tool artifacts on both platforms.
@@ -328,9 +335,10 @@ mise run restore -- atuin --apply
 
 Skillshare is also part of the shared Mise baseline; `mise upgrade` owns its CLI
 updates on every host. Do not combine that install with Homebrew or
-`skillshare upgrade --cli`. GitHub CLI is intentionally platform-owned instead:
-the official GitHub APT repository owns it on Debian, while Homebrew owns it on
-macOS, so `gh` is not declared in the shared Mise configuration.
+`skillshare upgrade --cli`. GitHub CLI and Codex are host-owned instead of part
+of the shared baseline. Omarchy provisions both through its own Mise wrappers;
+managed Debian and macOS hosts retain their platform or application owner. The
+shared Mise configuration therefore declares neither `gh` nor Codex.
 
 Btop is also platform-owned: Homebrew owns it on macOS, while each Linux
 distribution's package manager owns it. The repository restores only Btop's
@@ -355,15 +363,16 @@ mise run check -- --strict
 Warnings do not fail the normal command because different hosts intentionally
 have different capabilities. `--strict` treats warnings as failures.
 
-Skillshare inspection reads its executable location, YAML configuration, source
-directory, and known installation owners. It uses Mise's JSON inventory to
-distinguish an inactive Mise install from the active executable and warns only
-when independent owners coexist. Target inspection is derived from every
-`targets.*.skills.path` entry in the live configuration rather than a target
-name or directory list owned by this repository. `check` deliberately does not
-run `skillshare doctor`: that command may migrate configuration, update caches,
-and probe target paths with temporary writes. Run it explicitly when deeper
-Skillshare diagnosis is worth those local side effects.
+Skillshare inspection asks `skillshare status --global --json` for accepted
+configuration, source, tracked-repository, and target health instead of
+reimplementing Skillshare's YAML or merge-mode semantics. It validates the
+command result and JSON shape before trusting those fields. Installation
+ownership remains a separate check: Mise's JSON inventory distinguishes an
+inactive Mise install from the active executable and warns only when independent
+owners coexist. `check` deliberately does not run `skillshare doctor`: that
+command may migrate configuration, update caches, and probe target paths with
+temporary writes. Run it explicitly when deeper diagnosis is worth those local
+side effects.
 
 Missing or empty generated shell directories are reported as not ready. The
 report also verifies that the host's canonical Mise path is a real executable,
@@ -393,12 +402,13 @@ mise run update -- --apply
 
 The task discovers most supported updaters on `PATH`, reports missing tools as
 skipped, applies available updates in a stable order, and continues independent
-steps after a failure. Mise is the exception: its self-update, tool upgrade,
-and reshim steps always invoke the canonical Mise path explicitly. The
-self-update runs without the unrelated plugin update side effect. The preview
-is the authoritative list of supported updaters and the exact commands
-available on the current host. `PLANNED` means the updater command is available;
-the updater determines whether a newer version exists during apply. Any failed
+steps after a failure. Mise is the exception: its tool upgrade and reshim steps
+always invoke the canonical Mise path explicitly. The standalone canonical
+Mise install also self-updates without the unrelated plugin update side effect;
+a host-selected Mise path is updated by its host owner instead. The preview is
+the authoritative list of supported updaters and the exact commands available
+on the current host. `PLANNED` means the updater command is available; the
+updater determines whether a newer version exists during apply. Any failed
 step makes the command exit non-zero. It
 deliberately does not run `brew cleanup`, `brew autoremove`, or `mise prune`;
 removal and pruning require a separate, explicit operation.
@@ -474,20 +484,6 @@ inventory; snapshots have their own explicit task (see Host inventory).
 Generated files are a cache: shell startup sources them but does not regenerate
 them. The Mise generator always invokes the host's canonical Mise binary by
 absolute path, so cached activation remains bound to the selected owner.
-
-Repository-owned source builds are an explicit, slower sub-operation:
-
-```bash
-mise run runtime -- --build
-mise run runtime -- --build --apply
-```
-
-This refreshes the sources named by the runtime plan under the ignored
-`generated/sources/`, builds them with their declared commands, and atomically
-installs the artifacts into `generated/bin/`. Any other binary placed there
-must name its own owner; `mise run check` reports unknown binaries. Atuin and
-Zoxide are not runtime-built binaries; Mise owns them. A failed source refresh
-or build leaves the previous owned binary in place.
 
 ## Host inventory
 

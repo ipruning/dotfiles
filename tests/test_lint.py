@@ -179,6 +179,32 @@ def test_inspect_repository_rejects_tracked_private_and_generated_files(
     assert "repository.generated_tracked" in codes
 
 
+def test_inspect_repository_rejects_duplicate_mise_alias_identity(
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    config = repo_root / "reference/.config/mise/config.toml"
+    config.parent.mkdir(parents=True)
+    config.write_text(
+        '[alias]\nhunk = "aqua:modem-dev/hunk"\n\n'
+        '[tools]\nhunk = "latest"\n"aqua:modem-dev/hunk" = "latest"\n',
+    )
+    (repo_root / "mackup/applications").mkdir(parents=True)
+    (repo_root / "mackup/mackup.cfg").write_text(mackup_cfg())
+
+    report = inspect_repository(repo_root, home)
+    finding = next(
+        finding
+        for finding in report.findings
+        if finding.code == "mise.alias_duplicate_identity"
+    )
+
+    assert finding.severity is Severity.ERROR
+    assert "hunk" in finding.message
+    assert "aqua:modem-dev/hunk" in finding.message
+
+
 def test_inspect_repository_warns_when_checkout_is_not_home_dotfiles(
     tmp_path: Path,
 ) -> None:

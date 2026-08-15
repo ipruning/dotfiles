@@ -90,6 +90,11 @@ def configured_mise_path(home: Path) -> Path | None:
     return load_host_policy(home).mise_path
 
 
+def mutation_allowed(home: Path) -> bool:
+    """Return whether the host policy permits repository-owned mutation."""
+    return not load_host_policy(home).audit_only
+
+
 def require_mutation_allowed(home: Path) -> None:
     policy = load_host_policy(home)
     if policy.audit_only:
