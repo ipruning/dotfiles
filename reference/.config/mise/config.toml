@@ -64,8 +64,4 @@ compile = false
 [env]
 _.path = [
   "~/.bun/bin",
-  "~/.local/bin",
-  "~/.modular/bin",
-  "~/.opencode/bin",
-  "~/.raindrop/bin",
 ]
