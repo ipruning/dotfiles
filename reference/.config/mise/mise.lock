@@ -105,18 +105,18 @@ version = "2.12.0"
 backend = "gem:kamal"
 
 [[tools."github:agavra/tuicr"]]
-version = "0.22.0"
+version = "0.23.0"
 backend = "github:agavra/tuicr"
 
 [tools."github:agavra/tuicr"."platforms.linux-x64"]
-checksum = "sha256:f3081e68bf634cb672e7d92249836247c6169cdcb901cb6ced8772098d876a5d"
-url = "https://github.com/agavra/tuicr/releases/download/v0.22.0/tuicr-0.22.0-x86_64-unknown-linux-gnu.tar.gz"
-url_api = "https://api.github.com/repos/agavra/tuicr/releases/assets/513392546"
+checksum = "sha256:28d736150c3a234e3efd883ccf7215633300008cdf8d67c7eff7a94b822bbd56"
+url = "https://github.com/agavra/tuicr/releases/download/v0.23.0/tuicr-0.23.0-x86_64-unknown-linux-gnu.tar.gz"
+url_api = "https://api.github.com/repos/agavra/tuicr/releases/assets/520040107"
 
 [tools."github:agavra/tuicr"."platforms.macos-arm64"]
-checksum = "sha256:cd0db5cd02134a9008122268dcf015d190d1af51a23355d3917039e37e9389a2"
-url = "https://github.com/agavra/tuicr/releases/download/v0.22.0/tuicr-0.22.0-aarch64-apple-darwin.tar.gz"
-url_api = "https://api.github.com/repos/agavra/tuicr/releases/assets/513392761"
+checksum = "sha256:796416dad7df596c5e437bca94fae005b25849caf489556566ceba9c8823c7e9"
+url = "https://github.com/agavra/tuicr/releases/download/v0.23.0/tuicr-0.23.0-aarch64-apple-darwin.tar.gz"
+url_api = "https://api.github.com/repos/agavra/tuicr/releases/assets/520041138"
 
 [[tools."github:jihuanshe/linear"]]
 version = "0.0.1786361070-g484b146"
@@ -136,18 +136,18 @@ provenance = "github-attestations"
 provenance_verified = true
 
 [[tools."github:larksuite/cli"]]
-version = "1.0.87"
+version = "1.0.88"
 backend = "github:larksuite/cli"
 
 [tools."github:larksuite/cli"."platforms.linux-x64"]
-checksum = "sha256:6027b1ddc12440400581bbdf9554850d8e119c7dd400439b1220e7a87b9673c5"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.87/lark-cli-1.0.87-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/513128392"
+checksum = "sha256:497de20939acdd2aae4c898fea7a0ca71d5a459ed543202e762a8bcb3228effe"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.88/lark-cli-1.0.88-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/519628701"
 
 [tools."github:larksuite/cli"."platforms.macos-arm64"]
-checksum = "sha256:b4cf7b1b7ff9c3d8c9ac3dd577fd178f3c8a84ec82184a82de809335840d5b20"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.87/lark-cli-1.0.87-darwin-arm64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/513128395"
+checksum = "sha256:f1f40fb3fbae05c0786ffd515ee3719cdee3804766e4fa93e952596163cde7ac"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.88/lark-cli-1.0.88-darwin-arm64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/519628704"
 
 [[tools."github:lycorp-jp/sim-use"]]
 version = "0.13.0"
@@ -251,7 +251,7 @@ backend = "npm:@openai/codex-security"
 allow_low_downloads = "true"
 
 [[tools."npm:agent-device"]]
-version = "0.20.9"
+version = "0.20.10"
 backend = "npm:agent-device"
 
 [[tools."npm:cf"]]
