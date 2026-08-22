@@ -32,52 +32,28 @@ url_api = "https://api.github.com/repos/jdx/aube/releases/assets/517208780"
 provenance = "github-attestations"
 
 [[tools.bun]]
-version = "1.3.14"
+version = "1.4.0"
 backend = "core:bun"
 
-[tools.bun."platforms.linux-arm64"]
-checksum = "sha256:a27ffb63a8310375836e0d6f668ae17fa8d8d18b88c37c821c65331973a19a3b"
-url = "https://github.com/oven-sh/bun/releases/download/bun-v1.3.14/bun-linux-aarch64.zip"
-
-[tools.bun."platforms.linux-arm64-musl"]
-checksum = "sha256:b98e0ad3625c5c00d1d5b5ff55605c7adddbfae151861e68ade57b2d3b8703bb"
-url = "https://github.com/oven-sh/bun/releases/download/bun-v1.3.14/bun-linux-aarch64-musl.zip"
-
 [tools.bun."platforms.linux-x64"]
-checksum = "sha256:951ee2aee855f08595aeec6225226a298d3fea83a3dcd6465c09cbccdf7e848f"
-url = "https://github.com/oven-sh/bun/releases/download/bun-v1.3.14/bun-linux-x64.zip"
+checksum = "sha256:2d03fb5fb83ac8b567aca0a281b2ce1a1a19d488f56c2968d88c3f25e92fe452"
+url = "https://github.com/oven-sh/bun/releases/download/bun-v1.4.0/bun-linux-x64.zip"
 
 [tools.bun."platforms.linux-x64-baseline"]
-checksum = "sha256:a063908ae08b7852ca10939bbdc6ceed3ddabce8fb9402dce83d65d73b36e6c7"
-url = "https://github.com/oven-sh/bun/releases/download/bun-v1.3.14/bun-linux-x64-baseline.zip"
+checksum = "sha256:184fb4595f0d401a217cf7c78c1bc430ba83314dab7a8b94805babbf7fa7097f"
+url = "https://github.com/oven-sh/bun/releases/download/bun-v1.4.0/bun-linux-x64-baseline.zip"
 
 [tools.bun."platforms.linux-x64-musl"]
-checksum = "sha256:14bd9aedeebf1dba67e8def9531c89bc989ecfdf1de42e5bfcaf1b8cd9294719"
-url = "https://github.com/oven-sh/bun/releases/download/bun-v1.3.14/bun-linux-x64-musl.zip"
+checksum = "sha256:83b5f12fd258dd8d4fdcaea65ede954366aa717dab399e20093ecab280d54e7a"
+url = "https://github.com/oven-sh/bun/releases/download/bun-v1.4.0/bun-linux-x64-musl.zip"
 
 [tools.bun."platforms.linux-x64-musl-baseline"]
-checksum = "sha256:56a7d6806cf155536c0178f0ea5fbd098e684fa509ebdb4fc0a7e19fb65382dc"
-url = "https://github.com/oven-sh/bun/releases/download/bun-v1.3.14/bun-linux-x64-musl-baseline.zip"
+checksum = "sha256:618c4bc1f94b02337ee210003c0b7c066f11548a8cdc5109df10db043dc47ca2"
+url = "https://github.com/oven-sh/bun/releases/download/bun-v1.4.0/bun-linux-x64-musl-baseline.zip"
 
 [tools.bun."platforms.macos-arm64"]
-checksum = "sha256:d8b96221828ad6f97ac7ac0ab7e95872341af763001e8803e8267652c2652620"
-url = "https://github.com/oven-sh/bun/releases/download/bun-v1.3.14/bun-darwin-aarch64.zip"
-
-[tools.bun."platforms.macos-x64"]
-checksum = "sha256:4183df3374623e5bab315c547cfa0974533cd457d86b73b639f7a87974cd6633"
-url = "https://github.com/oven-sh/bun/releases/download/bun-v1.3.14/bun-darwin-x64.zip"
-
-[tools.bun."platforms.macos-x64-baseline"]
-checksum = "sha256:3e35ad6f53971a9834bf9e6786e2adf72b5f1921cc9a9c5fde073d2972944076"
-url = "https://github.com/oven-sh/bun/releases/download/bun-v1.3.14/bun-darwin-x64-baseline.zip"
-
-[tools.bun."platforms.windows-x64"]
-checksum = "sha256:0a0620930b6675d7ba440e81f4e0e00d3cfbe096c4b140d3fff02205e9e18922"
-url = "https://github.com/oven-sh/bun/releases/download/bun-v1.3.14/bun-windows-x64.zip"
-
-[tools.bun."platforms.windows-x64-baseline"]
-checksum = "sha256:538f9c846355d9e847b2671bc00c47da4229a0befb24df3282b739770f3b475f"
-url = "https://github.com/oven-sh/bun/releases/download/bun-v1.3.14/bun-windows-x64-baseline.zip"
+checksum = "sha256:c669e97f6164e1c96e0701748db98dfa77492908cbd8394c7557134a735de381"
+url = "https://github.com/oven-sh/bun/releases/download/bun-v1.4.0/bun-darwin-aarch64.zip"
 
 [[tools."cargo:https://github.com/ipruning/atuin"]]
 version = "rev:38e9d788024cf36898b42fa46e7c13d8c774eede"
@@ -105,49 +81,49 @@ version = "2.12.0"
 backend = "gem:kamal"
 
 [[tools."github:agavra/tuicr"]]
-version = "0.23.0"
+version = "0.23.1"
 backend = "github:agavra/tuicr"
 
 [tools."github:agavra/tuicr"."platforms.linux-x64"]
-checksum = "sha256:28d736150c3a234e3efd883ccf7215633300008cdf8d67c7eff7a94b822bbd56"
-url = "https://github.com/agavra/tuicr/releases/download/v0.23.0/tuicr-0.23.0-x86_64-unknown-linux-gnu.tar.gz"
-url_api = "https://api.github.com/repos/agavra/tuicr/releases/assets/520040107"
+checksum = "sha256:9cc1fe209803fac8993ecda7d1c0bd355b1fcc34e2a6746ea32fca006a2e900f"
+url = "https://github.com/agavra/tuicr/releases/download/v0.23.1/tuicr-0.23.1-x86_64-unknown-linux-gnu.tar.gz"
+url_api = "https://api.github.com/repos/agavra/tuicr/releases/assets/522479068"
 
 [tools."github:agavra/tuicr"."platforms.macos-arm64"]
-checksum = "sha256:796416dad7df596c5e437bca94fae005b25849caf489556566ceba9c8823c7e9"
-url = "https://github.com/agavra/tuicr/releases/download/v0.23.0/tuicr-0.23.0-aarch64-apple-darwin.tar.gz"
-url_api = "https://api.github.com/repos/agavra/tuicr/releases/assets/520041138"
+checksum = "sha256:8badc032c8fd927496c32d5a28cb8765d592c1d8a474769f873bc89959ae6765"
+url = "https://github.com/agavra/tuicr/releases/download/v0.23.1/tuicr-0.23.1-aarch64-apple-darwin.tar.gz"
+url_api = "https://api.github.com/repos/agavra/tuicr/releases/assets/522478671"
 
 [[tools."github:jihuanshe/linear"]]
-version = "0.0.1786361070-g484b146"
+version = "0.0.1787336221-g15cefb0"
 backend = "github:jihuanshe/linear"
 
 [tools."github:jihuanshe/linear"."platforms.linux-x64"]
-checksum = "sha256:2678c22b27f311ffa2267774027e03b440afc62d613f038f53a6cfef1814fffa"
-url = "https://github.com/jihuanshe/linear/releases/download/0.0.1786361070-g484b146/linear-x86_64-unknown-linux-gnu.tar.xz"
-url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/508671894"
+checksum = "sha256:5d8d7f3c956921902c7a6d5ec6c33d4de5b125d5313fc3ea14089bb9716223b9"
+url = "https://github.com/jihuanshe/linear/releases/download/0.0.1787336221-g15cefb0/linear-x86_64-unknown-linux-gnu.tar.xz"
+url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/524087560"
 provenance = "github-attestations"
 
 [tools."github:jihuanshe/linear"."platforms.macos-arm64"]
-checksum = "sha256:92263aee9f3e3048209011f3f69eecb317d4a2a4963ab931949e840f56884bbc"
-url = "https://github.com/jihuanshe/linear/releases/download/0.0.1786361070-g484b146/linear-aarch64-apple-darwin.tar.xz"
-url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/508671803"
+checksum = "sha256:dd90df2446ae727bad12e319b6a3fe503c8ceaeadf78b23e41db07fbae0867f9"
+url = "https://github.com/jihuanshe/linear/releases/download/0.0.1787336221-g15cefb0/linear-aarch64-apple-darwin.tar.xz"
+url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/524087375"
 provenance = "github-attestations"
 provenance_verified = true
 
 [[tools."github:larksuite/cli"]]
-version = "1.0.88"
+version = "1.0.89"
 backend = "github:larksuite/cli"
 
 [tools."github:larksuite/cli"."platforms.linux-x64"]
-checksum = "sha256:497de20939acdd2aae4c898fea7a0ca71d5a459ed543202e762a8bcb3228effe"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.88/lark-cli-1.0.88-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/519628701"
+checksum = "sha256:a07a603d29ed58e8b5b0d7395cae10dfabed2b860be31b7134f8bf39705e7cff"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.89/lark-cli-1.0.89-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/523778458"
 
 [tools."github:larksuite/cli"."platforms.macos-arm64"]
-checksum = "sha256:f1f40fb3fbae05c0786ffd515ee3719cdee3804766e4fa93e952596163cde7ac"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.88/lark-cli-1.0.88-darwin-arm64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/519628704"
+checksum = "sha256:62417d641a2a15fddec9bac0c70f939570d5e2f3fa1410703b93f3284d02d044"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.89/lark-cli-1.0.89-darwin-arm64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/523778459"
 
 [[tools."github:lycorp-jp/sim-use"]]
 version = "0.13.0"
@@ -164,30 +140,30 @@ url = "https://github.com/lycorp-jp/sim-use/releases/download/v0.13.0/sim-use-v0
 url_api = "https://api.github.com/repos/lycorp-jp/sim-use/releases/assets/503792087"
 
 [[tools.go]]
-version = "1.26.6"
+version = "1.27.0"
 backend = "core:go"
 
 [tools.go."platforms.linux-x64"]
-checksum = "sha256:708effb774be8237570d0add163225abbdfaf4fca28b2611df167beba4feef89"
-url = "https://dl.google.com/go/go1.26.6.linux-amd64.tar.gz"
+checksum = "sha256:675c26c449cbb18fc24b74650de1eabbae6e16f64326fd85a283fb3b58280685"
+url = "https://dl.google.com/go/go1.27.0.linux-amd64.tar.gz"
 
 [tools.go."platforms.macos-arm64"]
-checksum = "sha256:2dc95ce4675829f2df0e86b28bcef3283635902062a5f0580ca659bf570f3204"
-url = "https://dl.google.com/go/go1.26.6.darwin-arm64.tar.gz"
+checksum = "sha256:90493b3bbd5e10f91d12153198bf1994fd756399b4fec93b49b0c6e2acdeeb3e"
+url = "https://dl.google.com/go/go1.27.0.darwin-arm64.tar.gz"
 
 [[tools.herdr]]
-version = "0.8.0"
+version = "0.8.2"
 backend = "aqua:herdrdev/herdr"
 
 [tools.herdr."platforms.linux-x64"]
-checksum = "sha256:b872ea7e40fa2cb17e857ac9b62b1bf26db7b403c622f5d2f3f5b35f6e9acd28"
-url = "https://github.com/herdrdev/herdr/releases/download/v0.8.0/herdr-linux-x86_64"
-url_api = "https://api.github.com/repos/herdrdev/herdr/releases/assets/500422625"
+checksum = "sha256:976150a14d490c94b243ea2e1a7eb2dfb67f12e36b182db90936f6728e6aecf4"
+url = "https://github.com/herdrdev/herdr/releases/download/v0.8.2/herdr-linux-x86_64"
+url_api = "https://api.github.com/repos/herdrdev/herdr/releases/assets/521169107"
 
 [tools.herdr."platforms.macos-arm64"]
-checksum = "sha256:d53a9f93fccfdfcc55632927bf51002f5add0aa7990bcdf508ffbd84ac658178"
-url = "https://github.com/herdrdev/herdr/releases/download/v0.8.0/herdr-macos-aarch64"
-url_api = "https://api.github.com/repos/herdrdev/herdr/releases/assets/500422629"
+checksum = "sha256:a5d4f4d504d8b309c91f811050559300faba31258425f53c50852fc96f6ae574"
+url = "https://github.com/herdrdev/herdr/releases/download/v0.8.2/herdr-macos-aarch64"
+url_api = "https://api.github.com/repos/herdrdev/herdr/releases/assets/521169108"
 
 [[tools.hunk]]
 version = "0.19.0"
@@ -244,7 +220,7 @@ checksum = "sha256:7ee659a7768e641bbfd5360940660b8e8fd0052f77488f365562bac522fc1
 url = "https://nodejs.org/dist/v26.7.0/node-v26.7.0-darwin-arm64.tar.gz"
 
 [[tools."npm:@openai/codex-security"]]
-version = "0.1.14"
+version = "0.1.16"
 backend = "npm:@openai/codex-security"
 
 [tools."npm:@openai/codex-security".options]
@@ -255,7 +231,7 @@ version = "0.20.10"
 backend = "npm:agent-device"
 
 [[tools."npm:cf"]]
-version = "0.6.0"
+version = "0.8.0"
 backend = "npm:cf"
 
 [[tools.pi]]
@@ -323,7 +299,7 @@ url = "https://github.com/jdx/ruby/releases/download/4.0.6-1/ruby-4.0.6.macos.ta
 provenance = "github-attestations"
 
 [[tools.rust]]
-version = "1.97.1"
+version = "1.98.0"
 backend = "core:rust"
 
 [[tools.skillshare]]
