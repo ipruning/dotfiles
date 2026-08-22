@@ -1,8 +1,5 @@
 min_version = { hard = "2026.8.3" }
 
-[_.dotfiles.mise_sync.trusted_alias_backends]
-yarn = ["vfox:mise-plugins/vfox-yarn"]
-
 [tool_alias]
 agent-browser = "npm:agent-browser"
 aube = "aqua:jdx/aube"
