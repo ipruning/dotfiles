@@ -17,7 +17,7 @@ official fix.
 
 ## Safety model
 
-The installed LaunchAgent runs one short check every 30 seconds; it is not a
+The installed LaunchAgent runs one short check every 60 seconds; it is not a
 resident `KeepAlive` daemon. It monitors only unless installation explicitly
 opts into automatic recycling. An automatic recycle requires all of these
 conditions:
