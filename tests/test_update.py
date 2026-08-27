@@ -17,6 +17,10 @@ from scripts.update import (
     plan_updates,
 )
 
+# These integration tests run alongside the other verify tasks. Give the helper
+# process time to spawn its child before testing the updater's timeout behavior.
+PROCESS_GROUP_TEST_TIMEOUT_SECONDS = 5
+
 
 def _fake_tool(
     bin_dir: Path,
@@ -451,7 +455,12 @@ def test_update_progress_timeout_kills_the_process_group(tmp_path: Path) -> None
 
     with pytest.raises(subprocess.TimeoutExpired):
         _run_with_progress(
-            UpdateStep("timeout", "timeout", (str(tool_path),), 1),
+            UpdateStep(
+                "timeout",
+                "timeout",
+                (str(tool_path),),
+                PROCESS_GROUP_TEST_TIMEOUT_SECONDS,
+            ),
             env=None,
             progress_interval_seconds=1,
         )
@@ -483,7 +492,7 @@ def test_update_human_runner_timeout_kills_the_process_group(tmp_path: Path) -> 
         _run_process_group(
             (str(tool_path),),
             env=None,
-            timeout_seconds=1,
+            timeout_seconds=PROCESS_GROUP_TEST_TIMEOUT_SECONDS,
         )
 
     child_pid = int(child_pid_path.read_text())
