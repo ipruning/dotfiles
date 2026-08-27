@@ -1,18 +1,19 @@
+# macOS metadata
 .DS_Store
+
+# Host-private materializations; templates remain trackable
 *private*
+!*private*.tpl.*
+!*private*.template.*
 
-.jj/
-.repoprompt/
-
+# Python runtime and tool state
 __pycache__/
 .pytest_cache/
 .ruff_cache/
 .venv/
 
-generated/completions/*
-generated/functions/*
-generated/plugins/*
+# Repository-owned runtime state
+/generated/
 
-reference/.config/karabiner/automatic_backups/
-
-!*tpl*
+# Application-managed backups
+/reference/.config/karabiner/automatic_backups/
