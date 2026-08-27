@@ -154,7 +154,7 @@ plist="$home/Library/LaunchAgents/com.ipruning.cursoruiviewservice-watchdog.plis
 env "${test_env[@]}" "$cli" install --json >"$test_root/install-preview.json"
 mise exec -- jq -e '
   .schema_version == 1 and .operation == "install" and .ok == true and
-  .apply == false and .auto_recycle == false and .interval_seconds == 30 and
+  .apply == false and .auto_recycle == false and .interval_seconds == 60 and
   .threshold_bytes == 536870912 and
   .early_recycle_threshold_bytes == 402653184 and
   .required_unresponsive_samples == 3
@@ -173,7 +173,7 @@ plutil -extract ProgramArguments json -o - "$plist" | mise exec -- jq -e '
 env "${test_env[@]}" "$cli" install --auto-recycle --apply --json >"$test_root/install.json"
 [[ -x "$installed_bin" && -x "$runtime" && -f "$plist" && -e "$state/agent-loaded" ]] \
   || fail 'install did not complete the user LaunchAgent lifecycle'
-[[ "$(plutil -extract StartInterval raw -o - "$plist")" == 30 ]] \
+[[ "$(plutil -extract StartInterval raw -o - "$plist")" == 60 ]] \
   || fail 'LaunchAgent interval is wrong'
 [[ "$(plutil -extract ProcessType raw -o - "$plist")" == Background ]] \
   || fail 'LaunchAgent is not background-classified'
@@ -188,7 +188,7 @@ env "${test_env[@]}" "$cli" status --json >"$test_root/status.json"
 mise exec -- jq -e '
   .schema_version == 1 and .operation == "status" and .ok == true and
   .installed == true and .loaded == true and .service_available == true and
-  .auto_recycle == true and .interval_seconds == 30 and
+  .auto_recycle == true and .interval_seconds == 60 and
   .cooldown_seconds == 300 and
   .threshold_bytes == 536870912 and
   .early_recycle_threshold_bytes == 402653184 and
