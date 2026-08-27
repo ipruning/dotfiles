@@ -33,6 +33,7 @@ def _run_module(
 def test_mise_python_tasks_never_sync_dependencies_implicitly(tmp_path: Path) -> None:
     repo_root = Path(__file__).resolve().parents[1]
     config = tomllib.loads((repo_root / "mise.toml").read_text())
+    lockfile = tomllib.loads((repo_root / "mise.lock").read_text())
     task_commands: list[str] = []
     for task in config["tasks"].values():
         run = task.get("run")
@@ -47,7 +48,8 @@ def test_mise_python_tasks_never_sync_dependencies_implicitly(tmp_path: Path) ->
         "macos-arm64",
         "linux-x64",
     ]
-    assert config["min_version"]["hard"] == "2026.8.3"
+    assert config["min_version"]["hard"] == "2026.8.11"
+    assert lockfile["lockfile_version"] == 1
     assert config["tool_alias"] == {
         "fd": "aqua:sharkdp/fd",
         "jq": "aqua:jqlang/jq",
@@ -99,14 +101,23 @@ def test_global_mise_lock_covers_declared_artifact_platforms() -> None:
     config = tomllib.loads(
         (repo_root / "reference/.config/mise/config.toml").read_text(),
     )
-    assert config["min_version"]["hard"] == "2026.8.3"
+    assert config["min_version"]["hard"] == "2026.8.11"
     assert config["settings"]["auto_install"] is False
     assert "exec_auto_install" not in config["settings"]
     assert "task" not in config["settings"]
+    assert config["settings"]["trusted_config_paths"] == [
+        "~/Developer/ipruning",
+        "~/Developer/jihuanshe",
+    ]
     assert {"codex", "gh"}.isdisjoint(config["tools"])
+    assert config["tool_alias"]["yarn"] == "aqua:yarnpkg/berry"
+    assert config["tools"]["yarn"] == "latest"
+    assert "aqua:yarnpkg/berry" not in config["tools"]
     lockfile = tomllib.loads(
         (repo_root / "reference/.config/mise/mise.lock").read_text(),
     )
+    assert lockfile["lockfile_version"] == 1
+    assert "aqua:yarnpkg/berry" not in lockfile["tools"]
     version_only_backends = {"core:rust"}
     version_only_prefixes = ("cargo:", "gem:", "go:", "npm:", "pipx:")
     missing: list[str] = []

@@ -103,8 +103,8 @@ problems remain applicable and continue to gate strict inspection.
 The installer intentionally has no version argument: host and Orb bootstrap
 take the latest mise release available from `https://mise.run` rather than
 pinning the mise binary. The hard `min_version` in both project and global
-configuration is only the compatibility floor (currently 2026.8.3), not the
-version bootstrap should install.
+configuration is only the compatibility floor (currently 2026.8.11 for the
+versioned Mise lockfile format), not the version bootstrap should install.
 
 `mise trust` is required because this repository declares a project virtual
 environment. The explicit `mise install --locked ...` command requires every

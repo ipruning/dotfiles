@@ -1,6 +1,9 @@
-min_version = { hard = "2026.8.3" }
+# mise.lock v1 requires mise 2026.8.11 or newer.
+min_version = { hard = "2026.8.11" }
 
 [tool_alias]
+# Keep canonical tool identities pinned to plugin-free backends; [tools] must
+# use these aliases rather than declaring the same full backend separately.
 agent-browser = "npm:agent-browser"
 aube = "aqua:jdx/aube"
 herdr = "aqua:herdrdev/herdr"
@@ -17,7 +20,6 @@ yarn = "aqua:yarnpkg/berry"
 zoxide = "aqua:ajeetdsouza/zoxide"
 
 [tools]
-"aqua:yarnpkg/berry" = "latest"
 "cargo:https://github.com/ipruning/atuin" = { version = "rev:38e9d788024cf36898b42fa46e7c13d8c774eede", crate = "atuin", bin = "atuin", locked = true }
 "gem:kamal" = "latest"
 "github:agavra/tuicr" = "latest"
@@ -46,6 +48,7 @@ skillshare = "latest"
 starship = "latest"
 uv = "latest"
 xurl = "latest"
+yarn = "latest"
 zig = "latest"
 zoxide = "latest"
 
@@ -53,7 +56,12 @@ zoxide = "latest"
 auto_install = false
 lockfile = true
 lockfile_platforms = ["macos-arm64", "linux-x64"]
-trusted_config_paths = ["~/Developer"]
+# Auto-trust only first-party checkout roots. Third-party repositories under
+# ~/Developer/tries remain subject to per-config review and `mise trust`.
+trusted_config_paths = [
+  "~/Developer/ipruning",
+  "~/Developer/jihuanshe",
+]
 
 [settings.ruby]
 compile = false
