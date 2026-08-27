@@ -122,6 +122,16 @@ else
 fi
 printf '%s\n' "$((128 * 1024 * 1024))" >"$FAKE_STATE/footprint"
 EOF
+
+cat >"$fake_bin/osascript" <<'EOF'
+#!/bin/bash
+printf '%s\n' "${*: -1}" >>"$FAKE_STATE/probe-calls"
+if [[ -e "$FAKE_STATE/probe-result" ]]; then
+  cat "$FAKE_STATE/probe-result"
+else
+  echo responsive
+fi
+EOF
 chmod +x "$fake_bin"/*
 
 test_env=(
@@ -130,6 +140,7 @@ test_env=(
   CURSORUIVIEW_WATCHDOG_FOOTPRINT_BIN="$fake_bin/footprint"
   CURSORUIVIEW_WATCHDOG_PS_BIN="$fake_bin/ps"
   CURSORUIVIEW_WATCHDOG_KILL_BIN="$fake_bin/kill"
+  CURSORUIVIEW_WATCHDOG_OSASCRIPT_BIN="$fake_bin/osascript"
   CURSORUIVIEW_WATCHDOG_UNAME_BIN="$fake_bin/uname"
   FAKE_STATE="$state"
   EXPECTED_EXECUTABLE="$expected_executable"
@@ -144,7 +155,9 @@ env "${test_env[@]}" "$cli" install --json >"$test_root/install-preview.json"
 mise exec -- jq -e '
   .schema_version == 1 and .operation == "install" and .ok == true and
   .apply == false and .auto_recycle == false and .interval_seconds == 30 and
-  .threshold_bytes == 536870912
+  .threshold_bytes == 536870912 and
+  .early_recycle_threshold_bytes == 402653184 and
+  .required_unresponsive_samples == 3
 ' "$test_root/install-preview.json" >/dev/null || fail 'install preview contract is invalid'
 [[ ! -e "$installed_bin" && ! -e "$runtime" && ! -e "$plist" && ! -e "$state/agent-loaded" ]] \
   || fail 'install preview mutated installation state'
@@ -177,7 +190,9 @@ mise exec -- jq -e '
   .installed == true and .loaded == true and .service_available == true and
   .auto_recycle == true and .interval_seconds == 30 and
   .cooldown_seconds == 300 and
-  (has("required_high_samples") | not) and
+  .threshold_bytes == 536870912 and
+  .early_recycle_threshold_bytes == 402653184 and
+  .required_unresponsive_samples == 3 and
   (has("minimum_idle_seconds") | not)
 ' "$test_root/status.json" >/dev/null || fail 'installed status is invalid'
 
@@ -188,7 +203,8 @@ env "${test_env[@]}" "$cli" check --json >"$test_root/check-high.json" || exit_c
 mise exec -- jq -e '
   .operation == "check" and .ok == true and .high == true and
   .footprint_bytes == 5368709120 and .swapped_bytes == 4294967296 and
-  (has("idle_seconds") | not)
+  .early_high == true and .responsiveness == "responsive" and
+  .unresponsive == false and (has("idle_seconds") | not)
 ' "$test_root/check-high.json" >/dev/null || fail 'check did not report measured footprint'
 
 env "${test_env[@]}" "$cli" run --json >"$test_root/run-preview.json"
@@ -197,11 +213,71 @@ mise exec -- jq -e '.apply == false and .result == "preview" and .high == true' 
 [[ ! -e "$state_file" && ! -e "$state/kill-calls" ]] \
   || fail 'automatic preview mutated watchdog state'
 
+printf '%s\n' "$((400 * 1024 * 1024))" >"$state/footprint"
+printf '%s\n' 'error:-1743:not authorized' >"$state/probe-result"
+env "${test_env[@]}" "$cli" run --apply --json >"$test_root/run-probe-error.json"
+mise exec -- jq -e '
+  .result == "deferred-probe-error" and .early_high == true and
+  .high == false and .responsiveness == "error" and
+  .unresponsive_streak == 0 and (.probe_error | contains("-1743"))
+' "$test_root/run-probe-error.json" >/dev/null \
+  || fail 'responsiveness probe error was not safely deferred'
+[[ ! -e "$state/kill-calls" ]] || fail 'responsiveness probe error signaled the service'
+
+printf '%s\n' responsive >"$state/probe-result"
+env "${test_env[@]}" "$cli" run --apply --json >"$test_root/run-early-responsive.json"
+mise exec -- jq -e '
+  .result == "healthy" and .early_high == true and .high == false and
+  .responsiveness == "responsive" and .unresponsive_streak == 0
+' "$test_root/run-early-responsive.json" >/dev/null \
+  || fail 'responsive service above the early threshold was not retained'
+[[ ! -e "$state/kill-calls" ]] || fail 'responsive service was signaled'
+
+printf '%s\n' timeout >"$state/probe-result"
+exit_code=0
+env "${test_env[@]}" "$cli" check --json >"$test_root/check-unresponsive.json" || exit_code=$?
+[[ "$exit_code" == 1 ]] || fail 'read-only timeout check returned success'
+mise exec -- jq -e '
+  .high == false and .early_high == true and .responsiveness == "timeout" and
+  .unresponsive == true
+' "$test_root/check-unresponsive.json" >/dev/null \
+  || fail 'read-only check did not report the responsiveness timeout'
+
+env "${test_env[@]}" "$cli" run --apply --json >"$test_root/run-timeout-1.json"
+env "${test_env[@]}" "$cli" run --apply --json >"$test_root/run-timeout-2.json"
+mise exec -- jq -e '
+  .result == "deferred-unresponsive-streak" and .responsiveness == "timeout" and
+  .unresponsive_streak == 1
+' "$test_root/run-timeout-1.json" >/dev/null || fail 'first timeout was not deferred'
+mise exec -- jq -e '
+  .result == "deferred-unresponsive-streak" and .responsiveness == "timeout" and
+  .unresponsive_streak == 2
+' "$test_root/run-timeout-2.json" >/dev/null || fail 'second timeout was not deferred'
+[[ ! -e "$state/kill-calls" ]] || fail 'fewer than three timeouts signaled the service'
+
+env "${test_env[@]}" "$cli" run --apply --json >"$test_root/run-timeout-3.json"
+mise exec -- jq -e '
+  .result == "recycled" and .recycle_reason == "unresponsive" and
+  .responsiveness == "timeout" and .unresponsive_streak == 3 and
+  .old_pid == 123 and .new_pid == 124 and .new_footprint_bytes == 134217728
+' "$test_root/run-timeout-3.json" >/dev/null \
+  || fail 'three confirmed timeouts did not recycle the early-high service'
+[[ "$(wc -l <"$state/kill-calls" | tr -d ' ')" == 1 ]] \
+  || fail 'unresponsive recycle did not send exactly one signal'
+mise exec -- jq -e '
+  .last_recycle_reason == "unresponsive" and .last_probe_result == "timeout" and
+  .unresponsive_pid == null and .unresponsive_streak == 0
+' "$state_file" >/dev/null || fail 'unresponsive recycle state was not finalized'
+
+rm -f "$state_file" "$state/kill-calls" "$state/probe-calls" "$state/probe-result"
+printf '%s\n' 123 >"$state/service-pid"
+printf '%s\n' "$((5 * 1024 * 1024 * 1024))" >"$state/footprint"
 : >"$state/stale-after-kill"
 env "${test_env[@]}" "$cli" run --apply --json >"$test_root/run-aggressive.json"
 mise exec -- jq -e '
   .result == "recycled" and .old_pid == 123 and .new_pid == 124 and
-  .new_footprint_bytes == 134217728 and (has("high_streak") | not)
+  .new_footprint_bytes == 134217728 and .recycle_reason == "hard-threshold" and
+  .responsiveness == "not-required" and (has("high_streak") | not)
 ' "$test_root/run-aggressive.json" >/dev/null \
   || fail 'first high sample was not recycled across stale launchd state'
 [[ "$(wc -l <"$state/kill-calls" | tr -d ' ')" == 1 ]] \

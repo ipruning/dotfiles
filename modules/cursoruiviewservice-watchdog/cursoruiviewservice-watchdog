@@ -26,7 +26,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-VERSION = "1.1.0"
+VERSION = "1.2.0"
 SCHEMA_VERSION = 1
 LABEL = "com.ipruning.cursoruiviewservice-watchdog"
 SERVICE_LABEL = "com.apple.TextInputUI.xpc.CursorUIViewService"
@@ -35,9 +35,32 @@ EXPECTED_EXECUTABLE = Path(
     "XPCServices/CursorUIViewService.xpc/Contents/MacOS/CursorUIViewService"
 )
 FOOTPRINT_THRESHOLD_BYTES = 512 * 1024**2
+EARLY_RECYCLE_THRESHOLD_BYTES = 384 * 1024**2
+REQUIRED_UNRESPONSIVE_SAMPLES = 3
 COOLDOWN_SECONDS = 5 * 60
 CHECK_INTERVAL_SECONDS = 30
 WRAPPER_MARKER = "# managed by cursoruiviewservice-watchdog"
+RESPONSIVENESS_SCRIPT = """
+on run argv
+  set targetPid to item 1 of argv as integer
+  tell application "System Events"
+    set matches to every application process whose unix id is targetPid
+    if (count of matches) is 0 then return "not-running"
+  end tell
+  try
+    with timeout of 1 seconds
+      tell application "System Events"
+        set targetProcess to item 1 of (every application process whose unix id is targetPid)
+        set _ to value of attribute "AXFocusedUIElement" of targetProcess
+      end tell
+    end timeout
+    return "responsive"
+  on error errorMessage number errorNumber
+    if errorNumber is -1712 then return "timeout"
+    return "error:" & errorNumber & ":" & errorMessage
+  end try
+end run
+"""
 
 TEST_ROOT = os.getenv("CURSORUIVIEW_WATCHDOG_TEST_ROOT", "")
 HOME = Path(TEST_ROOT) / "home" if TEST_ROOT else Path.home()
@@ -60,6 +83,7 @@ LAUNCHCTL_BIN = test_binary("LAUNCHCTL", "/bin/launchctl")
 FOOTPRINT_BIN = test_binary("FOOTPRINT", "/usr/bin/footprint")
 PS_BIN = test_binary("PS", "/bin/ps")
 KILL_BIN = test_binary("KILL", "/bin/kill")
+OSASCRIPT_BIN = test_binary("OSASCRIPT", "/usr/bin/osascript")
 UNAME_BIN = test_binary("UNAME", "/usr/bin/uname")
 
 
@@ -245,6 +269,8 @@ def install_mode(apply: bool, auto_recycle: bool, output_json: bool) -> int:
         "auto_recycle": auto_recycle,
         "interval_seconds": CHECK_INTERVAL_SECONDS,
         "threshold_bytes": FOOTPRINT_THRESHOLD_BYTES,
+        "early_recycle_threshold_bytes": EARLY_RECYCLE_THRESHOLD_BYTES,
+        "required_unresponsive_samples": REQUIRED_UNRESPONSIVE_SAMPLES,
     }
     if not apply:
         emit(record, output_json)
@@ -395,6 +421,24 @@ def inspect_service() -> ServiceSnapshot:
     return ServiceSnapshot(True, pid, footprint, swapped)
 
 
+def probe_responsiveness(pid: int) -> tuple[str, str]:
+    try:
+        result = run_command(
+            [OSASCRIPT_BIN, "-e", RESPONSIVENESS_SCRIPT, str(pid)], timeout=4
+        )
+    except CliError as error:
+        return "error", str(error)
+    if result.returncode != 0:
+        detail = result.stderr.strip() or result.stdout.strip() or "osascript failed"
+        return "error", detail
+    response = result.stdout.strip()
+    if response in {"responsive", "timeout", "not-running"}:
+        return response, ""
+    if response.startswith("error:"):
+        return "error", response
+    return "error", f"unexpected responsiveness probe output: {response or 'empty'}"
+
+
 def snapshot_record(snapshot: ServiceSnapshot) -> dict[str, Any]:
     return {
         "running": snapshot.running,
@@ -402,6 +446,7 @@ def snapshot_record(snapshot: ServiceSnapshot) -> dict[str, Any]:
         "footprint_bytes": snapshot.footprint_bytes,
         "swapped_bytes": snapshot.swapped_bytes,
         "threshold_bytes": FOOTPRINT_THRESHOLD_BYTES,
+        "early_recycle_threshold_bytes": EARLY_RECYCLE_THRESHOLD_BYTES,
     }
 
 
@@ -411,16 +456,28 @@ def check_mode(output_json: bool) -> int:
         snapshot.footprint_bytes is not None
         and snapshot.footprint_bytes >= FOOTPRINT_THRESHOLD_BYTES
     )
+    early_high = bool(
+        snapshot.footprint_bytes is not None
+        and snapshot.footprint_bytes >= EARLY_RECYCLE_THRESHOLD_BYTES
+    )
+    responsiveness = "not-running"
+    probe_error = ""
+    if snapshot.pid is not None:
+        responsiveness, probe_error = probe_responsiveness(snapshot.pid)
     emit(
         {
             "operation": "check",
             "ok": True,
             **snapshot_record(snapshot),
             "high": high,
+            "early_high": early_high,
+            "responsiveness": responsiveness,
+            "unresponsive": responsiveness == "timeout",
+            "probe_error": probe_error,
         },
         output_json,
     )
-    return 1 if high else 0
+    return 1 if high or responsiveness == "timeout" else 0
 
 
 def kill_service(old_pid: int) -> tuple[int | None, int | None]:
@@ -444,7 +501,9 @@ def kill_service(old_pid: int) -> tuple[int | None, int | None]:
                 time.sleep(0.1)
                 continue
             if process.stdout.strip() != str(EXPECTED_EXECUTABLE):
-                raise CliError(f"replacement PID {new_pid} has an unexpected executable")
+                raise CliError(
+                    f"replacement PID {new_pid} has an unexpected executable"
+                )
             footprint, _ = measure_footprint(new_pid)
             if footprint >= FOOTPRINT_THRESHOLD_BYTES:
                 raise CliError(
@@ -453,9 +512,8 @@ def kill_service(old_pid: int) -> tuple[int | None, int | None]:
             return new_pid, footprint
         else:
             process = run_command([PS_BIN, "-p", str(old_pid), "-o", "comm="])
-            if (
-                process.returncode != 0
-                or process.stdout.strip() != str(EXPECTED_EXECUTABLE)
+            if process.returncode != 0 or process.stdout.strip() != str(
+                EXPECTED_EXECUTABLE
             ):
                 stopped = True
         time.sleep(0.1)
@@ -471,6 +529,14 @@ def run_mode(apply: bool, output_json: bool) -> int:
             snapshot.footprint_bytes is not None
             and snapshot.footprint_bytes >= FOOTPRINT_THRESHOLD_BYTES
         )
+        early_high = bool(
+            snapshot.footprint_bytes is not None
+            and snapshot.footprint_bytes >= EARLY_RECYCLE_THRESHOLD_BYTES
+        )
+        responsiveness = "not-probed"
+        probe_error = ""
+        if snapshot.pid is not None and early_high and not high:
+            responsiveness, probe_error = probe_responsiveness(snapshot.pid)
         emit(
             {
                 "operation": "run",
@@ -478,6 +544,10 @@ def run_mode(apply: bool, output_json: bool) -> int:
                 "apply": False,
                 **snapshot_record(snapshot),
                 "high": high,
+                "early_high": early_high,
+                "responsiveness": responsiveness,
+                "probe_error": probe_error,
+                "required_unresponsive_samples": REQUIRED_UNRESPONSIVE_SAMPLES,
                 "result": "preview",
             },
             output_json,
@@ -488,37 +558,137 @@ def run_mode(apply: bool, output_json: bool) -> int:
         snapshot = inspect_service()
         state = load_state()
         now = int(time.time())
+        high = bool(
+            snapshot.footprint_bytes is not None
+            and snapshot.footprint_bytes >= FOOTPRINT_THRESHOLD_BYTES
+        )
+        early_high = bool(
+            snapshot.footprint_bytes is not None
+            and snapshot.footprint_bytes >= EARLY_RECYCLE_THRESHOLD_BYTES
+        )
+        responsiveness = "not-probed"
+        probe_error = ""
         base = {
             "operation": "run",
             "ok": True,
             "apply": True,
             **snapshot_record(snapshot),
+            "high": high,
+            "early_high": early_high,
+            "required_unresponsive_samples": REQUIRED_UNRESPONSIVE_SAMPLES,
         }
         if not snapshot.running:
             state.update({
                 "last_check_at": utc_now(),
                 "last_result": "not-running",
+                "last_probe_result": "not-running",
+                "last_probe_error": "",
+                "unresponsive_pid": None,
+                "unresponsive_streak": 0,
             })
             save_state(state)
-            emit({**base, "result": "not-running"}, output_json)
+            emit(
+                {
+                    **base,
+                    "responsiveness": "not-running",
+                    "probe_error": "",
+                    "unresponsive_streak": 0,
+                    "result": "not-running",
+                },
+                output_json,
+            )
             return 0
 
         assert snapshot.pid is not None and snapshot.footprint_bytes is not None
-        if snapshot.footprint_bytes < FOOTPRINT_THRESHOLD_BYTES:
+        if not early_high:
             state.update({
                 "last_check_at": utc_now(),
                 "last_error": "",
                 "last_result": "healthy",
                 "last_footprint_bytes": snapshot.footprint_bytes,
+                "last_probe_result": "not-probed",
+                "last_probe_error": "",
+                "unresponsive_pid": None,
+                "unresponsive_streak": 0,
             })
             save_state(state)
-            emit({**base, "result": "healthy"}, output_json)
+            emit(
+                {
+                    **base,
+                    "responsiveness": responsiveness,
+                    "probe_error": probe_error,
+                    "unresponsive_streak": 0,
+                    "result": "healthy",
+                },
+                output_json,
+            )
             return 0
+
+        unresponsive_streak = 0
+        recycle_reason = "hard-threshold"
+        if not high:
+            responsiveness, probe_error = probe_responsiveness(snapshot.pid)
+            if responsiveness == "timeout":
+                unresponsive_streak = (
+                    int(state.get("unresponsive_streak", 0)) + 1
+                    if state.get("unresponsive_pid") == snapshot.pid
+                    else 1
+                )
+                state.update({
+                    "unresponsive_pid": snapshot.pid,
+                    "unresponsive_streak": unresponsive_streak,
+                })
+            else:
+                state.update({
+                    "unresponsive_pid": None,
+                    "unresponsive_streak": 0,
+                })
+        else:
+            responsiveness = "not-required"
+            state.update({
+                "unresponsive_pid": None,
+                "unresponsive_streak": 0,
+            })
 
         state.update({
             "last_check_at": utc_now(),
             "last_footprint_bytes": snapshot.footprint_bytes,
+            "last_probe_result": responsiveness,
+            "last_probe_error": probe_error,
         })
+        base.update({
+            "responsiveness": responsiveness,
+            "probe_error": probe_error,
+            "unresponsive_streak": unresponsive_streak,
+        })
+
+        if not high and responsiveness != "timeout":
+            result = (
+                "deferred-service-changed"
+                if responsiveness == "not-running"
+                else "deferred-probe-error"
+                if responsiveness == "error"
+                else "healthy"
+            )
+            state.update({
+                "last_error": "",
+                "last_result": result,
+            })
+            save_state(state)
+            emit({**base, "result": result}, output_json)
+            return 0
+
+        if not high and unresponsive_streak < REQUIRED_UNRESPONSIVE_SAMPLES:
+            state.update({
+                "last_error": "",
+                "last_result": "deferred-unresponsive-streak",
+            })
+            save_state(state)
+            emit({**base, "result": "deferred-unresponsive-streak"}, output_json)
+            return 0
+
+        if not high:
+            recycle_reason = "unresponsive"
 
         last_attempt = int(state.get("last_recycle_attempt_epoch", 0))
         if now - last_attempt < COOLDOWN_SECONDS:
@@ -529,6 +699,7 @@ def run_mode(apply: bool, output_json: bool) -> int:
                 {
                     **base,
                     "result": "deferred-cooldown",
+                    "recycle_reason": recycle_reason,
                     "cooldown_remaining_seconds": remaining,
                 },
                 output_json,
@@ -536,10 +707,15 @@ def run_mode(apply: bool, output_json: bool) -> int:
             return 0
 
         confirmation = inspect_service()
+        confirmation_threshold = (
+            FOOTPRINT_THRESHOLD_BYTES
+            if recycle_reason == "hard-threshold"
+            else EARLY_RECYCLE_THRESHOLD_BYTES
+        )
         if (
             confirmation.pid != snapshot.pid
             or confirmation.footprint_bytes is None
-            or confirmation.footprint_bytes < FOOTPRINT_THRESHOLD_BYTES
+            or confirmation.footprint_bytes < confirmation_threshold
         ):
             state.update({
                 "last_result": "deferred-service-changed",
@@ -555,10 +731,37 @@ def run_mode(apply: bool, output_json: bool) -> int:
             )
             return 0
 
+        if recycle_reason == "unresponsive":
+            confirmation_responsiveness, confirmation_error = probe_responsiveness(
+                snapshot.pid
+            )
+            state.update({
+                "last_probe_result": confirmation_responsiveness,
+                "last_probe_error": confirmation_error,
+            })
+            if confirmation_responsiveness != "timeout":
+                state.update({
+                    "last_result": "deferred-responsiveness-changed",
+                    "unresponsive_pid": None,
+                    "unresponsive_streak": 0,
+                })
+                save_state(state)
+                emit(
+                    {
+                        **base,
+                        "result": "deferred-responsiveness-changed",
+                        "confirmation_responsiveness": confirmation_responsiveness,
+                        "confirmation_probe_error": confirmation_error,
+                    },
+                    output_json,
+                )
+                return 0
+
         state.update({
             "last_recycle_attempt_at": utc_now(),
             "last_recycle_attempt_epoch": now,
             "last_result": "recycling",
+            "last_recycle_reason": recycle_reason,
         })
         save_state(state)
         try:
@@ -574,12 +777,15 @@ def run_mode(apply: bool, output_json: bool) -> int:
             "last_old_pid": snapshot.pid,
             "last_new_pid": new_pid,
             "last_new_footprint_bytes": new_footprint,
+            "unresponsive_pid": None,
+            "unresponsive_streak": 0,
         })
         save_state(state)
         emit(
             {
                 **base,
                 "result": "recycled",
+                "recycle_reason": recycle_reason,
                 "old_pid": snapshot.pid,
                 "new_pid": new_pid,
                 "new_footprint_bytes": new_footprint,
@@ -618,10 +824,13 @@ def recycle_mode(apply: bool, output_json: bool) -> int:
             "last_recycle_attempt_at": utc_now(),
             "last_recycle_attempt_epoch": int(time.time()),
             "last_result": "recycled-manually",
+            "last_recycle_reason": "manual",
             "last_recycled_at": utc_now(),
             "last_old_pid": snapshot.pid,
             "last_new_pid": new_pid,
             "last_new_footprint_bytes": new_footprint,
+            "unresponsive_pid": None,
+            "unresponsive_streak": 0,
         })
         save_state(state)
         emit(
@@ -658,11 +867,18 @@ def status_mode(output_json: bool) -> int:
         "plist": str(LAUNCH_AGENT),
         "service_target": service_target(),
         "threshold_bytes": FOOTPRINT_THRESHOLD_BYTES,
+        "early_recycle_threshold_bytes": EARLY_RECYCLE_THRESHOLD_BYTES,
+        "required_unresponsive_samples": REQUIRED_UNRESPONSIVE_SAMPLES,
         "interval_seconds": CHECK_INTERVAL_SECONDS,
         "cooldown_seconds": COOLDOWN_SECONDS,
         "last_result": state.get("last_result"),
         "last_check_at": state.get("last_check_at"),
         "last_recycled_at": state.get("last_recycled_at"),
+        "last_recycle_reason": state.get("last_recycle_reason"),
+        "last_probe_result": state.get("last_probe_result"),
+        "last_probe_error": state.get("last_probe_error", ""),
+        "unresponsive_pid": state.get("unresponsive_pid"),
+        "unresponsive_streak": state.get("unresponsive_streak", 0),
         "last_error": state_error or state.get("last_error", ""),
     }
     emit(record, output_json)

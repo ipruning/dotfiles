@@ -23,8 +23,19 @@ opts into automatic recycling. An automatic recycle requires all of these
 conditions:
 
 - the exact Apple executable has one process owned by the current user;
-- `/usr/bin/footprint` reports at least 512 MiB in one check; and
+- `/usr/bin/footprint` reports either at least 512 MiB in one check, or at
+  least 384 MiB while the same PID times out on three consecutive one-second
+  Accessibility probes; and
 - no recycle has been attempted in the previous five minutes.
+
+The early path treats only Apple event timeout `-1712` as an unresponsive
+sample. A responsive result resets the streak. A TCC denial, probe launch
+failure, unexpected response, PID replacement, or footprint below 384 MiB
+cannot trigger recycling. The 512 MiB threshold remains an independent
+fallback when the Accessibility probe is unavailable from the LaunchAgent.
+The probe identifies a process that cannot answer the same bounded UI request
+repeatedly; macOS does not expose Activity Monitor's private “Not Responding”
+decision as a supported API.
 
 Recovery uses the launchd-owned service target:
 
@@ -32,11 +43,13 @@ Recovery uses the launchd-owned service target:
 user/<uid>/com.apple.TextInputUI.xpc.CursorUIViewService
 ```
 
-It confirms launchd still owns the measured PID and repeats the footprint check
-immediately before sending `SIGKILL` to that exact PID. It then verifies that
-the old PID disappeared. If launchd starts a replacement immediately, it also
-verifies the exact Apple executable path and replacement footprint. Failure is
-logged and enters the same cooldown; it never uses a name-based PID loop.
+It confirms launchd still owns the measured PID and repeats the applicable
+footprint check immediately before sending `SIGKILL` to that exact PID. The
+early path also requires one final Accessibility timeout at this boundary. It
+then verifies that the old PID disappeared. If launchd starts a replacement
+immediately, it also verifies the exact Apple executable path and replacement
+footprint. Failure is logged and enters the same cooldown; it never uses a
+name-based PID loop.
 
 Direct `SIGKILL` is necessary because macOS rejects `launchctl kickstart -k`
 for this Apple XPC service while System Integrity Protection is enabled.
@@ -45,10 +58,10 @@ briefly disrupt or freeze the UI, and PID identity cannot be asserted
 atomically between inspection and signaling. The undocumented global
 FeatureFlags override is not used.
 
-The Accessibility timeout probe from the legacy command remains deliberately
-removed: one timeout is not sufficient authorization to recycle a service, and
-an unattended LaunchAgent may have different TCC behavior from an interactive
-shell.
+The Accessibility probe is supplemental rather than authoritative because an
+unattended LaunchAgent may have different TCC behavior from an interactive
+shell. One timeout never authorizes recycling, and all non-timeout probe errors
+degrade to the memory-only fallback.
 
 ## Lifecycle
 
@@ -91,10 +104,10 @@ and stderr live under `~/Library/Logs/cursoruiviewservice-watchdog/`.
 
 This is a bounded workaround for an operating-system-owned failure mode; the
 public reports do not establish Apple's root cause. Remove it only after a
-later macOS release keeps a fresh `CursorUIViewService` below 512 MiB
-through at least seven days of normal input-source and Caps Lock use, without
-typing lag or a non-responsive process. Recheck with `check --json`, uninstall
-the LaunchAgent, then delete this module and its `mise run test-modules` entry.
+later macOS release keeps a fresh `CursorUIViewService` below 384 MiB through
+at least seven days of normal input-source and Caps Lock use, without typing lag
+or a non-responsive process. Recheck with `check --json`, uninstall the
+LaunchAgent, then delete this module and its `mise run test-modules` entry.
 
 ## Verification
 
