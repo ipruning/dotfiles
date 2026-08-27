@@ -311,7 +311,7 @@ def test_mise_sync_blocks_a_malformed_additional_global_config(
 
 
 @pytest.mark.parametrize("alias_section", ["alias", "tool_alias"])
-def test_mise_sync_accepts_a_tracked_backend_migration_alias(
+def test_mise_sync_blocks_a_retired_backend_migration_alias(
     tmp_path: Path,
     alias_section: str,
 ) -> None:
@@ -326,19 +326,13 @@ def test_mise_sync_accepts_a_tracked_backend_migration_alias(
 
     preview = run_scripts_module("mise_sync", home, "--json")
 
-    assert preview.returncode == 0
+    assert preview.returncode == 1
     document = json.loads(preview.stdout)
-    assert document["safety"]["apply_blocked"] is False
-    assert document["safety"]["live_alias_overrides"] == []
+    assert document["safety"]["apply_blocked"] is True
+    assert document["safety"]["live_alias_overrides"] == [
+        {"alias": "yarn", "backend": "vfox:mise-plugins/vfox-yarn"}
+    ]
     assert document["safety"]["live_only_tools"] == []
-
-    applied = run_scripts_module("mise_sync", home, "--apply", "--json")
-
-    assert applied.returncode == 0
-    assert json.loads(applied.stdout)["ok"] is True
-    live_config = home / ".config/mise/config.toml"
-    assert live_config.is_symlink()
-    assert live_config.resolve() == REPO_ROOT / "reference/.config/mise/config.toml"
 
 
 def test_mise_sync_normalizes_an_explicit_backend_to_its_tracked_alias(
