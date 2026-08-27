@@ -1,6 +1,6 @@
 config-version = 2
 
-accordion-padding = 12
+accordion-padding = 0
 after-startup-command = ["workspace 6"]
 default-root-container-layout = "accordion"
 default-root-container-orientation = "vertical"
@@ -14,19 +14,10 @@ start-at-login = true
 # MDPro3, replace this title-only predicate; titles may initialize too late.
 on-window-detected = [
     { if = 'test "%{window-title}" ~= "MDPro3"', run = "layout floating" },
-    { if = "test %{app-bundle-id} = com.valvesoftware.steam", run = "layout floating" },
-    { if = "test %{app-bundle-id} = uk.co.powdertoy.tpt", run = "layout floating" },
-    { if = "test %{app-bundle-id} = com.xfge.LifeEasy", run = "layout floating" },
-    { if = "test %{app-bundle-id} = com.xingin.discover", run = "layout floating" },
     { if = "test %{app-bundle-id} = com.apple.audio.AudioMIDISetup", run = "layout floating" },
     { if = "test %{app-bundle-id} = com.apple.ScreenSharing", run = "layout floating" },
     { if = "test %{app-bundle-id} = org.pqrs.Karabiner-Elements.Settings", run = "layout floating" },
     { if = "test %{app-bundle-id} = org.pqrs.Karabiner-EventViewer", run = "layout floating" },
-    { if = "test %{app-bundle-id} = codes.rambo.VirtualBuddy", run = "layout floating" },
-    { if = "test %{app-bundle-id} = com.hypergryph.arknights", run = "layout floating" },
-    { if = "test %{app-bundle-id} = com.rogueamoeba.audiohijack", run = "layout floating" },
-    { if = "test %{app-bundle-id} = ai.tcgcard.app", run = "layout floating" },
-    { if = "test %{app-bundle-id} = com.sleeplessmind.Wooshy", run = "layout floating" },
 ]
 
 [key-mapping]
@@ -53,12 +44,16 @@ outer.right = 0
 9 = ["secondary", "studio display", "lg ultragear", "main"]
 0 = ["secondary", "studio display", "lg ultragear", "main"]
 
+# AeroSpace treats left and right Alt as one layer, so each chord can use the
+# opposite-hand modifier. Keep frequent actions there; lower-frequency window
+# structure changes live behind the single-key Service Leader.
 [mode.main.binding]
+# Toggle passthrough with the same guarded chord in both modes so `alt-p`
+# remains the Personal launcher in Main.
 alt-shift-p = "mode pass"
 
 alt-tab = "workspace-back-and-forth"
-alt-comma = "layout tiles vertical horizontal"
-alt-period = "layout accordion vertical"
+# Enter Service as a Leader: release Alt before the next command.
 alt-slash = "mode service"
 
 alt-1 = "workspace 1"
@@ -85,48 +80,61 @@ alt-shift-8 = "move-node-to-workspace 8"
 alt-shift-9 = "move-node-to-workspace 9"
 alt-shift-0 = "move-node-to-workspace 0"
 
-alt-h = "focus left --boundaries all-monitors-outer-frame"
-alt-j = "focus down --boundaries all-monitors-outer-frame"
-alt-k = "focus up --boundaries all-monitors-outer-frame"
-alt-l = "focus right --boundaries all-monitors-outer-frame"
-alt-shift-h = ["move left", "mode main"]
-alt-shift-j = ["move down", "mode main"]
-alt-shift-k = ["move up", "mode main"]
-alt-shift-l = ["move right", "mode main"]
+# HJKL traverses only tiled windows. Transparent floating overlays such as
+# Typeless' `Status` dialog otherwise become invisible focus targets.
+alt-h = "focus --ignore-floating left --boundaries all-monitors-outer-frame"
+alt-j = "focus --ignore-floating down --boundaries all-monitors-outer-frame"
+alt-k = "focus --ignore-floating up --boundaries all-monitors-outer-frame"
+alt-l = "focus --ignore-floating right --boundaries all-monitors-outer-frame"
+alt-shift-h = "move left"
+alt-shift-j = "move down"
+alt-shift-k = "move up"
+alt-shift-l = "move right"
 
-alt-a = 'exec-and-forget open -a ${HOME}/Applications/Chrome\ Apps.localized/Amp.app'
-alt-b = 'exec-and-forget open -a /Applications/Google\ Chrome.app'
-alt-c = "exec-and-forget open -a /Applications/Claude.app"
-alt-g = 'exec-and-forget open -a /Applications/Ghostty.app'
-alt-enter = '''exec-and-forget osascript -e 'tell application id "com.mitchellh.ghostty" to new window' '''
+# App launchers use stable roles: Agent, Business, Chat, Editor, Personal,
+# Research, Shell, Tasks, and Web.
+alt-a = 'exec-and-forget open -a /Applications/Amp.app'
+alt-b = 'exec-and-forget open -a /Applications/Lark.app'
+alt-c = 'exec-and-forget open -a /Applications/Claude.app'
+alt-e = 'exec-and-forget open -a /Applications/Zed.app'
+alt-p = 'exec-and-forget open -a /Applications/WeChat.app'
 alt-r = 'exec-and-forget open -a /Applications/Roam\ Research.app'
-alt-z = "exec-and-forget open -a /Applications/Zed.app"
+alt-s = 'exec-and-forget open -a /Applications/Ghostty.app'
+alt-t = 'exec-and-forget open -a /Applications/Linear.app'
+alt-w = 'exec-and-forget open -a /Applications/Google\ Chrome.app'
+
+# `alt-s` activates Ghostty; `alt-enter` deliberately creates a new window.
+alt-enter = '''exec-and-forget osascript -e 'tell application id "com.mitchellh.ghostty" to new window' '''
 
 cmd-m = []
 cmd-h = []
 
 [mode.pass.binding]
-alt-p = "mode main"
+alt-shift-p = "mode main"
 
+# One-shot Leader commands return to Main. Resize stays in Service so repeated
+# adjustments need no additional prefix.
 [mode.service.binding]
 esc = "mode main"
 
-cmd-r = ["reload-config", "mode main"]
+a = ["layout accordion vertical", "mode main"]
+t = ["layout tiles vertical horizontal", "mode main"]
 
-alt-h = ["move-node-to-monitor --focus-follows-window left", "mode main"]
-alt-j = ["move-node-to-monitor --focus-follows-window down", "mode main"]
-alt-k = ["move-node-to-monitor --focus-follows-window up", "mode main"]
-alt-l = ["move-node-to-monitor --focus-follows-window right", "mode main"]
+h = ["move-node-to-monitor --focus-follows-window left", "mode main"]
+j = ["move-node-to-monitor --focus-follows-window down", "mode main"]
+k = ["move-node-to-monitor --focus-follows-window up", "mode main"]
+l = ["move-node-to-monitor --focus-follows-window right", "mode main"]
 
-alt-shift-h = ["join-with left", "mode main"]
-alt-shift-j = ["join-with down", "mode main"]
-alt-shift-k = ["join-with up", "mode main"]
-alt-shift-l = ["join-with right", "mode main"]
+shift-h = ["join-with left", "mode main"]
+shift-j = ["join-with down", "mode main"]
+shift-k = ["join-with up", "mode main"]
+shift-l = ["join-with right", "mode main"]
 
 minus = "resize smart -50"
 equal = "resize smart +50"
 
 r = ["flatten-workspace-tree", "mode main"]
+shift-r = ["reload-config", "mode main"]
 backspace = ["close-all-windows-but-current", "mode main"]
 
 f = ["layout floating tiling", "mode main"]
