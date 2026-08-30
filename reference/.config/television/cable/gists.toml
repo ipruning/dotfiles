@@ -11,6 +11,6 @@ display = "{split:/:-1}"
 command = """
 tmp=$(mktemp) || exit
 trap 'rm -f "$tmp"' EXIT
-curl -fsSL -o "$tmp" -- '{}' || exit
+curl -fsSL -o "$tmp" -- '{replace:s/'/'"'"'/g}' || exit
 bat -n --color=always "$tmp"
 """

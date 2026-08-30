@@ -15,4 +15,4 @@ $1 !~ /^#/ && NF {
 ' "$HOME/.ssh/known_hosts"'''
 
 [preview]
-command = "ssh-keygen -F '{}'"
+command = "ssh-keygen -F '{replace:s/'/'\"'\"'/g}'"

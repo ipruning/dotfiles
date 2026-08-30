@@ -7,4 +7,4 @@ requirements = ["bat", "rg"]
 command = "rg --files-with-matches 'app = marimo.App()|jupyter' -g '*.py' -g '*.ipynb'"
 
 [preview]
-command = "bat -n --color=always '{}'"
+command = "bat -n --color=always '{replace:s/'/'\"'\"'/g}'"

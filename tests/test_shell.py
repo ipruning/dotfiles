@@ -261,6 +261,22 @@ def test_television_channel_triggers_are_unambiguous_and_exist() -> None:
     assert duplicates == {}
 
 
+def test_television_preview_placeholders_use_shell_safe_quoting() -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    cable_dir = repo_root / "reference/.config/television/cable"
+    shell_quote_transform = "replace:s/'/'\"'\"'/g"
+
+    for path in cable_dir.glob("*.toml"):
+        with path.open("rb") as file:
+            channel = tomllib.load(file)
+        preview = channel.get("preview")
+        if not isinstance(preview, dict) or "command" not in preview:
+            continue
+        command = preview["command"]
+        if "{" in command:
+            assert shell_quote_transform in command, path
+
+
 def test_television_ssh_channels_parse_aliases_and_known_hosts(
     tmp_path: Path,
 ) -> None:
@@ -312,11 +328,14 @@ def test_television_channels_use_safe_current_sources() -> None:
     assert dirs["source"]["command"] == "fd -t d --hidden"
     assert "curl" in gists["metadata"]["requirements"]
     assert 'select(type == "string" and length > 0)' in gists["source"]["command"]
-    assert "curl -fsSL -o \"$tmp\" -- '{}'" in gists["preview"]["command"]
+    assert (
+        "curl -fsSL -o \"$tmp\" -- '{replace:s/'/'\"'\"'/g}'"
+        in gists["preview"]["command"]
+    )
     assert "television/gists" not in gists["preview"]["command"]
     assert hosts["keybindings"]["enter"] == "actions:connect"
     assert hosts["actions"]["connect"] == {
-        "command": "ssh -- '{}'",
+        "command": "ssh -- '{replace:s/'/'\"'\"'/g}'",
         "mode": "execute",
     }
 

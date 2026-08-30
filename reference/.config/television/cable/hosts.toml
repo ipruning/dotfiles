@@ -7,11 +7,11 @@ requirements = ["awk", "ssh"]
 command = "awk '/^[[:space:]]*Host[[:space:]]+/ { for (i = 2; i <= NF; i++) if ($i !~ /[!*?]/ && !seen[$i]++) print $i }' ~/.ssh/config"
 
 [preview]
-command = "ssh -G -- '{}' 2>/dev/null | awk '$1 ~ /^(hostname|user|port|proxyjump|identityagent|identityfile|identitiesonly)$/ { print }'"
+command = "ssh -G -- '{replace:s/'/'\"'\"'/g}' 2>/dev/null | awk '$1 ~ /^(hostname|user|port|proxyjump|identityagent|identityfile|identitiesonly)$/ { print }'"
 
 [keybindings]
 enter = "actions:connect"
 
 [actions.connect]
-command = "ssh -- '{}'"
+command = "ssh -- '{replace:s/'/'\"'\"'/g}'"
 mode = "execute"

@@ -7,4 +7,4 @@ requirements = ["fd", "eza"]
 command = "fd -IHL -t directory"
 
 [preview]
-command = "eza --all --long --time-style long-iso --color always '{}'"
+command = "eza --all --long --time-style long-iso --color always '{replace:s/'/'\"'\"'/g}'"

@@ -7,7 +7,7 @@ requirements = ["fd"]
 command = "fd -t d --hidden"
 
 [preview]
-command = "ls -la --color=always -- '{}'"
+command = "ls -la --color=always -- '{replace:s/'/'\"'\"'/g}'"
 
 [keybindings]
 shortcut = "f2"
