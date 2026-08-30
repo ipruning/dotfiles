@@ -12,11 +12,11 @@ function siteUrlPattern(domains) {
 
 api.Hints.style(`
   font-family: MonoLisaCode;
-  font-size: 12px;
+  font-size: 13px;
 `);
 settings.theme = `
 .sk_theme #sk_omnibarSearchArea input, #sk_omnibarSearchResult {
-  font-size: 14px;
+  font-size: 15px;
 }
 `;
 
