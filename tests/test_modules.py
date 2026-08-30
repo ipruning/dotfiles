@@ -185,6 +185,106 @@ def test_pi_session_export_requires_an_explicit_command(tmp_path: Path) -> None:
     assert "convert" in completed.stderr
 
 
+def test_pi_session_export_keeps_data_derived_names_inside_output_dir(
+    tmp_path: Path,
+) -> None:
+    executable = (
+        Path(__file__).resolve().parents[1] / "modules/bin/pi-session-export.py"
+    )
+    input_path = tmp_path / "session.jsonl"
+    output_dir = tmp_path / "out"
+    input_path.write_text(json.dumps({"type": "session", "id": "session-123"}) + "\n")
+
+    completed = subprocess.run(
+        [str(executable), "convert", str(input_path), "--output-dir", str(output_dir)],
+        capture_output=True,
+        text=True,
+    )
+
+    assert completed.returncode == 0, completed.stderr
+    raw_path = output_dir / "session-123.jsonl"
+    turns_path = output_dir / "session-123.turns.with-tools.jsonl"
+    assert raw_path.is_file()
+    assert turns_path.is_file()
+    assert raw_path.read_text() == input_path.read_text()
+    assert raw_path.parent == turns_path.parent == output_dir
+
+
+@pytest.mark.parametrize(
+    "name", ("../escaped", "/tmp/escaped", "nested/name", "nested\\name")
+)
+def test_pi_session_export_rejects_path_like_names(tmp_path: Path, name: str) -> None:
+    executable = (
+        Path(__file__).resolve().parents[1] / "modules/bin/pi-session-export.py"
+    )
+    input_path = tmp_path / "session.jsonl"
+    output_dir = tmp_path / "out"
+    input_path.write_text(json.dumps({"type": "session", "id": name}) + "\n")
+
+    completed = subprocess.run(
+        [str(executable), "convert", str(input_path), "--output-dir", str(output_dir)],
+        capture_output=True,
+        text=True,
+    )
+
+    assert completed.returncode == 2
+    assert "single filename component" in completed.stderr
+    assert not output_dir.exists()
+    assert not (tmp_path / "escaped.jsonl").exists()
+
+
+def test_pi_session_export_rejects_path_like_stem(tmp_path: Path) -> None:
+    executable = (
+        Path(__file__).resolve().parents[1] / "modules/bin/pi-session-export.py"
+    )
+    input_path = tmp_path / "session.jsonl"
+    output_dir = tmp_path / "out"
+    input_path.write_text(json.dumps({"type": "session", "id": "session-123"}) + "\n")
+
+    completed = subprocess.run(
+        [
+            str(executable),
+            "convert",
+            str(input_path),
+            "--output-dir",
+            str(output_dir),
+            "--stem",
+            "../escaped",
+        ],
+        capture_output=True,
+        text=True,
+    )
+
+    assert completed.returncode == 2
+    assert "single filename component" in completed.stderr
+    assert not output_dir.exists()
+    assert not (tmp_path / "escaped.jsonl").exists()
+
+
+def test_pi_session_export_rejects_symlinked_output_destination(tmp_path: Path) -> None:
+    executable = (
+        Path(__file__).resolve().parents[1] / "modules/bin/pi-session-export.py"
+    )
+    input_path = tmp_path / "session.jsonl"
+    output_dir = tmp_path / "out"
+    outside = tmp_path / "outside.jsonl"
+    output_dir.mkdir()
+    outside.write_text("keep\n")
+    (output_dir / "session-123.jsonl").symlink_to(outside)
+    input_path.write_text(json.dumps({"type": "session", "id": "session-123"}) + "\n")
+
+    completed = subprocess.run(
+        [str(executable), "convert", str(input_path), "--output-dir", str(output_dir)],
+        capture_output=True,
+        text=True,
+    )
+
+    assert completed.returncode == 2
+    assert "symlinked output destination" in completed.stderr
+    assert outside.read_text() == "keep\n"
+    assert not (output_dir / "session-123.turns.with-tools.jsonl").exists()
+
+
 @skip_as_root
 def test_skillshare_exec_restore_failure_overrides_child_success(
     tmp_path: Path,

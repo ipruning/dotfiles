@@ -9,8 +9,8 @@ from __future__ import annotations
 import argparse
 import base64
 import json
+import os
 import re
-import shutil
 import sys
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
@@ -146,8 +146,47 @@ def clean(value: Any) -> Any:
     return value
 
 
+def _output_name(value: str, label: str) -> str:
+    if (
+        not value
+        or value in {".", ".."}
+        or Path(value).is_absolute()
+        or "/" in value
+        or "\\" in value
+        or any(ord(character) < 32 or ord(character) == 127 for character in value)
+    ):
+        raise ValueError(
+            f"{label} must be a single filename component without path separators"
+        )
+    return value
+
+
+def _output_path(output_dir: Path, name: str, suffix: str) -> Path:
+    path = output_dir / f"{_output_name(name, 'output name')}{suffix}"
+    if path.is_symlink():
+        raise ValueError(f"refusing symlinked output destination: {path}")
+    try:
+        path.resolve().relative_to(output_dir)
+    except ValueError as exc:
+        raise ValueError(f"output destination escapes output directory: {path}") from exc
+    return path
+
+
+def _write_bytes(path: Path, content: bytes) -> None:
+    flags = os.O_WRONLY | os.O_CREAT | os.O_TRUNC
+    if hasattr(os, "O_NOFOLLOW"):
+        flags |= os.O_NOFOLLOW
+    descriptor = os.open(path, flags, 0o600)
+    with os.fdopen(descriptor, "wb") as output:
+        output.write(content)
+
+
 def write_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
-    path.write_text("\n".join(json.dumps(clean(row), ensure_ascii=False) for row in rows) + "\n")
+    _write_bytes(
+        path,
+        ("\n".join(json.dumps(clean(row), ensure_ascii=False) for row in rows) + "\n")
+        .encode("utf-8"),
+    )
 
 
 def convert(input_path: Path, output_dir: Path | None, stem: str | None) -> None:
@@ -155,7 +194,6 @@ def convert(input_path: Path, output_dir: Path | None, stem: str | None) -> None
     if not input_path.is_file():
         raise ValueError(f"{input_path}: file not found")
     out = output_dir.expanduser().resolve() if output_dir else input_path.parent
-    out.mkdir(parents=True, exist_ok=True)
     if input_path.suffix.lower() == ".html":
         source, (records, session_id) = "html", parse_html_to_records(input_path)
     elif input_path.suffix.lower() == ".jsonl":
@@ -163,10 +201,12 @@ def convert(input_path: Path, output_dir: Path | None, stem: str | None) -> None
         session_id = infer_session_id(records, input_path.stem)
     else:
         raise ValueError("input must be .html or .jsonl")
-    raw_path = out / f"{stem or session_id}.jsonl"
-    turns_path = out / f"{stem or session_id}.turns.with-tools.jsonl"
+    output_name = _output_name(stem or session_id, "session identifier")
+    raw_path = _output_path(out, output_name, ".jsonl")
+    turns_path = _output_path(out, output_name, ".turns.with-tools.jsonl")
+    out.mkdir(parents=True, exist_ok=True)
     if source == "jsonl" and input_path != raw_path:
-        shutil.copyfile(input_path, raw_path)
+        _write_bytes(raw_path, input_path.read_bytes())
     elif source == "html":
         write_jsonl(raw_path, records)
     turns = records_to_turns_with_tools(records)
