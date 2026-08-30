@@ -160,12 +160,12 @@ COMPLETION_SPECS = (
     ("linear", "linear", ("linear", "completions", "zsh"), "_linear", ()),
     ("sesh", "sesh", ("sesh", "completion", "zsh"), "_sesh", ()),
     ("op", "op", ("op", "completion", "zsh"), "_op", ()),
-    # TODO: Remove the explicit httpx dependency once `uvx llm` can render
-    # `_LLM_COMPLETE=zsh_source` from its published dependencies alone.
+    # Keep the resolver inputs exact: this generator is an explicit runtime
+    # refresh boundary, not a request to execute the latest PyPI release.
     (
         "llm",
         "uvx",
-        ("uvx", "--with", "httpx", "llm"),
+        ("uvx", "--with", "httpx==0.28.1", "llm==0.33"),
         "_llm",
         (("_LLM_COMPLETE", "zsh_source"),),
     ),
@@ -544,6 +544,20 @@ def _atomic_install(target: Path, writer: AtomicWriter) -> None:
 
 
 def _command_environment(spec: RuntimeSpec, home: Path) -> dict[str, str]:
+    if spec.name == "completion.llm":
+        # LLM completion generation only needs a resolver path and temporary
+        # directory. Do not expose the user's API keys or other shell state to
+        # the downloaded package environment.
+        environment = {
+            "HOME": str(home),
+            "PATH": os.environ.get("PATH", os.defpath),
+        }
+        for name in ("TMPDIR", "TMP", "TEMP", "LANG", "LC_ALL"):
+            if value := os.environ.get(name):
+                environment[name] = value
+        environment.update(dict(spec.environment))
+        return environment
+
     environment = os.environ.copy()
     environment["HOME"] = str(home)
     environment.update(dict(spec.environment))

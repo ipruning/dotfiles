@@ -271,7 +271,7 @@ def test_runtime_removes_atuin_function_when_host_tool_is_unavailable(
     assert not (functions / "_atuin.zsh").exists()
 
 
-def test_runtime_generates_llm_completion_through_uvx(tmp_path: Path) -> None:
+def test_runtime_generates_llm_completion_through_pinned_uvx(tmp_path: Path) -> None:
     repo_root = tmp_path / "dotfiles"
     home = tmp_path / "home"
     bin_dir = tmp_path / "bin"
@@ -285,8 +285,8 @@ def test_runtime_generates_llm_completion_through_uvx(tmp_path: Path) -> None:
         "uvx",
         'test "$1" = --offline || exit 9\n'
         'test "$2" = --with || exit 7\n'
-        'test "$3" = httpx || exit 6\n'
-        'test "$4" = llm || exit 5\n'
+        'test "$3" = httpx==0.28.1 || exit 6\n'
+        'test "$4" = llm==0.33 || exit 5\n'
         'test "$_LLM_COMPLETE" = zsh_source || exit 8\n'
         "printf 'llm completion\\n'\n",
     )
@@ -300,9 +300,42 @@ def test_runtime_generates_llm_completion_through_uvx(tmp_path: Path) -> None:
         "uvx",
         "--offline",
         "--with",
-        "httpx",
-        "llm",
+        "httpx==0.28.1",
+        "llm==0.33",
     ]
+    assert completion.read_text() == "llm completion\n"
+
+
+def test_runtime_llm_completion_does_not_receive_host_credentials(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    bin_dir = tmp_path / "bin"
+    completion = repo_root / "generated/completions/_llm"
+    home.mkdir()
+    bin_dir.mkdir()
+    monkeypatch.setenv("OPENAI_API_KEY", "test-openai-key")
+    monkeypatch.setenv("BRRR_SECRET", "test-brrr-secret")
+    _fake_tool(
+        bin_dir,
+        "uvx",
+        'test -z "${OPENAI_API_KEY+x}" || exit 9\n'
+        'test -z "${BRRR_SECRET+x}" || exit 8\n'
+        'test "$_LLM_COMPLETE" = zsh_source || exit 7\n'
+        "printf 'llm completion\\n'\n",
+    )
+
+    completed = _run_runtime(repo_root, home, bin_dir, "--offline", "--apply", "--json")
+
+    assert completed.returncode == 0, completed.stderr
+    result = next(
+        step
+        for step in json.loads(completed.stdout)["steps"]
+        if step["name"] == "completion.llm"
+    )
+    assert result["status"] == "succeeded"
     assert completion.read_text() == "llm completion\n"
 
 
