@@ -17,13 +17,27 @@ log_message() {
 
 cd "$repo_root"
 
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+  printf '%s\n' \
+    'Usage: mise run zsh-profile -- [runs] [warmup]' \
+    '' \
+    'Measure interactive Zsh startup time and print a trace profile.' \
+    '' \
+    'Arguments:' \
+    '  runs    Positive benchmark run count (default: 50)' \
+    '  warmup  Nonnegative benchmark warmup count (default: 10)'
+  exit 0
+fi
+
 [[ $# -le 2 ]] || { log_message error "Usage: mise run zsh-profile -- [runs] [warmup]"; exit 2; }
 
 run_count="${1:-50}"
 warmup_count="${2:-10}"
 
-[[ "$run_count" =~ ^[0-9]+$ ]] && (( 10#$run_count > 0 )) \
-  || { log_message error "runs must be a positive integer (got: $run_count)"; exit 1; }
+if ! [[ "$run_count" =~ ^[0-9]+$ ]] || (( 10#$run_count <= 0 )); then
+  log_message error "runs must be a positive integer (got: $run_count)"
+  exit 1
+fi
 [[ "$warmup_count" =~ ^[0-9]+$ ]] \
   || { log_message error "warmup must be a nonnegative integer (got: $warmup_count)"; exit 1; }
 

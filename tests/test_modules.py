@@ -116,6 +116,18 @@ def test_zsh_profile_reports_invalid_input_without_optional_gum(
         assert source is not None
         (tool_bin / real).symlink_to(source)
 
+    help_result = subprocess.run(
+        [str(executable), "--help"],
+        env={"HOME": str(tmp_path), "PATH": str(tool_bin)},
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert help_result.returncode == 0
+    assert help_result.stderr == ""
+    assert "Usage: mise run zsh-profile -- [runs] [warmup]" in help_result.stdout
+
     completed = subprocess.run(
         [str(executable), "invalid"],
         env={"HOME": str(tmp_path), "PATH": str(tool_bin)},
