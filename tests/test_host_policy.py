@@ -6,6 +6,7 @@ import pytest
 
 from scripts.adopt import AdoptReport, apply_adopt
 from scripts.check import inspect_host
+from scripts.clean import execute_clean
 from scripts.host_policy import (
     HostPolicyError,
     HostPolicyMutationError,
@@ -81,6 +82,7 @@ def _apply_arguments(module: str, tmp_path: Path) -> tuple[str, ...]:
         ("adopt", "adopt"),
         ("runtime", "runtime"),
         ("inventory", "inventory"),
+        ("clean", "clean"),
     ],
 )
 def test_host_policy_refuses_every_cli_mutation_before_planning(
@@ -176,6 +178,7 @@ def test_audit_only_policy_guards_direct_mutation_apis(tmp_path: Path) -> None:
         lambda: execute_updates(home, executable_finder=lambda _tool: None),
         lambda: execute_runtime(RuntimeReport(False, ()), home),
         lambda: execute_inventory(InventoryReport("host", False, ()), home),
+        lambda: execute_clean(home, executable_finder=lambda _tool: None),
     )
 
     for mutation in calls:

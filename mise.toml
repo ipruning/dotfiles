@@ -44,6 +44,14 @@ run = 'python -m scripts.adopt "$@"'
 description = "Inspect this host's required and optional capabilities"
 run = 'python -m scripts.check "$@"'
 
+[tasks.doctor]
+description = "Aggregate read-only repository and host health checks"
+run = 'python -m scripts.doctor "$@"'
+
+[tasks.clean]
+description = "Preview or apply package-manager cleanup"
+run = 'python -m scripts.clean "$@"'
+
 [tasks.setup]
 description = "Preview or apply an explicit host profile"
 run = 'python -m scripts.setup "$@"'

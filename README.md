@@ -148,6 +148,7 @@ authoritative command interfaces:
 | Compare, restore, or adopt configuration | [Configuration drift](#configuration-drift) |
 | Converge global mise tools across hosts | [Global mise convergence](#global-mise-convergence) |
 | Inspect host and repository health | [Host health](#host-health) |
+| Run the complete health sweep | [Doctor and cleanup](#doctor-and-cleanup) |
 | Update installed tools | [Host updates](#host-updates) |
 | Refresh generated shell state | [Generated runtime](#generated-runtime) |
 | Record installed software | [Host inventory](#host-inventory) |
@@ -401,6 +402,43 @@ between machines running the same commit. `mise run verify` adds Python formatti
 tests, the standalone module suites on macOS, and the shell gate: `mise run shell`
 runs Bash syntax checks and ShellCheck for Bash files. Zsh files receive syntax
 checking when `zsh` is available.
+
+## Doctor and cleanup
+
+`doctor` is the read-only aggregate entrypoint for routine machine
+maintenance. It runs the repository's `check`, `diff`, `mise-sync`, and `lint`
+reports, then probes `mise doctor`, `skillshare doctor --json`, `brew doctor`,
+`pueue status`, and `rotom status --format json` when those owners are
+available. Each result remains separate, so a failure such as Rotom's missing
+Codex configuration does not hide the other checks:
+
+```bash
+mise run doctor
+mise run doctor -- --json
+mise run doctor -- --strict
+```
+
+Normal mode fails only on errors; `--strict` also treats warnings as failures.
+Unavailable optional host tools are reported as `skipped`. The JSON form emits
+one document on stdout and retains child reports and captured command output
+inside each check result.
+
+`clean` is a separate, preview-first operation. It asks the owners that already
+manage these resources what they would remove:
+
+```bash
+mise run clean
+mise run clean -- --json
+mise run clean -- --apply
+```
+
+The default runs only `mise prune --dry-run --tools`, `brew autoremove
+--dry-run`, and `brew cleanup --dry-run`; it does not change the host. Only
+`--apply` runs their mutating counterparts, and the existing host-local
+`audit-only` policy blocks that apply. Skillshare trash, Skillshare
+configuration synchronization, configuration adopt/restore, and repository
+state under `generated/` or `inventory/` are intentionally outside this
+cleanup scope and require their own explicit operations.
 
 ## Host updates
 
