@@ -36,8 +36,12 @@ case $- in
     # Activate mise after integrations that rewrite PROMPT_COMMAND so its
     # dynamic environment hook remains installed.
     if [ -x "$HOME/.local/bin/mise" ] && [ ! -L "$HOME/.local/bin/mise" ] && \
-      [ -f "$_dotfiles_functions_dir/_mise.bash" ]; then
-      . "$_dotfiles_functions_dir/_mise.bash"
+      [ -f "$_dotfiles_functions_dir/_mise.bash" ] && \
+      . "$_dotfiles_functions_dir/_mise.bash"; then
+      :
+    else
+      # Keep mise shims available when activation is unavailable or fails.
+      _dotfiles_prepend_path "$HOME/.local/share/mise/shims"
     fi
     bind '"\C-w": "\e\C-?"'
     # SSH logins intentionally open an ordinary shell; start Herdr explicitly.

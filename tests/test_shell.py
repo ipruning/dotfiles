@@ -644,6 +644,43 @@ def test_bash_init_adds_navigation_editing_and_guarded_history_tools(
     assert "stale shim" not in degraded.stderr
 
 
+def test_bash_init_keeps_mise_shims_when_activation_is_unavailable(
+    tmp_path: Path,
+) -> None:
+    source_root = Path(__file__).resolve().parents[1]
+    repo_root = tmp_path / "repo"
+    bash_init = repo_root / "modules/bash/init.bash"
+    bash_init.parent.mkdir(parents=True)
+    shutil.copy2(source_root / "modules/bash/init.bash", bash_init)
+    home = tmp_path / "home"
+    shims = home / ".local/share/mise/shims"
+    shims.mkdir(parents=True)
+    uv = shims / "uv"
+    uv.write_text("#!/bin/sh\nexit 0\n")
+    uv.chmod(0o755)
+    bash = shutil.which("bash")
+    assert bash is not None
+
+    completed = subprocess.run(
+        [
+            bash,
+            "--noprofile",
+            "--norc",
+            "-ic",
+            f'. "{bash_init}"; command -v uv; printf "%s" "$PATH"',
+        ],
+        env={"HOME": str(home), "PATH": "/usr/bin:/bin"},
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert completed.returncode == 0
+    command_path, loaded_path = completed.stdout.split("\n", 1)
+    assert command_path == str(uv)
+    assert loaded_path.split(":").count(str(shims)) == 1
+
+
 def test_bash_init_activates_mise_after_prompt_tools(tmp_path: Path) -> None:
     source_root = Path(__file__).resolve().parents[1]
     repo_root = tmp_path / "repo"
@@ -652,8 +689,10 @@ def test_bash_init_activates_mise_after_prompt_tools(tmp_path: Path) -> None:
     shutil.copy2(source_root / "modules/bash/init.bash", bash_init)
     home = tmp_path / "home"
     local_bin = home / ".local/bin"
+    shims = home / ".local/share/mise/shims"
     bin_dir = tmp_path / "bin"
     local_bin.mkdir(parents=True)
+    shims.mkdir(parents=True)
     bin_dir.mkdir()
     tools = {
         local_bin
@@ -685,7 +724,11 @@ def test_bash_init_activates_mise_after_prompt_tools(tmp_path: Path) -> None:
             "--noprofile",
             "--norc",
             "-ic",
-            f'. "{bash_init}"; printf "%s" "$PROMPT_COMMAND"',
+            (
+                f'. "{bash_init}"; '
+                'case ":$PATH:" in *":$HOME/.local/share/mise/shims:"*) exit 1;; esac; '
+                'printf "%s" "$PROMPT_COMMAND"'
+            ),
         ],
         env={"HOME": str(home), "PATH": f"{bin_dir}:/usr/bin:/bin"},
         check=False,
