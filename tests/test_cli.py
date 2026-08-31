@@ -110,14 +110,14 @@ def test_global_mise_lock_covers_declared_artifact_platforms() -> None:
         "~/Developer/jihuanshe",
     ]
     assert {"codex", "gh"}.isdisjoint(config["tools"])
-    assert config["tool_alias"]["yarn"] == "aqua:yarnpkg/berry"
+    assert config["tool_alias"]["yarn"] == "vfox:mise-plugins/vfox-yarn"
     assert config["tools"]["yarn"] == "latest"
-    assert "aqua:yarnpkg/berry" not in config["tools"]
+    assert "vfox:mise-plugins/vfox-yarn" not in config["tools"]
     lockfile = tomllib.loads(
         (repo_root / "reference/.config/mise/mise.lock").read_text(),
     )
     assert lockfile["lockfile_version"] == 1
-    assert "aqua:yarnpkg/berry" not in lockfile["tools"]
+    assert "vfox:mise-plugins/vfox-yarn" not in lockfile["tools"]
     version_only_backends = {"core:rust"}
     version_only_prefixes = ("cargo:", "gem:", "go:", "npm:", "pipx:")
     missing: list[str] = []

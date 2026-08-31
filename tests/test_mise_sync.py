@@ -311,7 +311,7 @@ def test_mise_sync_blocks_a_malformed_additional_global_config(
 
 
 @pytest.mark.parametrize("alias_section", ["alias", "tool_alias"])
-def test_mise_sync_blocks_a_retired_backend_migration_alias(
+def test_mise_sync_blocks_an_untracked_backend_migration_alias(
     tmp_path: Path,
     alias_section: str,
 ) -> None:
@@ -319,7 +319,7 @@ def test_mise_sync_blocks_a_retired_backend_migration_alias(
     home.mkdir()
     _write_live_config(home)
     (home / ".config/mise/config.toml").write_text(
-        f'[{alias_section}]\nyarn = "vfox:mise-plugins/vfox-yarn"\n\n'
+        f'[{alias_section}]\nyarn = "aqua:yarnpkg/berry"\n\n'
         '[tools]\nnode = "20"\nyarn = "latest"\n'
     )
     _write_mise(home, tmp_path / "mise.log")
@@ -330,7 +330,7 @@ def test_mise_sync_blocks_a_retired_backend_migration_alias(
     document = json.loads(preview.stdout)
     assert document["safety"]["apply_blocked"] is True
     assert document["safety"]["live_alias_overrides"] == [
-        {"alias": "yarn", "backend": "vfox:mise-plugins/vfox-yarn"}
+        {"alias": "yarn", "backend": "aqua:yarnpkg/berry"}
     ]
     assert document["safety"]["live_only_tools"] == []
 
@@ -355,7 +355,7 @@ def test_mise_sync_normalizes_an_explicit_backend_to_its_tracked_alias(
     assert document["safety"]["live_only_tools"] == []
 
 
-def test_mise_sync_accepts_a_previous_tracked_backend_without_its_new_alias(
+def test_mise_sync_blocks_a_previous_backend_without_its_new_alias(
     tmp_path: Path,
 ) -> None:
     home = tmp_path / "home"
@@ -368,10 +368,10 @@ def test_mise_sync_accepts_a_previous_tracked_backend_without_its_new_alias(
 
     completed = run_scripts_module("mise_sync", home, "--json")
 
-    assert completed.returncode == 0
+    assert completed.returncode == 1
     document = json.loads(completed.stdout)
-    assert document["safety"]["apply_blocked"] is False
-    assert document["safety"]["live_only_tools"] == []
+    assert document["safety"]["apply_blocked"] is True
+    assert document["safety"]["live_only_tools"] == ["aqua:yarnpkg/berry"]
 
 
 @pytest.mark.parametrize(
@@ -409,7 +409,7 @@ def test_mise_sync_accepts_a_previous_tracked_backend_without_its_new_alias(
                 '[tool_alias]\nnode = "aqua:evil/thing"\n\n'
                 '[tools]\n"aqua:yarnpkg/berry" = "latest"\n'
             ),
-            [],
+            ["aqua:yarnpkg/berry"],
             "node",
             "aqua:evil/thing",
         ),

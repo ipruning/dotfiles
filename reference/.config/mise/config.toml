@@ -2,7 +2,7 @@
 min_version = { hard = "2026.8.11" }
 
 [tool_alias]
-# Keep canonical tool identities pinned to plugin-free backends; [tools] must
+# Keep canonical tool identities pinned to explicit backends; [tools] must
 # use these aliases rather than declaring the same full backend separately.
 agent-browser = "npm:agent-browser"
 aube = "aqua:jdx/aube"
@@ -16,7 +16,7 @@ skillshare = "aqua:runkids/skillshare"
 starship = "aqua:starship/starship"
 uv = "aqua:astral-sh/uv"
 xurl = "github:xdevplatform/xurl"
-yarn = "aqua:yarnpkg/berry"
+yarn = "vfox:mise-plugins/vfox-yarn"
 zoxide = "aqua:ajeetdsouza/zoxide"
 
 [tools]
