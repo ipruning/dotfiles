@@ -15,7 +15,6 @@ _dotfiles_prepend_path() {
 }
 
 _dotfiles_prepend_path "$HOME/.local/bin"
-_dotfiles_prepend_path "$HOME/.local/share/mise/shims"
 export PATH
 
 case $- in
@@ -47,6 +46,12 @@ case $- in
     #   herdr --version >/dev/null 2>&1; then
     #   exec herdr
     # fi
+    ;;
+  *)
+    # Interactive Bash uses mise activation; non-interactive Bash keeps the
+    # shim path for commands launched without a shell hook.
+    _dotfiles_prepend_path "$HOME/.local/share/mise/shims"
+    export PATH
     ;;
 esac
 
