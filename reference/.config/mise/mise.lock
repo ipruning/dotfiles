@@ -3,25 +3,25 @@
 lockfile_version = 1
 
 [[tools.agent-browser]]
-version = "0.35.1"
+version = "0.36.0"
 backend = "npm:agent-browser"
 specifiers = ["latest"]
 
 [[tools.aube]]
-version = "2.2.0"
+version = "2.2.4"
 backend = "aqua:jdx/aube"
 specifiers = ["latest"]
 
 [tools.aube."platforms.linux-x64"]
-checksum = "sha256:5d8b91f772712e6f971a2e15a52dcc392acbb21782fbb532124588deb647656b"
-url = "https://github.com/jdx/aube/releases/download/v2.2.0/aube-v2.2.0-x86_64-unknown-linux-gnu.tar.gz"
-url_api = "https://api.github.com/repos/jdx/aube/releases/assets/529716822"
+checksum = "sha256:20b8fda0f9f471500ee64814880bd84c1bc402ee7f6dece39bfae25cc93aa1d8"
+url = "https://github.com/jdx/aube/releases/download/v2.2.4/aube-v2.2.4-x86_64-unknown-linux-gnu.tar.gz"
+url_api = "https://api.github.com/repos/jdx/aube/releases/assets/538149375"
 provenance = "github-attestations"
 
 [tools.aube."platforms.macos-arm64"]
-checksum = "sha256:702de7f549cef800a1f35900e638ea4fbe07bce854f234cef869cd5442484c90"
-url = "https://github.com/jdx/aube/releases/download/v2.2.0/aube-v2.2.0-aarch64-apple-darwin.tar.gz"
-url_api = "https://api.github.com/repos/jdx/aube/releases/assets/529761660"
+checksum = "sha256:aa3f6e8e319c8d9c92393e797cd5576229eacc0740e8cf2b34d4c65bb1e61708"
+url = "https://github.com/jdx/aube/releases/download/v2.2.4/aube-v2.2.4-aarch64-apple-darwin.tar.gz"
+url_api = "https://api.github.com/repos/jdx/aube/releases/assets/538155490"
 provenance = "github-attestations"
 
 [[tools.bun]]
@@ -93,37 +93,37 @@ url = "https://github.com/agavra/tuicr/releases/download/v0.24.0/tuicr-0.24.0-aa
 url_api = "https://api.github.com/repos/agavra/tuicr/releases/assets/529551249"
 
 [[tools."github:jihuanshe/linear"]]
-version = "0.0.1787897585-g23b0b7b"
+version = "0.0.1788261331-ga888a1d"
 backend = "github:jihuanshe/linear"
 specifiers = ["latest"]
 
 [tools."github:jihuanshe/linear"."platforms.linux-x64"]
-checksum = "sha256:dc843578abd798e5012b048a29c94468a35c7913c5d507172e074ab88d470033"
-url = "https://github.com/jihuanshe/linear/releases/download/0.0.1787897585-g23b0b7b/linear-x86_64-unknown-linux-gnu.tar.xz"
-url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/533355527"
+checksum = "sha256:d6041be32a8e0cb762b73100dd7f393e873c00c67f4486f7ead5a6bdd99c0c81"
+url = "https://github.com/jihuanshe/linear/releases/download/0.0.1788261331-ga888a1d/linear-x86_64-unknown-linux-gnu.tar.xz"
+url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/539441594"
 provenance = "github-attestations"
 
 [tools."github:jihuanshe/linear"."platforms.macos-arm64"]
-checksum = "sha256:caf0f176dcbeddb9f245a5fcd31de7f09caa0e4e64140e68f516f538239ea0ac"
-url = "https://github.com/jihuanshe/linear/releases/download/0.0.1787897585-g23b0b7b/linear-aarch64-apple-darwin.tar.xz"
-url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/533355227"
+checksum = "sha256:115686941466d64e73dcfd9e4ef0efa7d1a21f32148bd5cf91d944094f3a54de"
+url = "https://github.com/jihuanshe/linear/releases/download/0.0.1788261331-ga888a1d/linear-aarch64-apple-darwin.tar.xz"
+url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/539441412"
 provenance = "github-attestations"
 provenance_verified = true
 
 [[tools."github:larksuite/cli"]]
-version = "1.0.92"
+version = "1.0.93"
 backend = "github:larksuite/cli"
 specifiers = ["latest"]
 
 [tools."github:larksuite/cli"."platforms.linux-x64"]
-checksum = "sha256:ef0e19799c1edd94eb52d3bb5d587e00d0a2898e0a4b407a1b8dc66d56181ef1"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.92/lark-cli-1.0.92-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/533848708"
+checksum = "sha256:10031849a1884bf9165cb01de47102b4847fba81bb9eb76f4168125ea9746c51"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.93/lark-cli-1.0.93-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/539864878"
 
 [tools."github:larksuite/cli"."platforms.macos-arm64"]
-checksum = "sha256:abb1b96eee5ad32da4e12f434e44d48a9e01ebb0e81772419ac0347f91c34265"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.92/lark-cli-1.0.92-darwin-arm64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/533848705"
+checksum = "sha256:eaa09754925c00a6858e91518a49ab8e0a24bd4178e4698a7b185046b8ea24e2"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.93/lark-cli-1.0.93-darwin-arm64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/539864871"
 
 [[tools."github:lycorp-jp/sim-use"]]
 version = "0.14.0"
@@ -348,20 +348,20 @@ url = "https://github.com/starship/starship/releases/download/v1.26.0/starship-a
 url_api = "https://api.github.com/repos/starship/starship/releases/assets/460374577"
 
 [[tools.uv]]
-version = "0.12.7"
+version = "0.12.8"
 backend = "aqua:astral-sh/uv"
 specifiers = ["latest"]
 
 [tools.uv."platforms.linux-x64"]
-checksum = "sha256:788f18abea7c5f55d6216e4f5613fd89d4d59b631efeec117b2b07fe72f1da21"
-url = "https://github.com/astral-sh/uv/releases/download/0.12.7/uv-x86_64-unknown-linux-gnu.tar.gz"
-url_api = "https://api.github.com/repos/astral-sh/uv/releases/assets/532935280"
+checksum = "sha256:2e2b37e9811e17675a9e70bed5e1a58fc8c0388be63d751d72cc735188c149ff"
+url = "https://github.com/astral-sh/uv/releases/download/0.12.8/uv-x86_64-unknown-linux-gnu.tar.gz"
+url_api = "https://api.github.com/repos/astral-sh/uv/releases/assets/538592029"
 provenance = "github-attestations"
 
 [tools.uv."platforms.macos-arm64"]
-checksum = "sha256:127ebdda7ad953cdf198e964b570ea5771b85467ea93eb7cb6d6f8e6f55408f3"
-url = "https://github.com/astral-sh/uv/releases/download/0.12.7/uv-aarch64-apple-darwin.tar.gz"
-url_api = "https://api.github.com/repos/astral-sh/uv/releases/assets/532935178"
+checksum = "sha256:8ce083658dbff20143607ca7af8e0c1d64b6fd7bf03a5cdcb62bf3d47d991b5f"
+url = "https://github.com/astral-sh/uv/releases/download/0.12.8/uv-aarch64-apple-darwin.tar.gz"
+url_api = "https://api.github.com/repos/astral-sh/uv/releases/assets/538591946"
 provenance = "github-attestations"
 
 [[tools.xurl]]
