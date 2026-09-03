@@ -373,15 +373,18 @@ def test_update_executes_reshim_with_canonical_mise_first_on_path(
     canonical.chmod(0o755)
     observed_path = ""
 
-    def fake_run(command, **kwargs):
-        nonlocal observed_path
-        if tuple(command[:2]) == (str(canonical), "ls"):
-            return subprocess.CompletedProcess(command, 0, "{}", "")
-        if tuple(command) == (str(canonical), "reshim", "-C", str(home)):
-            observed_path = kwargs["env"]["PATH"]
-        return subprocess.CompletedProcess(command, 0, "", "")
+    def fake_inventory(command, **_kwargs):
+        assert tuple(command[:2]) == (str(canonical), "ls")
+        return subprocess.CompletedProcess(command, 0, "{}", "")
 
-    monkeypatch.setattr("scripts.update._run_process_group", fake_run)
+    def fake_run(step, **kwargs):
+        nonlocal observed_path
+        if step.command == (str(canonical), "reshim", "-C", str(home)):
+            observed_path = kwargs["env"]["PATH"]
+        return subprocess.CompletedProcess(step.command, 0, "", "")
+
+    monkeypatch.setattr("scripts.update._run_process_group", fake_inventory)
+    monkeypatch.setattr("scripts.update._run_with_progress", fake_run)
 
     report = execute_updates(
         home,
@@ -432,6 +435,30 @@ def test_update_json_streams_progress_to_stderr_while_stdout_stays_json(
         home,
         executable_finder=lambda tool: str(bin_dir / "amp") if tool == "amp" else None,
         capture_output=True,
+        progress_interval_seconds=0.02,
+    )
+
+    assert report.ok is True
+    progress = capfd.readouterr().err
+    assert "[amp] RUN amp update" in progress
+    assert "[amp] STILL RUNNING" in progress
+    assert "[amp] DONE exit=0" in progress
+
+
+def test_update_human_runner_streams_progress_to_stderr(
+    tmp_path: Path,
+    capfd: pytest.CaptureFixture[str],
+) -> None:
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    home = tmp_path / "home"
+    home.mkdir()
+    log_path = tmp_path / "invocations.log"
+    _fake_tool(bin_dir, "amp", log_path, delay_seconds=0.08)
+
+    report = execute_updates(
+        home,
+        executable_finder=lambda tool: str(bin_dir / "amp") if tool == "amp" else None,
         progress_interval_seconds=0.02,
     )
 

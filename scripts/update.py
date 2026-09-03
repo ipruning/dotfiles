@@ -141,15 +141,20 @@ def _run_with_progress(
     *,
     env: dict[str, str] | None,
     progress_interval_seconds: float,
+    inherit_output: bool = False,
+    announce_start: bool = True,
 ) -> subprocess.CompletedProcess[str]:
-    """Run a quiet JSON-mode command with progress and process-group timeout."""
-    print(f"[{step.name}] RUN {_display_command(step)}", file=sys.stderr, flush=True)
+    """Run an updater with progress and a process-group timeout."""
+    if announce_start:
+        print(
+            f"[{step.name}] RUN {_display_command(step)}", file=sys.stderr, flush=True
+        )
     started_at = time.monotonic()
     process = subprocess.Popen(
         step.command,
         stdin=(subprocess.PIPE if step.stdin_text is not None else subprocess.DEVNULL),
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
+        stdout=None if inherit_output else subprocess.DEVNULL,
+        stderr=None if inherit_output else subprocess.DEVNULL,
         env=env,
         process_group=0,
         text=True,
@@ -423,19 +428,12 @@ def execute_updates(
                 environment = os.environ.copy()
             if environment is not None:
                 environment.update(planned.step.environment)
-            completed = (
-                _run_with_progress(
-                    planned.step,
-                    env=environment,
-                    progress_interval_seconds=progress_interval_seconds,
-                )
-                if capture_output
-                else _run_process_group(
-                    planned.step.command,
-                    env=environment,
-                    timeout_seconds=planned.step.timeout_seconds,
-                    stdin_text=planned.step.stdin_text,
-                )
+            completed = _run_with_progress(
+                planned.step,
+                env=environment,
+                progress_interval_seconds=progress_interval_seconds,
+                inherit_output=not capture_output,
+                announce_start=on_start is None,
             )
         except subprocess.TimeoutExpired:
             reason = _failure_reason(
