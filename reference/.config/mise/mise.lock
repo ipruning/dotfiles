@@ -79,19 +79,19 @@ backend = "gem:kamal"
 specifiers = ["latest"]
 
 [[tools."github:agavra/tuicr"]]
-version = "0.24.0"
+version = "0.25.0"
 backend = "github:agavra/tuicr"
 specifiers = ["latest"]
 
 [tools."github:agavra/tuicr"."platforms.linux-x64"]
-checksum = "sha256:a6959bbe05644fde43e3fe1c13e23653f25c441b7d34f38d015b3a8de85aac8d"
-url = "https://github.com/agavra/tuicr/releases/download/v0.24.0/tuicr-0.24.0-x86_64-unknown-linux-gnu.tar.gz"
-url_api = "https://api.github.com/repos/agavra/tuicr/releases/assets/529551008"
+checksum = "sha256:10a9d7e64de3b6962eafca6c1dfada14a47235cd9866ee53017a8a5670915867"
+url = "https://github.com/agavra/tuicr/releases/download/v0.25.0/tuicr-0.25.0-x86_64-unknown-linux-gnu.tar.gz"
+url_api = "https://api.github.com/repos/agavra/tuicr/releases/assets/541532871"
 
 [tools."github:agavra/tuicr"."platforms.macos-arm64"]
-checksum = "sha256:25631798033a6434f6042c6f51b33a6ce918840e15cab290e992ffde9a8789ee"
-url = "https://github.com/agavra/tuicr/releases/download/v0.24.0/tuicr-0.24.0-aarch64-apple-darwin.tar.gz"
-url_api = "https://api.github.com/repos/agavra/tuicr/releases/assets/529551249"
+checksum = "sha256:3a74ce242e1e8f70bfbf90db8aaf69daaf02480e4925f8013af11c54a06d9b07"
+url = "https://github.com/agavra/tuicr/releases/download/v0.25.0/tuicr-0.25.0-aarch64-apple-darwin.tar.gz"
+url_api = "https://api.github.com/repos/agavra/tuicr/releases/assets/541533878"
 
 [[tools."github:jihuanshe/linear"]]
 version = "0.0.1788261331-ga888a1d"
@@ -103,6 +103,7 @@ checksum = "sha256:d6041be32a8e0cb762b73100dd7f393e873c00c67f4486f7ead5a6bdd99c0
 url = "https://github.com/jihuanshe/linear/releases/download/0.0.1788261331-ga888a1d/linear-x86_64-unknown-linux-gnu.tar.xz"
 url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/539441594"
 provenance = "github-attestations"
+provenance_verified = true
 
 [tools."github:jihuanshe/linear"."platforms.macos-arm64"]
 checksum = "sha256:115686941466d64e73dcfd9e4ef0efa7d1a21f32148bd5cf91d944094f3a54de"
