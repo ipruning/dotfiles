@@ -30,7 +30,7 @@ zoxide = "aqua:ajeetdsouza/zoxide"
 "npm:agent-device" = "latest"
 "npm:cf" = "latest"
 agent-browser = "latest"
-aube = "latest"
+aube = { version = "latest", github_attestations = false }
 bun = "latest"
 deno = "latest"
 go = "latest"
