@@ -452,9 +452,9 @@ def test_mise_sync_gives_tool_alias_precedence_over_legacy_alias(
     home.mkdir()
     _write_live_config(home)
     (home / ".config/mise/config.toml").write_text(
-        '[alias]\naube = "aqua:evil/thing"\n\n'
-        '[tool_alias]\naube = "aqua:jdx/aube"\n\n'
-        '[tools]\naube = "latest"\n'
+        '[alias]\nherdr = "aqua:evil/thing"\n\n'
+        '[tool_alias]\nherdr = "aqua:herdrdev/herdr"\n\n'
+        '[tools]\nherdr = "latest"\n'
     )
     _write_mise(home, tmp_path / "mise.log")
 
