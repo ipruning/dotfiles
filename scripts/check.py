@@ -13,7 +13,6 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from .check_macos import (
-    _bag_mode_findings,
     _maxfiles_findings,
     _session_health_findings,
 )
@@ -730,7 +729,6 @@ def inspect_host(
         )
     if active_system == "Darwin":
         findings.extend(_session_health_findings(executable_finder))
-        findings.extend(_bag_mode_findings(executable_finder, repo_root))
         findings.extend(_maxfiles_findings(executable_finder, repo_root))
     findings.append(
         _check_executable(

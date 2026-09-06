@@ -63,7 +63,6 @@ OPTIONAL_PATHS = {
     ("reference/.zshrc", "/usr/local/Cellar"),
     ("reference/.zshrc", "/usr/local/share/zsh/site-functions"),
     ("reference/.zshrc", "/usr/local/share/info"),
-    ("modules/bag-mode/bag-mode", "/opt/homebrew/bin/brightness"),
     (
         "modules/macos-session-health/macos-session-health",
         "/Applications/Codex.app/Contents/MacOS/Codex",

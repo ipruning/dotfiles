@@ -103,7 +103,6 @@ if [ "$(uname)" != Darwin ]; then
   exit 0
 fi
 ./modules/macos-session-health/macos-session-health-test
-./modules/bag-mode/bag-mode-test
 ./modules/macos-maxfiles/macos-maxfiles-test
 ./modules/cursoruiviewservice-watchdog/cursoruiviewservice-watchdog-test
 """

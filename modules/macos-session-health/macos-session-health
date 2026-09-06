@@ -49,7 +49,7 @@ DEFAULT_DB = (
 SUPPORT_DIR = DEFAULT_DB.parent
 RUNTIME_CLI = SUPPORT_DIR / "macos-session-health"
 WRAPPER_MARKER = "# managed by macos-session-health"
-DEFAULT_APP = "/Applications/Visual Studio Code.app"
+DEFAULT_APP = ""
 CODEX_APP = Path("/Applications/ChatGPT.app")
 CODEX_CONFIG = Path.home() / ".codex" / "config.toml"
 CODEX_CHROME_NATIVE_HOSTS = Path.home() / ".codex" / "chrome-native-hosts-v2.json"
@@ -58,7 +58,6 @@ BRRR_ENV_FILES = (
     Path.home() / ".config" / "notify" / "brrr.env",
 )
 CODEX_CHROME_EXTENSION_ID = "hehggadaopoacecdllhhajmbjkdcmajg"
-BAG_MODE_DIR = Path("/Library/Application Support/bag-mode")
 CODEX_BUNDLED_COMPUTER_USE = (
     CODEX_APP
     / "Contents"
@@ -79,7 +78,6 @@ KNOWN_EVENTS = {
     "app_bundle",
     "app_codesign_verify",
     "app_codesign_verify_skipped",
-    "bag_mode_guard",
     "brrr_notification",
     "brrr_notification_skipped",
     "code_sign_clone_delta",
@@ -1657,82 +1655,6 @@ def collect_codex_process_summary(
     return process_summary
 
 
-def bag_mode_controller_alive(state_file: Path) -> bool | None:
-    """Return controller liveness from the bag-mode root state file, or None."""
-    try:
-        lines = state_file.read_text().splitlines()
-    except OSError:
-        return None
-    pid_text = ""
-    for line in lines:
-        key, _, value = line.partition("\t")
-        if key == "pid":
-            pid_text = value.strip()
-            break
-    if not pid_text.isdigit():
-        return None
-    try:
-        os.kill(int(pid_text), 0)
-    except ProcessLookupError:
-        return False
-    except PermissionError:
-        return True
-    except OSError:
-        return None
-    return True
-
-
-def collect_bag_mode_guard(
-    store: Store,
-    snapshot_id: str,
-    args: argparse.Namespace,
-    codex_summary: dict[str, Any],
-) -> None:
-    root_dir: Path = args.bag_mode_dir
-    if not root_dir.is_dir():
-        return
-    enabled = (root_dir / "enabled").exists()
-    app_servers = parse_int(str(codex_summary.get("codex_app_server_count", ""))) or 0
-    node_repls = parse_int(str(codex_summary.get("node_repl_count", ""))) or 0
-    ai_processes = app_servers + node_repls
-    controller_alive = (
-        bag_mode_controller_alive(root_dir / "state") if enabled else None
-    )
-    store.emit(
-        snapshot_id,
-        "bag_mode_guard",
-        enabled=enabled,
-        controller_alive="" if controller_alive is None else controller_alive,
-        codex_app_server_count=app_servers,
-        node_repl_count=node_repls,
-    )
-    if enabled:
-        if controller_alive is False:
-            store.emit(
-                snapshot_id,
-                "health_signal",
-                "error",
-                signal="bag_mode_stalled",
-                value=1,
-                detail="bag-mode is enabled but its controller process is not running",
-            )
-        return
-    if not codex_summary:
-        return
-    if ai_processes >= args.bag_mode_guard_min_processes:
-        store.emit(
-            snapshot_id,
-            "health_signal",
-            "warning",
-            signal="bag_mode_unarmed",
-            value=ai_processes,
-            detail=(
-                "Codex sessions are running while bag-mode is disabled; "
-                "closing the lid will sleep the Mac and interrupt them"
-            ),
-        )
-
-
 def collect_notification_channel_guard(
     store: Store,
     snapshot_id: str,
@@ -2854,7 +2776,6 @@ def read_brrr_secret_from_file(env_file: Path) -> str:
         except ValueError:
             continue
         if fields and fields[0] == "export":
-            # bag-mode sources the same env files, which makes the
             # shell-idiomatic `export KEY=value` form equally valid here.
             fields = fields[1:]
         if len(fields) != 1 or "=" not in fields[0]:
@@ -3203,7 +3124,6 @@ def snapshot(args: argparse.Namespace, store: Store, mode: str) -> str:
         codex_summary = collect_codex_process_summary(
             store, snapshot_id, args, codex_config
         )
-        collect_bag_mode_guard(store, snapshot_id, args, codex_summary)
         collect_notification_channel_guard(store, snapshot_id, args)
         collect_skillshare_guard(store, snapshot_id, args)
         collect_code_sign_clone_status(store, snapshot_id, args)
@@ -4088,21 +4008,6 @@ Run `macos-session-health install` to install or refresh the user LaunchAgent.
         default=int(os.getenv("MACOS_SESSION_HEALTH_PROCESS_TABLE_WARN_PCT", "85")),
         help="Warn when live processes reach this percentage of kern.maxproc "
         "or kern.maxprocperuid.",
-    )
-    parser.add_argument(
-        "--bag-mode-dir",
-        type=Path,
-        default=Path(os.getenv("MACOS_SESSION_HEALTH_BAG_MODE_DIR", str(BAG_MODE_DIR))),
-        help="bag-mode service metadata directory used by the lid-close guard.",
-    )
-    parser.add_argument(
-        "--bag-mode-guard-min-processes",
-        type=int,
-        default=int(
-            os.getenv("MACOS_SESSION_HEALTH_BAG_MODE_GUARD_MIN_PROCESSES", "1")
-        ),
-        help="Minimum count of Codex session processes that makes a disabled "
-        "bag-mode worth an alert.",
     )
     parser.add_argument(
         "--skillshare-config",

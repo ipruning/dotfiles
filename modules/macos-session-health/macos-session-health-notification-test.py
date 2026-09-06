@@ -74,12 +74,11 @@ class NotificationSummaryTest(unittest.TestCase):
 
     def test_sorted_signal_summary_and_success_cooldown(self) -> None:
         payloads = self.install_delivery_stub()
-        self.notify({"spawn_failed", "bag_mode_unprotected"})
         self.notify({"spawn_failed"})
 
         self.assertEqual(len(payloads), 1)
         self.assertIn(
-            "signals=bag_mode_unprotected,spawn_failed", payloads[0]["message"]
+            "signals=spawn_failed", payloads[0]["message"]
         )
         self.assertIn("status=unhealthy", payloads[0]["message"])
         self.assertIn("incident --hours 6 --format markdown", payloads[0]["message"])
