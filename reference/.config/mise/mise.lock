@@ -3,7 +3,7 @@
 lockfile_version = 1
 
 [[tools.agent-browser]]
-version = "0.36.0"
+version = "0.37.0"
 backend = "npm:agent-browser"
 specifiers = ["latest"]
 
@@ -76,37 +76,37 @@ url = "https://github.com/agavra/tuicr/releases/download/v0.25.0/tuicr-0.25.0-aa
 url_api = "https://api.github.com/repos/agavra/tuicr/releases/assets/541533878"
 
 [[tools."github:jihuanshe/linear"]]
-version = "0.0.1788760279-gd65b676"
+version = "0.0.1788893807-g6d5ba25"
 backend = "github:jihuanshe/linear"
 specifiers = ["latest"]
 
 [tools."github:jihuanshe/linear"."platforms.linux-x64"]
-checksum = "sha256:ea48aa158f05d4272644d1b874d9e1915694d55be3215447065822d2e6dea0d4"
-url = "https://github.com/jihuanshe/linear/releases/download/0.0.1788760279-gd65b676/linear-x86_64-unknown-linux-gnu.tar.xz"
-url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/548252847"
+checksum = "sha256:327172b49b73d7ea46e8976ba9726238440b9b84fa230e865d479dfa14903e9c"
+url = "https://github.com/jihuanshe/linear/releases/download/0.0.1788893807-g6d5ba25/linear-x86_64-unknown-linux-gnu.tar.xz"
+url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/551113248"
 provenance = "github-attestations"
 
 [tools."github:jihuanshe/linear"."platforms.macos-arm64"]
-checksum = "sha256:242ef62075dbca57bfd09310d54ee1df7fd7b4f7becfec86a3fbcdd631ccc448"
-url = "https://github.com/jihuanshe/linear/releases/download/0.0.1788760279-gd65b676/linear-aarch64-apple-darwin.tar.xz"
-url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/548252721"
+checksum = "sha256:877eba3649601549f6c7c6e956666d684a025065c20e7e35bbcb92f58e723897"
+url = "https://github.com/jihuanshe/linear/releases/download/0.0.1788893807-g6d5ba25/linear-aarch64-apple-darwin.tar.xz"
+url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/551113016"
 provenance = "github-attestations"
 provenance_verified = true
 
 [[tools."github:larksuite/cli"]]
-version = "1.0.93"
+version = "1.0.94"
 backend = "github:larksuite/cli"
 specifiers = ["latest"]
 
 [tools."github:larksuite/cli"."platforms.linux-x64"]
-checksum = "sha256:10031849a1884bf9165cb01de47102b4847fba81bb9eb76f4168125ea9746c51"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.93/lark-cli-1.0.93-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/539864878"
+checksum = "sha256:60f505be65b43b5e58b01ec671199723483c5f630a03dfdd32d89f7f40f47d53"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.94/lark-cli-1.0.94-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/549042128"
 
 [tools."github:larksuite/cli"."platforms.macos-arm64"]
-checksum = "sha256:eaa09754925c00a6858e91518a49ab8e0a24bd4178e4698a7b185046b8ea24e2"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.93/lark-cli-1.0.93-darwin-arm64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/539864871"
+checksum = "sha256:cdf66d35c950c56f17cc180276c16b8ad4b7241eab715d809114cb57c88a825b"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.94/lark-cli-1.0.94-darwin-arm64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/549042130"
 
 [[tools."github:lycorp-jp/sim-use"]]
 version = "0.14.0"
@@ -137,19 +137,19 @@ checksum = "sha256:ee215d57e0ec269c60cc9ceca68e6bda321ba9ee5afe24f4b0988703c2d87
 url = "https://dl.google.com/go/go1.27.1.darwin-arm64.tar.gz"
 
 [[tools.herdr]]
-version = "0.8.2"
+version = "0.9.0"
 backend = "aqua:herdrdev/herdr"
 specifiers = ["latest"]
 
 [tools.herdr."platforms.linux-x64"]
-checksum = "sha256:976150a14d490c94b243ea2e1a7eb2dfb67f12e36b182db90936f6728e6aecf4"
-url = "https://github.com/herdrdev/herdr/releases/download/v0.8.2/herdr-linux-x86_64"
-url_api = "https://api.github.com/repos/herdrdev/herdr/releases/assets/521169107"
+checksum = "sha256:4fa1a01158dd8043da92d31b270780b0dcc10603038d9b61cac4d81ab63fb71f"
+url = "https://github.com/herdrdev/herdr/releases/download/v0.9.0/herdr-linux-x86_64"
+url_api = "https://api.github.com/repos/herdrdev/herdr/releases/assets/549270163"
 
 [tools.herdr."platforms.macos-arm64"]
-checksum = "sha256:a5d4f4d504d8b309c91f811050559300faba31258425f53c50852fc96f6ae574"
-url = "https://github.com/herdrdev/herdr/releases/download/v0.8.2/herdr-macos-aarch64"
-url_api = "https://api.github.com/repos/herdrdev/herdr/releases/assets/521169108"
+checksum = "sha256:32b53df09872628059c789a69f02a6b8e29e14ddf26711421f3463f70c1aef17"
+url = "https://github.com/herdrdev/herdr/releases/download/v0.9.0/herdr-macos-aarch64"
+url_api = "https://api.github.com/repos/herdrdev/herdr/releases/assets/549270162"
 
 [[tools.hunk]]
 version = "0.21.1"
