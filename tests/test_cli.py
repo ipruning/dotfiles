@@ -117,9 +117,22 @@ def test_global_mise_lock_covers_declared_artifact_platforms() -> None:
         (repo_root / "reference/.config/mise/mise.lock").read_text(),
     )
     assert lockfile["lockfile_version"] == 1
-    assert "vfox:mise-plugins/vfox-yarn" not in lockfile["tools"]
+    assert lockfile["tools"]["yarn"] == [
+        {
+            "version": "4.18.0",
+            "backend": "vfox:mise-plugins/vfox-yarn",
+            "specifiers": ["latest"],
+        },
+    ]
     version_only_backends = {"core:rust"}
-    version_only_prefixes = ("cargo:", "gem:", "go:", "npm:", "pipx:")
+    version_only_prefixes = (
+        "cargo:",
+        "gem:",
+        "go:",
+        "npm:",
+        "pipx:",
+        "vfox:",
+    )
     missing: list[str] = []
 
     for tool in config["tools"]:

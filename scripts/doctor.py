@@ -231,7 +231,6 @@ def _external_steps(
         ("skillshare.doctor", "skillshare", ("doctor", "--json"), 180, True),
         ("brew.doctor", "brew", ("doctor",), 300, False),
         ("pueue.status", "pueue", ("status",), 30, False),
-        ("rotom.status", "rotom", ("status", "--format", "json"), 180, True),
     ):
         executable = executable_finder(tool)
         if executable:
@@ -265,7 +264,7 @@ def inspect_doctor(
             ),
         )
     ]
-    known_tools = {"mise", "skillshare", "brew", "pueue", "rotom"}
+    known_tools = {"mise", "skillshare", "brew", "pueue"}
     present_tools = {
         result.step.owner for result in results if (result.step.owner in known_tools)
     }
@@ -274,7 +273,6 @@ def inspect_doctor(
         "skillshare": "skillshare.doctor",
         "brew": "brew.doctor",
         "pueue": "pueue.status",
-        "rotom": "rotom.status",
     }
     for tool in sorted(known_tools - present_tools):
         results.append(

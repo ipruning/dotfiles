@@ -53,13 +53,6 @@ def test_doctor_aggregates_internal_and_external_checks_without_mutation(
                 json.dumps({"ok": True, "summary": {"warnings": 2}}),
                 "",
             )
-        if command[0].endswith("rotom"):
-            return subprocess.CompletedProcess(
-                command,
-                1,
-                json.dumps({"ok": False}),
-                "codex configuration required",
-            )
         return subprocess.CompletedProcess(command, 0, "healthy\n", "")
 
     report = inspect_doctor(
@@ -73,8 +66,8 @@ def test_doctor_aggregates_internal_and_external_checks_without_mutation(
     assert results["dotfiles.diff"].status is DoctorStatus.WARN
     assert results["mise.doctor"].status is DoctorStatus.PASS
     assert results["skillshare.doctor"].status is DoctorStatus.WARN
-    assert results["rotom.status"].status is DoctorStatus.ERROR
-    assert report.ok is False
+    assert "rotom.status" not in results
+    assert report.ok is True
     assert [
         command[command.index("-m") + 1] for command in calls if "-m" in command
     ] == [
@@ -112,7 +105,6 @@ def test_doctor_skips_unavailable_external_owners(tmp_path: Path) -> None:
         "brew.doctor",
         "mise.doctor",
         "pueue.status",
-        "rotom.status",
         "skillshare.doctor",
     }
     assert report.ok is True

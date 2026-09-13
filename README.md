@@ -408,9 +408,8 @@ checking when `zsh` is available.
 `doctor` is the read-only aggregate entrypoint for routine machine
 maintenance. It runs the repository's `check`, `diff`, `mise-sync`, and `lint`
 reports, then probes `mise doctor`, `skillshare doctor --json`, `brew doctor`,
-`pueue status`, and `rotom status --format json` when those owners are
-available. Each result remains separate, so a failure such as Rotom's missing
-Codex configuration does not hide the other checks:
+and `pueue status` when those owners are available. Each result remains
+separate:
 
 ```bash
 mise run doctor
