@@ -76,22 +76,21 @@ url = "https://github.com/agavra/tuicr/releases/download/v0.25.0/tuicr-0.25.0-aa
 url_api = "https://api.github.com/repos/agavra/tuicr/releases/assets/541533878"
 
 [[tools."github:jihuanshe/linear"]]
-version = "0.0.1789083113-g62f9cbe"
+version = "0.0.1789486494-g35d6614"
 backend = "github:jihuanshe/linear"
 specifiers = ["latest"]
 
 [tools."github:jihuanshe/linear"."platforms.linux-x64"]
-checksum = "sha256:c0c0f6e6877d01ef943cc5fce326fcc0c9042fe6c7b028aec439ac9d9d2a9107"
-url = "https://github.com/jihuanshe/linear/releases/download/0.0.1789083113-g62f9cbe/linear-x86_64-unknown-linux-gnu.tar.xz"
-url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/556027667"
+checksum = "sha256:23118f5230cedda2bed819238844fe3020355ad04c4d7c0a9c87d807da40bca1"
+url = "https://github.com/jihuanshe/linear/releases/download/0.0.1789486494-g35d6614/linear-x86_64-unknown-linux-gnu.tar.xz"
+url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/565981315"
 provenance = "github-attestations"
 
 [tools."github:jihuanshe/linear"."platforms.macos-arm64"]
-checksum = "sha256:fb4f8a8079b3e66aecad4c6572cb9d9f972c1978a57c8e30e24209b205a931cd"
-url = "https://github.com/jihuanshe/linear/releases/download/0.0.1789083113-g62f9cbe/linear-aarch64-apple-darwin.tar.xz"
-url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/556027482"
+checksum = "sha256:46093bf5fa156c7d8a6b10ccfbe77731e05a369790a06bf3eef487a5fd1d61b7"
+url = "https://github.com/jihuanshe/linear/releases/download/0.0.1789486494-g35d6614/linear-aarch64-apple-darwin.tar.xz"
+url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/565981001"
 provenance = "github-attestations"
-provenance_verified = true
 
 [[tools."github:larksuite/cli"]]
 version = "1.0.95"
@@ -182,19 +181,19 @@ url = "https://github.com/jesseduffield/lazydocker/releases/download/v0.25.2/laz
 url_api = "https://api.github.com/repos/jesseduffield/lazydocker/releases/assets/399711580"
 
 [[tools.lazygit]]
-version = "0.65.0"
+version = "0.65.1"
 backend = "aqua:jesseduffield/lazygit"
 specifiers = ["latest"]
 
 [tools.lazygit."platforms.linux-x64"]
-checksum = "sha256:44d8e7dd1484b4a66e191bd4ab25a71e8b4b3a65ab122f838e65677ef58c5506"
-url = "https://github.com/jesseduffield/lazygit/releases/download/v0.65.0/lazygit_0.65.0_linux_x86_64.tar.gz"
-url_api = "https://api.github.com/repos/jesseduffield/lazygit/releases/assets/545957203"
+checksum = "sha256:02beacbcda0fa342e50ae3480ba8147307353af3fb28e1d5f790e02329c201a6"
+url = "https://github.com/jesseduffield/lazygit/releases/download/v0.65.1/lazygit_0.65.1_linux_x86_64.tar.gz"
+url_api = "https://api.github.com/repos/jesseduffield/lazygit/releases/assets/560658266"
 
 [tools.lazygit."platforms.macos-arm64"]
-checksum = "sha256:d8ea1cade9e4279e45cbb58652e84edb07e98a9f8ec0604099c8b0a8f709e63a"
-url = "https://github.com/jesseduffield/lazygit/releases/download/v0.65.0/lazygit_0.65.0_darwin_arm64.tar.gz"
-url_api = "https://api.github.com/repos/jesseduffield/lazygit/releases/assets/545957198"
+checksum = "sha256:65a367c6ea9a88efebaaf7998a6835eedb987e04916cef677264ff9b31b1b13e"
+url = "https://github.com/jesseduffield/lazygit/releases/download/v0.65.1/lazygit_0.65.1_darwin_arm64.tar.gz"
+url_api = "https://api.github.com/repos/jesseduffield/lazygit/releases/assets/560658243"
 
 [[tools.node]]
 version = "26.8.2"
@@ -218,7 +217,8 @@ specifiers = ["latest"]
 allow_low_downloads = "true"
 
 [[tools."npm:agent-device"]]
-version = "0.21.1"
+version = "0.21.2"
+aube = { path = "locks/npm-agent-device/0.21.2", digest = "sha256:1112ee2cc4ec78d864c55e341e3baa8bc3a26dcd8a6c686f0d4cd9d485782daf" }
 backend = "npm:agent-device"
 specifiers = ["latest"]
 
@@ -270,7 +270,7 @@ url = "https://github.com/astral-sh/python-build-standalone/releases/download/20
 provenance = "github-attestations"
 
 [[tools.ruby]]
-version = "4.0.6"
+version = "4.0.7"
 backend = "core:ruby"
 specifiers = ["latest"]
 
@@ -281,13 +281,13 @@ ruby_build_repo = "https://github.com/rbenv/ruby-build.git"
 ruby_install = "false"
 
 [tools.ruby."platforms.linux-x64"]
-checksum = "sha256:aefa111873bac3b15c5c416bfaaca84e793d5312d4496d651ad79c44521b200a"
-url = "https://github.com/jdx/ruby/releases/download/4.0.6-1/ruby-4.0.6.x86_64_linux.tar.gz"
+checksum = "sha256:32cd7e6ac93126e0f91dc40a0d2e6213f24a38be77937671e6cb82f82ea4ffe2"
+url = "https://github.com/jdx/ruby/releases/download/4.0.7-1/ruby-4.0.7.x86_64_linux.tar.gz"
 provenance = "github-attestations"
 
 [tools.ruby."platforms.macos-arm64"]
-checksum = "sha256:518c5849d7ab337790943963ded4f0b402d2d4ededea265288a5a19d4c8fee18"
-url = "https://github.com/jdx/ruby/releases/download/4.0.6-1/ruby-4.0.6.macos.tar.gz"
+checksum = "sha256:1b239cb6e4f8ba27e890e025c723c00ba781b993ac12aab2029618f347c2206d"
+url = "https://github.com/jdx/ruby/releases/download/4.0.7-1/ruby-4.0.7.macos.tar.gz"
 provenance = "github-attestations"
 
 [[tools.rust]]
