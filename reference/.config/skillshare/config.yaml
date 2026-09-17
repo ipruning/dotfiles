@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/runkids/skillshare/main/schemas/config.schema.json
 sources:
-  skills: ~/.config/skillshare/skills
+  skills: /Users/alex/.config/skillshare/skills
   extras: ~/.config/skillshare/skills/extras
 mode: merge
 targets:
@@ -11,15 +11,15 @@ targets:
     skills:
       path: ~/.agents/skills
 extras:
-  - name: codex
-    targets:
-      - path: ~/.codex
-        mode: copy
-  - name: claude
-    targets:
-      - path: ~/.claude
-        mode: copy
+- name: codex
+  targets:
+  - path: ~/.codex
+    mode: copy
+- name: claude
+  targets:
+  - path: ~/.claude
+    mode: copy
 ignore:
-  - "**/.DS_Store"
-  - "**/.git/**"
+- "**/.DS_Store"
+- "**/.git/**"
 preserve_tilde_on_save: true
