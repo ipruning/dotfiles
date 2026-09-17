@@ -3,7 +3,8 @@
 lockfile_version = 1
 
 [[tools.agent-browser]]
-version = "0.37.1"
+version = "0.38.0"
+aube = { path = "locks/agent-browser/0.38.0", digest = "sha256:1a6e5a7eab38a66a3a8060759c65553d966fd091b8511ee51cd673c2a0bea2a0" }
 backend = "npm:agent-browser"
 specifiers = ["latest"]
 
@@ -76,20 +77,20 @@ url = "https://github.com/agavra/tuicr/releases/download/v0.26.0/tuicr-0.26.0-aa
 url_api = "https://api.github.com/repos/agavra/tuicr/releases/assets/566753781"
 
 [[tools."github:jihuanshe/linear"]]
-version = "0.0.1789641740-g621527e"
+version = "0.0.1789655272-g14e1d0e"
 backend = "github:jihuanshe/linear"
 specifiers = ["latest"]
 
 [tools."github:jihuanshe/linear"."platforms.linux-x64"]
-checksum = "sha256:d82ef17af598e967b11dc1e4d2178239866e1f11ea3279a70d591c9a27e90732"
-url = "https://github.com/jihuanshe/linear/releases/download/0.0.1789641740-g621527e/linear-x86_64-unknown-linux-gnu.tar.xz"
-url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/570055221"
+checksum = "sha256:7947b7e7d814c22bfaaeaa813ae1d669c0a9e128c2deaccfbfee764ee593b290"
+url = "https://github.com/jihuanshe/linear/releases/download/0.0.1789655272-g14e1d0e/linear-x86_64-unknown-linux-gnu.tar.xz"
+url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/570430116"
 provenance = "github-attestations"
 
 [tools."github:jihuanshe/linear"."platforms.macos-arm64"]
-checksum = "sha256:73a1a9183eb9b46b080fd0451935b802766a757c4a8fa9c7406178e31bf3168b"
-url = "https://github.com/jihuanshe/linear/releases/download/0.0.1789641740-g621527e/linear-aarch64-apple-darwin.tar.xz"
-url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/570055028"
+checksum = "sha256:2c5a2d77b63d6dff173671939587f4feb2a3dd7410c7a5ff12e678af52b65122"
+url = "https://github.com/jihuanshe/linear/releases/download/0.0.1789655272-g14e1d0e/linear-aarch64-apple-darwin.tar.xz"
+url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/570429891"
 provenance = "github-attestations"
 
 [[tools."github:larksuite/cli"]]
@@ -209,7 +210,8 @@ checksum = "sha256:6f3de7ed853ee283b4bf24b6e426618f1d357401ce5815db1866eb85eb4b0
 url = "https://nodejs.org/dist/v26.9.0/node-v26.9.0-darwin-arm64.tar.gz"
 
 [[tools."npm:@openai/codex-security"]]
-version = "0.1.27"
+version = "0.1.28"
+aube = { path = "locks/npm-openai-codex-security/0.1.28~19b6a9e3", digest = "sha256:074cea6ef75ae1fffcb705c308ef7a47f6977fb56af5920469518239ad7c86d9" }
 backend = "npm:@openai/codex-security"
 specifiers = ["latest"]
 
