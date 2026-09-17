@@ -217,8 +217,7 @@ specifiers = ["latest"]
 allow_low_downloads = "true"
 
 [[tools."npm:agent-device"]]
-version = "0.21.4"
-aube = { path = "locks/npm-agent-device/0.21.4", digest = "sha256:85766fd1e2b893c63226af2747fe1de3225cd5408c275a58aec6a66731323256" }
+version = "0.21.5"
 backend = "npm:agent-device"
 specifiers = ["latest"]
 

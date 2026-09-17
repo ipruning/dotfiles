@@ -141,6 +141,8 @@ def test_global_mise_lock_covers_declared_artifact_platforms() -> None:
             missing.append(f"{tool}:lock-entry")
             continue
         for entry in entries:
+            assert "aube" not in entry
+            assert "uv" not in entry
             backend = entry["backend"]
             if backend in version_only_backends or backend.startswith(
                 version_only_prefixes,
