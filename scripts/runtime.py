@@ -570,6 +570,11 @@ def _command_environment(spec: RuntimeSpec, home: Path) -> dict[str, str]:
             "__MISE_ZSH_PRECMD_RUN",
         ):
             environment.pop(name, None)
+        if spec.name in {"function.mise", "function.mise-bash"}:
+            # Presence suppresses Mise's generation-time PATH snapshot. The
+            # Bash/Zsh templates still capture PATH when sourced, or preserve
+            # a nested shell's inherited baseline. Nushell lacks that guard.
+            environment["__MISE_ORIG_PATH"] = ""
     return environment
 
 
