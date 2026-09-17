@@ -76,20 +76,20 @@ url = "https://github.com/agavra/tuicr/releases/download/v0.26.0/tuicr-0.26.0-aa
 url_api = "https://api.github.com/repos/agavra/tuicr/releases/assets/566753781"
 
 [[tools."github:jihuanshe/linear"]]
-version = "0.0.1789486494-g35d6614"
+version = "0.0.1789641740-g621527e"
 backend = "github:jihuanshe/linear"
 specifiers = ["latest"]
 
 [tools."github:jihuanshe/linear"."platforms.linux-x64"]
-checksum = "sha256:23118f5230cedda2bed819238844fe3020355ad04c4d7c0a9c87d807da40bca1"
-url = "https://github.com/jihuanshe/linear/releases/download/0.0.1789486494-g35d6614/linear-x86_64-unknown-linux-gnu.tar.xz"
-url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/565981315"
+checksum = "sha256:d82ef17af598e967b11dc1e4d2178239866e1f11ea3279a70d591c9a27e90732"
+url = "https://github.com/jihuanshe/linear/releases/download/0.0.1789641740-g621527e/linear-x86_64-unknown-linux-gnu.tar.xz"
+url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/570055221"
 provenance = "github-attestations"
 
 [tools."github:jihuanshe/linear"."platforms.macos-arm64"]
-checksum = "sha256:46093bf5fa156c7d8a6b10ccfbe77731e05a369790a06bf3eef487a5fd1d61b7"
-url = "https://github.com/jihuanshe/linear/releases/download/0.0.1789486494-g35d6614/linear-aarch64-apple-darwin.tar.xz"
-url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/565981001"
+checksum = "sha256:73a1a9183eb9b46b080fd0451935b802766a757c4a8fa9c7406178e31bf3168b"
+url = "https://github.com/jihuanshe/linear/releases/download/0.0.1789641740-g621527e/linear-aarch64-apple-darwin.tar.xz"
+url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/570055028"
 provenance = "github-attestations"
 
 [[tools."github:larksuite/cli"]]
