@@ -1,5 +1,7 @@
+import os
 import shutil
 import subprocess
+import time
 import tomllib
 from pathlib import Path
 from typing import Any
@@ -375,6 +377,51 @@ def test_nushell_skips_stale_cached_integrations_when_tools_are_missing(
 
     assert completed.returncode == 0, completed.stderr
     assert completed.stdout.strip() == "nu-ready"
+
+
+@requires_zsh
+@pytest.mark.parametrize(
+    ("cache_state", "expected_arguments"),
+    [("missing", "-i"), ("empty", "-i"), ("fresh", "-i -C"), ("stale", "-i")],
+)
+def test_zshrc_selects_compinit_cache_mode(
+    tmp_path: Path,
+    cache_state: str,
+    expected_arguments: str,
+) -> None:
+    source_root = Path(__file__).resolve().parents[1]
+    repo_root = tmp_path / "repo"
+    home = tmp_path / "home"
+    home.mkdir()
+    # Isolate unrelated interactive integrations, not the .zshrc decision.
+    env_file = repo_root / "modules/zsh/env.zsh"
+    env_file.parent.mkdir(parents=True)
+    env_file.write_text("")
+    completions = repo_root / "generated/completions"
+    completions.mkdir(parents=True)
+    (completions / "compinit").write_text('print -r -- "$*"\n')
+    dump = home / ".zcompdump"
+    if cache_state != "missing":
+        dump.write_text("" if cache_state == "empty" else "cached completions\n")
+        age_hours = 25 if cache_state == "stale" else 23
+        modified = time.time() - age_hours * 3600
+        os.utime(dump, (modified, modified))
+
+    completed = subprocess.run(
+        ["zsh", "-dfc", 'source "$1"', "test", str(source_root / "reference/.zshrc")],
+        cwd=home,
+        env={
+            "HOME": str(home),
+            "PATH": "/usr/bin:/bin",
+            "DOTFILES_ROOT": str(repo_root),
+        },
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert completed.returncode == 0, completed.stderr
+    assert completed.stdout.splitlines() == [expected_arguments]
 
 
 @requires_zsh

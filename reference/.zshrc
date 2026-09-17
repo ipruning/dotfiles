@@ -57,11 +57,14 @@ completion_paths=()
 completion_paths+=("${fpath[@]}")
 fpath=("${completion_paths[@]}")
 autoload -Uz compinit
-if [[ ! -s ~/.zcompdump || -n ~/.zcompdump(N.mh+24) ]]; then
+# Expand the age qualifier outside [[ ]], where it would be a literal string.
+stale_compdumps=( ~/.zcompdump(N.mh+24) )
+if [[ ! -s ~/.zcompdump ]] || (( ${#stale_compdumps} )); then
   compinit -i
 else
   compinit -i -C
 fi
+unset stale_compdumps
 
 ZSH_MODULES_DIR="$DOTFILES_ROOT/modules/zsh"
 
