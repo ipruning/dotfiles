@@ -147,7 +147,11 @@ def _parse_output(spec: InventorySpec, stdout: str) -> str:
 
 def _scan_applications(scan_dir: Path) -> str:
     names = sorted(
-        (entry.name.removesuffix(".app") for entry in scan_dir.glob("*.app")),
+        (
+            entry.name.removesuffix(".app")
+            for entry in scan_dir.iterdir()
+            if entry.name.endswith(".app")
+        ),
         key=str.casefold,
     )
     return "".join(f"{name}\n" for name in names)
@@ -203,7 +207,12 @@ def _emit_failure(spec: InventorySpec, reason: str, stderr: str = "") -> None:
 def _collect(spec: InventorySpec) -> tuple[str, int | None]:
     """Return snapshot content for one planned spec, raising on failure."""
     if spec.scan_dir is not None:
-        return _scan_applications(spec.scan_dir), None
+        try:
+            return _scan_applications(spec.scan_dir), None
+        except FileNotFoundError:
+            if spec.name == "setapp":
+                return "", None
+            raise
     completed = subprocess.run(
         spec.command,
         check=False,

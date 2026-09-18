@@ -239,6 +239,41 @@ def test_inventory_records_zero_for_an_empty_setapp_directory(
     assert (host_dir / "setapp.txt").read_text() == ""
 
 
+@pytest.mark.parametrize("failure", ["permission", "not-directory"])
+def test_inventory_failed_setapp_scan_preserves_snapshot(
+    tmp_path: Path, failure: str
+) -> None:
+    applications = tmp_path / "Applications"
+    _make_applications(applications, apps=("Ghostty",), setapp=None)
+    setapp = applications / "Setapp"
+    host_dir = tmp_path / "dotfiles/inventory/TestHost"
+    host_dir.mkdir(parents=True)
+    (host_dir / "setapp.txt").write_text("Previous App\n")
+    if failure == "permission":
+        setapp.mkdir()
+        (setapp / "Hidden.app").mkdir()
+        setapp.chmod(0)
+    else:
+        setapp.write_text("not an application directory\n")
+    try:
+        if failure == "permission" and os.access(setapp, os.R_OK):
+            pytest.skip("effective privileges bypass directory permissions")
+        completed, _, _ = _run_inventory(tmp_path, "--apply", "--json", tools={})
+    finally:
+        if failure == "permission":
+            setapp.chmod(0o700)
+
+    assert completed.returncode == 1
+    document = json.loads(completed.stdout)
+    assert document["ok"] is False
+    steps = {step["name"]: step for step in document["steps"]}
+    assert steps["setapp"]["status"] == "failed"
+    assert str(setapp) in steps["setapp"]["reason"]
+    assert steps["applications"]["status"] == "written"
+    assert (host_dir / "setapp.txt").read_text() == "Previous App\n"
+    assert "[setapp] FAIL" in completed.stderr
+
+
 def test_inventory_failure_keeps_existing_snapshot_and_later_steps_run(
     tmp_path: Path,
 ) -> None:
