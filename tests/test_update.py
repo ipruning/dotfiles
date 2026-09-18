@@ -8,10 +8,10 @@ from pathlib import Path
 
 import pytest
 
+from scripts.process import run_process_group
 from scripts.update import (
     UpdateStatus,
     UpdateStep,
-    _run_process_group,
     _run_with_progress,
     execute_updates,
     plan_updates,
@@ -384,7 +384,7 @@ def test_update_executes_reshim_with_canonical_mise_first_on_path(
             observed_path = kwargs["env"]["PATH"]
         return subprocess.CompletedProcess(step.command, 0, "", "")
 
-    monkeypatch.setattr("scripts.update._run_process_group", fake_inventory)
+    monkeypatch.setattr("scripts.update.run_process_group", fake_inventory)
     monkeypatch.setattr("scripts.update._run_with_progress", fake_run)
 
     report = execute_updates(
@@ -500,7 +500,7 @@ def test_update_human_runner_timeout_kills_the_process_group(tmp_path: Path) -> 
     tool_path.chmod(0o755)
 
     with pytest.raises(subprocess.TimeoutExpired):
-        _run_process_group(
+        run_process_group(
             (str(tool_path),),
             env=None,
             timeout_seconds=PROCESS_GROUP_TEST_TIMEOUT_SECONDS,
@@ -632,7 +632,7 @@ def test_update_mise_step_passes_only_installed_versions(
         )
         return subprocess.CompletedProcess(command, 0, inventory, "")
 
-    monkeypatch.setattr("scripts.update._run_process_group", fake_run)
+    monkeypatch.setattr("scripts.update.run_process_group", fake_run)
     report = plan_updates(
         tmp_path,
         executable_finder=lambda tool: "/tools/mise" if tool == "mise" else None,
@@ -663,7 +663,7 @@ def test_update_fails_closed_when_mise_inventory_is_invalid(
     mise.write_text("#!/bin/sh\nexit 0\n")
     mise.chmod(0o755)
     monkeypatch.setattr(
-        "scripts.update._run_process_group",
+        "scripts.update.run_process_group",
         lambda command, **_kwargs: subprocess.CompletedProcess(
             command, 0, "not-json", ""
         ),
@@ -698,7 +698,7 @@ def test_update_apply_does_not_execute_a_failed_mise_preflight(
             return subprocess.CompletedProcess(command, 0, "not-json", "")
         return subprocess.CompletedProcess(command, 0, "", "")
 
-    monkeypatch.setattr("scripts.update._run_process_group", fake_run)
+    monkeypatch.setattr("scripts.update.run_process_group", fake_run)
 
     report = execute_updates(
         tmp_path,

@@ -6,7 +6,6 @@ import argparse
 import json
 import os
 import shutil
-import signal
 import subprocess
 import sys
 import time
@@ -27,6 +26,7 @@ from .mise import (
     canonical_mise_path,
 )
 from .models import ExecutableFinder
+from .process import kill_process_group, run_process_group
 from .render import emit_error
 
 StepCallback = Callable[["UpdateStep"], None]
@@ -92,50 +92,6 @@ def _failure_reason(step: UpdateStep, reason: str) -> str:
     return f"{reason}; {step.failure_note}" if step.failure_note else reason
 
 
-def _kill_process_group(
-    process: subprocess.Popen[bytes] | subprocess.Popen[str],
-) -> None:
-    try:
-        os.killpg(process.pid, signal.SIGKILL)
-    except ProcessLookupError:
-        pass
-    process.wait()
-
-
-def _run_process_group(
-    command: tuple[str, ...],
-    *,
-    env: dict[str, str] | None,
-    timeout_seconds: float,
-    capture_output: bool = False,
-    stdin_text: str | None = None,
-) -> subprocess.CompletedProcess[str]:
-    process = subprocess.Popen(
-        command,
-        stdin=subprocess.PIPE if stdin_text is not None else subprocess.DEVNULL,
-        stdout=subprocess.PIPE if capture_output else None,
-        stderr=subprocess.PIPE if capture_output else None,
-        env=env,
-        process_group=0,
-        text=True,
-    )
-    try:
-        stdout, stderr = process.communicate(
-            input=stdin_text,
-            timeout=timeout_seconds,
-        )
-    except subprocess.TimeoutExpired as error:
-        _kill_process_group(process)
-        stdout, stderr = process.communicate()
-        raise subprocess.TimeoutExpired(
-            command,
-            timeout_seconds,
-            output=stdout,
-            stderr=stderr,
-        ) from error
-    return subprocess.CompletedProcess(command, process.returncode, stdout, stderr)
-
-
 def _run_with_progress(
     step: UpdateStep,
     *,
@@ -175,7 +131,7 @@ def _run_with_progress(
             now = time.monotonic()
             remaining = step.timeout_seconds - (now - started_at)
             if remaining <= 0:
-                _kill_process_group(process)
+                kill_process_group(process)
                 raise subprocess.TimeoutExpired(step.command, step.timeout_seconds)
             exit_code = process.poll()
             if exit_code is not None:
@@ -199,7 +155,7 @@ def _run_with_progress(
             time.sleep(min(0.1, remaining, max(0, next_progress_at - now)))
     finally:
         if process.poll() is None:
-            _kill_process_group(process)
+            kill_process_group(process)
 
 
 def _installed_mise_tools(home: Path, mise_executable: str) -> tuple[str, ...]:
@@ -214,7 +170,7 @@ def _installed_mise_tools(home: Path, mise_executable: str) -> tuple[str, ...]:
         str(home),
     )
     try:
-        completed = _run_process_group(
+        completed = run_process_group(
             command,
             env=canonical_mise_environment(home),
             timeout_seconds=120,
