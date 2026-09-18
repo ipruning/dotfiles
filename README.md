@@ -82,9 +82,9 @@ mise_path = "/usr/bin/mise"
 ```
 
 `audit-only` keeps previews plus `diff`, `check`, `lint`, and verification
-available, but rejects every `--apply` operation before it writes files or runs
-updaters. Previews still show the counterfactual managed-host plan, but omit an
-inapplicable `--apply` next step. Apply-safety differences such as host-only
+available, but rejects `--apply` in the maintenance tasks under `scripts/`
+before they write files or run updaters. Previews show what a managed host
+would do, but omit an inapplicable `--apply` next step. Host-only
 global Mise tools remain visible facts and do not fail an audit-only preview;
 an incomplete inspection, unreadable configuration, or failed command probe
 still fails. The same mutation guard protects the underlying `apply_*` and
@@ -94,6 +94,10 @@ treated as an extra installation. An absent policy preserves the managed
 default above. An invalid policy, including unknown fields, fails closed and is
 diagnosed by `mise run check`; it never falls back silently to the standalone
 owner.
+
+This policy does not constrain the independent executables under `modules/`.
+Their lifecycle and recovery commands have separate CLI contracts and require
+explicit operator authorization; follow each module's runbook.
 
 Under this policy, `check` marks Dotfiles-owned shell integration, shared Mise
 capabilities, and generated runtime readiness as not applicable. Canonical Mise

@@ -31,12 +31,14 @@ semantics live in `README.md`.
 - External commands used by `check` must be proven read-only. A deeper probe
   that writes caches, migrations, or temporary target files belongs in the
   finding's suggested action, not in inspection.
-- Mutating tasks preview by default; only `--apply` changes state. Do not add
-  `--dry-run` flags or mutate-by-default entrypoints.
-- Keep stdout machine-readable when `--json` is selected and send operational
-  failures to stderr. Every JSON document carries `schema_version`,
-  `operation`, and `ok`; mutating operations add `apply`; domain failures with
-  `--json` emit the shared error document from `scripts/render.py`.
+- Maintenance tasks under `scripts/` preview by default; only `--apply` changes
+  state. Do not add `--dry-run` flags or mutate-by-default task entrypoints.
+- For those tasks, keep stdout machine-readable when `--json` is selected and
+  send operational failures to stderr. Every JSON document carries
+  `schema_version`, `operation`, and `ok`; mutating operations add `apply`;
+  domain failures with `--json` emit the shared error document from
+  `scripts/render.py`. Independent modules retain their documented CLI and
+  JSON contracts; inspect their help before assuming task flags or envelopes.
 - Compare reference and live configuration by location and metadata. Do not
   expose configuration contents in drift reports.
 - Parse structured data with its real parser: `jq` or a JSON library for JSON,

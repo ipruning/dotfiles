@@ -24,8 +24,8 @@ under `modules/bin/`.
 
 For macOS modules that install launchd services, generate host-specific launchd
 files during installation rather than tracking a second plist source. Verify
-lifecycle changes through the module's public CLI, including its dry-run
-installation, tests, installed status, and uninstall path. Linux modules should
+lifecycle changes through the module's public CLI, including its installation
+preview, tests, installed status, and uninstall path. Linux modules should
 use their platform's native service manager and its public lifecycle checks.
 
 ## Verification

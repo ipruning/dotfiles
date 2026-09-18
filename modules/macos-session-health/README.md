@@ -33,6 +33,10 @@ operator to inspect status and `rerun install`. Uninstall likewise keeps
 successful removals and directs the operator to `rerun uninstall` after a
 failure. Repeating either command converges the requested state.
 
+After a partial failure, use `modules/macos-session-health/macos-session-health`
+from the repository for status and retries: the installed wrapper may be absent
+or incomplete. Preview a repeated install with `install --dry-run` first.
+
 ## Triage
 
 Start with the incident report and direct process facts:
@@ -99,6 +103,12 @@ Validate the payload and local credential lookup without sending:
 ```zsh
 macos-session-health notify-test --dry-run
 ```
+
+This dry-run uses the invoking shell's credentials. Installation does not
+persist shell `BRRR_SECRET` or `BRRR_ENV_FILE` settings into the LaunchAgent.
+For the installed agent, use a default credential file listed above (or the
+proxy) and check `status --format json`: it ignores caller credential overrides
+and includes the last recorded delivery result.
 
 Process inventories are stored as one aggregate event per inventory instead of
 one row per process. Snapshot retention applies to both formats; use the
