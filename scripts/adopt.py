@@ -134,6 +134,8 @@ def _dirty_reference_paths(repo_root: Path, plan: AdoptReport) -> list[str]:
             str(repo_root),
             "status",
             "--porcelain",
+            "--ignored",
+            "--untracked-files=all",
             "-z",
             "--",
             *relative_paths,
@@ -279,7 +281,9 @@ def apply_adopt(repo_root: Path, home: Path, plan: AdoptReport) -> AdoptReport:
     if dirty:
         summary = ", ".join(sorted(dirty))
         precondition = (
-            f"reference paths have uncommitted changes; commit them first: {summary}"
+            "reference paths have uncommitted or ignored data; commit intended "
+            "reference changes and move private/ignored data to safety before "
+            f"retrying: {summary}"
         )
         return AdoptReport(
             application=plan.application,

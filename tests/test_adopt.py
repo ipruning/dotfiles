@@ -3,6 +3,8 @@ import os
 import subprocess
 from pathlib import Path
 
+import pytest
+
 from scripts.adopt import (
     AdoptReport,
     AdoptResult,
@@ -12,7 +14,7 @@ from scripts.adopt import (
     plan_adopt,
 )
 from scripts.models import Drift, DriftKind, FileKind
-from tests.conftest import REPO_ROOT, run_scripts_module
+from tests.conftest import REPO_ROOT, mackup_cfg, run_scripts_module
 
 
 def _tracked_repo(tmp_path: Path) -> tuple[Path, Path]:
@@ -189,6 +191,63 @@ def test_adopt_apply_refuses_uncommitted_reference_changes(tmp_path: Path) -> No
     assert (
         repo_root / "reference/.gitconfig"
     ).read_text() == "[user]\n  name = Dirty\n"
+
+
+@pytest.mark.parametrize("live_kind", ["missing", "file", "symlink"])
+@pytest.mark.parametrize("has_ignored_data", [False, True])
+def test_adopt_directory_requires_git_recoverable_contents(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    live_kind: str,
+    has_ignored_data: bool,
+) -> None:
+    repo_root, home = _tracked_repo(tmp_path)
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(home / ".config"))
+    mappings = repo_root / "mackup/applications"
+    mappings.mkdir(parents=True)
+    (mappings.parent / "mackup.cfg").write_text(mackup_cfg("example\n"))
+    (mappings / "example.cfg").write_text(
+        "[application]\nname = Example\n[configuration_files]\n.config/example\n"
+    )
+    reference = repo_root / "reference/.config/example"
+    reference.mkdir(parents=True)
+    (reference / "tracked").write_text("previous reference\n")
+    (repo_root / ".gitignore").write_text("*private*\nautomatic_backups/\n")
+    _commit_all(repo_root)
+    if has_ignored_data:
+        (reference / "host-private.conf").write_text("private sentinel\n")
+        (reference / "automatic_backups").mkdir()
+        (reference / "automatic_backups/probe").write_text("backup sentinel\n")
+    live = home / ".config/example"
+    live.parent.mkdir()
+    if live_kind == "file":
+        live.write_text("live replacement\n")
+    elif live_kind == "symlink":
+        (home / "target").write_text("live replacement\n")
+        live.symlink_to(home / "target")
+
+    plan = plan_adopt(repo_root, home, "example")
+    assert len(plan.results) == 1
+    assert plan.results[0].action == ("remove" if live_kind == "missing" else "copy")
+    applied = apply_adopt(repo_root, home, plan)
+
+    assert applied.ok is not has_ignored_data
+    if has_ignored_data:
+        assert applied.results[0].status is AdoptStatus.FAILED
+        error = applied.results[0].error or ""
+        assert "host-private.conf" in error
+        assert "automatic_backups" in error
+        assert "sentinel" not in error
+        assert (reference / "host-private.conf").read_text() == "private sentinel\n"
+        assert (
+            reference / "automatic_backups/probe"
+        ).read_text() == "backup sentinel\n"
+        assert (reference / "tracked").read_text() == "previous reference\n"
+    elif live_kind == "missing":
+        assert not reference.exists()
+    else:
+        assert reference.is_symlink() is (live_kind == "symlink")
+        assert reference.read_text() == "live replacement\n"
 
 
 def test_adopt_apply_copies_directories_and_confines_paths(tmp_path: Path) -> None:

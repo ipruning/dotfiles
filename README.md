@@ -253,7 +253,9 @@ restore: it is application-scoped, defaults to the same read-only plan, and
 `--apply` copies the live truth into `reference/` (and removes reference files
 whose live counterpart is gone). It writes only inside the repository, never
 under `$HOME`, and refuses to run while the affected reference paths have
-uncommitted changes, so Git can always revert an adoption.
+uncommitted changes or ignored data. Commit intended reference changes and
+move private/ignored data to safety before retrying; do not commit secrets.
+Git can then revert the adopted reference changes.
 
 ```bash
 mise run adopt -- mise
