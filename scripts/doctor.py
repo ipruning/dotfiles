@@ -227,8 +227,10 @@ def _external_steps(
     mise = canonical_mise_executable(home)
     if mise:
         steps.append(DoctorStep("mise.doctor", "mise", (mise, "doctor"), 300))
+    # Skillshare doctor migrates configuration and writes target probes, even
+    # with --json: https://github.com/runkids/skillshare/blob/v0.20.29/cmd/skillshare/doctor.go
+    # Its read-only configuration checks are already part of scripts.check.
     for name, tool, arguments, timeout, json_output in (
-        ("skillshare.doctor", "skillshare", ("doctor", "--json"), 180, True),
         ("brew.doctor", "brew", ("doctor",), 300, False),
         ("pueue.status", "pueue", ("status",), 30, False),
     ):
@@ -279,7 +281,12 @@ def inspect_doctor(
             DoctorResult(
                 DoctorStep(missing_names[tool], tool, (tool,), 0),
                 DoctorStatus.SKIPPED,
-                reason=f"{tool} is not available on PATH",
+                reason=(
+                    "skillshare doctor writes configuration and target probes; "
+                    "read-only Skillshare checks are included in dotfiles.check"
+                    if tool == "skillshare" and executable_finder(tool)
+                    else f"{tool} is not available on PATH"
+                ),
             ),
         )
     return DoctorReport(tuple(results), strict=strict)

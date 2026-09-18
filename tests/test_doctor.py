@@ -47,11 +47,8 @@ def test_doctor_aggregates_internal_and_external_checks_without_mutation(
         if command[0] == str(mise):
             return subprocess.CompletedProcess(command, 0, "No problems found\n", "")
         if command[0].endswith("skillshare"):
-            return subprocess.CompletedProcess(
-                command,
-                0,
-                json.dumps({"ok": True, "summary": {"warnings": 2}}),
-                "",
+            raise AssertionError(
+                "Skillshare diagnostics must not run during inspection"
             )
         return subprocess.CompletedProcess(command, 0, "healthy\n", "")
 
@@ -65,7 +62,8 @@ def test_doctor_aggregates_internal_and_external_checks_without_mutation(
     assert results["dotfiles.check"].status is DoctorStatus.WARN
     assert results["dotfiles.diff"].status is DoctorStatus.WARN
     assert results["mise.doctor"].status is DoctorStatus.PASS
-    assert results["skillshare.doctor"].status is DoctorStatus.WARN
+    assert results["skillshare.doctor"].status is DoctorStatus.SKIPPED
+    assert "writes configuration" in (results["skillshare.doctor"].reason or "")
     assert "rotom.status" not in results
     assert report.ok is True
     assert [

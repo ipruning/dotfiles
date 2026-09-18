@@ -409,9 +409,10 @@ checking when `zsh` is available.
 
 `doctor` is the read-only aggregate entrypoint for routine machine
 maintenance. It runs the repository's `check`, `diff`, `mise-sync`, and `lint`
-reports, then probes `mise doctor`, `skillshare doctor --json`, `brew doctor`,
-and `pueue status` when those owners are available. Each result remains
-separate:
+reports, then probes `mise doctor`, `brew doctor`, and `pueue status` when those
+owners are available. It skips `skillshare doctor` because that command can
+migrate configuration and write probe files in skill targets; read-only
+Skillshare checks remain part of `check`. Each result remains separate:
 
 ```bash
 mise run doctor
