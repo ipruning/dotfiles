@@ -45,11 +45,6 @@ case $- in
     fi
     bind '"\C-w": "\e\C-?"'
     # SSH logins intentionally open an ordinary shell; start Herdr explicitly.
-    # if [ -n "${SSH_TTY:-}" ] && [ -z "${HERDR_ENV:-}" ] && \
-    #   [ "${HERDR_SSH_AUTOSTART:-1}" != 0 ] && \
-    #   herdr --version >/dev/null 2>&1; then
-    #   exec herdr
-    # fi
     ;;
   *)
     # Interactive Bash uses mise activation; non-interactive Bash keeps the
