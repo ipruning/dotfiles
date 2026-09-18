@@ -20,6 +20,7 @@ from pathlib import Path
 
 from .host_policy import HostPolicyError, mutation_allowed, require_mutation_allowed
 from .models import ExecutableFinder
+from .process import run_process_group
 from .render import emit_error
 
 StepCallback = Callable[["InventorySpec"], None]
@@ -213,13 +214,10 @@ def _collect(spec: InventorySpec) -> tuple[str, int | None]:
             if spec.name == "setapp":
                 return "", None
             raise
-    completed = subprocess.run(
+    completed = run_process_group(
         spec.command,
-        check=False,
-        stdin=subprocess.DEVNULL,
         capture_output=True,
-        text=True,
-        timeout=spec.timeout_seconds,
+        timeout_seconds=spec.timeout_seconds,
     )
     if completed.returncode != 0:
         raise SnapshotParseError(

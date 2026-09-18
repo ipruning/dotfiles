@@ -1,10 +1,19 @@
 import json
 import os
+import time
 from pathlib import Path
 
 import pytest
 
-from scripts.mise_sync import _sync_steps
+from scripts.mise_sync import (
+    MiseSyncReport,
+    MiseSyncResult,
+    MiseSyncStatus,
+    MiseSyncStep,
+    _sync_steps,
+    execute_mise_sync,
+)
+from scripts.restore import RestoreReport
 from tests.conftest import REPO_ROOT, run_scripts_module
 
 
@@ -604,3 +613,52 @@ def test_mise_sync_skips_backend_tools_when_runtime_installation_fails(
         f"install --locked --yes -C {home} go node ruby rust",
         f"reshim --force -C {home}",
     ]
+
+
+def test_mise_sync_timeout_stops_children_and_skips_dependent_tools(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("HOME", str(tmp_path))
+    steps = (
+        MiseSyncStep(
+            "mise.runtimes",
+            (
+                "/bin/sh",
+                "-c",
+                (
+                    "(printf started > started; /bin/sleep 3; printf late > late) "
+                    ">/dev/null 2>&1 & wait"
+                ),
+            ),
+            2,
+            (),
+        ),
+        MiseSyncStep(
+            "mise.tools", ("/bin/sh", "-c", "printf unexpected > unexpected"), 2, ()
+        ),
+        MiseSyncStep(
+            "mise.shims", ("/bin/sh", "-c", "printf completed > completed"), 2, ()
+        ),
+    )
+    plan = MiseSyncReport(
+        apply=False,
+        restore=RestoreReport("mise", False, ()),
+        results=tuple(MiseSyncResult(step, MiseSyncStatus.PLANNED) for step in steps),
+    )
+    monkeypatch.setattr("scripts.mise_sync.plan_mise_sync", lambda *_args: plan)
+
+    report = execute_mise_sync(tmp_path, tmp_path, capture_output=True)
+
+    assert report.ok is False
+    assert [result.status for result in report.results] == [
+        MiseSyncStatus.FAILED,
+        MiseSyncStatus.SKIPPED,
+        MiseSyncStatus.SUCCEEDED,
+    ]
+    assert report.results[0].reason == "timed out after 2s"
+    assert (tmp_path / "started").read_text() == "started"
+    assert not (tmp_path / "unexpected").exists()
+    assert (tmp_path / "completed").read_text() == "completed"
+    time.sleep(1.5)
+    assert not (tmp_path / "late").exists()

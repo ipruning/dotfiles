@@ -20,6 +20,7 @@ from .mise import (
     canonical_mise_executable,
     canonical_mise_path,
 )
+from .process import run_process_group
 from .render import emit_error
 from .restore import (
     RestoreReport,
@@ -483,14 +484,11 @@ def execute_mise_sync(
         environment = canonical_mise_environment(home)
         environment.update(planned.step.environment)
         try:
-            completed = subprocess.run(
+            completed = run_process_group(
                 planned.step.command,
-                check=False,
-                stdin=subprocess.DEVNULL,
                 capture_output=capture_output,
                 env=environment,
-                text=True,
-                timeout=planned.step.timeout_seconds,
+                timeout_seconds=planned.step.timeout_seconds,
             )
         except subprocess.TimeoutExpired:
             reason = f"timed out after {planned.step.timeout_seconds}s"

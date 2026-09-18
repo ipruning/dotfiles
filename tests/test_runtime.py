@@ -5,6 +5,7 @@ import shlex
 import shutil
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 import pytest
@@ -339,6 +340,48 @@ def test_runtime_llm_completion_does_not_receive_host_credentials(
     )
     assert result["status"] == "succeeded"
     assert completion.read_text() == "llm completion\n"
+
+
+@pytest.mark.parametrize("capture_output", [False, True])
+def test_runtime_timeout_stops_children_before_running_later_steps(
+    tmp_path: Path, capture_output: bool
+) -> None:
+    spec = RuntimeSpec(
+        name="timeout",
+        tool=None,
+        command=(
+            "/bin/sh",
+            "-c",
+            (
+                "(printf started > started; /bin/sleep 3; printf late > late) "
+                ">/dev/null 2>&1 & wait"
+            ),
+        ),
+        timeout_seconds=2,
+    )
+    later = RuntimeSpec(
+        name="later",
+        tool=None,
+        command=("/bin/sh", "-c", "printf completed > completed"),
+    )
+    plan = RuntimeReport(
+        apply=False,
+        results=tuple(
+            RuntimeResult(step, RuntimeStatus.PLANNED, RuntimeAction.RUN)
+            for step in (spec, later)
+        ),
+    )
+
+    report = execute_runtime(plan, tmp_path, capture_output=capture_output)
+
+    assert report.ok is False
+    assert report.results[0].status is RuntimeStatus.FAILED
+    assert report.results[0].reason == "timed out after 2s"
+    assert (tmp_path / "started").read_text() == "started"
+    assert report.results[1].status is RuntimeStatus.SUCCEEDED
+    assert (tmp_path / "completed").read_text() == "completed"
+    time.sleep(1.5)
+    assert not (tmp_path / "late").exists()
 
 
 def test_runtime_rejects_invalid_download_without_replacing_asset(

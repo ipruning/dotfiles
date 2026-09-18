@@ -527,7 +527,7 @@ def test_inventory_reports_timeout_on_stderr_and_keeps_going(
     def fail_with_timeout(*_args: object, **_kwargs: object) -> None:
         raise subprocess.TimeoutExpired(("brew",), 300)
 
-    monkeypatch.setattr("scripts.inventory.subprocess.run", fail_with_timeout)
+    monkeypatch.setattr("scripts.inventory.run_process_group", fail_with_timeout)
     applications_root = tmp_path / "Applications"
     _make_applications(applications_root, apps=("Ghostty",), setapp=None)
     plan = plan_inventory(

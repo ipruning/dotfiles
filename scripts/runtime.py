@@ -21,6 +21,7 @@ from pathlib import Path
 from .host_policy import HostPolicyError, mutation_allowed, require_mutation_allowed
 from .mise import canonical_mise_executable, canonical_mise_path
 from .models import ExecutableFinder
+from .process import run_process_group
 from .render import emit_error
 
 Downloader = Callable[[str, int], bytes]
@@ -584,14 +585,11 @@ def _run_command(
     *,
     capture_output: bool,
 ) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(
+    return run_process_group(
         spec.command,
         cwd=home,
-        check=False,
-        stdin=subprocess.DEVNULL,
         capture_output=capture_output,
-        text=True,
-        timeout=spec.timeout_seconds,
+        timeout_seconds=spec.timeout_seconds,
         env=_command_environment(spec, home),
     )
 

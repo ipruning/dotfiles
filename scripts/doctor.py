@@ -16,6 +16,7 @@ from pathlib import Path
 
 from .host_policy import HostPolicyError
 from .mise import canonical_mise_environment, canonical_mise_executable
+from .process import run_process_group
 from .render import emit_error
 
 
@@ -71,14 +72,12 @@ def _default_runner(
     environment: dict[str, str],
     timeout_seconds: int,
 ) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(
+    return run_process_group(
         command,
-        check=False,
         capture_output=True,
         cwd=Path(__file__).resolve().parents[1],
         env=environment,
-        text=True,
-        timeout=timeout_seconds,
+        timeout_seconds=timeout_seconds,
     )
 
 
