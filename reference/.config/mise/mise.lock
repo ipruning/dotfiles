@@ -197,18 +197,18 @@ url = "https://github.com/jesseduffield/lazygit/releases/download/v0.65.1/lazygi
 url_api = "https://api.github.com/repos/jesseduffield/lazygit/releases/assets/560658243"
 
 [[tools.mr-boxington]]
-version = "1.12.0"
+version = "1.13.0"
 backend = "packslip:github.com/jdx/mr-boxington"
 specifiers = ["latest"]
 
 [tools.mr-boxington."platforms.linux-x64"]
-checksum = "sha256:d577a724dff2e6564329a049627f446e0a1d9a4cc0c9884c44e7487ea6253f33"
-url = "https://github.com/jdx/mr-boxington/releases/download/v1.12.0/mbx-x86_64-unknown-linux-gnu.tar.gz"
+checksum = "sha256:51469ae93c9b6a01b2458188d798f9a2103e619145396bfe348834b2ae6ee672"
+url = "https://github.com/jdx/mr-boxington/releases/download/v1.13.0/mbx-x86_64-unknown-linux-gnu.tar.gz"
 signer = "sigstore-oidc:https://github.com/jdx/mr-boxington/.github/workflows/release.yml"
 
 [tools.mr-boxington."platforms.macos-arm64"]
-checksum = "sha256:5457c4d06e547035f0c6521a1f94e67c0400751730feb88f89c1095ac1ddc2bd"
-url = "https://github.com/jdx/mr-boxington/releases/download/v1.12.0/mbx-aarch64-apple-darwin.tar.gz"
+checksum = "sha256:690fe9a52398eb816c416c7573c9f847cdfcab5aacf03bc60f6c00f1ef596d2f"
+url = "https://github.com/jdx/mr-boxington/releases/download/v1.13.0/mbx-aarch64-apple-darwin.tar.gz"
 signer = "sigstore-oidc:https://github.com/jdx/mr-boxington/.github/workflows/release.yml"
 
 [[tools.node]]

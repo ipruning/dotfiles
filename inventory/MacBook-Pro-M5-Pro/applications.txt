@@ -2,22 +2,24 @@
 1Password
 1Password for Safari
 AeroSpace
+Amp
 BetterDisplay
+Blender
 brrr
 calibre
 Capture One
 ChatGPT
 Claude
+Claude Science
 CodexBar
-Codiff
 Compressor Creator Studio
 Contexts
 CrystalFetch
-Cursor
+DBX
+Delta
 DEVONthink
 Discord
 Eagle
-ESTKme
 Final Cut Pro Creator Studio
 GarageBand
 Ghostty
@@ -26,58 +28,49 @@ Google Docs
 Google Drive
 Google Sheets
 Google Slides
-Helmor
+iMazing
 Immersive Translate
 iMovie
 Input Source Pro
 Karabiner-Elements
 Karabiner-EventViewer
+Keepresso
 Keynote
 Keynote Creator Studio
 Lark
 LibreOffice
 Linear
 LinearMouse
-LM Studio
 Logic Pro Creator Studio
 Longbridge
 MainStage Creator Studio
 Mos
+Moshi
 Motion Creator Studio
 MyCard
 OrbStack
 Pixelmator Pro Creator Studio
 qBittorrent
 QQ
-Raycast Beta
-Repo Prompt
-RepoPrompt CE
+Raycast
 Roam Research
 Safari
 SenPlayer
 Setapp
 Slack
+SmartSet
 Surfingkeys
 Surge
-T3 Code (Alpha)
 Tailscale
 Tampermonkey
 Telegram
 TestFlight
-Thaw
 Things3
 Typeless
 uBlock Origin Lite
-UTM
-Visual Studio Code
-Warp
 WeChat
-wechatwebdevtools
-WhatCable
-Xcode
-Xcodes
+Xcode-27.0.0
 YACReader
 YACReaderLibrary
 Zed
-ZeroTier
 Zotero
