@@ -3,8 +3,8 @@
 lockfile_version = 1
 
 [[tools.agent-browser]]
-version = "0.38.0"
-aube = { path = "locks/agent-browser/0.38.0", digest = "sha256:1a6e5a7eab38a66a3a8060759c65553d966fd091b8511ee51cd673c2a0bea2a0" }
+version = "0.38.1"
+aube = { path = "locks/agent-browser/0.38.1", digest = "sha256:71da2d3eacd2d671de6b4f1621c8eb49c1288cf86a6b33f55654a8ad3d0f8321" }
 backend = "npm:agent-browser"
 specifiers = ["latest"]
 
@@ -44,17 +44,17 @@ crate = "atuin"
 locked = "true"
 
 [[tools.deno]]
-version = "2.9.6"
+version = "2.9.7"
 backend = "core:deno"
 specifiers = ["latest"]
 
 [tools.deno."platforms.linux-x64"]
-checksum = "sha256:394f07f4da2bebe6ce6f1e7ce0fa16429b29b08c35e3fac3fe25972676dff4b2"
-url = "https://dl.deno.land/release/v2.9.6/deno-x86_64-unknown-linux-gnu.zip"
+checksum = "sha256:c6527f24f4b16031d3ae4fa9f658d5f11534c8d84ce7dc8502420280919c3490"
+url = "https://dl.deno.land/release/v2.9.7/deno-x86_64-unknown-linux-gnu.zip"
 
 [tools.deno."platforms.macos-arm64"]
-checksum = "sha256:213a2f304f04d3c9cb5220669afad138f60a5aab1fe80962abdeb8f35807a472"
-url = "https://dl.deno.land/release/v2.9.6/deno-aarch64-apple-darwin.zip"
+checksum = "sha256:5cd46d6268f6f78f5d88bdc7159d20bd44cdaa4b3303474839f87ec6fe7ae25c"
+url = "https://dl.deno.land/release/v2.9.7/deno-aarch64-apple-darwin.zip"
 
 [[tools."gem:kamal"]]
 version = "2.12.0"
@@ -94,19 +94,19 @@ url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/5704298
 provenance = "github-attestations"
 
 [[tools."github:larksuite/cli"]]
-version = "1.0.95"
+version = "1.0.96"
 backend = "github:larksuite/cli"
 specifiers = ["latest"]
 
 [tools."github:larksuite/cli"."platforms.linux-x64"]
-checksum = "sha256:7da92d426b7d000908c76a36b87a7d0357c270debf4c7149bbc6010b20d2541e"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.95/lark-cli-1.0.95-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/556447680"
+checksum = "sha256:5d1fa96832307b13298fdb11c477ab3f31c3e98026fec585b4b2eb7f63960c36"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.96/lark-cli-1.0.96-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/568342594"
 
 [tools."github:larksuite/cli"."platforms.macos-arm64"]
-checksum = "sha256:7ae7241b7de5ebfe86aa6b2b24af3600bd5019ec5b6206ea3bfdc0894f6fd925"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.95/lark-cli-1.0.95-darwin-arm64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/556447687"
+checksum = "sha256:124acdf380f72fa4b1b1e8307a0b00ee93217cf9558baca5bc40091304f2adcd"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.96/lark-cli-1.0.96-darwin-arm64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/568342593"
 
 [[tools."github:lycorp-jp/sim-use"]]
 version = "0.14.0"
@@ -137,19 +137,19 @@ checksum = "sha256:ee215d57e0ec269c60cc9ceca68e6bda321ba9ee5afe24f4b0988703c2d87
 url = "https://dl.google.com/go/go1.27.1.darwin-arm64.tar.gz"
 
 [[tools.herdr]]
-version = "0.9.0"
+version = "0.9.1"
 backend = "aqua:herdrdev/herdr"
 specifiers = ["latest"]
 
 [tools.herdr."platforms.linux-x64"]
-checksum = "sha256:4fa1a01158dd8043da92d31b270780b0dcc10603038d9b61cac4d81ab63fb71f"
-url = "https://github.com/herdrdev/herdr/releases/download/v0.9.0/herdr-linux-x86_64"
-url_api = "https://api.github.com/repos/herdrdev/herdr/releases/assets/549270163"
+checksum = "sha256:2a02fed16beb651ef006e1d43f048f652ca4dc58ad053cd2d44450563d5c54b7"
+url = "https://github.com/herdrdev/herdr/releases/download/v0.9.1/herdr-linux-x86_64"
+url_api = "https://api.github.com/repos/herdrdev/herdr/releases/assets/568559679"
 
 [tools.herdr."platforms.macos-arm64"]
-checksum = "sha256:32b53df09872628059c789a69f02a6b8e29e14ddf26711421f3463f70c1aef17"
-url = "https://github.com/herdrdev/herdr/releases/download/v0.9.0/herdr-macos-aarch64"
-url_api = "https://api.github.com/repos/herdrdev/herdr/releases/assets/549270162"
+checksum = "sha256:5fc7a7e7adfaca56fa80aa89dcb025693357268dab8285b9ce2d08a2313c89de"
+url = "https://github.com/herdrdev/herdr/releases/download/v0.9.1/herdr-macos-aarch64"
+url_api = "https://api.github.com/repos/herdrdev/herdr/releases/assets/568559677"
 
 [[tools.hunk]]
 version = "0.22.0"
@@ -196,6 +196,21 @@ checksum = "sha256:65a367c6ea9a88efebaaf7998a6835eedb987e04916cef677264ff9b31b1b
 url = "https://github.com/jesseduffield/lazygit/releases/download/v0.65.1/lazygit_0.65.1_darwin_arm64.tar.gz"
 url_api = "https://api.github.com/repos/jesseduffield/lazygit/releases/assets/560658243"
 
+[[tools.mr-boxington]]
+version = "1.12.0"
+backend = "packslip:github.com/jdx/mr-boxington"
+specifiers = ["latest"]
+
+[tools.mr-boxington."platforms.linux-x64"]
+checksum = "sha256:d577a724dff2e6564329a049627f446e0a1d9a4cc0c9884c44e7487ea6253f33"
+url = "https://github.com/jdx/mr-boxington/releases/download/v1.12.0/mbx-x86_64-unknown-linux-gnu.tar.gz"
+signer = "sigstore-oidc:https://github.com/jdx/mr-boxington/.github/workflows/release.yml"
+
+[tools.mr-boxington."platforms.macos-arm64"]
+checksum = "sha256:5457c4d06e547035f0c6521a1f94e67c0400751730feb88f89c1095ac1ddc2bd"
+url = "https://github.com/jdx/mr-boxington/releases/download/v1.12.0/mbx-aarch64-apple-darwin.tar.gz"
+signer = "sigstore-oidc:https://github.com/jdx/mr-boxington/.github/workflows/release.yml"
+
 [[tools.node]]
 version = "26.9.0"
 backend = "core:node"
@@ -211,7 +226,7 @@ url = "https://nodejs.org/dist/v26.9.0/node-v26.9.0-darwin-arm64.tar.gz"
 
 [[tools."npm:@openai/codex-security"]]
 version = "0.1.28"
-aube = { path = "locks/npm-openai-codex-security/0.1.28~19b6a9e3", digest = "sha256:074cea6ef75ae1fffcb705c308ef7a47f6977fb56af5920469518239ad7c86d9" }
+aube = { path = "locks/npm-openai-codex-security/0.1.28~19b6a9e3", digest = "sha256:58359b64f258b9204c1e440911cdc3c632361fd31c77fe00c7b87a1d1b24e0db" }
 backend = "npm:@openai/codex-security"
 specifiers = ["latest"]
 
@@ -219,7 +234,8 @@ specifiers = ["latest"]
 allow_low_downloads = "true"
 
 [[tools."npm:agent-device"]]
-version = "0.21.5"
+version = "0.21.6"
+aube = { path = "locks/npm-agent-device/0.21.6", digest = "sha256:ba891bb3412f855ea90fb78274b08b4b136dcb463559f25e9a85a8fa81194a2b" }
 backend = "npm:agent-device"
 specifiers = ["latest"]
 

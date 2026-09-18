@@ -40,7 +40,7 @@ pi = "latest"
 pnpm = "latest"
 python = "latest"
 ruby = "latest"
-rust = "latest"
+rust = { version = "latest", mr_boxington = true }
 skillshare = "latest"
 starship = "latest"
 uv = "latest"
@@ -48,6 +48,7 @@ xurl = "latest"
 yarn = "latest"
 zig = "latest"
 zoxide = "latest"
+mr-boxington = "latest"
 
 [settings]
 auto_install = false
