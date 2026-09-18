@@ -420,9 +420,12 @@ def test_update_human_output_announces_commands_before_summary(tmp_path: Path) -
     assert "Summary: 6 succeeded, 7 skipped" in completed.stdout
 
 
-def test_update_json_streams_progress_to_stderr_while_stdout_stays_json(
+@pytest.mark.parametrize("capture_output", [False, True])
+def test_update_streams_progress_to_stderr(
     tmp_path: Path,
     capfd: pytest.CaptureFixture[str],
+    monkeypatch: pytest.MonkeyPatch,
+    capture_output: bool,
 ) -> None:
     bin_dir = tmp_path / "bin"
     bin_dir.mkdir()
@@ -430,43 +433,23 @@ def test_update_json_streams_progress_to_stderr_while_stdout_stays_json(
     home.mkdir()
     log_path = tmp_path / "invocations.log"
     _fake_tool(bin_dir, "amp", log_path, delay_seconds=0.08)
+    monkeypatch.setenv("PATH", str(bin_dir))
+    monkeypatch.setenv("HOME", str(home))
 
     report = execute_updates(
         home,
         executable_finder=lambda tool: str(bin_dir / "amp") if tool == "amp" else None,
-        capture_output=True,
+        capture_output=capture_output,
         progress_interval_seconds=0.02,
     )
 
     assert report.ok is True
-    progress = capfd.readouterr().err
-    assert "[amp] RUN amp update" in progress
-    assert "[amp] STILL RUNNING" in progress
-    assert "[amp] DONE exit=0" in progress
-
-
-def test_update_human_runner_streams_progress_to_stderr(
-    tmp_path: Path,
-    capfd: pytest.CaptureFixture[str],
-) -> None:
-    bin_dir = tmp_path / "bin"
-    bin_dir.mkdir()
-    home = tmp_path / "home"
-    home.mkdir()
-    log_path = tmp_path / "invocations.log"
-    _fake_tool(bin_dir, "amp", log_path, delay_seconds=0.08)
-
-    report = execute_updates(
-        home,
-        executable_finder=lambda tool: str(bin_dir / "amp") if tool == "amp" else None,
-        progress_interval_seconds=0.02,
-    )
-
-    assert report.ok is True
-    progress = capfd.readouterr().err
-    assert "[amp] RUN amp update" in progress
-    assert "[amp] STILL RUNNING" in progress
-    assert "[amp] DONE exit=0" in progress
+    assert log_path.read_text().splitlines() == ["amp update"]
+    output = capfd.readouterr()
+    assert output.out == ""
+    assert "[amp] RUN amp update" in output.err
+    assert "[amp] STILL RUNNING" in output.err
+    assert "[amp] DONE exit=0" in output.err
 
 
 def test_update_progress_timeout_kills_the_process_group(tmp_path: Path) -> None:
