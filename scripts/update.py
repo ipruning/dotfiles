@@ -280,7 +280,7 @@ def _update_steps(home: Path) -> tuple[UpdateStep, ...]:
         UpdateStep(
             "mise.tools",
             "mise",
-            (mise_executable, "upgrade", "--bump", "-C", str(home)),
+            (mise_executable, "upgrade", "--bump", "--no-prune", "-C", str(home)),
             1800,
             path_prepend=mise_path,
         ),

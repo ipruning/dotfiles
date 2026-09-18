@@ -467,8 +467,9 @@ updater determines whether a newer version exists during apply. Any failed
 step makes the command exit non-zero. It deliberately does not run `brew
 cleanup`, `brew autoremove`, or `mise prune`;
 the Homebrew package step also sets `HOMEBREW_NO_INSTALL_CLEANUP=1` so
-`brew upgrade` cannot trigger cleanup implicitly. Removal and pruning require a
-separate, explicit operation. Because Sprite's updater treats a closed upgrade
+`brew upgrade` cannot trigger cleanup implicitly, and Mise uses `--no-prune`
+to prevent scheduling old versions for removal. Cleanup requires a separate,
+explicit operation. Because Sprite's updater treats a closed upgrade
 prompt as a successful no-op, `--apply` supplies its affirmative response;
 preview output and JSON expose that stdin behavior. Claude receives a 30-minute
 outer timeout so its updater can report its own download failure. A failed
