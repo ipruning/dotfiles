@@ -1,5 +1,5 @@
-# mise.lock v1 requires mise 2026.8.11 or newer.
-min_version = { hard = "2026.8.11" }
+# Native dependency sidecars beside symlinked lockfiles require mise 2026.9.11.
+min_version = { hard = "2026.9.11" }
 
 [tool_alias]
 # Keep canonical tool identities pinned to explicit backends; [tools] must

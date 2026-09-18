@@ -1,3 +1,4 @@
+import hashlib
 import json
 import os
 import shutil
@@ -5,6 +6,8 @@ import subprocess
 import sys
 import tomllib
 from pathlib import Path
+
+from ruamel.yaml import YAML
 
 import scripts.diff as diff_module
 
@@ -48,7 +51,7 @@ def test_mise_python_tasks_never_sync_dependencies_implicitly(tmp_path: Path) ->
         "macos-arm64",
         "linux-x64",
     ]
-    assert config["min_version"]["hard"] == "2026.8.11"
+    assert config["min_version"]["hard"] == "2026.9.11"
     assert lockfile["lockfile_version"] == 1
     assert config["tool_alias"] == {
         "fd": "aqua:sharkdp/fd",
@@ -101,7 +104,7 @@ def test_global_mise_lock_covers_declared_artifact_platforms() -> None:
     config = tomllib.loads(
         (repo_root / "reference/.config/mise/config.toml").read_text(),
     )
-    assert config["min_version"]["hard"] == "2026.8.11"
+    assert config["min_version"]["hard"] == "2026.9.11"
     assert config["settings"]["auto_install"] is False
     assert "exec_auto_install" not in config["settings"]
     assert "task" not in config["settings"]
@@ -113,9 +116,8 @@ def test_global_mise_lock_covers_declared_artifact_platforms() -> None:
     assert config["tool_alias"]["yarn"] == "vfox:mise-plugins/vfox-yarn"
     assert config["tools"]["yarn"] == "latest"
     assert "vfox:mise-plugins/vfox-yarn" not in config["tools"]
-    lockfile = tomllib.loads(
-        (repo_root / "reference/.config/mise/mise.lock").read_text(),
-    )
+    lock_root = repo_root / "reference/.config/mise"
+    lockfile = tomllib.loads((lock_root / "mise.lock").read_text())
     assert lockfile["lockfile_version"] == 1
     assert lockfile["tools"]["yarn"] == [
         {
@@ -141,9 +143,36 @@ def test_global_mise_lock_covers_declared_artifact_platforms() -> None:
             missing.append(f"{tool}:lock-entry")
             continue
         for entry in entries:
-            assert "aube" not in entry
+            # Mise accepts native npm sidecars in v1; Python graphs require v2.
             assert "uv" not in entry
             backend = entry["backend"]
+            if "aube" in entry:
+                assert backend.startswith("npm:")
+                pointer = entry["aube"]
+                assert set(pointer) == {"path", "digest"}
+                relative = Path(pointer["path"])
+                assert not relative.is_absolute()
+                assert ".." not in relative.parts
+                assert "\\" not in pointer["path"]
+                sidecar_root = (lock_root / "locks").resolve()
+                sidecar = (lock_root / relative).resolve()
+                assert sidecar.is_relative_to(sidecar_root)
+                graph = sidecar / "aube-lock.yaml"
+                manifest = sidecar / "package.json"
+                for path in (graph, manifest):
+                    assert path.is_file()
+                    assert path.resolve().is_relative_to(sidecar_root)
+                assert pointer["digest"] == (
+                    "sha256:" + hashlib.sha256(graph.read_bytes()).hexdigest()
+                )
+                package = backend.removeprefix("npm:")
+                assert json.loads(manifest.read_text())["dependencies"] == {
+                    package: entry["version"],
+                }
+                dependencies = YAML(typ="safe").load(graph)["importers"]["."][
+                    "dependencies"
+                ]
+                assert dependencies[package]["specifier"] == entry["version"]
             if backend in version_only_backends or backend.startswith(
                 version_only_prefixes,
             ):
