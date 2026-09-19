@@ -77,20 +77,20 @@ url = "https://github.com/agavra/tuicr/releases/download/v0.26.0/tuicr-0.26.0-aa
 url_api = "https://api.github.com/repos/agavra/tuicr/releases/assets/566753781"
 
 [[tools."github:jihuanshe/linear"]]
-version = "0.0.1789800357-g4a62834"
+version = "0.0.1789804810-g43b5121"
 backend = "github:jihuanshe/linear"
 specifiers = ["latest"]
 
 [tools."github:jihuanshe/linear"."platforms.linux-x64"]
-checksum = "sha256:8e40a711241866eda096be24c8eef4d8a9e539ad0b3e648240ac1578edfc389d"
-url = "https://github.com/jihuanshe/linear/releases/download/0.0.1789800357-g4a62834/linear-x86_64-unknown-linux-gnu.tar.xz"
-url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/574254785"
+checksum = "sha256:c69defd99c3c1e8fe157fce81d6515403c77be918253cd30b7282960be66305f"
+url = "https://github.com/jihuanshe/linear/releases/download/0.0.1789804810-g43b5121/linear-x86_64-unknown-linux-gnu.tar.xz"
+url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/574355275"
 provenance = "github-attestations"
 
 [tools."github:jihuanshe/linear"."platforms.macos-arm64"]
-checksum = "sha256:d17b48ff16c9016a0026173ec01e5f8c1a4209b31395fa07c08cf25c06e47519"
-url = "https://github.com/jihuanshe/linear/releases/download/0.0.1789800357-g4a62834/linear-aarch64-apple-darwin.tar.xz"
-url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/574254644"
+checksum = "sha256:c1639e3eb6b774f1e12e4434b2eb11368ef5a4ada1d0371268020bfa3e3f6a79"
+url = "https://github.com/jihuanshe/linear/releases/download/0.0.1789804810-g43b5121/linear-aarch64-apple-darwin.tar.xz"
+url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/574354866"
 provenance = "github-attestations"
 
 [[tools."github:larksuite/cli"]]
@@ -197,18 +197,18 @@ url = "https://github.com/jesseduffield/lazygit/releases/download/v0.65.1/lazygi
 url_api = "https://api.github.com/repos/jesseduffield/lazygit/releases/assets/560658243"
 
 [[tools.mr-boxington]]
-version = "1.13.0"
+version = "1.14.0"
 backend = "packslip:github.com/jdx/mr-boxington"
 specifiers = ["latest"]
 
 [tools.mr-boxington."platforms.linux-x64"]
-checksum = "sha256:51469ae93c9b6a01b2458188d798f9a2103e619145396bfe348834b2ae6ee672"
-url = "https://github.com/jdx/mr-boxington/releases/download/v1.13.0/mbx-x86_64-unknown-linux-gnu.tar.gz"
+checksum = "sha256:fc32cc431a9e022519b16348962f99ca84626ff25196bc11e61cb05df66fb069"
+url = "https://github.com/jdx/mr-boxington/releases/download/v1.14.0/mbx-x86_64-unknown-linux-gnu.tar.gz"
 signer = "sigstore-oidc:https://github.com/jdx/mr-boxington/.github/workflows/release.yml"
 
 [tools.mr-boxington."platforms.macos-arm64"]
-checksum = "sha256:690fe9a52398eb816c416c7573c9f847cdfcab5aacf03bc60f6c00f1ef596d2f"
-url = "https://github.com/jdx/mr-boxington/releases/download/v1.13.0/mbx-aarch64-apple-darwin.tar.gz"
+checksum = "sha256:ff743aad797d198c9381d36ff3c4f49e6a2601832f7bdf8cccdb34106e5385cd"
+url = "https://github.com/jdx/mr-boxington/releases/download/v1.14.0/mbx-aarch64-apple-darwin.tar.gz"
 signer = "sigstore-oidc:https://github.com/jdx/mr-boxington/.github/workflows/release.yml"
 
 [[tools.node]]
@@ -225,8 +225,8 @@ checksum = "sha256:6f3de7ed853ee283b4bf24b6e426618f1d357401ce5815db1866eb85eb4b0
 url = "https://nodejs.org/dist/v26.9.0/node-v26.9.0-darwin-arm64.tar.gz"
 
 [[tools."npm:@openai/codex-security"]]
-version = "0.1.28"
-aube = { path = "locks/npm-openai-codex-security/0.1.28~19b6a9e3", digest = "sha256:cd5036d043e14096462af4563e36d2b9d211deeb8927f75cb24ea4da925d22f1" }
+version = "0.1.29"
+aube = { path = "locks/npm-openai-codex-security/0.1.29~19b6a9e3", digest = "sha256:65111b867f616ae2d45e346b46c8044576ee915fee37a9e2249f3e4d9327a83c" }
 backend = "npm:@openai/codex-security"
 specifiers = ["latest"]
 
