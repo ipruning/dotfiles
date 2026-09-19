@@ -1,0 +1,7 @@
+SET enable_progress_bar = TRUE;
+
+.headers on
+.mode duckbox
+.nullvalue '∅'
+.prompt '🦆 ' '… '
+.timer on
