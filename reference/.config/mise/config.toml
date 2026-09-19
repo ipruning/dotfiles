@@ -4,7 +4,7 @@ min_version = { hard = "2026.9.11" }
 [tool_alias]
 # Keep canonical tool identities pinned to explicit backends; [tools] must
 # use these aliases rather than declaring the same full backend separately.
-agent-browser = "npm:agent-browser"
+agent-browser = "aqua:vercel-labs/agent-browser"
 herdr = "aqua:herdrdev/herdr"
 hunk = "aqua:modem-dev/hunk"
 lazydocker = "aqua:jesseduffield/lazydocker"
