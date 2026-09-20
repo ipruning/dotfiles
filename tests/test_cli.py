@@ -112,20 +112,12 @@ def test_global_mise_lock_covers_declared_artifact_platforms() -> None:
         "~/Developer/ipruning",
         "~/Developer/jihuanshe",
     ]
-    assert {"codex", "gh"}.isdisjoint(config["tools"])
-    assert config["tool_alias"]["yarn"] == "vfox:mise-plugins/vfox-yarn"
-    assert config["tools"]["yarn"] == "latest"
-    assert "vfox:mise-plugins/vfox-yarn" not in config["tools"]
+    assert {"codex", "gh", "pnpm", "yarn"}.isdisjoint(config["tools"])
+    assert {"pnpm", "yarn"}.isdisjoint(config["tool_alias"])
     lock_root = repo_root / "reference/.config/mise"
     lockfile = tomllib.loads((lock_root / "mise.lock").read_text())
     assert lockfile["lockfile_version"] == 1
-    assert lockfile["tools"]["yarn"] == [
-        {
-            "version": "4.18.0",
-            "backend": "vfox:mise-plugins/vfox-yarn",
-            "specifiers": ["latest"],
-        },
-    ]
+    assert {"pnpm", "yarn"}.isdisjoint(lockfile["tools"])
     version_only_backends = {"core:rust"}
     version_only_prefixes = (
         "cargo:",

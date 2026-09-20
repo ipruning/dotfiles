@@ -328,8 +328,8 @@ def test_mise_sync_blocks_an_untracked_backend_migration_alias(
     home.mkdir()
     _write_live_config(home)
     (home / ".config/mise/config.toml").write_text(
-        f'[{alias_section}]\nyarn = "aqua:yarnpkg/berry"\n\n'
-        '[tools]\nnode = "20"\nyarn = "latest"\n'
+        f'[{alias_section}]\nuv = "github:astral-sh/uv"\n\n'
+        '[tools]\nnode = "20"\nuv = "latest"\n'
     )
     _write_mise(home, tmp_path / "mise.log")
 
@@ -339,7 +339,7 @@ def test_mise_sync_blocks_an_untracked_backend_migration_alias(
     document = json.loads(preview.stdout)
     assert document["safety"]["apply_blocked"] is True
     assert document["safety"]["live_alias_overrides"] == [
-        {"alias": "yarn", "backend": "aqua:yarnpkg/berry"}
+        {"alias": "uv", "backend": "github:astral-sh/uv"}
     ]
     assert document["safety"]["live_only_tools"] == []
 
