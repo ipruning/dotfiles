@@ -5,7 +5,10 @@ lockfile_version = 1
 [[tools.agent-browser]]
 version = "0.38.1"
 backend = "aqua:vercel-labs/agent-browser"
-specifiers = ["latest"]
+specifiers = [
+    "0.38.1",
+    "latest",
+]
 
 [tools.agent-browser."platforms.linux-x64"]
 checksum = "sha256:e4b4555c450d6903567f18ae572c26a6f86dcad31c401f9b56d5bc00334afc91"
@@ -20,7 +23,10 @@ url_api = "https://api.github.com/repos/vercel-labs/agent-browser/releases/asset
 [[tools.bun]]
 version = "1.4.2"
 backend = "core:bun"
-specifiers = ["latest"]
+specifiers = [
+    "1.4.2",
+    "latest",
+]
 
 [tools.bun."platforms.linux-x64"]
 checksum = "sha256:36368faef7527875d5ffa52e53cd48021741f2a83eb6208a8dd64068d422a913"
@@ -55,7 +61,10 @@ locked = "true"
 [[tools.deno]]
 version = "2.9.7"
 backend = "core:deno"
-specifiers = ["latest"]
+specifiers = [
+    "2.9.7",
+    "latest",
+]
 
 [tools.deno."platforms.linux-x64"]
 checksum = "sha256:c6527f24f4b16031d3ae4fa9f658d5f11534c8d84ce7dc8502420280919c3490"
@@ -68,12 +77,18 @@ url = "https://dl.deno.land/release/v2.9.7/deno-aarch64-apple-darwin.zip"
 [[tools."gem:kamal"]]
 version = "2.12.0"
 backend = "gem:kamal"
-specifiers = ["latest"]
+specifiers = [
+    "2.12.0",
+    "latest",
+]
 
 [[tools."github:agavra/tuicr"]]
 version = "0.26.0"
 backend = "github:agavra/tuicr"
-specifiers = ["latest"]
+specifiers = [
+    "0.26.0",
+    "latest",
+]
 
 [tools."github:agavra/tuicr"."platforms.linux-x64"]
 checksum = "sha256:d00b3388da64a96801bedcfa6ff71411c2f118d44e96e65eea81153c95b585ef"
@@ -88,7 +103,10 @@ url_api = "https://api.github.com/repos/agavra/tuicr/releases/assets/566753781"
 [[tools."github:jihuanshe/linear"]]
 version = "0.0.1790091496-gde62e92"
 backend = "github:jihuanshe/linear"
-specifiers = ["latest"]
+specifiers = [
+    "0.0.1790091496-gde62e92",
+    "latest",
+]
 
 [tools."github:jihuanshe/linear"."platforms.linux-x64"]
 checksum = "sha256:dfde68bf92df3ac74c3def21868d7a2aba041a4639582fcafa748711f62adfc6"
@@ -105,7 +123,10 @@ provenance = "github-attestations"
 [[tools."github:larksuite/cli"]]
 version = "1.0.96"
 backend = "github:larksuite/cli"
-specifiers = ["latest"]
+specifiers = [
+    "1.0.96",
+    "latest",
+]
 
 [tools."github:larksuite/cli"."platforms.linux-x64"]
 checksum = "sha256:5d1fa96832307b13298fdb11c477ab3f31c3e98026fec585b4b2eb7f63960c36"
@@ -120,7 +141,10 @@ url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/568342593"
 [[tools."github:lycorp-jp/sim-use"]]
 version = "0.14.0"
 backend = "github:lycorp-jp/sim-use"
-specifiers = ["latest"]
+specifiers = [
+    "0.14.0",
+    "latest",
+]
 
 [tools."github:lycorp-jp/sim-use"."platforms.linux-x64"]
 checksum = "sha256:67e2ee29a7246272de8646e46664a93d9cebcace134094cfd3d07dfb82bda3e6"
@@ -135,7 +159,10 @@ url_api = "https://api.github.com/repos/lycorp-jp/sim-use/releases/assets/532128
 [[tools.go]]
 version = "1.27.1"
 backend = "core:go"
-specifiers = ["latest"]
+specifiers = [
+    "1.27.1",
+    "latest",
+]
 
 [tools.go."platforms.linux-x64"]
 checksum = "sha256:63d339f0da5ab53635a56f2490a7984dfe12dfcff22ad749f63edaf590168445"
@@ -148,7 +175,10 @@ url = "https://dl.google.com/go/go1.27.1.darwin-arm64.tar.gz"
 [[tools.herdr]]
 version = "0.9.1"
 backend = "aqua:herdrdev/herdr"
-specifiers = ["latest"]
+specifiers = [
+    "0.9.1",
+    "latest",
+]
 
 [tools.herdr."platforms.linux-x64"]
 checksum = "sha256:2a02fed16beb651ef006e1d43f048f652ca4dc58ad053cd2d44450563d5c54b7"
@@ -163,7 +193,10 @@ url_api = "https://api.github.com/repos/herdrdev/herdr/releases/assets/568559677
 [[tools.hunk]]
 version = "0.22.0"
 backend = "aqua:modem-dev/hunk"
-specifiers = ["latest"]
+specifiers = [
+    "0.22.0",
+    "latest",
+]
 
 [tools.hunk."platforms.linux-x64"]
 checksum = "sha256:5f280374f2ab0fc4c48266a9909ee1b0e0c59d77dd99a340f1c26f2125d2229b"
@@ -178,7 +211,10 @@ url_api = "https://api.github.com/repos/modem-dev/hunk/releases/assets/554957248
 [[tools.lazydocker]]
 version = "0.25.2"
 backend = "aqua:jesseduffield/lazydocker"
-specifiers = ["latest"]
+specifiers = [
+    "0.25.2",
+    "latest",
+]
 
 [tools.lazydocker."platforms.linux-x64"]
 checksum = "sha256:0d9dbfc26068b218e7ed84b104748cadc6e3cf733c0afd35465306fb39b9523c"
@@ -193,7 +229,10 @@ url_api = "https://api.github.com/repos/jesseduffield/lazydocker/releases/assets
 [[tools.lazygit]]
 version = "0.65.1"
 backend = "aqua:jesseduffield/lazygit"
-specifiers = ["latest"]
+specifiers = [
+    "0.65.1",
+    "latest",
+]
 
 [tools.lazygit."platforms.linux-x64"]
 checksum = "sha256:02beacbcda0fa342e50ae3480ba8147307353af3fb28e1d5f790e02329c201a6"
@@ -208,7 +247,10 @@ url_api = "https://api.github.com/repos/jesseduffield/lazygit/releases/assets/56
 [[tools.mr-boxington]]
 version = "1.15.0"
 backend = "packslip:github.com/jdx/mr-boxington"
-specifiers = ["latest"]
+specifiers = [
+    "1.15.0",
+    "latest",
+]
 
 [tools.mr-boxington."platforms.linux-x64"]
 checksum = "sha256:ee89e29a76849fe6344d81187cdcdb8c7710b96d7a2f54a7f99dc9f49eba114e"
@@ -223,7 +265,10 @@ signer = "sigstore-oidc:https://github.com/jdx/mr-boxington/.github/workflows/re
 [[tools.node]]
 version = "26.10.0"
 backend = "core:node"
-specifiers = ["latest"]
+specifiers = [
+    "26.10.0",
+    "latest",
+]
 
 [tools.node."platforms.linux-x64"]
 checksum = "sha256:cb5c9ce9c80d7b8821e3a258543c71b939138cf17c74d5cc44bbe85d6dbc5ad8"
@@ -237,7 +282,10 @@ url = "https://nodejs.org/dist/v26.10.0/node-v26.10.0-darwin-arm64.tar.gz"
 version = "0.1.30"
 aube = { path = "locks/npm-openai-codex-security/0.1.30~19b6a9e3", digest = "sha256:6d00106f4e3d24042c416dcf52de5588be10581c72f73a30f3465cbda7447457" }
 backend = "npm:@openai/codex-security"
-specifiers = ["latest"]
+specifiers = [
+    "0.1.30",
+    "latest",
+]
 
 [tools."npm:@openai/codex-security".options]
 allow_low_downloads = "true"
@@ -246,12 +294,18 @@ allow_low_downloads = "true"
 version = "0.21.12"
 aube = { path = "locks/npm-agent-device/0.21.12", digest = "sha256:d0f88e35aab96ea630a61e8d99b446b314b6ecba9dd99f2a5fe4a3e5fa45fe12" }
 backend = "npm:agent-device"
-specifiers = ["latest"]
+specifiers = [
+    "0.21.12",
+    "latest",
+]
 
 [[tools.pi]]
 version = "0.87.1"
 backend = "aqua:earendil-works/pi"
-specifiers = ["latest"]
+specifiers = [
+    "0.87.1",
+    "latest",
+]
 
 [tools.pi."platforms.linux-x64"]
 checksum = "sha256:80d78dd62d50049a006b981d994c61255bcc10e730b0c278d4ea0a755909764c"
@@ -266,7 +320,10 @@ url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/582094
 [[tools.python]]
 version = "3.14.7"
 backend = "core:python"
-specifiers = ["latest"]
+specifiers = [
+    "3.14.7",
+    "latest",
+]
 
 [tools.python."platforms.linux-x64"]
 checksum = "sha256:a0f39e822fd3b96a2605f30f954acf9a2cdf91faa1385a13e24bc407a41e05ea"
@@ -281,7 +338,10 @@ provenance = "github-attestations"
 [[tools.ruby]]
 version = "4.0.7"
 backend = "core:ruby"
-specifiers = ["latest"]
+specifiers = [
+    "4.0.7",
+    "latest",
+]
 
 [tools.ruby.options]
 compile = "false"
@@ -302,12 +362,18 @@ provenance = "github-attestations"
 [[tools.rust]]
 version = "1.98.1"
 backend = "core:rust"
-specifiers = ["latest"]
+specifiers = [
+    "1.98.1",
+    "latest",
+]
 
 [[tools.skillshare]]
 version = "0.21.6"
 backend = "aqua:runkids/skillshare"
-specifiers = ["latest"]
+specifiers = [
+    "0.21.6",
+    "latest",
+]
 
 [tools.skillshare."platforms.linux-x64"]
 checksum = "sha256:c4a767552b43b5f01f8e5d5c2c4279384b954422351e9a5be842bab18dafa062"
@@ -322,7 +388,10 @@ url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/58188
 [[tools.starship]]
 version = "1.26.0"
 backend = "aqua:starship/starship"
-specifiers = ["latest"]
+specifiers = [
+    "1.26.0",
+    "latest",
+]
 
 [tools.starship."platforms.linux-x64"]
 checksum = "sha256:321f0dd7af8340a5f2e6a8fec6538a04f617486f9ec70d878f91c09cd8deef22"
@@ -337,7 +406,10 @@ url_api = "https://api.github.com/repos/starship/starship/releases/assets/460374
 [[tools.uv]]
 version = "0.12.18"
 backend = "aqua:astral-sh/uv"
-specifiers = ["latest"]
+specifiers = [
+    "0.12.18",
+    "latest",
+]
 
 [tools.uv."platforms.linux-x64"]
 checksum = "sha256:89eadd7c76fc063887959510d5ba0ab1264dfd5f1143b925ddb73021a40acf16"
@@ -354,7 +426,10 @@ provenance = "github-attestations"
 [[tools.xurl]]
 version = "1.3.1"
 backend = "github:xdevplatform/xurl"
-specifiers = ["latest"]
+specifiers = [
+    "1.3.1",
+    "latest",
+]
 
 [tools.xurl."platforms.linux-x64"]
 checksum = "sha256:ccfc4b3ca5240565da650ef003b51d7f887eabe0c6e3797802410240289d4feb"
@@ -369,7 +444,10 @@ url_api = "https://api.github.com/repos/xdevplatform/xurl/releases/assets/485078
 [[tools.zig]]
 version = "0.16.0"
 backend = "core:zig"
-specifiers = ["latest"]
+specifiers = [
+    "0.16.0",
+    "latest",
+]
 
 [tools.zig."platforms.linux-x64"]
 checksum = "sha256:70e49664a74374b48b51e6f3fdfbf437f6395d42509050588bd49abe52ba3d00"
@@ -382,7 +460,10 @@ url = "https://ziglang.org/download/0.16.0/zig-aarch64-macos-0.16.0.tar.xz"
 [[tools.zoxide]]
 version = "0.10.0"
 backend = "aqua:ajeetdsouza/zoxide"
-specifiers = ["latest"]
+specifiers = [
+    "0.10.0",
+    "latest",
+]
 
 [tools.zoxide."platforms.linux-x64"]
 checksum = "sha256:2d93385b99f3e82cf2701609a1bffcad863fbeb75aa3fe7eb6be4d29be68b1ae"
