@@ -1,4 +1,7 @@
 {
+  "markdown_preview": {
+    "open_markdown_files_in_preview": true,
+  },
   "diff_view_style": "split",
   "proxy": "",
   "edit_predictions": {
@@ -32,6 +35,9 @@
     "custom": 1.5,
   },
   "cursor_blink": false,
+  "cursor_animation": {
+    "enabled": true,
+  },
   "file_types": {
     "Dockerfile": ["Dockerfile", "Dockerfile.*"],
     "JSON": ["json"],
