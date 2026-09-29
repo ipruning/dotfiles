@@ -119,7 +119,10 @@ specifiers = [
 [[tools."github:agavra/tuicr"]]
 version = "0.27.0"
 backend = "github:agavra/tuicr"
-specifiers = ["latest"]
+specifiers = [
+    "0.27.0",
+    "latest",
+]
 
 [tools."github:agavra/tuicr"."platforms.linux-x64"]
 checksum = "sha256:851c7671d85fd20dc77d30321b201093af9dcdfe45011ad1d51ae65a229da192"
@@ -132,20 +135,23 @@ url = "https://github.com/agavra/tuicr/releases/download/v0.27.0/tuicr-0.27.0-aa
 url_api = "https://api.github.com/repos/agavra/tuicr/releases/assets/584424400"
 
 [[tools."github:jihuanshe/linear"]]
-version = "0.0.1790588630-ga7b00de"
+version = "0.0.1790671411-g5f03138"
 backend = "github:jihuanshe/linear"
-specifiers = ["latest"]
+specifiers = [
+    "0.0.1790671411-g5f03138",
+    "latest",
+]
 
 [tools."github:jihuanshe/linear"."platforms.linux-x64"]
-checksum = "sha256:ebd17c8a2abc20851c9b95e41a4a7773ef548b399d273b24145fc7a09735b9cf"
-url = "https://github.com/jihuanshe/linear/releases/download/0.0.1790588630-ga7b00de/linear-x86_64-unknown-linux-gnu.tar.xz"
-url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/595052832"
+checksum = "sha256:4dfa6dd1fa3d1847df742ca3ab5e123bf60a9e431a6f9e7ed1cf51ed21eb2112"
+url = "https://github.com/jihuanshe/linear/releases/download/0.0.1790671411-g5f03138/linear-x86_64-unknown-linux-gnu.tar.xz"
+url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/597725146"
 provenance = "github-attestations"
 
 [tools."github:jihuanshe/linear"."platforms.macos-arm64"]
-checksum = "sha256:8d6cb7a5aed98114d5e728427aba265ea4f3ee36b1ef2d5d5cc231c958ceaf57"
-url = "https://github.com/jihuanshe/linear/releases/download/0.0.1790588630-ga7b00de/linear-aarch64-apple-darwin.tar.xz"
-url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/595052648"
+checksum = "sha256:0073e2613ece6d2227571a3ca91a993bcd66379df12335e238daee7314ae39ed"
+url = "https://github.com/jihuanshe/linear/releases/download/0.0.1790671411-g5f03138/linear-aarch64-apple-darwin.tar.xz"
+url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/597724896"
 provenance = "github-attestations"
 
 [[tools."github:larksuite/cli"]]
@@ -333,18 +339,18 @@ url = "https://github.com/jesseduffield/lazygit/releases/download/v0.65.1/lazygi
 url_api = "https://api.github.com/repos/jesseduffield/lazygit/releases/assets/560658244"
 
 [[tools.mr-boxington]]
-version = "1.18.0"
+version = "1.19.0"
 backend = "packslip:github.com/jdx/mr-boxington"
 specifiers = ["latest"]
 
 [tools.mr-boxington."platforms.linux-x64"]
-checksum = "sha256:92833c87261ea0c65fee52898ea67605b152b516fc0a3d8dee5a276601a8924c"
-url = "https://github.com/jdx/mr-boxington/releases/download/v1.18.0/mbx-x86_64-unknown-linux-gnu.tar.gz"
+checksum = "sha256:c41238298b30d7c7da53dfe850f06036dd103b65865cc9dc986077eaf3e565d2"
+url = "https://github.com/jdx/mr-boxington/releases/download/v1.19.0/mbx-x86_64-unknown-linux-gnu.tar.gz"
 signer = "sigstore-oidc:https://github.com/jdx/mr-boxington/.github/workflows/release.yml"
 
 [tools.mr-boxington."platforms.macos-arm64"]
-checksum = "sha256:70ab23933b3745205125174120bd930c0116c1ef3ac38786122e5651636b9aea"
-url = "https://github.com/jdx/mr-boxington/releases/download/v1.18.0/mbx-aarch64-apple-darwin.tar.gz"
+checksum = "sha256:dbaad252f9a483be80f6d00ad315f4957d8f9b9d19213ca05171b25a8dba6748"
+url = "https://github.com/jdx/mr-boxington/releases/download/v1.19.0/mbx-aarch64-apple-darwin.tar.gz"
 signer = "sigstore-oidc:https://github.com/jdx/mr-boxington/.github/workflows/release.yml"
 
 [[tools.node]]
@@ -366,13 +372,17 @@ url = "https://nodejs.org/dist/v26.10.0/node-v26.10.0-darwin-arm64.tar.gz"
 [[tools."npm:@openai/codex-security"]]
 version = "0.1.31"
 backend = "npm:@openai/codex-security"
-specifiers = ["latest"]
+specifiers = [
+    "0.1.31",
+    "latest",
+]
 
 [tools."npm:@openai/codex-security".options]
 allow_low_downloads = "true"
 
 [[tools."npm:agent-device"]]
-version = "0.21.15"
+version = "0.21.16"
+aube = { path = "locks/npm-agent-device/0.21.16", digest = "sha256:9dd5758e193716bf80a2d660da6cb3ac0f55bb71ba5608b92304e2e343e0b914" }
 backend = "npm:agent-device"
 specifiers = ["latest"]
 
@@ -474,19 +484,19 @@ specifiers = [
 ]
 
 [[tools.skillshare]]
-version = "0.21.10"
+version = "0.21.12"
 backend = "aqua:runkids/skillshare"
 specifiers = ["latest"]
 
 [tools.skillshare."platforms.linux-x64"]
-checksum = "sha256:2a4568c42fe53a517181a83de85d51b9fab364d6e818d391d31af1409d8631ab"
-url = "https://github.com/runkids/skillshare/releases/download/v0.21.10/skillshare_0.21.10_linux_amd64.tar.gz"
-url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/592755736"
+checksum = "sha256:5717b8282c8d579fd0ee149a3674209fe5c3ef2fccdc422c1245ff96d0260ddb"
+url = "https://github.com/runkids/skillshare/releases/download/v0.21.12/skillshare_0.21.12_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/593507761"
 
 [tools.skillshare."platforms.macos-arm64"]
-checksum = "sha256:9b252eed390b2a5cd4120d2377fe5ee5a7f216df442cc1d1f7a484c3f12d9067"
-url = "https://github.com/runkids/skillshare/releases/download/v0.21.10/skillshare_0.21.10_darwin_arm64.tar.gz"
-url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/592755734"
+checksum = "sha256:d63e31149505b23fb06b98743263e692466b09b0bd6de57f6fe33a178a7187d1"
+url = "https://github.com/runkids/skillshare/releases/download/v0.21.12/skillshare_0.21.12_darwin_arm64.tar.gz"
+url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/593507805"
 
 [[tools.starship]]
 version = "1.26.0"
@@ -519,7 +529,10 @@ url_api = "https://api.github.com/repos/starship/starship/releases/assets/460374
 [[tools.uv]]
 version = "0.12.19"
 backend = "aqua:astral-sh/uv"
-specifiers = ["latest"]
+specifiers = [
+    "0.12.19",
+    "latest",
+]
 
 [tools.uv."platforms.linux-x64"]
 checksum = "sha256:23bf5552d220e0842b65c862097b2ebaeba0064b74eda5e565e77fd25969d8c8"
@@ -536,7 +549,10 @@ provenance = "github-attestations"
 [[tools.xurl]]
 version = "1.3.2"
 backend = "github:xdevplatform/xurl"
-specifiers = ["latest"]
+specifiers = [
+    "1.3.2",
+    "latest",
+]
 
 [tools.xurl."platforms.linux-x64"]
 checksum = "sha256:d8d04dfd2aca03178815f2b9bb00f56a02c7513ccf2df5e3fddc48dc67bc1aa4"

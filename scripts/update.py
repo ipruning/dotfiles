@@ -159,7 +159,12 @@ def _run_with_progress(
 
 
 def _installed_mise_tools(home: Path, mise_executable: str) -> tuple[str, ...]:
-    """Return active installed versions so upgrade cannot bootstrap missing tools."""
+    """Return active installed tools as rolling requests.
+
+    Restricting the command to installed tools prevents upgrade from
+    bootstrapping missing tools, while ``@latest`` keeps rolling selectors
+    rolling when ``--bump`` persists the request.
+    """
     command = (
         mise_executable,
         "ls",
@@ -207,7 +212,7 @@ def _installed_mise_tools(home: Path, mise_executable: str) -> tuple[str, ...]:
                 raise RuntimeError(f"mise tool inventory for {name} has no version")
             if version.startswith(MISE_REF_PREFIXES):
                 continue
-            installed.append(f"{name}@{version}")
+            installed.append(f"{name}@latest")
     return tuple(sorted(set(installed)))
 
 

@@ -134,7 +134,7 @@ def test_update_previews_exact_plan_by_default_without_running_tools(
                 "--no-prune",
                 "-C",
                 str(tmp_path / "home"),
-                "python@3.14.6",
+                "python@latest",
             ],
         ),
         (
@@ -357,7 +357,7 @@ def test_update_runs_available_tools_in_order_and_reports_skips(tmp_path: Path) 
         "brew update",
         "brew upgrade",
         "mise self-update --yes --no-plugins",
-        f"mise upgrade --bump --no-prune -C {tmp_path / 'home'} python@3.14.6",
+        f"mise upgrade --bump --no-prune -C {tmp_path / 'home'} python@latest",
         f"mise reshim -C {tmp_path / 'home'}",
         "amp update",
     ]
@@ -649,8 +649,8 @@ def test_update_mise_step_passes_only_installed_versions(
         "--no-prune",
         "-C",
         str(tmp_path),
-        "github:larksuite/cli@1.0.72",
-        "python@3.14.6",
+        "github:larksuite/cli@latest",
+        "python@latest",
     )
 
 
