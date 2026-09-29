@@ -326,18 +326,18 @@ url = "https://github.com/jesseduffield/lazygit/releases/download/v0.65.1/lazygi
 url_api = "https://api.github.com/repos/jesseduffield/lazygit/releases/assets/560658244"
 
 [[tools.mr-boxington]]
-version = "1.19.0"
+version = "1.20.0"
 backend = "packslip:github.com/jdx/mr-boxington"
 specifiers = ["latest"]
 
 [tools.mr-boxington."platforms.linux-x64"]
-checksum = "sha256:c41238298b30d7c7da53dfe850f06036dd103b65865cc9dc986077eaf3e565d2"
-url = "https://github.com/jdx/mr-boxington/releases/download/v1.19.0/mbx-x86_64-unknown-linux-gnu.tar.gz"
+checksum = "sha256:f3537f6a2a7d3eaef5840fcd0bfccb108941f7a7ab395ec82914fd99c91ff357"
+url = "https://github.com/jdx/mr-boxington/releases/download/v1.20.0/mbx-x86_64-unknown-linux-gnu.tar.gz"
 signer = "sigstore-oidc:https://github.com/jdx/mr-boxington/.github/workflows/release.yml"
 
 [tools.mr-boxington."platforms.macos-arm64"]
-checksum = "sha256:dbaad252f9a483be80f6d00ad315f4957d8f9b9d19213ca05171b25a8dba6748"
-url = "https://github.com/jdx/mr-boxington/releases/download/v1.19.0/mbx-aarch64-apple-darwin.tar.gz"
+checksum = "sha256:0b4b12d09dd4cc4571a53472823dd04a987d0105e162ed2d383d73e22f17a602"
+url = "https://github.com/jdx/mr-boxington/releases/download/v1.20.0/mbx-aarch64-apple-darwin.tar.gz"
 signer = "sigstore-oidc:https://github.com/jdx/mr-boxington/.github/workflows/release.yml"
 
 [[tools.node]]
@@ -374,19 +374,19 @@ backend = "npm:agent-device"
 specifiers = ["latest"]
 
 [[tools.pi]]
-version = "0.99.0"
+version = "0.99.1"
 backend = "aqua:earendil-works/pi"
 specifiers = ["latest"]
 
 [tools.pi."platforms.linux-x64"]
-checksum = "sha256:2d51edb25b264d0418ac889a3452cb8235ba1721e063d8d9dc8dfb4826586447"
-url = "https://github.com/earendil-works/pi/releases/download/v0.99.0/pi-linux-x64.tar.gz"
-url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/598751055"
+checksum = "sha256:c81b9a367bb2985fa45a2c0d4f12b147acc43655683910a5abf937fe22208425"
+url = "https://github.com/earendil-works/pi/releases/download/v0.99.1/pi-linux-x64.tar.gz"
+url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/598875655"
 
 [tools.pi."platforms.macos-arm64"]
-checksum = "sha256:c0db49b7d8ff279740d2ec7c48d8edc97acb1605b7986c1d177bfa2e40f83ffc"
-url = "https://github.com/earendil-works/pi/releases/download/v0.99.0/pi-darwin-arm64.tar.gz"
-url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/598751050"
+checksum = "sha256:4692aba1dcd48219b61edb4ecebc3c33f6199ebe65299228fce5ba69c31a23a6"
+url = "https://github.com/earendil-works/pi/releases/download/v0.99.1/pi-darwin-arm64.tar.gz"
+url_api = "https://api.github.com/repos/earendil-works/pi/releases/assets/598875653"
 
 [[tools.python]]
 version = "3.14.7"
@@ -458,19 +458,19 @@ specifiers = [
 ]
 
 [[tools.skillshare]]
-version = "0.21.13"
+version = "0.21.14"
 backend = "aqua:runkids/skillshare"
 specifiers = ["latest"]
 
 [tools.skillshare."platforms.linux-x64"]
-checksum = "sha256:c12c921911bbfd586a6e5a5015029d3db726a5bb5e7c88eb19c5603307f3c984"
-url = "https://github.com/runkids/skillshare/releases/download/v0.21.13/skillshare_0.21.13_linux_amd64.tar.gz"
-url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/595409205"
+checksum = "sha256:cea8260f883889f38c81b66171c0eadc199aea259b9c3e4da1916866fcb59ffd"
+url = "https://github.com/runkids/skillshare/releases/download/v0.21.14/skillshare_0.21.14_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/595959665"
 
 [tools.skillshare."platforms.macos-arm64"]
-checksum = "sha256:4dab1d803d5c61a37484f8f5e657cfcdecbda87befe015513f67ba013fdc6c37"
-url = "https://github.com/runkids/skillshare/releases/download/v0.21.13/skillshare_0.21.13_darwin_arm64.tar.gz"
-url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/595409202"
+checksum = "sha256:9315ecb0140aed65ce73dabf49ddeedf0b1fcf1929810939ae26fcac3ff38083"
+url = "https://github.com/runkids/skillshare/releases/download/v0.21.14/skillshare_0.21.14_darwin_arm64.tar.gz"
+url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/595959667"
 
 [[tools.starship]]
 version = "1.26.0"
