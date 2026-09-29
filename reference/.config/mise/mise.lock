@@ -155,32 +155,19 @@ url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/5977248
 provenance = "github-attestations"
 
 [[tools."github:larksuite/cli"]]
-version = "1.0.96"
+version = "1.0.97"
 backend = "github:larksuite/cli"
-specifiers = [
-    "1.0.96",
-    "latest",
-]
-
-[tools."github:larksuite/cli"."platforms.linux-arm64"]
-checksum = "sha256:a83124bad70ddb5a42c8d10a80e8d52f49913b1cb397c7a0a835bd0ddb65f3e2"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.96/lark-cli-1.0.96-linux-arm64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/568342596"
+specifiers = ["latest"]
 
 [tools."github:larksuite/cli"."platforms.linux-x64"]
-checksum = "sha256:5d1fa96832307b13298fdb11c477ab3f31c3e98026fec585b4b2eb7f63960c36"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.96/lark-cli-1.0.96-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/568342594"
+checksum = "sha256:7ce11848724f0b0bc8204012140adbf76fe7c1fc8abd41c1878bc97b7228126b"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.97/lark-cli-1.0.97-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/595441138"
 
 [tools."github:larksuite/cli"."platforms.macos-arm64"]
-checksum = "sha256:124acdf380f72fa4b1b1e8307a0b00ee93217cf9558baca5bc40091304f2adcd"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.96/lark-cli-1.0.96-darwin-arm64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/568342593"
-
-[tools."github:larksuite/cli"."platforms.macos-x64"]
-checksum = "sha256:f6bd28263dfc4a4d6c2581657efa6af8e8f92eba22394c9c4d840d4ad1fae65e"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.96/lark-cli-1.0.96-darwin-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/568342597"
+checksum = "sha256:64e856a05c8dfdac5dbecd316766e4b05299f230f54833b674a623df3ac13f1c"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.97/lark-cli-1.0.97-darwin-arm64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/595441137"
 
 [[tools."github:lycorp-jp/sim-use"]]
 version = "0.14.0"
@@ -484,19 +471,19 @@ specifiers = [
 ]
 
 [[tools.skillshare]]
-version = "0.21.12"
+version = "0.21.13"
 backend = "aqua:runkids/skillshare"
 specifiers = ["latest"]
 
 [tools.skillshare."platforms.linux-x64"]
-checksum = "sha256:5717b8282c8d579fd0ee149a3674209fe5c3ef2fccdc422c1245ff96d0260ddb"
-url = "https://github.com/runkids/skillshare/releases/download/v0.21.12/skillshare_0.21.12_linux_amd64.tar.gz"
-url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/593507761"
+checksum = "sha256:c12c921911bbfd586a6e5a5015029d3db726a5bb5e7c88eb19c5603307f3c984"
+url = "https://github.com/runkids/skillshare/releases/download/v0.21.13/skillshare_0.21.13_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/595409205"
 
 [tools.skillshare."platforms.macos-arm64"]
-checksum = "sha256:d63e31149505b23fb06b98743263e692466b09b0bd6de57f6fe33a178a7187d1"
-url = "https://github.com/runkids/skillshare/releases/download/v0.21.12/skillshare_0.21.12_darwin_arm64.tar.gz"
-url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/593507805"
+checksum = "sha256:4dab1d803d5c61a37484f8f5e657cfcdecbda87befe015513f67ba013fdc6c37"
+url = "https://github.com/runkids/skillshare/releases/download/v0.21.13/skillshare_0.21.13_darwin_arm64.tar.gz"
+url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/595409202"
 
 [[tools.starship]]
 version = "1.26.0"
