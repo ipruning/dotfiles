@@ -513,6 +513,12 @@ a configured but missing mise tool is not installed. Other missing CLIs are
 skipped rather than bootstrapped. Package managers may still replace package
 dependencies as part of an ordinary upgrade.
 
+The shared Mise configuration sets `minimum_release_age = "0s"`: tool updates
+and Mise self-updates accept newly published releases immediately, without
+Mise's default release-age delay. This opts out of that supply-chain safeguard.
+Use `mise run mise-sync -- --apply` to install missing tools from the committed
+lock; `update` does not install them.
+
 When the live global mise files are linked to `reference/`, the mise tool
 upgrade may refresh the tracked lockfile. Run `update --apply` on a checkout
 where that declaration change will be reviewed and committed. Other hosts use

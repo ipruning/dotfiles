@@ -116,6 +116,7 @@ def test_global_mise_lock_covers_declared_artifact_platforms() -> None:
     )
     assert config["min_version"]["hard"] == "2026.9.18"
     assert config["settings"]["auto_install"] is False
+    assert config["settings"]["minimum_release_age"] == "0s"
     assert "exec_auto_install" not in config["settings"]
     assert "task" not in config["settings"]
     assert config["settings"]["trusted_config_paths"] == [

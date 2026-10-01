@@ -53,6 +53,8 @@ mr-boxington = "latest"
 auto_install = false
 lockfile = true
 lockfile_platforms = ["macos-arm64", "linux-x64"]
+# Personal tools accept newly published releases without a waiting period.
+minimum_release_age = "0s"
 # Auto-trust only first-party checkout roots. Third-party repositories under
 # ~/Developer/tries remain subject to per-config review and `mise trust`.
 trusted_config_paths = [
