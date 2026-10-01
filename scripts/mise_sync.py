@@ -91,7 +91,7 @@ def _tool_declaration(
     except FileNotFoundError:
         if required:
             raise ValueError(f"{config_path} is missing") from None
-        return frozenset(), {}
+        return frozenset[str](), {}
     except (OSError, tomllib.TOMLDecodeError) as error:
         raise ValueError(f"{config_path} cannot be read as TOML: {error}") from error
     tools = document.get("tools", {})

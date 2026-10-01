@@ -390,7 +390,7 @@ def _render(report: AdoptReport, *, apply_allowed: bool = True) -> None:
     }
     rendered = ", ".join(f"{count} {status}" for status, count in summary.items())
     print(f"Summary: {rendered or 'no changes'}")
-    if not report.apply and summary.get(AdoptStatus.PLANNED.value, 0):
+    if not report.apply and summary.get(AdoptStatus.PLANNED.value):
         if apply_allowed:
             print(
                 "No files changed. Re-run with --apply to adopt this application's"

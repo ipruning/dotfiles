@@ -665,24 +665,18 @@ def inspect_host(
         ownership = _skillshare_ownership_finding(home, skillshare_finding.path)
         if ownership:
             findings.append(ownership)
-    findings.append(
+    findings.extend((
         _check_executable(
-            "starship",
-            required=False,
-            executable_finder=executable_finder,
+            "starship", required=False, executable_finder=executable_finder
         ),
-    )
-    findings.append(
         _check_executable(
             "herdr",
             required=False,
             executable_finder=executable_finder,
-            missing_action=(
-                "Preview with mise run mise-sync, then apply with "
-                "mise run mise-sync -- --apply."
-            ),
+            missing_action="Preview with mise run mise-sync, then apply with "
+            "mise run mise-sync -- --apply.",
         ),
-    )
+    ))
     for command in ("atuin", "zoxide", "hunk", "lazygit", "lazydocker"):
         findings.append(
             _check_executable(
@@ -712,14 +706,14 @@ def inspect_host(
     )
     findings.extend(_dangling_repo_link_findings(repo_root, home))
     if active_profile is HostProfile.LINUX_LITE:
-        findings.append(
+        findings.extend((
             _bash_integration_finding(
                 repo_root,
                 home,
                 mutation_allowed=bool(host_policy and not host_policy.audit_only),
             ),
-        )
-        findings.append(_legacy_repo_path_finding(repo_root))
+            _legacy_repo_path_finding(repo_root),
+        ))
         if host_policy and host_policy.audit_only:
             findings = _apply_audit_only_applicability(findings)
         return CheckReport(

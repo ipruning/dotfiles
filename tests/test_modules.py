@@ -357,7 +357,7 @@ def test_skillshare_exec_requires_a_command_before_switching_source(
     )
 
     assert completed.returncode == 2
-    assert "Missing argument 'CMD...'" in completed.stderr
+    assert "Missing argument 'cmd'." in completed.stderr
     assert config.read_text() == "source: /original\n"
 
 

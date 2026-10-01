@@ -17,6 +17,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, replace
 from enum import StrEnum
 from pathlib import Path
+from typing import cast
 
 from .host_policy import HostPolicyError, mutation_allowed, require_mutation_allowed
 from .mise import canonical_mise_executable, canonical_mise_path
@@ -666,7 +667,7 @@ def _checkout_revision(
 def _download(source: str, timeout_seconds: int) -> bytes:
     request = urllib.request.Request(source, headers={"User-Agent": "dotfiles-runtime"})
     with urllib.request.urlopen(request, timeout=timeout_seconds) as response:
-        return response.read()
+        return cast("bytes", response.read())
 
 
 def execute_runtime(

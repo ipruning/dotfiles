@@ -294,7 +294,7 @@ def _mise_systemd_shim_findings(
                 ):
                     risky_units.append((unit_file, key.strip()))
                     break
-    findings = (
+    findings: list[Finding] = (
         [
             Finding(
                 "mise.systemd_shims",

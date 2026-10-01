@@ -28,7 +28,7 @@ unset MISE_GLOBAL_CONFIG_FILE
 mise trust "$repo_root/mise.toml"
 
 printf '\nInstalling locked repository tools\n'
-time mise install --locked fd jq python ripgrep shellcheck uv
+time mise install --locked actionlint fd jq prek python ripgrep shellcheck uv
 
 printf '\nSynchronizing locked Python dependencies\n'
 time mise exec -- uv sync --locked --python "$(mise which python)" --no-python-downloads

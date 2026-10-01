@@ -57,7 +57,7 @@ export PATH="$HOME/.local/bin:$PATH"
 git clone https://github.com/ipruning/dotfiles.git ~/dotfiles
 cd ~/dotfiles
 mise trust
-mise install --locked fd jq python ripgrep shellcheck uv
+mise install --locked actionlint fd jq prek python ripgrep shellcheck uv
 mise exec -- uv sync --locked
 mise tasks
 mise run mise-sync
@@ -107,10 +107,10 @@ problems remain applicable and continue to gate strict inspection.
 The installer intentionally has no version argument: host and Orb bootstrap
 take the latest mise release available from `https://mise.run` rather than
 pinning the mise binary. The hard `min_version` in both project and global
-configuration is only the compatibility floor (currently 2026.9.11 for native
-npm dependency sidecars beside symlinked lockfiles), not the version bootstrap
-should install. Commit the referenced `reference/.config/mise/locks/` files
-alongside changes to the global lockfile.
+configuration is only the compatibility floor (currently 2026.9.18, covering
+version-3 lockfiles and native npm dependency sidecars), not the version
+bootstrap should install. Commit the referenced `reference/.config/mise/locks/`
+files alongside changes to the global lockfile.
 
 `mise trust` is required because this repository declares a project virtual
 environment. The explicit `mise install --locked ...` command requires every
@@ -160,6 +160,26 @@ authoritative command interfaces:
 | Record installed software | [Host inventory](#host-inventory) |
 | Operate a self-installing module | [Standalone tools](#standalone-tools) |
 | Inspect Skillshare ownership | [Skillshare](#skillshare) |
+
+## Development checks
+
+`mise run verify` is the shared verification gate for local development, prek,
+and GitHub Actions. It includes workflow validation with Actionlint. The CI
+workflow runs on Linux x64 and macOS ARM64, installs the locked project tools
+and Python dependencies, and rejects changes made by verification.
+
+`mise run prek` runs the hooks in `prek.toml` against all files. Prek uses the
+same provisioned tools; it does not install another copy of Ruff, ty, or pytest.
+Enable the local pre-commit hook explicitly:
+
+```bash
+mise exec -- prek install
+```
+
+Hook installation is optional and is not part of inspection or bootstrap. Amp
+Orbs provision project dependencies through `.agents/setup`; they do not apply
+the managed-host configuration steps above. `.agents/resume` checks the locked
+environment offline without reinstalling dependencies.
 
 ## Linux Lite setup
 

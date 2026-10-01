@@ -116,7 +116,7 @@ class SubprocessMackupRunner:
             if not reports_unreadable:
                 detail = completed.stderr.strip() or "Mackup exited 1"
                 raise MackupCommandError(detail)
-        return document
+        return cast("dict[str, object]", document)
 
 
 def _file_kind(value: object, field: str) -> FileKind | None:

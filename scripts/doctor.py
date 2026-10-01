@@ -13,6 +13,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
+from typing import cast
 
 from .host_policy import HostPolicyError
 from .mise import canonical_mise_environment, canonical_mise_executable
@@ -129,7 +130,7 @@ def _parse_report(step: DoctorStep, stdout: str) -> dict[str, object] | None:
         raise ValueError(f"returned invalid JSON: {error}") from error
     if not isinstance(document, dict):
         raise ValueError("returned JSON that is not an object")
-    return document
+    return cast("dict[str, object]", document)
 
 
 def _step_environment(

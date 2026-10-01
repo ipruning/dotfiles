@@ -393,7 +393,7 @@ def test_update_executes_reshim_with_canonical_mise_first_on_path(
     )
 
     assert report.ok is True
-    assert observed_path.split(os.pathsep)[0] == str(canonical.parent)
+    assert observed_path.split(os.pathsep, maxsplit=1)[0] == str(canonical.parent)
 
 
 def test_update_preview_human_output_points_to_apply(tmp_path: Path) -> None:
