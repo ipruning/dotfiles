@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+cd -- "$repo_root"
+export PATH="$HOME/.local/bin:$PATH"
+TIMEFORMAT='orb setup: %3R seconds'
+
+printf '\nPreparing mise\n'
+time {
+  if ! command -v mise >/dev/null 2>&1; then
+    if [[ -e "$HOME/.local/bin/mise" || -L "$HOME/.local/bin/mise" ]]; then
+      printf 'Cannot install mise: ~/.local/bin/mise is already occupied\n' >&2
+      exit 1
+    fi
+    # Select the latest release, not the installer's default 24-hour delay.
+    curl -fsSL https://mise.run | MISE_SELF_UPDATE_MINIMUM_RELEASE_AGE=0s sh
+  fi
+  mise --version
+}
+
+# Provision only this project, not any global or system tool declarations.
+config_dir="$(mktemp -d)"
+trap 'rm -rf -- "$config_dir"' EXIT
+export MISE_CONFIG_DIR="$config_dir"
+export MISE_SYSTEM_CONFIG_DIR="$config_dir"
+unset MISE_GLOBAL_CONFIG_FILE
+mise trust "$repo_root/mise.toml"
+
+printf '\nInstalling locked repository tools\n'
+time mise install --locked actionlint fd jq prek python ripgrep shellcheck uv
+
+printf '\nSynchronizing locked Python dependencies\n'
+time mise exec -- uv sync --locked --python "$(mise which python)" --no-python-downloads
+
+printf '\nPersisting the non-interactive login environment\n'
+time {
+  profile_marker="# dotfiles orb development environment: $repo_root"
+  if ! grep -Fqx "$profile_marker" "$HOME/.bash_profile" 2>/dev/null; then
+    {
+      printf '\n%s\n' "$profile_marker"
+      printf 'if [[ -r %q ]]; then\n' "$repo_root/.agents/environment.bash"
+      printf '  source %q\nfi\n' "$repo_root/.agents/environment.bash"
+    } >> "$HOME/.bash_profile"
+  fi
+}
+
+printf '\nOrb development dependencies are ready; no reference configuration was applied.\n'

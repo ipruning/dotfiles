@@ -4,7 +4,7 @@
 # dependencies = [
 #     "rich==15.0.0",
 #     "ruamel-yaml==0.19.1",
-#     "typer==0.26.8",
+#     "typer==0.27.2",
 # ]
 # ///
 # TODO(cleanup): trigger=fact:skillshare provides a config-set command; action=drop the ruamel-yaml dependency and write config through skillshare itself

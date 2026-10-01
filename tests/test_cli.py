@@ -51,15 +51,25 @@ def test_mise_python_tasks_never_sync_dependencies_implicitly(tmp_path: Path) ->
         "macos-arm64",
         "linux-x64",
     ]
-    assert config["min_version"]["hard"] == "2026.9.11"
-    assert lockfile["lockfile_version"] == 1
+    assert config["min_version"]["hard"] == "2026.9.18"
+    assert lockfile["lockfile_version"] == 3
     assert config["tool_alias"] == {
+        "actionlint": "aqua:rhysd/actionlint",
         "fd": "aqua:sharkdp/fd",
         "jq": "aqua:jqlang/jq",
+        "prek": "aqua:j178/prek",
         "ripgrep": "aqua:BurntSushi/ripgrep",
         "shellcheck": "aqua:koalaman/shellcheck",
         "uv": "aqua:astral-sh/uv",
     }
+    for tool, version in config["tools"].items():
+        entries = lockfile["tools"][tool]
+        assert len(entries) == 1
+        assert entries[0]["version"] == version
+        for platform_name in config["settings"]["lockfile_platforms"]:
+            artifact = entries[0][f"platforms.{platform_name}"]
+            assert artifact["url"].startswith("https://")
+            assert artifact["checksum"].startswith("sha256:")
     assert task_commands
     assert all("uv run " not in command for command in task_commands)
     assert "uv run" not in (repo_root / "scripts/zsh-profile").read_text()
@@ -104,7 +114,7 @@ def test_global_mise_lock_covers_declared_artifact_platforms() -> None:
     config = tomllib.loads(
         (repo_root / "reference/.config/mise/config.toml").read_text(),
     )
-    assert config["min_version"]["hard"] == "2026.9.11"
+    assert config["min_version"]["hard"] == "2026.9.18"
     assert config["settings"]["auto_install"] is False
     assert "exec_auto_install" not in config["settings"]
     assert "task" not in config["settings"]
@@ -116,7 +126,7 @@ def test_global_mise_lock_covers_declared_artifact_platforms() -> None:
     assert {"pnpm", "yarn"}.isdisjoint(config["tool_alias"])
     lock_root = repo_root / "reference/.config/mise"
     lockfile = tomllib.loads((lock_root / "mise.lock").read_text())
-    assert lockfile["lockfile_version"] == 1
+    assert lockfile["lockfile_version"] == 3
     assert {"pnpm", "yarn"}.isdisjoint(lockfile["tools"])
     version_only_backends = {"core:rust"}
     version_only_prefixes = (
@@ -135,9 +145,10 @@ def test_global_mise_lock_covers_declared_artifact_platforms() -> None:
             missing.append(f"{tool}:lock-entry")
             continue
         for entry in entries:
-            # Mise accepts native npm sidecars in v1; Python graphs require v2.
             assert "uv" not in entry
             backend = entry["backend"]
+            if backend.startswith("npm:"):
+                assert "aube" in entry
             if "aube" in entry:
                 assert backend.startswith("npm:")
                 pointer = entry["aube"]

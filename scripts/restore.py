@@ -270,7 +270,7 @@ def _render(report: RestoreReport, *, apply_allowed: bool = True) -> None:
     }
     rendered = ", ".join(f"{count} {status}" for status, count in summary.items())
     print(f"Summary: {rendered or 'no changes'}")
-    if not report.apply and summary.get(RestoreStatus.PLANNED.value, 0):
+    if not report.apply and summary.get(RestoreStatus.PLANNED.value):
         if apply_allowed:
             print("No files changed. Re-run with --apply to restore this application.")
             print("Next:")

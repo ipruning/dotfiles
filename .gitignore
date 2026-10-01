@@ -15,5 +15,8 @@ __pycache__/
 # Repository-owned runtime state
 /generated/
 
+# Amp portal metadata is local to each orb
+/.amp/portals/*
+
 # Application-managed backups
 /reference/.config/karabiner/automatic_backups/

@@ -1,0 +1,10 @@
+[[repos]]
+repo = "local"
+
+[[repos.hooks]]
+id = "verify"
+name = "Repository verification"
+language = "system"
+entry = "mise run verify"
+pass_filenames = false
+always_run = true
