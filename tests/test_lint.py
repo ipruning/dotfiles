@@ -108,6 +108,41 @@ def test_inspect_repository_rejects_text_based_structured_data_parsers(
     assert findings[0].path == script
 
 
+def test_inspect_repository_skips_ignored_scratch_but_checks_source_changes(
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "dotfiles"
+    (repo_root / "mackup/applications").mkdir(parents=True)
+    (repo_root / "reference").mkdir()
+    (repo_root / "mackup/mackup.cfg").write_text(mackup_cfg())
+    (repo_root / ".gitignore").write_text("ignored/\ntracked.sh\n")
+    subprocess.run(["git", "init", "-q", str(repo_root)], check=True)
+    (repo_root / ".git/info/exclude").write_text("/.amp/in/\n")
+    tracked = repo_root / "tracked.sh"
+    tracked.write_text("#!/bin/sh\n")
+    subprocess.run(["git", "-C", str(repo_root), "add", "-f", "tracked.sh"], check=True)
+    bad_source = "helper=/home/someone/private/tool\nrg 'ok' report.json\n"
+    tracked.write_text(bad_source)
+    untracked = repo_root / "new\nsource.sh"
+    untracked.write_text(bad_source)
+    for path in (
+        repo_root / "ignored/scratch.sh",
+        repo_root / ".amp/in/scratch.sh",
+    ):
+        path.parent.mkdir(parents=True)
+        path.write_text(bad_source)
+
+    report = inspect_repository(repo_root, tmp_path / "home")
+
+    for code in ("path.absolute_home", "repository.structured_data_text_parser"):
+        assert {
+            finding.path for finding in report.findings if finding.code == code
+        } == {
+            tracked,
+            untracked,
+        }
+
+
 def test_inspect_repository_with_relative_root_does_not_scan_its_own_patterns(
     monkeypatch,
 ) -> None:

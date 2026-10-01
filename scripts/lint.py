@@ -102,9 +102,9 @@ def _is_binary(file_path: Path) -> bool:
         return True
 
 
-def _iter_text_files(repo_root: Path) -> list[Path]:
+def _iter_text_files(repo_root: Path, candidates: list[Path]) -> list[Path]:
     files: list[Path] = []
-    for file_path in repo_root.rglob("*"):
+    for file_path in candidates:
         relative = file_path.relative_to(repo_root)
         relative_text = relative.as_posix()
         if any(part in SKIP_PARTS for part in relative.parts):
@@ -260,9 +260,10 @@ def _path_findings(
     repo_root: Path,
     home: Path,
     system_name: str,
+    text_files: list[Path],
 ) -> list[Finding]:
     findings: list[Finding] = []
-    for file_path in _iter_text_files(repo_root):
+    for file_path in text_files:
         relative = file_path.relative_to(repo_root).as_posix()
         try:
             lines = file_path.read_text(errors="replace").splitlines()
@@ -288,9 +289,11 @@ def _path_findings(
     return findings
 
 
-def _structured_data_parser_findings(repo_root: Path) -> list[Finding]:
+def _structured_data_parser_findings(
+    repo_root: Path, text_files: list[Path]
+) -> list[Finding]:
     findings: list[Finding] = []
-    for file_path in _iter_text_files(repo_root):
+    for file_path in text_files:
         try:
             lines = file_path.read_text(errors="replace").splitlines()
         except OSError:
@@ -450,9 +453,14 @@ def _mackup_findings(repo_root: Path, tracked_paths: set[Path]) -> list[Finding]
     return findings
 
 
-def _tracked_paths(repo_root: Path) -> tuple[list[Path], Finding | None]:
+def _tracked_paths(
+    repo_root: Path, *, include_untracked: bool = False
+) -> tuple[list[Path], Finding | None]:
+    command = ["git", "-C", str(repo_root), "ls-files", "-z"]
+    if include_untracked:
+        command.extend(("--cached", "--others", "--exclude-standard"))
     completed = subprocess.run(
-        ["git", "-C", str(repo_root), "ls-files", "-z"],
+        command,
         check=False,
         capture_output=True,
     )
@@ -467,6 +475,8 @@ def _tracked_paths(repo_root: Path) -> tuple[list[Path], Finding | None]:
         )
     detail = completed.stderr.decode(errors="replace").strip()
     if "not a git repository" in detail.lower():
+        if include_untracked:
+            return list(repo_root.rglob("*")), None
         return [], None
     return (
         [],
@@ -608,11 +618,15 @@ def inspect_repository(
     system_name: str | None = None,
 ) -> LintReport:
     """Return repository path, mapping, and symlink invariants."""
-    findings = _path_findings(repo_root, home, system_name or platform.system())
-    findings.extend(_structured_data_parser_findings(repo_root))
     tracked_paths, tracked_finding = _tracked_paths(repo_root)
-    if tracked_finding:
-        findings.append(tracked_finding)
+    candidates, candidate_finding = _tracked_paths(repo_root, include_untracked=True)
+    text_files = _iter_text_files(repo_root, candidates)
+    findings = _path_findings(
+        repo_root, home, system_name or platform.system(), text_files
+    )
+    findings.extend(_structured_data_parser_findings(repo_root, text_files))
+    if finding := tracked_finding or candidate_finding:
+        findings.append(finding)
     findings.extend(_mackup_findings(repo_root, set(tracked_paths)))
     findings.extend(_symlink_findings(repo_root, tracked_paths))
     findings.extend(_tracked_file_findings(repo_root, tracked_paths))
