@@ -24,8 +24,12 @@ semantics live in `README.md`.
 
 ## Working rules
 
-- Use `mise tasks` to discover commands and the relevant `mise run <task>`
-  entrypoint for verification.
+- Use `mise tasks` and `mise tasks info <task>` to discover repository
+  operations without executing them. Inspection and maintenance CLIs expose
+  `mise run <task> -- --help`; aggregate verification tasks do not. Independent
+  commands are indexed in `modules/bin/README.md`; self-installing modules own
+  their runbooks. Do not probe a bare command to discover it, or assume
+  independent modules use the task preview/apply flags.
 - Keep `diff`, `check`, and `lint` read-only. A repair or installation belongs
   in an explicit user-directed operation, not inside an inspection.
 - External commands used by `check` must be proven read-only. A deeper probe
@@ -100,6 +104,8 @@ for optional tools.
 Global harness prompts and skills are owned by the Skillshare source repo.
 This repository may inspect the configured source and store its reference
 configuration, but it must not synchronize or rewrite global harness files.
+Pi's `.pi/agent/AGENTS.md` is the explicit exception: the existing `agents`
+Mackup mapping owns it, and only an operator-directed scoped restore applies it.
 
 ## Commits
 

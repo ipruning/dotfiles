@@ -22,6 +22,20 @@ does not automatically overwrite `$HOME` or rebuild an entire machine.
 Agent-specific rules live in `AGENTS.md`. Files under `modules/` also inherit
 `modules/AGENTS.md`.
 
+## Find a command
+
+For repository operations, start with `mise tasks` and
+`mise tasks info <task>` to inspect an entrypoint without executing it.
+Inspection and maintenance CLIs expose `mise run <task> -- --help`; aggregate
+gates such as `verify` do not. Maintenance tasks under `scripts/` preview by
+default; use the ASCII `--apply` flag only after reviewing that preview.
+`update` upgrades installed tools; `mise-sync` installs the committed tool
+baseline, including missing tools.
+
+For independent commands, use the [command index](modules/bin/README.md).
+For services, use the [module runbooks](#standalone-tools). Their flags and
+mutation defaults are independent of the repository tasks.
+
 ## Operating model
 
 The human who owns the target host and decides which changes are acceptable is
@@ -52,7 +66,7 @@ operation, and skip `mise-sync --apply`.
 The managed-host bootstrap is:
 
 ```bash
-curl -fsSL https://mise.run | sh
+curl -fsSL https://mise.run | MISE_SELF_UPDATE_MINIMUM_RELEASE_AGE=0s sh
 export PATH="$HOME/.local/bin:$PATH"
 git clone https://github.com/ipruning/dotfiles.git ~/dotfiles
 cd ~/dotfiles
@@ -506,8 +520,9 @@ records. Child output is discarded so it cannot corrupt JSON or hold the task
 open through inherited pipes. An agent can still distinguish active work from
 a stalled command.
 
-For mise, the preview records the active installed tool versions. An apply
-updates a standalone Mise CLI first; a host-selected Mise binary is left to its
+For mise, the preview lists the installed tools selected for upgrade as
+`name@latest`; it does not report their current or resolved next versions.
+An apply updates a standalone Mise CLI first; a host-selected Mise binary is left to its
 host owner. It then passes the explicit installed-tool list to `mise upgrade`;
 a configured but missing mise tool is not installed. Other missing CLIs are
 skipped rather than bootstrapped. Package managers may still replace package
@@ -614,15 +629,20 @@ recovery decisions:
   bounded recovery from Apple's text-cursor service memory growth.
 
 Ordinary commands under `modules/bin/` are independent of the dotfiles
-inspection tasks. Linux Lite deliberately does not add them to `PATH`. The macOS
-shell configuration currently expects this repository at `~/dotfiles`; `mise run
+inspection tasks; their [index](modules/bin/README.md) lists dependencies and
+effects. Help is safe at the command layer; Python scripts' uv launchers may
+still provision dependencies (see the index). Linux Lite deliberately does not
+add them to `PATH`. The macOS shell configuration currently expects this
+repository at `~/dotfiles`; `mise run
 lint` reports when that assumption is false.
 
 ## Skillshare
 
 Global harness prompts and AI skills remain owned by the Skillshare source
-repository. This repository stores only the portable Skillshare configuration;
-its source and default extras directories live under `~/.config/skillshare/`,
+repository, except Pi's `~/.pi/agent/AGENTS.md`, which the `agents` Mackup
+mapping restores only by an explicit `restore -- agents --apply`. This
+repository stores the portable Skillshare configuration; its source and default
+extras directories live under `~/.config/skillshare/`,
 while their contents remain untracked here. Adopt or restore that configuration
 explicitly with `mise run adopt -- skillshare --apply` or `mise run restore --
 skillshare --apply`. The host check reports when the executable, configuration,
@@ -639,8 +659,10 @@ keeps `.metadata.json` and copied external Skills from diverging by host.
 The default `skillshare sync` operation synchronizes skills. The tracked
 configuration also declares opt-in extras targets under `~/.codex` and
 `~/.claude`; only an explicit extras sync writes those global harness
-directories. Amp global guidance is configured in Amp's personal or workspace
-settings and is not synchronized by this repository. Skill targets use merge
+directories. In Skillshare 0.23, `sync --all` includes skills, agents, extras,
+MCP settings, and hooks; it excludes plugins. Review every included resource,
+not just Skill targets. Amp global guidance is configured in Amp's personal or
+workspace settings and is not synchronized by this repository. Skill targets use merge
 mode, so target-local non-symlink Skill directories are healthy and preserved.
 In
 `skillshare diff --json`, an `action` of `remove` with `is_sync: false`
