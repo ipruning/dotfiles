@@ -3,6 +3,8 @@ import json
 from datetime import UTC, datetime
 from pathlib import Path
 
+import pytest
+
 import scripts.check as check_module
 import scripts.check_mise as check_mise_module
 import scripts.check_skillshare as check_skillshare_module
@@ -556,9 +558,11 @@ def test_inspect_host_reports_empty_generated_state_without_running_skillshare(
     assert findings["shell.functions_empty"].severity is Severity.WARN
 
 
+@pytest.mark.parametrize("use_shim", [True, False])
 def test_skillshare_ownership_reports_independent_mise_and_homebrew_owners(
     tmp_path: Path,
     monkeypatch,
+    use_shim: bool,
 ) -> None:
     home = tmp_path / "home"
     canonical_mise = home / ".local/bin/mise"
@@ -567,6 +571,9 @@ def test_skillshare_ownership_reports_independent_mise_and_homebrew_owners(
     canonical_mise.chmod(0o755)
     mise_install = home / ".local/share/mise/installs/skillshare/0.20.20"
     mise_install.mkdir(parents=True)
+    mise_binary = mise_install / "skillshare"
+    mise_binary.write_text("#!/bin/sh\nexit 0\n")
+    mise_binary.chmod(0o755)
     brew_binary = tmp_path / "Cellar/skillshare/0.20.22/bin/skillshare"
     brew_binary.parent.mkdir(parents=True)
     brew_binary.write_text("#!/bin/sh\nexit 0\n")
@@ -592,7 +599,7 @@ def test_skillshare_ownership_reports_independent_mise_and_homebrew_owners(
         assert tuple(command) == (
             str(canonical_mise),
             "ls",
-            "github:runkids/skillshare",
+            "skillshare",
             "--installed",
             "--json",
         )
@@ -609,13 +616,16 @@ def test_skillshare_ownership_reports_independent_mise_and_homebrew_owners(
         "SKILLSHARE_SYSTEM_PATHS",
         (brew_link,),
     )
-    finding = check_skillshare_module._skillshare_ownership_finding(home, shim)
+    finding = check_skillshare_module._skillshare_ownership_finding(
+        home, shim if use_shim else mise_binary
+    )
 
     assert finding is not None
     assert finding.code == "skillshare.ownership_multiple"
     assert finding.severity is Severity.WARN
     assert "Mise 0.20.20 (inactive)" in finding.message
     assert "Homebrew" in finding.message
+    assert "system/PATH" not in finding.message
     assert "mise ls" in (finding.action or "")
     assert "brew list" in (finding.action or "")
 
