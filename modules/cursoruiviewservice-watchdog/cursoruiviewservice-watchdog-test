@@ -13,6 +13,26 @@ trap cleanup EXIT
 fail() { printf 'FAIL: %s\n' "$*" >&2; exit 1; }
 
 mkdir -p "$fake_bin" "$state"
+# Keep the standalone source parseable at its documented Python floor.
+mise exec -- python - "$cli" <<'PY'
+import ast
+import sys
+from pathlib import Path
+
+ast.parse(Path(sys.argv[1]).read_text(), feature_version=(3, 11))
+PY
+bad_python_bin="$test_root/bad-python-bin"
+mkdir -p "$bad_python_bin"
+printf '#!/bin/sh\nexit 9\n' >"$bad_python_bin/python3"
+chmod +x "$bad_python_bin/python3"
+exit_code=0
+env HOME="$test_root/no-runtime" PATH="$bad_python_bin" /bin/sh "$cli" --help \
+  >"$test_root/bad-python.out" 2>"$test_root/bad-python.err" || exit_code=$?
+[[ "$exit_code" == 1 && ! -d "$test_root/no-runtime" ]] \
+  || fail 'unsupported Python was accepted or mutated host state'
+rg -q 'Python 3.11 or newer is required' "$test_root/bad-python.err" \
+  || fail 'unsupported Python failure did not explain the prerequisite'
+
 printf '123\n' >"$state/service-pid"
 printf '%s\n' "$((5 * 1024 * 1024 * 1024))" >"$state/footprint"
 printf '%s\n' "$((4 * 1024 * 1024 * 1024))" >"$state/swapped"

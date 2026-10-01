@@ -4,6 +4,10 @@ python_bin="$HOME/.local/share/mise/installs/python/latest/bin/python3"
 if [ ! -x "$python_bin" ]; then
   python_bin="$(command -v python3)"
 fi
+if ! "$python_bin" -c 'import sys; sys.exit(sys.version_info < (3, 11))' >/dev/null 2>&1; then
+  echo 'cursoruiviewservice-watchdog: Python 3.11 or newer is required' >&2
+  exit 1
+fi
 exec "$python_bin" "$0" "$@"
 ":"""
 
@@ -214,7 +218,7 @@ def managed_wrapper() -> bool:
         return False
     try:
         return WRAPPER_MARKER in USER_BIN.read_text().splitlines()[:2]
-    except OSError, UnicodeError:
+    except (OSError, UnicodeError):
         return False
 
 
@@ -898,7 +902,7 @@ def installed_auto_recycle() -> bool | None:
     try:
         payload = plistlib.loads(LAUNCH_AGENT.read_bytes())
         return "--apply" in payload["ProgramArguments"]
-    except OSError, KeyError, TypeError, plistlib.InvalidFileException:
+    except (OSError, KeyError, TypeError, plistlib.InvalidFileException):
         return None
 
 
