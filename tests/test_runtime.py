@@ -17,6 +17,7 @@ from scripts.runtime import (
     RuntimeSpec,
     RuntimeStatus,
     _next_commands,
+    _render,
     execute_runtime,
     plan_runtime,
     shim_aware_finder,
@@ -414,7 +415,7 @@ def test_runtime_rejects_invalid_download_without_replacing_asset(
     assert target.read_bytes() == b"known-good"
 
 
-def test_runtime_failed_preview_does_not_suggest_apply(tmp_path: Path) -> None:
+def test_runtime_failed_preview_does_not_suggest_apply(tmp_path: Path, capsys) -> None:
     planned = RuntimeResult(
         RuntimeSpec(name="planned", tool=None, target=tmp_path / "planned"),
         RuntimeStatus.PLANNED,
@@ -427,7 +428,14 @@ def test_runtime_failed_preview_does_not_suggest_apply(tmp_path: Path) -> None:
         "target is not a Git checkout",
     )
 
-    assert _next_commands(RuntimeReport(False, (planned, failed))) == ()
+    report = RuntimeReport(False, (planned, failed))
+    assert _next_commands(report) == ()
+    _render(report)
+    output = capsys.readouterr()
+    assert "target is not a Git checkout" in output.err
+    assert "Resolve preview failures" in output.out
+    assert "--apply" not in output.out
+    assert "Next:" not in output.out
 
 
 def test_runtime_failed_clone_never_publishes_partial_checkout(

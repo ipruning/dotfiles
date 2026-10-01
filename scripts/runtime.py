@@ -981,14 +981,16 @@ def _render(report: RuntimeReport, *, apply_allowed: bool = True) -> None:
     rendered = ", ".join(f"{count} {status}" for status, count in summary.items())
     print(f"Summary: {rendered or 'no steps'}")
     if not report.apply:
-        if summary.get(RuntimeStatus.PLANNED.value, 0):
-            if apply_allowed:
-                print("No files changed. Re-run with --apply to refresh the runtime.")
-                print("Next:")
-                for command in _next_commands(report):
-                    print(f"  {command}")
-            else:
-                print("No files changed. Host policy disables runtime apply.")
+        next_commands = _next_commands(report, apply_allowed=apply_allowed)
+        if not report.ok:
+            print("No files changed. Resolve preview failures before applying.")
+        elif next_commands:
+            print("No files changed. Re-run with --apply to refresh the runtime.")
+            print("Next:")
+            for command in next_commands:
+                print(f"  {command}")
+        elif not apply_allowed:
+            print("No files changed. Host policy disables runtime apply.")
         else:
             print("No runtime refresh steps are available on this host.")
         return
