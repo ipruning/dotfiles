@@ -135,23 +135,20 @@ url = "https://github.com/agavra/tuicr/releases/download/v0.27.0/tuicr-0.27.0-aa
 url_api = "https://api.github.com/repos/agavra/tuicr/releases/assets/584424400"
 
 [[tools."github:jihuanshe/linear"]]
-version = "0.0.1790671411-g5f03138"
+version = "0.0.1790870794-g9787d08"
 backend = "github:jihuanshe/linear"
-specifiers = [
-    "0.0.1790671411-g5f03138",
-    "latest",
-]
+specifiers = ["latest"]
 
 [tools."github:jihuanshe/linear"."platforms.linux-x64"]
-checksum = "sha256:4dfa6dd1fa3d1847df742ca3ab5e123bf60a9e431a6f9e7ed1cf51ed21eb2112"
-url = "https://github.com/jihuanshe/linear/releases/download/0.0.1790671411-g5f03138/linear-x86_64-unknown-linux-gnu.tar.xz"
-url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/597725146"
+checksum = "sha256:347f78d039d6f7c8502f2d06339bd471bd035c1c1eee20fd66bd1def0f2d53cf"
+url = "https://github.com/jihuanshe/linear/releases/download/0.0.1790870794-g9787d08/linear-x86_64-unknown-linux-gnu.tar.xz"
+url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/603623711"
 provenance = "github-attestations"
 
 [tools."github:jihuanshe/linear"."platforms.macos-arm64"]
-checksum = "sha256:0073e2613ece6d2227571a3ca91a993bcd66379df12335e238daee7314ae39ed"
-url = "https://github.com/jihuanshe/linear/releases/download/0.0.1790671411-g5f03138/linear-aarch64-apple-darwin.tar.xz"
-url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/597724896"
+checksum = "sha256:09871b8442b0a5d3945a9f6353adb7510366c96fe8f60955dc11563830f3cfd2"
+url = "https://github.com/jihuanshe/linear/releases/download/0.0.1790870794-g9787d08/linear-aarch64-apple-darwin.tar.xz"
+url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/603623105"
 provenance = "github-attestations"
 
 [[tools."github:larksuite/cli"]]
@@ -345,8 +342,8 @@ specifiers = [
 allow_low_downloads = "true"
 
 [[tools."npm:agent-device"]]
-version = "0.21.18"
-aube = { path = "locks/npm-agent-device/0.21.18", digest = "sha256:15d58409ac63361d922ca58f71682e3b9c360325fe5ad1f9f948c2e91a3844f1" }
+version = "0.21.19"
+aube = { path = "locks/npm-agent-device/0.21.19", digest = "sha256:3cc92e472901f5a273b4543728fe245edd7f77f7da008b43198fffc88b9a0296" }
 backend = "npm:agent-device"
 specifiers = ["latest"]
 
@@ -427,27 +424,24 @@ checksum = "sha256:911ace20f90d068ca0e4dda6d0e4f0f81e52e52f2dd4f4004c721e253412e
 url = "https://cache.ruby-lang.org/pub/ruby/4.0/ruby-4.0.7.tar.gz"
 
 [[tools.rust]]
-version = "1.98.1"
+version = "1.99.0"
 backend = "core:rust"
-specifiers = [
-    "1.98.1",
-    "latest",
-]
+specifiers = ["latest"]
 
 [[tools.skillshare]]
-version = "0.23.0"
+version = "0.23.1"
 backend = "aqua:runkids/skillshare"
 specifiers = ["latest"]
 
 [tools.skillshare."platforms.linux-x64"]
-checksum = "sha256:aff87decd453611bea3db10a47128b48bea5646299de6df18782eb687470855f"
-url = "https://github.com/runkids/skillshare/releases/download/v0.23.0/skillshare_0.23.0_linux_amd64.tar.gz"
-url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/601562944"
+checksum = "sha256:4042286f51f2a967b836d034d38260b1fde58abacacd0bdf85ff0cbd48d09004"
+url = "https://github.com/runkids/skillshare/releases/download/v0.23.1/skillshare_0.23.1_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/603596748"
 
 [tools.skillshare."platforms.macos-arm64"]
-checksum = "sha256:0624dd9c580791fc2f8eebb7680a21a049dfc2264b9957790fe4b021305424c7"
-url = "https://github.com/runkids/skillshare/releases/download/v0.23.0/skillshare_0.23.0_darwin_arm64.tar.gz"
-url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/601562940"
+checksum = "sha256:cb4c6f54d693126dbc21b5e6c8ecf21baca807b5f31ba3e8fa9f16265a58508d"
+url = "https://github.com/runkids/skillshare/releases/download/v0.23.1/skillshare_0.23.1_darwin_arm64.tar.gz"
+url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/603596753"
 
 [[tools.starship]]
 version = "1.26.0"
