@@ -49,7 +49,6 @@ DEFAULT_DB = (
 SUPPORT_DIR = DEFAULT_DB.parent
 RUNTIME_CLI = SUPPORT_DIR / "macos-session-health"
 WRAPPER_MARKER = "# managed by macos-session-health"
-DEFAULT_APP = ""
 CODEX_APP = Path("/Applications/ChatGPT.app")
 CODEX_CONFIG = Path.home() / ".codex" / "config.toml"
 CODEX_CHROME_NATIVE_HOSTS = Path.home() / ".codex" / "chrome-native-hosts-v2.json"
@@ -574,7 +573,7 @@ def test_brrr_notification(args: argparse.Namespace) -> int:
 
 def open_read_db(db_path: Path) -> sqlite3.Connection:
     try:
-        conn = sqlite3.connect(db_path)
+        conn = sqlite3.connect(f"{db_path.resolve().as_uri()}?mode=ro", uri=True)
     except sqlite3.Error as exc:
         raise CliError("unable to open database") from exc
     conn.row_factory = sqlite3.Row
@@ -4391,8 +4390,10 @@ def main() -> int:
     parser = build_parser()
     args = parser.parse_args()
     args.command = args.command or "snapshot"
+    if any(not app.strip() for app in args.app):
+        parser.error("--app requires a non-empty app bundle path")
     if not args.app:
-        args.app = [DEFAULT_APP, str(CODEX_APP)]
+        args.app = [str(CODEX_APP)]
 
     try:
         if args.command == "install":

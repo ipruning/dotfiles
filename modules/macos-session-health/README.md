@@ -5,6 +5,10 @@ shell commands fail to spawn. The collector records user-session diagnostics in
 `~/Library/Application Support/macos-session-health/health.sqlite3` and writes
 logs under `~/Library/Logs/macos-session-health/`.
 
+App-bundle checks default to `/Applications/ChatGPT.app`. Pass global
+`--app PATH` before the subcommand to replace that selection; repeat the flag
+to inspect multiple bundles. Empty paths are rejected before collection.
+
 ## Lifecycle
 
 The single-file CLI owns a small wrapper at `~/.local/bin/macos-session-health`,
@@ -58,6 +62,9 @@ macos-session-health incident --hours 6 --format json
 macos-session-health query --signals --limit 30 --format json
 macos-session-health events --format json
 ```
+
+`query`, `events`, `trend`, and `incident` open SQLite read-only. A missing
+database is an error, not a reason to create an empty database.
 
 ## Safety
 
