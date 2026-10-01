@@ -1,6 +1,16 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
+if [[ $# -eq 1 && ( $1 == -h || $1 == --help ) ]]; then
+  echo 'Usage: pi-tmux'
+  echo 'Create or attach to a Pi tmux session for the current directory (requires git, tmux, zsh, pi).'
+  exit 0
+fi
+if (( $# != 0 )); then
+  echo 'pi-tmux: no arguments accepted; use --help' >&2
+  exit 2
+fi
+
 # shellcheck source=_lib/session-id.sh
 # shellcheck disable=SC1091
 source "$(dirname "${BASH_SOURCE[0]}")/_lib/session-id.sh"

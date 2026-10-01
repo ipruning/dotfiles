@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
+if [[ $# -eq 1 && ( $1 == -h || $1 == --help ) ]]; then
+  echo 'Usage: g [lazygit arguments...]'
+  echo 'Launch the interactive Git manager. For delegated options, see lazygit --help.'
+  exit 0
+fi
 if ! command -v lazygit >/dev/null 2>&1; then
   echo "lazygit not found. Preview: mise run mise-sync; apply: mise run mise-sync -- --apply" >&2
   exit 1

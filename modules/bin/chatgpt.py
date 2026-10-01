@@ -65,4 +65,9 @@ def main(user_instructions: str | None = None, dry_run=False) -> None:
 
 
 if __name__ == "__main__":
-    fire.Fire(main)
+    if sys.argv[1:] in (["-h"], ["--help"]):
+        print("Usage: chatgpt.py [USER_INSTRUCTIONS] [--dry_run]")
+        print("Send stdin and/or instructions to ChatGPT in Chrome via clipboard and UI automation on macOS.")
+        print("--dry_run prints the composed message without clipboard or UI changes.")
+    else:
+        fire.Fire(main)

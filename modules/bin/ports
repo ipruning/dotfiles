@@ -1,14 +1,34 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
+if [[ $# -eq 1 && ( $1 == -h || $1 == --help ) ]]; then
+  echo 'Usage: ports [--watch]'
+  echo 'List listening sockets once; --watch explicitly starts viddy at a one-second interval.'
+  echo 'Requires ss on Linux or lsof on macOS; watch also requires viddy.'
+  exit 0
+fi
+if (( $# > 1 )) || [[ $# -eq 1 && $1 != --watch ]]; then
+  echo 'ports: expected no arguments or --watch; use --help' >&2
+  exit 2
+fi
+
 if [[ $OSTYPE == linux* ]]; then
-  exec ss -tulpn
+  command=(ss -tulpn)
 elif [[ $OSTYPE == darwin* ]]; then
-  if command -v viddy >/dev/null 2>&1; then
-    exec viddy --interval 1s 'lsof -nP -iTCP -sTCP:LISTEN'
-  else
-    exec lsof -nP -iTCP -sTCP:LISTEN
-  fi
+  command=(lsof -nP -iTCP -sTCP:LISTEN)
 else
+  echo "ports: unsupported OS: ${OSTYPE:-unknown}" >&2
   exit 1
 fi
+if ! command -v "${command[0]}" >/dev/null 2>&1; then
+  echo "ports: required command not found: ${command[0]}" >&2
+  exit 1
+fi
+if [[ ${1:-} == --watch ]]; then
+  if ! command -v viddy >/dev/null 2>&1; then
+    echo 'ports: --watch requires viddy; omit --watch for a one-shot listing' >&2
+    exit 1
+  fi
+  exec viddy --interval 1s "${command[*]}"
+fi
+exec "${command[@]}"

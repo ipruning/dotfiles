@@ -1,6 +1,15 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
+if [[ $# -eq 1 && ( $1 == -h || $1 == --help ) ]]; then
+  echo 'Usage: c'
+  echo 'Copy stdin to the clipboard using pbcopy, xclip, or putclip.'
+  exit 0
+fi
+if (( $# != 0 )); then
+  echo 'c: no arguments accepted; use --help' >&2
+  exit 2
+fi
 if command -v pbcopy >/dev/null 2>&1; then
   exec pbcopy
 elif command -v xclip >/dev/null 2>&1; then

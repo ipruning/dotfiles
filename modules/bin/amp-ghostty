@@ -12,14 +12,26 @@ set -euo pipefail
 #   │          │  yazi    │
 #   └──────────┴──────────┘
 #
-# Ghostty keybindings required:
-#   super+d       = new_split:right
-#   super+shift+d = new_split:down
+# Requires Ghostty 1.3+ with AppleScript and Accessibility access enabled.
+if [[ $# -eq 1 && ( $1 == -h || $1 == --help ) ]]; then
+  echo 'Usage: amp-ghostty [directory]'
+  echo 'Open amp, lazygit, and yazi in a new three-pane Ghostty tab.'
+  echo 'Requires macOS, Ghostty 1.3+ (macos-applescript enabled), Accessibility access, osascript, amp, lazygit, yazi.'
+  exit 0
+fi
+if (( $# > 1 )) || [[ ${1:-} == -* || ( $# -eq 1 && -z $1 ) ]]; then
+  echo 'amp-ghostty: expected at most one directory; use --help' >&2
+  exit 2
+fi
+if [[ $OSTYPE != darwin* ]]; then
+  echo 'amp-ghostty: macOS is required' >&2
+  exit 1
+fi
 
 dir="${1:-$(pwd)}"
 dir="$(cd "$dir" && pwd -P)" || { echo "directory not found: $1" >&2; exit 1; }
 
-for cmd in amp lazygit yazi; do
+for cmd in osascript amp lazygit yazi; do
   command -v "$cmd" >/dev/null 2>&1 || { echo "required: $cmd" >&2; exit 1; }
 done
 
@@ -29,61 +41,48 @@ lazygit_command="cd $dir_q && lazygit"
 yazi_command="cd $dir_q && yazi"
 
 osascript - "$amp_command" "$lazygit_command" "$yazi_command" <<'APPLESCRIPT'
-on run argv
-set ampCommand to item 1 of argv
-set lazygitCommand to item 2 of argv
-set yaziCommand to item 3 of argv
-try
-  set oldClip to the clipboard as text
-on error
-  set oldClip to ""
-end try
-
-try
-tell application id "com.mitchellh.ghostty" to activate
-delay 0.05
-
-tell application "System Events"
-  tell process "Ghostty"
-    -- New tab
-    keystroke "t" using {command down}
-    delay 0.3
-
-    -- Left pane: amp
-    set the clipboard to ampCommand
-    keystroke "v" using {command down}
-    delay 0.1
-    key code 36
-    delay 0.3
-
-    -- Split right: lazygit
-    keystroke "d" using {command down}
-    delay 0.1
-    set the clipboard to lazygitCommand
-    keystroke "v" using {command down}
-    delay 0.1
-    key code 36
-    delay 0.3
-
-    -- Split bottom-right: yazi
-    keystroke "d" using {command down, shift down}
-    delay 0.1
-    set the clipboard to yaziCommand
-    keystroke "v" using {command down}
-    delay 0.3
-    key code 36
-    delay 0.3
-
-    -- Focus back to left pane (amp)
-    keystroke "]" using {command down}
+on waitForNewTerminal(existingIds)
+  tell application id "com.mitchellh.ghostty"
+    repeat 40 times
+      set candidateId to id of focused terminal of selected tab of front window
+      if candidateId is not in existingIds then return terminal id candidateId
+      delay 0.05
+    end repeat
   end tell
-end tell
+  error "Ghostty did not create a new terminal; no commands sent to the existing terminal"
+end waitForNewTerminal
 
-delay 0.3
-set the clipboard to oldClip
-on error errorMessage number errorNumber
-  set the clipboard to oldClip
-  error errorMessage number errorNumber
-end try
+on sendCommand(commandText, targetTerminal)
+  tell application id "com.mitchellh.ghostty"
+    input text commandText to targetTerminal
+    send key "enter" to targetTerminal
+  end tell
+end sendCommand
+
+on run argv
+  tell application id "com.mitchellh.ghostty"
+    activate
+    set existingIds to id of every terminal
+  end tell
+  -- TODO: Replace the menu and identity wait with native new tab when a supported
+  -- release passes a three-pane smoke. Ghostty 1.3.1 creates a tab then returns
+  -- -1708, so retrying can duplicate tabs. Until then, reject old terminal IDs.
+  -- https://github.com/ghostty-org/ghostty/issues/11457
+  tell application "System Events" to tell process "Ghostty"
+    click menu item "New Tab" of menu "File" of menu bar item "File" of menu bar 1
+  end tell
+  set ampTerminal to my waitForNewTerminal(existingIds)
+  my sendCommand(item 1 of argv, ampTerminal)
+
+  tell application id "com.mitchellh.ghostty"
+    set lazygitTerminal to split ampTerminal direction right
+  end tell
+  my sendCommand(item 2 of argv, lazygitTerminal)
+
+  tell application id "com.mitchellh.ghostty"
+    set yaziTerminal to split lazygitTerminal direction down
+  end tell
+  my sendCommand(item 3 of argv, yaziTerminal)
+  tell application id "com.mitchellh.ghostty" to focus ampTerminal
 end run
 APPLESCRIPT

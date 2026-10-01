@@ -1,6 +1,15 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
+if [[ $# -eq 1 && ( $1 == -h || $1 == --help ) ]]; then
+  echo 'Usage: repoprompt'
+  echo 'Open the current directory in Repo Prompt on macOS.'
+  exit 0
+fi
+if (( $# != 0 )); then
+  echo 'repoprompt: no arguments accepted; use --help' >&2
+  exit 2
+fi
 if [[ $OSTYPE == darwin* ]]; then
   exec open "repoprompt://open/$(pwd)"
 else

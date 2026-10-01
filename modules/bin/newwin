@@ -2,7 +2,16 @@
 
 set -euo pipefail
 
-app="${1:-}"; shift || true
+if [[ $# -eq 1 && ( $1 == -h || $1 == --help || $1 == help ) ]]; then
+  echo 'Usage: newwin {atlas|chrome|cursor|ghostty|zed}'
+  echo 'Open a new application window on macOS using open or osascript (UI automation may require Accessibility permission).'
+  exit 0
+fi
+if (( $# != 1 )); then
+  echo 'newwin: expected exactly one app; use --help' >&2
+  exit 2
+fi
+app="$1"
 
 case "$app" in
   atlas)
@@ -40,10 +49,6 @@ delay 0.05
 tell application "System Events" to tell process "Zed" ¬
   to click menu item "New Window" of menu 1 of menu bar item "File" of menu bar 1
 APPLESCRIPT
-    ;;
-  ""|-h|--help|help)
-    echo "usage: newwin {atlas|chrome|cursor|ghostty|zed}" >&2
-    exit 2
     ;;
   *)
     echo "newwin: unknown app '$app'" >&2

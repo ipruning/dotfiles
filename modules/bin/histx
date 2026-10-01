@@ -1,6 +1,15 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
+if [[ $# -eq 1 && ( $1 == -h || $1 == --help ) ]]; then
+  echo 'Usage: histx [lines]'
+  echo 'List Atuin history, or the last N HISTFILE lines (default: 1) when Atuin is absent.'
+  exit 0
+fi
+if (( $# > 1 )) || [[ $# -eq 1 && ! $1 =~ ^[0-9]+$ ]]; then
+  echo 'histx: expected at most one nonnegative line count; use --help' >&2
+  exit 2
+fi
 if command -v atuin >/dev/null 2>&1; then
   exec atuin history list --format '{time} - [{duration}] - {command}'
 elif [ -r "${HISTFILE:-}" ]; then

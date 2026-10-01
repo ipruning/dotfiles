@@ -2,6 +2,17 @@
 
 set -euo pipefail
 
+if [[ $# -eq 1 && ( $1 == -h || $1 == --help ) ]]; then
+  echo 'Usage: zed-image-paste'
+  echo 'Save a clipboard PNG and copy its Markdown link (macOS; requires osascript, pbcopy, python3).'
+  echo 'Requires ZED_FILE (*.md), ZED_WORKTREE_ROOT, IMG_SAVE_PATH, ZED_STEM, and ZED_DIRNAME.'
+  exit 0
+fi
+if (( $# != 0 )); then
+  echo 'zed-image-paste: no arguments accepted; use --help' >&2
+  exit 2
+fi
+
 require_env() {
   local name="$1"
   if [[ -z "${!name:-}" ]]; then

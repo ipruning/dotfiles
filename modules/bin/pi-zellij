@@ -1,6 +1,16 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
+if [[ $# -eq 1 && ( $1 == -h || $1 == --help ) ]]; then
+  echo 'Usage: pi-zellij'
+  echo 'Create or attach to a Pi Zellij session for the current directory (requires git, zellij, and its pi layout).'
+  exit 0
+fi
+if (( $# != 0 )); then
+  echo 'pi-zellij: no arguments accepted; use --help' >&2
+  exit 2
+fi
+
 # shellcheck disable=SC1091
 source "$(dirname "${BASH_SOURCE[0]}")/_lib/session-id.sh"
 

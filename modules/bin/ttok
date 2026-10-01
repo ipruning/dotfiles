@@ -49,6 +49,11 @@ def count_request(args: list[str], stdin_text: str, base_dir: Path) -> int:
 
 def main() -> int:
     args = sys.argv[1:]
+    if args in (["-h"], ["--help"]):
+        print("Usage: ttok TEXT | ttok FILE... | command | ttok")
+        print(__doc__)
+        print("The tokenizer may download and cache encoding data on first use.")
+        return 0
     if not args and sys.stdin.isatty():
         print(__doc__, file=sys.stderr)
         print("Usage: ttok TEXT | ttok FILE... | command | ttok", file=sys.stderr)

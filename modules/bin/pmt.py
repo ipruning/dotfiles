@@ -69,6 +69,11 @@ def _maybe_read_user_instructions_from_args(args: list[str]) -> str | None:
 
 
 def main(args: list[str]) -> None:
+    if args in (["-h"], ["--help"]):
+        print("Usage: pmt.py [TEXT... | @FILE | FILE | --file FILE]")
+        print("Wrap instructions and optional stdin context in tags; writes only to stdout.")
+        return
+
     other_context = ""
 
     if not sys.stdin.isatty():

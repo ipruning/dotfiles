@@ -1,6 +1,15 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
+if [[ $# -eq 1 && ( $1 == -h || $1 == --help ) ]]; then
+  echo 'Usage: p'
+  echo 'Print clipboard text using pbpaste, xclip, or getclip.'
+  exit 0
+fi
+if (( $# != 0 )); then
+  echo 'p: no arguments accepted; use --help' >&2
+  exit 2
+fi
 if command -v pbpaste >/dev/null 2>&1; then
   exec pbpaste -Prefer txt
 elif command -v xclip >/dev/null 2>&1; then

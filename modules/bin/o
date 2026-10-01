@@ -1,6 +1,16 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
+if [[ $# -eq 1 && ( $1 == -h || $1 == --help ) ]]; then
+  echo 'Usage: o [target]'
+  echo 'Open a path or URL (default: current directory) using open on macOS or xdg-open on Linux.'
+  echo 'Use ./ for paths beginning with -.'
+  exit 0
+fi
+if (( $# > 1 )) || [[ ${1:-} == -* || ( $# -eq 1 && -z $1 ) ]]; then
+  echo 'o: expected at most one target; use --help' >&2
+  exit 2
+fi
 target="${1:-.}"
 if [[ $OSTYPE == darwin* ]]; then
   exec open "$target"
