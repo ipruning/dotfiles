@@ -315,39 +315,39 @@ def test_runtime_removes_atuin_function_when_host_tool_is_unavailable(
     assert not (functions / "_atuin.zsh").exists()
 
 
-def test_runtime_generates_llm_completion_through_pinned_uvx(tmp_path: Path) -> None:
+@pytest.mark.parametrize("existing", [False, True])
+def test_runtime_offline_skips_llm_without_running_uvx_or_replacing_output(
+    tmp_path: Path,
+    existing: bool,
+) -> None:
     repo_root = tmp_path / "dotfiles"
     home = tmp_path / "home"
     bin_dir = tmp_path / "bin"
     completion = repo_root / "generated/completions/_llm"
-    completion.parent.mkdir(parents=True)
-    completion.write_text("stale\n")
     home.mkdir()
     bin_dir.mkdir()
+    original_mtime: int | None = None
+    if existing:
+        completion.parent.mkdir(parents=True)
+        completion.write_text("existing completion\n")
+        original_mtime = completion.stat().st_mtime_ns
+    invocation = tmp_path / "uvx-invoked"
     _fake_tool(
-        bin_dir,
-        "uvx",
-        'test "$1" = --offline || exit 9\n'
-        'test "$2" = --with || exit 7\n'
-        'test "$3" = httpx==0.28.1 || exit 6\n'
-        'test "$4" = llm==0.33 || exit 5\n'
-        'test "$_LLM_COMPLETE" = zsh_source || exit 8\n'
-        "printf 'llm completion\\n'\n",
+        bin_dir, "uvx", f"printf invoked > {shlex.quote(str(invocation))}\nexit 9\n"
     )
 
     completed = _run_runtime(repo_root, home, bin_dir, "--offline", "--apply", "--json")
 
-    assert completed.returncode == 0
+    assert completed.returncode == 0, completed.stderr
     steps = {step["name"]: step for step in json.loads(completed.stdout)["steps"]}
-    assert steps["completion.llm"]["status"] == "succeeded"
-    assert steps["completion.llm"]["command"] == [
-        "uvx",
-        "--offline",
-        "--with",
-        "httpx==0.28.1",
-        "llm==0.33",
-    ]
-    assert completion.read_text() == "llm completion\n"
+    assert steps["completion.llm"]["status"] == "skipped"
+    assert "package resolution" in steps["completion.llm"]["reason"]
+    assert not invocation.exists()
+    if existing:
+        assert completion.read_text() == "existing completion\n"
+        assert completion.stat().st_mtime_ns == original_mtime
+    else:
+        assert not completion.exists()
 
 
 def test_runtime_llm_completion_does_not_receive_host_credentials(
@@ -365,21 +365,23 @@ def test_runtime_llm_completion_does_not_receive_host_credentials(
     _fake_tool(
         bin_dir,
         "uvx",
+        'test "$1" = --with || exit 10\n'
+        'test "$2" = httpx==0.28.1 || exit 11\n'
+        'test "$3" = llm==0.33 || exit 12\n'
         'test -z "${OPENAI_API_KEY+x}" || exit 9\n'
         'test -z "${BRRR_SECRET+x}" || exit 8\n'
         'test "$_LLM_COMPLETE" = zsh_source || exit 7\n'
         "printf 'llm completion\\n'\n",
     )
 
-    completed = _run_runtime(repo_root, home, bin_dir, "--offline", "--apply", "--json")
+    monkeypatch.setenv("PATH", str(bin_dir))
+    plan = plan_runtime(repo_root, home, network=True)
+    llm = next(item for item in plan.results if item.spec.name == "completion.llm")
+    # Keep network assets outside this generator's test boundary.
+    report = execute_runtime(RuntimeReport(False, (llm,), plan.generated_root), home)
 
-    assert completed.returncode == 0, completed.stderr
-    result = next(
-        step
-        for step in json.loads(completed.stdout)["steps"]
-        if step["name"] == "completion.llm"
-    )
-    assert result["status"] == "succeeded"
+    assert report.ok, report.results[0].reason
+    assert report.results[0].status is RuntimeStatus.SUCCEEDED
     assert completion.read_text() == "llm completion\n"
 
 

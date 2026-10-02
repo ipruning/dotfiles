@@ -588,7 +588,8 @@ Unchanged generated content is retained without rewriting. A clean plugin at
 its pinned commit skips fetching. Dirty plugin checkouts are reported rather
 than reset. WASM assets with matching checksums are retained.
 
-Use `--offline` to skip network asset work. Ordinary `update` uses this local
+Use `--offline` to skip network asset work and LLM completion package resolution;
+existing LLM completion files are retained. Ordinary `update` uses this local
 refresh; missing network assets remain skipped, so a first setup or missing
 plugin repair still needs the explicit full runtime operation. Generator errors
 or empty output retain existing generated files. Existing plugin updates report

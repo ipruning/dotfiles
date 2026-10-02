@@ -223,18 +223,23 @@ def plan_runtime(
         )
         results.append(_generator_result(spec, executable_finder=generator_finder))
     for name, tool, command, filename, environment in COMPLETION_SPECS:
-        effective_command = (
-            (command[0], "--offline", *command[1:])
-            if tool == "uvx" and not network
-            else command
-        )
         spec = RuntimeSpec(
             name=f"completion.{name}",
             tool=tool,
             target=completions_dir / filename,
-            command=effective_command,
+            command=command,
             environment=environment,
         )
+        if name == "llm" and not network:
+            results.append(
+                RuntimeResult(
+                    spec,
+                    RuntimeStatus.SKIPPED,
+                    RuntimeAction.GENERATE,
+                    "LLM completion needs package resolution; refresh with runtime without --offline",
+                )
+            )
+            continue
         results.append(_generator_result(spec, executable_finder=executable_finder))
     git_available = executable_finder("git") is not None
     for name, source, revision, entrypoint in PLUGIN_SPECS:
