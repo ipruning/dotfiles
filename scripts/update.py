@@ -327,7 +327,7 @@ def plan_updates(
                     )
                 )
                 continue
-            if manager_owned and step.name != "pi.extensions":
+            if manager_owned:
                 results.append(
                     UpdateResult(
                         step,

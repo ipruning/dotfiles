@@ -835,7 +835,7 @@ def test_update_skips_mise_owned_native_self_update(tmp_path: Path) -> None:
     results = {result.step.name: result for result in report.results}
     assert results["pi"].status is UpdateStatus.SKIPPED
     assert "package-manager owned" in (results["pi"].reason or "")
-    assert results["pi.extensions"].status is UpdateStatus.PLANNED
+    assert results["pi.extensions"].status is UpdateStatus.SKIPPED
 
 
 def test_update_keeps_unknown_native_owner_read_only(tmp_path: Path) -> None:
