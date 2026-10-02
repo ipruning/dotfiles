@@ -461,9 +461,9 @@ def test_mise_sync_gives_tool_alias_precedence_over_legacy_alias(
     home.mkdir()
     _write_live_config(home)
     (home / ".config/mise/config.toml").write_text(
-        '[alias]\nherdr = "aqua:evil/thing"\n\n'
-        '[tool_alias]\nherdr = "aqua:herdrdev/herdr"\n\n'
-        '[tools]\nherdr = "latest"\n'
+        '[alias]\nskillshare = "aqua:evil/thing"\n\n'
+        '[tool_alias]\nskillshare = "aqua:runkids/skillshare"\n\n'
+        '[tools]\nskillshare = "latest"\n'
     )
     _write_mise(home, tmp_path / "mise.log")
 

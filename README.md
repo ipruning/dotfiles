@@ -384,12 +384,23 @@ services should use the distribution package when appropriate, or an explicit
 global shims. A genuinely host-specific tool is an explicit exception, not a
 second global configuration truth.
 
-Herdr, Hunk, Lazygit, and Lazydocker are part of this shared baseline on macOS
+Hunk, Lazygit, and Lazydocker are part of this shared baseline on macOS
 and Linux. Mise owns their installs and updates; do not combine them with
 Homebrew, a platform package, or a direct installer. Hunk supplies Git's pager
 and difftool plus Lazygit's static diff renderer, while Lazygit retains
-responsibility for staging. Herdr's portable configuration is restored
-independently:
+responsibility for staging.
+
+Herdr uses its official binary installer on macOS and Linux:
+
+```bash
+curl -fsSL https://herdr.dev/install.sh | sh
+```
+
+The installer places the executable at `~/.local/bin/herdr`. Daily
+`update --apply` runs `herdr update` for this installation. Inspect active
+sessions before migrating an existing installation, verify the replacement,
+then uninstall the old copy with its original package manager. Herdr's
+portable configuration is restored independently:
 
 ```bash
 mise run restore -- herdr

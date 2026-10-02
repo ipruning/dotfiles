@@ -311,6 +311,7 @@ def _update_steps(home: Path) -> tuple[UpdateStep, ...]:
             ),
         ),
         UpdateStep("tigris", "tigris", ("tigris", "update"), 300),
+        UpdateStep("herdr", "herdr", ("herdr", "update"), 900),
         UpdateStep("pi", "pi", ("pi", "update"), 1800),
         UpdateStep(
             "pi.extensions",
@@ -344,7 +345,14 @@ def plan_updates(
         resolved = (
             executable_finder(step.tool) if step.tool != "mise" else mise_executable
         )
-        if resolved and step.tool in {"amp", "claude", "pi", "tigris", "sprite"}:
+        if resolved and step.tool in {
+            "amp",
+            "claude",
+            "pi",
+            "tigris",
+            "sprite",
+            "herdr",
+        }:
             path = Path(resolved)
             target = path.resolve()
             mise_root = home / ".local/share/mise"
@@ -361,10 +369,13 @@ def plan_updates(
                 "pi": (home / ".pi/agent/install", home / ".pi/agent/bin"),
                 "tigris": (home / ".local/bin",),
                 "sprite": (home / ".local/bin",),
+                "herdr": (home / ".local/bin",),
             }
             native = any(
                 target.is_relative_to(root) for root in native_roots[step.tool]
             )
+            if step.tool == "herdr":
+                native = target == home.resolve() / ".local/bin/herdr"
             if not manager_owned and not native:
                 results.append(
                     UpdateResult(

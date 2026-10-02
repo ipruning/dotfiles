@@ -39,6 +39,7 @@ def _fake_tool(
         "pi": ".pi/agent/install",
         "sprite": ".local/bin",
         "tigris": ".local/bin",
+        "herdr": ".local/bin",
     }
     if name in native_dir:
         home = bin_dir.parent / "home"
@@ -189,7 +190,7 @@ def test_update_previews_exact_plan_by_default_without_running_tools(
         ),
         ("amp", "planned", [str(tmp_path / "bin/amp"), "update"]),
     ]
-    assert document["summary"] == {"planned": 6, "skipped": 8}
+    assert document["summary"] == {"planned": 6, "skipped": 9}
     assert document["notes"] == [
         (
             "planned means the updater command is available; each updater "
@@ -436,7 +437,7 @@ def test_update_runs_available_tools_in_order_and_reports_skips(tmp_path: Path) 
     document = json.loads(completed.stdout)
     assert document["apply"] is True
     assert document["ok"] is True
-    assert document["summary"] == {"skipped": 8, "succeeded": 6}
+    assert document["summary"] == {"skipped": 9, "succeeded": 6}
     assert [
         (step["name"], step["status"], step["exit_code"])
         for step in document["steps"]
@@ -513,7 +514,7 @@ def test_update_human_output_announces_commands_before_summary(tmp_path: Path) -
     assert completed.stdout.splitlines()[0].endswith(" && brew update")
     assert "SUCCEEDED brew.metadata" in completed.stdout
     assert ("Next:\n  mise run check\n") in completed.stdout
-    assert "Summary: 6 succeeded, 8 skipped" in completed.stdout
+    assert "Summary: 6 succeeded, 9 skipped" in completed.stdout
 
 
 @pytest.mark.parametrize("capture_output", [False, True])
@@ -1009,7 +1010,7 @@ def test_update_cli_installs_locked_target_when_only_older_version_is_installed(
     tmp_path: Path,
 ) -> None:
     inventory = json.dumps({
-        "herdr": [{"version": "0.9.1", "installed": True, "active": False}],
+        "skillshare": [{"version": "0.9.1", "installed": True, "active": False}],
         "unowned-tool": [{"version": "1.0", "installed": True, "active": False}],
     })
     completed, log = _run_update(
@@ -1046,10 +1047,56 @@ def test_update_cli_installs_locked_target_when_only_older_version_is_installed(
         "--yes",
         "-C",
         str(tmp_path / "home"),
-        "herdr",
+        "skillshare",
     ]
     assert (
-        f"mise install --locked --yes -C {tmp_path / 'home'} herdr"
+        f"mise install --locked --yes -C {tmp_path / 'home'} skillshare"
         in log.read_text().splitlines()
     )
     assert lock.read_bytes() == before
+
+
+def test_update_cli_runs_native_herdr_self_update(tmp_path: Path) -> None:
+    completed, log = _run_update(tmp_path, "--apply", "--json", tools=("herdr",))
+    assert completed.returncode == 0, completed.stderr
+    document = json.loads(completed.stdout)
+    step = next(step for step in document["steps"] if step["name"] == "herdr")
+    assert step["status"] == "succeeded"
+    assert step["command"][-1] == "update"
+    assert Path(step["command"][0]).resolve() == tmp_path / "home/.local/bin/herdr"
+    assert log.read_text().splitlines() == ["herdr update"]
+
+
+@pytest.mark.parametrize("owner", ["mise", "brew"])
+def test_update_cli_skips_package_owned_herdr_self_update(
+    tmp_path: Path, owner: str
+) -> None:
+    completed, log = _run_update(tmp_path, "--json", tools=("herdr",))
+    assert completed.returncode == 0, completed.stderr
+    native = tmp_path / "home/.local/bin/herdr"
+    package = (
+        tmp_path / "home/.local/share/mise/installs/herdr/0.9.1/herdr"
+        if owner == "mise"
+        else tmp_path / "brew/Cellar/herdr/0.9.1/bin/herdr"
+    )
+    package.parent.mkdir(parents=True)
+    native.rename(package)
+    native.symlink_to(package)
+    env = os.environ.copy()
+    env.update(
+        HOME=str(tmp_path / "home"),
+        PATH=os.pathsep.join((str(tmp_path / "bin"), str(native.parent))),
+    )
+    completed = subprocess.run(
+        [sys.executable, "-m", "scripts.update", "--apply", "--json"],
+        cwd=tmp_path / "project",
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert completed.returncode == 0, completed.stderr
+    document = json.loads(completed.stdout)
+    step = next(step for step in document["steps"] if step["name"] == "herdr")
+    assert step["status"] == "skipped"
+    assert not log.exists()
