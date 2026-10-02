@@ -68,6 +68,10 @@ run = 'python -m scripts.setup "$@"'
 description = "Preview or apply host tool updates"
 run = 'python -m scripts.update "$@"'
 
+[tasks.upgrade-tools]
+description = "Preview or advance the shared mise baseline on the maintenance host"
+run = 'python -m scripts.upgrade_tools "$@"'
+
 [tasks.mise-sync]
 description = "Preview or converge global mise configuration, locked tools, and shims"
 run = 'python -m scripts.mise_sync "$@"'

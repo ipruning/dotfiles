@@ -359,6 +359,7 @@ def test_nushell_skips_stale_cached_integrations_when_tools_are_missing(
     functions = repo_root / "generated/functions"
     functions.mkdir(parents=True)
     (functions / "_mise.nu").write_text(
+        f"if not ('{tmp_path}/missing-mise' | path exists) {{ return }}\n"
         'error make { msg: "stale mise cache loaded" }\n'
     )
     (functions / "_zoxide.nu").write_text(

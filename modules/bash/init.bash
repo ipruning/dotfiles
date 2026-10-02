@@ -35,8 +35,7 @@ case $- in
     fi
     # Activate mise after integrations that rewrite PROMPT_COMMAND so its
     # dynamic environment hook remains installed.
-    if [ -x "$HOME/.local/bin/mise" ] && [ ! -L "$HOME/.local/bin/mise" ] && \
-      [ -f "$_dotfiles_functions_dir/_mise.bash" ] && \
+    if [ -r "$_dotfiles_functions_dir/_mise.bash" ] && \
       . "$_dotfiles_functions_dir/_mise.bash"; then
       :
     else

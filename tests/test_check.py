@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 
 import scripts.check as check_module
+import scripts.check_git as check_git_module
 import scripts.check_mise as check_mise_module
 import scripts.check_skillshare as check_skillshare_module
 from scripts.check import inspect_host
@@ -1067,7 +1068,7 @@ def test_private_git_probe_failure_is_not_reported_as_missing(
     )
     private_config.chmod(0o600)
     monkeypatch.setattr(
-        check_module.subprocess,
+        check_git_module.subprocess,
         "run",
         lambda *_args, **_kwargs: (_ for _ in ()).throw(OSError("git unavailable")),
     )

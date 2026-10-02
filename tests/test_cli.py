@@ -123,12 +123,12 @@ def test_global_mise_lock_covers_declared_artifact_platforms() -> None:
         "~/Developer/ipruning",
         "~/Developer/jihuanshe",
     ]
-    assert {"codex", "gh", "pnpm", "yarn"}.isdisjoint(config["tools"])
-    assert {"pnpm", "yarn"}.isdisjoint(config["tool_alias"])
+    assert {"codex", "gh", "pi", "pnpm", "yarn"}.isdisjoint(config["tools"])
+    assert {"pi", "pnpm", "yarn"}.isdisjoint(config["tool_alias"])
     lock_root = repo_root / "reference/.config/mise"
     lockfile = tomllib.loads((lock_root / "mise.lock").read_text())
     assert lockfile["lockfile_version"] == 3
-    assert {"pnpm", "yarn"}.isdisjoint(lockfile["tools"])
+    assert {"pi", "pnpm", "yarn"}.isdisjoint(lockfile["tools"])
     version_only_backends = {"core:rust"}
     version_only_prefixes = (
         "cargo:",

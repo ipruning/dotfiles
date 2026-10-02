@@ -79,6 +79,7 @@ def _apply_arguments(module: str, tmp_path: Path) -> tuple[str, ...]:
         ("mise_sync", "mise-sync"),
         ("restore", "restore"),
         ("update", "update"),
+        ("upgrade_tools", "upgrade-tools"),
         ("adopt", "adopt"),
         ("runtime", "runtime"),
         ("inventory", "inventory"),

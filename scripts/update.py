@@ -5,10 +5,12 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import shlex
 import shutil
 import subprocess
 import sys
 import time
+import tomllib
 from collections.abc import Callable
 from dataclasses import dataclass, replace
 from enum import StrEnum
@@ -26,17 +28,14 @@ from .mise import (
     canonical_mise_path,
 )
 from .models import ExecutableFinder
-from .process import kill_process_group, run_process_group
+from .process import run_process_group
 from .render import emit_error
 
 StepCallback = Callable[["UpdateStep"], None]
-NEXT_COMMANDS = (
-    "git diff -- reference/.config/mise",
-    "mise run runtime",
-)
+NEXT_COMMANDS = ("mise run check",)
 MISE_TOOLS_NOTE = (
-    "mise.tools uses --bump and may update tracked reference/.config/mise files "
-    "when the live global config is linked to this checkout."
+    "mise.tools consumes the shared lock without changing declarations; "
+    "use upgrade-tools explicitly to advance the shared baseline."
 )
 PREVIEW_NOTE = (
     "planned means the updater command is available; each updater determines "
@@ -63,6 +62,7 @@ class UpdateStep:
     environment: tuple[tuple[str, str], ...] = ()
     stdin_text: str | None = None
     failure_note: str | None = None
+    cwd: Path | None = None
 
 
 @dataclass(frozen=True)
@@ -72,16 +72,21 @@ class UpdateResult:
     exit_code: int | None = None
     duration_ms: int | None = None
     reason: str | None = None
+    stdout_tail: str | None = None
+    stderr_tail: str | None = None
 
 
 @dataclass(frozen=True)
 class UpdateReport:
     apply: bool
     results: tuple[UpdateResult, ...]
+    runtime: dict[str, object] | None = None
 
     @property
     def ok(self) -> bool:
-        return all(result.status is not UpdateStatus.FAILED for result in self.results)
+        return all(
+            result.status is not UpdateStatus.FAILED for result in self.results
+        ) and (self.runtime is None or bool(self.runtime["ok"]))
 
 
 def _emit_failure(step: UpdateStep, reason: str) -> None:
@@ -105,66 +110,39 @@ def _run_with_progress(
         print(
             f"[{step.name}] RUN {_display_command(step)}", file=sys.stderr, flush=True
         )
-    started_at = time.monotonic()
-    process = subprocess.Popen(
-        step.command,
-        stdin=(subprocess.PIPE if step.stdin_text is not None else subprocess.DEVNULL),
-        stdout=None if inherit_output else subprocess.DEVNULL,
-        stderr=None if inherit_output else subprocess.DEVNULL,
-        env=env,
-        process_group=0,
-        text=True,
-    )
-    if step.stdin_text is not None:
-        assert process.stdin is not None
-        try:
-            process.stdin.write(step.stdin_text)
-            process.stdin.flush()
-        except BrokenPipeError:
-            pass
-        finally:
-            process.stdin.close()
 
-    next_progress_at = started_at + progress_interval_seconds
-    try:
-        while True:
-            now = time.monotonic()
-            remaining = step.timeout_seconds - (now - started_at)
-            if remaining <= 0:
-                kill_process_group(process)
-                raise subprocess.TimeoutExpired(step.command, step.timeout_seconds)
-            exit_code = process.poll()
-            if exit_code is not None:
-                duration_seconds = round(time.monotonic() - started_at)
-                print(
-                    f"[{step.name}] DONE exit={exit_code} elapsed={duration_seconds}s",
-                    file=sys.stderr,
-                    flush=True,
-                )
-                return subprocess.CompletedProcess(step.command, exit_code, "", "")
-            now = time.monotonic()
-            if now >= next_progress_at:
-                elapsed_seconds = round(now - started_at)
-                print(
-                    f"[{step.name}] STILL RUNNING elapsed={elapsed_seconds}s "
-                    f"timeout={step.timeout_seconds}s",
-                    file=sys.stderr,
-                    flush=True,
-                )
-                next_progress_at = now + progress_interval_seconds
-            time.sleep(min(0.1, remaining, max(0, next_progress_at - now)))
-    finally:
-        if process.poll() is None:
-            kill_process_group(process)
+    def progress(elapsed: float) -> None:
+        print(
+            f"[{step.name}] STILL RUNNING elapsed={round(elapsed)}s "
+            f"timeout={step.timeout_seconds}s",
+            file=sys.stderr,
+            flush=True,
+        )
+
+    started_at = time.monotonic()
+    completed = run_process_group(
+        step.command,
+        env=env,
+        cwd=step.cwd,
+        timeout_seconds=step.timeout_seconds,
+        capture_output=True,
+        output_limit_chars=8192,
+        inherit_output=inherit_output,
+        stdin_text=step.stdin_text,
+        on_progress=progress,
+        progress_interval_seconds=progress_interval_seconds,
+    )
+    print(
+        f"[{step.name}] DONE exit={completed.returncode} "
+        f"elapsed={round(time.monotonic() - started_at)}s",
+        file=sys.stderr,
+        flush=True,
+    )
+    return completed
 
 
 def _installed_mise_tools(home: Path, mise_executable: str) -> tuple[str, ...]:
-    """Return active installed tools as rolling requests.
-
-    Restricting the command to installed tools prevents upgrade from
-    bootstrapping missing tools, while ``@latest`` keeps rolling selectors
-    rolling when ``--bump`` persists the request.
-    """
+    """Return active installed identities without resolving newer versions."""
     command = (
         mise_executable,
         "ls",
@@ -210,9 +188,7 @@ def _installed_mise_tools(home: Path, mise_executable: str) -> tuple[str, ...]:
             version = raw_version.get("version")
             if not isinstance(version, str) or not version:
                 raise RuntimeError(f"mise tool inventory for {name} has no version")
-            if version.startswith(MISE_REF_PREFIXES):
-                continue
-            installed.append(f"{name}@latest")
+            installed.append(name)
     return tuple(sorted(set(installed)))
 
 
@@ -241,7 +217,7 @@ def _update_steps(home: Path) -> tuple[UpdateStep, ...]:
         UpdateStep(
             "mise.tools",
             "mise",
-            (mise_executable, "upgrade", "--bump", "--no-prune", "-C", str(home)),
+            (mise_executable, "install", "--locked", "--yes", "-C", str(home)),
             1800,
             path_prepend=mise_path,
         ),
@@ -286,6 +262,7 @@ def _update_steps(home: Path) -> tuple[UpdateStep, ...]:
             ),
         ),
         UpdateStep("tigris", "tigris", ("tigris", "update"), 300),
+        UpdateStep("pi", "pi", ("pi", "update"), 1800),
         UpdateStep(
             "pi.extensions",
             "pi",
@@ -299,11 +276,16 @@ def plan_updates(
     home: Path,
     *,
     executable_finder: ExecutableFinder = shutil.which,
+    repo_root: Path | None = None,
 ) -> UpdateReport:
     """Return the exact available update plan without running commands."""
     results = []
     mise_executable = canonical_mise_executable(home)
+    reference = (
+        repo_root or Path(__file__).resolve().parents[1]
+    ) / "reference/.config/mise/config.toml"
     for step in _update_steps(home):
+        step = replace(step, cwd=home)
         if step.name == "mise.self" and configured_mise_path(home) is not None:
             results.append(
                 UpdateResult(
@@ -313,6 +295,49 @@ def plan_updates(
                 ),
             )
             continue
+        resolved = (
+            executable_finder(step.tool) if step.tool != "mise" else mise_executable
+        )
+        if resolved and step.tool in {"amp", "claude", "pi", "tigris", "sprite"}:
+            path = Path(resolved)
+            target = path.resolve()
+            mise_root = home / ".local/share/mise"
+            manager_owned = (
+                target.is_relative_to(mise_root)
+                or path.is_relative_to(mise_root)
+                or target.is_relative_to(Path("/opt/homebrew"))
+                or "Cellar" in target.parts
+                or target.is_relative_to(Path("/usr/bin"))
+            )
+            native_roots = {
+                "amp": (home / ".amp/bin",),
+                "claude": (home / ".local/share/claude/versions",),
+                "pi": (home / ".pi/agent/install", home / ".pi/agent/bin"),
+                "tigris": (home / ".local/bin",),
+                "sprite": (home / ".local/bin",),
+            }
+            native = any(
+                target.is_relative_to(root) for root in native_roots[step.tool]
+            )
+            if not manager_owned and not native:
+                results.append(
+                    UpdateResult(
+                        step,
+                        UpdateStatus.SKIPPED,
+                        reason=f"{path} has no verified native owner; inspect its installation before self-update",
+                    )
+                )
+                continue
+            if manager_owned and step.name != "pi.extensions":
+                results.append(
+                    UpdateResult(
+                        step,
+                        UpdateStatus.SKIPPED,
+                        reason=f"{path} is package-manager owned; native self-update is skipped",
+                    )
+                )
+                continue
+            step = replace(step, command=(str(path), *step.command[1:]))
         available = (
             mise_executable is not None
             if step.tool == "mise"
@@ -322,11 +347,62 @@ def plan_updates(
             assert mise_executable is not None
             try:
                 installed = _installed_mise_tools(home, mise_executable)
-            except RuntimeError as error:
+                from .mise_sync import _mise_tool_safety, _tool_declaration
+
+                root = repo_root or Path(__file__).resolve().parents[1]
+                live_only, aliases_changed, extra_configs, error = _mise_tool_safety(
+                    root, home, mise_executable
+                )
+                if error or live_only or aliases_changed or extra_configs:
+                    raise RuntimeError(
+                        "shared mise declaration is not the sole live owner; "
+                        "preview `mise run mise-sync` before updating: "
+                        + (error or str((live_only, aliases_changed, extra_configs)))
+                    )
+                shared, aliases = _tool_declaration(reference, required=True)
+                live_tools, live_aliases = _tool_declaration(
+                    home / ".config/mise/config.toml", required=True
+                )
+                with reference.open("rb") as stream:
+                    reference_document = tomllib.load(stream)
+                with (home / ".config/mise/config.toml").open("rb") as stream:
+                    live_document = tomllib.load(stream)
+                if any(
+                    reference_document.get(section) != live_document.get(section)
+                    for section in ("tools", "tool_alias", "alias")
+                ):
+                    raise RuntimeError(
+                        "live mise versions or options differ from reference; preview mise-sync"
+                    )
+                with reference.with_name("mise.lock").open("rb") as stream:
+                    reference_lock = tomllib.load(stream)
+                with (home / ".config/mise/mise.lock").open("rb") as stream:
+                    live_lock = tomllib.load(stream)
+                if reference_lock != live_lock:
+                    raise RuntimeError(
+                        "live mise lock differs from reference; preview mise-sync"
+                    )
+                if shared != live_tools or aliases != live_aliases:
+                    raise RuntimeError(
+                        "live mise declaration differs from reference; "
+                        "preview `mise run mise-sync` before updating"
+                    )
+                installed_names = set(installed)
+                installed = tuple(
+                    sorted(
+                        name
+                        for name in shared
+                        if name in installed_names
+                        or aliases.get(name) in installed_names
+                    )
+                )
+            except (RuntimeError, OSError, ValueError) as error:
                 results.append(
                     UpdateResult(
                         step=step,
-                        status=UpdateStatus.FAILED,
+                        status=UpdateStatus.FAILED
+                        if mutation_allowed(home)
+                        else UpdateStatus.SKIPPED,
                         reason=str(error),
                     ),
                 )
@@ -366,11 +442,27 @@ def execute_updates(
     capture_output: bool = False,
     on_start: StepCallback | None = None,
     progress_interval_seconds: float = PROGRESS_INTERVAL_SECONDS,
+    repo_root: Path | None = None,
 ) -> UpdateReport:
     """Run every available updater and retain independent failure results."""
     require_mutation_allowed(home)
+    plan = plan_updates(home, executable_finder=executable_finder, repo_root=repo_root)
+    if not plan.ok:
+        return UpdateReport(
+            True,
+            tuple(
+                replace(
+                    result,
+                    status=UpdateStatus.SKIPPED,
+                    reason="ownership preflight failed; no updater commands run",
+                )
+                if result.status is UpdateStatus.PLANNED
+                else result
+                for result in plan.results
+            ),
+        )
     results = []
-    for planned in plan_updates(home, executable_finder=executable_finder).results:
+    for planned in plan.results:
         # Carry through anything the preflight already resolved (SKIPPED, or a
         # FAILED mise inventory). Only PLANNED steps run: executing a FAILED
         # mise.tools step would run `mise upgrade` with no tool arguments and
@@ -396,7 +488,7 @@ def execute_updates(
                 inherit_output=not capture_output,
                 announce_start=on_start is None,
             )
-        except subprocess.TimeoutExpired:
+        except subprocess.TimeoutExpired as error:
             reason = _failure_reason(
                 planned.step,
                 f"timed out after {planned.step.timeout_seconds}s",
@@ -409,6 +501,8 @@ def execute_updates(
                     status=UpdateStatus.FAILED,
                     duration_ms=round((time.monotonic() - started_at) * 1000),
                     reason=reason,
+                    stdout_tail=error.output if isinstance(error.output, str) else None,
+                    stderr_tail=error.stderr if isinstance(error.stderr, str) else None,
                 ),
             )
             continue
@@ -445,6 +539,8 @@ def execute_updates(
                 exit_code=completed.returncode,
                 duration_ms=round((time.monotonic() - started_at) * 1000),
                 reason=(None if completed.returncode == 0 else failure_reason),
+                stdout_tail=completed.stdout or None,
+                stderr_tail=completed.stderr or None,
             ),
         )
     return UpdateReport(apply=True, results=tuple(results))
@@ -514,14 +610,21 @@ def _document(
                     "variables": dict(result.step.environment),
                 },
                 "stdin": result.step.stdin_text,
+                "cwd": str(result.step.cwd) if result.step.cwd else None,
                 "attention": None,
                 "status": result.status.value,
                 "exit_code": result.exit_code,
                 "duration_ms": result.duration_ms,
                 "reason": result.reason,
+                "stdout_tail": result.stdout_tail,
+                "stderr_tail": result.stderr_tail,
+                "retry": _display_command(result.step)
+                if result.status is UpdateStatus.FAILED
+                else None,
             }
             for result in report.results
         ],
+        "runtime": report.runtime,
         "summary": _summary(report),
         "notes": list(_notes(report)),
         "next": list(_next_commands(report, apply_allowed=apply_allowed)),
@@ -529,16 +632,18 @@ def _document(
 
 
 def _display_command(step: UpdateStep) -> str:
-    command = " ".join(step.command)
-    if step.stdin_text is not None:
-        escaped_input = step.stdin_text.encode("unicode_escape").decode("ascii")
-        command = f"printf '{escaped_input}' | {command}"
+    command = shlex.join(step.command)
     prefixes = []
     if step.path_prepend:
         path = ":".join(str(directory) for directory in step.path_prepend)
-        prefixes.append(f"PATH={path}:$PATH")
-    prefixes.extend(f"{key}={value}" for key, value in step.environment)
-    return " ".join((*prefixes, command))
+        prefixes.append(f'PATH={shlex.quote(path)}:"$PATH"')
+    prefixes.extend(f"{key}={shlex.quote(value)}" for key, value in step.environment)
+    command = " ".join((*prefixes, command))
+    if step.stdin_text is not None:
+        command = f"printf '%s' {shlex.quote(step.stdin_text)} | {command}"
+    if step.cwd is not None:
+        command = f"cd -- {shlex.quote(str(step.cwd))} && {command}"
+    return command
 
 
 def _render(report: UpdateReport, *, apply_allowed: bool = True) -> None:
@@ -562,6 +667,10 @@ def _render(report: UpdateReport, *, apply_allowed: bool = True) -> None:
                 f"{label:7} {result.step.name}{duration(result)}: {result.reason}",
                 file=sys.stderr,
             )
+            for output in (result.stdout_tail, result.stderr_tail):
+                if output:
+                    print(output.rstrip(), file=sys.stderr)
+            print(f"Retry: {_display_command(result.step)}", file=sys.stderr)
     summary = _summary(report)
     rendered = ", ".join(f"{count} {status}" for status, count in summary.items())
     print(f"Summary: {rendered or 'no steps'}")
@@ -579,8 +688,10 @@ def _render(report: UpdateReport, *, apply_allowed: bool = True) -> None:
         return
     if not report.ok:
         print(
-            "Update incomplete. Refresh runtime for completed steps, then resolve failures."
+            "Update incomplete. Resolve the reported failures; runtime has its own result."
         )
+    if report.runtime is not None:
+        print(f"Runtime: {'SUCCEEDED' if report.runtime['ok'] else 'FAILED'}")
     next_commands = _next_commands(report)
     if not next_commands:
         if report.ok:
@@ -623,6 +734,33 @@ def main(argv: list[str] | None = None) -> int:
             if args.apply
             else plan_updates(home)
         )
+        safety_failed = any(
+            result.step.name == "mise.tools"
+            and result.status is UpdateStatus.FAILED
+            and result.exit_code is None
+            for result in report.results
+        )
+        if args.apply and safety_failed:
+            report = replace(
+                report,
+                runtime={
+                    "ok": False,
+                    "apply": False,
+                    "status": "skipped",
+                    "reason": "mise ownership preflight failed; resolve before refreshing runtime",
+                },
+            )
+        elif args.apply:
+            from .runtime import _document as runtime_document
+            from .runtime import execute_runtime, plan_runtime
+
+            runtime = execute_runtime(
+                plan_runtime(Path(__file__).resolve().parents[1], home, network=False),
+                home,
+                capture_output=True,
+            )
+            report = replace(report, runtime=runtime_document(runtime))
+
     except HostPolicyError as error:
         emit_error(
             "update",

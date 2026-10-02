@@ -1,6 +1,7 @@
 import json
 import os
 import shlex
+import shutil
 import subprocess
 import sys
 import time
@@ -32,13 +33,43 @@ def _fake_tool(
     mise_inventory: str | None = None,
     delay_seconds: float = 0,
 ) -> None:
+    native_dir = {
+        "amp": ".amp/bin",
+        "claude": ".local/share/claude/versions",
+        "pi": ".pi/agent/install",
+        "sprite": ".local/bin",
+        "tigris": ".local/bin",
+    }
+    if name in native_dir:
+        home = bin_dir.parent / "home"
+        target_dir = home / native_dir[name]
+        target_dir.mkdir(parents=True, exist_ok=True)
+        if bin_dir != target_dir:
+            (bin_dir / name).symlink_to(target_dir / name)
+        bin_dir = target_dir
     tool_path = bin_dir / name
     inventory = ""
     if name == "mise":
         inventory_document = mise_inventory or json.dumps(
             {"python": [{"version": "3.14.6", "installed": True}]},
         )
+        config = tool_path.parents[2] / ".config/mise/config.toml"
+        config.parent.mkdir(parents=True, exist_ok=True)
+        source = (
+            Path(__file__).resolve().parents[1] / "reference/.config/mise/config.toml"
+        )
+        if not config.exists():
+            shutil.copy2(source, config)
+        shutil.copy2(source.with_name("mise.lock"), config.with_name("mise.lock"))
         inventory = (
+            'if [ "$1" = "config" ]; then\n'
+            f"  printf '%s\\n' {shlex.quote(json.dumps([{'path': str(config), 'tools': []}]))}\n"
+            "  exit 0\n"
+            "fi\n"
+            'if [ "$1" = "activate" ] || [ "$1" = "completion" ]; then\n'
+            "  printf '# shell runtime\\n'\n"
+            "  exit 0\n"
+            "fi\n"
             'if [ "$1" = "ls" ]; then\n'
             f"  printf '%s\\n' {shlex.quote(inventory_document)}\n"
             "  exit 0\n"
@@ -85,9 +116,16 @@ def _run_update(
         )
     environment = os.environ.copy()
     environment["HOME"] = str(home)
-    environment["PATH"] = str(bin_dir)
+    environment["PATH"] = os.pathsep.join((str(bin_dir), str(home / ".local/bin")))
+    project = tmp_path / "project"
+    source_root = Path(__file__).resolve().parents[1]
+    shutil.copytree(source_root / "scripts", project / "scripts")
+    shutil.copytree(
+        source_root / "reference/.config/mise", project / "reference/.config/mise"
+    )
     completed = subprocess.run(
         [sys.executable, "-m", "scripts.update", *arguments],
+        cwd=project,
         env=environment,
         check=False,
         capture_output=True,
@@ -129,12 +167,12 @@ def test_update_previews_exact_plan_by_default_without_running_tools(
             "planned",
             [
                 str(tmp_path / "home/.local/bin/mise"),
-                "upgrade",
-                "--bump",
-                "--no-prune",
+                "install",
+                "--locked",
+                "--yes",
                 "-C",
                 str(tmp_path / "home"),
-                "python@latest",
+                "python",
             ],
         ),
         (
@@ -147,17 +185,17 @@ def test_update_previews_exact_plan_by_default_without_running_tools(
                 str(tmp_path / "home"),
             ],
         ),
-        ("amp", "planned", ["amp", "update"]),
+        ("amp", "planned", [str(tmp_path / "bin/amp"), "update"]),
     ]
-    assert document["summary"] == {"planned": 6, "skipped": 7}
+    assert document["summary"] == {"planned": 6, "skipped": 8}
     assert document["notes"] == [
         (
             "planned means the updater command is available; each updater "
             "determines whether an update exists during apply."
         ),
         (
-            "mise.tools uses --bump and may update tracked reference/.config/mise "
-            "files when the live global config is linked to this checkout."
+            "mise.tools consumes the shared lock without changing declarations; "
+            "use upgrade-tools explicitly to advance the shared baseline."
         ),
     ]
     assert document["next"] == ["mise run update -- --apply"]
@@ -189,6 +227,60 @@ def test_update_preview_treats_tigris_like_other_updaters(tmp_path: Path) -> Non
     assert tigris["attention"] is None
 
 
+def test_update_previews_pi_self_and_extensions_without_running_either(
+    tmp_path: Path,
+) -> None:
+    completed, log_path = _run_update(tmp_path, "--json", tools=("pi",))
+
+    assert completed.returncode == 0
+    document = json.loads(completed.stdout)
+    assert [
+        (step["name"], step["command"])
+        for step in document["steps"]
+        if step["status"] == "planned"
+    ] == [
+        ("pi", [str(tmp_path / "bin/pi"), "update"]),
+        ("pi.extensions", [str(tmp_path / "bin/pi"), "update", "--extensions"]),
+    ]
+    assert not log_path.exists()
+
+
+def test_update_runs_pi_extensions_even_after_self_update_failure(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    log_path = tmp_path / "pi.log"
+    pi = tmp_path / "home/.pi/agent/install/pi"
+    pi.parent.mkdir(parents=True)
+    (bin_dir / "pi").symlink_to(pi)
+    pi.write_text(
+        "#!/bin/sh\n"
+        f"printf '%s\\n' \"pi $*\" >> {shlex.quote(str(log_path))}\n"
+        'if [ "$#" -eq 1 ]; then exit 7; fi\n'
+        "exit 0\n",
+    )
+    pi.chmod(0o755)
+    monkeypatch.setenv("PATH", str(bin_dir))
+
+    report = execute_updates(
+        tmp_path / "home",
+        capture_output=True,
+    )
+
+    assert report.ok is False
+    assert [
+        (result.step.name, result.status, result.exit_code)
+        for result in report.results
+        if result.status is not UpdateStatus.SKIPPED
+    ] == [
+        ("pi", UpdateStatus.FAILED, 7),
+        ("pi.extensions", UpdateStatus.SUCCEEDED, 0),
+    ]
+    assert log_path.read_text().splitlines() == ["pi update", "pi update --extensions"]
+
+
 def test_update_gives_package_managers_transaction_scale_timeouts(
     tmp_path: Path,
 ) -> None:
@@ -205,6 +297,7 @@ def test_update_gives_package_managers_transaction_scale_timeouts(
     assert steps["brew.packages"].timeout_seconds >= 3600
     assert steps["mise.tools"].timeout_seconds >= 1800
     assert steps["claude"].timeout_seconds >= 1800
+    assert steps["pi"].timeout_seconds >= 1800
 
 
 def test_update_leaves_host_selected_mise_self_update_to_its_owner(
@@ -258,7 +351,8 @@ def test_update_confirms_sprite_in_noninteractive_apply(
     home = tmp_path / "home"
     home.mkdir()
     result_path = tmp_path / "sprite-result"
-    sprite = bin_dir / "sprite"
+    sprite = home / ".local/bin/sprite"
+    sprite.parent.mkdir(parents=True)
     sprite.write_text(
         "#!/bin/sh\n"
         'if IFS= read -r answer && [ "$answer" = y ]; then\n'
@@ -340,7 +434,7 @@ def test_update_runs_available_tools_in_order_and_reports_skips(tmp_path: Path) 
     document = json.loads(completed.stdout)
     assert document["apply"] is True
     assert document["ok"] is True
-    assert document["summary"] == {"skipped": 7, "succeeded": 6}
+    assert document["summary"] == {"skipped": 8, "succeeded": 6}
     assert [
         (step["name"], step["status"], step["exit_code"])
         for step in document["steps"]
@@ -357,7 +451,7 @@ def test_update_runs_available_tools_in_order_and_reports_skips(tmp_path: Path) 
         "brew update",
         "brew upgrade",
         "mise self-update --yes --no-plugins",
-        f"mise upgrade --bump --no-prune -C {tmp_path / 'home'} python@latest",
+        f"mise install --locked --yes -C {tmp_path / 'home'} python",
         f"mise reshim -C {tmp_path / 'home'}",
         "amp update",
     ]
@@ -370,8 +464,7 @@ def test_update_executes_reshim_with_canonical_mise_first_on_path(
     home = tmp_path / "home"
     canonical = home / ".local/bin/mise"
     canonical.parent.mkdir(parents=True)
-    canonical.write_text("#!/bin/sh\nexit 0\n")
-    canonical.chmod(0o755)
+    _fake_tool(canonical.parent, "mise", tmp_path / "mise.log")
     observed_path = ""
 
     def fake_inventory(command, **_kwargs):
@@ -400,7 +493,8 @@ def test_update_preview_human_output_points_to_apply(tmp_path: Path) -> None:
     completed, log_path = _run_update(tmp_path)
 
     assert completed.returncode == 0
-    assert "PLANNED brew.metadata: brew update" in completed.stdout
+    assert "PLANNED brew.metadata: cd -- " in completed.stdout
+    assert " && brew update" in completed.stdout
     assert (
         "No commands run. Re-run with --apply to update host tools." in completed.stdout
     )
@@ -413,12 +507,11 @@ def test_update_human_output_announces_commands_before_summary(tmp_path: Path) -
     completed, _log_path = _run_update(tmp_path, "--apply")
 
     assert completed.returncode == 0
-    assert completed.stdout.splitlines()[0] == "RUN brew.metadata: brew update"
+    assert completed.stdout.splitlines()[0].startswith("RUN brew.metadata: cd -- ")
+    assert completed.stdout.splitlines()[0].endswith(" && brew update")
     assert "SUCCEEDED brew.metadata" in completed.stdout
-    assert (
-        "Next:\n  git diff -- reference/.config/mise\n  mise run runtime\n"
-    ) in completed.stdout
-    assert "Summary: 6 succeeded, 7 skipped" in completed.stdout
+    assert ("Next:\n  mise run check\n") in completed.stdout
+    assert "Summary: 6 succeeded, 8 skipped" in completed.stdout
 
 
 @pytest.mark.parametrize("capture_output", [False, True])
@@ -448,7 +541,7 @@ def test_update_streams_progress_to_stderr(
     assert log_path.read_text().splitlines() == ["amp update"]
     output = capfd.readouterr()
     assert output.out == ""
-    assert "[amp] RUN amp update" in output.err
+    assert f"[amp] RUN cd -- {home} && {bin_dir / 'amp'} update" in output.err
     assert "[amp] STILL RUNNING" in output.err
     assert "[amp] DONE exit=0" in output.err
 
@@ -537,8 +630,7 @@ def test_update_failure_is_contextual_and_does_not_hide_later_results(
     assert results["amp"]["exit_code"] == 7
     assert results["tigris"]["status"] == "succeeded"
     assert document["next"] == [
-        "git diff -- reference/.config/mise",
-        "mise run runtime",
+        "mise run check",
     ]
     assert log_path.read_text().splitlines() == ["amp update", "tigris update"]
     assert "[amp] FAIL command exited 7" in completed.stderr
@@ -570,7 +662,9 @@ def test_update_reports_timeout_and_launch_failures_on_stderr(
     monkeypatch.setattr("scripts.update._run_with_progress", fail_with_timeout)
     timeout_report = execute_updates(
         tmp_path,
-        executable_finder=lambda tool: "/fake/amp" if tool == "amp" else None,
+        executable_finder=lambda tool: (
+            str(tmp_path / ".amp/bin/amp") if tool == "amp" else None
+        ),
         capture_output=True,
     )
 
@@ -586,7 +680,9 @@ def test_update_reports_timeout_and_launch_failures_on_stderr(
     monkeypatch.setattr("scripts.update._run_with_progress", fail_to_launch)
     launch_report = execute_updates(
         tmp_path,
-        executable_finder=lambda tool: "/fake/amp" if tool == "amp" else None,
+        executable_finder=lambda tool: (
+            str(tmp_path / ".amp/bin/amp") if tool == "amp" else None
+        ),
         capture_output=True,
     )
 
@@ -603,8 +699,7 @@ def test_update_mise_step_passes_only_installed_versions(
 ) -> None:
     mise = tmp_path / ".local/bin/mise"
     mise.parent.mkdir(parents=True)
-    mise.write_text("#!/bin/sh\nexit 0\n")
-    mise.chmod(0o755)
+    _fake_tool(mise.parent, "mise", tmp_path / "mise.log")
     inventory = json.dumps(
         {
             "python": [{"version": "3.14.6", "installed": True}],
@@ -644,13 +739,14 @@ def test_update_mise_step_passes_only_installed_versions(
     assert result.status is UpdateStatus.PLANNED
     assert result.step.command == (
         str(mise),
-        "upgrade",
-        "--bump",
-        "--no-prune",
+        "install",
+        "--locked",
+        "--yes",
         "-C",
         str(tmp_path),
-        "github:larksuite/cli@latest",
-        "python@latest",
+        "cargo:https://github.com/ipruning/atuin",
+        "github:larksuite/cli",
+        "python",
     )
 
 
@@ -724,3 +820,185 @@ def test_update_help_and_invalid_options_never_run_tools(tmp_path: Path) -> None
     assert invalid_result.returncode == 2
     assert "unrecognized arguments: --unknown" in invalid_result.stderr
     assert not invalid_log.exists()
+
+
+def test_update_skips_mise_owned_native_self_update(tmp_path: Path) -> None:
+    home = tmp_path / "home"
+    pi = home / ".local/share/mise/installs/pi/1.0/bin/pi"
+    pi.parent.mkdir(parents=True)
+    pi.write_text("#!/bin/sh\nexit 0\n")
+    pi.chmod(0o755)
+    report = plan_updates(
+        home, executable_finder=lambda tool: str(pi) if tool == "pi" else None
+    )
+    results = {result.step.name: result for result in report.results}
+    assert results["pi"].status is UpdateStatus.SKIPPED
+    assert "package-manager owned" in (results["pi"].reason or "")
+    assert results["pi.extensions"].status is UpdateStatus.PLANNED
+
+
+def test_update_keeps_unknown_native_owner_read_only(tmp_path: Path) -> None:
+    report = plan_updates(
+        tmp_path,
+        executable_finder=lambda tool: (
+            "/usr/local/bin/tigris" if tool == "tigris" else None
+        ),
+    )
+    result = next(result for result in report.results if result.step.name == "tigris")
+    assert result.status is UpdateStatus.SKIPPED
+    assert "no verified native owner" in (result.reason or "")
+
+
+def test_update_cli_refreshes_runtime_after_independent_failure(tmp_path: Path) -> None:
+    completed, log = _run_update(
+        tmp_path, "--apply", "--json", tools=("amp", "mise"), failing_tool="amp"
+    )
+    document = json.loads(completed.stdout)
+    assert completed.returncode == 1
+    assert document["runtime"]["apply"] is True
+    assert document["runtime"]["ok"] is True
+    assert any(
+        step["name"] == "amp" and step["status"] == "failed"
+        for step in document["steps"]
+    )
+    assert "amp update" in log.read_text()
+    assert (tmp_path / "project/generated/functions/_mise.zsh").is_file()
+
+
+def _run_upgrade(tmp_path: Path, *arguments: str, linked: bool = True):
+    source_root = Path(__file__).resolve().parents[1]
+    project = tmp_path / "project"
+    shutil.copytree(source_root / "scripts", project / "scripts")
+    source = project / "reference/.config/mise/config.toml"
+    source.parent.mkdir(parents=True)
+    shutil.copy2(
+        source_root / "reference/.config/mise/mise.lock", source.with_name("mise.lock")
+    )
+    source.write_text(
+        '[tools]\npython = "latest"\n"cargo:https://github.com/ipruning/atuin" = { version = "rev:abc" }\n'
+    )
+    home = tmp_path / "home"
+    binary = home / ".local/bin"
+    binary.mkdir(parents=True)
+    log = tmp_path / "upgrade.log"
+    _fake_tool(binary, "mise", log)
+    live = home / ".config/mise/config.toml"
+    live.unlink()
+    if linked:
+        live.symlink_to(source)
+    else:
+        shutil.copy2(source, live)
+    env = os.environ.copy()
+    env.update(HOME=str(home), PATH=str(binary))
+    completed = subprocess.run(
+        [sys.executable, "-m", "scripts.upgrade_tools", *arguments],
+        cwd=project,
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    return completed, log
+
+
+def test_upgrade_tools_cli_previews_shared_scope_without_updating(
+    tmp_path: Path,
+) -> None:
+    completed, log = _run_upgrade(tmp_path, "--json")
+    assert completed.returncode == 0, completed.stderr
+    document = json.loads(completed.stdout)
+    assert document["operation"] == "upgrade-tools"
+    assert document["apply"] is False
+    assert document["steps"][0]["command"][1:] == [
+        "upgrade",
+        "--bump",
+        "--no-prune",
+        "-C",
+        str(tmp_path / "home"),
+        "python@latest",
+    ]
+    assert not log.exists()
+
+
+def test_upgrade_tools_cli_requires_shared_config_link(tmp_path: Path) -> None:
+    completed, log = _run_upgrade(tmp_path, "--apply", "--json", linked=False)
+    assert completed.returncode == 1
+    document = json.loads(completed.stdout)
+    assert document["steps"][0]["status"] == "failed"
+    assert "must link" in document["steps"][0]["reason"]
+    assert not log.exists()
+
+
+def test_upgrade_tools_cli_updates_only_installed_shared_tools(tmp_path: Path) -> None:
+    completed, log = _run_upgrade(tmp_path, "--apply", "--json")
+    assert completed.returncode == 0, completed.stderr
+    document = json.loads(completed.stdout)
+    assert document["apply"] is True
+    assert document["ok"] is True
+    assert log.read_text().splitlines() == [
+        f"mise upgrade --bump --no-prune -C {tmp_path / 'home'} python@latest"
+    ]
+
+
+def test_upgrade_tools_audit_only_keeps_preview_read_only(tmp_path: Path) -> None:
+    completed, _ = _run_upgrade(tmp_path, "--json")
+    home = tmp_path / "home"
+    policy = home / ".config/dotfiles/policy.toml"
+    policy.parent.mkdir(parents=True)
+    policy.write_text('mode = "audit-only"\n')
+    env = os.environ.copy()
+    env.update(HOME=str(home), PATH=str(home / ".local/bin"))
+    completed = subprocess.run(
+        [sys.executable, "-m", "scripts.upgrade_tools", "--apply", "--json"],
+        cwd=tmp_path / "project",
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    document = json.loads(completed.stdout)
+    assert completed.returncode == 1
+    assert document["error"]["code"] == "host_policy.audit_only"
+    assert not (tmp_path / "upgrade.log").exists()
+
+
+def test_failed_report_retry_preserves_quoted_arguments_cwd_and_input(
+    tmp_path: Path,
+) -> None:
+    from scripts.update import UpdateReport, UpdateResult, _document
+
+    working = tmp_path / "working space's"
+    working.mkdir()
+    literal = "literal $HOME $(touch unexpected)"
+    step = UpdateStep(
+        "fixture",
+        "python",
+        (
+            sys.executable,
+            "-c",
+            "import json,os,sys; print(json.dumps([os.getcwd(),os.getenv('FIXTURE'),sys.argv[1],sys.stdin.read()]))",
+            literal,
+        ),
+        10,
+        cwd=working,
+        environment=(("FIXTURE", "value with spaces"),),
+        stdin_text="line one\nline two\n",
+    )
+    report = UpdateReport(True, (UpdateResult(step, UpdateStatus.FAILED, exit_code=7),))
+    retry = json.loads(json.dumps(_document(report)))["steps"][0]["retry"]
+    completed = subprocess.run(
+        retry,
+        shell=True,
+        executable="/bin/sh",
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert completed.returncode == 0
+    assert json.loads(completed.stdout) == [
+        str(working),
+        "value with spaces",
+        literal,
+        "line one\nline two\n",
+    ]
+    assert not (working / "unexpected").exists()

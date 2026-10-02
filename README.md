@@ -4,6 +4,23 @@ Personal configuration references and standalone maintenance tools for macOS
 and Linux hosts. This repository reports drift and missing capabilities. It
 does not automatically overwrite `$HOME` or rebuild an entire machine.
 
+## Daily maintenance
+
+| Intent | Preview | Apply |
+| --- | --- | --- |
+| Inspect this host | `mise run check` | Read-only |
+| Maintain installed tools and shell runtime | `mise run update` | `mise run update -- --apply` |
+| Advance the shared tool baseline | `mise run upgrade-tools` | `mise run upgrade-tools -- --apply` |
+| Connect shared configuration and install missing tools | `mise run mise-sync` | `mise run mise-sync -- --apply` |
+| Repair generated runtime, including pinned plugins | `mise run runtime` | `mise run runtime -- --apply` |
+| Diagnose failures | `mise run doctor` | Read-only |
+
+Upgrade the shared baseline in one checkout, verify and commit it, then pull
+that commit on managed hosts. Ordinary updates consume its locked versions.
+Audit-only hosts retain their own tool and configuration owners; these tasks
+never bypass that policy. Configuration restore, cleanup and server restart
+remain separate explicit operations.
+
 ## Repository model
 
 - `reference/` contains the intended examples compared with live files under
@@ -29,8 +46,9 @@ For repository operations, start with `mise tasks` and
 Inspection and maintenance CLIs expose `mise run <task> -- --help`; aggregate
 gates such as `verify` do not. Maintenance tasks under `scripts/` preview by
 default; use the ASCII `--apply` flag only after reviewing that preview.
-`update` upgrades installed tools; `mise-sync` installs the committed tool
-baseline, including missing tools.
+`update` maintains installed tools at the committed baseline and refreshes local
+shell runtime. `upgrade-tools` advances the shared baseline; `mise-sync`
+explicitly connects configuration and installs missing baseline tools.
 
 For independent commands, use the [command index](modules/bin/README.md).
 For services, use the [module runbooks](#standalone-tools). Their flags and
@@ -398,6 +416,20 @@ official APT package, and macOS can use Homebrew. The shared Mise configuration
 therefore declares neither `gh` nor Codex, and version differences between
 those host owners are not Dotfiles drift.
 
+Pi is also outside the shared Mise baseline. Install it explicitly with its
+official installer, using the host's existing Node.js and npm toolchain.
+
+The installer refuses to replace a Pi owned by another installer. When
+migrating from Mise, remove its Pi declaration, run `mise uninstall --all pi`,
+and refresh shims with `mise reshim` before installation.
+
+```bash
+curl -fsSL https://pi.dev/install.sh | sh
+```
+
+The default managed installation lives under `~/.pi/agent/install` and places
+its launcher on `PATH`. `mise-sync` does not install Pi.
+
 Btop is also platform-owned: Homebrew owns it on macOS, while each Linux
 distribution's package manager owns it. The repository restores only Btop's
 portable configuration and theme; `check` reports a missing binary but never
@@ -484,8 +516,7 @@ cleanup scope and require their own explicit operations.
 
 ## Host updates
 
-Updating installed tools is an explicit mutation, separate from configuration
-inspection. Preview the exact commands first:
+Preview the exact available commands before applying:
 
 ```bash
 mise run update
@@ -493,91 +524,56 @@ mise run update -- --json
 mise run update -- --apply
 ```
 
-The task discovers most supported updaters on `PATH`, reports missing tools as
-skipped, applies available updates in a stable order, and continues independent
-steps after a failure. Mise is the exception: its tool upgrade and reshim steps
-always invoke the canonical Mise path explicitly. The standalone canonical
-Mise install also self-updates without the unrelated plugin update side effect;
-a host-selected Mise path is updated by its host owner instead. The preview is
-the authoritative list of supported updaters and the exact commands available
-on the current host. `PLANNED` means the updater command is available; the
-updater determines whether a newer version exists during apply. Any failed
-step makes the command exit non-zero. It deliberately does not run `brew
-cleanup`, `brew autoremove`, or `mise prune`;
-the Homebrew package step also sets `HOMEBREW_NO_INSTALL_CLEANUP=1` so
-`brew upgrade` cannot trigger cleanup implicitly, and Mise uses `--no-prune`
-to prevent scheduling old versions for removal. Cleanup requires a separate,
-explicit operation. Because Sprite's updater treats a closed upgrade
-prompt as a successful no-op, `--apply` supplies its affirmative response;
-preview output and JSON expose that stdin behavior. Claude receives a 30-minute
-outer timeout so its updater can report its own download failure. A failed
-Claude update is not cleaned automatically: retry `claude update`, then inspect
-its staging and versions directories before any explicit cleanup.
+`update` maintains installed shared Mise tools at the versions in this checkout's
+lockfile. It does not bump the shared declaration, install missing tools or
+restore configuration. If the live declaration differs, its Mise tool step
+reports the conflict instead of overwriting it. Use `mise-sync` for explicit
+configuration convergence and missing tools.
 
-During a JSON apply, stdout remains one machine-readable document while stderr
-reports `RUN`, 30-second `STILL RUNNING`, `DONE`, and contextual failure
-records. Child output is discarded so it cannot corrupt JSON or hold the task
-open through inherited pipes. An agent can still distinguish active work from
-a stalled command.
+Homebrew maintains its installed packages. Independent CLI self-updaters run
+only when the selected executable belongs to the supported native installation;
+Mise, Homebrew and unknown owners are skipped with a reason. Omarchy and Linux
+system packages remain with their host updater. A host-selected Mise executable
+is not self-updated by Dotfiles.
 
-For mise, the preview lists the installed tools selected for upgrade as
-`name@latest`; it does not report their current or resolved next versions.
-An apply updates a standalone Mise CLI first; a host-selected Mise binary is left to its
-host owner. It then passes the explicit installed-tool list to `mise upgrade`;
-a configured but missing mise tool is not installed. Other missing CLIs are
-skipped rather than bootstrapped. Package managers may still replace package
-dependencies as part of an ordinary upgrade.
+The final step refreshes local shell runtime without network asset downloads.
+Tool and runtime outcomes are reported separately: a runtime failure makes the
+operation fail even when tools updated successfully. Independent steps continue
+after failures; dependent steps state why they were skipped. The operation does
+not pull Git, clean old versions, restore application settings, synchronize
+Skillshare content, restart servers or restart your shell.
 
-The shared Mise configuration sets `minimum_release_age = "0s"`: tool updates
-and Mise self-updates accept newly published releases immediately, without
-Mise's default release-age delay. This opts out of that supply-chain safeguard.
-Use `mise run mise-sync -- --apply` to install missing tools from the committed
-lock; `update` does not install them.
+In JSON mode, stdout contains one report. Stderr carries command progress and
+bounded diagnostics. A failure identifies the command, working directory,
+exit code or timeout and output tail. Retry the failing command, then rerun
+`runtime` and `check` as needed; failed updater staging files are not deleted.
 
-When the live global mise files are linked to `reference/`, the mise tool
-upgrade may refresh the tracked lockfile. Run `update --apply` on a checkout
-where that declaration change will be reviewed and committed. Other hosts use
-`mise-sync --apply` to consume the committed lock without bumping it.
+### Shared baseline upgrades
+
+Run this only in the checkout where you will review and commit the shared lock:
 
 ```bash
+mise run upgrade-tools
+mise run upgrade-tools -- --apply
+mise run verify
 git diff -- reference/.config/mise
 ```
 
-A hard `min_version` failure happens before mise can launch this repository's
-`update` task. In that bootstrap case, update the canonical binary directly
-with `<canonical-mise> self-update` when its owner supports that operation, then
-run the task normally. The hard minimum is only the oldest compatible release,
-not a mise binary pin.
+Other managed hosts consume the committed result with `update` or explicitly
+install missing baseline tools with `mise-sync`. The shared configuration accepts
+new releases without a waiting period (`minimum_release_age = "0s"`). Fixed
+revision tools retain their declared revisions.
 
-`update` does not pull this repository, synchronize Skillshare content, or
-converge live configuration from `reference/`. Its Mise step may update the
-tracked global declaration as described above. Inspect the resulting host state
-separately:
-
-```bash
-mise run runtime
-```
-
-After updating tools, refresh the generated runtime. Restart each affected
-shell to load generated integrations; for Zsh, open a new shell or run
-`exec zsh`:
-
-```bash
-mise run runtime -- --apply
-exec zsh
-```
-
-From the refreshed shell, inspect the resulting host and configuration state:
-
-```bash
-mise run check
-mise run diff
-```
+A hard `min_version` failure happens before Mise can start a task. Bootstrap
+its canonical executable with its existing owner: standalone installs support
+`self-update`; system-owned installs must use their host updater. The hard
+minimum is a compatibility floor, not a version pin.
 
 ## Generated runtime
 
-Shell runtime is maintained separately from tool updates and configuration
-restore. Preview the owned operations, then apply them explicitly:
+Generated files remain a local cache under the ignored `generated/` directory.
+`fd -H` still respects Git ignore rules; use `fd -HI generated` or `ls generated`
+to inspect them. Shell startup only loads this cache and never installs tools.
 
 ```bash
 mise run runtime
@@ -585,14 +581,23 @@ mise run runtime -- --json
 mise run runtime -- --apply
 ```
 
-The runtime task owns generated shell functions, completions, plugins, caches,
-and other declared runtime artifacts. Its preview is the authoritative list of
-planned operations on the current host. `--offline` limits an apply to local
-generation and cache maintenance. It never runs Skillshare or writes host
-inventory; snapshots have their own explicit task (see Host inventory).
-Generated files are a cache: shell startup sources them but does not regenerate
-them. The Mise generator always invokes the host's canonical Mise binary by
-absolute path, so cached activation remains bound to the selected owner.
+The task generates shell integrations and completions, restores pinned Zsh
+plugins and Zellij assets, and maintains declared caches. It uses the selected
+host's Mise executable; Bash, Zsh and Nushell load the same generated binding.
+Unchanged generated content is retained without rewriting. A clean plugin at
+its pinned commit skips fetching. Dirty plugin checkouts are reported rather
+than reset. WASM assets with matching checksums are retained.
+
+Use `--offline` to skip network asset work. Ordinary `update` uses this local
+refresh; missing network assets remain skipped, so a first setup or missing
+plugin repair still needs the explicit full runtime operation. Generator errors
+or empty output retain existing generated files. Existing plugin updates report
+the actual revision after failure and are not transactional rollbacks.
+
+When a refresh changes shell files, open a new shell (or `exec zsh`) to load them.
+Repeated refreshes with unchanged files do not require a restart. Check the new
+shell with `mise run check`; use `mise run diff` separately for configuration
+drift. Runtime never writes software inventory or synchronizes Skillshare.
 
 ## Host inventory
 

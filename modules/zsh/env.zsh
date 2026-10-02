@@ -378,12 +378,16 @@ if command -v try-rs >/dev/null 2>&1 && [[ -f "$GENERATED_FUNCTIONS_DIR/_try-rs.
   source "$GENERATED_FUNCTIONS_DIR/_try-rs.zsh"
 fi
 
-# 👇 mise (will cost 40ms)
-if [[ -x "$HOME/.local/bin/mise" && ! -L "$HOME/.local/bin/mise" && -f "$GENERATED_FUNCTIONS_DIR/_mise.zsh" ]]; then
+# 👇 mise: the generated integration guards the host-selected executable.
+if [[ -r "$GENERATED_FUNCTIONS_DIR/_mise.zsh" ]]; then
   # `.zshenv` exposes shims to non-interactive shells. Full activation owns the
   # interactive PATH, and auto-install is disabled, so remove that fallback.
+  _dotfiles_mise_path=("${path[@]}")
   path=("${(@)path:#$HOME/.local/share/mise/shims}")
-  source "$GENERATED_FUNCTIONS_DIR/_mise.zsh"
+  if ! source "$GENERATED_FUNCTIONS_DIR/_mise.zsh"; then
+    path=("${_dotfiles_mise_path[@]}")
+  fi
+  unset _dotfiles_mise_path
 fi
 
 # 👇 Herdr (temporarily disabled for terminal launch debugging)

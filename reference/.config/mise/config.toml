@@ -9,7 +9,6 @@ herdr = "aqua:herdrdev/herdr"
 hunk = "aqua:modem-dev/hunk"
 lazydocker = "aqua:jesseduffield/lazydocker"
 lazygit = "aqua:jesseduffield/lazygit"
-pi = "aqua:earendil-works/pi"
 skillshare = "aqua:runkids/skillshare"
 starship = "aqua:starship/starship"
 uv = "aqua:astral-sh/uv"
@@ -18,7 +17,7 @@ zoxide = "aqua:ajeetdsouza/zoxide"
 
 [tools]
 # Declare tools as "latest" (atuin stays on its fork revision). mise.lock records the exact
-# versions: `mise run update -- --apply` bumps it here for review, other hosts consume it with
+# versions: `mise run upgrade-tools -- --apply` bumps it here for review, other hosts consume it with
 # `mise run mise-sync -- --apply`. Do not rewrite these entries into exact versions.
 "cargo:https://github.com/ipruning/atuin" = { version = "rev:38e9d788024cf36898b42fa46e7c13d8c774eede", crate = "atuin", bin = "atuin", locked = true }
 "gem:kamal" = "latest"
@@ -37,7 +36,6 @@ hunk = "latest"
 lazydocker = "latest"
 lazygit = "latest"
 node = "latest"
-pi = "latest"
 python = "latest"
 ruby = "latest"
 rust = { version = "latest", mr_boxington = true }

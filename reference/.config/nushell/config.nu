@@ -15,9 +15,8 @@ const repo_root = (
 const generated_functions = ($repo_root | path join "generated/functions")
 const mise_init = ($generated_functions | path join "_mise.nu")
 const zoxide_init = ($generated_functions | path join "_zoxide.nu")
-const mise_bin = ("~/.local/bin/mise" | path expand)
 const zoxide_bin = ("~/.local/share/mise/shims/zoxide" | path expand)
-source (if (($mise_init | path exists) and ($mise_bin | path exists)) { $mise_init } else { null })
+source (if ($mise_init | path exists) { $mise_init } else { null })
 source (if (($zoxide_init | path exists) and ($zoxide_bin | path exists)) { $zoxide_init } else { null })
 
 # 👇 Banner
