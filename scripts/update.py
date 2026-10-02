@@ -15,6 +15,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, replace
 from enum import StrEnum
 from pathlib import Path
+from typing import cast
 
 from .host_policy import (
     HostPolicyError,
@@ -191,6 +192,55 @@ def _installed_mise_tools(home: Path, mise_executable: str) -> tuple[str, ...]:
     return tuple(sorted(set(installed)))
 
 
+def inspect_shared_mise_tools(
+    repo_root: Path, home: Path, executable: str
+) -> tuple[tuple[str, ...], dict[str, object]]:
+    """核对共享声明的唯一归属，返回已安装工具名称与原始版本请求。"""
+    from .mise_sync import _loaded_global_configs, _same_config_file, _tool_declaration
+
+    reference = repo_root / "reference/.config/mise/config.toml"
+    live = home / ".config/mise/config.toml"
+    installed_names = set(_installed_mise_tools(home, executable))
+    extra_configs = tuple(
+        str(path)
+        for path in _loaded_global_configs(home, executable)
+        if not _same_config_file(path, live)
+    )
+    if extra_configs:
+        raise RuntimeError(
+            "shared mise declaration is not the sole live owner; "
+            "preview `mise run mise-sync` before updating: " + ", ".join(extra_configs)
+        )
+    with reference.open("rb") as stream:
+        reference_document = tomllib.load(stream)
+    with live.open("rb") as stream:
+        live_document = tomllib.load(stream)
+    if any(
+        reference_document.get(section) != live_document.get(section)
+        for section in ("tools", "tool_alias", "alias")
+    ):
+        raise RuntimeError(
+            "live mise versions or options differ from reference; preview mise-sync"
+        )
+    shared, aliases = _tool_declaration(
+        reference, required=True, document=reference_document
+    )
+    with reference.with_name("mise.lock").open("rb") as stream:
+        reference_lock = tomllib.load(stream)
+    with live.with_name("mise.lock").open("rb") as stream:
+        live_lock = tomllib.load(stream)
+    if reference_lock != live_lock:
+        raise RuntimeError("live mise lock differs from reference; preview mise-sync")
+    installed = tuple(
+        sorted(
+            name
+            for name in shared
+            if name in installed_names or aliases.get(name) in installed_names
+        )
+    )
+    return installed, cast(dict[str, object], reference_document.get("tools", {}))
+
+
 def _update_steps(home: Path) -> tuple[UpdateStep, ...]:
     mise_executable = str(canonical_mise_path(home))
     mise_path = (canonical_mise_path(home).parent,)
@@ -280,9 +330,6 @@ def plan_updates(
     """Return the exact available update plan without running commands."""
     results = []
     mise_executable = canonical_mise_executable(home)
-    reference = (
-        repo_root or Path(__file__).resolve().parents[1]
-    ) / "reference/.config/mise/config.toml"
     for step in _update_steps(home):
         step = replace(step, cwd=home)
         if step.name == "mise.self" and configured_mise_path(home) is not None:
@@ -345,55 +392,10 @@ def plan_updates(
         if available and step.name == "mise.tools":
             assert mise_executable is not None
             try:
-                installed = _installed_mise_tools(home, mise_executable)
-                from .mise_sync import _mise_tool_safety, _tool_declaration
-
-                root = repo_root or Path(__file__).resolve().parents[1]
-                live_only, aliases_changed, extra_configs, error = _mise_tool_safety(
-                    root, home, mise_executable
-                )
-                if error or live_only or aliases_changed or extra_configs:
-                    raise RuntimeError(
-                        "shared mise declaration is not the sole live owner; "
-                        "preview `mise run mise-sync` before updating: "
-                        + (error or str((live_only, aliases_changed, extra_configs)))
-                    )
-                shared, aliases = _tool_declaration(reference, required=True)
-                live_tools, live_aliases = _tool_declaration(
-                    home / ".config/mise/config.toml", required=True
-                )
-                with reference.open("rb") as stream:
-                    reference_document = tomllib.load(stream)
-                with (home / ".config/mise/config.toml").open("rb") as stream:
-                    live_document = tomllib.load(stream)
-                if any(
-                    reference_document.get(section) != live_document.get(section)
-                    for section in ("tools", "tool_alias", "alias")
-                ):
-                    raise RuntimeError(
-                        "live mise versions or options differ from reference; preview mise-sync"
-                    )
-                with reference.with_name("mise.lock").open("rb") as stream:
-                    reference_lock = tomllib.load(stream)
-                with (home / ".config/mise/mise.lock").open("rb") as stream:
-                    live_lock = tomllib.load(stream)
-                if reference_lock != live_lock:
-                    raise RuntimeError(
-                        "live mise lock differs from reference; preview mise-sync"
-                    )
-                if shared != live_tools or aliases != live_aliases:
-                    raise RuntimeError(
-                        "live mise declaration differs from reference; "
-                        "preview `mise run mise-sync` before updating"
-                    )
-                installed_names = set(installed)
-                installed = tuple(
-                    sorted(
-                        name
-                        for name in shared
-                        if name in installed_names
-                        or aliases.get(name) in installed_names
-                    )
+                installed, _declaration = inspect_shared_mise_tools(
+                    repo_root or Path(__file__).resolve().parents[1],
+                    home,
+                    mise_executable,
                 )
             except (RuntimeError, OSError, ValueError) as error:
                 results.append(

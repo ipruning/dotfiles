@@ -12,6 +12,7 @@ import tomllib
 from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
+from typing import cast
 
 from .diff import DriftProtocolError, MackupCommandError
 from .host_policy import HostPolicyError, mutation_allowed, require_mutation_allowed
@@ -83,17 +84,23 @@ class MiseSyncReport:
 
 
 def _tool_declaration(
-    config_path: Path, *, required: bool
+    config_path: Path,
+    *,
+    required: bool,
+    document: dict[str, object] | None = None,
 ) -> tuple[frozenset[str], dict[str, str]]:
-    try:
-        with config_path.open("rb") as config_file:
-            document = tomllib.load(config_file)
-    except FileNotFoundError:
-        if required:
-            raise ValueError(f"{config_path} is missing") from None
-        return frozenset[str](), {}
-    except (OSError, tomllib.TOMLDecodeError) as error:
-        raise ValueError(f"{config_path} cannot be read as TOML: {error}") from error
+    if document is None:
+        try:
+            with config_path.open("rb") as config_file:
+                document = cast(dict[str, object], tomllib.load(config_file))
+        except FileNotFoundError:
+            if required:
+                raise ValueError(f"{config_path} is missing") from None
+            return frozenset[str](), {}
+        except (OSError, tomllib.TOMLDecodeError) as error:
+            raise ValueError(
+                f"{config_path} cannot be read as TOML: {error}"
+            ) from error
     tools = document.get("tools", {})
     if not isinstance(tools, dict):
         raise ValueError(f"{config_path} [tools] must be a table")

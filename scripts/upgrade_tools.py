@@ -6,75 +6,94 @@ import argparse
 import json
 import subprocess
 import sys
-import tomllib
 from dataclasses import replace
 from pathlib import Path
 
 from .host_policy import HostPolicyError, mutation_allowed, require_mutation_allowed
-from .mise import canonical_mise_environment
+from .mise import (
+    canonical_mise_environment,
+    canonical_mise_executable,
+    canonical_mise_path,
+)
 from .update import (
     MISE_REF_PREFIXES,
     UpdateReport,
     UpdateResult,
     UpdateStatus,
+    UpdateStep,
     _document,
     _run_with_progress,
-    plan_updates,
+    inspect_shared_mise_tools,
 )
 
 
 def plan_upgrade_tools(repo_root: Path, home: Path) -> UpdateReport:
     """只推进指向此 checkout 的共享声明，不读取其他项目版本。"""
-    source = repo_root / "reference/.config/mise/config.toml"
-    live = home / ".config/mise/config.toml"
-    tools = next(
-        result
-        for result in plan_updates(home, repo_root=repo_root).results
-        if result.step.name == "mise.tools"
-    )
-    if tools.status is not UpdateStatus.PLANNED:
-        return UpdateReport(False, (tools,))
-    try:
-        if not live.samefile(source):
-            raise ValueError(
-                "live global mise config must link to this checkout; preview mise-sync"
-            )
-        with source.open("rb") as stream:
-            declaration = tomllib.load(stream)["tools"]
-        selectors = []
-        for name in tools.step.command[6:]:
-            request = declaration[name]
-            version = request.get("version") if isinstance(request, dict) else request
-            if isinstance(version, str) and not version.startswith(MISE_REF_PREFIXES):
-                selectors.append(f"{name}@latest")
-    except (OSError, ValueError, KeyError) as error:
-        return UpdateReport(
-            False, (replace(tools, status=UpdateStatus.FAILED, reason=str(error)),)
-        )
-    if not selectors:
-        return UpdateReport(
-            False,
-            (
-                replace(
-                    tools,
-                    status=UpdateStatus.SKIPPED,
-                    reason="no rolling shared tools are installed",
-                ),
-            ),
-        )
-    step = replace(
-        tools.step,
-        name="mise.baseline",
-        command=(
-            tools.step.command[0],
+    executable = canonical_mise_executable(home)
+    step = UpdateStep(
+        "mise.baseline",
+        "mise",
+        (
+            str(canonical_mise_path(home)),
             "upgrade",
             "--bump",
             "--no-prune",
             "-C",
             str(home),
-            *selectors,
         ),
+        1800,
+        path_prepend=(canonical_mise_path(home).parent,),
+        cwd=home,
     )
+    if executable is None:
+        return UpdateReport(
+            False,
+            (
+                UpdateResult(
+                    step,
+                    UpdateStatus.SKIPPED,
+                    reason=f"{canonical_mise_path(home)} is missing, broken, or not executable",
+                ),
+            ),
+        )
+    try:
+        installed, declaration = inspect_shared_mise_tools(repo_root, home, executable)
+        source = repo_root / "reference/.config/mise/config.toml"
+        if not (home / ".config/mise/config.toml").samefile(source):
+            raise ValueError(
+                "live global mise config must link to this checkout; preview mise-sync"
+            )
+        selectors = []
+        for name in installed:
+            request = declaration[name]
+            version = request.get("version") if isinstance(request, dict) else request
+            if isinstance(version, str) and not version.startswith(MISE_REF_PREFIXES):
+                selectors.append(f"{name}@latest")
+    except (OSError, ValueError, RuntimeError) as error:
+        return UpdateReport(
+            False,
+            (
+                UpdateResult(
+                    step,
+                    UpdateStatus.FAILED
+                    if mutation_allowed(home)
+                    else UpdateStatus.SKIPPED,
+                    reason=str(error),
+                ),
+            ),
+        )
+    if not selectors:
+        return UpdateReport(
+            False,
+            (
+                UpdateResult(
+                    step,
+                    UpdateStatus.SKIPPED,
+                    reason="no rolling shared tools are installed",
+                ),
+            ),
+        )
+    step = replace(step, command=(*step.command, *selectors))
     return UpdateReport(False, (UpdateResult(step, UpdateStatus.PLANNED),))
 
 
