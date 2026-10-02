@@ -530,7 +530,10 @@ restore configuration. If the live declaration differs, its Mise tool step
 reports the conflict instead of overwriting it. Use `mise-sync` for explicit
 configuration convergence and missing tools.
 
-Homebrew maintains its installed packages. Independent CLI self-updaters run
+Homebrew maintains installed formulae only (`brew upgrade --formula`). Desktop
+apps are left to their own updater or an explicit manual cask upgrade; ordinary
+maintenance does not close them or request a sudo password. Independent CLI
+self-updaters run
 only when the selected executable belongs to the supported native installation;
 Mise, Homebrew and unknown owners are skipped with a reason. Omarchy and Linux
 system packages remain with their host updater. A host-selected Mise executable

@@ -202,7 +202,7 @@ def _update_steps(home: Path) -> tuple[UpdateStep, ...]:
         UpdateStep(
             "brew.packages",
             "brew",
-            ("brew", "upgrade"),
+            ("brew", "upgrade", "--formula"),
             3600,
             environment=(("HOMEBREW_NO_INSTALL_CLEANUP", "1"),),
         ),

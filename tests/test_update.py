@@ -153,7 +153,7 @@ def test_update_previews_exact_plan_by_default_without_running_tools(
         if step["status"] == "planned"
     ] == [
         ("brew.metadata", "planned", ["brew", "update"]),
-        ("brew.packages", "planned", ["brew", "upgrade"]),
+        ("brew.packages", "planned", ["brew", "upgrade", "--formula"]),
         (
             "mise.self",
             "planned",
@@ -451,7 +451,7 @@ def test_update_runs_available_tools_in_order_and_reports_skips(tmp_path: Path) 
     ]
     assert log_path.read_text().splitlines() == [
         "brew update",
-        "brew upgrade",
+        "brew upgrade --formula",
         "mise self-update --yes --no-plugins",
         f"mise install --locked --yes -C {tmp_path / 'home'} python",
         f"mise reshim -C {tmp_path / 'home'}",
