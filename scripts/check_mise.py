@@ -240,6 +240,8 @@ def _mise_project_uv_finding(repo_root: Path, home: Path) -> Finding | None:
                 Path(resolved),
             )
         reason = f"mise which uv exited {completed.returncode}"
+        if detail := completed.stderr.strip():
+            reason += f": {detail.splitlines()[0]}"
     return Finding(
         "mise.project_uv",
         Severity.WARN,
@@ -248,7 +250,8 @@ def _mise_project_uv_finding(repo_root: Path, home: Path) -> Finding | None:
         config_path,
         (
             f"Inspect with {canonical_mise_path(home)} ls uv --installed --json and "
-            f"{canonical_mise_path(home)} which uv. Reinstall the exact locked uv version if "
+            f"{canonical_mise_path(home)} which uv. Resolve any Mise version or configuration "
+            "failure through its host owner first. Reinstall the exact locked uv version if "
             "its recorded backend no longer matches its executable layout."
         ),
     )
