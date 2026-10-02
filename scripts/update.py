@@ -142,11 +142,10 @@ def _run_with_progress(
 
 
 def _installed_mise_tools(home: Path, mise_executable: str) -> tuple[str, ...]:
-    """Return active installed identities without resolving newer versions."""
+    """Return installed identities, including versions older than the current lock."""
     command = (
         mise_executable,
         "ls",
-        "--current",
         "--installed",
         "--json",
         "-C",

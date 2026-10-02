@@ -98,6 +98,7 @@ def _run_update(
     tools: tuple[str, ...] = ("brew", "mise", "amp"),
     failing_tool: str | None = None,
     failure_output: bool = True,
+    mise_inventory: str | None = None,
 ) -> tuple[subprocess.CompletedProcess[str], Path]:
     bin_dir = tmp_path / "bin"
     bin_dir.mkdir(parents=True)
@@ -113,6 +114,7 @@ def _run_update(
             log_path,
             exit_code=7 if name == failing_tool else 0,
             failure_output=failure_output,
+            mise_inventory=mise_inventory if name == "mise" else None,
         )
     environment = os.environ.copy()
     environment["HOME"] = str(home)
@@ -719,10 +721,9 @@ def test_update_mise_step_passes_only_installed_versions(
         command: tuple[str, ...],
         **_kwargs: object,
     ) -> subprocess.CompletedProcess[str]:
-        assert command[:4] == (
+        assert command[:3] == (
             str(mise),
             "ls",
-            "--current",
             "--installed",
         )
         return subprocess.CompletedProcess(command, 0, inventory, "")
@@ -1002,3 +1003,53 @@ def test_failed_report_retry_preserves_quoted_arguments_cwd_and_input(
         "line one\nline two\n",
     ]
     assert not (working / "unexpected").exists()
+
+
+def test_update_cli_installs_locked_target_when_only_older_version_is_installed(
+    tmp_path: Path,
+) -> None:
+    inventory = json.dumps({
+        "herdr": [{"version": "0.9.1", "installed": True, "active": False}],
+        "unowned-tool": [{"version": "1.0", "installed": True, "active": False}],
+    })
+    completed, log = _run_update(
+        tmp_path, "--json", tools=("mise",), mise_inventory=inventory
+    )
+    assert completed.returncode == 0, completed.stderr
+    binary = tmp_path / "home/.local/bin/mise"
+    binary.write_text(
+        binary.read_text().replace(
+            'if [ "$1" = "ls" ]; then\n',
+            'if [ "$1" = "ls" ]; then\n'
+            '  case " $* " in *" --current "*) printf "{}\\n"; exit 0 ;; esac\n',
+        )
+    )
+    lock = tmp_path / "home/.config/mise/mise.lock"
+    before = lock.read_bytes()
+    env = os.environ.copy()
+    env.update(HOME=str(tmp_path / "home"), PATH=str(binary.parent))
+    completed = subprocess.run(
+        [sys.executable, "-m", "scripts.update", "--apply", "--json"],
+        cwd=tmp_path / "project",
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert completed.returncode == 0, completed.stderr
+    document = json.loads(completed.stdout)
+    step = next(step for step in document["steps"] if step["name"] == "mise.tools")
+    assert step["status"] == "succeeded"
+    assert step["command"][1:] == [
+        "install",
+        "--locked",
+        "--yes",
+        "-C",
+        str(tmp_path / "home"),
+        "herdr",
+    ]
+    assert (
+        f"mise install --locked --yes -C {tmp_path / 'home'} herdr"
+        in log.read_text().splitlines()
+    )
+    assert lock.read_bytes() == before
