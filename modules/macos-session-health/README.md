@@ -97,7 +97,13 @@ When the collector has current health signals, it sends a generic summary with
 the snapshot status, sorted signal names, and the exact incident-report
 command. One successful-send timestamp enforces the configured minimum
 interval. Failed deliveries do not advance it. No signal means no alert;
-the tool does not emit a clear-state alert. Notifications never execute
+the tool does not emit a clear-state alert. For `zombies_present`, only the first
+observation or a count above the successfully notified peak can trigger a push.
+Unchanged or lower counts remain in the diagnostic history. The peak resets only
+when a successful process inventory observes zero zombies, not when a periodic
+probe is skipped. Failed deliveries and cooldown skips do not advance the peak.
+Other warning-or-higher signals retain their existing cooldown behavior.
+Notifications never execute
 recovery actions. Use the incident report to see emitted and skipped decisions.
 
 The Skillshare guard immediately reports a missing executable, configuration,

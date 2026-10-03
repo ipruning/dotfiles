@@ -2162,6 +2162,11 @@ def collect_process_counts(
             detail="zombie processes exist",
         )
 
+    else:
+        # Only an actual process inventory can confirm recovery; snapshots that
+        # skip this periodic probe must retain the notification high-water mark.
+        store.delete_state("brrr_zombie_notified_peak")
+
     user_rows = [
         {"count": count, "user": user}
         for user, count in sorted(
@@ -2953,16 +2958,35 @@ def maybe_send_brrr_notification(
     args: argparse.Namespace,
     status: str,
 ) -> None:
+    zombie_count = max(
+        (
+            int(signal.get("value", 0))
+            for signal in store.current_signals
+            if signal.get("signal") == "zombies_present"
+        ),
+        default=0,
+    )
+    zombie_peak = int(store.get_state("brrr_zombie_notified_peak") or "0")
     signals = sorted(
         {
             str(signal.get("signal") or "")
             for signal in store.current_signals
             if signal_meets_min_severity(signal, "warning")
             and not str(signal.get("signal") or "").startswith("notification_channel_")
+            and (signal.get("signal") != "zombies_present" or zombie_count > zombie_peak)
         }
         - {""}
     )
     if not signals:
+        if zombie_count:
+            store.emit(
+                snapshot_id,
+                "brrr_notification_skipped",
+                reason="zombie_count_not_increased",
+                signals=["zombies_present"],
+                zombie_count=zombie_count,
+                notified_peak=zombie_peak,
+            )
         return
     if not brrr_cooldown_elapsed(store, args.brrr_notify_cooldown_minutes):
         store.emit(
@@ -2998,6 +3022,8 @@ def maybe_send_brrr_notification(
         signals=signals,
     ):
         store.set_state("last_brrr_notification_sent_at", utc_now())
+        if "zombies_present" in signals:
+            store.set_state("brrr_zombie_notified_peak", str(zombie_count))
 
 
 def should_collect_log_excerpt(

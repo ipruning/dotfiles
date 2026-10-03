@@ -314,6 +314,95 @@ class NotificationSummaryTest(unittest.TestCase):
         self.notify(set(), status="ok")
         self.assertEqual(payloads, [])
 
+    def zombie_snapshot(
+        self, count: int | None, *, ps_failed: bool = False, other_signal: str = ""
+    ) -> None:
+        snapshot_id = self.store.create_snapshot("test", [])
+        if count is not None:
+            output = "alex 1 100 S sshd-session\n" + "".join(
+                f"alex 100 {200 + i} Z <defunct>\n" for i in range(count)
+            )
+            with mock.patch.dict(
+                self.module["collect_process_counts"].__globals__,
+                {
+                    "run_command": lambda *_args, **_kwargs: (
+                        1 if ps_failed else 0,
+                        output,
+                        "ps failed" if ps_failed else "",
+                        False,
+                        1,
+                    )
+                },
+            ):
+                self.module["collect_process_counts"](self.store, snapshot_id, 15, 1)
+        if other_signal:
+            self.store.emit(
+                snapshot_id, "health_signal", "error", signal=other_signal, value=1
+            )
+        self.module["maybe_send_brrr_notification"](
+            self.store, snapshot_id, self.args, "ok"
+        )
+        self.store.finish_snapshot(snapshot_id, "ok")
+
+    def expire_cooldown(self) -> None:
+        self.store.set_state("last_brrr_notification_sent_at", "2000-01-01T00:00:00Z")
+
+    def test_zombie_peak_survives_skipped_probes_and_resets_on_observed_zero(
+        self,
+    ) -> None:
+        payloads = self.install_delivery_stub()
+        self.zombie_snapshot(1)
+        self.expire_cooldown()
+        self.zombie_snapshot(None)
+        self.zombie_snapshot(1)
+        self.assertEqual(len(payloads), 1)
+        self.zombie_snapshot(2)
+        self.assertEqual(len(payloads), 2)
+        self.expire_cooldown()
+        self.zombie_snapshot(1)
+        self.zombie_snapshot(2)
+        self.assertEqual(len(payloads), 2)
+        self.zombie_snapshot(0)
+        self.assertEqual(len(payloads), 2)
+        self.zombie_snapshot(1)
+        self.assertEqual(len(payloads), 3)
+
+    def test_zombie_cooldown_and_failure_do_not_advance_peak(self) -> None:
+        payloads = self.install_delivery_stub()
+        self.zombie_snapshot(1)
+        self.zombie_snapshot(2)
+        self.assertEqual(self.store.get_state("brrr_zombie_notified_peak"), "1")
+        self.expire_cooldown()
+        self.install_delivery_stub([
+            {
+                "exit": 1,
+                "timeout": True,
+                "auth_mode": "bearer",
+                "credential_source": "test",
+            }
+        ])
+        self.zombie_snapshot(2)
+        self.assertEqual(self.store.get_state("brrr_zombie_notified_peak"), "1")
+        retry_payloads = self.install_delivery_stub()
+        self.zombie_snapshot(2)
+        self.assertEqual(len(retry_payloads), 1)
+        self.assertEqual(self.store.get_state("brrr_zombie_notified_peak"), "2")
+        self.assertEqual(len(payloads), 1)
+
+    def test_failed_process_probe_does_not_reset_peak_or_suppress_other_faults(
+        self,
+    ) -> None:
+        payloads = self.install_delivery_stub()
+        self.zombie_snapshot(1)
+        self.expire_cooldown()
+        self.zombie_snapshot(0, ps_failed=True)
+        self.assertEqual(self.store.get_state("brrr_zombie_notified_peak"), "1")
+        self.assertIn("signals=ps_failed", payloads[-1]["message"])
+        self.expire_cooldown()
+        self.zombie_snapshot(1, other_signal="spawn_failed")
+        self.assertIn("signals=spawn_failed", payloads[-1]["message"])
+        self.assertNotIn("zombies_present", payloads[-1]["message"])
+
     def test_failed_delivery_does_not_start_cooldown(self) -> None:
         payloads = self.install_delivery_stub(
             [
