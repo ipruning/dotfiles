@@ -168,6 +168,78 @@ class ReadOnlyReportsTest(unittest.TestCase):
                 db.unlink()
 
 
+class TrustdResourcesTest(unittest.TestCase):
+    def setUp(self) -> None:
+        self.module = runpy.run_path(str(MODULE_PATH))
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.store = self.module["Store"](
+            Path(self.temp_dir.name) / "health.sqlite3", emit_stdout=False
+        )
+        self.args = SimpleNamespace(
+            command_timeout=1,
+            trustd_cpu_warn=50,
+            trustd_rss_warn_mb=100,
+            trustd_rss_growth_warn_mb_per_minute=1,
+            trustd_rss_error_mb=200,
+        )
+
+    def tearDown(self) -> None:
+        self.store.close()
+        self.temp_dir.cleanup()
+
+    def collect(self, rows: list[tuple[int, str, int]]) -> list[dict[str, Any]]:
+        snapshot_id = self.store.create_snapshot("test", [])
+
+        def run(command: list[str], **_kwargs: Any) -> tuple[int, str, str, bool, int]:
+            if command[0] == "pgrep":
+                return 0, "\n".join(str(row[0]) for row in rows), "", False, 1
+            pid, user, rss_kb = next(row for row in rows if str(row[0]) == command[2])
+            return (
+                0,
+                f"{pid} 1 {user} S 0.0 0.0 {rss_kb} 04-01:00:00 /usr/libexec/trustd",
+                "",
+                False,
+                1,
+            )
+
+        with mock.patch.dict(
+            self.module["collect_trustd_health"].__globals__, {"run_command": run}
+        ):
+            self.module["collect_trustd_health"](self.store, snapshot_id, self.args)
+        signals = list(self.store.current_signals)
+        self.store.finish_snapshot(snapshot_id, "ok")
+        return signals
+
+    def test_rss_rank_changes_do_not_report_restarts(self) -> None:
+        # Ignore the old aggregate baseline on upgrade; it tracks RSS rank.
+        self.store.set_state(
+            "last_process_resource:trustd",
+            json.dumps({"ts": "2000-01-01T00:00:00Z", "pid": "712", "rss_mb": 10}),
+        )
+        self.assertEqual(self.collect([(495, "_trustd", 11264), (712, "alex", 10240)]), [])
+        self.assertEqual(self.collect([(712, "alex", 10240), (495, "_trustd", 9216)]), [])
+        self.assertEqual(self.collect([(495, "_trustd", 9216), (712, "alex", 8192)]), [])
+
+    def test_restart_of_smaller_instance_is_reported(self) -> None:
+        self.collect([(495, "_trustd", 10240), (712, "alex", 5120)])
+        signals = self.collect([(495, "_trustd", 10240), (900, "alex", 5120)])
+        self.assertEqual(len(signals), 1)
+        self.assertEqual(signals[0]["signal"], "process_pid_changed")
+        self.assertEqual(str(signals[0]["pid"]), "900")
+        self.assertEqual(str(signals[0]["value"]), "712")
+
+    def test_growth_of_smaller_instance_is_reported(self) -> None:
+        self.collect([(495, "_trustd", 10240), (712, "alex", 5120)])
+        signals = self.collect([(495, "_trustd", 10240), (712, "alex", 8192)])
+        self.assertEqual(len(signals), 1)
+        self.assertEqual(signals[0]["signal"], "process_rss_growth_high")
+        self.assertEqual(str(signals[0]["pid"]), "712")
+
+    def test_new_user_has_no_previous_process(self) -> None:
+        self.collect([(495, "_trustd", 10240)])
+        self.assertEqual(self.collect([(495, "_trustd", 10240), (712, "alex", 5120)]), [])
+
+
 class NotificationSummaryTest(unittest.TestCase):
     def setUp(self) -> None:
         self.module = runpy.run_path(str(MODULE_PATH))

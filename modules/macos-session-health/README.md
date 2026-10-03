@@ -66,6 +66,12 @@ macos-session-health events --format json
 `query`, `events`, `trend`, and `incident` open SQLite read-only. A missing
 database is an error, not a reason to create an empty database.
 
+`trustd` resource deltas track each user and executable separately. Changes in
+which instance has the largest RSS do not indicate a restart. A PID change for
+the same identity still emits `process_pid_changed`; RSS growth and limits are
+checked for every sampled instance. The first sample after this upgrade creates
+new per-instance baselines without comparing the previous aggregate baseline.
+
 ## Safety
 
 Do not restart `syspolicyd` with `launchctl`; SIP blocks that path. Do not run

@@ -1094,6 +1094,7 @@ def collect_process_resource_delta(
     resource_data: dict[str, Any] | None,
     *,
     role: str,
+    identity: str | None = None,
     rss_growth_warn_mb_per_minute: float | None = None,
     rss_error_mb: float | None = None,
 ) -> None:
@@ -1106,6 +1107,8 @@ def collect_process_resource_delta(
         return
 
     state_key = f"last_process_resource:{role}"
+    if identity is not None:
+        state_key += f":{identity}"
     previous_raw = store.get_state(state_key)
     now = dt.datetime.now(dt.timezone.utc)
     current_state = {
@@ -1828,18 +1831,18 @@ def collect_trustd_health(
 
     if not resources:
         return
-    largest = max(
-        resources,
-        key=lambda item: parse_float(str(item.get("rss_mb") or "")) or 0,
-    )
-    collect_process_resource_delta(
-        store,
-        snapshot_id,
-        largest,
-        role="trustd",
-        rss_growth_warn_mb_per_minute=args.trustd_rss_growth_warn_mb_per_minute,
-        rss_error_mb=args.trustd_rss_error_mb,
-    )
+    # Each user's trustd has its own baseline. RSS rank changes between
+    # concurrently running instances are not process restarts.
+    for resource in resources:
+        collect_process_resource_delta(
+            store,
+            snapshot_id,
+            resource,
+            role="trustd",
+            identity=json.dumps([resource["user"], resource["comm"]]),
+            rss_growth_warn_mb_per_minute=args.trustd_rss_growth_warn_mb_per_minute,
+            rss_error_mb=args.trustd_rss_error_mb,
+        )
 
 
 def collect_code_sign_clone_status(
