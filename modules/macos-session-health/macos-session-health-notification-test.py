@@ -314,6 +314,69 @@ class NotificationSummaryTest(unittest.TestCase):
         self.notify(set(), status="ok")
         self.assertEqual(payloads, [])
 
+    def test_missing_trusted_roots_remain_inventory_without_pushes(self) -> None:
+        payloads = self.install_delivery_stub()
+        root = Path(self.temp_dir.name)
+        config = root / "config.toml"
+        missing = [root / "deleted-project", root / "deleted-worktree"]
+        config.write_text(
+            "\n".join(
+                f'[projects.{json.dumps(str(path))}]\ntrust_level = "trusted"'
+                for path in missing + [root]
+            ),
+            encoding="utf-8",
+        )
+        args = SimpleNamespace(codex_config=config, codex_trusted_root_check_timeout=1)
+        for _ in range(2):
+            snapshot_id = self.store.create_snapshot("test", [])
+            self.module["collect_codex_trusted_project_roots"](
+                self.store, snapshot_id, args
+            )
+            self.module["maybe_send_brrr_notification"](
+                self.store, snapshot_id, self.args, "ok"
+            )
+            self.assertEqual(self.store.current_signals, [])
+            assert self.store.conn is not None
+            records = {
+                record["root"]: record
+                for (data,) in self.store.conn.execute(
+                    "SELECT data_json FROM events "
+                    "WHERE snapshot_id = ? AND event = 'codex_trusted_project_root'",
+                    (snapshot_id,),
+                )
+                for record in [json.loads(data)]
+            }
+            self.assertEqual(set(records), {str(path) for path in missing + [root]})
+            for path in missing:
+                self.assertFalse(records[str(path)]["root_exists"])
+            self.assertTrue(records[str(root)]["root_exists"])
+            self.store.finish_snapshot(snapshot_id, "ok")
+        self.assertEqual(payloads, [])
+        self.assertIsNone(self.store.get_state("last_brrr_notification_sent_at"))
+
+    def test_existing_trusted_root_with_invalid_git_still_notifies(self) -> None:
+        payloads = self.install_delivery_stub()
+        root = Path(self.temp_dir.name)
+        project = root / "broken-project"
+        project.mkdir()
+        (project / ".git").write_text("gitdir: missing-worktree\n", encoding="utf-8")
+        config = root / "config.toml"
+        config.write_text(
+            f'[projects.{json.dumps(str(project))}]\ntrust_level = "trusted"\n',
+            encoding="utf-8",
+        )
+        snapshot_id = self.store.create_snapshot("test", [])
+        self.module["collect_codex_trusted_project_roots"](
+            self.store,
+            snapshot_id,
+            SimpleNamespace(codex_config=config, codex_trusted_root_check_timeout=1),
+        )
+        self.module["maybe_send_brrr_notification"](
+            self.store, snapshot_id, self.args, "ok"
+        )
+        self.assertEqual(len(payloads), 1)
+        self.assertIn("codex_trusted_root_git_invalid", payloads[0]["message"])
+
     def zombie_snapshot(
         self, count: int | None, *, ps_failed: bool = False, other_signal: str = ""
     ) -> None:

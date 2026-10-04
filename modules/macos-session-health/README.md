@@ -110,6 +110,11 @@ The Skillshare guard immediately reports a missing executable, configuration,
 configured source, or failed status query. It records the observed command
 failure directly instead of maintaining a consecutive-failure state machine.
 
+Codex 信任列表中的目录可以在项目删除后继续保留。目录不存在时，只记录
+`codex_trusted_project_root` 的 `root_exists=false`，不产生健康告警或推送。
+无需为消除通知删除 Codex 信任配置。仍存在的目录若 `.git` 无效，或信任配置
+无法解析，仍会触发告警。
+
 Each push makes one bounded HTTP attempt with no repeated attempt or second channel. A
 failure event records endpoint, authentication mode, HTTP/timeout/error facts,
 and the exact `notify-test --dry-run` and incident checks. Notification-channel

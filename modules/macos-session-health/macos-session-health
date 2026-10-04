@@ -1550,16 +1550,9 @@ def collect_codex_trusted_project_roots(
 
         store.emit(snapshot_id, "codex_trusted_project_root", **record)
 
-        if not root_exists:
-            store.emit(
-                snapshot_id,
-                "health_signal",
-                "warning",
-                signal="codex_trusted_root_missing",
-                value=1,
-                detail=f"trusted Codex project root does not exist: {project_root}",
-            )
-        elif git_exists and not record.get("git_valid"):
+        # Trust entries outlive deleted projects; absence is inventory, not a
+        # session failure. Keep root_exists in the diagnostic event above.
+        if root_exists and git_exists and not record.get("git_valid"):
             store.emit(
                 snapshot_id,
                 "health_signal",
