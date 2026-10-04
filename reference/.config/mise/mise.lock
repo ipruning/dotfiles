@@ -500,18 +500,17 @@ url = "https://github.com/xdevplatform/xurl/releases/download/v1.3.4/xurl_Darwin
 url_api = "https://api.github.com/repos/xdevplatform/xurl/releases/assets/599260757"
 
 [[tools.zig]]
-version = "0.17.0"
+version = "0.16.0"
 backend = "core:zig"
-specifiers = ["latest"]
+specifiers = ["0.16.0"]
 
 [tools.zig."platforms.linux-x64"]
-checksum = "sha256:1cbe9df9f27e6b78d14ccbca43b6703a404ef79ef1c463de901d7f088d4e2026"
-url = "https://ziglang.org/download/0.17.0/zig-x86_64-linux-0.17.0.tar.xz"
-provenance = "minisign"
+checksum = "sha256:70e49664a74374b48b51e6f3fdfbf437f6395d42509050588bd49abe52ba3d00"
+url = "https://ziglang.org/download/0.16.0/zig-x86_64-linux-0.16.0.tar.xz"
 
 [tools.zig."platforms.macos-arm64"]
-checksum = "sha256:b607e9b9234790a008116ae5bdb71c6243b84b9fb42a53a9e70fde41c06c536a"
-url = "https://ziglang.org/download/0.17.0/zig-aarch64-macos-0.17.0.tar.xz"
+checksum = "sha256:b23d70deaa879b5c2d486ed3316f7eaa53e84acf6fc9cc747de152450d401489"
+url = "https://ziglang.org/download/0.16.0/zig-aarch64-macos-0.16.0.tar.xz"
 
 [[tools.zoxide]]
 version = "0.10.0"
