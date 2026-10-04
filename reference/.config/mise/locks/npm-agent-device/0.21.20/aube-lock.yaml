@@ -1,0 +1,29 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+
+  .:
+    dependencies:
+      agent-device:
+        specifier: 0.21.20
+        version: 0.21.20
+
+packages:
+
+  agent-device@0.21.20:
+    resolution: {integrity: sha512-nD2QNRTbQo3mMEnpOTqgguIreY98lri+VfWBo0Njzc+CLBrISHApUJD2Cs2P8zfzvZCvbGibX1D+LP/B/qeQrQ==}
+    engines: {node: '>=22.12'}
+    hasBin: true
+    peerDependencies:
+      ai: ^6.0.0 || ^7.0.0
+    peerDependenciesMeta:
+      ai:
+        optional: true
+
+snapshots:
+
+  agent-device@0.21.20: {}
