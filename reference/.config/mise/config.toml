@@ -41,11 +41,7 @@ skillshare = "latest"
 starship = "latest"
 uv = "latest"
 xurl = "latest"
-# TODO: Restore "latest" once ziglang.org/download/index.json lists 0.17.0 or
-# mise's core zig backend installs from the locked URL; until then mise 2026.10.2
-# guesses the legacy zig-macos-aarch64-0.17.0.tar.xz name and 404s.
-# Verify with `mise install --locked zig -C ~` after restoring.
-zig = "0.16.0"
+zig = "latest"
 zoxide = "latest"
 mr-boxington = "latest"
 
