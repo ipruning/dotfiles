@@ -940,6 +940,83 @@ def test_runtime_mise_cache_uses_the_consuming_shell_path(
     ]
 
 
+def test_runtime_nu_mise_cache_uses_the_consuming_shell_path(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    mise = shutil.which("mise")
+    if mise is None:
+        raise AssertionError("mise is required to verify this repository")
+    nu = shutil.which("nu")
+    if nu is None:
+        pytest.skip("nu is not installed")
+    repo_root = tmp_path / "dotfiles"
+    home = tmp_path / "home"
+    global_node = tmp_path / "global-node"
+    project_node = tmp_path / "project-node"
+    bin_dir = global_node / "bin"
+    fallback_bin = tmp_path / "host-bin"
+    project = home / "project"
+    home.mkdir()
+    project.mkdir()
+    for directory, label in (
+        (bin_dir, "global-node"),
+        (project_node / "bin", "project-node"),
+        (fallback_bin, "host-node"),
+    ):
+        directory.mkdir(parents=True)
+        _fake_tool(directory, "node", f"printf '{label}\\n'\n")
+    (bin_dir / "mise").symlink_to(Path(mise).resolve())
+    isolated_environment = {
+        "HOME": str(home),
+        "XDG_CONFIG_HOME": str(home / ".config"),
+        "MISE_CONFIG_DIR": str(home / ".config/mise"),
+        "MISE_DATA_DIR": str(home / ".local/share/mise"),
+        "MISE_CACHE_DIR": str(home / ".cache/mise"),
+        "MISE_STATE_DIR": str(home / ".local/state/mise"),
+        "MISE_TRUSTED_CONFIG_PATHS": str(tmp_path),
+    }
+    for key, value in isolated_environment.items():
+        monkeypatch.setenv(key, value)
+    config = home / ".config/mise/config.toml"
+    config.parent.mkdir(parents=True)
+    config.write_text(
+        f'[tools]\nnode = "path:{global_node}"\n[settings]\nauto_install = false\n'
+    )
+    (project / "mise.toml").write_text(f'[tools]\nnode = "path:{project_node}"\n')
+
+    # Generate with the managed bin directory already on PATH, as with mise run.
+    completed = _run_runtime(repo_root, home, bin_dir, "--offline", "--apply", "--json")
+
+    assert completed.returncode == 0, completed.stderr
+    activation = repo_root / "generated/functions/_mise.nu"
+    baseline_path = f"{fallback_bin}:/usr/bin:/bin"
+    script = (
+        f"source {json.dumps(str(activation))}\n"
+        "print $env.__MISE_ORIG_PATH\n"
+        "mise_hook\n"
+        "print (which node | get path.0)\n"
+        f"cd {json.dumps(str(project))}\n"
+        "mise_hook\n"
+        "print (which node | get path.0)\n"
+    )
+    consumed = subprocess.run(
+        [nu, "--no-config-file", "-c", script],
+        cwd=home,
+        env={**isolated_environment, "PATH": baseline_path},
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert consumed.returncode == 0, consumed.stderr
+    assert consumed.stdout.splitlines() == [
+        baseline_path,
+        str(bin_dir / "node"),
+        str(project_node / "bin/node"),
+    ]
+
+
 def test_runtime_refuses_to_clobber_non_git_plugin_dirs(tmp_path: Path) -> None:
     repo_root = tmp_path / "dotfiles"
     home = tmp_path / "home"

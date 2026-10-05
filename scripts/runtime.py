@@ -451,6 +451,20 @@ def execute_runtime(
         if planned.status is not RuntimeStatus.PLANNED:
             results.append(planned)
             continue
+        if spec.name == "zsh.compdump" and not any(
+            result.status is RuntimeStatus.SUCCEEDED
+            and result.spec.name.startswith("completion.")
+            for result in results
+        ):
+            results.append(
+                RuntimeResult(
+                    spec,
+                    RuntimeStatus.SKIPPED,
+                    planned.action,
+                    "completion outputs are unchanged",
+                )
+            )
+            continue
         if on_start:
             on_start(spec, planned.action)
         exit_code: int | None = None
@@ -586,20 +600,6 @@ def execute_runtime(
                 exit_code = None
             elif planned.action is RuntimeAction.REMOVE:
                 if spec.name == "zsh.compdump":
-                    if not any(
-                        result.status is RuntimeStatus.SUCCEEDED
-                        and result.spec.name.startswith("completion.")
-                        for result in results
-                    ):
-                        results.append(
-                            RuntimeResult(
-                                spec,
-                                RuntimeStatus.SKIPPED,
-                                planned.action,
-                                "completion outputs are unchanged",
-                            )
-                        )
-                        continue
                     for file_path in home.glob(".zcompdump*"):
                         file_path.unlink(missing_ok=True)
                 else:

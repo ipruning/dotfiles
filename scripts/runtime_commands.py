@@ -22,7 +22,13 @@ def guarded_activation(spec: RuntimeSpec, output: str) -> str:
         return output
     executable = spec.command[0]
     if spec.name == "function.mise-nu":
-        guard = f"if not ({json.dumps(executable, ensure_ascii=False)} | path exists) {{ return }}\n"
+        # Mise's Nushell template has no load-time PATH capture, so supply the
+        # one the Bash/Zsh templates perform when sourced.
+        guard = (
+            f"if not ({json.dumps(executable, ensure_ascii=False)} | path exists) {{ return }}\n"
+            'if "__MISE_ORIG_PATH" not-in $env { '
+            "$env.__MISE_ORIG_PATH = ($env.PATH | str join (char esep)) }\n"
+        )
     else:
         guard = f"if [ ! -x {shlex.quote(executable)} ]; then return 1; fi\n"
     return guard + output
@@ -94,11 +100,11 @@ def _command_environment(spec: RuntimeSpec, home: Path) -> dict[str, str]:
             "__MISE_ZSH_PRECMD_RUN",
         ):
             environment.pop(name, None)
-        if spec.name in {"function.mise", "function.mise-bash"}:
-            # Presence suppresses Mise's generation-time PATH snapshot. The
-            # Bash/Zsh templates still capture PATH when sourced, or preserve
-            # a nested shell's inherited baseline. Nushell lacks that guard.
-            environment["__MISE_ORIG_PATH"] = ""
+        # Presence suppresses Mise's generation-time PATH snapshot, which would
+        # otherwise bake the generating process's PATH (for example a project's
+        # tools under `mise run`) into every consuming shell. Each shell
+        # captures PATH when sourced instead; see guarded_activation for Nu.
+        environment["__MISE_ORIG_PATH"] = ""
     return environment
 
 
