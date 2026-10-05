@@ -16,7 +16,6 @@ from .mise import (
     canonical_mise_path,
 )
 from .update import (
-    MISE_REF_PREFIXES,
     UpdateReport,
     UpdateResult,
     UpdateStatus,
@@ -67,7 +66,8 @@ def plan_upgrade_tools(repo_root: Path, home: Path) -> UpdateReport:
         for name in installed:
             request = declaration[name]
             version = request.get("version") if isinstance(request, dict) else request
-            if isinstance(version, str) and not version.startswith(MISE_REF_PREFIXES):
+            # Exact pins and refs are deliberate holds; `--bump` would rewrite them.
+            if version == "latest":
                 selectors.append(f"{name}@latest")
     except (OSError, ValueError, RuntimeError) as error:
         return UpdateReport(

@@ -877,13 +877,22 @@ def _run_upgrade(tmp_path: Path, *arguments: str, linked: bool = True):
         source_root / "reference/.config/mise/mise.lock", source.with_name("mise.lock")
     )
     source.write_text(
-        '[tools]\npython = "latest"\n"cargo:https://github.com/ipruning/atuin" = { version = "rev:abc" }\n'
+        '[tools]\npython = "latest"\nzig = "0.16.0"\n'
+        '"cargo:https://github.com/ipruning/atuin" = { version = "rev:abc" }\n'
     )
     home = tmp_path / "home"
     binary = home / ".local/bin"
     binary.mkdir(parents=True)
     log = tmp_path / "upgrade.log"
-    _fake_tool(binary, "mise", log)
+    _fake_tool(
+        binary,
+        "mise",
+        log,
+        mise_inventory=json.dumps({
+            "python": [{"version": "3.14.6", "installed": True}],
+            "zig": [{"version": "0.16.0", "installed": True}],
+        }),
+    )
     live = home / ".config/mise/config.toml"
     live.unlink()
     if linked:
