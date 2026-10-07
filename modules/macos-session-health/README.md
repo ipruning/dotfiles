@@ -97,7 +97,10 @@ When the collector has current health signals, it sends a generic summary with
 the snapshot status, sorted signal names, and the exact incident-report
 command. One successful-send timestamp enforces the configured minimum
 interval. Failed deliveries do not advance it. No signal means no alert;
-the tool does not emit a clear-state alert. For `zombies_present`, only the first
+the tool does not emit a clear-state alert. `zombies_present` excludes one
+zombie per live `sshd-session: <user> [postauth]` parent: macOS sshd keeps that
+exited child until the SSH connection closes, so it tracks logins, not leaks.
+For `zombies_present`, only the first
 observation or a count above the successfully notified peak can trigger a push.
 Unchanged or lower counts remain in the diagnostic history. The peak resets only
 when a successful process inventory observes zero zombies, not when a periodic

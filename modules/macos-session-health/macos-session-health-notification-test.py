@@ -382,7 +382,7 @@ class NotificationSummaryTest(unittest.TestCase):
     ) -> None:
         snapshot_id = self.store.create_snapshot("test", [])
         if count is not None:
-            output = "alex 1 100 S sshd-session\n" + "".join(
+            output = "alex 1 100 S node\n" + "".join(
                 f"alex 100 {200 + i} Z <defunct>\n" for i in range(count)
             )
             with mock.patch.dict(
@@ -406,6 +406,39 @@ class NotificationSummaryTest(unittest.TestCase):
             self.store, snapshot_id, self.args, "ok"
         )
         self.store.finish_snapshot(snapshot_id, "ok")
+
+    def test_live_sshd_session_zombie_is_not_a_signal(self) -> None:
+        payloads = self.install_delivery_stub()
+        snapshot_id = self.store.create_snapshot("test", [])
+        output = (
+            "root 1 100 Ss sshd-session: alex [postauth]\n"
+            "root 100 101 Z <defunct>\n"
+            "alex 100 102 S sshd-session: alex@notty\n"
+            "root 1 110 Ss sshd-session: alex [postauth]\n"
+            "root 110 111 Z <defunct>\n"
+        )
+        with mock.patch.dict(
+            self.module["collect_process_counts"].__globals__,
+            {"run_command": lambda *_args, **_kwargs: (0, output, "", False, 1)},
+        ):
+            self.module["collect_process_counts"](self.store, snapshot_id, 15, 1)
+        self.module["maybe_send_brrr_notification"](
+            self.store, snapshot_id, self.args, "ok"
+        )
+        self.assertEqual(payloads, [])
+
+        snapshot_id = self.store.create_snapshot("test", [])
+        output += "root 100 103 Z <defunct>\n"
+        with mock.patch.dict(
+            self.module["collect_process_counts"].__globals__,
+            {"run_command": lambda *_args, **_kwargs: (0, output, "", False, 1)},
+        ):
+            self.module["collect_process_counts"](self.store, snapshot_id, 15, 1)
+        self.module["maybe_send_brrr_notification"](
+            self.store, snapshot_id, self.args, "ok"
+        )
+        self.assertEqual(len(payloads), 1)
+        self.assertIn("zombies_present", payloads[0]["message"])
 
     def expire_cooldown(self) -> None:
         self.store.set_state("last_brrr_notification_sent_at", "2000-01-01T00:00:00Z")

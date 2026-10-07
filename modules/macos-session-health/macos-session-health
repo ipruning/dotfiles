@@ -2136,6 +2136,19 @@ def collect_process_counts(
         if "Z" in stat:
             zombies.append((stat, ppid, pid, comm))
 
+    # macOS sshd keeps one exited child of each live "sshd-session: <user>
+    # [postauth]" monitor unreaped until that connection closes, so it tracks
+    # SSH logins rather than a process leak. Only extra zombies under the same
+    # monitor, or zombies under any other parent, are actionable.
+    sshd_reserved: set[str] = set()
+    alertable_zombies = 0
+    for _stat, ppid, _pid, _comm in zombies:
+        parent_comm = pid_commands.get(ppid, "")
+        if parent_comm.startswith("sshd-session:") and ppid not in sshd_reserved:
+            sshd_reserved.add(ppid)
+        else:
+            alertable_zombies += 1
+
     store.emit(
         snapshot_id,
         "process_summary",
@@ -2143,16 +2156,17 @@ def collect_process_counts(
         user=current_user,
         user_total=current_user_total,
         zombie_total=len(zombies),
+        sshd_session_zombie_total=len(sshd_reserved),
         ps_duration_ms=round(duration_ms, 1),
     )
-    if zombies:
+    if alertable_zombies:
         store.emit(
             snapshot_id,
             "health_signal",
             "warning",
             signal="zombies_present",
-            value=len(zombies),
-            detail="zombie processes exist",
+            value=alertable_zombies,
+            detail="zombie processes exist outside live sshd-session monitors",
         )
 
     else:
