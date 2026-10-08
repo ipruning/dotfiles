@@ -415,19 +415,19 @@ backend = "core:rust"
 specifiers = ["latest"]
 
 [[tools.skillshare]]
-version = "0.24.6"
+version = "0.25.0"
 backend = "aqua:runkids/skillshare"
 specifiers = ["latest"]
 
 [tools.skillshare."platforms.linux-x64"]
-checksum = "sha256:60843798ceb159165bc77bb032682f9de4ca3454000b59f0d34154955f79099a"
-url = "https://github.com/runkids/skillshare/releases/download/v0.24.6/skillshare_0.24.6_linux_amd64.tar.gz"
-url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/611967497"
+checksum = "sha256:ccd31f4b05ef9ebfb6f950d94f0bf78e28057bcd458e06da50149eef14ff17a9"
+url = "https://github.com/runkids/skillshare/releases/download/v0.25.0/skillshare_0.25.0_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/615184605"
 
 [tools.skillshare."platforms.macos-arm64"]
-checksum = "sha256:297ccaefd3ae060cab9f9e4bd1190b529ed5b67b9a6d2f1923ede6847698fc7e"
-url = "https://github.com/runkids/skillshare/releases/download/v0.24.6/skillshare_0.24.6_darwin_arm64.tar.gz"
-url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/611967496"
+checksum = "sha256:4fef912fc6aa82ec71c3afa7a7827bc9bdd0e4e28917fff4dc21ee47d4ddce26"
+url = "https://github.com/runkids/skillshare/releases/download/v0.25.0/skillshare_0.25.0_darwin_arm64.tar.gz"
+url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/615184612"
 
 [[tools.starship]]
 version = "1.26.0"
