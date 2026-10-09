@@ -361,6 +361,12 @@ aube = { path = "locks/npm-agent-device/0.21.20", digest = "sha256:2f2fb2cc54957
 backend = "npm:agent-device"
 specifiers = ["latest"]
 
+[[tools."npm:yarn"]]
+version = "1.22.22"
+aube = { path = "locks/npm-yarn/1.22.22", digest = "sha256:fb0a6374649a0fec5fe1999a7cc726567ee94d03802994a1a86b7d2264d470bc" }
+backend = "npm:yarn"
+specifiers = ["1.22.22"]
+
 [[tools.python]]
 version = "3.14.8"
 backend = "core:python"

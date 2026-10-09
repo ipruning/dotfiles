@@ -44,6 +44,7 @@ xurl = "latest"
 zig = "latest"
 zoxide = "latest"
 mr-boxington = "latest"
+"npm:yarn" = "1.22.22"
 
 [settings]
 auto_install = false
