@@ -550,6 +550,10 @@ Mise, Homebrew and unknown owners are skipped with a reason. Omarchy and Linux
 system packages remain with their host updater. A host-selected Mise executable
 is not self-updated by Dotfiles.
 
+Inside a Herdr session (`HERDR_ENV=1`), Herdr's self-update is skipped with a
+command to run in an external terminal after detaching. Other updaters and the
+shell runtime refresh continue.
+
 The final step refreshes local shell runtime without network asset downloads.
 Tool and runtime outcomes are reported separately: a runtime failure makes the
 operation fail even when tools updated successfully. Independent steps continue

@@ -395,6 +395,18 @@ def plan_updates(
                 )
                 continue
             step = replace(step, command=(str(path), *step.command[1:]))
+            if step.tool == "herdr" and os.environ.get("HERDR_ENV") == "1":
+                results.append(
+                    UpdateResult(
+                        step,
+                        UpdateStatus.SKIPPED,
+                        reason=(
+                            "running inside a Herdr session; detach and run "
+                            f"`{_display_command(step)}` outside Herdr"
+                        ),
+                    )
+                )
+                continue
         available = (
             mise_executable is not None
             if step.tool == "mise"

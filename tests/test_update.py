@@ -100,6 +100,7 @@ def _run_update(
     failing_tool: str | None = None,
     failure_output: bool = True,
     mise_inventory: str | None = None,
+    herdr_env: str | None = None,
 ) -> tuple[subprocess.CompletedProcess[str], Path]:
     bin_dir = tmp_path / "bin"
     bin_dir.mkdir(parents=True)
@@ -118,6 +119,9 @@ def _run_update(
             mise_inventory=mise_inventory if name == "mise" else None,
         )
     environment = os.environ.copy()
+    environment.pop("HERDR_ENV", None)
+    if herdr_env is not None:
+        environment["HERDR_ENV"] = herdr_env
     environment["HOME"] = str(home)
     environment["PATH"] = os.pathsep.join((str(bin_dir), str(home / ".local/bin")))
     project = tmp_path / "project"
@@ -1065,14 +1069,94 @@ def test_update_cli_installs_locked_target_when_only_older_version_is_installed(
     assert lock.read_bytes() == before
 
 
-def test_update_cli_runs_native_herdr_self_update(tmp_path: Path) -> None:
-    completed, log = _run_update(tmp_path, "--apply", "--json", tools=("herdr",))
+@pytest.mark.parametrize("herdr_env", [None, "", "0", "true"])
+def test_update_cli_runs_native_herdr_self_update(
+    tmp_path: Path, herdr_env: str | None
+) -> None:
+    completed, log = _run_update(
+        tmp_path, "--apply", "--json", tools=("herdr",), herdr_env=herdr_env
+    )
     assert completed.returncode == 0, completed.stderr
     document = json.loads(completed.stdout)
     step = next(step for step in document["steps"] if step["name"] == "herdr")
     assert step["status"] == "succeeded"
     assert step["command"][-1] == "update"
     assert Path(step["command"][0]).resolve() == tmp_path / "home/.local/bin/herdr"
+    assert log.read_text().splitlines() == ["herdr update"]
+
+
+@pytest.mark.parametrize("apply", [False, True])
+def test_update_cli_skips_native_herdr_inside_session(
+    tmp_path: Path, apply: bool
+) -> None:
+    arguments = ("--apply", "--json") if apply else ("--json",)
+    completed, log = _run_update(
+        tmp_path,
+        *arguments,
+        tools=("herdr", "pi"),
+        failing_tool="herdr",
+        herdr_env="1",
+    )
+
+    assert completed.returncode == 0, completed.stderr
+    document = json.loads(completed.stdout)
+    assert document["schema_version"] == 1
+    assert document["operation"] == "update"
+    assert document["apply"] is apply
+    assert document["ok"] is True
+    steps = {step["name"]: step for step in document["steps"]}
+    herdr = steps["herdr"]
+    assert herdr["status"] == "skipped"
+    assert herdr["exit_code"] is None
+    assert "inside a Herdr session" in herdr["reason"]
+    assert "detach" in herdr["reason"]
+    assert shlex.join(herdr["command"]) in herdr["reason"]
+    assert Path(herdr["command"][0]).resolve() == tmp_path / "home/.local/bin/herdr"
+    assert "outside Herdr" in herdr["reason"]
+    assert herdr["retry"] is None
+    assert steps["pi"]["status"] == ("succeeded" if apply else "planned")
+    if apply:
+        assert log.read_text().splitlines() == ["pi update", "pi update --extensions"]
+        assert document["runtime"]["ok"] is True
+    else:
+        assert not log.exists()
+        assert document["runtime"] is None
+
+
+def test_update_cli_explains_herdr_session_skip_in_human_output(tmp_path: Path) -> None:
+    completed, log = _run_update(
+        tmp_path,
+        "--apply",
+        tools=("herdr", "pi"),
+        failing_tool="herdr",
+        herdr_env="1",
+    )
+
+    assert completed.returncode == 0, completed.stderr
+    assert "SKIPPED herdr: running inside a Herdr session" in completed.stdout
+    assert f"{tmp_path}/bin/herdr update" in completed.stdout
+    assert "outside Herdr" in completed.stdout
+    assert "RUN herdr:" not in completed.stdout
+    assert "SUCCEEDED pi" in completed.stdout
+    assert "Runtime: SUCCEEDED" in completed.stdout
+    assert log.read_text().splitlines() == ["pi update", "pi update --extensions"]
+
+
+def test_update_cli_reports_herdr_failure_outside_session(tmp_path: Path) -> None:
+    completed, log = _run_update(
+        tmp_path,
+        "--apply",
+        "--json",
+        tools=("herdr",),
+        failing_tool="herdr",
+    )
+
+    assert completed.returncode == 1
+    document = json.loads(completed.stdout)
+    herdr = next(step for step in document["steps"] if step["name"] == "herdr")
+    assert document["ok"] is False
+    assert herdr["status"] == "failed"
+    assert herdr["exit_code"] == 7
     assert log.read_text().splitlines() == ["herdr update"]
 
 
@@ -1095,6 +1179,7 @@ def test_update_cli_skips_package_owned_herdr_self_update(
     env.update(
         HOME=str(tmp_path / "home"),
         PATH=os.pathsep.join((str(tmp_path / "bin"), str(native.parent))),
+        HERDR_ENV="1",
     )
     completed = subprocess.run(
         [sys.executable, "-m", "scripts.update", "--apply", "--json"],
@@ -1108,4 +1193,5 @@ def test_update_cli_skips_package_owned_herdr_self_update(
     document = json.loads(completed.stdout)
     step = next(step for step in document["steps"] if step["name"] == "herdr")
     assert step["status"] == "skipped"
+    assert "package-manager owned" in step["reason"]
     assert not log.exists()
