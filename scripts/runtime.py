@@ -140,6 +140,13 @@ def shim_aware_finder(executable_finder: ExecutableFinder) -> ExecutableFinder:
         found = executable_finder(tool)
         if found and Path(found).parent == shims_dir and not shim_is_healthy(tool):
             found = None
+            if executable_finder is shutil.which:
+                search_path = os.pathsep.join(
+                    directory
+                    for directory in os.get_exec_path()
+                    if Path(directory).absolute() != shims_dir.absolute()
+                )
+                found = shutil.which(tool, path=search_path)
         if found:
             return found
         return None
@@ -154,7 +161,8 @@ def _generator_result(
 ) -> RuntimeResult:
     assert spec.tool is not None
     assert spec.target is not None
-    if executable_finder(spec.tool):
+    if executable := executable_finder(spec.tool):
+        spec = replace(spec, command=(executable, *spec.command[1:]))
         return RuntimeResult(spec, RuntimeStatus.PLANNED, RuntimeAction.GENERATE)
     if spec.target.exists() or spec.target.is_symlink():
         return RuntimeResult(

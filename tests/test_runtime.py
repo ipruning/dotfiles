@@ -722,7 +722,7 @@ def test_runtime_human_preview_shows_commands_and_targets(tmp_path: Path) -> Non
 
     assert completed.returncode == 0
     assert (
-        "PLANNED completion.codex: codex completion zsh -> "
+        f"PLANNED completion.codex: {bin_dir}/codex completion zsh -> "
         f"{repo_root}/generated/completions/_codex"
     ) in completed.stdout
     apply_command = shlex.join(
@@ -1269,6 +1269,38 @@ def test_shim_without_reachable_mise_counts_as_absent(
     finder = shim_aware_finder({"orphan-tool": str(shims / "orphan-tool")}.get)
 
     assert finder("orphan-tool") is None
+
+
+def test_runtime_generates_with_native_tool_behind_stale_mise_shim(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    home = tmp_path / "home"
+    home.mkdir()
+    repo_root = tmp_path / "dotfiles"
+    data_dir = home / ".local/share/mise"
+    shims = data_dir / "shims"
+    shims.mkdir(parents=True)
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    _fake_tool(bin_dir, "mise", "exit 1\n")
+    _fake_tool(shims, "codex", "exit 99\n")
+    _fake_tool(bin_dir, "codex", "printf '# native completion\\n'\n")
+    monkeypatch.setenv("HOME", str(home))
+    monkeypatch.setenv("MISE_DATA_DIR", str(data_dir))
+    monkeypatch.setenv("PATH", os.pathsep.join((str(shims), str(bin_dir))))
+
+    plan = plan_runtime(repo_root, home, network=False)
+    completion = next(
+        result for result in plan.results if result.spec.name == "completion.codex"
+    )
+    assert completion.spec.command[0] == str(bin_dir / "codex")
+    report = execute_runtime(plan, home)
+
+    assert report.ok
+    assert (repo_root / "generated/completions/_codex").read_text() == (
+        "# native completion\n"
+    )
 
 
 def test_runtime_repeat_preserves_outputs_and_completion_cache(tmp_path: Path) -> None:
