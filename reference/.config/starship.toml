@@ -11,6 +11,7 @@ $shell
 $character\
 """
 add_newline = false
+scan_timeout = 100
 command_timeout = 1_000
 
 [sudo]
