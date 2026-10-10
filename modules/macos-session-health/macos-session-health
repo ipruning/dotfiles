@@ -30,6 +30,7 @@ import tomllib
 import urllib.error
 import urllib.request
 import uuid
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
@@ -624,6 +625,9 @@ class Store:
         self.emit_stdout = emit_stdout
         self.conn: sqlite3.Connection | None = None
         self.current_signals: list[dict[str, Any]] = []
+        self.current_probe = ""
+        self.completed_probes: set[str] = set()
+        self.failed_probes: set[str] = set()
         if db_path is not None:
             db_path.parent.mkdir(parents=True, exist_ok=True)
             self.conn = sqlite3.connect(db_path)
@@ -692,6 +696,8 @@ class Store:
             )
             self.conn.commit()
         self.current_signals = []
+        self.completed_probes = set()
+        self.failed_probes = set()
         return snapshot_id
 
     def finish_snapshot(self, snapshot_id: str, status: str) -> None:
@@ -739,13 +745,39 @@ class Store:
     def delete_state(self, *keys: str) -> None:
         if self.conn is None or not keys:
             return
-        self.conn.executemany("DELETE FROM state WHERE key = ?", ((key,) for key in keys))
+        self.conn.executemany(
+            "DELETE FROM state WHERE key = ?", ((key,) for key in keys)
+        )
 
     def emit(
         self, snapshot_id: str, event: str, severity: str | None = None, **data: Any
     ) -> None:
         ts = utc_now()
+        observation_failed = any(
+            (key == "exit" or key.endswith("_exit")) and value not in (0, None, "")
+            or (key == "timeout" or key.endswith("_timeout")) and value is True
+            or (key == "error" or key.endswith("_error")) and bool(value)
+            or key == "accessible" and value is False
+            for key, value in data.items()
+        )
+        if self.current_probe and observation_failed:
+            self.failed_probes.add(self.current_probe)
+        if self.current_probe == "collect_app_assess" and event in (
+            "app_codesign_verify",
+            "app_assess",
+        ) and not observation_failed:
+            self.completed_probes.add(f"collect_app_assess:{event}:{data.get('app', '')}")
         if event == "health_signal":
+            if self.current_probe:
+                data["probe"] = self.current_probe
+                name = str(data.get("signal", ""))
+                if self.current_probe == "collect_app_assess":
+                    if name.startswith("app_codesign_"):
+                        data["probe"] += f":app_codesign_verify:{data.get('app', '')}"
+                    elif name.startswith("app_assess_"):
+                        data["probe"] += f":app_assess:{data.get('app', '')}"
+                if name.endswith(("_failed", "_timeout")) or data.get("timeout"):
+                    self.failed_probes.add(self.current_probe)
             signal = {"severity": severity}
             signal.update(data)
             self.current_signals.append(signal)
@@ -1336,7 +1368,8 @@ def collect_syspolicyd_health(
         args.syspolicyd_lsof_interval_minutes,
     )
     if run_syspolicyd_lsof:
-        collect_process_lsof(
+        collect_observation(
+            collect_process_lsof,
             store,
             snapshot_id,
             pid,
@@ -1365,7 +1398,8 @@ def collect_audio_registrar_health(
             service,
             args.command_timeout,
             warn_if_missing=True,
-            warn_if_not_running=True,
+            # This Mach service supports pressured exit and launches on demand.
+            warn_if_not_running=False,
         )
         collect_process_resource(
             store,
@@ -1558,6 +1592,7 @@ def collect_codex_trusted_project_roots(
                 "health_signal",
                 "warning",
                 signal="codex_trusted_root_git_invalid",
+                root=str(project_root),
                 value=1,
                 detail=f"trusted Codex project root has an invalid .git: {project_root}",
             )
@@ -1570,7 +1605,7 @@ def collect_codex_process_summary(
     codex_config: dict[str, Any],
 ) -> dict[str, Any]:
     code, out, err, timed_out, duration_ms = run_command(
-        ["ps", "axww", "-o", "command="],
+        ["ps", "axww", "-o", "pid=,ppid=,stat=,%cpu=,rss=,etime=,command="],
         timeout=args.command_timeout,
     )
     if code != 0 or timed_out:
@@ -1594,11 +1629,27 @@ def collect_codex_process_summary(
         return {}
 
     role_counts: dict[str, int] = {}
-    for command in out.splitlines():
+    node_processes = []
+    for line in out.splitlines():
+        fields = line.split(None, 6)
+        if len(fields) != 7:
+            continue
+        pid, ppid, stat, cpu, rss, elapsed, command = fields
         role = codex_process_role(command)
         if not role:
             continue
         role_counts[role] = role_counts.get(role, 0) + 1
+        if role == "codex_node_repl":
+            node_processes.append(
+                dict(
+                    pid=pid,
+                    ppid=ppid,
+                    stat=stat,
+                    cpu_percent=parse_float(cpu),
+                    rss_kb=parse_int(rss),
+                    elapsed=elapsed,
+                )
+            )
 
     def count(role: str) -> int:
         return role_counts.get(role, 0)
@@ -1617,6 +1668,7 @@ def collect_codex_process_summary(
         "chrome_extension_host_count": count("codex_chrome_extension_host"),
     }
     store.emit(snapshot_id, "codex_process_summary", None, **process_summary)
+    store.emit(snapshot_id, "codex_node_repl_inventory", processes=node_processes)
 
     computer_use_enabled = codex_config.get("plugin_computer_use_enabled")
     chrome_enabled = codex_config.get("plugin_chrome_enabled")
@@ -1642,7 +1694,7 @@ def collect_codex_process_summary(
         store.emit(
             snapshot_id,
             "health_signal",
-            "warning",
+            "info",
             signal="codex_node_repl_many",
             value=count("codex_node_repl"),
             detail="Codex app-server has many node_repl child processes",
@@ -1796,14 +1848,14 @@ def collect_trustd_health(
         ["pgrep", "-x", "trustd"], timeout=args.command_timeout
     )
     pids = [line.strip() for line in out.splitlines() if line.strip()]
-    if timed_out:
+    if timed_out or code not in (0, 1):
         store.emit(
             snapshot_id,
             "health_signal",
             "warning",
-            signal="trustd_pgrep_timeout",
+            signal="trustd_pgrep_timeout" if timed_out else "trustd_pgrep_failed",
             value=code,
-            detail=err.strip() or "pgrep trustd did not finish before timeout",
+            detail=err.strip() or "pgrep trustd failed",
         )
         return
 
@@ -1866,19 +1918,21 @@ def collect_code_sign_clone_status(
             {
                 "size_mb": size_mb,
                 "du_timeout": timed_out,
-                "du_error": err.strip(),
+                "du_exit": code,
+                "du_error": err.strip() or ("unable to read du size" if size_kb is None else ""),
             }
         )
         store.emit(snapshot_id, "code_sign_clone_status", **status)
 
-        if timed_out:
+        if timed_out or code != 0 or size_kb is None:
             store.emit(
                 snapshot_id,
                 "health_signal",
                 "warning",
-                signal="code_sign_clone_du_timeout",
+                signal="code_sign_clone_du_timeout" if timed_out else "code_sign_clone_du_failed",
+                path=str(path),
                 value=code,
-                detail=f"du timed out for {path}",
+                detail=f"du failed for {path}",
             )
             continue
 
@@ -1890,6 +1944,7 @@ def collect_code_sign_clone_status(
                 "health_signal",
                 "warning",
                 signal="code_sign_clone_size_high",
+                path=str(path),
                 value=size_mb,
                 detail=f"Codex code_sign_clone is {size_mb} MiB",
             )
@@ -1926,6 +1981,7 @@ def collect_code_sign_clone_status(
                         "health_signal",
                         "warning",
                         signal="code_sign_clone_growth_high",
+                        path=str(path),
                         value=growth,
                         detail="Codex code_sign_clone is growing quickly",
                     )
@@ -2042,6 +2098,8 @@ def collect_limits(
         current_user = getpass.getuser()
         process_total = len(users)
         user_process_total = sum(1 for user in users if user == current_user)
+    store.emit(snapshot_id, "process_table_sample", exit=proc_code,
+               timeout=proc_timed_out, total=process_total, user_total=user_process_total)
     for signal_name, signal_value, signal_detail in process_table_pressure_signals(
         process_total,
         user_process_total,
@@ -2633,14 +2691,14 @@ def classify_passive_log_line(line: str) -> tuple[str, str] | None:
     if "failed lookup: name = com.apple.audio.audiocomponentregistrar" in lower:
         return "audio_registrar_lookup_failed", "error"
     if "removing service: com.apple.audio.audiocomponentregistrar" in lower:
-        return "audio_registrar_removed", "warning"
+        return "audio_registrar_removed", "info"
     if "service inactive: com.apple.audio.audiocomponentregistrar" in lower:
-        return "audio_registrar_inactive", "warning"
+        return "audio_registrar_inactive", "info"
     if (
         "audiocomponentregistrar" in lower
         and "failed to check-in, peer may have been unloaded" in lower
     ):
-        return "audio_registrar_unloaded", "warning"
+        return "audio_registrar_unloaded", "info"
     return None
 
 
@@ -2726,14 +2784,17 @@ def collect_passive_log_signals(
         matches=len(matches),
         predicate=predicate,
     )
-    if timed_out:
+    if timed_out or code != 0:
         store.emit(
             snapshot_id,
             "health_signal",
             "warning",
-            signal="macos_passive_log_timeout",
+            signal="macos_passive_log_timeout"
+            if timed_out
+            else "macos_passive_log_failed",
             value=code,
-            detail=f"{scan_kind} passive log scan did not finish before timeout",
+            detail=f"{scan_kind} passive log scan failed: "
+            + ("timeout" if timed_out else err.strip()),
         )
 
     for category, severity, line in matches[-max_lines:]:
@@ -2750,6 +2811,8 @@ def collect_passive_log_signals(
 
     ok = True
     for (category, severity), count in sorted(category_counts.items()):
+        if severity == "info":
+            continue
         signal_severity = severity
         detail = f"matched {count} macOS unified log line(s) in the last {last_minutes} minute(s)"
         if (
@@ -2965,6 +3028,42 @@ def maybe_send_brrr_notification(
     args: argparse.Namespace,
     status: str,
 ) -> None:
+    # Each successful delivery remembers the active issue and its severity.
+    # Only a completed recheck may clear it; skipped periodic probes are not recovery.
+    notified = json.loads(store.get_state("brrr_notified_issues") or "{}")
+    candidates = {}
+    for signal in store.current_signals:
+        name = str(signal.get("signal") or "")
+        if not name or not signal_meets_min_severity(signal, "warning"):
+            continue
+        if name.startswith("notification_channel_"):
+            continue
+        identity = json.dumps(
+            [
+                signal.get(field, "")
+                for field in (
+                    "probe",
+                    "signal",
+                    "service",
+                    "role",
+                    "pid",
+                    "comm",
+                    "path",
+                    "root",
+                    "app",
+                    "name",
+                )
+            ],
+            separators=(",", ":"),
+        )
+        if SEVERITY_RANK[signal["severity"]] >= SEVERITY_RANK.get(
+            candidates.get(identity, {}).get("severity", ""), 0
+        ):
+            candidates[identity] = signal
+    for identity, previous in list(notified.items()):
+        if previous["probe"] in store.completed_probes and identity not in candidates:
+            del notified[identity]
+    store.set_state("brrr_notified_issues", json.dumps(notified))
     zombie_count = max(
         (
             int(signal.get("value", 0))
@@ -2974,16 +3073,17 @@ def maybe_send_brrr_notification(
         default=0,
     )
     zombie_peak = int(store.get_state("brrr_zombie_notified_peak") or "0")
-    signals = sorted(
-        {
-            str(signal.get("signal") or "")
-            for signal in store.current_signals
-            if signal_meets_min_severity(signal, "warning")
-            and not str(signal.get("signal") or "").startswith("notification_channel_")
-            and (signal.get("signal") != "zombies_present" or zombie_count > zombie_peak)
-        }
-        - {""}
-    )
+    pending = {
+        identity: signal
+        for identity, signal in candidates.items()
+        if (signal["signal"] == "zombies_present" and zombie_count > zombie_peak)
+        or (
+            signal["signal"] != "zombies_present"
+            and SEVERITY_RANK[signal["severity"]]
+            > notified.get(identity, {}).get("rank", 0)
+        )
+    }
+    signals = sorted({str(signal["signal"]) for signal in pending.values()})
     if not signals:
         if zombie_count:
             store.emit(
@@ -2994,8 +3094,18 @@ def maybe_send_brrr_notification(
                 zombie_count=zombie_count,
                 notified_peak=zombie_peak,
             )
+        elif candidates:
+            store.emit(
+                snapshot_id,
+                "brrr_notification_skipped",
+                reason="unchanged_issues",
+                signals=sorted({str(s["signal"]) for s in candidates.values()}),
+            )
         return
-    if not brrr_cooldown_elapsed(store, args.brrr_notify_cooldown_minutes):
+    urgent = any(signal_meets_min_severity(s, "error") for s in pending.values())
+    if not urgent and not brrr_cooldown_elapsed(
+        store, args.brrr_notify_cooldown_minutes
+    ):
         store.emit(
             snapshot_id,
             "brrr_notification_skipped",
@@ -3010,7 +3120,7 @@ def maybe_send_brrr_notification(
         "title": f"{socket.gethostname()}: macOS session health signals",
         "subtitle": "macOS session health",
         "message": (
-            f"status={status}; signals={','.join(signals)}. "
+            f"status={status if status != 'ok' else 'warning'}; signals={','.join(signals)}. "
             "Run `macos-session-health incident --hours 6 --format markdown` to inspect facts."
         ),
         "thread_id": args.brrr_thread_id,
@@ -3028,6 +3138,12 @@ def maybe_send_brrr_notification(
         title=str(payload["title"]),
         signals=signals,
     ):
+        for identity, signal in pending.items():
+            notified[identity] = {
+                "probe": signal.get("probe", ""),
+                "rank": SEVERITY_RANK[signal["severity"]],
+            }
+        store.set_state("brrr_notified_issues", json.dumps(notified))
         store.set_state("last_brrr_notification_sent_at", utc_now())
         if "zombies_present" in signals:
             store.set_state("brrr_zombie_notified_peak", str(zombie_count))
@@ -3104,6 +3220,27 @@ def should_run_periodic_probe(
     return True
 
 
+def collect_observation(
+    collector: Callable[..., Any],
+    store: Store,
+    snapshot_id: str,
+    *args: Any,
+    **kwargs: Any,
+) -> Any:
+    previous = store.current_probe
+    probe = collector.__name__ + (
+        ":" + kwargs["scan_kind"] if "scan_kind" in kwargs else ""
+    )
+    store.current_probe = probe
+    try:
+        result = collector(store, snapshot_id, *args, **kwargs)
+        if probe not in store.failed_probes:
+            store.completed_probes.add(probe)
+        return result
+    finally:
+        store.current_probe = previous
+
+
 def snapshot(args: argparse.Namespace, store: Store, mode: str) -> str:
     snapshot_id = store.create_snapshot(mode, args.app)
     status = "ok"
@@ -3124,9 +3261,15 @@ def snapshot(args: argparse.Namespace, store: Store, mode: str) -> str:
                 retention_days=args.retention_days,
                 deleted_snapshots=deleted,
             )
-        collect_system_context(store, snapshot_id, args.command_timeout)
-        collect_limits(
-            store, snapshot_id, args.command_timeout, args.process_table_warn_pct
+        collect_observation(
+            collect_system_context, store, snapshot_id, args.command_timeout
+        )
+        collect_observation(
+            collect_limits,
+            store,
+            snapshot_id,
+            args.command_timeout,
+            args.process_table_warn_pct,
         )
         run_process_top = should_run_periodic_probe(
             store,
@@ -3135,8 +3278,16 @@ def snapshot(args: argparse.Namespace, store: Store, mode: str) -> str:
             args.process_top_interval_minutes,
         )
         if run_process_top:
-            collect_process_counts(store, snapshot_id, args.top, args.command_timeout)
-            collect_cpu_top(store, snapshot_id, args.top, args.command_timeout)
+            collect_observation(
+                collect_process_counts,
+                store,
+                snapshot_id,
+                args.top,
+                args.command_timeout,
+            )
+            collect_observation(
+                collect_cpu_top, store, snapshot_id, args.top, args.command_timeout
+            )
         run_fd_top = should_run_periodic_probe(
             store,
             snapshot_id,
@@ -3144,10 +3295,17 @@ def snapshot(args: argparse.Namespace, store: Store, mode: str) -> str:
             args.fd_top_interval_minutes,
         )
         if run_fd_top:
-            collect_fd_top(
-                store, snapshot_id, args.top, args.fd_warn, args.lsof_timeout
+            collect_observation(
+                collect_fd_top,
+                store,
+                snapshot_id,
+                args.top,
+                args.fd_warn,
+                args.lsof_timeout,
             )
-        codex_config = collect_codex_config_snapshot(store, snapshot_id, args)
+        codex_config = collect_observation(
+            collect_codex_config_snapshot, store, snapshot_id, args
+        )
         run_trusted_root_check = should_run_periodic_probe(
             store,
             snapshot_id,
@@ -3155,16 +3313,20 @@ def snapshot(args: argparse.Namespace, store: Store, mode: str) -> str:
             args.codex_trusted_root_check_interval_minutes,
         )
         if run_trusted_root_check:
-            collect_codex_trusted_project_roots(store, snapshot_id, args)
-        codex_summary = collect_codex_process_summary(
-            store, snapshot_id, args, codex_config
+            collect_observation(
+                collect_codex_trusted_project_roots, store, snapshot_id, args
+            )
+        codex_summary = collect_observation(
+            collect_codex_process_summary, store, snapshot_id, args, codex_config
         )
-        collect_notification_channel_guard(store, snapshot_id, args)
-        collect_skillshare_guard(store, snapshot_id, args)
-        collect_code_sign_clone_status(store, snapshot_id, args)
-        collect_syspolicyd_health(store, snapshot_id, args)
-        collect_trustd_health(store, snapshot_id, args)
-        collect_audio_registrar_health(store, snapshot_id, args)
+        collect_observation(
+            collect_notification_channel_guard, store, snapshot_id, args
+        )
+        collect_observation(collect_skillshare_guard, store, snapshot_id, args)
+        collect_observation(collect_code_sign_clone_status, store, snapshot_id, args)
+        collect_observation(collect_syspolicyd_health, store, snapshot_id, args)
+        collect_observation(collect_trustd_health, store, snapshot_id, args)
+        collect_observation(collect_audio_registrar_health, store, snapshot_id, args)
         passive_log_ok = True
         run_passive_log = should_run_periodic_probe(
             store,
@@ -3173,7 +3335,8 @@ def snapshot(args: argparse.Namespace, store: Store, mode: str) -> str:
             args.passive_log_interval_minutes,
         )
         if run_passive_log:
-            passive_log_ok = collect_passive_log_signals(
+            passive_log_ok = collect_observation(
+                collect_passive_log_signals,
                 store,
                 snapshot_id,
                 args.log_timeout,
@@ -3190,7 +3353,8 @@ def snapshot(args: argparse.Namespace, store: Store, mode: str) -> str:
             args.codex_passive_log_interval_minutes,
         )
         if run_codex_passive_log:
-            codex_passive_log_ok = collect_passive_log_signals(
+            codex_passive_log_ok = collect_observation(
+                collect_passive_log_signals,
                 store,
                 snapshot_id,
                 args.log_timeout,
@@ -3201,7 +3365,9 @@ def snapshot(args: argparse.Namespace, store: Store, mode: str) -> str:
                 include_codex_warnings=True,
             )
             passive_log_ok = passive_log_ok and codex_passive_log_ok
-        spawn_ok = collect_spawn_check(store, snapshot_id, args.spawn_check_timeout)
+        spawn_ok = collect_observation(
+            collect_spawn_check, store, snapshot_id, args.spawn_check_timeout
+        )
         run_spctl = should_run_periodic_probe(
             store,
             snapshot_id,
@@ -3214,7 +3380,8 @@ def snapshot(args: argparse.Namespace, store: Store, mode: str) -> str:
             "codesign_app_verify",
             args.codesign_interval_minutes,
         )
-        app_ok = collect_app_assess(
+        app_ok = collect_observation(
+            collect_app_assess,
             store,
             snapshot_id,
             args.app,
@@ -3229,7 +3396,7 @@ def snapshot(args: argparse.Namespace, store: Store, mode: str) -> str:
         if signal_unhealthy or not spawn_ok or not app_ok or not passive_log_ok:
             status = "unhealthy"
             if (
-                (not spawn_ok or not app_ok)
+                (signal_unhealthy or not spawn_ok or not app_ok)
                 and args.collect_log_excerpt
                 and should_collect_log_excerpt(
                     store,
@@ -3237,13 +3404,15 @@ def snapshot(args: argparse.Namespace, store: Store, mode: str) -> str:
                     args.log_excerpt_cooldown_minutes,
                 )
             ):
-                collect_macos_log_excerpt(
+                collect_observation(
+                    collect_macos_log_excerpt,
                     store,
                     snapshot_id,
                     args.app,
                     args.log_timeout,
                     args.log_lines,
                 )
+        store.completed_probes.add("collector_exception")
         maybe_send_brrr_notification(store, snapshot_id, args, status)
         store.emit(snapshot_id, "snapshot_end", sid=snapshot_id, status=status)
     except Exception as exc:
@@ -3254,6 +3423,7 @@ def snapshot(args: argparse.Namespace, store: Store, mode: str) -> str:
                 "health_signal",
                 "critical",
                 signal="collector_exception",
+                probe="collector_exception",
                 value=type(exc).__name__,
                 detail=str(exc),
             )
@@ -3598,6 +3768,31 @@ def render_incident_markdown(report: dict[str, Any]) -> str:
     if not report["recent_health_signals"]:
         lines.append("No recent health signals.")
 
+    for title, key in (
+        ("Passive Log Evidence", "passive_log_matches"),
+        ("Spawn Checks", "spawn_checks"),
+        ("Failure Log Excerpts", "log_excerpts"),
+    ):
+        lines.extend(["", f"## {title}", ""])
+        for record in report.get(key, []):
+            lines.append(
+                f"- `{record['ts']}` "
+                + compact_record(
+                    record,
+                    [
+                        "category",
+                        "line",
+                        "name",
+                        "exit",
+                        "timeout",
+                        "duration_ms",
+                        "stderr",
+                    ],
+                )
+            )
+        if not report.get(key):
+            lines.append("No records in window.")
+
     lines.extend(["", "## syspolicyd Resources", ""])
     for record in report["syspolicyd_resources"]:
         lines.append(
@@ -3670,6 +3865,15 @@ def render_incident_markdown(report: dict[str, Any]) -> str:
         )
     else:
         lines.append("- processes unavailable")
+
+    for inventory in report.get("node_repl_inventories", []):
+        for process in inventory.get("processes", []):
+            lines.append(
+                f"- node_repl `{inventory['ts']}` "
+                + compact_record(
+                    process, ["pid", "ppid", "stat", "cpu_percent", "rss_kb", "elapsed"]
+                )
+            )
 
     for record in report["code_sign_clone_status"]:
         lines.append(
@@ -3867,6 +4071,15 @@ def incident_report(db_path: Path, hours: float, limit: int, output_format: str)
         passive_log_scans = load_recent_events(
             conn, cutoff=cutoff, event="macos_passive_log_scan", limit=limit
         )
+        evidence = {
+            key: load_recent_events(conn, cutoff=cutoff, event=event, limit=limit)
+            for key, event in (
+                ("passive_log_matches", "macos_passive_log_match"),
+                ("spawn_checks", "spawn_check"),
+                ("log_excerpts", "macos_log_excerpt"),
+                ("node_repl_inventories", "codex_node_repl_inventory"),
+            )
+        }
         codex_diagnostic_signal_candidates = load_recent_events(
             conn, cutoff=cutoff, event="health_signal", limit=max(limit * 8, 80)
         )
@@ -3982,6 +4195,7 @@ def incident_report(db_path: Path, hours: float, limit: int, output_format: str)
         "brrr_events": brrr_events,
         "latest_cpu_top": latest_cpu_top,
         "latest_fd_top": latest_fd_top,
+        **evidence,
     }
 
     if output_format == "json":
@@ -4270,7 +4484,7 @@ Run `macos-session-health install` to install or refresh the user LaunchAgent.
     parser.add_argument(
         "--passive-log-last-minutes",
         type=int,
-        default=int(os.getenv("MACOS_SESSION_HEALTH_PASSIVE_LOG_LAST_MINUTES", "5")),
+        default=int(os.getenv("MACOS_SESSION_HEALTH_PASSIVE_LOG_LAST_MINUTES", "10")),
         help="Look back this many minutes during each targeted passive unified-log scan.",
     )
     parser.add_argument(
@@ -4303,7 +4517,7 @@ Run `macos-session-health install` to install or refresh the user LaunchAgent.
         "--brrr-notify-cooldown-minutes",
         type=int,
         default=int(os.getenv("MACOS_SESSION_HEALTH_BRRR_COOLDOWN_MINUTES", "10")),
-        help="Minimum interval between successful observation-summary notifications.",
+        help="Minimum interval for new warning notifications; new errors bypass it.",
     )
     parser.add_argument(
         "--brrr-thread-id",

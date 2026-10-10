@@ -72,6 +72,32 @@ the same identity still emits `process_pid_changed`; RSS growth and limits are
 checked for every sampled instance. The first sample after this upgrade creates
 new per-instance baselines without comparing the previous aggregate baseline.
 
+## Capture the next failure
+
+Leave the LaunchAgent running. It samples once per minute by default, retains
+14 days, and scans the previous ten minutes of targeted system logs every five
+minutes. Error-level signals trigger a bounded broader log excerpt (at most once
+per 30 minutes). `incident` includes raw matched log lines, spawn-check exit codes
+and timing, Node REPL inventories, and notification decisions.
+
+When an app bounces, audio fails, or a command cannot spawn, note the local time,
+app, triggering action, and visible symptom before restarting it. From this
+repository, preserve the surrounding hour:
+
+```zsh
+mkdir -p outputs
+stamp=$(date +%Y%m%d-%H%M%S)
+macos-session-health incident --hours 1 --limit 200 --format json > "outputs/session-$stamp.json"
+macos-session-health incident --hours 1 --limit 200 --format markdown > "outputs/session-$stamp.md"
+```
+
+These commands only read the database. Check the report's newest snapshot time:
+a stale collector cannot diagnose its own outage. A sub-minute failure without
+a matching retained system log can escape these samples; `status=ok` does not
+prove the user-visible app worked. Inspect `status --format json` and the
+collector logs if the snapshots stopped. Share only relevant excerpts after
+checking local paths and system-log content.
+
 ## Safety
 
 Do not restart `syspolicyd` with `launchctl`; SIP blocks that path. Do not run
@@ -93,19 +119,27 @@ Skillshare-managed sender. An explicit `BRRR_SECRET` from the environment,
 precedence over the exe.dev brrr proxy. Notifications identify the host and
 summarize impact and action without embedding snapshot IDs or raw signal fields.
 
-When the collector has current health signals, it sends a generic summary with
-the snapshot status, sorted signal names, and the exact incident-report
-command. One successful-send timestamp enforces the configured minimum
-interval. Failed deliveries do not advance it. No signal means no alert;
-the tool does not emit a clear-state alert. `zombies_present` excludes one
-zombie per live `sshd-session: <user> [postauth]` parent: macOS sshd keeps that
-exited child until the SSH connection closes, so it tracks logins, not leaks.
-For `zombies_present`, only the first
-observation or a count above the successfully notified peak can trigger a push.
-Unchanged or lower counts remain in the diagnostic history. The peak resets only
-when a successful process inventory observes zero zombies, not when a periodic
-probe is skipped. Failed deliveries and cooldown skips do not advance the peak.
-Other warning-or-higher signals retain their existing cooldown behavior.
+A warning is sent once per active issue (check, signal, and affected object).
+Its severity increasing to error or critical sends immediately, even during the
+warning cooldown. Unchanged issues remain in SQLite and do not repeat every ten
+minutes. A completed recheck without that issue rearms it; skipped or failed
+checks do not establish recovery. Failed deliveries do not acknowledge an issue.
+The ten-minute cooldown applies to new warnings. The notification says
+`status=warning` when the collector has warnings but no error; the snapshot's
+`status=ok` still means no error-level failure was detected.
+
+AudioComponentRegistrar is an on-demand Mach service with pressured exit.
+An installed but idle service and its inactive/removed/unloaded lifecycle log
+messages are diagnostic evidence, not alerts. Missing services, failed lookups,
+and actual audio errors still alert. `codex_node_repl_many` is informational:
+count alone does not establish a leak. Each snapshot records its PID, parent PID,
+state, CPU, RSS, and elapsed time without process arguments. Process-table pressure,
+spawn failures, and resource error thresholds retain their alerts.
+
+`zombies_present` excludes one zombie per live
+`sshd-session: <user> [postauth]` parent. Only the first observation or a count
+above the successfully notified peak can trigger a push. The peak resets after a
+successful process inventory observes zero, never on a skipped or failed probe.
 Notifications never execute
 recovery actions. Use the incident report to see emitted and skipped decisions.
 
