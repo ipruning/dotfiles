@@ -9,7 +9,7 @@ from pathlib import Path
 import pytest
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-BIN = REPO_ROOT / "modules/bin"
+BIN = REPO_ROOT / "commands"
 SPECIAL_NAMES = [
     "space path",
     "single'quote",

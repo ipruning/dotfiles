@@ -42,8 +42,8 @@ def test_linux_lite_setup_preserves_shell_config_and_is_idempotent(
 ) -> None:
     repo_root = tmp_path / "dotfiles"
     home = tmp_path / "home"
-    (repo_root / "modules/bash").mkdir(parents=True)
-    (repo_root / "modules/bash/init.bash").write_text("export READY=1\n")
+    (repo_root / "shell/bash").mkdir(parents=True)
+    (repo_root / "shell/bash/init.bash").write_text("export READY=1\n")
     home.mkdir()
     bashrc = home / ".bashrc"
     bashrc.write_text("# existing host setup\n")
@@ -64,15 +64,15 @@ def test_linux_lite_setup_preserves_shell_config_and_is_idempotent(
     assert bashrc.read_text().startswith("# >>> dotfiles linux-lite >>>\n")
     assert "# existing host setup\n" in bashrc.read_text()
     assert bashrc.read_text().count("# >>> dotfiles linux-lite >>>") == 1
-    assert str(repo_root / "modules/bash/init.bash") in bashrc.read_text()
+    assert str(repo_root / "shell/bash/init.bash") in bashrc.read_text()
     assert "~/.private.gitconfig" in gitconfig.read_text()
 
 
 def test_linux_lite_setup_rejects_incomplete_managed_block(tmp_path: Path) -> None:
     repo_root = tmp_path / "dotfiles"
     home = tmp_path / "home"
-    (repo_root / "modules/bash").mkdir(parents=True)
-    (repo_root / "modules/bash/init.bash").write_text("export READY=1\n")
+    (repo_root / "shell/bash").mkdir(parents=True)
+    (repo_root / "shell/bash/init.bash").write_text("export READY=1\n")
     home.mkdir()
     bashrc = home / ".bashrc"
     bashrc.write_text("# >>> dotfiles linux-lite >>>\n")
@@ -86,8 +86,8 @@ def test_linux_lite_setup_rejects_incomplete_managed_block(tmp_path: Path) -> No
 def test_linux_lite_setup_refuses_symlinked_bash_config(tmp_path: Path) -> None:
     repo_root = tmp_path / "dotfiles"
     home = tmp_path / "home"
-    (repo_root / "modules/bash").mkdir(parents=True)
-    (repo_root / "modules/bash/init.bash").write_text("export READY=1\n")
+    (repo_root / "shell/bash").mkdir(parents=True)
+    (repo_root / "shell/bash/init.bash").write_text("export READY=1\n")
     home.mkdir()
     external_target = tmp_path / "elsewhere/bashrc"
     external_target.parent.mkdir()
@@ -111,8 +111,8 @@ def test_linux_lite_setup_refuses_symlinked_bash_config(tmp_path: Path) -> None:
 def test_linux_lite_setup_preserves_bash_config_permissions(tmp_path: Path) -> None:
     repo_root = tmp_path / "dotfiles"
     home = tmp_path / "home"
-    (repo_root / "modules/bash").mkdir(parents=True)
-    (repo_root / "modules/bash/init.bash").write_text("export READY=1\n")
+    (repo_root / "shell/bash").mkdir(parents=True)
+    (repo_root / "shell/bash/init.bash").write_text("export READY=1\n")
     home.mkdir()
     bashrc = home / ".bashrc"
     bashrc.write_text("# existing host setup\n")
@@ -131,8 +131,8 @@ def test_linux_lite_setup_rejects_non_file_git_config_before_writing_bash(
 ) -> None:
     repo_root = tmp_path / "dotfiles"
     home = tmp_path / "home"
-    (repo_root / "modules/bash").mkdir(parents=True)
-    (repo_root / "modules/bash/init.bash").write_text("export READY=1\n")
+    (repo_root / "shell/bash").mkdir(parents=True)
+    (repo_root / "shell/bash/init.bash").write_text("export READY=1\n")
     home.mkdir()
     bashrc = home / ".bashrc"
     bashrc.write_text("# unchanged\n")
@@ -149,8 +149,8 @@ def test_linux_lite_setup_preserves_bash_when_git_update_fails(
 ) -> None:
     repo_root = tmp_path / "dotfiles"
     home = tmp_path / "home"
-    (repo_root / "modules/bash").mkdir(parents=True)
-    (repo_root / "modules/bash/init.bash").write_text("export READY=1\n")
+    (repo_root / "shell/bash").mkdir(parents=True)
+    (repo_root / "shell/bash/init.bash").write_text("export READY=1\n")
     home.mkdir()
     bashrc = home / ".bashrc"
     bashrc.write_text("# unchanged\n")
@@ -168,8 +168,8 @@ def test_linux_lite_setup_converges_after_bash_update_fails(
 ) -> None:
     repo_root = tmp_path / "dotfiles"
     home = tmp_path / "home"
-    (repo_root / "modules/bash").mkdir(parents=True)
-    (repo_root / "modules/bash/init.bash").write_text("export READY=1\n")
+    (repo_root / "shell/bash").mkdir(parents=True)
+    (repo_root / "shell/bash/init.bash").write_text("export READY=1\n")
     home.mkdir()
     bashrc = home / ".bashrc"
     bashrc.write_text("# unchanged\n")
@@ -203,8 +203,8 @@ def test_linux_lite_setup_converges_after_bash_update_fails(
 def test_linux_lite_setup_refuses_symlinked_git_config(tmp_path: Path) -> None:
     repo_root = tmp_path / "dotfiles"
     home = tmp_path / "home"
-    (repo_root / "modules/bash").mkdir(parents=True)
-    (repo_root / "modules/bash/init.bash").write_text("export READY=1\n")
+    (repo_root / "shell/bash").mkdir(parents=True)
+    (repo_root / "shell/bash/init.bash").write_text("export READY=1\n")
     home.mkdir()
     external_target = tmp_path / "elsewhere/gitconfig"
     external_target.parent.mkdir()
@@ -220,8 +220,8 @@ def test_linux_lite_setup_refuses_symlinked_git_config(tmp_path: Path) -> None:
 def test_linux_lite_setup_accepts_configured_git_symlink(tmp_path: Path) -> None:
     repo_root = tmp_path / "dotfiles"
     home = tmp_path / "home"
-    (repo_root / "modules/bash").mkdir(parents=True)
-    (repo_root / "modules/bash/init.bash").write_text("export READY=1\n")
+    (repo_root / "shell/bash").mkdir(parents=True)
+    (repo_root / "shell/bash/init.bash").write_text("export READY=1\n")
     home.mkdir()
     external_target = tmp_path / "elsewhere/gitconfig"
     external_target.parent.mkdir()
@@ -241,8 +241,8 @@ def test_linux_lite_loader_runs_before_noninteractive_bash_return(
 ) -> None:
     repo_root = tmp_path / "dotfiles"
     home = tmp_path / "home"
-    (repo_root / "modules/bash").mkdir(parents=True)
-    (repo_root / "modules/bash/init.bash").write_text("export DOTFILES_READY=1\n")
+    (repo_root / "shell/bash").mkdir(parents=True)
+    (repo_root / "shell/bash/init.bash").write_text("export DOTFILES_READY=1\n")
     home.mkdir()
     bashrc = home / ".bashrc"
     bashrc.write_text("case $- in *i*) ;; *) return;; esac\n")
@@ -269,7 +269,7 @@ def test_bash_module_exposes_only_user_and_mise_commands_without_duplicates(
     tmp_path: Path,
 ) -> None:
     repo_root = Path(__file__).resolve().parents[1]
-    module_path = repo_root / "modules/bash/init.bash"
+    module_path = repo_root / "shell/bash/init.bash"
     home = tmp_path / "home"
     local_bin = home / ".local/bin"
     shims = home / ".local/share/mise/shims"
@@ -314,4 +314,4 @@ def test_bash_module_exposes_only_user_and_mise_commands_without_duplicates(
     loaded_path = lines[4].split(":")
     assert loaded_path.count(str(local_bin)) == 1
     assert loaded_path.count(str(shims)) == 1
-    assert str(repo_root / "modules/bin") not in loaded_path
+    assert str(repo_root / "commands") not in loaded_path

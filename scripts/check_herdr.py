@@ -21,7 +21,7 @@ def inspect_herdr(
         )
     ),
 ) -> list[Finding]:
-    """Read known candidates and verify the locked active Mise artifact."""
+    """Read known candidates and verify the locked active mise artifact."""
     findings: list[Finding] = []
     installations = home / ".local/share/mise/installs/herdr"
     owners: dict[str, Path] = {}
@@ -78,7 +78,7 @@ def inspect_herdr(
                         f"Herdr binary differs from its lock: expected {checksum}; actual {actual}",
                         binary,
                         "Inspect running sessions, then explicitly reinstall this "
-                        "locked Herdr version with Mise; do not run herdr update on it.",
+                        "locked Herdr version with mise; do not run herdr update on it.",
                     )
                 )
     except (OSError, ValueError, KeyError, TypeError) as error:
@@ -89,7 +89,7 @@ def inspect_herdr(
                 "herdr.inspection_failed",
                 f"Herdr ownership inspection failed: {error}",
                 installations,
-                "Inspect the candidate paths and the global Mise lockfile.",
+                "Inspect the candidate paths and the global mise lockfile.",
             )
         )
     return findings

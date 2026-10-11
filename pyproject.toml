@@ -8,7 +8,7 @@ dependencies = [
     # Runtime dependencies of scripts/: ruamel-yaml (check) and the pinned
     # read-only Mackup fork (diff). Pinning Mackup here — locked in uv.lock —
     # keeps it inside the explicit `uv sync --locked` bootstrap boundary instead
-    # of a runtime uvx fetch. Type-only imports for the standalone modules/bin
+    # of a runtime uvx fetch. Type-only imports for the standalone commands
     # scripts live in the dev group so this list stays true to what the package
     # runs.
     "mackup @ git+https://github.com/ipruning/mackup@da1c75dc34e494b6884c0f000af8f93758a778d9",
@@ -37,7 +37,7 @@ ignore = ["TRY004"]
 
 [tool.ruff.lint.per-file-ignores]
 # These integration tests assert the child process return code explicitly.
-"tests/test_modules.py" = ["PLW1510"]
+"tests/test_commands.py" = ["PLW1510"]
 
 [tool.ty.analysis]
 strict-equality-semantics = true
@@ -57,9 +57,9 @@ dev = [
     "pytest>=9.1.1",
     "ruff>=0.16.9",
     "ty>=0.0.84",
-    # Import targets so editors can resolve the standalone modules/bin scripts.
+    # Import targets so editors can resolve the standalone commands scripts.
     # Each is a PEP 723 `uv run --script` with its own inline runtime deps; ty
-    # does not check modules/bin, and scripts/ never imports these.
+    # does not check commands, and scripts/ never imports these.
     "autocorrect-py>=2.14.0",
     "fire>=0.7.1",
     "loguru>=0.7.3",

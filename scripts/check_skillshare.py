@@ -237,25 +237,25 @@ def _mise_skillshare_installations(home: Path) -> list[tuple[str, Path, bool]]:
         )
     except (OSError, subprocess.TimeoutExpired) as error:
         raise RuntimeError(
-            f"Mise Skillshare inventory could not run: {error}"
+            f"mise Skillshare inventory could not run: {error}"
         ) from error
     if completed.returncode != 0:
         detail = completed.stderr.strip() or completed.stdout.strip()
-        reason = f"Mise Skillshare inventory exited {completed.returncode}"
+        reason = f"mise Skillshare inventory exited {completed.returncode}"
         raise RuntimeError(f"{reason}: {detail}" if detail else reason)
     try:
         document = json.loads(completed.stdout)
     except json.JSONDecodeError as error:
         raise RuntimeError(
-            f"Mise Skillshare inventory returned invalid JSON: {error}"
+            f"mise Skillshare inventory returned invalid JSON: {error}"
         ) from error
     if not isinstance(document, list):
-        raise RuntimeError("Mise Skillshare inventory must be a JSON array")
+        raise RuntimeError("mise Skillshare inventory must be a JSON array")
 
     installations: list[tuple[str, Path, bool]] = []
     for raw_installation in document:
         if not isinstance(raw_installation, dict):
-            raise RuntimeError("Mise Skillshare inventory contains a non-object entry")
+            raise RuntimeError("mise Skillshare inventory contains a non-object entry")
         version = raw_installation.get("version")
         install_path = raw_installation.get("install_path")
         installed = raw_installation.get("installed")
@@ -268,7 +268,7 @@ def _mise_skillshare_installations(home: Path) -> list[tuple[str, Path, bool]]:
             or not isinstance(installed, bool)
             or not isinstance(active, bool)
         ):
-            raise RuntimeError("Mise Skillshare inventory contains invalid fields")
+            raise RuntimeError("mise Skillshare inventory contains invalid fields")
         if installed:
             installations.append((version, Path(install_path), active))
     return installations
@@ -292,7 +292,7 @@ def _candidate_skillshare_owners(
         except OSError:
             continue
         if resolved == canonical_mise:
-            # A Mise shim is a dispatcher, not an independent Skillshare owner.
+            # A mise shim is a dispatcher, not an independent Skillshare owner.
             continue
         if any(
             _path_within(resolved, install_path.resolve())
@@ -333,7 +333,7 @@ def skillshare_ownership_finding(
     owners = _candidate_skillshare_owners(home, executable, mise_installations)
     descriptions = (
         [
-            "Mise "
+            "mise "
             + ", ".join(
                 f"{version} ({'active' if active else 'inactive'}) at {install_path}"
                 for version, install_path, active in mise_installations

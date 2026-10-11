@@ -1,4 +1,4 @@
-"""Read-only Mise ownership and service dependency checks."""
+"""Read-only mise ownership and service dependency checks."""
 
 from __future__ import annotations
 
@@ -84,9 +84,9 @@ def mise_installation_findings(
             Severity.OK,
             "mise.canonical_ready",
             (
-                "The host-selected Mise executable is ready"
+                "The host-selected mise executable is ready"
                 if host_selected
-                else "The standalone Mise executable is ready at its canonical location"
+                else "The standalone mise executable is ready at its canonical location"
             ),
             canonical,
         )
@@ -97,15 +97,15 @@ def mise_installation_findings(
             Severity.WARN,
             f"mise.canonical_{state}",
             (
-                "The host-selected Mise executable is missing, broken, or not executable"
+                "The host-selected mise executable is missing, broken, or not executable"
                 if host_selected
-                else "The canonical standalone Mise executable is missing, broken, or not executable"
+                else "The canonical standalone mise executable is missing, broken, or not executable"
             ),
             canonical,
             (
                 f"Restore {canonical} with the host owner that selected it."
                 if host_selected
-                else "Install standalone Mise at ~/.local/bin/mise with https://mise.run."
+                else "Install standalone mise at ~/.local/bin/mise with https://mise.run."
             ),
         )
 
@@ -132,7 +132,7 @@ def mise_installation_findings(
             "mise.installations_multiple",
             f"Additional mise executable installations exist outside the canonical path: {paths}",
             next(iter(alternatives.values())),
-            f"Remove additional Mise copies after {canonical} is ready.",
+            f"Remove additional mise copies after {canonical} is ready.",
         )
     else:
         installations_finding = Finding(
@@ -177,7 +177,7 @@ def mise_shim_finding(
             "mise.shims",
             Severity.WARN,
             "mise.shims_unreadable",
-            f"Mise shim ownership cannot be inspected: {error}",
+            f"mise shim ownership cannot be inspected: {error}",
             shims_directory,
             "Make the shim directory readable, then run mise run check again.",
         )
@@ -187,15 +187,15 @@ def mise_shim_finding(
             "mise.shims",
             Severity.WARN,
             "mise.shims_stale",
-            f"Mise shims are not owned by the valid canonical executable; targets: {targets}",
+            f"mise shims are not owned by the valid canonical executable; targets: {targets}",
             stale[0][0],
             (
                 "Run mise run mise-sync, then mise run mise-sync -- --apply."
                 if canonical_ready and dotfiles_managed
                 else (
-                    "Rebuild the shims with the host owner that selected the canonical Mise executable."
+                    "Rebuild the shims with the host owner that selected the canonical mise executable."
                     if canonical_ready
-                    else f"Restore the canonical Mise executable at {canonical} before rebuilding shims."
+                    else f"Restore the canonical mise executable at {canonical} before rebuilding shims."
                 )
             ),
         )
@@ -236,7 +236,7 @@ def mise_project_uv_finding(repo_root: Path, home: Path) -> Finding | None:
                 "mise.project_uv",
                 Severity.OK,
                 "mise.project_uv_ready",
-                "Canonical Mise resolves the project's locked uv executable",
+                "Canonical mise resolves the project's locked uv executable",
                 Path(resolved),
             )
         reason = f"mise which uv exited {completed.returncode}"
@@ -246,11 +246,11 @@ def mise_project_uv_finding(repo_root: Path, home: Path) -> Finding | None:
         "mise.project_uv",
         Severity.WARN,
         "mise.project_uv_unresolved",
-        f"Canonical Mise cannot resolve the project's locked uv executable: {reason}",
+        f"Canonical mise cannot resolve the project's locked uv executable: {reason}",
         config_path,
         (
             f"Inspect with {canonical_mise_path(home)} ls uv --installed --json and "
-            f"{canonical_mise_path(home)} which uv. Resolve any Mise version or configuration "
+            f"{canonical_mise_path(home)} which uv. Resolve any mise version or configuration "
             "failure through its host owner first. Reinstall the exact locked uv version if "
             "its recorded backend no longer matches its executable layout."
         ),
@@ -303,7 +303,7 @@ def mise_systemd_shim_findings(
                 "mise.systemd_shims",
                 Severity.WARN,
                 "mise.systemd_shims_inspection_unavailable",
-                f"Mise systemd shim inspection could not read {len(unreadable_paths)} paths; first unreadable path: {unreadable_paths[0]}",
+                f"mise systemd shim inspection could not read {len(unreadable_paths)} paths; first unreadable path: {unreadable_paths[0]}",
                 unreadable_paths[0],
                 "Inspect systemd unit path permissions before relying on this result.",
             )
@@ -317,7 +317,7 @@ def mise_systemd_shim_findings(
                 "mise.systemd_shims",
                 Severity.OK,
                 "mise.systemd_shims_clean",
-                "No readable custom systemd service directly uses a global Mise shim",
+                "No readable custom systemd service directly uses a global mise shim",
             ),
         )
     findings.extend(
@@ -325,7 +325,7 @@ def mise_systemd_shim_findings(
             "mise.systemd_shims",
             Severity.WARN,
             "mise.systemd_shim_dependency",
-            f"{unit_file.name} uses a global Mise shim in {directive_name}",
+            f"{unit_file.name} uses a global mise shim in {directive_name}",
             unit_file,
             (
                 f"Bind the service to a project config with {canonical_mise_path(home)} -C "

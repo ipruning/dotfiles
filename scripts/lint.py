@@ -64,18 +64,18 @@ OPTIONAL_PATHS = {
     ("reference/.zshrc", "/usr/local/share/zsh/site-functions"),
     ("reference/.zshrc", "/usr/local/share/info"),
     (
-        "modules/macos-session-health/macos-session-health",
+        "services/macos-session-health/macos-session-health",
         "/Applications/Codex.app/Contents/MacOS/Codex",
     ),
     (
-        "modules/macos-session-health/macos-session-health",
+        "services/macos-session-health/macos-session-health",
         "/Applications/{app_name}.app/Contents/Resources/codex",
     ),
     (
-        "modules/macos-session-health/macos-session-health",
+        "services/macos-session-health/macos-session-health",
         "/Applications/{app_name}.app/Contents/Resources/cua_node/bin/node_repl",
     ),
-    ("modules/zsh/env.zsh", "/usr/local/bin/op"),
+    ("shell/zsh/env.zsh", "/usr/local/bin/op"),
 }
 
 
@@ -526,7 +526,7 @@ def _mise_alias_findings(repo_root: Path) -> list[Finding]:
             _located_finding(
                 Severity.ERROR,
                 "mise.config_invalid",
-                f"shared Mise config is unreadable or invalid: {error}",
+                f"shared mise config is unreadable or invalid: {error}",
                 config_path,
             ),
         ]
@@ -537,7 +537,7 @@ def _mise_alias_findings(repo_root: Path) -> list[Finding]:
             _located_finding(
                 Severity.ERROR,
                 "mise.config_invalid",
-                "shared Mise [tools] section must be a table",
+                "shared mise [tools] section must be a table",
                 config_path,
             ),
         ]
@@ -550,7 +550,7 @@ def _mise_alias_findings(repo_root: Path) -> list[Finding]:
                 _located_finding(
                     Severity.ERROR,
                     "mise.config_invalid",
-                    f"shared Mise [{section}] section must be a table",
+                    f"shared mise [{section}] section must be a table",
                     config_path,
                 ),
             ]
@@ -564,7 +564,7 @@ def _mise_alias_findings(repo_root: Path) -> list[Finding]:
                     _located_finding(
                         Severity.ERROR,
                         "mise.config_invalid",
-                        f"shared Mise [{section}] backends must be strings",
+                        f"shared mise [{section}] backends must be strings",
                         config_path,
                     ),
                 ]
@@ -586,7 +586,7 @@ def _mise_alias_findings(repo_root: Path) -> list[Finding]:
         _located_finding(
             Severity.OK,
             "mise.alias_identities_unique",
-            "shared Mise tools use one identity per alias",
+            "shared mise tools use one identity per alias",
             config_path,
         ),
     ]

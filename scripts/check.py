@@ -342,7 +342,7 @@ def _bash_integration_finding(
     mutation_allowed: bool = True,
 ) -> Finding:
     bashrc = home / ".bashrc"
-    module_path = repo_root.resolve() / "modules/bash/init.bash"
+    module_path = repo_root.resolve() / "shell/bash/init.bash"
     try:
         configured = bashrc.is_file() and str(module_path) in bashrc.read_text()
     except OSError as error:
@@ -374,7 +374,7 @@ def _bash_integration_finding(
 
 
 def _legacy_repo_path_finding(repo_root: Path) -> Finding:
-    legacy_directories = ((repo_root / "modules/bin").resolve(),)
+    legacy_directories = ((repo_root / "commands").resolve(),)
     active_directories = {
         Path(entry).expanduser().resolve()
         for entry in os.environ.get("PATH", "").split(os.pathsep)
@@ -399,7 +399,7 @@ def _legacy_repo_path_finding(repo_root: Path) -> Finding:
         ),
         exposed,
         (
-            "Remove dotfiles modules/bin from Bash or global mise PATH configuration."
+            "Remove dotfiles commands from Bash or global mise PATH configuration."
             if exposed
             else None
         ),

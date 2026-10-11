@@ -1,4 +1,4 @@
-# Independent commands
+# Commands
 
 Start with the linked source or `<command> --help`, not a bare invocation:
 several commands immediately launch an editor, application, or session, or write

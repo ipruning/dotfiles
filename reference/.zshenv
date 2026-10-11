@@ -21,7 +21,7 @@ _dotfiles_core_path() {
     # Repository commands are a macOS-only surface. Keeping them out of the
     # cross-platform mise [env] config means restoring that config on Linux can
     # never shadow system tools.
-    [[ -d "$HOME/dotfiles/modules/bin" ]] && path=("$HOME/dotfiles/modules/bin" $path)
+    [[ -d "$HOME/dotfiles/commands" ]] && path=("$HOME/dotfiles/commands" $path)
   fi
 
   # mise's installer and other per-user executables use this cross-platform

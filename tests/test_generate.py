@@ -907,7 +907,7 @@ def test_generate_mise_cache_uses_the_consuming_shell_path(
     assert completed.returncode == 0, completed.stderr
     activation = repo_root / f"generated/functions/_mise.{shell}"
     baseline_path = f"{fallback_bin}:/usr/bin:/bin"
-    # Mise also makes its canonical executable available before saving PATH.
+    # mise also makes its canonical executable available before saving PATH.
     original_path = f"{home / '.local/bin'}:{baseline_path}"
     probe = 'source "$1"; printf "%s\\n" "$__MISE_ORIG_PATH"; command -v node; node'
     consumed = subprocess.run(

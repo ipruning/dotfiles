@@ -22,7 +22,7 @@ def guarded_activation(spec: GenerateSpec, output: str) -> str:
         return output
     executable = spec.command[0]
     if spec.name == "function.mise-nu":
-        # Mise's Nushell template has no load-time PATH capture, so supply the
+        # mise's Nushell template has no load-time PATH capture, so supply the
         # one the Bash/Zsh templates perform when sourced.
         guard = (
             f"if not ({json.dumps(executable, ensure_ascii=False)} | path exists) {{ return }}\n"
@@ -100,7 +100,7 @@ def _command_environment(spec: GenerateSpec, home: Path) -> dict[str, str]:
             "__MISE_ZSH_PRECMD_RUN",
         ):
             environment.pop(name, None)
-        # Presence suppresses Mise's generation-time PATH snapshot, which would
+        # Presence suppresses mise's generation-time PATH snapshot, which would
         # otherwise bake the generating process's PATH (for example a project's
         # tools under `mise run`) into every consuming shell. Each shell
         # captures PATH when sourced instead; see guarded_activation for Nu.

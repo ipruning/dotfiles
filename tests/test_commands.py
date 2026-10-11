@@ -17,10 +17,10 @@ skip_as_root = pytest.mark.skipif(
 
 def test_skillshare_source_uses_a_descriptive_non_system_command_name() -> None:
     repo_root = Path(__file__).resolve().parents[1]
-    executable = repo_root / "modules/bin/skillshare-source"
+    executable = repo_root / "commands/skillshare-source"
 
     assert executable.is_file()
-    assert not (repo_root / "modules/bin/ss").exists()
+    assert not (repo_root / "commands/ss").exists()
 
     completed = subprocess.run(
         [str(executable), "--version"],
@@ -34,7 +34,7 @@ def test_skillshare_source_uses_a_descriptive_non_system_command_name() -> None:
 
 
 def test_skillshare_source_removed_commands_are_unknown() -> None:
-    executable = Path(__file__).resolve().parents[1] / "modules/bin/skillshare-source"
+    executable = Path(__file__).resolve().parents[1] / "commands/skillshare-source"
 
     help_result = subprocess.run(
         [str(executable), "--help"],
@@ -58,7 +58,7 @@ def test_skillshare_source_removed_commands_are_unknown() -> None:
 def test_skillshare_source_stops_guessing_when_default_target_is_removed(
     tmp_path: Path,
 ) -> None:
-    executable = Path(__file__).resolve().parents[1] / "modules/bin/skillshare-source"
+    executable = Path(__file__).resolve().parents[1] / "commands/skillshare-source"
     config = tmp_path / "skillshare/config.yaml"
     config.parent.mkdir()
     target = tmp_path / "installed-skills"
@@ -180,9 +180,7 @@ def _write_executable(path: Path, contents: str) -> None:
 
 
 def test_pi_session_export_requires_an_explicit_command(tmp_path: Path) -> None:
-    executable = (
-        Path(__file__).resolve().parents[1] / "modules/bin/pi-session-export.py"
-    )
+    executable = Path(__file__).resolve().parents[1] / "commands/pi-session-export.py"
     input_path = tmp_path / "session.jsonl"
     input_path.write_text("")
 
@@ -200,9 +198,7 @@ def test_pi_session_export_requires_an_explicit_command(tmp_path: Path) -> None:
 def test_pi_session_export_keeps_data_derived_names_inside_output_dir(
     tmp_path: Path,
 ) -> None:
-    executable = (
-        Path(__file__).resolve().parents[1] / "modules/bin/pi-session-export.py"
-    )
+    executable = Path(__file__).resolve().parents[1] / "commands/pi-session-export.py"
     input_path = tmp_path / "session.jsonl"
     output_dir = tmp_path / "out"
     input_path.write_text(json.dumps({"type": "session", "id": "session-123"}) + "\n")
@@ -226,9 +222,7 @@ def test_pi_session_export_keeps_data_derived_names_inside_output_dir(
     "name", ("../escaped", "/tmp/escaped", "nested/name", "nested\\name")
 )
 def test_pi_session_export_rejects_path_like_names(tmp_path: Path, name: str) -> None:
-    executable = (
-        Path(__file__).resolve().parents[1] / "modules/bin/pi-session-export.py"
-    )
+    executable = Path(__file__).resolve().parents[1] / "commands/pi-session-export.py"
     input_path = tmp_path / "session.jsonl"
     output_dir = tmp_path / "out"
     input_path.write_text(json.dumps({"type": "session", "id": name}) + "\n")
@@ -246,9 +240,7 @@ def test_pi_session_export_rejects_path_like_names(tmp_path: Path, name: str) ->
 
 
 def test_pi_session_export_rejects_path_like_stem(tmp_path: Path) -> None:
-    executable = (
-        Path(__file__).resolve().parents[1] / "modules/bin/pi-session-export.py"
-    )
+    executable = Path(__file__).resolve().parents[1] / "commands/pi-session-export.py"
     input_path = tmp_path / "session.jsonl"
     output_dir = tmp_path / "out"
     input_path.write_text(json.dumps({"type": "session", "id": "session-123"}) + "\n")
@@ -274,9 +266,7 @@ def test_pi_session_export_rejects_path_like_stem(tmp_path: Path) -> None:
 
 
 def test_pi_session_export_rejects_symlinked_output_destination(tmp_path: Path) -> None:
-    executable = (
-        Path(__file__).resolve().parents[1] / "modules/bin/pi-session-export.py"
-    )
+    executable = Path(__file__).resolve().parents[1] / "commands/pi-session-export.py"
     input_path = tmp_path / "session.jsonl"
     output_dir = tmp_path / "out"
     outside = tmp_path / "outside.jsonl"
@@ -301,7 +291,7 @@ def test_pi_session_export_rejects_symlinked_output_destination(tmp_path: Path) 
 def test_skillshare_exec_restore_failure_overrides_child_success(
     tmp_path: Path,
 ) -> None:
-    executable = Path(__file__).resolve().parents[1] / "modules/bin/skillshare-source"
+    executable = Path(__file__).resolve().parents[1] / "commands/skillshare-source"
     config_dir = tmp_path / "skillshare"
     config_dir.mkdir()
     config = config_dir / "config.yaml"
@@ -342,7 +332,7 @@ def test_skillshare_exec_restore_failure_overrides_child_success(
 def test_skillshare_exec_requires_a_command_before_switching_source(
     tmp_path: Path,
 ) -> None:
-    executable = Path(__file__).resolve().parents[1] / "modules/bin/skillshare-source"
+    executable = Path(__file__).resolve().parents[1] / "commands/skillshare-source"
     config_dir = tmp_path / "skillshare"
     config_dir.mkdir()
     config = config_dir / "config.yaml"
@@ -363,7 +353,7 @@ def test_skillshare_exec_requires_a_command_before_switching_source(
 
 @skip_as_root
 def test_skillshare_exec_switch_failure_preserves_config(tmp_path: Path) -> None:
-    executable = Path(__file__).resolve().parents[1] / "modules/bin/skillshare-source"
+    executable = Path(__file__).resolve().parents[1] / "commands/skillshare-source"
     config_dir = tmp_path / "skillshare"
     config_dir.mkdir()
     config = config_dir / "config.yaml"
@@ -401,7 +391,7 @@ def test_skillshare_exec_switch_failure_preserves_config(tmp_path: Path) -> None
 
 
 def test_skillshare_exec_preserves_symlinked_config(tmp_path: Path) -> None:
-    executable = Path(__file__).resolve().parents[1] / "modules/bin/skillshare-source"
+    executable = Path(__file__).resolve().parents[1] / "commands/skillshare-source"
     config_dir = tmp_path / "skillshare"
     config_dir.mkdir()
     actual_config = tmp_path / "shared/config.yaml"
@@ -442,7 +432,7 @@ def test_skillshare_exec_preserves_symlinked_config(tmp_path: Path) -> None:
 def test_skillshare_switch_writes_the_nested_sources_skills_key(
     tmp_path: Path,
 ) -> None:
-    executable = Path(__file__).resolve().parents[1] / "modules/bin/skillshare-source"
+    executable = Path(__file__).resolve().parents[1] / "commands/skillshare-source"
     config_dir = tmp_path / "skillshare"
     config_dir.mkdir()
     config = config_dir / "config.yaml"
@@ -478,7 +468,7 @@ def test_skillshare_switch_writes_the_nested_sources_skills_key(
 
 
 def test_skillshare_add_preserves_symlinked_sources_registry(tmp_path: Path) -> None:
-    executable = Path(__file__).resolve().parents[1] / "modules/bin/skillshare-source"
+    executable = Path(__file__).resolve().parents[1] / "commands/skillshare-source"
     config_dir = tmp_path / "skillshare"
     config_dir.mkdir()
     config = config_dir / "config.yaml"

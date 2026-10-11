@@ -26,7 +26,7 @@ def session_health_findings(
                 "session_health.missing",
                 "macos-session-health is not installed",
                 action=(
-                    "Run modules/macos-session-health/macos-session-health install."
+                    "Run services/macos-session-health/macos-session-health install."
                 ),
             ),
         ]
@@ -104,7 +104,7 @@ def session_health_findings(
             action=(
                 None
                 if agent_ready
-                else "Run modules/macos-session-health/macos-session-health install."
+                else "Run services/macos-session-health/macos-session-health install."
             ),
         ),
     ]
@@ -199,7 +199,7 @@ def maxfiles_findings(
                 Severity.WARN,
                 "maxfiles.missing",
                 "macos-maxfiles is not installed",
-                action="Run modules/macos-maxfiles/macos-maxfiles install.",
+                action="Run services/macos-maxfiles/macos-maxfiles install.",
             ),
         ]
     try:
@@ -255,11 +255,11 @@ def maxfiles_findings(
             action=(
                 None
                 if agent_ready
-                else "Run modules/macos-maxfiles/macos-maxfiles install."
+                else "Run services/macos-maxfiles/macos-maxfiles install."
             ),
         ),
     ]
-    source = repo_root / "modules/macos-maxfiles/macos-maxfiles"
+    source = repo_root / "services/macos-maxfiles/macos-maxfiles"
     expected_soft = _module_source_constant(source, "SOFT_LIMIT")
     expected_hard = _module_source_constant(source, "HARD_LIMIT")
     if agent_ready and expected_soft and expected_hard:
@@ -284,7 +284,7 @@ def maxfiles_findings(
                 action=(
                     None
                     if matches
-                    else "Run modules/macos-maxfiles/macos-maxfiles install to reapply the limit."
+                    else "Run services/macos-maxfiles/macos-maxfiles install to reapply the limit."
                 ),
             ),
         )

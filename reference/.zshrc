@@ -9,8 +9,8 @@ typeset -U path
 typeset -U fpath
 
 if [[ -n ${DOTFILES_ROOT:-} ]]; then
-  if [[ ! -d $DOTFILES_ROOT || ! -r $DOTFILES_ROOT/modules/zsh/env.zsh ]]; then
-    print -u2 -- "DOTFILES_ROOT is invalid: $DOTFILES_ROOT (expected modules/zsh/env.zsh)"
+  if [[ ! -d $DOTFILES_ROOT || ! -r $DOTFILES_ROOT/shell/zsh/env.zsh ]]; then
+    print -u2 -- "DOTFILES_ROOT is invalid: $DOTFILES_ROOT (expected shell/zsh/env.zsh)"
     return 1
   fi
   DOTFILES_ROOT=${DOTFILES_ROOT:A}
@@ -66,14 +66,14 @@ else
 fi
 unset stale_compdumps
 
-ZSH_MODULES_DIR="$DOTFILES_ROOT/modules/zsh"
+ZSH_SHELL_DIR="$DOTFILES_ROOT/shell/zsh"
 
-[[ -d "$ZSH_MODULES_DIR" ]] && {
+[[ -d "$ZSH_SHELL_DIR" ]] && {
   config_files=(
-    "$ZSH_MODULES_DIR/aliases.zsh"
-    "$ZSH_MODULES_DIR/env.zsh"
-    "$ZSH_MODULES_DIR/env.private.zsh"
-    "$ZSH_MODULES_DIR/completions.zsh"  # after env.zsh so fzf-tab plugin is loaded first
+    "$ZSH_SHELL_DIR/aliases.zsh"
+    "$ZSH_SHELL_DIR/env.zsh"
+    "$ZSH_SHELL_DIR/env.private.zsh"
+    "$ZSH_SHELL_DIR/completions.zsh"  # after env.zsh so fzf-tab plugin is loaded first
   )
   for file in "${config_files[@]}"; do
     [[ -e "$file" ]] && builtin source "$file"

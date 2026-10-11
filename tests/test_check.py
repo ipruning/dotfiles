@@ -121,7 +121,7 @@ def test_inspect_host_reports_capabilities_and_their_invalid_transition(
         },
     )
     _write_module_source(
-        repo_root / "modules/macos-maxfiles/macos-maxfiles",
+        repo_root / "services/macos-maxfiles/macos-maxfiles",
         'SOFT_LIMIT="8192"\nHARD_LIMIT="65536"',
     )
 
@@ -624,7 +624,7 @@ def test_skillshare_ownership_reports_independent_mise_and_homebrew_owners(
     assert finding is not None
     assert finding.code == "skillshare.ownership_multiple"
     assert finding.severity is Severity.WARN
-    assert "Mise 0.20.20 (inactive)" in finding.message
+    assert "mise 0.20.20 (inactive)" in finding.message
     assert "Homebrew" in finding.message
     assert "system/PATH" not in finding.message
     assert "mise ls" in (finding.action or "")
@@ -898,7 +898,7 @@ def test_linux_lite_check_requires_only_git_and_mise_and_reports_legacy_path(
 ) -> None:
     repo_root = tmp_path / "repo"
     home = tmp_path / "home"
-    legacy_bin = repo_root / "modules/bin"
+    legacy_bin = repo_root / "commands"
     legacy_bin.mkdir(parents=True)
     monkeypatch.setenv("PATH", f"{legacy_bin}:/usr/bin:/bin")
 
@@ -1291,7 +1291,7 @@ def test_maxfiles_probe_flags_limit_drift_and_unloaded_daemon(
 ) -> None:
     (tmp_path / "home").mkdir()
     _write_module_source(
-        tmp_path / "repo/modules/macos-maxfiles/macos-maxfiles",
+        tmp_path / "repo/services/macos-maxfiles/macos-maxfiles",
         'SOFT_LIMIT="8192"\nHARD_LIMIT="65536"',
     )
     stub = _maxfiles_stub(
@@ -1360,13 +1360,13 @@ def test_maxfiles_probe_flags_limit_drift_and_unloaded_daemon(
 
 def test_bash_integration_recognizes_symlinked_checkout(tmp_path: Path) -> None:
     checkout = tmp_path / "workspace/dotfiles"
-    (checkout / "modules/bash").mkdir(parents=True)
-    (checkout / "modules/bash/init.bash").write_text("export READY=1\n")
+    (checkout / "shell/bash").mkdir(parents=True)
+    (checkout / "shell/bash/init.bash").write_text("export READY=1\n")
     repo_link = tmp_path / "dotfiles"
     repo_link.symlink_to(checkout)
     home = tmp_path / "home"
     home.mkdir()
-    module_path = checkout / "modules/bash/init.bash"
+    module_path = checkout / "shell/bash/init.bash"
     (home / ".bashrc").write_text(
         f"# >>> dotfiles linux-lite >>>\n. {module_path}\n# <<< dotfiles linux-lite <<<\n",
     )

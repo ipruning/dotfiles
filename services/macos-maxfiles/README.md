@@ -9,8 +9,8 @@ on a tracked plist.
 Preview the exact target and paths before authorizing the system-wide change:
 
 ```zsh
-modules/macos-maxfiles/macos-maxfiles install --dry-run
-modules/macos-maxfiles/macos-maxfiles install
+services/macos-maxfiles/macos-maxfiles install --dry-run
+services/macos-maxfiles/macos-maxfiles install
 macos-maxfiles status --json
 ```
 
@@ -39,7 +39,7 @@ After changing the module, verify the generated plist, effective-limit readback,
 transaction rollback, and removal path through the public suite:
 
 ```zsh
-modules/macos-maxfiles/macos-maxfiles-test
-modules/macos-maxfiles/macos-maxfiles install --dry-run
+services/macos-maxfiles/macos-maxfiles-test
+services/macos-maxfiles/macos-maxfiles install --dry-run
 macos-maxfiles status --json
 ```

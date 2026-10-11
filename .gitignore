@@ -4,7 +4,6 @@
 # Host-private materializations; templates remain trackable
 *private*
 !*private*.tpl.*
-!*private*.template.*
 
 # Python runtime and tool state
 __pycache__/
@@ -12,7 +11,7 @@ __pycache__/
 .ruff_cache/
 .venv/
 
-# Repository-owned runtime state
+# Local output of mise run generate
 /generated/
 
 # Amp portal metadata is local to each orb

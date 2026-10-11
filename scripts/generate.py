@@ -114,7 +114,7 @@ def _mise_shims_dir() -> Path:
 
 
 def shim_aware_finder(executable_finder: ExecutableFinder) -> ExecutableFinder:
-    """Resolve tools from PATH while rejecting stale Mise shims."""
+    """Resolve tools from PATH while rejecting stale mise shims."""
     shims_dir = _mise_shims_dir()
     shim_health: dict[str, bool] = {}
 

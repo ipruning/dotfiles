@@ -37,15 +37,15 @@ def _tracked_repo(tmp_path: Path, files: dict[str, str]) -> Path:
 
 
 def test_shell_dialect_covers_extensions_shebangs_and_reference_data() -> None:
-    assert shell_dialect("modules/bash/init.bash", "# sourced fragment") == "bash"
-    assert shell_dialect("modules/bin/_lib/session-id.sh", "") == "bash"
-    assert shell_dialect("modules/zsh/env.zsh", "") == "zsh"
-    assert shell_dialect("modules/bin/g", "#!/usr/bin/env bash") == "bash"
-    assert shell_dialect("modules/bin/ttok", "#!/usr/bin/env -S zsh -f") == "zsh"
-    assert shell_dialect("modules/bin/watchdog", "#!/bin/sh") == "bash"
-    assert shell_dialect("modules/bin/portable", "#!/usr/bin/env sh") == "bash"
-    assert shell_dialect("modules/bin/dashy", "#!/bin/dash") == "bash"
-    assert shell_dialect("modules/bin/pyenvish", "#!/usr/bin/env -S python3 -u") is None
+    assert shell_dialect("shell/bash/init.bash", "# sourced fragment") == "bash"
+    assert shell_dialect("commands/_lib/session-id.sh", "") == "bash"
+    assert shell_dialect("shell/zsh/env.zsh", "") == "zsh"
+    assert shell_dialect("commands/g", "#!/usr/bin/env bash") == "bash"
+    assert shell_dialect("commands/ttok", "#!/usr/bin/env -S zsh -f") == "zsh"
+    assert shell_dialect("commands/watchdog", "#!/bin/sh") == "bash"
+    assert shell_dialect("commands/portable", "#!/usr/bin/env sh") == "bash"
+    assert shell_dialect("commands/dashy", "#!/bin/dash") == "bash"
+    assert shell_dialect("commands/pyenvish", "#!/usr/bin/env -S python3 -u") is None
     assert shell_dialect("scripts/diff.py", "#!/usr/bin/env python3") is None
     # Restored startup dotfiles are gated by name even under reference/...
     assert shell_dialect("reference/.zshrc", "autoload -Uz compinit") == "zsh"
@@ -64,8 +64,8 @@ def test_check_shell_files_reports_bash_syntax_failures_then_passes(
     repo_root = _tracked_repo(
         tmp_path,
         {
-            "modules/bin/good": "#!/usr/bin/env bash\nprintf 'ok\\n'\n",
-            "modules/bin/broken": "#!/usr/bin/env bash\nif true; then\n",
+            "commands/good": "#!/usr/bin/env bash\nprintf 'ok\\n'\n",
+            "commands/broken": "#!/usr/bin/env bash\nif true; then\n",
         },
     )
     quiet_shellcheck = tmp_path / "quiet-shellcheck"
@@ -86,7 +86,7 @@ def test_check_shell_files_reports_bash_syntax_failures_then_passes(
     )
     assert failing.is_ok() is False
 
-    (repo_root / "modules/bin/broken").write_text(
+    (repo_root / "commands/broken").write_text(
         "#!/usr/bin/env bash\nif true; then\n  printf 'ok\\n'\nfi\n",
     )
     assert check_shell_files(repo_root, executable_finder=finder).is_ok() is True
@@ -97,7 +97,7 @@ def test_check_shell_files_reports_shellcheck_warnings(tmp_path: Path) -> None:
     repo_root = _tracked_repo(
         tmp_path,
         {
-            "modules/bin/warned": (
+            "commands/warned": (
                 "#!/usr/bin/env bash\n"
                 "helper() {\n"
                 "  local stamp=$(date)\n"
@@ -123,7 +123,7 @@ def test_check_shell_files_checks_zsh_syntax(tmp_path: Path) -> None:
     repo_root = _tracked_repo(
         tmp_path,
         {
-            "modules/zsh/broken.zsh": "if true; then\n",
+            "shell/zsh/broken.zsh": "if true; then\n",
         },
     )
 
@@ -160,9 +160,9 @@ def test_check_shell_files_gates_restored_reference_startup_dotfiles(
 def test_zsh_tv_binding_requires_television(tmp_path: Path) -> None:
     source_root = Path(__file__).resolve().parents[1]
     repo_root = tmp_path / "repo"
-    env_file = repo_root / "modules/zsh/env.zsh"
+    env_file = repo_root / "shell/zsh/env.zsh"
     env_file.parent.mkdir(parents=True)
-    shutil.copy2(source_root / "modules/zsh/env.zsh", env_file)
+    shutil.copy2(source_root / "shell/zsh/env.zsh", env_file)
     home = tmp_path / "home"
     bin_dir = tmp_path / "bin"
     home.mkdir()
@@ -395,7 +395,7 @@ def test_zshrc_selects_compinit_cache_mode(
     home = tmp_path / "home"
     home.mkdir()
     # Isolate unrelated interactive integrations, not the .zshrc decision.
-    env_file = repo_root / "modules/zsh/env.zsh"
+    env_file = repo_root / "shell/zsh/env.zsh"
     env_file.parent.mkdir(parents=True)
     env_file.write_text("")
     completions = repo_root / "generated/completions"
@@ -434,7 +434,7 @@ def test_zshenv_exposes_user_and_mise_commands_without_repo_bins_on_linux(
     home = tmp_path / "home"
     local_bin = home / ".local/bin"
     shims = home / ".local/share/mise/shims"
-    modules_bin = home / "dotfiles/modules/bin"
+    modules_bin = home / "dotfiles/commands"
     system_bin = tmp_path / "system-bin"
     for directory in (local_bin, shims, modules_bin, system_bin):
         directory.mkdir(parents=True)
@@ -482,9 +482,9 @@ def test_zsh_mise_activation_replaces_the_noninteractive_shim_fallback(
 ) -> None:
     source_root = Path(__file__).resolve().parents[1]
     repo_root = tmp_path / "repo"
-    env_file = repo_root / "modules/zsh/env.zsh"
+    env_file = repo_root / "shell/zsh/env.zsh"
     env_file.parent.mkdir(parents=True)
-    shutil.copy2(source_root / "modules/zsh/env.zsh", env_file)
+    shutil.copy2(source_root / "shell/zsh/env.zsh", env_file)
     home = tmp_path / "home"
     local_bin = home / ".local/bin"
     shims = home / ".local/share/mise/shims"
@@ -524,9 +524,9 @@ def test_zsh_mise_activation_replaces_the_noninteractive_shim_fallback(
 def test_bash_init_loads_starship_only_for_interactive_shells(tmp_path: Path) -> None:
     source_root = Path(__file__).resolve().parents[1]
     repo_root = tmp_path / "repo"
-    bash_init = repo_root / "modules/bash/init.bash"
+    bash_init = repo_root / "shell/bash/init.bash"
     bash_init.parent.mkdir(parents=True)
-    shutil.copy2(source_root / "modules/bash/init.bash", bash_init)
+    shutil.copy2(source_root / "shell/bash/init.bash", bash_init)
     home = tmp_path / "home"
     bin_dir = tmp_path / "bin"
     home.mkdir()
@@ -606,9 +606,9 @@ def test_bash_init_adds_navigation_editing_and_guarded_history_tools(
 ) -> None:
     source_root = Path(__file__).resolve().parents[1]
     repo_root = tmp_path / "repo"
-    bash_init = repo_root / "modules/bash/init.bash"
+    bash_init = repo_root / "shell/bash/init.bash"
     bash_init.parent.mkdir(parents=True)
-    shutil.copy2(source_root / "modules/bash/init.bash", bash_init)
+    shutil.copy2(source_root / "shell/bash/init.bash", bash_init)
     home = tmp_path / "home"
     bin_dir = tmp_path / "bin"
     home.mkdir()
@@ -697,9 +697,9 @@ def test_bash_init_keeps_mise_shims_when_activation_is_unavailable(
 ) -> None:
     source_root = Path(__file__).resolve().parents[1]
     repo_root = tmp_path / "repo"
-    bash_init = repo_root / "modules/bash/init.bash"
+    bash_init = repo_root / "shell/bash/init.bash"
     bash_init.parent.mkdir(parents=True)
-    shutil.copy2(source_root / "modules/bash/init.bash", bash_init)
+    shutil.copy2(source_root / "shell/bash/init.bash", bash_init)
     home = tmp_path / "home"
     shims = home / ".local/share/mise/shims"
     shims.mkdir(parents=True)
@@ -732,9 +732,9 @@ def test_bash_init_keeps_mise_shims_when_activation_is_unavailable(
 def test_bash_init_activates_mise_after_prompt_tools(tmp_path: Path) -> None:
     source_root = Path(__file__).resolve().parents[1]
     repo_root = tmp_path / "repo"
-    bash_init = repo_root / "modules/bash/init.bash"
+    bash_init = repo_root / "shell/bash/init.bash"
     bash_init.parent.mkdir(parents=True)
-    shutil.copy2(source_root / "modules/bash/init.bash", bash_init)
+    shutil.copy2(source_root / "shell/bash/init.bash", bash_init)
     home = tmp_path / "home"
     local_bin = home / ".local/bin"
     shims = home / ".local/share/mise/shims"
@@ -792,7 +792,7 @@ def test_bash_init_does_not_autostart_herdr_for_interactive_ssh(
     tmp_path: Path,
 ) -> None:
     repo_root = Path(__file__).resolve().parents[1]
-    bash_init = repo_root / "modules/bash/init.bash"
+    bash_init = repo_root / "shell/bash/init.bash"
     home = tmp_path / "home"
     bin_dir = tmp_path / "bin"
     home.mkdir()
@@ -852,7 +852,7 @@ def test_bash_init_does_not_autostart_herdr_for_interactive_ssh(
 def test_check_shell_files_requires_missing_tools_explicitly(tmp_path: Path) -> None:
     repo_root = _tracked_repo(
         tmp_path,
-        {"modules/bin/good": "#!/usr/bin/env bash\nprintf 'ok\\n'\n"},
+        {"commands/good": "#!/usr/bin/env bash\nprintf 'ok\\n'\n"},
     )
 
     with pytest.raises(ShellCheckError, match="shellcheck"):
@@ -870,8 +870,8 @@ def test_check_shell_files_skips_zsh_loudly_when_zsh_is_absent(
     repo_root = _tracked_repo(
         tmp_path,
         {
-            "modules/zsh/env.zsh": "alias ok=true\n",
-            "modules/bin/good": "#!/usr/bin/env bash\nprintf 'ok\\n'\n",
+            "shell/zsh/env.zsh": "alias ok=true\n",
+            "commands/good": "#!/usr/bin/env bash\nprintf 'ok\\n'\n",
         },
     )
     quiet_shellcheck = tmp_path / "quiet-shellcheck"
@@ -900,7 +900,7 @@ def test_check_shell_files_skips_zsh_loudly_when_zsh_is_absent(
 @requires_zsh
 def test_zsh_env_derives_root_and_rejects_invalid_override(tmp_path: Path) -> None:
     repo_root = Path(__file__).resolve().parents[1]
-    env_file = repo_root / "modules/zsh/env.zsh"
+    env_file = repo_root / "shell/zsh/env.zsh"
     environment = {"HOME": str(tmp_path), "PATH": "/usr/bin:/bin"}
 
     derived = subprocess.run(
@@ -927,7 +927,7 @@ def test_zsh_env_derives_root_and_rejects_invalid_override(tmp_path: Path) -> No
 @requires_zsh
 def test_openv_uses_one_selected_op_without_signin_retry(tmp_path: Path) -> None:
     repo_root = Path(__file__).resolve().parents[1]
-    env_file = repo_root / "modules/zsh/env.zsh"
+    env_file = repo_root / "shell/zsh/env.zsh"
     fake_op = tmp_path / "op"
     log = tmp_path / "op.log"
     fake_op.write_text(

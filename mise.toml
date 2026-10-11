@@ -105,16 +105,16 @@ run = [
 description = "Run behavior tests"
 run = "pytest"
 
-[tasks.test-modules]
-description = "Run standalone module test suites (macOS only)"
+[tasks.test-services]
+description = "Run the service test suites (macOS only)"
 run = """
 if [ "$(uname)" != Darwin ]; then
-  echo "skipped: module suites are macOS-only"
+  echo "skipped: service suites are macOS-only"
   exit 0
 fi
-./modules/macos-session-health/macos-session-health-test
-./modules/macos-maxfiles/macos-maxfiles-test
-./modules/cursoruiviewservice-watchdog/cursoruiviewservice-watchdog-test
+./services/macos-session-health/macos-session-health-test
+./services/macos-maxfiles/macos-maxfiles-test
+./services/cursoruiviewservice-watchdog/cursoruiviewservice-watchdog-test
 """
 
 [tasks.typecheck]
@@ -127,4 +127,4 @@ run = "actionlint"
 
 [tasks.verify]
 description = "Run all repository verification"
-depends = ["format", "lint", "shell", "typecheck", "test", "test-modules", "actionlint"]
+depends = ["format", "lint", "shell", "typecheck", "test", "test-services", "actionlint"]

@@ -73,15 +73,15 @@ degrade to the memory-only fallback.
 Inspect the live process and preview installation before changing the host:
 
 ```zsh
-modules/cursoruiviewservice-watchdog/cursoruiviewservice-watchdog check --json
-modules/cursoruiviewservice-watchdog/cursoruiviewservice-watchdog install --json
-modules/cursoruiviewservice-watchdog/cursoruiviewservice-watchdog install --auto-recycle --json
+services/cursoruiviewservice-watchdog/cursoruiviewservice-watchdog check --json
+services/cursoruiviewservice-watchdog/cursoruiviewservice-watchdog install --json
+services/cursoruiviewservice-watchdog/cursoruiviewservice-watchdog install --auto-recycle --json
 ```
 
 Install and verify the user LaunchAgent:
 
 ```zsh
-modules/cursoruiviewservice-watchdog/cursoruiviewservice-watchdog install --auto-recycle --apply
+services/cursoruiviewservice-watchdog/cursoruiviewservice-watchdog install --auto-recycle --apply
 cursoruiviewservice-watchdog status --json
 ```
 
@@ -112,12 +112,12 @@ public reports do not establish Apple's root cause. Remove it only after a
 later macOS release keeps a fresh `CursorUIViewService` below 384 MiB through
 at least seven days of normal input-source and Caps Lock use, without typing lag
 or a non-responsive process. Recheck with `check --json`, uninstall the
-LaunchAgent, then delete this module and its `mise run test-modules` entry.
+LaunchAgent, then delete this module and its `mise run test-services` entry.
 
 ## Verification
 
 ```zsh
-modules/cursoruiviewservice-watchdog/cursoruiviewservice-watchdog-test
-modules/cursoruiviewservice-watchdog/cursoruiviewservice-watchdog install --json
+services/cursoruiviewservice-watchdog/cursoruiviewservice-watchdog-test
+services/cursoruiviewservice-watchdog/cursoruiviewservice-watchdog install --json
 mise run verify
 ```

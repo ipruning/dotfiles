@@ -86,7 +86,7 @@ def load_host_policy(home: Path) -> HostPolicy:
 
 
 def configured_mise_path(home: Path) -> Path | None:
-    """Return the host-selected Mise path without hiding an invalid policy."""
+    """Return the host-selected mise path without hiding an invalid policy."""
     return load_host_policy(home).mise_path
 
 

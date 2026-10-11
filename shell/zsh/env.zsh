@@ -1,6 +1,6 @@
 if [[ -n ${DOTFILES_ROOT:-} ]]; then
-  if [[ ! -d $DOTFILES_ROOT || ! -r $DOTFILES_ROOT/modules/zsh/env.zsh ]]; then
-    print -u2 -- "DOTFILES_ROOT is invalid: $DOTFILES_ROOT (expected modules/zsh/env.zsh)"
+  if [[ ! -d $DOTFILES_ROOT || ! -r $DOTFILES_ROOT/shell/zsh/env.zsh ]]; then
+    print -u2 -- "DOTFILES_ROOT is invalid: $DOTFILES_ROOT (expected shell/zsh/env.zsh)"
     return 1
   fi
   DOTFILES_ROOT=${DOTFILES_ROOT:A}
@@ -252,8 +252,8 @@ fi
 
 # 👇 Functions
 if [[ "$OSTYPE" == darwin* ]]; then
-  source "$DOTFILES_ROOT/modules/zsh/macos.zsh"
-  source "$DOTFILES_ROOT/modules/zsh/surge.zsh"
+  source "$DOTFILES_ROOT/shell/zsh/macos.zsh"
+  source "$DOTFILES_ROOT/shell/zsh/surge.zsh"
 fi
 
 # 👇 1Password Environment Loader

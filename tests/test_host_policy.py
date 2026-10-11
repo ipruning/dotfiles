@@ -233,12 +233,12 @@ def test_valid_policy_selects_mise_and_is_visible_to_check(tmp_path: Path) -> No
     assert findings["mise.canonical"].path == mise
     assert (
         findings["mise.canonical"].message
-        == "The host-selected Mise executable is ready"
+        == "The host-selected mise executable is ready"
     )
     assert findings["mise.installations"].code == "mise.installations_single"
     assert findings["mise.shims"].severity is Severity.WARN
     assert findings["mise.shims"].action == (
-        "Rebuild the shims with the host owner that selected the canonical Mise executable."
+        "Rebuild the shims with the host owner that selected the canonical mise executable."
     )
     assert findings["shell.bash"].severity is None
     assert findings["shell.bash"].applicable is False

@@ -139,7 +139,7 @@ def _configure_linux_lite(
     *,
     apply: bool,
 ) -> SetupReport:
-    module_path = repo_root.resolve() / "modules/bash/init.bash"
+    module_path = repo_root.resolve() / "shell/bash/init.bash"
     if not module_path.is_file():
         raise SetupError(f"Linux Lite Bash module is missing: {module_path}")
     bashrc = home / ".bashrc"

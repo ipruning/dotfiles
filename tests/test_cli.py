@@ -77,9 +77,9 @@ def test_mise_python_tasks_never_sync_dependencies_implicitly(tmp_path: Path) ->
     # use the provisioned interpreter without creating project runtime state.
     project = tmp_path / "project"
     shutil.copytree(repo_root / "scripts", project / "scripts")
-    bash_module = project / "modules/bash/init.bash"
+    bash_module = project / "shell/bash/init.bash"
     bash_module.parent.mkdir(parents=True)
-    shutil.copy2(repo_root / "modules/bash/init.bash", bash_module)
+    shutil.copy2(repo_root / "shell/bash/init.bash", bash_module)
     home = tmp_path / "home"
     home.mkdir()
     environment = os.environ.copy()

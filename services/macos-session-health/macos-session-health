@@ -3734,7 +3734,7 @@ def render_incident_markdown(report: dict[str, Any]) -> str:
         f"- generated_at: `{report['generated_at']}`",
         f"- db: `{report['db']}`",
         f"- window_hours: `{report['window_hours']}`",
-        "- runbook: `modules/macos-session-health/README.md`",
+        "- runbook: `services/macos-session-health/README.md`",
         "",
         "## Collector Run Summary",
         "",

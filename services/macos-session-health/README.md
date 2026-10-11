@@ -18,8 +18,8 @@ mise `python/latest` path when available, so the daemon and CLI do not depend on
 mise shims or a long-lived uv script environment.
 
 ```zsh
-modules/macos-session-health/macos-session-health install --dry-run
-modules/macos-session-health/macos-session-health install
+services/macos-session-health/macos-session-health install --dry-run
+services/macos-session-health/macos-session-health install
 macos-session-health status --format json
 ```
 
@@ -37,7 +37,7 @@ operator to inspect status and `rerun install`. Uninstall likewise keeps
 successful removals and directs the operator to `rerun uninstall` after a
 failure. Repeating either command converges the requested state.
 
-After a partial failure, use `modules/macos-session-health/macos-session-health`
+After a partial failure, use `services/macos-session-health/macos-session-health`
 from the repository for status and retries: the installed wrapper may be absent
 or incomplete. Preview a repeated install with `install --dry-run` first.
 
@@ -193,11 +193,11 @@ After changing the collector, validate its command interface and read-only
 outputs before reinstalling it:
 
 ```zsh
-modules/macos-session-health/macos-session-health --version
-modules/macos-session-health/macos-session-health-test
-modules/macos-session-health/macos-session-health incident --hours 1 --limit 3 --format json
+services/macos-session-health/macos-session-health --version
+services/macos-session-health/macos-session-health-test
+services/macos-session-health/macos-session-health incident --hours 1 --limit 3 --format json
 git diff --check
-modules/macos-session-health/macos-session-health install
+services/macos-session-health/macos-session-health install
 macos-session-health status --format json
 ```
 
