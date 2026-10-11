@@ -57,7 +57,6 @@ def test_mise_python_tasks_never_sync_dependencies_implicitly(tmp_path: Path) ->
         "actionlint": "aqua:rhysd/actionlint",
         "fd": "aqua:sharkdp/fd",
         "jq": "aqua:jqlang/jq",
-        "prek": "aqua:j178/prek",
         "ripgrep": "aqua:BurntSushi/ripgrep",
         "shellcheck": "aqua:koalaman/shellcheck",
         "uv": "aqua:astral-sh/uv",

@@ -5,7 +5,6 @@ min_version = { hard = "2026.9.18" }
 actionlint = "aqua:rhysd/actionlint"
 fd = "aqua:sharkdp/fd"
 jq = "aqua:jqlang/jq"
-prek = "aqua:j178/prek"
 ripgrep = "aqua:BurntSushi/ripgrep"
 shellcheck = "aqua:koalaman/shellcheck"
 uv = "aqua:astral-sh/uv"
@@ -23,7 +22,6 @@ lockfile_platforms = ["macos-arm64", "linux-x64"]
 actionlint = "1.7.12"
 fd = "10.5.0"
 jq = "1.8.2"
-prek = "0.5.4"
 # TODO(upgrade): Move to the latest stable Python once python-build-standalone
 # publishes its linux-x64 and macos-arm64 binaries; 3.14.8 has no locked artifacts.
 # Then update this pin and both mise.lock files and verify locked bootstrap.
@@ -126,10 +124,6 @@ run = "ty check scripts tests"
 [tasks.actionlint]
 description = "Check GitHub Actions workflows"
 run = "actionlint"
-
-[tasks.prek]
-description = "Run the repository Git hooks against all files"
-run = "prek run --all-files"
 
 [tasks.verify]
 description = "Run all repository verification"
