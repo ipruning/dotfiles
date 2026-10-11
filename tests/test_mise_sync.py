@@ -585,7 +585,7 @@ def test_mise_sync_reports_install_failure_but_still_repairs_shims(
         f"install --locked --yes -C {home}",
         f"reshim --force -C {home}",
     ]
-    assert "[mise.tools] FAIL command exited 7" in completed.stderr
+    assert "[mise.baseline-tools] FAIL command exited 7" in completed.stderr
 
 
 def test_mise_sync_skips_backend_tools_when_runtime_installation_fails(
@@ -635,7 +635,10 @@ def test_mise_sync_timeout_stops_children_and_skips_dependent_tools(
             (),
         ),
         MiseSyncStep(
-            "mise.tools", ("/bin/sh", "-c", "printf unexpected > unexpected"), 2, ()
+            "mise.baseline-tools",
+            ("/bin/sh", "-c", "printf unexpected > unexpected"),
+            2,
+            (),
         ),
         MiseSyncStep(
             "mise.shims", ("/bin/sh", "-c", "printf completed > completed"), 2, ()

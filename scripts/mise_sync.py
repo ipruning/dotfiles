@@ -275,7 +275,7 @@ def _sync_steps(
             path_prepend,
         ),
         MiseSyncStep(
-            "mise.tools",
+            "mise.baseline-tools",
             (executable, "install", "--locked", "--yes", "-C", str(home)),
             3600,
             path_prepend,
@@ -414,7 +414,7 @@ def execute_mise_sync(
 
     results: list[MiseSyncResult] = []
     for planned in plan.results:
-        if planned.step.name == "mise.tools" and any(
+        if planned.step.name == "mise.baseline-tools" and any(
             result.step.name == "mise.runtimes" and result.status is Status.FAILED
             for result in results
         ):

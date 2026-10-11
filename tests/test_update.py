@@ -177,7 +177,7 @@ def test_update_previews_exact_plan_by_default_without_running_tools(
             ],
         ),
         (
-            "mise.tools",
+            "mise.installed-tools",
             "planned",
             [
                 str(tmp_path / "home/.local/bin/mise"),
@@ -195,6 +195,7 @@ def test_update_previews_exact_plan_by_default_without_running_tools(
             [
                 str(tmp_path / "home/.local/bin/mise"),
                 "reshim",
+                "--force",
                 "-C",
                 str(tmp_path / "home"),
             ],
@@ -208,7 +209,7 @@ def test_update_previews_exact_plan_by_default_without_running_tools(
             "determines whether an update exists during apply."
         ),
         (
-            "mise.tools consumes the shared lock without changing declarations; "
+            "mise.installed-tools consumes the shared lock without changing declarations; "
             "use upgrade-tools explicitly to advance the shared baseline."
         ),
     ]
@@ -216,7 +217,10 @@ def test_update_previews_exact_plan_by_default_without_running_tools(
     steps = {step["name"]: step for step in document["steps"]}
     expected_mise_path = [str(tmp_path / "home/.local/bin")]
     assert steps["mise.self"]["environment"]["PATH_prepend"] == expected_mise_path
-    assert steps["mise.tools"]["environment"]["PATH_prepend"] == expected_mise_path
+    assert (
+        steps["mise.installed-tools"]["environment"]["PATH_prepend"]
+        == expected_mise_path
+    )
     assert steps["mise.shims"]["environment"]["PATH_prepend"] == expected_mise_path
     assert steps["brew.metadata"]["environment"]["PATH_prepend"] == []
     assert steps["brew.metadata"]["environment"]["variables"] == {}
@@ -332,7 +336,7 @@ def test_update_gives_package_managers_transaction_scale_timeouts(
     steps = {result.step.name: result.step for result in report.results}
 
     assert steps["brew.packages"].timeout_seconds >= 3600
-    assert steps["mise.tools"].timeout_seconds >= 1800
+    assert steps["mise.installed-tools"].timeout_seconds >= 1800
     assert steps["claude"].timeout_seconds >= 1800
     assert steps["pi"].timeout_seconds >= 1800
 
@@ -480,7 +484,7 @@ def test_update_runs_available_tools_in_order_and_reports_skips(tmp_path: Path) 
         ("brew.metadata", "succeeded", 0),
         ("brew.packages", "succeeded", 0),
         ("mise.self", "succeeded", 0),
-        ("mise.tools", "succeeded", 0),
+        ("mise.installed-tools", "succeeded", 0),
         ("mise.shims", "succeeded", 0),
         ("amp", "succeeded", 0),
     ]
@@ -489,7 +493,7 @@ def test_update_runs_available_tools_in_order_and_reports_skips(tmp_path: Path) 
         "brew upgrade --formula",
         "mise self-update --yes --no-plugins",
         f"mise install --locked --yes -C {tmp_path / 'home'} python",
-        f"mise reshim -C {tmp_path / 'home'}",
+        f"mise reshim --force -C {tmp_path / 'home'}",
         "amp update",
     ]
 
@@ -510,7 +514,7 @@ def test_update_executes_reshim_with_canonical_mise_first_on_path(
 
     def fake_run(step, **kwargs):
         nonlocal observed_path
-        if step.command == (str(canonical), "reshim", "-C", str(home)):
+        if step.command == (str(canonical), "reshim", "--force", "-C", str(home)):
             observed_path = kwargs["env"]["PATH"]
         return subprocess.CompletedProcess(step.command, 0, "", "")
 
@@ -770,7 +774,9 @@ def test_update_mise_step_passes_only_installed_versions(
     )
 
     result = next(
-        result for result in report.results if result.step.name == "mise.tools"
+        result
+        for result in report.results
+        if result.step.name == "mise.installed-tools"
     )
     assert result.status is Status.PLANNED
     assert result.step.command == (
@@ -807,7 +813,9 @@ def test_update_fails_closed_when_mise_inventory_is_invalid(
     )
 
     result = next(
-        result for result in report.results if result.step.name == "mise.tools"
+        result
+        for result in report.results
+        if result.step.name == "mise.installed-tools"
     )
     assert result.status is Status.FAILED
     assert "invalid JSON" in (result.reason or "")
@@ -837,7 +845,9 @@ def test_update_apply_does_not_execute_a_failed_mise_preflight(
         executable_finder=lambda tool: "/tools/mise" if tool == "mise" else None,
     )
 
-    mise_result = next(r for r in report.results if r.step.name == "mise.tools")
+    mise_result = next(
+        r for r in report.results if r.step.name == "mise.installed-tools"
+    )
     assert mise_result.status is Status.FAILED
     # A failed inventory must not fall through to `mise upgrade` with no tool
     # arguments, which would upgrade every installed tool.
@@ -1115,7 +1125,9 @@ def test_update_cli_installs_locked_target_when_only_older_version_is_installed(
     )
     assert completed.returncode == 0, completed.stderr
     document = json.loads(completed.stdout)
-    step = next(step for step in document["steps"] if step["name"] == "mise.tools")
+    step = next(
+        step for step in document["steps"] if step["name"] == "mise.installed-tools"
+    )
     assert step["status"] == "succeeded"
     assert step["command"][1:] == [
         "install",

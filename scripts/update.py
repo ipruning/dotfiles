@@ -36,7 +36,7 @@ from .update_native import native_updaters, resolve_native_step
 StepCallback = Callable[["UpdateStep"], None]
 NEXT_COMMANDS = ("mise run check",)
 MISE_TOOLS_NOTE = (
-    "mise.tools consumes the shared lock without changing declarations; "
+    "mise.installed-tools consumes the shared lock without changing declarations; "
     "use upgrade-tools explicitly to advance the shared baseline."
 )
 PREVIEW_NOTE = (
@@ -221,7 +221,7 @@ def _update_steps(home: Path) -> tuple[UpdateStep, ...]:
             path_prepend=mise_path,
         ),
         UpdateStep(
-            "mise.tools",
+            "mise.installed-tools",
             "mise",
             (mise_executable, "install", "--locked", "--yes", "-C", str(home)),
             1800,
@@ -230,7 +230,7 @@ def _update_steps(home: Path) -> tuple[UpdateStep, ...]:
         UpdateStep(
             "mise.shims",
             "mise",
-            (mise_executable, "reshim", "-C", str(home)),
+            (mise_executable, "reshim", "--force", "-C", str(home)),
             120,
             path_prepend=mise_path,
         ),
@@ -296,7 +296,7 @@ def plan_updates(
             if step.tool == "mise"
             else executable_finder(step.tool) is not None
         )
-        if available and step.name == "mise.tools":
+        if available and step.name == "mise.installed-tools":
             assert mise_executable is not None
             try:
                 installed, _declaration = inspect_shared_mise_tools(
@@ -373,7 +373,7 @@ def execute_updates(
     for planned in plan.results:
         # Carry through anything the preflight already resolved (SKIPPED, or a
         # FAILED mise inventory). Only PLANNED steps run: executing a FAILED
-        # mise.tools step would run `mise install` with no tool arguments and
+        # mise.installed-tools step would run `mise install` with no tool arguments and
         # install every tool the host's configs declare — the exact outcome the
         # preflight avoids.
         if planned.status is not Status.PLANNED:
@@ -479,7 +479,8 @@ def _notes(report: UpdateReport) -> tuple[str, ...]:
     if not report.apply:
         notes.append(PREVIEW_NOTE)
     if any(
-        result.step.name == "mise.tools" and result.status is not Status.SKIPPED
+        result.step.name == "mise.installed-tools"
+        and result.status is not Status.SKIPPED
         for result in report.results
     ):
         notes.append(MISE_TOOLS_NOTE)
@@ -632,7 +633,7 @@ def main(argv: list[str] | None = None) -> int:
             else plan_updates(home)
         )
         safety_failed = any(
-            result.step.name == "mise.tools"
+            result.step.name == "mise.installed-tools"
             and result.status is Status.FAILED
             and result.exit_code is None
             for result in report.results
