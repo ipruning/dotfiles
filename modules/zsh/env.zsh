@@ -308,16 +308,6 @@ openv-longbridge() {
 # 👇 Brew
 export HOMEBREW_NO_ANALYTICS=1
 
-# 👇 Prek
-export PREK_COLOR="never"
-
-# 👇 tailspin
-if command -v tailspin >/dev/null 2>&1; then
-  if command -v ov >/dev/null 2>&1; then
-    export TAILSPIN_PAGER="ov -f [FILE]"
-  fi
-fi
-
 # 👇 OrbStack
 if [[ -f "$HOME/.orbstack/shell/init.zsh" ]]; then
   source "$HOME/.orbstack/shell/init.zsh"
@@ -402,14 +392,4 @@ fi
 # 👇 atuin
 if command -v atuin >/dev/null 2>&1 && [[ -f "$GENERATED_FUNCTIONS_DIR/_atuin.zsh" ]]; then
   source "$GENERATED_FUNCTIONS_DIR/_atuin.zsh"
-fi
-
-# 👇 OpenClaw Completion
-if [[ -f "$HOME/.openclaw/completions/openclaw.zsh" ]]; then
-  source "$HOME/.openclaw/completions/openclaw.zsh"
-fi
-
-# 👇 broot
-if [[ -f "$HOME/.config/broot/launcher/bash/br" ]]; then
-  source "$HOME/.config/broot/launcher/bash/br"
 fi

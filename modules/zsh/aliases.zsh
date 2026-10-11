@@ -7,7 +7,8 @@ alias df="df -h"
 
 alias du="du -h"
 
-alias free="free -h"
+# macOS has no free(1).
+[[ $OSTYPE == darwin* ]] || alias free="free -h"
 
 alias grep="grep --color=auto"
 

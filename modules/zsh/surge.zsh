@@ -51,15 +51,3 @@ function toggle-outbound-mode() {
   fi
   echo "Outbound Mode: $(xh --body GET https://localhost:6171/v1/outbound X-Key:$x_key | jq -r '.mode')"
 }
-
-function surge-status() {
-  surge diagnostics
-}
-
-function surge-flush-dns() {
-  surge flush dns
-}
-
-function surge-reload() {
-  surge reload
-}
