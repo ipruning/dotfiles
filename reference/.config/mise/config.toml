@@ -45,6 +45,7 @@ zig = "latest"
 zoxide = "latest"
 mr-boxington = "latest"
 "npm:yarn" = "1.22.22"
+"npm:cf" = "latest"
 
 [settings]
 auto_install = false
