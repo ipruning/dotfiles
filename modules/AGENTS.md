@@ -7,8 +7,8 @@ self-installing maintenance tools. Repository inspection logic belongs in
 ## User commands
 
 - Put user-facing commands in `modules/bin/`.
-- Keep command-specific helpers beside their owner. Shared shell helpers under
-  `modules/bin/_lib/` must have at least two real callers.
+- Keep command-specific helpers inside their owner. Add a shared helper only
+  when at least two real commands call it.
 - New executable names use kebab-case. Imported Python helpers use `.py`;
   directly invoked commands use a working shebang and executable mode.
 - Agent-facing output stays parseable. Send diagnostics to stderr and provide a

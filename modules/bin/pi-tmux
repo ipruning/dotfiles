@@ -11,12 +11,16 @@ if (( $# != 0 )); then
   exit 2
 fi
 
-# shellcheck source=_lib/session-id.sh
-# shellcheck disable=SC1091
-source "$(dirname "${BASH_SOURCE[0]}")/_lib/session-id.sh"
+if ! command -v git >/dev/null 2>&1; then
+  echo 'pi-tmux: git is required to derive a stable session ID' >&2
+  exit 127
+fi
 
+# Session name: "<sanitized basename>-<first 8 hex of the path's git blob hash>".
 pwd_abs="$(pwd -P)"
-session="$(session_id_for_dir "$pwd_abs")"
+base="$(basename "$pwd_abs" | tr -cs '[:alnum:]' '_' | sed 's/^_//; s/_$//')"
+hash="$(printf '%s' "$pwd_abs" | git hash-object --stdin | cut -c1-8)"
+session="$base-$hash"
 
 tmux has-session -t "$session" 2>/dev/null || \
   tmux new-session -d -s "$session" -n pi -c "$pwd_abs" 'zsh -i -c "pi"' || true

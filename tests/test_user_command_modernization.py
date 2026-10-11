@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os
-import shlex
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -25,39 +25,17 @@ def _write_executable(path: Path, content: str) -> None:
     path.chmod(0o755)
 
 
-def _pi_environment(
-    tmp_path: Path, list_status: int, list_output: str
-) -> tuple[dict[str, str], Path]:
-    fake_bin = tmp_path / "bin"
-    fake_bin.mkdir()
-    log = tmp_path / "zellij.log"
-    _write_executable(
-        fake_bin / "zellij",
-        "#!/bin/bash\n"
-        'printf \'%s\\n\' "$*" >>"$ZELLIJ_LOG"\n'
-        "if [[ $1 == list-sessions ]]; then\n"
-        "  printf '%s' \"$LIST_OUTPUT\"\n"
-        '  exit "$LIST_STATUS"\n'
-        "fi\n",
-    )
-    env = {
-        **os.environ,
-        "PATH": f"{fake_bin}:{os.environ['PATH']}",
-        "ZELLIJ_LOG": str(log),
-        "LIST_STATUS": str(list_status),
-        "LIST_OUTPUT": list_output,
-    }
-    return env, log
-
-
 def _session_for(directory: Path) -> str:
-    command = (
-        f"source {shlex.quote(str(BIN / '_lib/session-id.sh'))}; "
-        f"session_id_for_dir {shlex.quote(str(directory.resolve()))}"
-    )
-    return subprocess.run(
-        ["bash", "-c", command], check=True, capture_output=True, text=True
-    ).stdout
+    path = str(directory.resolve())
+    base = re.sub(r"[^0-9A-Za-z]+", "_", Path(path).name).strip("_")
+    digest = subprocess.run(
+        ["git", "hash-object", "--stdin"],
+        input=path,
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout[:8]
+    return f"{base}-{digest}"
 
 
 def test_link_reads_zellij_dump_screen_from_stdout(tmp_path: Path) -> None:
@@ -135,13 +113,14 @@ def test_link_rejects_non_exact_fzf_selection(tmp_path: Path) -> None:
     assert not open_log.exists()
 
 
-def test_session_id_requires_git() -> None:
-    command = (
-        f"source {shlex.quote(str(BIN / '_lib/session-id.sh'))}; "
-        "PATH='' session_id_short_hash /tmp/example"
-    )
+def test_pi_tmux_requires_git(tmp_path: Path) -> None:
     completed = subprocess.run(
-        ["bash", "-c", command], capture_output=True, text=True, check=False
+        ["/bin/bash", BIN / "pi-tmux"],
+        cwd=tmp_path,
+        env={**os.environ, "PATH": ""},
+        capture_output=True,
+        text=True,
+        check=False,
     )
 
     assert completed.returncode == 127
@@ -165,45 +144,6 @@ def test_pmt_keeps_prompt_behavior_without_zellij_context() -> None:
         "<user_instructions>\nhello world\n</user_instructions>\n\n"
     )
     assert "terminal_context" not in completed.stdout
-
-
-def test_pi_zellij_attaches_to_existing_session(tmp_path: Path) -> None:
-    session = _session_for(tmp_path)
-    env, log = _pi_environment(tmp_path, 0, f"other\n{session}\n")
-
-    completed = subprocess.run([BIN / "pi-zellij"], cwd=tmp_path, env=env, check=False)
-
-    assert completed.returncode == 0
-    assert log.read_text().splitlines() == [
-        "list-sessions --no-formatting --short",
-        f"attach {session}",
-    ]
-
-
-def test_pi_zellij_creates_when_zellij_reports_no_sessions(tmp_path: Path) -> None:
-    env, log = _pi_environment(tmp_path, 1, "No active zellij sessions found.\n")
-
-    completed = subprocess.run([BIN / "pi-zellij"], cwd=tmp_path, env=env, check=False)
-
-    assert completed.returncode == 0
-    assert "--new-session-with-layout pi" in log.read_text()
-
-
-def test_pi_zellij_preserves_other_list_failure(tmp_path: Path) -> None:
-    env, log = _pi_environment(tmp_path, 7, "connection failed\n")
-
-    completed = subprocess.run(
-        [BIN / "pi-zellij"],
-        cwd=tmp_path,
-        env=env,
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-
-    assert completed.returncode == 7
-    assert completed.stderr == "connection failed\n"
-    assert log.read_text().splitlines() == ["list-sessions --no-formatting --short"]
 
 
 @pytest.mark.parametrize("special_name", SPECIAL_NAMES)
@@ -324,13 +264,10 @@ SHELL_COMMANDS = [
     "d",
     "dateutc",
     "g",
-    "histx",
     "mkbir",
-    "newwin",
     "o",
     "p",
     "pi-tmux",
-    "pi-zellij",
     "ports",
     "repoprompt",
     "scratch",
@@ -507,8 +444,6 @@ def test_shell_rejected_arguments_have_no_effects(
         ("mkbir", [""]),
         ("o", ["one", "two"]),
         ("o", [""]),
-        ("newwin", ["chrome", "extra"]),
-        ("histx", ["-1"]),
         ("ports", ["--watch", "extra"]),
     ],
 )
