@@ -89,7 +89,7 @@ def _symlinked_generated_directory(generated_root: Path) -> Path | None:
 
 def _symlinked_directory_reason(directory: Path) -> str:
     return (
-        f"generated directory is a symlink ({os.readlink(directory)}); "
+        f"generated directory is a symlink ({directory.readlink()}); "
         "remove it before refreshing"
     )
 
@@ -302,7 +302,7 @@ def plan_generate(
                     spec,
                     Status.FAILED,
                     action,
-                    f"plugin target is a symlink ({os.readlink(target)}); "
+                    f"plugin target is a symlink ({target.readlink()}); "
                     "remove it before refreshing",
                 ),
             )
@@ -313,7 +313,7 @@ def plan_generate(
                     Status.FAILED,
                     action,
                     f"plugin Git metadata is a symlink "
-                    f"({os.readlink(git_directory)}); remove it before refreshing",
+                    f"({git_directory.readlink()}); remove it before refreshing",
                 ),
             )
         elif action is GenerateAction.UPDATE and git_available:
@@ -490,7 +490,7 @@ def execute_generate(
             if command_directory is not None and command_directory.is_symlink():
                 raise RuntimeError(
                     "generated command directory is a symlink "
-                    f"({os.readlink(command_directory)}); refusing to execute outside "
+                    f"({command_directory.readlink()}); refusing to execute outside "
                     "generated state",
                 )
             if command_directory is not None:
@@ -498,7 +498,7 @@ def execute_generate(
                 if command_git_directory.is_symlink():
                     raise RuntimeError(
                         "generated command Git metadata is a symlink "
-                        f"({os.readlink(command_git_directory)}); refusing to execute "
+                        f"({command_git_directory.readlink()}); refusing to execute "
                         "outside generated state",
                     )
                 if not command_git_directory.is_dir():

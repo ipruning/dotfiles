@@ -9,8 +9,8 @@ from scripts.mise_sync import (
     MiseSyncReport,
     MiseSyncResult,
     MiseSyncStep,
-    _sync_steps,
     execute_mise_sync,
+    sync_steps,
 )
 from scripts.models import Status
 from scripts.restore import RestoreReport
@@ -126,7 +126,7 @@ def test_mise_sync_previews_configuration_tools_and_shims_without_writing(
 def test_mise_sync_disables_release_stripping_only_for_macos_27_tool_builds(
     tmp_path: Path,
 ) -> None:
-    macos_27_steps = _sync_steps(
+    macos_27_steps = sync_steps(
         tmp_path,
         system_name="Darwin",
         system_version="27.0",
@@ -139,7 +139,7 @@ def test_mise_sync_disables_release_stripping_only_for_macos_27_tool_builds(
 
     assert all(
         not step.environment
-        for step in _sync_steps(
+        for step in sync_steps(
             tmp_path,
             system_name="Darwin",
             system_version="26.5",
@@ -147,7 +147,7 @@ def test_mise_sync_disables_release_stripping_only_for_macos_27_tool_builds(
     )
     assert all(
         not step.environment
-        for step in _sync_steps(
+        for step in sync_steps(
             tmp_path,
             system_name="Linux",
             system_version="27.0",

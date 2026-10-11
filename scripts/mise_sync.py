@@ -247,7 +247,7 @@ def _cargo_build_environment(
     return (("CARGO_PROFILE_RELEASE_STRIP", "none"),)
 
 
-def _sync_steps(
+def sync_steps(
     home: Path,
     *,
     system_name: str | None = None,
@@ -300,7 +300,7 @@ def plan_mise_sync(repo_root: Path, home: Path) -> MiseSyncReport:
         additional_global_configs,
         configuration_error,
     ) = _mise_tool_safety(repo_root, home, executable)
-    steps = _sync_steps(home)
+    steps = sync_steps(home)
     if not restore.ok:
         reason = "mise configuration restore is not safe to apply"
         results = tuple(

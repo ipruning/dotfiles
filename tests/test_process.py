@@ -1,5 +1,6 @@
 """Verify output, timeout, and progress boundaries with real child processes."""
 
+import contextlib
 import os
 import signal
 import subprocess
@@ -113,7 +114,5 @@ def test_timeout_does_not_wait_for_escaped_child_pipe(tmp_path: Path) -> None:
         assert pid_path.exists()
     finally:
         if pid_path.exists():
-            try:
+            with contextlib.suppress(ProcessLookupError):
                 os.kill(int(pid_path.read_text()), signal.SIGKILL)
-            except ProcessLookupError:
-                pass

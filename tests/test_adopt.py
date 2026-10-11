@@ -1,5 +1,4 @@
 import json
-import os
 import subprocess
 from pathlib import Path
 
@@ -9,9 +8,9 @@ from scripts.adopt import (
     AdoptReport,
     AdoptResult,
     Status,
-    _render,
     apply_adopt,
     plan_adopt,
+    render_adopt,
 )
 from scripts.models import Drift, DriftKind, FileKind
 from tests.conftest import REPO_ROOT, mackup_cfg, run_scripts_module
@@ -95,7 +94,7 @@ def test_adopt_defaults_to_a_read_only_application_plan(tmp_path: Path) -> None:
 
 
 def test_adopt_human_output_does_not_suggest_apply_when_converged(capsys) -> None:
-    _render(AdoptReport(application="example", apply=False, results=()))
+    render_adopt(AdoptReport(application="example", apply=False, results=()))
 
     captured = capsys.readouterr()
     assert captured.out == "Summary: no changes\n"
@@ -166,7 +165,7 @@ def test_adopt_preserves_live_symlinks_instead_of_materializing_targets(
     assert applied.ok is True
     adopted = repo_root / "reference/.linked"
     assert adopted.is_symlink()
-    assert os.readlink(adopted) == str(secret_target)
+    assert adopted.readlink() == secret_target
 
 
 def test_adopt_apply_refuses_uncommitted_reference_changes(tmp_path: Path) -> None:

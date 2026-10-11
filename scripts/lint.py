@@ -592,7 +592,7 @@ def _mise_alias_findings(repo_root: Path) -> list[Finding]:
     ]
 
 
-def _symlink_findings(repo_root: Path, tracked_paths: list[Path]) -> list[Finding]:
+def _symlink_findings(tracked_paths: list[Path]) -> list[Finding]:
     return [
         _located_finding(
             Severity.ERROR,
@@ -622,7 +622,7 @@ def inspect_repository(
     if finding := tracked_finding or candidate_finding:
         findings.append(finding)
     findings.extend(_mackup_findings(repo_root, set(tracked_paths)))
-    findings.extend(_symlink_findings(repo_root, tracked_paths))
+    findings.extend(_symlink_findings(tracked_paths))
     findings.extend(_tracked_file_findings(repo_root, tracked_paths))
     findings.extend(_mise_alias_findings(repo_root))
     return LintReport(schema_version=1, findings=tuple(findings))

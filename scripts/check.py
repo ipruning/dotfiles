@@ -290,7 +290,7 @@ def _dangling_repo_link_findings(repo_root: Path, home: Path) -> list[Finding]:
     findings = []
     for link in sorted(links):
         try:
-            raw_target = os.readlink(link)
+            raw_target = link.readlink()
         except OSError:
             unreadable_paths.append(link)
             continue

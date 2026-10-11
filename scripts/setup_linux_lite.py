@@ -110,8 +110,8 @@ def _write_file(path: Path, content: bytes, mode: int) -> None:
     try:
         with os.fdopen(descriptor, "wb") as handle:
             handle.write(content)
-        os.chmod(tmp_name, mode)
-        os.replace(tmp_name, path)
+        Path(tmp_name).chmod(mode)
+        Path(tmp_name).replace(path)
     except OSError:
         Path(tmp_name).unlink(missing_ok=True)
         raise

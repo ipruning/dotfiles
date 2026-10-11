@@ -258,8 +258,8 @@ def plan_updates(
     native_roots = {
         updater.step.name: updater.roots for updater in native_updaters(home)
     }
-    for step in _update_steps(home):
-        step = replace(step, cwd=home)
+    for declared in _update_steps(home):
+        step = replace(declared, cwd=home)
         if step.name == "mise.self" and configured_mise_path(home) is not None:
             results.append(
                 UpdateResult(

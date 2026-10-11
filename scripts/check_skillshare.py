@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import os
 import subprocess
+from itertools import starmap
 from pathlib import Path
 from typing import cast
 
@@ -20,11 +21,13 @@ from .models import Finding, Severity
 
 SKILLSHARE_MISE_TOOL = "skillshare"
 SKILLSHARE_SYSTEM_PATHS = tuple(
-    Path("/").joinpath(*parts)
-    for parts in (
-        ("opt", "homebrew", "bin", "skillshare"),
-        ("home", "linuxbrew", ".linuxbrew", "bin", "skillshare"),
-        ("usr", "local", "bin", "skillshare"),
+    starmap(
+        Path("/").joinpath,
+        (
+            ("opt", "homebrew", "bin", "skillshare"),
+            ("home", "linuxbrew", ".linuxbrew", "bin", "skillshare"),
+            ("usr", "local", "bin", "skillshare"),
+        ),
     )
 )
 

@@ -1,14 +1,13 @@
 import json
-import os
 from pathlib import Path
 
 from scripts.models import Drift, DriftKind, FileKind, Status
 from scripts.restore import (
     RestoreReport,
     RestoreResult,
-    _render,
     apply_restore,
     plan_restore,
+    render_restore,
 )
 from tests.conftest import REPO_ROOT, run_scripts_module
 
@@ -43,7 +42,7 @@ def test_restore_defaults_to_a_read_only_application_plan(tmp_path: Path) -> Non
 
 
 def test_restore_human_output_does_not_suggest_apply_when_converged(capsys) -> None:
-    _render(RestoreReport(application="example", apply=False, results=()))
+    render_restore(RestoreReport(application="example", apply=False, results=()))
 
     captured = capsys.readouterr()
     assert captured.out == "Summary: no changes\n"
@@ -115,7 +114,7 @@ def test_restore_recreates_an_adopted_symlink(tmp_path: Path) -> None:
     assert result.backup_path is not None
     assert result.backup_path.read_text() == "host-specific\n"
     assert live.is_symlink()
-    assert os.readlink(live) == str(external)
+    assert live.readlink() == external
     assert external.read_text() == "outside content\n"
 
 

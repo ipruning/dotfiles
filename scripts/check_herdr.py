@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import platform
 import tomllib
+from itertools import starmap
 from pathlib import Path
 
 from .models import Finding, Severity
@@ -14,10 +15,9 @@ def inspect_herdr(
     home: Path,
     *,
     system_paths: tuple[Path, ...] = tuple(
-        Path("/").joinpath(*parts)
-        for parts in (
-            ("opt", "homebrew", "bin", "herdr"),
-            ("usr", "local", "bin", "herdr"),
+        starmap(
+            Path("/").joinpath,
+            (("opt", "homebrew", "bin", "herdr"), ("usr", "local", "bin", "herdr")),
         )
     ),
 ) -> list[Finding]:

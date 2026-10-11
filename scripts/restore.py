@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import shlex
 import sys
 from dataclasses import dataclass
@@ -133,7 +132,7 @@ def apply_restore(repo_root: Path, home: Path, plan: RestoreReport) -> RestoreRe
                 RestoreError,
             )
             if drift.reference_path.is_symlink():
-                link_target = Path(os.readlink(drift.reference_path))
+                link_target = drift.reference_path.readlink()
             else:
                 resolved_reference = drift.reference_path.resolve()
                 relative_path(
@@ -218,7 +217,7 @@ def _document(
     }
 
 
-def _render(report: RestoreReport, *, apply_allowed: bool = True) -> None:
+def render_restore(report: RestoreReport, *, apply_allowed: bool = True) -> None:
     for result in report.results:
         label = result.status.value.upper()
         print(f"{label:7} {result.drift.live_path}")
@@ -297,7 +296,7 @@ def main(argv: list[str] | None = None) -> int:
                     file=sys.stderr,
                 )
     else:
-        _render(report, apply_allowed=apply_allowed)
+        render_restore(report, apply_allowed=apply_allowed)
     return 0 if report.ok else 1
 
 

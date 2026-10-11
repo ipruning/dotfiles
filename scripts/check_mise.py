@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 import re
 import subprocess
+from itertools import starmap
 from pathlib import Path
 
 from .host_policy import configured_mise_path
@@ -16,13 +17,15 @@ from .mise import (
 from .models import ExecutableFinder, Finding, Severity
 
 MISE_COMMON_LOCATIONS = tuple(
-    Path("/").joinpath(*parts)
-    for parts in (
-        ("opt", "homebrew", "bin", "mise"),
-        ("usr", "local", "bin", "mise"),
-        ("home", "linuxbrew", ".linuxbrew", "bin", "mise"),
-        ("usr", "bin", "mise"),
-        ("snap", "bin", "mise"),
+    starmap(
+        Path("/").joinpath,
+        (
+            ("opt", "homebrew", "bin", "mise"),
+            ("usr", "local", "bin", "mise"),
+            ("home", "linuxbrew", ".linuxbrew", "bin", "mise"),
+            ("usr", "bin", "mise"),
+            ("snap", "bin", "mise"),
+        ),
     )
 )
 MISE_BINDING_PATTERN = re.compile(r"(?<![\w])(/[^\s\"'()]+/mise)(?=[\s\"'();]|$)")
@@ -162,7 +165,7 @@ def mise_shim_finding(
         for shim in entries:
             if not shim.is_symlink():
                 continue
-            raw_target = Path(os.readlink(shim))
+            raw_target = shim.readlink()
             target = (
                 raw_target if raw_target.is_absolute() else shim.parent / raw_target
             )

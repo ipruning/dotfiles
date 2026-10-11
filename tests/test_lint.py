@@ -149,7 +149,7 @@ def test_inspect_repository_with_relative_root_does_not_scan_its_own_patterns(
     repo_root = Path(__file__).resolve().parents[1]
     monkeypatch.chdir(repo_root)
 
-    report = inspect_repository(Path("."), Path.home())
+    report = inspect_repository(Path(), Path.home())
 
     assert "repository.structured_data_text_parser" not in {
         finding.code for finding in report.findings

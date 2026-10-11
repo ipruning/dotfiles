@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import shlex
 import shutil
 import subprocess
@@ -210,7 +209,7 @@ def _copy_live_into_reference(live_path: Path, reference_path: Path) -> None:
         return
     # The file must be closed before copy2 replaces it and retained until the
     # staged reference is published, so a context manager is not appropriate.
-    descriptor = tempfile.NamedTemporaryFile(  # noqa: SIM115
+    descriptor = tempfile.NamedTemporaryFile(  # ruff: ignore[open-file-with-context-handler]
         dir=reference_path.parent,
         prefix=".adopt-",
         delete=False,
@@ -220,7 +219,7 @@ def _copy_live_into_reference(live_path: Path, reference_path: Path) -> None:
     try:
         if live_path.is_symlink():
             staged_file.unlink()
-            staged_file.symlink_to(os.readlink(live_path))
+            staged_file.symlink_to(live_path.readlink())
         else:
             shutil.copy2(live_path, staged_file)
         _publish_staged_reference(staged_file, reference_path)
@@ -344,7 +343,7 @@ def _document(
     }
 
 
-def _render(report: AdoptReport, *, apply_allowed: bool = True) -> None:
+def render_adopt(report: AdoptReport, *, apply_allowed: bool = True) -> None:
     for result in report.results:
         label = result.status.value.upper()
         print(f"{label:7} {result.drift.reference_path}")
@@ -429,7 +428,7 @@ def main(argv: list[str] | None = None) -> int:
                     file=sys.stderr,
                 )
     else:
-        _render(report, apply_allowed=apply_allowed)
+        render_adopt(report, apply_allowed=apply_allowed)
     return 0 if report.ok else 1
 
 
