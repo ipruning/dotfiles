@@ -1,29 +1,29 @@
-"""JSON and operator handoffs for runtime refresh reports."""
+"""JSON and operator handoffs for generate reports."""
 
 from __future__ import annotations
 
 import shlex
 import sys
 
+from .generate_models import GenerateAction, GenerateReport, GenerateSpec
 from .models import Status, status_summary
-from .runtime_models import RuntimeAction, RuntimeReport, RuntimeSpec
 
 
-def _summary(report: RuntimeReport) -> dict[str, int]:
+def _summary(report: GenerateReport) -> dict[str, int]:
     return status_summary(result.status for result in report.results)
 
 
-def runtime_document(
-    report: RuntimeReport,
+def generate_document(
+    report: GenerateReport,
     *,
     apply_allowed: bool = True,
 ) -> dict[str, object]:
     return {
         "schema_version": 1,
-        "operation": "runtime",
+        "operation": "generate",
         "apply": report.apply,
         "ok": report.ok,
-        "next": list(runtime_next_commands(report, apply_allowed=apply_allowed)),
+        "next": list(generate_next_commands(report, apply_allowed=apply_allowed)),
         "shell_restart_required": _shell_restart_required(report),
         "steps": [
             {
@@ -45,8 +45,8 @@ def runtime_document(
     }
 
 
-def runtime_next_commands(
-    report: RuntimeReport,
+def generate_next_commands(
+    report: GenerateReport,
     *,
     apply_allowed: bool = True,
 ) -> tuple[str, ...]:
@@ -57,7 +57,7 @@ def runtime_next_commands(
             or not any(result.status is Status.PLANNED for result in report.results)
         ):
             return ()
-        arguments = ["mise", "run", "runtime", "--"]
+        arguments = ["mise", "run", "generate", "--"]
         if report.generated_root is not None:
             arguments.extend(("--repo-root", str(report.generated_root.parent)))
         if not report.network:
@@ -71,7 +71,7 @@ def runtime_next_commands(
     return ()
 
 
-def _shell_restart_required(report: RuntimeReport) -> bool:
+def _shell_restart_required(report: GenerateReport) -> bool:
     return any(
         result.status is Status.SUCCEEDED
         and (
@@ -82,21 +82,21 @@ def _shell_restart_required(report: RuntimeReport) -> bool:
     )
 
 
-def _step_detail(spec: RuntimeSpec, action: RuntimeAction) -> str:
+def _step_detail(spec: GenerateSpec, action: GenerateAction) -> str:
     command = shlex.join(spec.command) if spec.command else ""
     revision = f" [revision={spec.revision}]" if spec.revision else ""
-    if action is RuntimeAction.GENERATE:
+    if action is GenerateAction.GENERATE:
         return f"{command} -> {spec.target}"
     if command:
         return f"{command}{revision}"
-    if action is RuntimeAction.DOWNLOAD:
+    if action is GenerateAction.DOWNLOAD:
         return f"download {spec.source} -> {spec.target}"
-    if action is RuntimeAction.REMOVE:
+    if action is GenerateAction.REMOVE:
         return f"remove {spec.target}"
     return str(spec.target or action)
 
 
-def render_runtime(report: RuntimeReport, *, apply_allowed: bool = True) -> None:
+def render_generate(report: GenerateReport, *, apply_allowed: bool = True) -> None:
     for result in report.results:
         if result.status is Status.FAILED:
             print(
@@ -116,31 +116,31 @@ def render_runtime(report: RuntimeReport, *, apply_allowed: bool = True) -> None
     rendered = ", ".join(f"{count} {status}" for status, count in summary.items())
     print(f"Summary: {rendered or 'no steps'}")
     if not report.apply:
-        next_commands = runtime_next_commands(report, apply_allowed=apply_allowed)
+        next_commands = generate_next_commands(report, apply_allowed=apply_allowed)
         if not report.ok:
             print("No files changed. Resolve preview failures before applying.")
         elif next_commands:
-            print("No files changed. Re-run with --apply to refresh the runtime.")
+            print("No files changed. Re-run with --apply to regenerate generated/.")
             print("Next:")
             for command in next_commands:
                 print(f"  {command}")
         elif not apply_allowed:
-            print("No files changed. Host policy disables runtime apply.")
+            print("No files changed. Host policy disables generate apply.")
         else:
-            print("No runtime refresh steps are available on this host.")
+            print("No generate steps are available on this host.")
         return
     if _shell_restart_required(report):
-        print("Refreshed shell runtime is not active in existing shells.")
+        print("Regenerated shell integrations are not active in existing shells.")
         print(
             "Restart the affected shell; for Zsh, open a new shell or run `exec zsh`."
         )
     if not report.ok:
         return
-    if runtime_next_commands(report):
+    if generate_next_commands(report):
         print("Next:")
-        for command in runtime_next_commands(report):
+        for command in generate_next_commands(report):
             print(f"  {command}")
 
 
-def announce_runtime_step(spec: RuntimeSpec, action: RuntimeAction) -> None:
+def announce_generate_step(spec: GenerateSpec, action: GenerateAction) -> None:
     print(f"RUN {spec.name}: {_step_detail(spec, action)}", flush=True)

@@ -16,7 +16,7 @@ semantics live in `README.md`.
   fork.
 - `modules/` owns independent commands and self-installing tools. It inherits
   `modules/AGENTS.md`.
-- `generated/` is optional runtime state. Do not track files under it or
+- `generated/` is optional generated state written only by `mise run generate`. Do not track files under it or
   claim that it represents current host truth.
 - `inventory/` holds per-host software snapshots written only by `mise run
   inventory`. A snapshot records one point in time; never read it as current

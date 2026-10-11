@@ -7,6 +7,7 @@ import pytest
 from scripts.adopt import AdoptReport, apply_adopt
 from scripts.check import inspect_host
 from scripts.clean import execute_clean
+from scripts.generate import GenerateReport, execute_generate
 from scripts.host_policy import (
     HostPolicyError,
     HostPolicyMutationError,
@@ -17,8 +18,7 @@ from scripts.mise import canonical_mise_executable, canonical_mise_path
 from scripts.mise_sync import execute_mise_sync
 from scripts.models import Severity
 from scripts.restore import RestoreReport, apply_restore
-from scripts.runtime import RuntimeReport, execute_runtime
-from scripts.setup import apply_setup
+from scripts.setup_linux_lite import apply_setup
 from scripts.update import execute_updates
 from tests.conftest import run_scripts_module
 
@@ -46,12 +46,10 @@ def _write_mise(home: Path) -> Path:
 
 
 def _apply_arguments(module: str, tmp_path: Path) -> tuple[str, ...]:
-    if module == "setup":
-        return "--profile", "linux-lite"
     if module in {"restore", "adopt"}:
         return ("hushlogin",)
-    if module == "runtime":
-        return "--offline", "--repo-root", str(tmp_path / "runtime-repo")
+    if module == "generate":
+        return "--offline", "--repo-root", str(tmp_path / "generate-repo")
     if module == "inventory":
         return (
             "--repo-root",
@@ -75,13 +73,13 @@ def _apply_arguments(module: str, tmp_path: Path) -> tuple[str, ...]:
 @pytest.mark.parametrize(
     ("module", "operation"),
     [
-        ("setup", "setup"),
+        ("setup_linux_lite", "setup-linux-lite"),
         ("mise_sync", "mise-sync"),
         ("restore", "restore"),
         ("update", "update"),
         ("upgrade_tools", "upgrade-tools"),
         ("adopt", "adopt"),
-        ("runtime", "runtime"),
+        ("generate", "generate"),
         ("inventory", "inventory"),
         ("clean", "clean"),
     ],
@@ -111,13 +109,21 @@ def test_host_policy_refuses_every_cli_mutation_before_planning(
     assert document["ok"] is False
     assert document["error"]["code"] == expected_code
     assert "Traceback" not in completed.stderr
-    assert not (tmp_path / "runtime-repo").exists()
+    assert not (tmp_path / "generate-repo").exists()
     assert not (tmp_path / "inventory-repo").exists()
 
 
 @pytest.mark.parametrize(
     "module",
-    ["setup", "mise_sync", "restore", "update", "adopt", "runtime", "inventory"],
+    [
+        "setup_linux_lite",
+        "mise_sync",
+        "restore",
+        "update",
+        "adopt",
+        "generate",
+        "inventory",
+    ],
 )
 def test_audit_only_policy_keeps_cli_previews_available(
     tmp_path: Path,
@@ -177,7 +183,7 @@ def test_audit_only_policy_guards_direct_mutation_apis(tmp_path: Path) -> None:
         lambda: apply_restore(repo_root, home, RestoreReport("example", False, ())),
         lambda: apply_adopt(repo_root, home, AdoptReport("example", False, ())),
         lambda: execute_updates(home, executable_finder=lambda _tool: None),
-        lambda: execute_runtime(RuntimeReport(False, ()), home),
+        lambda: execute_generate(GenerateReport(False, ()), home),
         lambda: execute_inventory(InventoryReport("host", False, ()), home),
         lambda: execute_clean(home, executable_finder=lambda _tool: None),
     )
@@ -288,8 +294,8 @@ def test_audit_only_full_check_skips_repository_runtime_readiness(
         "shell.plugins",
         "shell.completions",
         "shell.functions",
-        "runtime.function.mise",
-        "runtime.plugin.fzf-tab",
+        "generated.function.mise",
+        "generated.plugin.fzf-tab",
         "zellij.zjstatus.wasm",
     ):
         assert findings[check].applicable is False

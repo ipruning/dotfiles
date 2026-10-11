@@ -1,6 +1,6 @@
-"""Declared shell generators and pinned runtime assets."""
+"""Declared shell generators and pinned plugin assets."""
 
-from .runtime_models import ShellInitSpec
+from .generate_models import ShellInitSpec
 
 FUNCTION_SPECS = (
     ShellInitSpec("mise", "mise", "zsh", ("mise", "activate", "zsh"), "_mise.zsh"),
@@ -72,8 +72,8 @@ COMPLETION_SPECS = (
     ("linear", "linear", ("linear", "completions", "zsh"), "_linear", ()),
     ("sesh", "sesh", ("sesh", "completion", "zsh"), "_sesh", ()),
     ("op", "op", ("op", "completion", "zsh"), "_op", ()),
-    # Keep the resolver inputs exact: this generator is an explicit runtime
-    # refresh boundary, not a request to execute the latest PyPI release.
+    # Keep the resolver inputs exact: this generator is an explicit generate
+    # boundary, not a request to execute the latest PyPI release.
     (
         "llm",
         "uvx",

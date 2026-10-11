@@ -347,29 +347,29 @@ def mise_runtime_binding_finding(
         content = generated_function.read_text()
     except OSError as error:
         return Finding(
-            "runtime.function.mise_binding",
+            "generated.function.mise_binding",
             Severity.WARN,
-            "runtime.function.mise_binding_unreadable",
+            "generated.function.mise_binding_unreadable",
             f"Generated mise Zsh initialization cannot be read: {error}",
             generated_function,
-            "Run mise run runtime, then mise run runtime -- --apply.",
+            "Run mise run generate, then mise run generate -- --apply.",
         )
     expected = str(canonical_mise_path(home))
     bindings = sorted(set(MISE_BINDING_PATTERN.findall(content)))
     if bindings == [expected]:
         return Finding(
-            "runtime.function.mise_binding",
+            "generated.function.mise_binding",
             Severity.OK,
-            "runtime.function.mise_binding_ready",
+            "generated.function.mise_binding_ready",
             "Generated mise Zsh initialization is bound to the canonical executable",
             generated_function,
         )
     actual = ", ".join(bindings) if bindings else "no absolute mise executable"
     return Finding(
-        "runtime.function.mise_binding",
+        "generated.function.mise_binding",
         Severity.WARN,
-        "runtime.function.mise_binding_mismatch",
+        "generated.function.mise_binding_mismatch",
         f"Generated mise Zsh initialization is not bound only to {expected}: {actual}",
         generated_function,
-        "Run mise run runtime, then mise run runtime -- --apply.",
+        "Run mise run generate, then mise run generate -- --apply.",
     )

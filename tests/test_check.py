@@ -183,7 +183,7 @@ def test_inspect_host_reports_capabilities_and_their_invalid_transition(
     assert degraded.is_ok() is True
     assert findings["git.private_file_missing"].severity is Severity.WARN
     assert findings["skillshare.source_missing"].severity is Severity.WARN
-    assert findings["runtime.function.mise_missing"].severity is Severity.WARN
+    assert findings["generated.function.mise_missing"].severity is Severity.WARN
     assert degraded.is_ok(strict=True) is False
 
     (home / ".gitconfig").write_text(
@@ -236,8 +236,8 @@ def test_inspect_host_reports_duplicate_mise_and_stale_runtime_binding(
     assert findings["mise.shims"].code == "mise.shims_stale"
     assert findings["mise.shims"].severity is Severity.WARN
     assert (
-        findings["runtime.function.mise_binding"].code
-        == "runtime.function.mise_binding_mismatch"
+        findings["generated.function.mise_binding"].code
+        == "generated.function.mise_binding_mismatch"
     )
 
     python_shim.unlink()
@@ -260,8 +260,8 @@ def test_inspect_host_reports_duplicate_mise_and_stale_runtime_binding(
     assert findings["mise.shims"].code == "mise.shims_ready"
     assert findings["mise.shims"].severity is Severity.OK
     assert (
-        findings["runtime.function.mise_binding"].code
-        == "runtime.function.mise_binding_ready"
+        findings["generated.function.mise_binding"].code
+        == "generated.function.mise_binding_ready"
     )
 
     canonical.unlink()
@@ -282,9 +282,9 @@ def test_inspect_host_reports_duplicate_mise_and_stale_runtime_binding(
     stale_runtime = next(
         finding
         for finding in missing.findings
-        if finding.check == "runtime.function.mise"
+        if finding.check == "generated.function.mise"
     )
-    assert stale_runtime.code == "runtime.function.mise_stale"
+    assert stale_runtime.code == "generated.function.mise_stale"
     assert stale_runtime.severity is Severity.WARN
 
 
@@ -1478,7 +1478,7 @@ def test_inspect_host_reports_generated_plugins_without_an_owner(
     )
     findings = {finding.code: finding for finding in report.findings}
 
-    finding = findings["runtime.plugin.old-plugin_unowned"]
+    finding = findings["generated.plugin.old-plugin_unowned"]
     assert finding.severity is Severity.WARN
     assert finding.path == stale_plugin
     assert finding.action is not None
@@ -1503,7 +1503,7 @@ def test_inspect_host_reports_stale_owned_completion_when_tool_is_missing(
     )
     findings = {finding.code: finding for finding in report.findings}
 
-    finding = findings["runtime.completion.bootdev_stale"]
+    finding = findings["generated.completion.bootdev_stale"]
     assert finding.severity is Severity.WARN
     assert finding.path == stale
 

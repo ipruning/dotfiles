@@ -1,4 +1,4 @@
-"""Refresh generated shell runtime owned by this repository."""
+"""Regenerate the generated/ shell state owned by this repository."""
 
 from __future__ import annotations
 
@@ -14,11 +14,7 @@ import urllib.error
 from dataclasses import replace
 from pathlib import Path
 
-from .host_policy import HostPolicyError, mutation_allowed, require_mutation_allowed
-from .mise import canonical_mise_executable, canonical_mise_path
-from .models import ExecutableFinder, Status
-from .render import emit_error
-from .runtime_commands import (
+from .generate_commands import (
     atomic_install,
     checkout_revision,
     command_failure_reason,
@@ -30,29 +26,33 @@ from .runtime_commands import (
     run_command,
     timeout_reason,
 )
-from .runtime_models import (
+from .generate_models import (
     AtomicWriter,
     Downloader,
-    RuntimeAction,
-    RuntimeReport,
-    RuntimeResult,
-    RuntimeSpec,
+    GenerateAction,
+    GenerateReport,
+    GenerateResult,
+    GenerateSpec,
     ShellInitSpec,
     StepCallback,
 )
-from .runtime_render import (
-    announce_runtime_step,
-    render_runtime,
-    runtime_document,
-    runtime_next_commands,
+from .generate_render import (
+    announce_generate_step,
+    generate_document,
+    generate_next_commands,
+    render_generate,
 )
-from .runtime_specs import (
+from .generate_specs import (
     COMPLETION_SPECS,
     FUNCTION_SPECS,
     OWNED_GENERATED_DIRECTORIES,
     PLUGIN_SPECS,
     WASM_SPECS,
 )
+from .host_policy import HostPolicyError, mutation_allowed, require_mutation_allowed
+from .mise import canonical_mise_executable, canonical_mise_path
+from .models import ExecutableFinder, Status
+from .render import emit_error
 
 __all__ = [
     "COMPLETION_SPECS",
@@ -62,17 +62,17 @@ __all__ = [
     "WASM_SPECS",
     "AtomicWriter",
     "Downloader",
-    "RuntimeAction",
-    "RuntimeReport",
-    "RuntimeResult",
-    "RuntimeSpec",
+    "GenerateAction",
+    "GenerateReport",
+    "GenerateResult",
+    "GenerateSpec",
     "ShellInitSpec",
     "StepCallback",
-    "execute_runtime",
+    "execute_generate",
     "file_sha256",
-    "plan_runtime",
-    "render_runtime",
-    "runtime_next_commands",
+    "generate_next_commands",
+    "plan_generate",
+    "render_generate",
     "shim_aware_finder",
 ]
 
@@ -89,7 +89,7 @@ def _symlinked_generated_directory(generated_root: Path) -> Path | None:
 
 def _symlinked_directory_reason(directory: Path) -> str:
     return (
-        f"generated runtime directory is a symlink ({os.readlink(directory)}); "
+        f"generated directory is a symlink ({os.readlink(directory)}); "
         "remove it before refreshing"
     )
 
@@ -158,55 +158,55 @@ def shim_aware_finder(executable_finder: ExecutableFinder) -> ExecutableFinder:
 
 
 def _generator_result(
-    spec: RuntimeSpec,
+    spec: GenerateSpec,
     *,
     executable_finder: ExecutableFinder,
-) -> RuntimeResult:
+) -> GenerateResult:
     assert spec.tool is not None
     assert spec.target is not None
     if executable := executable_finder(spec.tool):
         spec = replace(spec, command=(executable, *spec.command[1:]))
-        return RuntimeResult(spec, Status.PLANNED, RuntimeAction.GENERATE)
+        return GenerateResult(spec, Status.PLANNED, GenerateAction.GENERATE)
     if spec.target.exists() or spec.target.is_symlink():
-        return RuntimeResult(
+        return GenerateResult(
             spec,
             Status.PLANNED,
-            RuntimeAction.REMOVE,
+            GenerateAction.REMOVE,
             f"{spec.tool} is not available; remove stale owned output",
         )
-    return RuntimeResult(
+    return GenerateResult(
         spec,
         Status.SKIPPED,
-        RuntimeAction.GENERATE,
+        GenerateAction.GENERATE,
         f"{spec.tool} is not available on PATH",
     )
 
 
-def plan_runtime(
+def plan_generate(
     repo_root: Path,
     home: Path,
     *,
     executable_finder: ExecutableFinder = shutil.which,
     network: bool = True,
-) -> RuntimeReport:
-    """Return the exact generated runtime refresh without changing files."""
+) -> GenerateReport:
+    """Return the exact generate plan without changing files."""
     generated_root = repo_root / "generated"
     if symlinked_directory := _symlinked_generated_directory(generated_root):
         relative_name = (
             symlinked_directory.relative_to(repo_root).as_posix().replace("/", ".")
         )
-        spec = RuntimeSpec(
+        spec = GenerateSpec(
             name=f"directory.{relative_name}",
             tool=None,
             target=symlinked_directory,
         )
-        return RuntimeReport(
+        return GenerateReport(
             apply=False,
             results=(
-                RuntimeResult(
+                GenerateResult(
                     spec,
                     Status.FAILED,
-                    RuntimeAction.VALIDATE,
+                    GenerateAction.VALIDATE,
                     _symlinked_directory_reason(symlinked_directory),
                 ),
             ),
@@ -226,7 +226,7 @@ def plan_runtime(
             mise_executable = canonical_mise_executable(home)
             command = (str(canonical_mise_path(home)), *command[1:])
             generator_finder = {tool: mise_executable}.get
-        spec = RuntimeSpec(
+        spec = GenerateSpec(
             name=f"function.{function_spec.name}",
             tool=tool,
             target=functions_dir / function_spec.filename,
@@ -234,7 +234,7 @@ def plan_runtime(
         )
         results.append(_generator_result(spec, executable_finder=generator_finder))
     for name, tool, command, filename, environment in COMPLETION_SPECS:
-        spec = RuntimeSpec(
+        spec = GenerateSpec(
             name=f"completion.{name}",
             tool=tool,
             target=completions_dir / filename,
@@ -243,11 +243,11 @@ def plan_runtime(
         )
         if name == "llm" and not network:
             results.append(
-                RuntimeResult(
+                GenerateResult(
                     spec,
                     Status.SKIPPED,
-                    RuntimeAction.GENERATE,
-                    "LLM completion needs package resolution; refresh with runtime without --offline",
+                    GenerateAction.GENERATE,
+                    "LLM completion needs package resolution; run generate without --offline",
                 )
             )
             continue
@@ -262,13 +262,13 @@ def plan_runtime(
         is_symlink = target.is_symlink()
         git_directory_is_symlink = git_directory.is_symlink()
         action = (
-            RuntimeAction.UPDATE
+            GenerateAction.UPDATE
             if not is_symlink
             and not git_directory_is_symlink
             and git_directory.is_dir()
-            else RuntimeAction.CLONE
+            else GenerateAction.CLONE
         )
-        spec = RuntimeSpec(
+        spec = GenerateSpec(
             name=f"plugin.{name}",
             tool="git",
             target=target,
@@ -285,7 +285,7 @@ def plan_runtime(
                     "origin",
                     revision,
                 )
-                if action is RuntimeAction.UPDATE
+                if action is GenerateAction.UPDATE
                 else (
                     "git",
                     "clone",
@@ -298,7 +298,7 @@ def plan_runtime(
         )
         if is_symlink:
             results.append(
-                RuntimeResult(
+                GenerateResult(
                     spec,
                     Status.FAILED,
                     action,
@@ -308,7 +308,7 @@ def plan_runtime(
             )
         elif git_directory_is_symlink:
             results.append(
-                RuntimeResult(
+                GenerateResult(
                     spec,
                     Status.FAILED,
                     action,
@@ -316,23 +316,23 @@ def plan_runtime(
                     f"({os.readlink(git_directory)}); remove it before refreshing",
                 ),
             )
-        elif action is RuntimeAction.UPDATE and git_available:
+        elif action is GenerateAction.UPDATE and git_available:
             try:
                 current = inspect_plugin(spec, home)
             except (OSError, RuntimeError, subprocess.TimeoutExpired) as error:
-                results.append(RuntimeResult(spec, Status.FAILED, action, str(error)))
+                results.append(GenerateResult(spec, Status.FAILED, action, str(error)))
             else:
                 results.append(
-                    RuntimeResult(
+                    GenerateResult(
                         spec,
                         Status.UNCHANGED,
                         action,
                         "pinned revision and tracked files are current",
                     )
                     if current
-                    else RuntimeResult(spec, Status.PLANNED, action)
+                    else GenerateResult(spec, Status.PLANNED, action)
                     if network
-                    else RuntimeResult(
+                    else GenerateResult(
                         spec,
                         Status.SKIPPED,
                         action,
@@ -341,16 +341,16 @@ def plan_runtime(
                 )
         elif not network:
             results.append(
-                RuntimeResult(
+                GenerateResult(
                     spec,
                     Status.SKIPPED,
                     action,
                     "network refresh is disabled",
                 ),
             )
-        elif target.exists() and action is RuntimeAction.CLONE:
+        elif target.exists() and action is GenerateAction.CLONE:
             results.append(
-                RuntimeResult(
+                GenerateResult(
                     spec,
                     Status.FAILED,
                     action,
@@ -358,10 +358,10 @@ def plan_runtime(
                 ),
             )
         elif git_available:
-            results.append(RuntimeResult(spec, Status.PLANNED, action))
+            results.append(GenerateResult(spec, Status.PLANNED, action))
         else:
             results.append(
-                RuntimeResult(
+                GenerateResult(
                     spec,
                     Status.SKIPPED,
                     action,
@@ -370,7 +370,7 @@ def plan_runtime(
             )
     for name, source, sha256 in WASM_SPECS:
         target = plugins_dir / f"{name}.wasm"
-        spec = RuntimeSpec(
+        spec = GenerateSpec(
             name=f"wasm.{name}",
             tool=None,
             target=target,
@@ -380,63 +380,63 @@ def plan_runtime(
         )
         if file_sha256(target) == sha256:
             results.append(
-                RuntimeResult(
+                GenerateResult(
                     spec,
                     Status.UNCHANGED,
-                    RuntimeAction.DOWNLOAD,
+                    GenerateAction.DOWNLOAD,
                     "checksum is current",
                 ),
             )
         elif network:
             results.append(
-                RuntimeResult(spec, Status.PLANNED, RuntimeAction.DOWNLOAD),
+                GenerateResult(spec, Status.PLANNED, GenerateAction.DOWNLOAD),
             )
         else:
             results.append(
-                RuntimeResult(
+                GenerateResult(
                     spec,
                     Status.SKIPPED,
-                    RuntimeAction.DOWNLOAD,
+                    GenerateAction.DOWNLOAD,
                     "network refresh is disabled",
                 ),
             )
-    bat_spec = RuntimeSpec(
+    bat_spec = GenerateSpec(
         name="bat.cache",
         tool="bat",
         command=("bat", "cache", "--build"),
     )
     results.append(
-        RuntimeResult(bat_spec, Status.PLANNED, RuntimeAction.RUN)
+        GenerateResult(bat_spec, Status.PLANNED, GenerateAction.RUN)
         if executable_finder("bat")
-        else RuntimeResult(
+        else GenerateResult(
             bat_spec,
             Status.SKIPPED,
-            RuntimeAction.RUN,
+            GenerateAction.RUN,
             "bat is not available on PATH",
         ),
     )
     compdumps = tuple(sorted(home.glob(".zcompdump*")))
-    compdump_spec = RuntimeSpec(
+    compdump_spec = GenerateSpec(
         name="zsh.compdump",
         tool=None,
         target=home / ".zcompdump*",
     )
     results.append(
-        RuntimeResult(
+        GenerateResult(
             compdump_spec,
             Status.PLANNED,
-            RuntimeAction.REMOVE,
+            GenerateAction.REMOVE,
             "invalidate only if completion outputs change",
         )
         if compdumps
-        else RuntimeResult(
+        else GenerateResult(
             compdump_spec,
             Status.SKIPPED,
-            RuntimeAction.REMOVE,
+            GenerateAction.REMOVE,
             "no zcompdump files exist",
         ),
     )
-    return RuntimeReport(
+    return GenerateReport(
         apply=False,
         results=tuple(results),
         generated_root=generated_root,
@@ -444,15 +444,15 @@ def plan_runtime(
     )
 
 
-def execute_runtime(
-    plan: RuntimeReport,
+def execute_generate(
+    plan: GenerateReport,
     home: Path,
     *,
     downloader: Downloader = download_url,
     on_start: StepCallback | None = None,
     capture_output: bool = True,
-) -> RuntimeReport:
-    """Execute a previously rendered runtime plan."""
+) -> GenerateReport:
+    """Execute a previously rendered generate plan."""
     require_mutation_allowed(home)
     results = []
     for planned in plan.results:
@@ -466,7 +466,7 @@ def execute_runtime(
             for result in results
         ):
             results.append(
-                RuntimeResult(
+                GenerateResult(
                     spec,
                     Status.UNCHANGED,
                     planned.action,
@@ -485,11 +485,11 @@ def execute_runtime(
             ):
                 raise RuntimeError(_symlinked_directory_reason(symlinked_directory))
             command_directory = (
-                spec.target if planned.action is RuntimeAction.UPDATE else None
+                spec.target if planned.action is GenerateAction.UPDATE else None
             )
             if command_directory is not None and command_directory.is_symlink():
                 raise RuntimeError(
-                    "runtime command directory is a symlink "
+                    "generated command directory is a symlink "
                     f"({os.readlink(command_directory)}); refusing to execute outside "
                     "generated state",
                 )
@@ -497,16 +497,16 @@ def execute_runtime(
                 command_git_directory = command_directory / ".git"
                 if command_git_directory.is_symlink():
                     raise RuntimeError(
-                        "runtime command Git metadata is a symlink "
+                        "generated command Git metadata is a symlink "
                         f"({os.readlink(command_git_directory)}); refusing to execute "
                         "outside generated state",
                     )
                 if not command_git_directory.is_dir():
                     raise RuntimeError(
-                        "runtime command Git metadata is not a directory; refusing "
+                        "generated command Git metadata is not a directory; refusing "
                         "to execute outside generated state",
                     )
-            if planned.action is RuntimeAction.GENERATE:
+            if planned.action is GenerateAction.GENERATE:
                 completed = run_command(spec, home, capture_output=True)
                 exit_code = completed.returncode
                 emit_command_output(spec, completed.stderr)
@@ -522,7 +522,7 @@ def execute_runtime(
                     and spec.target.read_bytes() == output.encode()
                 ):
                     results.append(
-                        RuntimeResult(
+                        GenerateResult(
                             spec,
                             Status.UNCHANGED,
                             planned.action,
@@ -540,14 +540,14 @@ def execute_runtime(
 
                 atomic_install(spec.target, write_generated_output)
             elif planned.action in {
-                RuntimeAction.CLONE,
-                RuntimeAction.UPDATE,
-                RuntimeAction.RUN,
+                GenerateAction.CLONE,
+                GenerateAction.UPDATE,
+                GenerateAction.RUN,
             }:
                 staging: Path | None = None
                 command_spec = spec
                 target = spec.target
-                if planned.action is RuntimeAction.CLONE:
+                if planned.action is GenerateAction.CLONE:
                     assert target is not None
                     target.parent.mkdir(parents=True, exist_ok=True)
                     staging = Path(
@@ -588,7 +588,7 @@ def execute_runtime(
                 finally:
                     if staging is not None:
                         shutil.rmtree(staging, ignore_errors=True)
-            elif planned.action is RuntimeAction.DOWNLOAD:
+            elif planned.action is GenerateAction.DOWNLOAD:
                 assert spec.source is not None
                 assert spec.sha256 is not None
                 assert spec.target is not None
@@ -607,7 +607,7 @@ def execute_runtime(
 
                 atomic_install(spec.target, write_downloaded_content)
                 exit_code = None
-            elif planned.action is RuntimeAction.REMOVE:
+            elif planned.action is GenerateAction.REMOVE:
                 if spec.name == "zsh.compdump":
                     for file_path in home.glob(".zcompdump*"):
                         file_path.unlink(missing_ok=True)
@@ -616,7 +616,7 @@ def execute_runtime(
                     spec.target.unlink(missing_ok=True)
                 exit_code = None
             else:
-                raise RuntimeError(f"unsupported runtime action: {planned.action}")
+                raise RuntimeError(f"unsupported generate action: {planned.action}")
         except (
             OSError,
             RuntimeError,
@@ -629,7 +629,7 @@ def execute_runtime(
                 else str(error)
             )
             if (
-                planned.action is RuntimeAction.UPDATE
+                planned.action is GenerateAction.UPDATE
                 and spec.name.startswith("plugin.")
                 and spec.revision is not None
                 and spec.target is not None
@@ -641,9 +641,9 @@ def execute_runtime(
                 reason = (
                     f"{reason}; target revision: {spec.revision}; actual revision: "
                     f"{actual_revision}; path: {spec.target}; action: inspect the plugin "
-                    "checkout and rerun the runtime update"
+                    "checkout and rerun generate"
                 )
-            failed = RuntimeResult(
+            failed = GenerateResult(
                 spec,
                 Status.FAILED,
                 planned.action,
@@ -652,14 +652,14 @@ def execute_runtime(
             )
             results.append(failed)
             continue
-        succeeded = RuntimeResult(
+        succeeded = GenerateResult(
             spec,
             Status.SUCCEEDED,
             planned.action,
             exit_code=exit_code,
         )
         results.append(succeeded)
-    return RuntimeReport(
+    return GenerateReport(
         apply=True,
         results=tuple(results),
         generated_root=plan.generated_root,
@@ -669,12 +669,12 @@ def execute_runtime(
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        description="Refresh generated shell runtime owned by this repository.",
+        description="Regenerate the generated/ shell state owned by this repository.",
     )
     parser.add_argument(
         "--apply",
         action="store_true",
-        help="write the planned runtime changes (default: preview only)",
+        help="write the planned generated changes (default: preview only)",
     )
     parser.add_argument(
         "--offline",
@@ -691,7 +691,7 @@ def main(argv: list[str] | None = None) -> int:
         "--repo-root",
         type=Path,
         default=Path(__file__).resolve().parents[1],
-        help="repository root that owns the runtime (default: this checkout)",
+        help="repository root that owns generated/ (default: this checkout)",
     )
     args = parser.parse_args(argv)
     home = Path.home()
@@ -699,21 +699,21 @@ def main(argv: list[str] | None = None) -> int:
         apply_allowed = mutation_allowed(home)
         if args.apply:
             require_mutation_allowed(home)
-        report = plan_runtime(
+        report = plan_generate(
             args.repo_root,
             home,
             network=not args.offline,
         )
         if args.apply:
-            report = execute_runtime(
+            report = execute_generate(
                 report,
                 home,
-                on_start=None if args.as_json else announce_runtime_step,
+                on_start=None if args.as_json else announce_generate_step,
                 capture_output=args.as_json,
             )
     except HostPolicyError as error:
         emit_error(
-            "runtime",
+            "generate",
             str(error),
             as_json=args.as_json,
             apply=args.apply,
@@ -723,7 +723,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.as_json:
         print(
             json.dumps(
-                runtime_document(report, apply_allowed=apply_allowed),
+                generate_document(report, apply_allowed=apply_allowed),
                 indent=2,
                 sort_keys=True,
             ),
@@ -735,7 +735,7 @@ def main(argv: list[str] | None = None) -> int:
                     file=sys.stderr,
                 )
     else:
-        render_runtime(report, apply_allowed=apply_allowed)
+        render_generate(report, apply_allowed=apply_allowed)
     return 0 if report.ok else 1
 
 

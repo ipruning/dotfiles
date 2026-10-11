@@ -891,8 +891,8 @@ def test_update_cli_refreshes_runtime_after_independent_failure(tmp_path: Path) 
     )
     document = json.loads(completed.stdout)
     assert completed.returncode == 1
-    assert document["runtime"]["apply"] is True
-    assert document["runtime"]["ok"] is True
+    assert document["generate"]["apply"] is True
+    assert document["generate"]["ok"] is True
     assert any(
         step["name"] == "amp" and step["status"] == "failed"
         for step in document["steps"]
@@ -1147,10 +1147,10 @@ def test_update_cli_skips_native_herdr_inside_session(
     assert steps["pi"]["status"] == ("succeeded" if apply else "planned")
     if apply:
         assert log.read_text().splitlines() == ["pi update", "pi update --extensions"]
-        assert document["runtime"]["ok"] is True
+        assert document["generate"]["ok"] is True
     else:
         assert not log.exists()
-        assert document["runtime"] is None
+        assert document["generate"] is None
 
 
 def test_update_cli_explains_herdr_session_skip_in_human_output(tmp_path: Path) -> None:
@@ -1168,7 +1168,7 @@ def test_update_cli_explains_herdr_session_skip_in_human_output(tmp_path: Path) 
     assert "outside Herdr" in completed.stdout
     assert "RUN herdr:" not in completed.stdout
     assert "SUCCEEDED pi" in completed.stdout
-    assert "Runtime: SUCCEEDED" in completed.stdout
+    assert "Generate: SUCCEEDED" in completed.stdout
     assert log.read_text().splitlines() == ["pi update", "pi update --extensions"]
 
 

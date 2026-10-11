@@ -12,11 +12,11 @@ from dataclasses import replace
 from pathlib import Path
 from typing import cast
 
+from .generate_models import AtomicWriter, GenerateSpec
 from .process import run_process_group
-from .runtime_models import AtomicWriter, RuntimeSpec
 
 
-def guarded_activation(spec: RuntimeSpec, output: str) -> str:
+def guarded_activation(spec: GenerateSpec, output: str) -> str:
     """Keep cached activation bound to its selected executable at consumption."""
     if spec.tool != "mise" or not spec.name.startswith("function."):
         return output
@@ -34,7 +34,7 @@ def guarded_activation(spec: RuntimeSpec, output: str) -> str:
     return guard + output
 
 
-def inspect_plugin(spec: RuntimeSpec, home: Path) -> bool:
+def inspect_plugin(spec: GenerateSpec, home: Path) -> bool:
     """Inspect tracked state; never discard local edits to a generated clone."""
     assert spec.target is not None
     status_spec = replace(
@@ -73,7 +73,7 @@ def atomic_install(target: Path, writer: AtomicWriter) -> None:
         temporary.unlink(missing_ok=True)
 
 
-def _command_environment(spec: RuntimeSpec, home: Path) -> dict[str, str]:
+def _command_environment(spec: GenerateSpec, home: Path) -> dict[str, str]:
     if spec.name == "completion.llm":
         # LLM completion generation only needs a resolver path and temporary
         # directory. Do not expose the user's API keys or other shell state to
@@ -109,7 +109,7 @@ def _command_environment(spec: RuntimeSpec, home: Path) -> dict[str, str]:
 
 
 def run_command(
-    spec: RuntimeSpec,
+    spec: GenerateSpec,
     home: Path,
     *,
     capture_output: bool,
@@ -132,7 +132,7 @@ def run_command(
     )
 
 
-def timeout_reason(spec: RuntimeSpec, error: subprocess.TimeoutExpired) -> str:
+def timeout_reason(spec: GenerateSpec, error: subprocess.TimeoutExpired) -> str:
     reason = f"timed out after {spec.timeout_seconds}s"
     detail = error.stderr
     if isinstance(detail, bytes):
@@ -142,7 +142,7 @@ def timeout_reason(spec: RuntimeSpec, error: subprocess.TimeoutExpired) -> str:
     )
 
 
-def emit_command_output(spec: RuntimeSpec, output: str | None) -> None:
+def emit_command_output(spec: GenerateSpec, output: str | None) -> None:
     for line in (output or "").splitlines():
         print(f"[{spec.name}] {line}", file=sys.stderr)
 
@@ -154,7 +154,7 @@ def command_failure_reason(completed: subprocess.CompletedProcess[str]) -> str:
 
 
 def read_revision(
-    spec: RuntimeSpec,
+    spec: GenerateSpec,
     directory: Path,
     home: Path,
 ) -> str:
@@ -169,7 +169,7 @@ def read_revision(
 
 
 def _set_revision(
-    spec: RuntimeSpec,
+    spec: GenerateSpec,
     directory: Path,
     revision: str,
     home: Path,
@@ -195,7 +195,7 @@ def _set_revision(
 
 
 def checkout_revision(
-    spec: RuntimeSpec,
+    spec: GenerateSpec,
     directory: Path,
     home: Path,
     *,
@@ -216,6 +216,8 @@ def checkout_revision(
 
 
 def download_url(source: str, timeout_seconds: int) -> bytes:
-    request = urllib.request.Request(source, headers={"User-Agent": "dotfiles-runtime"})
+    request = urllib.request.Request(
+        source, headers={"User-Agent": "dotfiles-generate"}
+    )
     with urllib.request.urlopen(request, timeout=timeout_seconds) as response:
         return cast("bytes", response.read())

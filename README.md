@@ -9,10 +9,10 @@ does not automatically overwrite `$HOME` or rebuild an entire machine.
 | Intent | Preview | Apply |
 | --- | --- | --- |
 | Inspect this host | `mise run check` | Read-only |
-| Maintain installed tools and shell runtime | `mise run update` | `mise run update -- --apply` |
+| Maintain installed tools and generated shell state | `mise run update` | `mise run update -- --apply` |
 | Advance the shared tool baseline | `mise run upgrade-tools` | `mise run upgrade-tools -- --apply` |
 | Connect shared configuration and install missing tools | `mise run mise-sync` | `mise run mise-sync -- --apply` |
-| Repair generated runtime, including pinned plugins | `mise run runtime` | `mise run runtime -- --apply` |
+| Regenerate `generated/`, including pinned plugins | `mise run generate` | `mise run generate -- --apply` |
 | Diagnose failures | `mise run doctor` | Read-only |
 
 Upgrade the shared baseline in one checkout, verify and commit it, then pull
@@ -31,7 +31,7 @@ remain separate explicit operations.
 - `modules/bin/` contains independent user commands.
 - `modules/<tool>/` contains substantial tools that own their installation and
   removal.
-- `generated/` is optional shell runtime state. A missing generated directory
+- `generated/` is optional generated shell state. A missing generated directory
   is a host-health warning, not a reason to mutate the repository.
 - `inventory/` contains per-host software snapshots written only by
   `mise run inventory`.
@@ -46,8 +46,8 @@ For repository operations, start with `mise tasks` and
 Inspection and maintenance CLIs expose `mise run <task> -- --help`; aggregate
 gates such as `verify` do not. Maintenance tasks under `scripts/` preview by
 default; use the ASCII `--apply` flag only after reviewing that preview.
-`update` maintains installed tools at the committed baseline and refreshes local
-shell runtime. `upgrade-tools` advances the shared baseline; `mise-sync`
+`update` maintains installed tools at the committed baseline and then runs
+`generate`. `upgrade-tools` advances the shared baseline; `mise-sync`
 explicitly connects configuration and installs missing baseline tools.
 
 For independent commands, use the [command index](modules/bin/README.md).
@@ -132,7 +132,7 @@ Their lifecycle and recovery commands have separate CLI contracts and require
 explicit operator authorization; follow each module's runbook.
 
 Under this policy, `check` marks Dotfiles-owned shell integration, shared Mise
-capabilities, and generated runtime readiness as not applicable. Canonical Mise
+capabilities, and generated state readiness as not applicable. Canonical Mise
 health, duplicate owners, Skillshare health, permissions, and other host-owned
 problems remain applicable and continue to gate strict inspection.
 
@@ -188,7 +188,7 @@ authoritative command interfaces:
 | Inspect host and repository health | [Host health](#host-health) |
 | Run the complete health sweep | [Doctor and cleanup](#doctor-and-cleanup) |
 | Update installed tools | [Host updates](#host-updates) |
-| Refresh generated shell state | [Generated runtime](#generated-runtime) |
+| Regenerate generated shell state | [Generated state](#generated-state) |
 | Record installed software | [Host inventory](#host-inventory) |
 | Operate a self-installing module | [Standalone tools](#standalone-tools) |
 | Inspect Skillshare ownership | [Skillshare](#skillshare) |
@@ -211,8 +211,8 @@ task that edits shell and Git bootstrap configuration in place; like every
 mutating task it previews by default:
 
 ```bash
-mise run setup -- --profile linux-lite
-mise run setup -- --profile linux-lite --apply
+mise run setup-linux-lite
+mise run setup-linux-lite -- --apply
 exec bash
 ```
 
@@ -319,7 +319,7 @@ personal interactive baseline for macOS and Linux hosts. They do not own
 systemd services, cron jobs, workers, or project runtimes: those must use a
 system package or invoke the owning project's Mise config explicitly. Installed
 tools, download caches, shims, and generated shell functions remain local
-runtime state and are rebuilt from the shared declaration rather than
+host state and are rebuilt from the shared declaration rather than
 synchronized through Git.
 
 This convergence operation belongs to managed hosts. On an audit-only host its
@@ -544,10 +544,10 @@ is not self-updated by Dotfiles.
 
 Inside a Herdr session (`HERDR_ENV=1`), Herdr's self-update is skipped with a
 command to run in an external terminal after detaching. Other updaters and the
-shell runtime refresh continue.
+final generate step continue.
 
-The final step refreshes local shell runtime without network asset downloads.
-Tool and runtime outcomes are reported separately: a runtime failure makes the
+The final step runs `generate` without network asset downloads. Tool and
+generate outcomes are reported separately: a generate failure makes the
 operation fail even when tools updated successfully. Independent steps continue
 after failures; dependent steps state why they were skipped. The operation does
 not pull Git, clean old versions, restore application settings, synchronize
@@ -556,7 +556,7 @@ Skillshare content, restart servers or restart your shell.
 In JSON mode, stdout contains one report. Stderr carries command progress and
 bounded diagnostics. A failure identifies the command, working directory,
 exit code or timeout and output tail. Retry the failing command, then rerun
-`runtime` and `check` as needed; failed updater staging files are not deleted.
+`generate` and `check` as needed; failed updater staging files are not deleted.
 
 ### Shared baseline upgrades
 
@@ -578,16 +578,16 @@ A hard `min_version` failure happens before Mise can start a task. Bootstrap
 its canonical executable with its existing owner: standalone installs support
 `self-update`; system-owned installs must use their host updater.
 
-## Generated runtime
+## Generated state
 
 Generated files remain a local cache under the ignored `generated/` directory.
 `fd -H` still respects Git ignore rules; use `fd -HI generated` or `ls generated`
 to inspect them. Shell startup only loads this cache and never installs tools.
 
 ```bash
-mise run runtime
-mise run runtime -- --json
-mise run runtime -- --apply
+mise run generate
+mise run generate -- --json
+mise run generate -- --apply
 ```
 
 The task generates shell integrations and completions, restores pinned Zsh
@@ -600,14 +600,14 @@ than reset. WASM assets with matching checksums are retained.
 Use `--offline` to skip network asset work and LLM completion package resolution;
 existing LLM completion files are retained. Ordinary `update` uses this local
 refresh; missing network assets remain skipped, so a first setup or missing
-plugin repair still needs the explicit full runtime operation. Generator errors
+plugin repair still needs an explicit online `generate`. Generator errors
 or empty output retain existing generated files. Existing plugin updates report
 the actual revision after failure and are not transactional rollbacks.
 
 When a refresh changes shell files, open a new shell (or `exec zsh`) to load them.
 Repeated refreshes with unchanged files do not require a restart. Check the new
 shell with `mise run check`; use `mise run diff` separately for configuration
-drift. Runtime never writes software inventory or synchronizes Skillshare.
+drift. `generate` never writes software inventory or synchronizes Skillshare.
 
 ## Host inventory
 

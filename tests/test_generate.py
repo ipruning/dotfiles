@@ -10,18 +10,18 @@ from pathlib import Path
 
 import pytest
 
-from scripts.models import Status
-from scripts.runtime import (
-    RuntimeAction,
-    RuntimeReport,
-    RuntimeResult,
-    RuntimeSpec,
-    execute_runtime,
-    plan_runtime,
-    render_runtime,
-    runtime_next_commands,
+from scripts.generate import (
+    GenerateAction,
+    GenerateReport,
+    GenerateResult,
+    GenerateSpec,
+    execute_generate,
+    generate_next_commands,
+    plan_generate,
+    render_generate,
     shim_aware_finder,
 )
+from scripts.models import Status
 
 
 def _fake_tool(bin_dir: Path, name: str, body: str = "exit 0\n") -> None:
@@ -80,7 +80,7 @@ def _run_runtime(
         [
             sys.executable,
             "-m",
-            "scripts.runtime",
+            "scripts.generate",
             "--repo-root",
             str(repo_root),
             *arguments,
@@ -93,7 +93,7 @@ def _run_runtime(
     )
 
 
-def test_runtime_previews_owned_refresh_by_default_without_writing(
+def test_generate_previews_owned_refresh_by_default_without_writing(
     tmp_path: Path,
 ) -> None:
     repo_root = tmp_path / "dotfiles"
@@ -114,7 +114,7 @@ def test_runtime_previews_owned_refresh_by_default_without_writing(
     assert completed.returncode == 0
     document = json.loads(completed.stdout)
     assert document["schema_version"] == 1
-    assert document["operation"] == "runtime"
+    assert document["operation"] == "generate"
     assert document["apply"] is False
     steps = {step["name"]: step for step in document["steps"]}
     assert steps["function.mise"]["action"] == "generate"
@@ -138,7 +138,7 @@ def test_runtime_previews_owned_refresh_by_default_without_writing(
     assert not (repo_root / "generated").exists()
 
 
-def test_runtime_text_preview_exposes_pinned_revision(tmp_path: Path) -> None:
+def test_generate_text_preview_exposes_pinned_revision(tmp_path: Path) -> None:
     repo_root = tmp_path / "dotfiles"
     home = tmp_path / "home"
     bin_dir = tmp_path / "bin"
@@ -152,7 +152,7 @@ def test_runtime_text_preview_exposes_pinned_revision(tmp_path: Path) -> None:
     assert "revision=24105b15714bfec37989ed5c5b6e60f572253019" in completed.stdout
 
 
-def test_runtime_refuses_symlinked_owned_directories(tmp_path: Path) -> None:
+def test_generate_refuses_symlinked_owned_directories(tmp_path: Path) -> None:
     cases = (
         (Path("generated"), ()),
         (Path("generated/functions"), ()),
@@ -194,7 +194,7 @@ def test_runtime_refuses_symlinked_owned_directories(tmp_path: Path) -> None:
         assert not any(outside.iterdir())
 
 
-def test_runtime_offline_apply_generates_and_removes_owned_shell_files(
+def test_generate_offline_apply_generates_and_removes_owned_shell_files(
     tmp_path: Path,
 ) -> None:
     repo_root = tmp_path / "dotfiles"
@@ -254,7 +254,7 @@ def test_runtime_offline_apply_generates_and_removes_owned_shell_files(
     assert not compdump.exists()
 
 
-def test_runtime_generates_mise_activation_with_the_canonical_binary(
+def test_generate_generates_mise_activation_with_the_canonical_binary(
     tmp_path: Path,
 ) -> None:
     repo_root = tmp_path / "dotfiles"
@@ -294,7 +294,7 @@ def test_runtime_generates_mise_activation_with_the_canonical_binary(
     )
 
 
-def test_runtime_removes_atuin_function_when_host_tool_is_unavailable(
+def test_generate_removes_atuin_function_when_host_tool_is_unavailable(
     tmp_path: Path,
 ) -> None:
     repo_root = tmp_path / "dotfiles"
@@ -316,7 +316,7 @@ def test_runtime_removes_atuin_function_when_host_tool_is_unavailable(
 
 
 @pytest.mark.parametrize("existing", [False, True])
-def test_runtime_offline_skips_llm_without_running_uvx_or_replacing_output(
+def test_generate_offline_skips_llm_without_running_uvx_or_replacing_output(
     tmp_path: Path,
     existing: bool,
 ) -> None:
@@ -350,7 +350,7 @@ def test_runtime_offline_skips_llm_without_running_uvx_or_replacing_output(
         assert not completion.exists()
 
 
-def test_runtime_llm_completion_does_not_receive_host_credentials(
+def test_generate_llm_completion_does_not_receive_host_credentials(
     tmp_path: Path,
     monkeypatch,
 ) -> None:
@@ -375,10 +375,10 @@ def test_runtime_llm_completion_does_not_receive_host_credentials(
     )
 
     monkeypatch.setenv("PATH", str(bin_dir))
-    plan = plan_runtime(repo_root, home, network=True)
+    plan = plan_generate(repo_root, home, network=True)
     llm = next(item for item in plan.results if item.spec.name == "completion.llm")
     # Keep network assets outside this generator's test boundary.
-    report = execute_runtime(RuntimeReport(False, (llm,), plan.generated_root), home)
+    report = execute_generate(GenerateReport(False, (llm,), plan.generated_root), home)
 
     assert report.ok, report.results[0].reason
     assert report.results[0].status is Status.SUCCEEDED
@@ -386,10 +386,10 @@ def test_runtime_llm_completion_does_not_receive_host_credentials(
 
 
 @pytest.mark.parametrize("capture_output", [False, True])
-def test_runtime_timeout_stops_children_before_running_later_steps(
+def test_generate_timeout_stops_children_before_running_later_steps(
     tmp_path: Path, capture_output: bool
 ) -> None:
-    spec = RuntimeSpec(
+    spec = GenerateSpec(
         name="timeout",
         tool=None,
         command=(
@@ -402,20 +402,20 @@ def test_runtime_timeout_stops_children_before_running_later_steps(
         ),
         timeout_seconds=2,
     )
-    later = RuntimeSpec(
+    later = GenerateSpec(
         name="later",
         tool=None,
         command=("/bin/sh", "-c", "printf completed > completed"),
     )
-    plan = RuntimeReport(
+    plan = GenerateReport(
         apply=False,
         results=tuple(
-            RuntimeResult(step, Status.PLANNED, RuntimeAction.RUN)
+            GenerateResult(step, Status.PLANNED, GenerateAction.RUN)
             for step in (spec, later)
         ),
     )
 
-    report = execute_runtime(plan, tmp_path, capture_output=capture_output)
+    report = execute_generate(plan, tmp_path, capture_output=capture_output)
 
     assert report.ok is False
     assert report.results[0].status is Status.FAILED
@@ -427,25 +427,25 @@ def test_runtime_timeout_stops_children_before_running_later_steps(
     assert not (tmp_path / "late").exists()
 
 
-def test_runtime_rejects_invalid_download_without_replacing_asset(
+def test_generate_rejects_invalid_download_without_replacing_asset(
     tmp_path: Path,
 ) -> None:
     target = tmp_path / "plugin.wasm"
     target.write_bytes(b"known-good")
     expected = hashlib.sha256(b"new-valid").hexdigest()
-    spec = RuntimeSpec(
+    spec = GenerateSpec(
         name="wasm.test",
         tool=None,
         target=target,
         source="https://example.invalid/plugin.wasm",
         sha256=expected,
     )
-    plan = RuntimeReport(
+    plan = GenerateReport(
         apply=False,
-        results=(RuntimeResult(spec, Status.PLANNED, RuntimeAction.DOWNLOAD),),
+        results=(GenerateResult(spec, Status.PLANNED, GenerateAction.DOWNLOAD),),
     )
 
-    report = execute_runtime(
+    report = execute_generate(
         plan,
         tmp_path,
         downloader=lambda _source, _timeout: b"corrupt",
@@ -457,22 +457,22 @@ def test_runtime_rejects_invalid_download_without_replacing_asset(
     assert target.read_bytes() == b"known-good"
 
 
-def test_runtime_failed_preview_does_not_suggest_apply(tmp_path: Path, capsys) -> None:
-    planned = RuntimeResult(
-        RuntimeSpec(name="planned", tool=None, target=tmp_path / "planned"),
+def test_generate_failed_preview_does_not_suggest_apply(tmp_path: Path, capsys) -> None:
+    planned = GenerateResult(
+        GenerateSpec(name="planned", tool=None, target=tmp_path / "planned"),
         Status.PLANNED,
-        RuntimeAction.DOWNLOAD,
+        GenerateAction.DOWNLOAD,
     )
-    failed = RuntimeResult(
-        RuntimeSpec(name="failed", tool=None, target=tmp_path / "failed"),
+    failed = GenerateResult(
+        GenerateSpec(name="failed", tool=None, target=tmp_path / "failed"),
         Status.FAILED,
-        RuntimeAction.CLONE,
+        GenerateAction.CLONE,
         "target is not a Git checkout",
     )
 
-    report = RuntimeReport(False, (planned, failed))
-    assert runtime_next_commands(report) == ()
-    render_runtime(report)
+    report = GenerateReport(False, (planned, failed))
+    assert generate_next_commands(report) == ()
+    render_generate(report)
     output = capsys.readouterr()
     assert "target is not a Git checkout" in output.err
     assert "Resolve preview failures" in output.out
@@ -480,7 +480,7 @@ def test_runtime_failed_preview_does_not_suggest_apply(tmp_path: Path, capsys) -
     assert "Next:" not in output.out
 
 
-def test_runtime_failed_clone_never_publishes_partial_checkout(
+def test_generate_failed_clone_never_publishes_partial_checkout(
     tmp_path: Path,
     monkeypatch,
 ) -> None:
@@ -496,7 +496,7 @@ def test_runtime_failed_clone_never_publishes_partial_checkout(
         'for final_argument do :; done\n/bin/mkdir -p "$final_argument/.git"\nexit 7\n',
     )
     monkeypatch.setenv("PATH", str(bin_dir))
-    spec = RuntimeSpec(
+    spec = GenerateSpec(
         name="plugin.example",
         tool="git",
         target=target,
@@ -509,14 +509,14 @@ def test_runtime_failed_clone_never_publishes_partial_checkout(
             str(target),
         ),
     )
-    report = execute_runtime(
-        RuntimeReport(
+    report = execute_generate(
+        GenerateReport(
             apply=False,
             results=(
-                RuntimeResult(
+                GenerateResult(
                     spec,
                     Status.PLANNED,
-                    RuntimeAction.CLONE,
+                    GenerateAction.CLONE,
                 ),
             ),
         ),
@@ -527,7 +527,7 @@ def test_runtime_failed_clone_never_publishes_partial_checkout(
     assert report.results[0].exit_code == 7
     assert not target.exists()
     assert not list(target.parent.glob(".example.clone-*"))
-    next_plan = plan_runtime(
+    next_plan = plan_generate(
         repo_root,
         home,
         executable_finder=lambda tool: str(bin_dir / tool) if tool == "git" else None,
@@ -535,10 +535,10 @@ def test_runtime_failed_clone_never_publishes_partial_checkout(
     next_result = next(
         result for result in next_plan.results if result.spec.name == "plugin.fzf-tab"
     )
-    assert next_result.action is RuntimeAction.CLONE
+    assert next_result.action is GenerateAction.CLONE
 
 
-def test_runtime_successful_clone_atomically_publishes_checkout(
+def test_generate_successful_clone_atomically_publishes_checkout(
     tmp_path: Path,
     monkeypatch,
 ) -> None:
@@ -566,21 +566,21 @@ def test_runtime_successful_clone_atomically_publishes_checkout(
         "fi\n",
     )
     monkeypatch.setenv("PATH", str(bin_dir))
-    spec = RuntimeSpec(
+    spec = GenerateSpec(
         name="plugin.example",
         tool="git",
         target=target,
         command=("git", "clone", "https://example.invalid/example.git", str(target)),
         revision="0123456789abcdef0123456789abcdef01234567",
     )
-    report = execute_runtime(
-        RuntimeReport(
+    report = execute_generate(
+        GenerateReport(
             apply=False,
             results=(
-                RuntimeResult(
+                GenerateResult(
                     spec,
                     Status.PLANNED,
-                    RuntimeAction.CLONE,
+                    GenerateAction.CLONE,
                 ),
             ),
         ),
@@ -596,7 +596,7 @@ def test_runtime_successful_clone_atomically_publishes_checkout(
     assert not list(target.parent.glob(".example.clone-*"))
 
 
-def test_runtime_failed_update_verification_reports_state_without_rollback(
+def test_generate_failed_update_verification_reports_state_without_rollback(
     tmp_path: Path,
     monkeypatch,
 ) -> None:
@@ -629,7 +629,7 @@ def test_runtime_failed_update_verification_reports_state_without_rollback(
         "fi\n",
     )
     monkeypatch.setenv("PATH", str(bin_dir))
-    spec = RuntimeSpec(
+    spec = GenerateSpec(
         name="plugin.example",
         tool="git",
         target=target,
@@ -645,14 +645,14 @@ def test_runtime_failed_update_verification_reports_state_without_rollback(
         revision=new_revision,
     )
 
-    report = execute_runtime(
-        RuntimeReport(
+    report = execute_generate(
+        GenerateReport(
             apply=False,
             results=(
-                RuntimeResult(
+                GenerateResult(
                     spec,
                     Status.PLANNED,
-                    RuntimeAction.UPDATE,
+                    GenerateAction.UPDATE,
                 ),
             ),
         ),
@@ -668,7 +668,7 @@ def test_runtime_failed_update_verification_reports_state_without_rollback(
     assert (target / ".checked-out-revision").read_text().strip() == "wrong-revision"
 
 
-def test_runtime_human_mode_announces_work_and_reports_failure_to_stderr(
+def test_generate_human_mode_announces_work_and_reports_failure_to_stderr(
     tmp_path: Path,
 ) -> None:
     repo_root = tmp_path / "dotfiles"
@@ -692,7 +692,7 @@ def test_runtime_human_mode_announces_work_and_reports_failure_to_stderr(
     )
 
 
-def test_runtime_announces_the_exact_compdump_pattern(tmp_path: Path) -> None:
+def test_generate_announces_the_exact_compdump_pattern(tmp_path: Path) -> None:
     repo_root = tmp_path / "dotfiles"
     home = tmp_path / "home"
     bin_dir = tmp_path / "bin"
@@ -710,7 +710,7 @@ def test_runtime_announces_the_exact_compdump_pattern(tmp_path: Path) -> None:
     assert not (home / ".zcompdump-test").exists()
 
 
-def test_runtime_human_preview_shows_commands_and_targets(tmp_path: Path) -> None:
+def test_generate_human_preview_shows_commands_and_targets(tmp_path: Path) -> None:
     repo_root = tmp_path / "dotfiles"
     home = tmp_path / "home"
     bin_dir = tmp_path / "bin"
@@ -729,7 +729,7 @@ def test_runtime_human_preview_shows_commands_and_targets(tmp_path: Path) -> Non
         (
             "mise",
             "run",
-            "runtime",
+            "generate",
             "--",
             "--repo-root",
             str(repo_root),
@@ -740,7 +740,7 @@ def test_runtime_human_preview_shows_commands_and_targets(tmp_path: Path) -> Non
     assert f"Next:\n  {apply_command}\n" in completed.stdout
 
 
-def test_runtime_preview_does_not_suggest_apply_when_every_step_is_skipped(
+def test_generate_preview_does_not_suggest_apply_when_every_step_is_skipped(
     tmp_path: Path,
 ) -> None:
     repo_root = tmp_path / "dotfiles"
@@ -752,11 +752,11 @@ def test_runtime_preview_does_not_suggest_apply_when_every_step_is_skipped(
     completed = _run_runtime(repo_root, home, bin_dir, "--offline")
 
     assert completed.returncode == 0
-    assert "No runtime refresh steps are available" in completed.stdout
+    assert "No generate steps are available" in completed.stdout
     assert "--apply" not in completed.stdout
 
 
-def test_runtime_surfaces_operational_output_but_keeps_json_on_stdout(
+def test_generate_surfaces_operational_output_but_keeps_json_on_stdout(
     tmp_path: Path,
 ) -> None:
     repo_root = tmp_path / "dotfiles"
@@ -789,7 +789,7 @@ def test_runtime_surfaces_operational_output_but_keeps_json_on_stdout(
     assert "[bat.cache] cache note" in machine.stderr
 
 
-def test_runtime_json_keeps_captured_failure_detail(tmp_path: Path) -> None:
+def test_generate_json_keeps_captured_failure_detail(tmp_path: Path) -> None:
     repo_root = tmp_path / "dotfiles"
     home = tmp_path / "home"
     bin_dir = tmp_path / "bin"
@@ -817,7 +817,7 @@ def test_runtime_json_keeps_captured_failure_detail(tmp_path: Path) -> None:
     assert "[bat.cache] cache failed" in completed.stderr
 
 
-def test_runtime_partial_apply_keeps_exit_code_and_restart_handoff(
+def test_generate_partial_apply_keeps_exit_code_and_restart_handoff(
     tmp_path: Path,
 ) -> None:
     repo_root = tmp_path / "dotfiles"
@@ -846,13 +846,16 @@ def test_runtime_partial_apply_keeps_exit_code_and_restart_handoff(
     assert document["shell_restart_required"] is True
     assert document["next"] == []
     assert human.returncode == 1
-    assert "Refreshed shell runtime is not active in existing shells." in human.stdout
+    assert (
+        "Regenerated shell integrations are not active in existing shells."
+        in human.stdout
+    )
     assert "Restart the affected shell; for Zsh" in human.stdout
     assert "Next:" not in human.stdout
 
 
 @pytest.mark.parametrize("shell", ["bash", "zsh"])
-def test_runtime_mise_cache_uses_the_consuming_shell_path(
+def test_generate_mise_cache_uses_the_consuming_shell_path(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
     shell: str,
@@ -940,7 +943,7 @@ def test_runtime_mise_cache_uses_the_consuming_shell_path(
     ]
 
 
-def test_runtime_nu_mise_cache_uses_the_consuming_shell_path(
+def test_generate_nu_mise_cache_uses_the_consuming_shell_path(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -1017,7 +1020,7 @@ def test_runtime_nu_mise_cache_uses_the_consuming_shell_path(
     ]
 
 
-def test_runtime_refuses_to_clobber_non_git_plugin_dirs(tmp_path: Path) -> None:
+def test_generate_refuses_to_clobber_non_git_plugin_dirs(tmp_path: Path) -> None:
     repo_root = tmp_path / "dotfiles"
     home = tmp_path / "home"
     bin_dir = tmp_path / "bin"
@@ -1034,7 +1037,7 @@ def test_runtime_refuses_to_clobber_non_git_plugin_dirs(tmp_path: Path) -> None:
     assert "not a Git checkout" in steps["plugin.fzf-tab"]["reason"]
 
 
-def test_runtime_refuses_symlinked_plugin_targets(tmp_path: Path) -> None:
+def test_generate_refuses_symlinked_plugin_targets(tmp_path: Path) -> None:
     repo_root = tmp_path / "dotfiles"
     home = tmp_path / "home"
     bin_dir = tmp_path / "bin"
@@ -1060,7 +1063,7 @@ def test_runtime_refuses_symlinked_plugin_targets(tmp_path: Path) -> None:
     assert (plugins / "fzf-tab").is_symlink()
 
 
-def test_runtime_refuses_symlinked_git_metadata(tmp_path: Path) -> None:
+def test_generate_refuses_symlinked_git_metadata(tmp_path: Path) -> None:
     repo_root = tmp_path / "dotfiles"
     home = tmp_path / "home"
     home.mkdir()
@@ -1071,7 +1074,7 @@ def test_runtime_refuses_symlinked_git_metadata(tmp_path: Path) -> None:
     (external_plugin_git / "sentinel").write_text("do not touch\n")
     (plugin / ".git").symlink_to(external_plugin_git)
 
-    report = plan_runtime(
+    report = plan_generate(
         repo_root,
         home,
         executable_finder=lambda tool: f"/fake/{tool}",
@@ -1085,7 +1088,7 @@ def test_runtime_refuses_symlinked_git_metadata(tmp_path: Path) -> None:
     assert (external_plugin_git / "sentinel").read_text() == "do not touch\n"
 
 
-def test_runtime_rechecks_plugin_git_metadata_before_update(tmp_path: Path) -> None:
+def test_generate_rechecks_plugin_git_metadata_before_update(tmp_path: Path) -> None:
     repo_root = tmp_path / "dotfiles"
     home = tmp_path / "home"
     plugin = repo_root / "generated/plugins/fzf-tab"
@@ -1094,7 +1097,7 @@ def test_runtime_rechecks_plugin_git_metadata_before_update(tmp_path: Path) -> N
     _git_plugin(plugin)
     external_git.mkdir()
     (external_git / "sentinel").write_text("do not touch\n")
-    plan = plan_runtime(
+    plan = plan_generate(
         repo_root,
         home,
         executable_finder=lambda tool: f"/fake/{tool}" if tool == "git" else None,
@@ -1103,19 +1106,19 @@ def test_runtime_rechecks_plugin_git_metadata_before_update(tmp_path: Path) -> N
     plugin_step = next(
         item for item in plan.results if item.spec.name == "plugin.fzf-tab"
     )
-    plan = RuntimeReport(
+    plan = GenerateReport(
         apply=plan.apply,
         results=(plugin_step,),
         generated_root=plan.generated_root,
     )
 
-    def replace_git_metadata(spec: RuntimeSpec, _action: RuntimeAction) -> None:
+    def replace_git_metadata(spec: GenerateSpec, _action: GenerateAction) -> None:
         if spec.name != "plugin.fzf-tab":
             return
         shutil.rmtree(plugin / ".git")
         (plugin / ".git").symlink_to(external_git)
 
-    report = execute_runtime(plan, home, on_start=replace_git_metadata)
+    report = execute_generate(plan, home, on_start=replace_git_metadata)
 
     result = next(item for item in report.results if item.spec.name == "plugin.fzf-tab")
     assert result.status is Status.FAILED
@@ -1124,7 +1127,7 @@ def test_runtime_rechecks_plugin_git_metadata_before_update(tmp_path: Path) -> N
     assert (plugin / ".git").is_symlink()
 
 
-def test_runtime_rechecks_plugin_gitdir_file_before_update(tmp_path: Path) -> None:
+def test_generate_rechecks_plugin_gitdir_file_before_update(tmp_path: Path) -> None:
     repo_root = tmp_path / "dotfiles"
     home = tmp_path / "home"
     plugin = repo_root / "generated/plugins/fzf-tab"
@@ -1133,7 +1136,7 @@ def test_runtime_rechecks_plugin_gitdir_file_before_update(tmp_path: Path) -> No
     _git_plugin(plugin)
     external_git.mkdir()
     (external_git / "sentinel").write_text("do not touch\n")
-    plan = plan_runtime(
+    plan = plan_generate(
         repo_root,
         home,
         executable_finder=lambda tool: f"/fake/{tool}" if tool == "git" else None,
@@ -1142,19 +1145,19 @@ def test_runtime_rechecks_plugin_gitdir_file_before_update(tmp_path: Path) -> No
     plugin_step = next(
         item for item in plan.results if item.spec.name == "plugin.fzf-tab"
     )
-    plan = RuntimeReport(
+    plan = GenerateReport(
         apply=plan.apply,
         results=(plugin_step,),
         generated_root=plan.generated_root,
     )
 
-    def replace_git_metadata(spec: RuntimeSpec, _action: RuntimeAction) -> None:
+    def replace_git_metadata(spec: GenerateSpec, _action: GenerateAction) -> None:
         if spec.name != "plugin.fzf-tab":
             return
         shutil.rmtree(plugin / ".git")
         (plugin / ".git").write_text(f"gitdir: {external_git}\n")
 
-    report = execute_runtime(plan, home, on_start=replace_git_metadata)
+    report = execute_generate(plan, home, on_start=replace_git_metadata)
 
     result = next(item for item in report.results if item.spec.name == "plugin.fzf-tab")
     assert result.status is Status.FAILED
@@ -1163,7 +1166,7 @@ def test_runtime_rechecks_plugin_gitdir_file_before_update(tmp_path: Path) -> No
     assert (plugin / ".git").is_file()
 
 
-def test_runtime_rechecks_owned_directories_immediately_before_execution(
+def test_generate_rechecks_owned_directories_immediately_before_execution(
     tmp_path: Path,
 ) -> None:
     repo_root = tmp_path / "dotfiles"
@@ -1177,7 +1180,7 @@ def test_runtime_rechecks_owned_directories_immediately_before_execution(
     canonical_mise = home / ".local/bin/mise"
     canonical_mise.parent.mkdir(parents=True)
     shutil.copy2(bin_dir / "mise", canonical_mise)
-    plan = plan_runtime(
+    plan = plan_generate(
         repo_root,
         home,
         executable_finder=lambda tool: str(bin_dir / tool) if tool == "mise" else None,
@@ -1186,7 +1189,7 @@ def test_runtime_rechecks_owned_directories_immediately_before_execution(
 
     replaced = False
 
-    def replace_owned_directory(spec: RuntimeSpec, _action: RuntimeAction) -> None:
+    def replace_owned_directory(spec: GenerateSpec, _action: GenerateAction) -> None:
         nonlocal replaced
         if replaced or spec.name != "function.mise":
             return
@@ -1195,7 +1198,7 @@ def test_runtime_rechecks_owned_directories_immediately_before_execution(
         functions.symlink_to(outside, target_is_directory=True)
         replaced = True
 
-    report = execute_runtime(plan, home, on_start=replace_owned_directory)
+    report = execute_generate(plan, home, on_start=replace_owned_directory)
 
     result = next(item for item in report.results if item.spec.name == "function.mise")
     assert result.status is Status.FAILED
@@ -1203,7 +1206,7 @@ def test_runtime_rechecks_owned_directories_immediately_before_execution(
     assert not any(outside.iterdir())
 
 
-def test_runtime_keeps_old_output_when_generator_prints_nothing(
+def test_generate_keeps_old_output_when_generator_prints_nothing(
     tmp_path: Path,
 ) -> None:
     repo_root = tmp_path / "dotfiles"
@@ -1271,7 +1274,7 @@ def test_shim_without_reachable_mise_counts_as_absent(
     assert finder("orphan-tool") is None
 
 
-def test_runtime_generates_with_native_tool_behind_stale_mise_shim(
+def test_generate_generates_with_native_tool_behind_stale_mise_shim(
     tmp_path: Path,
     monkeypatch,
 ) -> None:
@@ -1290,12 +1293,12 @@ def test_runtime_generates_with_native_tool_behind_stale_mise_shim(
     monkeypatch.setenv("MISE_DATA_DIR", str(data_dir))
     monkeypatch.setenv("PATH", os.pathsep.join((str(shims), str(bin_dir))))
 
-    plan = plan_runtime(repo_root, home, network=False)
+    plan = plan_generate(repo_root, home, network=False)
     completion = next(
         result for result in plan.results if result.spec.name == "completion.codex"
     )
     assert completion.spec.command[0] == str(bin_dir / "codex")
-    report = execute_runtime(plan, home)
+    report = execute_generate(plan, home)
 
     assert report.ok
     assert (repo_root / "generated/completions/_codex").read_text() == (
@@ -1303,7 +1306,7 @@ def test_runtime_generates_with_native_tool_behind_stale_mise_shim(
     )
 
 
-def test_runtime_repeat_preserves_outputs_and_completion_cache(tmp_path: Path) -> None:
+def test_generate_repeat_preserves_outputs_and_completion_cache(tmp_path: Path) -> None:
     repo_root = tmp_path / "dotfiles"
     home = tmp_path / "home"
     bin_dir = tmp_path / "bin"
@@ -1344,7 +1347,7 @@ def test_runtime_repeat_preserves_outputs_and_completion_cache(tmp_path: Path) -
     assert json.loads(changed.stdout)["shell_restart_required"] is True
 
 
-def test_runtime_pinned_plugin_skips_fetch_and_preserves_dirty_checkout(
+def test_generate_pinned_plugin_skips_fetch_and_preserves_dirty_checkout(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -1354,7 +1357,7 @@ def test_runtime_pinned_plugin_skips_fetch_and_preserves_dirty_checkout(
     plugin = repo_root / "generated/plugins/fzf-tab"
     revision = _git_plugin(plugin)
     monkeypatch.setattr(
-        "scripts.runtime.PLUGIN_SPECS",
+        "scripts.generate.PLUGIN_SPECS",
         (
             (
                 "fzf-tab",
@@ -1365,34 +1368,34 @@ def test_runtime_pinned_plugin_skips_fetch_and_preserves_dirty_checkout(
         ),
     )
     finder = {"git": shutil.which("git")}.get
-    current_plan = plan_runtime(repo_root, home, executable_finder=finder)
+    current_plan = plan_generate(repo_root, home, executable_finder=finder)
     current = next(
         item for item in current_plan.results if item.spec.name == "plugin.fzf-tab"
     )
     assert current.status is Status.UNCHANGED
     assert "current" in (current.reason or "")
-    report = execute_runtime(
-        RuntimeReport(False, (current,), repo_root / "generated"), home
+    report = execute_generate(
+        GenerateReport(False, (current,), repo_root / "generated"), home
     )
     assert report.ok
 
     entrypoint = plugin / "fzf-tab.plugin.zsh"
     entrypoint.write_text("# local edit\n")
-    dirty_plan = plan_runtime(repo_root, home, executable_finder=finder)
+    dirty_plan = plan_generate(repo_root, home, executable_finder=finder)
     dirty = next(
         item for item in dirty_plan.results if item.spec.name == "plugin.fzf-tab"
     )
     assert dirty.status is Status.FAILED
     assert "local changes" in (dirty.reason or "")
-    dirty_report = execute_runtime(
-        RuntimeReport(False, (dirty,), repo_root / "generated"), home
+    dirty_report = execute_generate(
+        GenerateReport(False, (dirty,), repo_root / "generated"), home
     )
     assert not dirty_report.ok
     assert entrypoint.read_text() == "# local edit\n"
 
 
 @pytest.mark.parametrize("shell", ["bash", "zsh", "nu"])
-def test_runtime_activation_uses_host_selected_mise_and_guards_missing_owner(
+def test_generate_activation_uses_host_selected_mise_and_guards_missing_owner(
     tmp_path: Path,
     shell: str,
 ) -> None:

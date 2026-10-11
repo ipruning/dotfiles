@@ -36,10 +36,10 @@ class UpdateResult:
 class UpdateReport:
     apply: bool
     results: tuple[UpdateResult, ...]
-    runtime: dict[str, object] | None = None
+    generate: dict[str, object] | None = None
 
     @property
     def ok(self) -> bool:
         return all(result.status is not Status.FAILED for result in self.results) and (
-            self.runtime is None or bool(self.runtime["ok"])
+            self.generate is None or bool(self.generate["ok"])
         )

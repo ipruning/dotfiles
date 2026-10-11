@@ -1,4 +1,4 @@
-"""Apply small, explicit host setup operations."""
+"""Preview or apply the Linux Lite host setup (Bash startup block and Git include)."""
 
 from __future__ import annotations
 
@@ -13,7 +13,6 @@ from pathlib import Path
 
 from .host_policy import HostPolicyError, mutation_allowed, require_mutation_allowed
 from .models import Status, status_summary
-from .profiles import HostProfile
 from .render import emit_error
 
 BASH_BLOCK_START = "# >>> dotfiles linux-lite >>>"
@@ -33,7 +32,6 @@ class SetupChange:
 
 @dataclass(frozen=True)
 class SetupReport:
-    profile: HostProfile
     apply: bool
     changes: tuple[SetupChange, ...]
 
@@ -47,13 +45,8 @@ def _next_commands(
     *,
     apply_allowed: bool = True,
 ) -> tuple[str, ...]:
-    if (
-        apply_allowed
-        and not report.apply
-        and report.profile is HostProfile.LINUX_LITE
-        and report.changed
-    ):
-        return ("mise run setup -- --profile linux-lite --apply",)
+    if apply_allowed and not report.apply and report.changed:
+        return ("mise run setup-linux-lite -- --apply",)
     return ()
 
 
@@ -203,26 +196,21 @@ def _configure_linux_lite(
                 if git_include_changed:
                     raise SetupError(
                         f"could not update Bash config {bashrc}: {error}; "
-                        "Git include was completed; re-run setup to continue convergence",
+                        "Git include was completed; re-run setup-linux-lite to continue convergence",
                     ) from error
                 raise SetupError(
                     f"could not update Bash config {bashrc}: {error}"
                 ) from error
     status = Status.SUCCEEDED if apply else Status.PLANNED
     return SetupReport(
-        profile=HostProfile.LINUX_LITE,
         apply=apply,
         changes=tuple(SetupChange(action=action, status=status) for action in actions),
     )
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Apply explicit host setup.")
-    parser.add_argument(
-        "--profile",
-        choices=[HostProfile.LINUX_LITE.value],
-        required=True,
-        help="host profile whose setup should run",
+    parser = argparse.ArgumentParser(
+        description="Preview or apply the Linux Lite Bash startup block and Git include."
     )
     parser.add_argument(
         "--apply",
@@ -246,7 +234,7 @@ def main(argv: list[str] | None = None) -> int:
         report = setup(repo_root, home)
     except HostPolicyError as error:
         emit_error(
-            "setup",
+            "setup-linux-lite",
             str(error),
             as_json=args.as_json,
             apply=args.apply,
@@ -254,17 +242,18 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 1
     except SetupError as error:
-        emit_error("setup", str(error), as_json=args.as_json, apply=args.apply)
+        emit_error(
+            "setup-linux-lite", str(error), as_json=args.as_json, apply=args.apply
+        )
         return 1
     summary = status_summary(change.status for change in report.changes)
     document = {
         "schema_version": 1,
-        "operation": "setup",
+        "operation": "setup-linux-lite",
         "apply": report.apply,
         "ok": True,
         "next": list(_next_commands(report, apply_allowed=apply_allowed)),
         "shell_restart_required": _shell_restart_required(report),
-        "profile": report.profile.value,
         "changes": [
             {"action": change.action, "status": change.status.value}
             for change in report.changes
@@ -274,7 +263,6 @@ def main(argv: list[str] | None = None) -> int:
     if args.as_json:
         print(json.dumps(document, indent=2, sort_keys=True))
         return 0
-    print(f"Profile: {report.profile.value}")
     for change in report.changes:
         print(f"{change.status.value.upper():7} {change.action}")
     rendered = ", ".join(f"{count} {status}" for status, count in summary.items())
@@ -288,7 +276,7 @@ def main(argv: list[str] | None = None) -> int:
             for command in _next_commands(report):
                 print(f"  {command}")
         else:
-            print("No files changed. Host policy disables setup apply.")
+            print("No files changed. Host policy disables setup-linux-lite apply.")
     elif _shell_restart_required(report):
         print("Updated Bash startup configuration is not active in this shell.")
         print("Open a new Bash or run `exec bash` to load it.")

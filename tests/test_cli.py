@@ -89,10 +89,8 @@ def test_mise_python_tasks_never_sync_dependencies_implicitly(tmp_path: Path) ->
         [
             "bash",
             "-c",
-            config["tasks"]["setup"]["run"],
+            config["tasks"]["setup-linux-lite"]["run"],
             "mise-task",
-            "--profile",
-            "linux-lite",
             "--json",
         ],
         cwd=project,
@@ -193,10 +191,8 @@ def test_setup_cli_previews_linux_lite_as_json_without_writing(tmp_path: Path) -
     home.mkdir()
 
     completed = _run_module(
-        "scripts.setup",
+        "scripts.setup_linux_lite",
         home,
-        "--profile",
-        "linux-lite",
         "--json",
     )
     document = json.loads(completed.stdout)
@@ -204,9 +200,8 @@ def test_setup_cli_previews_linux_lite_as_json_without_writing(tmp_path: Path) -
     assert completed.returncode == 0
     assert completed.stderr == ""
     assert document["schema_version"] == 1
-    assert document["operation"] == "setup"
+    assert document["operation"] == "setup-linux-lite"
     assert document["ok"] is True
-    assert document["profile"] == "linux-lite"
     assert document["apply"] is False
     assert document["summary"] == {"planned": 2}
     assert [change["status"] for change in document["changes"]] == [
@@ -240,7 +235,6 @@ def test_check_cli_reports_optional_linux_lite_gaps_as_json(tmp_path: Path) -> N
     assert completed.returncode == 0
     assert completed.stderr == ""
     assert document["ok"] is True
-    assert document["profile"] == "linux-lite"
     assert sum(document["summary"].values()) == len(document["findings"])
     assert "git.private_include_missing" in codes
     assert "executable.skillshare.missing" in codes

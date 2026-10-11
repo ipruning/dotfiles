@@ -1,4 +1,4 @@
-"""Shared contracts for generated shell runtime operations."""
+"""Shared contracts for generate operations."""
 
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ Downloader = Callable[[str, int], bytes]
 AtomicWriter = Callable[[Path], object]
 
 
-class RuntimeAction(StrEnum):
+class GenerateAction(StrEnum):
     GENERATE = "generate"
     CLONE = "clone"
     UPDATE = "update"
@@ -24,7 +24,7 @@ class RuntimeAction(StrEnum):
 
 
 @dataclass(frozen=True)
-class RuntimeSpec:
+class GenerateSpec:
     name: str
     tool: str | None
     target: Path | None = None
@@ -47,21 +47,21 @@ class ShellInitSpec:
 
 
 @dataclass(frozen=True)
-class RuntimeResult:
-    spec: RuntimeSpec
+class GenerateResult:
+    spec: GenerateSpec
     status: Status
-    action: RuntimeAction
+    action: GenerateAction
     reason: str | None = None
     exit_code: int | None = None
 
 
-StepCallback = Callable[[RuntimeSpec, RuntimeAction], None]
+StepCallback = Callable[[GenerateSpec, GenerateAction], None]
 
 
 @dataclass(frozen=True)
-class RuntimeReport:
+class GenerateReport:
     apply: bool
-    results: tuple[RuntimeResult, ...]
+    results: tuple[GenerateResult, ...]
     generated_root: Path | None = None
     network: bool = True
 

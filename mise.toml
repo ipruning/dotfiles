@@ -58,9 +58,9 @@ run = 'python -m scripts.doctor "$@"'
 description = "Preview or apply package-manager cleanup"
 run = 'python -m scripts.clean "$@"'
 
-[tasks.setup]
-description = "Preview or apply an explicit host profile"
-run = 'python -m scripts.setup "$@"'
+[tasks.setup-linux-lite]
+description = "Preview or apply the Linux Lite Bash startup block and Git include"
+run = 'python -m scripts.setup_linux_lite "$@"'
 
 [tasks.update]
 description = "Preview or apply host tool updates"
@@ -74,9 +74,9 @@ run = 'python -m scripts.upgrade_tools "$@"'
 description = "Preview or converge global mise configuration, locked tools, and shims"
 run = 'python -m scripts.mise_sync "$@"'
 
-[tasks.runtime]
-description = "Preview or refresh generated shell runtime and owned plugins"
-run = 'python -m scripts.runtime "$@"'
+[tasks.generate]
+description = "Preview or regenerate generated/ shell integrations, completions, and plugins"
+run = 'python -m scripts.generate "$@"'
 
 [tasks.inventory]
 description = "Preview or snapshot installed host software into inventory/<host>/"

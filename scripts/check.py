@@ -24,6 +24,8 @@ from .check_mise import (
     mise_systemd_shim_findings,
 )
 from .check_skillshare import skillshare_findings, skillshare_ownership_finding
+from .generate import file_sha256, shim_aware_finder
+from .generate_specs import COMPLETION_SPECS, FUNCTION_SPECS, PLUGIN_SPECS, WASM_SPECS
 from .host_policy import (
     HostPolicy,
     HostPolicyError,
@@ -34,8 +36,6 @@ from .mise import canonical_mise_executable
 from .models import CheckReport, ExecutableFinder, Finding, Severity
 from .profiles import HostProfile, resolve_profile
 from .render import finding_document, render_findings
-from .runtime import file_sha256, shim_aware_finder
-from .runtime_specs import COMPLETION_SPECS, FUNCTION_SPECS, PLUGIN_SPECS, WASM_SPECS
 
 AUDIT_ONLY_NON_APPLICABLE_CHECKS = frozenset(
     {
@@ -52,7 +52,7 @@ AUDIT_ONLY_NON_APPLICABLE_CHECKS = frozenset(
         "executable.lazydocker",
     },
 )
-AUDIT_ONLY_NON_APPLICABLE_PREFIXES = ("runtime.", "zellij.")
+AUDIT_ONLY_NON_APPLICABLE_PREFIXES = ("generated.", "zellij.")
 
 
 def _apply_audit_only_applicability(findings: list[Finding]) -> list[Finding]:
@@ -164,7 +164,7 @@ def _owned_generated_capability(
     *,
     tool_available: bool,
 ) -> Finding | None:
-    action = "Run mise run runtime, then mise run runtime -- --apply."
+    action = "Run mise run generate, then mise run generate -- --apply."
     if tool_available:
         return _file_capability(check, file_path, label, action)
     if file_path.exists() or file_path.is_symlink():
@@ -187,7 +187,7 @@ def _generated_directory_finding(directory_path: Path, label: str) -> Finding:
             f"shell.{label}_symlinked",
             f"Generated shell {label} directory is a symlink",
             directory_path,
-            "Remove the symlink before refreshing repository-owned runtime state.",
+            "Remove the symlink before regenerating repository-owned generated state.",
         )
     if not directory_path.is_dir():
         return Finding(
@@ -196,7 +196,7 @@ def _generated_directory_finding(directory_path: Path, label: str) -> Finding:
             f"shell.{label}_missing",
             f"Generated shell {label} directory is missing",
             directory_path,
-            "Run the generator that owns this shell runtime state.",
+            "Run mise run generate, which owns this generated state.",
         )
     populated = any(
         child.name != ".gitkeep"
@@ -208,9 +208,9 @@ def _generated_directory_finding(directory_path: Path, label: str) -> Finding:
         Severity.OK if populated else Severity.WARN,
         f"shell.{label}_{'ready' if populated else 'empty'}",
         f"Generated shell {label} directory "
-        f"{'contains runtime data' if populated else 'contains no runtime data'}",
+        f"{'contains generated data' if populated else 'contains no generated data'}",
         directory_path,
-        None if populated else "Generate this shell runtime state if the host uses it.",
+        None if populated else "Run mise run generate if the host uses it.",
     )
 
 
@@ -365,8 +365,8 @@ def _bash_integration_finding(
         None
         if configured
         else (
-            "Preview with mise run setup -- --profile linux-lite, then apply with "
-            "mise run setup -- --profile linux-lite --apply."
+            "Preview with mise run setup-linux-lite, then apply with "
+            "mise run setup-linux-lite -- --apply."
             if mutation_allowed
             else "Host policy disables dotfiles setup; keep Bash with its host owner."
         ),
@@ -560,7 +560,7 @@ def inspect_host(
             else owned_tool_finder(tool) is not None
         )
         finding = _owned_generated_capability(
-            f"runtime.function.{function_spec.name}",
+            f"generated.function.{function_spec.name}",
             repo_root / "generated/functions" / function_spec.filename,
             f"Generated {tool} {function_spec.shell} initialization",
             tool_available=tool_available,
@@ -569,7 +569,7 @@ def inspect_host(
             findings.append(finding)
     for name, tool, _command, filename, _environment in COMPLETION_SPECS:
         finding = _owned_generated_capability(
-            f"runtime.completion.{name}",
+            f"generated.completion.{name}",
             repo_root / "generated/completions" / filename,
             f"Generated {name} completion",
             tool_available=owned_tool_finder(tool) is not None,
@@ -579,10 +579,10 @@ def inspect_host(
     for name, _source, _revision, entrypoint in PLUGIN_SPECS:
         findings.append(
             _file_capability(
-                f"runtime.plugin.{name}",
+                f"generated.plugin.{name}",
                 repo_root / "generated/plugins" / name / entrypoint,
                 f"Zsh plugin {name}",
-                "Run mise run runtime, then mise run runtime -- --apply.",
+                "Run mise run generate, then mise run generate -- --apply.",
             ),
         )
     generated_plugins = repo_root / "generated/plugins"
@@ -595,12 +595,12 @@ def inspect_host(
                 continue
             findings.append(
                 Finding(
-                    f"runtime.plugin.{plugin_path.name}",
+                    f"generated.plugin.{plugin_path.name}",
                     Severity.WARN,
-                    f"runtime.plugin.{plugin_path.name}_unowned",
+                    f"generated.plugin.{plugin_path.name}_unowned",
                     f"Generated plugin {plugin_path.name} has no repository owner",
                     plugin_path,
-                    "Remove it explicitly if obsolete, or define its runtime owner.",
+                    "Remove it explicitly if obsolete, or declare it in scripts/generate_specs.py.",
                 ),
             )
     for name, _source, sha256 in WASM_SPECS:
@@ -631,7 +631,7 @@ def inspect_host(
                     f"zellij.{plugin_name}_{code}",
                     message,
                     plugin_path,
-                    "Run mise run runtime, then mise run runtime -- --apply.",
+                    "Run mise run generate, then mise run generate -- --apply.",
                 ),
             )
     if active_system == "Darwin":

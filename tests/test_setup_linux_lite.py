@@ -4,9 +4,8 @@ from pathlib import Path
 
 import pytest
 
-import scripts.setup as setup_script
-from scripts.profiles import HostProfile
-from scripts.setup import SetupError, apply_setup, plan_setup
+import scripts.setup_linux_lite as setup_script
+from scripts.setup_linux_lite import SetupError, apply_setup, plan_setup
 from tests.conftest import run_scripts_module
 
 
@@ -15,25 +14,19 @@ def test_setup_json_exposes_apply_handoff_and_shell_restart(tmp_path: Path) -> N
     home.mkdir()
 
     preview = run_scripts_module(
-        "setup",
+        "setup_linux_lite",
         home,
-        "--profile",
-        "linux-lite",
         "--json",
     )
     assert preview.returncode == 0
     preview_document = json.loads(preview.stdout)
     assert preview_document["apply"] is False
-    assert preview_document["next"] == [
-        "mise run setup -- --profile linux-lite --apply"
-    ]
+    assert preview_document["next"] == ["mise run setup-linux-lite -- --apply"]
     assert preview_document["shell_restart_required"] is False
 
     applied = run_scripts_module(
-        "setup",
+        "setup_linux_lite",
         home,
-        "--profile",
-        "linux-lite",
         "--apply",
         "--json",
     )
@@ -60,7 +53,6 @@ def test_linux_lite_setup_preserves_shell_config_and_is_idempotent(
     preview = plan_setup(repo_root, home)
 
     assert preview.changed is True
-    assert preview.profile is HostProfile.LINUX_LITE
     assert bashrc.read_text() == "# existing host setup\n"
     assert "include" not in gitconfig.read_text()
 
@@ -191,7 +183,7 @@ def test_linux_lite_setup_converges_after_bash_update_fails(
 
     with pytest.raises(
         SetupError,
-        match="Git include was completed; re-run setup to continue convergence",
+        match="Git include was completed; re-run setup-linux-lite to continue convergence",
     ):
         apply_setup(repo_root, home)
 

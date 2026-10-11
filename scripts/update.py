@@ -521,7 +521,7 @@ def update_document(
             }
             for result in report.results
         ],
-        "runtime": report.runtime,
+        "generate": report.generate,
         "summary": _summary(report),
         "notes": list(_notes(report)),
         "next": list(_next_commands(report, apply_allowed=apply_allowed)),
@@ -585,10 +585,10 @@ def _render(report: UpdateReport, *, apply_allowed: bool = True) -> None:
         return
     if not report.ok:
         print(
-            "Update incomplete. Resolve the reported failures; runtime has its own result."
+            "Update incomplete. Resolve the reported failures; generate has its own result."
         )
-    if report.runtime is not None:
-        print(f"Runtime: {'SUCCEEDED' if report.runtime['ok'] else 'FAILED'}")
+    if report.generate is not None:
+        print(f"Generate: {'SUCCEEDED' if report.generate['ok'] else 'FAILED'}")
     next_commands = _next_commands(report)
     if not next_commands:
         if report.ok:
@@ -640,23 +640,23 @@ def main(argv: list[str] | None = None) -> int:
         if args.apply and safety_failed:
             report = replace(
                 report,
-                runtime={
+                generate={
                     "ok": False,
                     "apply": False,
                     "status": "skipped",
-                    "reason": "mise ownership preflight failed; resolve before refreshing runtime",
+                    "reason": "mise ownership preflight failed; resolve before running generate",
                 },
             )
         elif args.apply:
-            from .runtime import execute_runtime, plan_runtime
-            from .runtime_render import runtime_document
+            from .generate import execute_generate, plan_generate
+            from .generate_render import generate_document
 
-            runtime = execute_runtime(
-                plan_runtime(Path(__file__).resolve().parents[1], home, network=False),
+            generated = execute_generate(
+                plan_generate(Path(__file__).resolve().parents[1], home, network=False),
                 home,
                 capture_output=True,
             )
-            report = replace(report, runtime=runtime_document(runtime))
+            report = replace(report, generate=generate_document(generated))
 
     except HostPolicyError as error:
         emit_error(
