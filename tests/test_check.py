@@ -932,7 +932,8 @@ def test_linux_lite_check_requires_only_git_and_mise_and_reports_legacy_path(
     }
     assert findings["executable.herdr"].severity is Severity.WARN
     assert findings["executable.herdr"].action == (
-        "Install Herdr with its official installer; see the Herdr section of README.md."
+        "Install Herdr with its official installer: "
+        "curl -fsSL https://herdr.dev/install.sh | sh"
     )
     for command in ("atuin", "zoxide"):
         assert findings[f"executable.{command}"].severity is Severity.WARN

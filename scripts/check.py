@@ -472,8 +472,8 @@ def inspect_host(
             "herdr",
             required=False,
             executable_finder=executable_finder,
-            missing_action="Install Herdr with its official installer; see the "
-            "Herdr section of README.md.",
+            missing_action="Install Herdr with its official installer: "
+            "curl -fsSL https://herdr.dev/install.sh | sh",
         ),
     ))
     findings.extend(inspect_herdr(home))

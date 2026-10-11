@@ -1,57 +1,39 @@
 # dotfiles
 
-Personal configuration references and standalone maintenance tools for macOS
-and Linux hosts. This repository reports drift and missing capabilities. It
-does not automatically overwrite `$HOME` or rebuild an entire machine.
+Personal configuration references and maintenance tasks for macOS and Linux
+hosts. The repository reports drift and missing capabilities; it never
+overwrites `$HOME` or rebuilds a machine on its own.
+
+[`AGENTS.md`](AGENTS.md) defines the layout (`scripts/`, `reference/`,
+`mackup/`, `shell/`, `commands/`, `services/`, `manual/`, `generated/`,
+`inventory/`), the shared status and severity vocabulary, and the
+Operator/Executor handoff. This README describes how to operate the tasks.
 
 ## Daily maintenance
 
 | Intent | Preview | Apply |
 | --- | --- | --- |
-| Inspect this host | `mise run check` | Read-only |
-| Maintain installed tools and generated shell state | `mise run update` | `mise run update -- --apply` |
-| Advance the shared tool baseline | `mise run upgrade-tools` | `mise run upgrade-tools -- --apply` |
-| Connect shared configuration and install missing tools | `mise run mise-sync` | `mise run mise-sync -- --apply` |
-| Regenerate `generated/`, including pinned plugins | `mise run generate` | `mise run generate -- --apply` |
-| Diagnose failures | `mise run doctor` | Read-only |
+| Inspect this host | `mise run check` | read-only |
+| Compare reference and live configuration | `mise run diff` | read-only |
+| Install locked tools, plugins, and generated shell state | `mise run update` | `mise run update -- --apply` |
+| Advance the shared baselines (maintenance host) | `mise run upgrade-tools` | `mise run upgrade-tools -- --apply` |
+| Link mise configuration and install missing baseline tools | `mise run mise-sync` | `mise run mise-sync -- --apply` |
+| Regenerate `generated/` | `mise run generate` | `mise run generate -- --apply` |
+| Diagnose failures | `mise run doctor` | read-only |
 
-Upgrade the shared baseline in one checkout, verify and commit it, then pull
-that commit on managed hosts. Ordinary updates consume its locked versions.
-Audit-only hosts retain their own tool and configuration owners; these tasks
-never bypass that policy. Configuration restore, cleanup and server restart
-remain separate explicit operations.
+Every mutating task previews by default and writes only with `--apply`. Discover
+tasks with `mise tasks`, `mise tasks info <task>`, and `mise run <task> --
+--help`; aggregate gates such as `verify` have no help. Commands are listed in
+the [command index](commands/README.md) and services in [Services](#services);
+their flags are their own.
 
-## Repository model
-
-The top-level directories are the repository's vocabulary: `scripts/` (tasks),
-`reference/` (desired configuration), `mackup/` (path mapping), `shell/`
-(sourced shell fragments), `commands/` (user commands), `services/`
-(self-installing tools), `manual/` (configuration copied by hand),
-`generated/` (local generated output) and `inventory/` (software snapshots).
-[`AGENTS.md`](AGENTS.md#layout) defines each one, the shared status and
-severity words, and the rules for changing them; this README describes how to
-operate the tasks.
-
-Start with `mise tasks` and `mise tasks info <task>`, then
-`mise run <task> -- --help`; aggregate gates such as `verify` have no help.
-Every mutating task previews by default and writes only with `--apply`.
-Commands are listed in the [command index](commands/README.md); services in
-[Services](#services). Their flags and mutation defaults are their own.
-
-Changes to a host follow the Operator/Executor handoff in
-[`AGENTS.md`](AGENTS.md#operator-handoff): a finding's suggested action is never
-authorization to mutate the host.
+The baseline flow is one-writer: advance it in one checkout, verify and commit,
+then pull on the other hosts and run `update`.
 
 ## Start
 
-Git and mise are the only bootstrap requirements. On a machine without mise,
-install the latest release from the official installer only when dotfiles will
-manage that host. If the operating system or another platform already owns
-mise or global configuration, retain that owner, create the
-[audit-only policy](#host-local-ownership-policy) before running any dotfiles
-operation, and skip `mise-sync --apply`.
-
-The managed-host bootstrap is:
+Git and mise are the only bootstrap requirements. Bootstrap a host that dotfiles
+manages with:
 
 ```bash
 curl -fsSL https://mise.run | MISE_SELF_UPDATE_MINIMUM_RELEASE_AGE=0s sh
@@ -61,124 +43,88 @@ cd ~/dotfiles
 mise trust
 mise install --locked actionlint fd jq python ripgrep shellcheck uv
 mise exec -- uv sync --locked
-mise tasks
 mise run mise-sync
 mise run mise-sync -- --apply
 ```
 
-Managed hosts default to the standalone executable at `~/.local/bin/mise`. Do
-not install a second copy with Homebrew, apt, or another package manager:
-multiple owners may leave generated shell activation bound to the wrong binary.
-The upstream installer uses this standalone path by default, and this
-installation supports `mise self-update`.
+- The installer takes the latest mise; `min_version` (2026.9.18) in both mise
+  configs is only a compatibility floor for version-3 lockfiles and npm
+  sidecars. Keep the standalone binary at `~/.local/bin/mise` as the single
+  owner (it supports `mise self-update`); a second copy from Homebrew or apt can
+  bind shell activation to the wrong binary.
+- Name the repository tools explicitly. A bare `mise install --locked` also
+  loads the global configuration and installs every host-wide tool.
+- `settings.auto_install = false` makes these two install commands the only
+  bootstrap boundary: later task, exec, and command-not-found paths fail instead
+  of downloading. Do not split that gate into narrower settings.
+- `uv sync --locked` installs the Python dependencies, including the pinned
+  Mackup fork. Python tasks use `.venv`'s interpreter directly, because mise
+  inserts its PATH entries where the shims directory sits (after `/usr/bin` on
+  Omarchy).
+- On Linux, `diff` and `check` select the `linux-lite` profile; macOS selects
+  `macos`. Pass `--profile full` to audit every stored reference.
 
 ### Host-local ownership policy
 
-A host whose operating system owns configuration or mise can opt out of
-repository mutation without changing the shared reference. Create the
-untracked host-local file `~/.config/dotfiles/policy.toml`:
+When the operating system or another platform owns mise or global configuration,
+create the untracked `~/.config/dotfiles/policy.toml` before running any task,
+and skip `mise-sync --apply`:
 
 ```toml
 mode = "audit-only"
 mise_path = "/usr/bin/mise"
 ```
 
-`audit-only` keeps previews plus `diff`, `check`, `lint`, and verification
-available, but rejects `--apply` in the maintenance tasks under `scripts/`
-before they write files or run updaters. Previews show what a managed host
-would do, but omit an inapplicable `--apply` next step. Host-only
-global mise tools remain visible facts and do not fail an audit-only preview;
-an incomplete inspection, unreadable configuration, or failed command probe
-still fails. The same mutation guard protects the underlying `apply_*` and
-`execute_*` Python operations. `mise_path` selects the host's canonical mise
-owner, so a package-managed binary such as Omarchy's `/usr/bin/mise` is not
-treated as an extra installation. An absent policy preserves the managed
-default above. An invalid policy, including unknown fields, fails closed and is
-diagnosed by `mise run check`; it never falls back silently to the standalone
-owner.
-
-This policy does not constrain `commands/` or `services/`. Their lifecycle and
-recovery commands have separate CLI contracts and require explicit operator
-authorization; follow each service's runbook.
-
-Under this policy, `check` marks dotfiles-owned shell integration, shared mise
-capabilities, and generated state readiness as not applicable. Canonical mise
-health, duplicate owners, Skillshare health, permissions, and other host-owned
-problems remain applicable and continue to gate strict inspection.
-
-The installer intentionally has no version argument: host and Orb bootstrap
-take the latest mise release available from `https://mise.run` rather than
-pinning the mise binary. The hard `min_version` in both project and global
-configuration is only the compatibility floor (currently 2026.9.18, covering
-version-3 lockfiles and native npm dependency sidecars), not the version
-bootstrap should install. Commit the referenced `reference/.config/mise/locks/`
-files alongside changes to the global lockfile.
-
-`mise trust` is required because this repository declares a project virtual
-environment. The explicit `mise install --locked ...` command requires every
-project tool to have a URL and checksum for the current platform in
-`mise.lock`. `mise exec -- uv sync --locked` then materializes the locked Python
-dependencies, including the pinned Mackup fork, before shell activation makes
-uv directly available. mise auto-install is disabled by the master
-`settings.auto_install = false` gate, covering task, exec, and command-not-found
-paths: these two commands form the explicit bootstrap boundary, and later
-commands fail instead of quietly downloading a missing tool or project
-dependency. Do not split the master gate into narrower task or exec settings.
-Do not replace the explicit tool list with a bare
-`mise install --locked`: mise also loads the global configuration and would
-install host-wide tools during repository bootstrap.
-
-`mise tasks` is the authoritative command list. The main inspection interface
-is:
-
-```bash
-mise run diff
-mise run check
-mise run lint
-mise run verify
-```
-
-On Linux, `diff` and `check` automatically select the small `linux-lite`
-profile. macOS selects `macos`. Use `--profile full` when deliberately auditing
-every stored reference:
-
-```bash
-mise run diff -- --profile full
-mise run check -- --profile full
-```
-
-Choose the operation by intent; `mise tasks` and each task's `--help` remain the
-authoritative command interfaces:
-
-| Intent | Documentation |
-| --- | --- |
-| Bootstrap a small Linux host | [Linux Lite setup](#linux-lite-setup) |
-| Compare, restore, or adopt configuration | [Configuration drift](#configuration-drift) |
-| Converge global mise tools across hosts | [Global mise convergence](#global-mise-convergence) |
-| Inspect host and repository health | [Host health](#host-health) |
-| Run the complete health sweep | [Doctor and cleanup](#doctor-and-cleanup) |
-| Update installed tools | [Host updates](#host-updates) |
-| Regenerate generated shell state | [Generated state](#generated-state) |
-| Record installed software | [Host inventory](#host-inventory) |
-| Operate a service | [Services](#services) |
-| Inspect Skillshare ownership | [Skillshare](#skillshare) |
+`audit-only` keeps previews, `diff`, `check`, `lint`, and verification, but
+rejects `--apply` (and the underlying `apply_*`/`execute_*` operations) before
+anything is written. `mise_path` names the host's canonical mise, so a
+package-managed binary is not reported as an extra installation. `check` marks
+dotfiles-owned shell integration, shared mise capabilities, and generated state
+as not applicable; mise health, duplicate owners, Skillshare, and permissions
+still apply. An invalid policy fails closed. The policy does not govern
+`commands/` or `services/`.
 
 ## Development checks
 
-`mise run verify` is the shared verification gate for local development and
-GitHub Actions. It includes workflow validation with Actionlint. The CI
-workflow runs on Linux x64 and macOS ARM64, installs the locked project tools
-and Python dependencies, and rejects changes made by verification.
+`mise run verify` is the gate for local work and GitHub Actions (Linux x64 and
+macOS ARM64): Ruff, ty, pytest, the macOS service suites, `lint`, the shell
+gate, and Actionlint. CI fails if verification changes any file. Amp Orbs
+provision through `.agents/setup` and check offline with `.agents/resume`; they
+never apply host configuration.
 
-Amp Orbs provision project dependencies through `.agents/setup`; they do not apply
-the managed-host configuration steps above. `.agents/resume` checks the locked
-environment offline without reinstalling dependencies.
+- `lint` inspects repository paths, Mackup mappings, and dangling symlinks. Its
+  `path.*` findings are host-relative, so warning counts differ between hosts on
+  the same commit.
+- `shell` runs `bash -n` and ShellCheck on Bash files, and `zsh -n` where zsh is
+  installed (elsewhere those files are reported as not applicable).
 
-## Linux Lite setup
+## Configuration drift
 
-Inspection remains read-only. The explicit setup task is the only repository
-task that edits shell and Git bootstrap configuration in place; like every
-mutating task it previews by default:
+`diff` compares profile-relevant files under `reference/` with their `$HOME`
+paths by location and file kind, never contents. Drift exits 0; an incomplete
+inspection exits non-zero. It runs the locked Mackup fork against
+`mackup/applications/` without touching either side.
+
+```bash
+mise run diff
+mise run diff -- git --json
+```
+
+`restore` and `adopt` are application-scoped mirrors; there is no restore-all.
+
+- `restore -- <app> --apply` moves each changed live path into
+  `~/.local/state/dotfiles/restore-backups/` and links it to the reference.
+- `adopt -- <app> --apply` copies live files into `reference/` (removing
+  reference files whose live counterpart is gone). It writes only inside the
+  repository and refuses while affected reference paths have uncommitted
+  changes or ignored data. Never commit secrets.
+
+Applications that save by atomic replace (LinearMouse, Zed, Herdr, btop) turn a
+link back into a file or write through it; reconcile with `restore` or `adopt`.
+Host-specific environment belongs in `~/.zshenv.private.zsh`, which the
+reference `.zshenv` sources.
+
+## Linux Lite
 
 ```bash
 mise run setup-linux-lite
@@ -186,493 +132,162 @@ mise run setup-linux-lite -- --apply
 exec bash
 ```
 
-It preserves the existing `~/.bashrc`, adds one marked block that loads
-`shell/bash/init.bash`, and adds `~/.private.gitconfig` to Git's includes. It
-does not create an identity, install optional tools, clone private repositories,
-or synchronize Skillshare extras. The Bash module adds `~/.local/bin` and mise's
-shim directory to `PATH`, then activates mise and guarded Starship, Atuin, and
-Zoxide integrations in interactive shells. It provides `..`, `...`, a `Ctrl-W`
-binding that deletes the same path segment as the macOS Zsh configuration,
-reserves `Ctrl-R` for Atuin when later startup files initialize FZF, and provides
-Zoxide's `j` command while leaving the ordinary up arrow to Bash. Interactive
-SSH logins remain ordinary shells; start Herdr explicitly when needed. It does
-not expose `commands` on Linux. The managed block is placed before Ubuntu's
-non-interactive early return, so direct SSH commands also receive the user and
-mise paths without interactive shell initialization.
+This adds one marked block to `~/.bashrc` (before Ubuntu's non-interactive
+early return) that loads `shell/bash/init.bash`, and adds `~/.private.gitconfig`
+to Git's includes. Re-running it rewrites the block in place. The Bash module
+puts `~/.local/bin` and mise's shims on `PATH`, activates mise, and guards
+Starship, Atuin (which owns `Ctrl-R`), and Zoxide (`j`). It provides `..`,
+`...`, and a path-segment `Ctrl-W`. It does not create an identity, install
+tools, clone private repositories, sync Skillshare, or expose `commands/`.
 
-The Linux Lite drift profile observes Git, mise, Herdr, portable Atuin and Btop
-configuration, and the availability of Btop, Starship, Atuin, Zoxide, Herdr,
-Skillshare, Hunk, Lazygit, and Lazydocker. Optional capabilities remain
-warnings: inspection never installs a missing tool or restores configuration
-automatically. `mise run check -- --strict` treats those warnings as failures.
+The Linux Lite profile checks Git, mise, Herdr, Atuin, and btop configuration,
+and reports missing optional capabilities as warnings (`--strict` makes them
+failures).
 
-## Linux Zsh contract
+The full Zsh reference is safe on Linux (`mise run restore -- zsh`): `.zshrc`
+loads `shell/zsh/` and generated completions on every platform, while
+`.zshenv` adds `commands/` to `PATH` only on macOS, so repository commands never
+shadow Linux system tools. Optional integrations degrade when their tools are
+absent.
 
-Linux Lite targets Bash, but the full Zsh reference is deliberately safe to
-restore on a Linux host as well, so `mise run restore -- zsh` is supported
-there. The contract is a split between experience and commands:
+## Global mise baseline
 
-- The Zsh *experience* loads on Linux. `.zshrc` sources `shell/zsh/` (aliases,
-  environment, completions, plugins) and the generated completion directory
-  regardless of platform; the Homebrew block is macOS-only and the clash block
-  is Linux-only.
-- The user bin and mise shim directories load on every platform. The repository
-  command directory does not: `.zshenv` prepends `commands` to `PATH` only
-  under `darwin*`, so a Linux host never gains repository commands and they
-  can never shadow a system tool.
-- The repository mise configuration carries no repository bins. Its committed
-  lockfile contains URLs and checksums for both `macos-arm64` and `linux-x64`,
-  so bootstrap uses the same reviewed tool artifacts on both platforms.
+`reference/.config/mise/config.toml` and its multi-platform `mise.lock` are the
+shared personal toolset: interactive commands wanted on every personal host.
+Project tools belong to that project's mise config. Services use a distribution
+package or `<canonical-mise> -C <project> exec -- <tool>`, never global shims.
 
-What is not promised: an identical experience when optional tools are absent.
-Their integrations degrade gracefully, and `mise run check` reports
-profile-scoped missing capabilities. Starship, Atuin, and Zoxide are declared in
-the shared global mise configuration for a consistent personal shell;
-Television remains host-managed. `mise run shell` reflects the same asymmetry —
-it syntax-checks Zsh files only where `zsh` is installed and marks them
-not-applicable elsewhere rather than failing.
+`mise-sync --apply` backs up and links the live config to the reference,
+installs the locked Go, Node, Ruby, and Rust runtimes first (so `cargo:` builds
+do not race an older compiler), installs the whole locked baseline, and rebuilds
+shims with `~/.local/bin` first on `PATH`. A tool declared only in the live
+config blocks apply until you decide whether it joins the baseline, moves to its
+project, or is removed. On an audit-only host the preview is a counterfactual
+comparison, not a verdict. On macOS 27 the tool step disables Cargo release
+stripping, because stripped proc-macro libraries fail to load until stable Rust
+ships LLVM 22.1.8; remove the override once the locked Atuin builds without it.
 
-## Configuration drift
-
-`mise run diff` compares profile-relevant files under `reference/` with the
-corresponding paths under the current `$HOME`. It reports locations and file
-kinds, never file contents. Ordinary drift exits successfully; an incomplete
-inspection, such as an unreadable path or invalid Mackup response, exits
-non-zero.
+`update` installs the locked versions of tools already present; `upgrade-tools`
+runs `mise upgrade --bump` for tools declared as `latest` (exact pins and refs
+are held) and `ya pkg upgrade` when `~/.config/yazi/package.toml` links to this
+checkout:
 
 ```bash
-mise run diff
-mise run diff -- git
-mise run diff -- --json
-mise run diff -- --profile full
-```
-
-The command runs the immutable Mackup fork pinned as a locked git dependency in
-`pyproject.toml` and recorded in `uv.lock`. The bootstrap command `mise exec --
-uv sync --locked` provisions it, so no Mackup fetch happens during inspection.
-It loads application definitions directly from `mackup/applications/` and does
-not install `~/.mackup` links or change either side.
-
-Restore is deliberately application-scoped. It defaults to the same read-only
-plan; `--apply` first moves each changed live path into
-`~/.local/state/dotfiles/restore-backups/`, then links the live path to its
-reference. There is no implicit restore-all operation.
-
-```bash
-mise run restore -- git
-mise run restore -- git --json
-mise run restore -- git --apply
-```
-
-When a live configuration should become the reference, adopt is the mirror of
-restore: it is application-scoped, defaults to the same read-only plan, and
-`--apply` copies the live truth into `reference/` (and removes reference files
-whose live counterpart is gone). It writes only inside the repository, never
-under `$HOME`, and refuses to run while the affected reference paths have
-uncommitted changes or ignored data. Commit intended reference changes and
-move private/ignored data to safety before retrying; do not commit secrets.
-Git can then revert the adopted reference changes.
-
-```bash
-mise run adopt -- mise
-mise run adopt -- mise --json
-mise run adopt -- mise --apply
-```
-
-Git protects repository changes; restore backups protect the replaced live
-paths.
-
-## Global mise convergence
-
-The tracked global `config.toml` and multi-platform `mise.lock` are the shared
-personal interactive baseline for macOS and Linux hosts. They do not own
-systemd services, cron jobs, workers, or project runtimes: those must use a
-system package or invoke the owning project's mise config explicitly. Installed
-tools, download caches, shims, and generated shell functions remain local
-host state and are rebuilt from the shared declaration rather than
-synchronized through Git.
-
-This convergence operation belongs to managed hosts. On an audit-only host its
-preview is a counterfactual comparison, not a health verdict: host-owned tools
-and alias differences remain in the safety report, but do not fail the preview
-or produce an apply handoff.
-
-Preview the complete convergence first:
-
-```bash
-mise run mise-sync
-mise run mise-sync -- --json
-```
-
-An apply backs up and links the live mise configuration to `reference/`, first
-installs the locked Go, Node, Ruby, and Rust runtimes, then installs the complete
-locked tool set against `$HOME`. Staging the runtimes prevents package-manager
-backends such as `cargo:` from racing an older compiler already on the host.
-Finally, it replaces all shims with a canonical rebuild while `~/.local/bin` is
-forced to the front of `PATH`:
-
-```bash
-mise run mise-sync -- --apply
-```
-
-On macOS 27, the complete tool step temporarily disables Cargo release
-stripping. Rust stable currently produces stripped proc-macro libraries that
-macOS 27 refuses to load; the override can be removed after stable Rust carries
-LLVM 22.1.8 or newer and the locked Atuin build passes without it.
-
-Before replacing the live declaration, `mise-sync` compares its `[tools]`
-entries with the tracked baseline. Any live-only tool blocks apply and is named
-in the report. Decide whether to add it to the shared baseline, move it to its
-project or service owner, or remove it explicitly; `mise-sync` never makes that
-destructive choice. An unreadable or invalid live configuration also blocks
-apply because ownership cannot be established safely.
-
-This operation deliberately does not pull Git, self-update mise, update the
-lockfile, remove an alternate package-managed mise, or install tools during
-shell startup. A canonical binary older than the repository's hard minimum
-must still be updated directly before any repository task can launch (see
-[Start](#start) for the compatibility floor).
-Backends that support lockfile URLs are artifact-locked; package-manager
-backends such as `gem:`, `go:`, and `npm:` are version-locked but retain their
-upstream package manager's artifact and integrity semantics.
-
-Global tools should be interactive commands wanted on every personal host.
-Project tools belong in that project's mise configuration. Long-running Linux
-services should use the distribution package when appropriate, or an explicit
-`<canonical-mise> -C <project> exec -- <tool>` command; they must not depend on
-global shims. A genuinely host-specific tool is an explicit exception, not a
-second global configuration truth.
-
-Hunk, Lazygit, and Lazydocker are part of this shared baseline on macOS
-and Linux. mise owns their installs and updates; do not combine them with
-Homebrew, a platform package, or a direct installer. Hunk supplies Git's pager
-and difftool plus Lazygit's static diff renderer, while Lazygit retains
-responsibility for staging.
-
-Herdr uses its official binary installer on macOS and Linux:
-
-```bash
-curl -fsSL https://herdr.dev/install.sh | sh
-```
-
-The installer places the executable at `~/.local/bin/herdr`. Daily
-`update --apply` runs `herdr update` for this installation. Inspect active
-sessions before migrating an existing installation, verify the replacement,
-then uninstall the old copy with its original package manager. Herdr's
-portable configuration is restored independently:
-
-```bash
-mise run restore -- herdr
-mise run restore -- herdr --apply
-```
-
-Atuin and Zoxide follow the same mise ownership rule. Atuin is compiled on each
-host from the custom fork commit pinned in the shared declaration; the lockfile
-records that exact revision. Only `~/.config/atuin/config.toml` is portable and
-restored through Mackup. Atuin history, login and encryption state, and
-Zoxide's database stay local to each host:
-
-```bash
-mise run restore -- atuin
-mise run restore -- atuin --apply
-```
-
-Skillshare is also part of the shared mise baseline; its CLI version follows the
-shared lockfile (`update` installs it, `upgrade-tools` advances it). Do not combine that install with Homebrew or
-`skillshare upgrade --cli`. GitHub CLI and Codex are host-owned instead of part
-of the shared baseline. The capability is shared, but its installer is not:
-Omarchy provisions both through its own mise wrappers, Debian can use the
-official APT package, and macOS can use Homebrew. The shared mise configuration
-therefore declares neither `gh` nor Codex, and version differences between
-those host owners are not dotfiles drift.
-
-Pi is also outside the shared mise baseline. Install it explicitly with its
-official installer, using the host's existing Node.js and npm toolchain.
-
-The installer refuses to replace a Pi owned by another installer. When
-migrating from mise, remove its Pi declaration, run `mise uninstall --all pi`,
-and refresh shims with `mise reshim` before installation.
-
-```bash
-curl -fsSL https://pi.dev/install.sh | sh
-```
-
-The default managed installation lives under `~/.pi/agent/install` and places
-its launcher on `PATH`. `mise-sync` does not install Pi.
-
-Btop is also platform-owned: Homebrew owns it on macOS, while each Linux
-distribution's package manager owns it. The repository restores only Btop's
-portable configuration and theme; `check` reports a missing binary but never
-installs it. Distribution package versions can therefore differ without
-creating configuration drift.
-
-## Host health
-
-`mise run check` reports required executables and optional capabilities
-separately. The selected profile determines the current check set, which the
-plain or JSON report lists directly. On macOS, the report also consumes
-`macos-session-health status --format json` to detect an unavailable collector
-or notification path.
-
-```bash
-mise run check
-mise run check -- --json
-mise run check -- --strict
-```
-
-Warnings do not fail the normal command because different hosts intentionally
-have different capabilities. `--strict` treats warnings as failures.
-
-Skillshare inspection parses the global YAML configuration and checks its source
-and target locations without invoking the Skillshare CLI. Installation ownership
-remains a separate check: mise's JSON inventory distinguishes an inactive mise
-install from the active executable and warns only when independent owners
-coexist. Run `skillshare status --global --json` or `skillshare doctor`
-explicitly when tracked-repository, synchronization, or deeper target health is
-needed: those commands may migrate legacy configuration or write diagnostic
-state and therefore do not belong in read-only `check`.
-
-Missing or empty generated shell directories are reported as not ready. The
-report also verifies that the host's canonical mise path is a real executable,
-warns when another mise installation exists on `PATH` or at a common system
-location, verifies that mise-owned shims target the canonical executable, and
-checks that generated Zsh activation names only the canonical executable.
-
-`mise run lint` inspects repository paths, Mackup mappings, and dangling
-symlinks. Its `path.*` findings are host-relative: a machine-specific path
-referenced by tracked configuration is reported OK where it exists and as a
-warning on hosts where it does not, so warning counts legitimately differ
-between machines running the same commit. `mise run verify` adds Python formatting, type checking, behavior
-tests, the standalone module suites on macOS, and the shell gate: `mise run shell`
-runs Bash syntax checks and ShellCheck for Bash files. Zsh files receive syntax
-checking when `zsh` is available.
-
-## Doctor and cleanup
-
-`doctor` is the read-only aggregate entrypoint for routine machine
-maintenance. It runs the repository's `check`, `diff`, `mise-sync`, and `lint`
-reports, then probes `mise doctor`, `brew doctor`, and `pueue status` when those
-owners are available. It skips `skillshare doctor` because that command can
-migrate configuration and write probe files in skill targets; read-only
-Skillshare checks remain part of `check`. Each result remains separate:
-
-```bash
-mise run doctor
-mise run doctor -- --json
-mise run doctor -- --strict
-```
-
-Normal mode fails only on errors; `--strict` also treats warnings as failures.
-Unavailable optional host tools are reported as `skipped`. The JSON form emits
-one document on stdout and retains child reports and captured command output
-inside each check result.
-
-`clean` is a separate, preview-first operation. It asks the owners that already
-manage these resources what they would remove:
-
-```bash
-mise run clean
-mise run clean -- --json
-mise run clean -- --apply
-```
-
-The default runs only `mise prune --dry-run --tools`, `brew autoremove
---dry-run`, and `brew cleanup --dry-run`; it does not change the host. Only
-`--apply` runs their mutating counterparts, and the existing host-local
-`audit-only` policy blocks that apply. Skillshare trash, Skillshare
-configuration synchronization, configuration adopt/restore, and repository
-state under `generated/` or `inventory/` are intentionally outside this
-cleanup scope and require their own explicit operations.
-
-## Host updates
-
-Preview the exact available commands before applying:
-
-```bash
-mise run update
-mise run update -- --json
-mise run update -- --apply
-```
-
-`update` maintains installed shared mise tools at the versions in this checkout's
-lockfile. It does not bump the shared declaration, install missing tools or
-restore configuration. If the live declaration differs, its mise tool step
-reports the conflict instead of overwriting it. Use `mise-sync` for explicit
-configuration convergence and missing tools.
-
-Homebrew maintains installed formulae only (`brew upgrade --formula`). Desktop
-apps are left to their own updater or an explicit manual cask upgrade; ordinary
-maintenance does not close them or request a sudo password. Independent CLI
-self-updaters (Sprite, Amp, Claude Code, Tigris, Herdr, Pi, Codex, Droid, Grok,
-Claude Science, Notion `ntn`, Rotom and `jh`) run
-only when the selected executable belongs to the supported native installation;
-mise, Homebrew and unknown owners are skipped with a reason. Tigris and `ntn`
-are supported only as user installs under `~/.local/bin`; their default
-`/usr/local/bin` location needs sudo and is reported as an unknown owner. Omarchy and Linux
-system packages remain with their host updater. A host-selected mise executable
-is not self-updated by dotfiles.
-
-Inside a Herdr session (`HERDR_ENV=1`), Herdr's self-update is skipped with a
-command to run in an external terminal after detaching. Other updaters and the
-final generate step continue.
-
-The final step runs `generate` without network asset downloads. Tool and
-generate outcomes are reported separately: a generate failure makes the
-operation fail even when tools updated successfully. Independent steps continue
-after failures; dependent steps state why they were skipped. The operation does
-not pull Git, clean old versions, restore application settings, synchronize
-Skillshare content, restart servers or restart your shell.
-
-In JSON mode, stdout contains one report. Stderr carries command progress and
-bounded diagnostics. A failure identifies the command, working directory,
-exit code or timeout and output tail. Retry the failing command, then rerun
-`generate` and `check` as needed; failed updater staging files are not deleted.
-
-### Shared baseline upgrades
-
-Run this only in the checkout where you will review and commit the shared lock.
-It advances the rolling mise tools and, when `~/.config/yazi/package.toml` links
-to this checkout, the Yazi plugin revisions (`ya pkg upgrade`):
-
-```bash
-mise run upgrade-tools
 mise run upgrade-tools -- --apply
 mise run verify
 git diff -- reference/.config/mise reference/.config/yazi/package.toml
 ```
 
-Other managed hosts consume the committed result with `update` (`mise install
---locked`, `ya pkg install`) or explicitly
-install missing baseline tools with `mise-sync`. The shared configuration accepts
-new releases without a waiting period (`minimum_release_age = "0s"`). Fixed
-revision tools retain their declared revisions.
+Commit the referenced `reference/.config/mise/locks/` sidecars with the lock and
+drop sidecars it no longer references. Artifact-capable backends are locked by
+URL and checksum; `gem:`, `go:`, and `npm:` are locked by version.
 
-A hard `min_version` failure happens before mise can start a task. Bootstrap
-its canonical executable with its existing owner: standalone installs support
-`self-update`; system-owned installs must use their host updater.
+Tool owners:
+
+| Tool | Owner |
+| --- | --- |
+| Hunk, Lazygit, Lazydocker, Starship, Zoxide, Skillshare | shared mise baseline on every platform |
+| Atuin | shared baseline, compiled per host from the pinned fork revision; only `config.toml` is restored |
+| btop | Homebrew on macOS; the shared baseline on Linux (Debian's 1.2/1.3 rewrite the linked config) |
+| Herdr | official installer at `~/.local/bin/herdr` (`curl -fsSL https://herdr.dev/install.sh \| sh`) |
+| Pi | official installer under `~/.pi/agent/install` (`curl -fsSL https://pi.dev/install.sh \| sh`); to migrate from mise, remove its declaration, `mise uninstall --all pi`, and `mise reshim` first |
+| GitHub CLI, Codex | the host (Homebrew, APT, Omarchy); version differences are not drift |
+
+## Host health and doctor
+
+`check` reports required executables and optional capabilities for the selected
+profile; warnings pass unless `--strict`. It verifies the canonical mise binary,
+other mise copies, shim targets, and generated activation. It parses Skillshare's
+YAML without running the CLI (`skillshare status` and `doctor` may migrate or
+write, so run them explicitly). On macOS it reads `macos-session-health status`.
+
+`doctor` aggregates `check`, `diff`, a `mise-sync` preview, and `lint`, then
+probes `mise doctor`, `brew doctor`, and `pueue status` when present. It skips
+`skillshare doctor`, which writes. `clean` previews `mise prune --tools`,
+`brew autoremove`, and `brew cleanup`, and runs them only with `--apply`.
+
+## Host updates
+
+`update --apply` runs, in order and independently of earlier failures:
+
+- `brew update` and `brew upgrade --formula` (casks and desktop apps keep their
+  own updaters; no sudo);
+- `mise self-update` (standalone owner only), `mise install --locked` for
+  installed shared tools, and `mise reshim --force`;
+- `gh extension upgrade --all`, `tldr --update`, and `ya pkg install`;
+- native self-updaters for Sprite, Amp, Claude Code, Tigris, Herdr, Pi, Codex,
+  Droid, Grok, Claude Science, Notion `ntn`, Rotom, and `jh`, only when the
+  executable lives in that tool's own install root (mise, Homebrew, and unknown
+  owners are skipped). Tigris and `ntn` must be user installs in
+  `~/.local/bin`; `jh upgrade` needs a valid `jh auth login --remote` session.
+  Inside a Herdr session (`HERDR_ENV=1`), Herdr's self-update is skipped;
+- finally `generate --offline`.
+
+`update` never changes the shared declaration, installs missing tools, restores
+configuration, pulls Git, cleans versions, or restarts services or shells. A
+live declaration that differs from the reference makes the mise step report the
+conflict. In JSON mode stdout holds one report; failures name the command,
+directory, exit code, and output tail.
 
 ## Generated state
 
-Generated files remain a local cache under the ignored `generated/` directory.
-`fd -H` still respects Git ignore rules; use `fd -HI generated` or `ls generated`
-to inspect them. Shell startup only loads this cache and never installs tools.
+`generated/` is an ignored local cache (`fd -HI generated` to inspect). Shell
+startup only loads it.
 
-```bash
-mise run generate
-mise run generate -- --json
-mise run generate -- --apply
-```
-
-The task generates shell integrations and completions, restores pinned Zsh
-plugins and Zellij assets, and maintains declared caches. It uses the selected
-host's mise executable; Bash, Zsh and Nushell load the same generated binding.
-Unchanged generated content is retained without rewriting. A clean plugin at
-its pinned commit skips fetching. Dirty plugin checkouts are reported rather
-than reset. WASM assets with matching checksums are retained.
-
-Use `--offline` to skip network asset work and LLM completion package resolution;
-existing LLM completion files are retained. Ordinary `update` uses this local
-refresh; missing network assets remain skipped, so a first setup or missing
-plugin repair still needs an explicit online `generate`. Generator errors
-or empty output retain existing generated files. Existing plugin updates report
-the actual revision after failure and are not transactional rollbacks.
-
-When a refresh changes shell files, open a new shell (or `exec zsh`) to load them.
-Repeated refreshes with unchanged files do not require a restart. Check the new
-shell with `mise run check`; use `mise run diff` separately for configuration
-drift. `generate` never writes software inventory or synchronizes Skillshare.
+`generate` writes shell integrations and completions with the host's mise, and
+restores pinned Zsh plugins and Zellij WASM assets. Unchanged outputs report
+`unchanged`; clean plugins at their pinned commit skip fetching; dirty plugin
+checkouts are reported, not reset; generator errors keep existing files.
+`--offline` skips network assets and LLM completion resolution, so a first setup
+needs an online `generate`. Open a new shell after files change.
 
 ## Host inventory
 
-Inventory snapshots record which software a host had installed at one point in
-time. They are tracked under `inventory/<host>/` so history stays reviewable,
-and they are only ever written by the explicit task:
-
-```bash
-mise run inventory
-mise run inventory -- --json
-mise run inventory -- --apply
-```
-
-The preview is the authoritative list of collectors, destinations, and skipped
-host capabilities. A failed collector or an invalid empty result makes the
-command exit non-zero and leaves the existing snapshot untouched. Collectors
-whose domain permits zero items instead write an empty snapshot, replacing any
-stale non-empty result. Nothing regenerates these files implicitly — a snapshot
-is as old as its last committed run, never a claim about current host truth.
+`inventory -- --apply` writes `inventory/<host>/` snapshots of installed
+software (Brewfile, applications, gh extensions, Setapp). A failed collector or
+an invalid empty result leaves the snapshot untouched. A snapshot is as old as
+its last committed run.
 
 ## Services
 
-`macos-session-health`, `macos-maxfiles`, and
-`cursoruiviewservice-watchdog` are services. Each executable owns its command
-interface, installation, removal, tests, and generated launchd configuration.
-Their runbooks own the service-specific operating and recovery decisions:
+Each service executable owns its interface, installation, removal, tests, and
+generated launchd configuration; its runbook owns operation and recovery:
 
 - [`macos-session-health`](services/macos-session-health/README.md): incident
   diagnosis and guarded recovery;
-- [`macos-maxfiles`](services/macos-maxfiles/README.md): machine-wide limit
-  lifecycle, rollback, and reboot behavior;
+- [`macos-maxfiles`](services/macos-maxfiles/README.md): machine-wide file limit
+  lifecycle and rollback;
 - [`cursoruiviewservice-watchdog`](services/cursoruiviewservice-watchdog/README.md):
   bounded recovery from Apple's text-cursor service memory growth.
 
-Ordinary commands under `commands/` are independent of the dotfiles
-inspection tasks; their [index](commands/README.md) lists dependencies and
-effects. Help is safe at the command layer; Python scripts' uv launchers may
-still provision dependencies (see the index). Linux Lite deliberately does not
-add them to `PATH`. The macOS shell configuration currently expects this
-repository at `~/dotfiles`; `mise run
-lint` reports when that assumption is false.
+The macOS shell configuration expects the checkout at `~/dotfiles`; `lint`
+reports when it is elsewhere.
 
 ## Skillshare
 
-Global harness prompts and AI skills remain owned by the Skillshare source
-repository, except Pi's `~/.pi/agent/AGENTS.md`, which the `agents` Mackup
-mapping restores only by an explicit `restore -- agents --apply`. This
-repository stores the portable Skillshare configuration; its source and default
-extras directories live under `~/.config/skillshare/`,
-while their contents remain untracked here. Adopt or restore that configuration
-explicitly with `mise run adopt -- skillshare --apply` or `mise run restore --
-skillshare --apply`. The host check reports when the executable, configuration,
-source directory, targets, or known installation ownership is unhealthy. This
-repository does not install or synchronize Skillshare automatically; `mise run
-update -- --apply` only refreshes an already installed CLI.
+The Skillshare source repository owns global harness prompts and skills; this
+repository stores only the portable configuration (`mise run restore --
+skillshare`). Its source lives at `~/.config/skillshare/skills` on every host.
+Pi's `~/.pi/agent/AGENTS.md` is the exception: the `agents` mapping restores it
+only through `mise run restore -- agents --apply`.
 
-Use one authoring host to run `skillshare update --all`, review the resulting
-source changes, and publish them. Consumer hosts pull that reviewed Skillshare
-source, rehydrate missing tracked repositories, and run `skillshare sync`; they
-do not independently update every external Skill. This single-writer boundary
-keeps `.metadata.json` and copied external Skills from diverging by host.
+One authoring host runs `skillshare update --all`, reviews, and publishes the
+source; other hosts pull it and run `skillshare sync`. This keeps
+`.metadata.json` and copied external skills from diverging.
 
-The default `skillshare sync` operation synchronizes skills. The tracked
-configuration also declares opt-in extras targets under `~/.codex` and
-`~/.claude`; only an explicit extras sync writes those global harness
-directories. `skillshare sync --all` includes skills, agents, extras,
-MCP settings, and hooks; it excludes plugins. Review every included resource,
-not just Skill targets. Amp global guidance is configured in Amp's personal or
-workspace settings and is not synchronized by this repository. Skill targets use merge
-mode, so target-local non-symlink Skill directories are healthy and preserved.
-In
-`skillshare diff --json`, an `action` of `remove` with `is_sync: false`
-describes the direction of the difference; it is not a planned sync deletion.
-
-Before any external write, preview the complete synchronization and inspect each
-target's `local` and `pruned` counts:
+`skillshare sync` writes skills; `sync --all` also writes agents, extras
+(`~/.codex`, `~/.claude`), MCP settings, and hooks, but not plugins. Before any
+sync, preview everything:
 
 ```bash
 skillshare sync --all --global --dry-run --force --json
 ```
 
-`local > 0` with `pruned == 0` means synchronization preserves the local
-entries. Only `pruned > 0` means the preview plans deletion; list those entries
-and request explicit confirmation. A failed preview leaves inspection
-incomplete and must not be reported as safe. After reviewing the complete
-preview, an extras-only preview remains available with `skillshare sync extras
---dry-run --force --json`.
-
-Installing Skillshare, choosing a source repository, and synchronizing skills
-are separate operator decisions. Linux Lite reports the missing capability and
-stops there; use the Skillshare source repository's current instructions if the
-host should gain that capability.
+Targets merge, so `local > 0` with `pruned == 0` keeps local entries; only
+`pruned > 0` plans deletion and needs explicit confirmation. In `skillshare diff
+--json`, `action: remove` with `is_sync: false` describes direction, not a
+planned deletion. A failed preview means inspection is incomplete. Amp's global
+guidance lives in Amp's own settings.
 
 ## License
 
