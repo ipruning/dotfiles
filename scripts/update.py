@@ -12,8 +12,7 @@ import sys
 import time
 import tomllib
 from collections.abc import Callable
-from dataclasses import dataclass, replace
-from enum import StrEnum
+from dataclasses import replace
 from pathlib import Path
 from typing import cast
 
@@ -31,6 +30,8 @@ from .mise import (
 from .models import ExecutableFinder
 from .process import run_process_group
 from .render import emit_error
+from .update_models import UpdateReport, UpdateResult, UpdateStatus, UpdateStep
+from .update_native import native_updaters, resolve_native_step
 
 StepCallback = Callable[["UpdateStep"], None]
 NEXT_COMMANDS = ("mise run check",)
@@ -44,50 +45,6 @@ PREVIEW_NOTE = (
 )
 MISE_REF_PREFIXES = ("branch:", "ref:", "rev:", "tag:")
 PROGRESS_INTERVAL_SECONDS = 30
-
-
-class UpdateStatus(StrEnum):
-    PLANNED = "planned"
-    SKIPPED = "skipped"
-    SUCCEEDED = "succeeded"
-    FAILED = "failed"
-
-
-@dataclass(frozen=True)
-class UpdateStep:
-    name: str
-    tool: str
-    command: tuple[str, ...]
-    timeout_seconds: int
-    path_prepend: tuple[Path, ...] = ()
-    environment: tuple[tuple[str, str], ...] = ()
-    stdin_text: str | None = None
-    failure_note: str | None = None
-    cwd: Path | None = None
-
-
-@dataclass(frozen=True)
-class UpdateResult:
-    step: UpdateStep
-    status: UpdateStatus
-    exit_code: int | None = None
-    duration_ms: int | None = None
-    reason: str | None = None
-    stdout_tail: str | None = None
-    stderr_tail: str | None = None
-
-
-@dataclass(frozen=True)
-class UpdateReport:
-    apply: bool
-    results: tuple[UpdateResult, ...]
-    runtime: dict[str, object] | None = None
-
-    @property
-    def ok(self) -> bool:
-        return all(
-            result.status is not UpdateStatus.FAILED for result in self.results
-        ) and (self.runtime is None or bool(self.runtime["ok"]))
 
 
 def _emit_failure(step: UpdateStep, reason: str) -> None:
@@ -285,40 +242,7 @@ def _update_steps(home: Path) -> tuple[UpdateStep, ...]:
         ),
         UpdateStep("tldr.pages", "tldr", ("tldr", "--update"), 300),
         UpdateStep("yazi.packages", "ya", ("ya", "pkg", "upgrade"), 300),
-        UpdateStep(
-            "sprite.version",
-            "sprite",
-            ("sprite", "upgrade"),
-            300,
-            # `sprite upgrade` treats a declined/closed prompt as exit 0. An
-            # explicit update --apply is the operator's confirmation, so feed
-            # the affirmative response instead of reporting a no-op as success.
-            stdin_text="y\n",
-        ),
-        UpdateStep("amp", "amp", ("amp", "update"), 300),
-        UpdateStep(
-            "claude",
-            "claude",
-            ("claude", "update"),
-            # Let Claude's updater own its download deadline and report its
-            # actual error instead of killing a valid slow download at 5m.
-            1800,
-            failure_note=(
-                "retry `claude update`; failed downloads may remain under "
-                f"{home}/.cache/claude/staging and "
-                f"{home}/.local/share/claude/versions and are not cleaned "
-                "automatically"
-            ),
-        ),
-        UpdateStep("tigris", "tigris", ("tigris", "update"), 300),
-        UpdateStep("herdr", "herdr", ("herdr", "update"), 900),
-        UpdateStep("pi", "pi", ("pi", "update"), 1800),
-        UpdateStep(
-            "pi.extensions",
-            "pi",
-            ("pi", "update", "--extensions"),
-            300,
-        ),
+        *(updater.step for updater in native_updaters(home)),
     )
 
 
@@ -331,6 +255,9 @@ def plan_updates(
     """Return the exact available update plan without running commands."""
     results = []
     mise_executable = canonical_mise_executable(home)
+    native_roots = {
+        updater.step.name: updater.roots for updater in native_updaters(home)
+    }
     for step in _update_steps(home):
         step = replace(step, cwd=home)
         if step.name == "mise.self" and configured_mise_path(home) is not None:
@@ -345,56 +272,15 @@ def plan_updates(
         resolved = (
             executable_finder(step.tool) if step.tool != "mise" else mise_executable
         )
-        if resolved and step.tool in {
-            "amp",
-            "claude",
-            "pi",
-            "tigris",
-            "sprite",
-            "herdr",
-        }:
-            path = Path(resolved)
-            target = path.resolve()
-            mise_root = home / ".local/share/mise"
-            manager_owned = (
-                target.is_relative_to(mise_root)
-                or path.is_relative_to(mise_root)
-                or target.is_relative_to(Path("/opt/homebrew"))
-                or "Cellar" in target.parts
-                or target.is_relative_to(Path("/usr/bin"))
+        if resolved and step.name in native_roots:
+            step, skip_reason = resolve_native_step(
+                step, native_roots[step.name], home, resolved
             )
-            native_roots = {
-                "amp": (home / ".amp/bin",),
-                "claude": (home / ".local/share/claude/versions",),
-                "pi": (home / ".pi/agent/install", home / ".pi/agent/bin"),
-                "tigris": (home / ".local/bin",),
-                "sprite": (home / ".local/bin",),
-                "herdr": (home / ".local/bin",),
-            }
-            native = any(
-                target.is_relative_to(root) for root in native_roots[step.tool]
-            )
-            if step.tool == "herdr":
-                native = target == home.resolve() / ".local/bin/herdr"
-            if not manager_owned and not native:
+            if skip_reason is not None:
                 results.append(
-                    UpdateResult(
-                        step,
-                        UpdateStatus.SKIPPED,
-                        reason=f"{path} has no verified native owner; inspect its installation before self-update",
-                    )
+                    UpdateResult(step, UpdateStatus.SKIPPED, reason=skip_reason)
                 )
                 continue
-            if manager_owned:
-                results.append(
-                    UpdateResult(
-                        step,
-                        UpdateStatus.SKIPPED,
-                        reason=f"{path} is package-manager owned; native self-update is skipped",
-                    )
-                )
-                continue
-            step = replace(step, command=(str(path), *step.command[1:]))
             if step.tool == "herdr" and os.environ.get("HERDR_ENV") == "1":
                 results.append(
                     UpdateResult(

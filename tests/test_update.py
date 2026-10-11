@@ -40,6 +40,13 @@ def _fake_tool(
         "sprite": ".local/bin",
         "tigris": ".local/bin",
         "herdr": ".local/bin",
+        "codex": ".codex/packages/standalone/current/bin",
+        "droid": ".local/bin",
+        "grok": ".grok/downloads",
+        "claude-science": ".claude-science/bin",
+        "ntn": ".local/bin",
+        "rotom": ".local/bin",
+        "jh": ".local/bin",
     }
     if name in native_dir:
         home = bin_dir.parent / "home"
@@ -194,7 +201,7 @@ def test_update_previews_exact_plan_by_default_without_running_tools(
         ),
         ("amp", "planned", [str(tmp_path / "bin/amp"), "update"]),
     ]
-    assert document["summary"] == {"planned": 6, "skipped": 9}
+    assert document["summary"] == {"planned": 6, "skipped": 16}
     assert document["notes"] == [
         (
             "planned means the updater command is available; each updater "
@@ -232,6 +239,31 @@ def test_update_preview_treats_tigris_like_other_updaters(tmp_path: Path) -> Non
     tigris = next(step for step in document["steps"] if step["name"] == "tigris")
     assert tigris["status"] == "planned"
     assert tigris["attention"] is None
+
+
+def test_update_apply_runs_curl_installed_self_updaters(tmp_path: Path) -> None:
+    tools = ("tigris", "codex", "droid", "grok", "claude-science", "ntn", "rotom", "jh")
+    completed, log_path = _run_update(tmp_path, "--apply", "--json", tools=tools)
+
+    document = json.loads(completed.stdout)
+    steps = {step["name"]: step for step in document["steps"]}
+    home = tmp_path / "home"
+    for name in tools:
+        assert steps[name]["status"] == "succeeded", steps[name]
+        assert Path(steps[name]["command"][0]).resolve().is_relative_to(home)
+    assert steps["tigris"]["environment"]["variables"] == {
+        "TIGRIS_INSTALL_DIR": str(home / ".local/bin"),
+        "TIGRIS_SKIP_PATH": "1",
+        "HOME": "/var/empty",
+    }
+    assert steps["droid"]["environment"]["variables"] == {
+        "FACTORY_DROID_AUTO_UPDATE_ENABLED": "true",
+    }
+    # The runtime refresh also invokes some fakes (e.g. `codex completion zsh`).
+    assert {
+        *(f"{name} update" for name in tools if name != "jh"),
+        "jh upgrade",
+    } <= set(log_path.read_text().splitlines())
 
 
 def test_update_previews_pi_self_and_extensions_without_running_either(
@@ -441,7 +473,7 @@ def test_update_runs_available_tools_in_order_and_reports_skips(tmp_path: Path) 
     document = json.loads(completed.stdout)
     assert document["apply"] is True
     assert document["ok"] is True
-    assert document["summary"] == {"skipped": 9, "succeeded": 6}
+    assert document["summary"] == {"skipped": 16, "succeeded": 6}
     assert [
         (step["name"], step["status"], step["exit_code"])
         for step in document["steps"]
@@ -518,7 +550,7 @@ def test_update_human_output_announces_commands_before_summary(tmp_path: Path) -
     assert completed.stdout.splitlines()[0].endswith(" && brew update")
     assert "SUCCEEDED brew.metadata" in completed.stdout
     assert ("Next:\n  mise run check\n") in completed.stdout
-    assert "Summary: 6 succeeded, 9 skipped" in completed.stdout
+    assert "Summary: 6 succeeded, 16 skipped" in completed.stdout
 
 
 @pytest.mark.parametrize("capture_output", [False, True])

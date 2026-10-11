@@ -544,9 +544,12 @@ configuration convergence and missing tools.
 Homebrew maintains installed formulae only (`brew upgrade --formula`). Desktop
 apps are left to their own updater or an explicit manual cask upgrade; ordinary
 maintenance does not close them or request a sudo password. Independent CLI
-self-updaters run
+self-updaters (Sprite, Amp, Claude Code, Tigris, Herdr, Pi, Codex, Droid, Grok,
+Claude Science, Notion `ntn`, Rotom and `jh`) run
 only when the selected executable belongs to the supported native installation;
-Mise, Homebrew and unknown owners are skipped with a reason. Omarchy and Linux
+Mise, Homebrew and unknown owners are skipped with a reason. Tigris and `ntn`
+are supported only as user installs under `~/.local/bin`; their default
+`/usr/local/bin` location needs sudo and is reported as an unknown owner. Omarchy and Linux
 system packages remain with their host updater. A host-selected Mise executable
 is not self-updated by Dotfiles.
 
