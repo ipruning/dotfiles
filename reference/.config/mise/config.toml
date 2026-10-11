@@ -47,7 +47,7 @@ uv = "latest"
 xurl = "latest"
 zig = "latest"
 zoxide = "latest"
-mr-boxington = "latest"
+mr-boxington = { version = "latest", workflow = "release.yml@refs/heads/main" }
 "npm:yarn" = "1.22.22"
 "npm:cf" = "latest"
 
