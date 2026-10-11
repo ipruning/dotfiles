@@ -275,3 +275,19 @@ def test_diff_cli_renders_profile_and_exit_status_at_the_mackup_boundary(
         "schema_version": 1,
         "summary": {},
     }
+
+
+def test_readme_bootstrap_installs_exactly_the_repository_tools() -> None:
+    # A bare `mise install --locked` also installs the host's global tools, so
+    # the bootstrap names the repository tools explicitly; keep both in step.
+    repo_root = Path(__file__).resolve().parents[1]
+    config = tomllib.loads((repo_root / "mise.toml").read_text())
+    prefix = "mise install --locked "
+    lines = [
+        line
+        for line in (repo_root / "README.md").read_text().splitlines()
+        if line.startswith(prefix)
+    ]
+
+    assert len(lines) == 1
+    assert sorted(lines[0].removeprefix(prefix).split()) == sorted(config["tools"])

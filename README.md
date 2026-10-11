@@ -59,7 +59,7 @@ export PATH="$HOME/.local/bin:$PATH"
 git clone https://github.com/ipruning/dotfiles.git ~/dotfiles
 cd ~/dotfiles
 mise trust
-mise install --locked
+mise install --locked actionlint fd jq python ripgrep shellcheck uv
 mise exec -- uv sync --locked
 mise tasks
 mise run mise-sync
