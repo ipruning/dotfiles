@@ -61,7 +61,7 @@ def test_doctor_aggregates_internal_and_external_checks_without_mutation(
     results = {result.step.name: result for result in report.results}
     assert results["dotfiles.check"].status is DoctorStatus.WARN
     assert results["dotfiles.diff"].status is DoctorStatus.WARN
-    assert results["mise.doctor"].status is DoctorStatus.PASS
+    assert results["mise.doctor"].status is DoctorStatus.OK
     assert results["skillshare.doctor"].status is DoctorStatus.SKIPPED
     assert "writes configuration" in (results["skillshare.doctor"].reason or "")
     assert "rotom.status" not in results

@@ -5,23 +5,15 @@ from __future__ import annotations
 import shlex
 import sys
 
-from .runtime_models import RuntimeAction, RuntimeReport, RuntimeSpec, RuntimeStatus
+from .models import Status, status_summary
+from .runtime_models import RuntimeAction, RuntimeReport, RuntimeSpec
 
 
 def _summary(report: RuntimeReport) -> dict[str, int]:
-    return {
-        status.value: count
-        for status in (
-            RuntimeStatus.PLANNED,
-            RuntimeStatus.SUCCEEDED,
-            RuntimeStatus.SKIPPED,
-            RuntimeStatus.FAILED,
-        )
-        if (count := sum(result.status is status for result in report.results))
-    }
+    return status_summary(result.status for result in report.results)
 
 
-def _document(
+def runtime_document(
     report: RuntimeReport,
     *,
     apply_allowed: bool = True,
@@ -31,7 +23,7 @@ def _document(
         "operation": "runtime",
         "apply": report.apply,
         "ok": report.ok,
-        "next": list(_next_commands(report, apply_allowed=apply_allowed)),
+        "next": list(runtime_next_commands(report, apply_allowed=apply_allowed)),
         "shell_restart_required": _shell_restart_required(report),
         "steps": [
             {
@@ -53,7 +45,7 @@ def _document(
     }
 
 
-def _next_commands(
+def runtime_next_commands(
     report: RuntimeReport,
     *,
     apply_allowed: bool = True,
@@ -62,9 +54,7 @@ def _next_commands(
         if (
             not apply_allowed
             or not report.ok
-            or not any(
-                result.status is RuntimeStatus.PLANNED for result in report.results
-            )
+            or not any(result.status is Status.PLANNED for result in report.results)
         ):
             return ()
         arguments = ["mise", "run", "runtime", "--"]
@@ -76,14 +66,14 @@ def _next_commands(
         return (shlex.join(arguments),)
     if not report.ok:
         return ()
-    if any(result.status is RuntimeStatus.SUCCEEDED for result in report.results):
+    if any(result.status is Status.SUCCEEDED for result in report.results):
         return ("mise run check", "mise run diff")
     return ()
 
 
 def _shell_restart_required(report: RuntimeReport) -> bool:
     return any(
-        result.status is RuntimeStatus.SUCCEEDED
+        result.status is Status.SUCCEEDED
         and (
             result.spec.name.startswith(("function.", "completion.", "plugin."))
             or result.spec.name == "zsh.compdump"
@@ -106,9 +96,9 @@ def _step_detail(spec: RuntimeSpec, action: RuntimeAction) -> str:
     return str(spec.target or action)
 
 
-def _render(report: RuntimeReport, *, apply_allowed: bool = True) -> None:
+def render_runtime(report: RuntimeReport, *, apply_allowed: bool = True) -> None:
     for result in report.results:
-        if result.status is RuntimeStatus.FAILED:
+        if result.status is Status.FAILED:
             print(
                 f"[{result.spec.name}] FAIL {result.reason}",
                 file=sys.stderr,
@@ -116,7 +106,7 @@ def _render(report: RuntimeReport, *, apply_allowed: bool = True) -> None:
             continue
         detail = (
             _step_detail(result.spec, result.action)
-            if result.status in {RuntimeStatus.PLANNED, RuntimeStatus.SKIPPED}
+            if result.status in {Status.PLANNED, Status.SKIPPED}
             else result.action.value
         )
         print(f"{result.status.value.upper():7} {result.spec.name}: {detail}")
@@ -126,7 +116,7 @@ def _render(report: RuntimeReport, *, apply_allowed: bool = True) -> None:
     rendered = ", ".join(f"{count} {status}" for status, count in summary.items())
     print(f"Summary: {rendered or 'no steps'}")
     if not report.apply:
-        next_commands = _next_commands(report, apply_allowed=apply_allowed)
+        next_commands = runtime_next_commands(report, apply_allowed=apply_allowed)
         if not report.ok:
             print("No files changed. Resolve preview failures before applying.")
         elif next_commands:
@@ -146,11 +136,11 @@ def _render(report: RuntimeReport, *, apply_allowed: bool = True) -> None:
         )
     if not report.ok:
         return
-    if _next_commands(report):
+    if runtime_next_commands(report):
         print("Next:")
-        for command in _next_commands(report):
+        for command in runtime_next_commands(report):
             print(f"  {command}")
 
 
-def _announce_step(spec: RuntimeSpec, action: RuntimeAction) -> None:
+def announce_runtime_step(spec: RuntimeSpec, action: RuntimeAction) -> None:
     print(f"RUN {spec.name}: {_step_detail(spec, action)}", flush=True)

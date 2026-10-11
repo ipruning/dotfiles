@@ -10,20 +10,13 @@ import subprocess
 import time
 from collections.abc import Callable
 from dataclasses import dataclass
-from enum import StrEnum
 from pathlib import Path
 
 from .host_policy import HostPolicyError, mutation_allowed, require_mutation_allowed
 from .mise import canonical_mise_environment, canonical_mise_executable
-from .process import run_process_group
+from .models import Status, status_summary
+from .process import CommandRunner, run_in_repository
 from .render import emit_error
-
-
-class CleanStatus(StrEnum):
-    PREVIEWED = "previewed"
-    SKIPPED = "skipped"
-    SUCCEEDED = "succeeded"
-    FAILED = "failed"
 
 
 @dataclass(frozen=True)
@@ -42,7 +35,7 @@ class CleanStep:
 @dataclass(frozen=True)
 class CleanResult:
     step: CleanStep
-    status: CleanStatus
+    status: Status
     command: tuple[str, ...]
     exit_code: int | None = None
     duration_ms: int | None = None
@@ -57,27 +50,7 @@ class CleanReport:
 
     @property
     def ok(self) -> bool:
-        return all(result.status is not CleanStatus.FAILED for result in self.results)
-
-
-CommandRunner = Callable[
-    [tuple[str, ...], dict[str, str], int],
-    subprocess.CompletedProcess[str],
-]
-
-
-def _default_runner(
-    command: tuple[str, ...],
-    environment: dict[str, str],
-    timeout_seconds: int,
-) -> subprocess.CompletedProcess[str]:
-    return run_process_group(
-        command,
-        capture_output=True,
-        cwd=Path(__file__).resolve().parents[1],
-        env=environment,
-        timeout_seconds=timeout_seconds,
-    )
+        return all(result.status is not Status.FAILED for result in self.results)
 
 
 def _steps(
@@ -157,7 +130,7 @@ def _execute_step(
     except subprocess.TimeoutExpired:
         return CleanResult(
             step,
-            CleanStatus.FAILED,
+            Status.FAILED,
             command,
             duration_ms=round((time.monotonic() - started_at) * 1000),
             reason=f"timed out after {step.timeout_seconds}s",
@@ -165,7 +138,7 @@ def _execute_step(
     except OSError as error:
         return CleanResult(
             step,
-            CleanStatus.FAILED,
+            Status.FAILED,
             command,
             duration_ms=round((time.monotonic() - started_at) * 1000),
             reason=str(error),
@@ -173,9 +146,9 @@ def _execute_step(
     succeeded = completed.returncode == 0
     return CleanResult(
         step,
-        CleanStatus.SUCCEEDED
+        Status.SUCCEEDED
         if apply and succeeded
-        else (CleanStatus.PREVIEWED if not apply and succeeded else CleanStatus.FAILED),
+        else (Status.PLANNED if not apply and succeeded else Status.FAILED),
         command,
         exit_code=completed.returncode,
         duration_ms=round((time.monotonic() - started_at) * 1000),
@@ -188,7 +161,7 @@ def plan_clean(
     home: Path,
     *,
     executable_finder: Callable[[str], str | None] = shutil.which,
-    runner: CommandRunner = _default_runner,
+    runner: CommandRunner = run_in_repository,
 ) -> CleanReport:
     """Run package-manager dry-runs without changing the host."""
     return CleanReport(
@@ -204,7 +177,7 @@ def execute_clean(
     home: Path,
     *,
     executable_finder: Callable[[str], str | None] = shutil.which,
-    runner: CommandRunner = _default_runner,
+    runner: CommandRunner = run_in_repository,
 ) -> CleanReport:
     """Run the selected cleanup commands after the host policy allows mutation."""
     require_mutation_allowed(home)
@@ -218,11 +191,7 @@ def execute_clean(
 
 
 def _summary(report: CleanReport) -> dict[str, int]:
-    return {
-        status.value: count
-        for status in CleanStatus
-        if (count := sum(result.status is status for result in report.results))
-    }
+    return status_summary(result.status for result in report.results)
 
 
 def _document(report: CleanReport, *, apply_allowed: bool) -> dict[str, object]:
@@ -253,7 +222,7 @@ def _document(report: CleanReport, *, apply_allowed: bool) -> dict[str, object]:
             ["mise run clean -- --apply"]
             if not report.apply
             and apply_allowed
-            and any(result.status is CleanStatus.PREVIEWED for result in report.results)
+            and any(result.status is Status.PLANNED for result in report.results)
             else []
         ),
     }
@@ -274,7 +243,7 @@ def _render(report: CleanReport, *, apply_allowed: bool) -> None:
     print(f"Summary: {summary or 'no steps'}")
     if not report.apply:
         if apply_allowed and any(
-            result.status is CleanStatus.PREVIEWED for result in report.results
+            result.status is Status.PLANNED for result in report.results
         ):
             print("Next: mise run clean -- --apply")
         elif not apply_allowed:

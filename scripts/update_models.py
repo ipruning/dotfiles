@@ -3,15 +3,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from enum import StrEnum
 from pathlib import Path
 
-
-class UpdateStatus(StrEnum):
-    PLANNED = "planned"
-    SKIPPED = "skipped"
-    SUCCEEDED = "succeeded"
-    FAILED = "failed"
+from .models import Status
 
 
 @dataclass(frozen=True)
@@ -30,7 +24,7 @@ class UpdateStep:
 @dataclass(frozen=True)
 class UpdateResult:
     step: UpdateStep
-    status: UpdateStatus
+    status: Status
     exit_code: int | None = None
     duration_ms: int | None = None
     reason: str | None = None
@@ -46,6 +40,6 @@ class UpdateReport:
 
     @property
     def ok(self) -> bool:
-        return all(
-            result.status is not UpdateStatus.FAILED for result in self.results
-        ) and (self.runtime is None or bool(self.runtime["ok"]))
+        return all(result.status is not Status.FAILED for result in self.results) and (
+            self.runtime is None or bool(self.runtime["ok"])
+        )

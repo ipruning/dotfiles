@@ -15,24 +15,15 @@ import tempfile
 import time
 from collections.abc import Callable
 from dataclasses import dataclass
-from enum import StrEnum
 from pathlib import Path
 
 from .host_policy import HostPolicyError, mutation_allowed, require_mutation_allowed
-from .models import ExecutableFinder
+from .models import ExecutableFinder, Status, status_summary
 from .process import run_process_group
 from .render import emit_error
 
 StepCallback = Callable[["InventorySpec"], None]
 HOST_NAME_RE = re.compile(r"[^A-Za-z0-9._-]")
-
-
-class InventoryStatus(StrEnum):
-    PLANNED = "planned"
-    SKIPPED = "skipped"
-    WRITTEN = "written"
-    UNCHANGED = "unchanged"
-    FAILED = "failed"
 
 
 @dataclass(frozen=True)
@@ -49,7 +40,7 @@ class InventorySpec:
 @dataclass(frozen=True)
 class InventoryResult:
     spec: InventorySpec
-    status: InventoryStatus
+    status: Status
     target: Path
     reason: str | None = None
     exit_code: int | None = None
@@ -66,9 +57,7 @@ class InventoryReport:
 
     @property
     def ok(self) -> bool:
-        return all(
-            result.status is not InventoryStatus.FAILED for result in self.results
-        )
+        return all(result.status is not Status.FAILED for result in self.results)
 
 
 class SnapshotParseError(ValueError):
@@ -183,9 +172,7 @@ def plan_inventory(
         results.append(
             InventoryResult(
                 spec=spec,
-                status=(
-                    InventoryStatus.PLANNED if available else InventoryStatus.SKIPPED
-                ),
+                status=(Status.PLANNED if available else Status.SKIPPED),
                 target=host_dir / spec.filename,
                 reason=reason,
             ),
@@ -242,7 +229,7 @@ def execute_inventory(
     require_mutation_allowed(home)
     results = []
     for planned in plan.results:
-        if planned.status is not InventoryStatus.PLANNED:
+        if planned.status is not Status.PLANNED:
             results.append(planned)
             continue
         if on_start:
@@ -256,7 +243,7 @@ def execute_inventory(
                     "collector produced empty output; kept existing snapshot"
                 )
             if planned.target.exists() and planned.target.read_text() == content:
-                status = InventoryStatus.UNCHANGED
+                status = Status.UNCHANGED
             else:
                 planned.target.parent.mkdir(parents=True, exist_ok=True)
                 descriptor, temporary_name = tempfile.mkstemp(
@@ -273,7 +260,7 @@ def execute_inventory(
                     temporary.replace(planned.target)
                 finally:
                     temporary.unlink(missing_ok=True)
-                status = InventoryStatus.WRITTEN
+                status = Status.SUCCEEDED
             results.append(
                 InventoryResult(
                     spec=planned.spec,
@@ -289,7 +276,7 @@ def execute_inventory(
             results.append(
                 InventoryResult(
                     spec=planned.spec,
-                    status=InventoryStatus.FAILED,
+                    status=Status.FAILED,
                     target=planned.target,
                     reason=reason,
                     duration_ms=round((time.monotonic() - started_at) * 1000),
@@ -303,7 +290,7 @@ def execute_inventory(
             results.append(
                 InventoryResult(
                     spec=planned.spec,
-                    status=InventoryStatus.FAILED,
+                    status=Status.FAILED,
                     target=planned.target,
                     reason=reason,
                     exit_code=exit_code,
@@ -320,17 +307,7 @@ def execute_inventory(
 
 
 def _summary(report: InventoryReport) -> dict[str, int]:
-    return {
-        status.value: count
-        for status in (
-            InventoryStatus.PLANNED,
-            InventoryStatus.WRITTEN,
-            InventoryStatus.UNCHANGED,
-            InventoryStatus.SKIPPED,
-            InventoryStatus.FAILED,
-        )
-        if (count := sum(result.status is status for result in report.results))
-    }
+    return status_summary(result.status for result in report.results)
 
 
 def _next_commands(
@@ -340,7 +317,7 @@ def _next_commands(
 ) -> tuple[str, ...]:
     if not report.apply:
         if not apply_allowed or not any(
-            result.status is InventoryStatus.PLANNED for result in report.results
+            result.status is Status.PLANNED for result in report.results
         ):
             return ()
         arguments = ["mise", "run", "inventory", "--"]
@@ -350,7 +327,7 @@ def _next_commands(
         arguments.extend(("--applications-root", str(report.applications_root)))
         arguments.append("--apply")
         return (shlex.join(arguments),)
-    if not any(result.status is InventoryStatus.WRITTEN for result in report.results):
+    if not any(result.status is Status.SUCCEEDED for result in report.results):
         return ()
     if report.repo_root is None:
         return ("git diff inventory/",)
@@ -401,18 +378,18 @@ def _render(
     for result in report.results:
         target = result.target.relative_to(repo_root)
         label = result.status.value.upper()
-        if result.status is InventoryStatus.PLANNED:
+        if result.status is Status.PLANNED:
             source = (
                 " ".join(result.spec.command)
                 if result.spec.command
                 else f"scan {result.spec.scan_dir}"
             )
             print(f"{label:7} {result.spec.name}: {source} -> {target}")
-        elif result.status is InventoryStatus.SKIPPED:
+        elif result.status is Status.SKIPPED:
             print(f"{label:7} {result.spec.name}: {result.reason}")
-        elif result.status is InventoryStatus.WRITTEN:
+        elif result.status is Status.SUCCEEDED:
             print(f"{label:7} {result.spec.name}: {target}")
-        elif result.status is InventoryStatus.UNCHANGED:
+        elif result.status is Status.UNCHANGED:
             print(f"{label:7} {result.spec.name}: {target} unchanged")
         else:
             print(
@@ -424,7 +401,7 @@ def _render(
     print(f"Summary: {rendered or 'no steps'}")
     if not report.apply:
         if not apply_allowed and any(
-            result.status is InventoryStatus.PLANNED for result in report.results
+            result.status is Status.PLANNED for result in report.results
         ):
             print("No snapshots written. Host policy disables inventory apply.")
         elif _next_commands(report):

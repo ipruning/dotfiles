@@ -9,10 +9,10 @@ import shlex
 import subprocess
 import tempfile
 from dataclasses import dataclass
-from enum import StrEnum
 from pathlib import Path
 
 from .host_policy import HostPolicyError, mutation_allowed, require_mutation_allowed
+from .models import Status, status_summary
 from .profiles import HostProfile
 from .render import emit_error
 
@@ -25,15 +25,10 @@ class SetupError(RuntimeError):
     """The requested setup could not be applied safely."""
 
 
-class SetupStatus(StrEnum):
-    PLANNED = "planned"
-    APPLIED = "applied"
-
-
 @dataclass(frozen=True)
 class SetupChange:
     action: str
-    status: SetupStatus
+    status: Status
 
 
 @dataclass(frozen=True)
@@ -64,7 +59,7 @@ def _next_commands(
 
 def _shell_restart_required(report: SetupReport) -> bool:
     return report.apply and any(
-        change.status is SetupStatus.APPLIED
+        change.status is Status.SUCCEEDED
         and change.action.startswith("configure Bash through ")
         for change in report.changes
     )
@@ -213,7 +208,7 @@ def _configure_linux_lite(
                 raise SetupError(
                     f"could not update Bash config {bashrc}: {error}"
                 ) from error
-    status = SetupStatus.APPLIED if apply else SetupStatus.PLANNED
+    status = Status.SUCCEEDED if apply else Status.PLANNED
     return SetupReport(
         profile=HostProfile.LINUX_LITE,
         apply=apply,
@@ -261,11 +256,7 @@ def main(argv: list[str] | None = None) -> int:
     except SetupError as error:
         emit_error("setup", str(error), as_json=args.as_json, apply=args.apply)
         return 1
-    summary = {
-        status.value: sum(change.status is status for change in report.changes)
-        for status in SetupStatus
-        if any(change.status is status for change in report.changes)
-    }
+    summary = status_summary(change.status for change in report.changes)
     document = {
         "schema_version": 1,
         "operation": "setup",

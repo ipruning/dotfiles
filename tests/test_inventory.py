@@ -13,11 +13,11 @@ from scripts.inventory import (
     InventoryReport,
     InventoryResult,
     InventorySpec,
-    InventoryStatus,
     execute_inventory,
     plan_inventory,
     sanitize_host,
 )
+from scripts.models import Status
 
 BREWFILE = 'tap "acme/tap"\nbrew "fd"\ncask "ghostty"\n'
 GH_EXTENSIONS = "gh poi\tseachicken/gh-poi\tv0.18.1\ngh dash\tdlvhdr/gh-dash\tv4.25.2\n"
@@ -180,7 +180,7 @@ def test_inventory_writes_sorted_snapshots_then_reports_unchanged(
     assert (host_dir / "setapp.txt").read_text() == "CleanShot X\nTablePlus\n"
     assert stat.S_IMODE((host_dir / "Brewfile").stat().st_mode) == 0o644
     assert all(
-        step["status"] == "written" for step in json.loads(first.stdout)["steps"]
+        step["status"] == "succeeded" for step in json.loads(first.stdout)["steps"]
     )
 
     second, _host_dir, _log_path = _run_inventory(tmp_path, "--apply", "--json")
@@ -215,8 +215,8 @@ def test_inventory_skips_missing_tools_but_records_zero_for_absent_scan_dirs(
     assert (host_dir / "gh_extensions.txt").read_text() == "old/extension\n"
     # ...but an absent Setapp directory is a known zero-app state that must
     # overwrite the stale snapshot rather than leave it misleading.
-    assert steps["setapp"]["status"] == "written"
-    assert steps["brew.bundle"]["status"] == "written"
+    assert steps["setapp"]["status"] == "succeeded"
+    assert steps["brew.bundle"]["status"] == "succeeded"
     assert (host_dir / "setapp.txt").read_text() == ""
 
 
@@ -235,7 +235,7 @@ def test_inventory_records_zero_for_an_empty_setapp_directory(
 
     assert completed.returncode == 0
     steps = {step["name"]: step for step in json.loads(completed.stdout)["steps"]}
-    assert steps["setapp"]["status"] == "written"
+    assert steps["setapp"]["status"] == "succeeded"
     assert (host_dir / "setapp.txt").read_text() == ""
 
 
@@ -269,7 +269,7 @@ def test_inventory_failed_setapp_scan_preserves_snapshot(
     steps = {step["name"]: step for step in document["steps"]}
     assert steps["setapp"]["status"] == "failed"
     assert str(setapp) in steps["setapp"]["reason"]
-    assert steps["applications"]["status"] == "written"
+    assert steps["applications"]["status"] == "succeeded"
     assert (host_dir / "setapp.txt").read_text() == "Previous App\n"
     assert "[setapp] FAIL" in completed.stderr
 
@@ -300,8 +300,8 @@ def test_inventory_failure_keeps_existing_snapshot_and_later_steps_run(
     assert steps["brew.bundle"]["status"] == "failed"
     assert steps["brew.bundle"]["reason"] == "command exited 7"
     assert steps["brew.bundle"]["exit_code"] == 7
-    assert steps["gh.extensions"]["status"] == "written"
-    assert steps["applications"]["status"] == "written"
+    assert steps["gh.extensions"]["status"] == "succeeded"
+    assert steps["applications"]["status"] == "succeeded"
     assert (host_dir / "Brewfile").read_text() == 'brew "previous"\n'
     assert "[brew.bundle] simulated brew failure" in completed.stderr
     assert "[brew.bundle] FAIL command exited 7" in completed.stderr
@@ -317,10 +317,10 @@ def test_inventory_executes_only_planned_results(tmp_path: Path) -> None:
     terminal_results = tuple(
         InventoryResult(spec, status, target, reason="terminal state")
         for status in (
-            InventoryStatus.SKIPPED,
-            InventoryStatus.FAILED,
-            InventoryStatus.WRITTEN,
-            InventoryStatus.UNCHANGED,
+            Status.SKIPPED,
+            Status.FAILED,
+            Status.SUCCEEDED,
+            Status.UNCHANGED,
         )
     )
     started: list[InventorySpec] = []
@@ -377,7 +377,7 @@ def test_inventory_zero_gh_extensions_is_a_legitimate_snapshot(
 
     assert completed.returncode == 0
     steps = {step["name"]: step for step in json.loads(completed.stdout)["steps"]}
-    assert steps["gh.extensions"]["status"] == "written"
+    assert steps["gh.extensions"]["status"] == "succeeded"
     assert (host_dir / "gh_extensions.txt").read_text() == ""
 
 
@@ -433,7 +433,7 @@ def test_inventory_failed_atomic_publish_keeps_previous_snapshot(
     application = next(
         result for result in report.results if result.spec.name == "applications"
     )
-    assert application.status is InventoryStatus.FAILED
+    assert application.status is Status.FAILED
     assert target.read_text() == "Previous App\n"
     assert not list(target.parent.glob(f".{target.name}.tmp-*"))
 
@@ -502,10 +502,10 @@ def test_inventory_human_output_announces_collectors_and_summary(
     assert completed.stdout.splitlines()[0] == (
         "RUN brew.bundle: brew bundle dump --file=- --quiet"
     )
-    assert "WRITTEN brew.bundle: inventory/TestHost/Brewfile" in completed.stdout
+    assert "SUCCEEDED brew.bundle: inventory/TestHost/Brewfile" in completed.stdout
     # Setapp is absent but /Applications exists, so it records zero apps.
-    assert "WRITTEN setapp: inventory/TestHost/setapp.txt" in completed.stdout
-    assert "Summary: 4 written" in completed.stdout
+    assert "SUCCEEDED setapp: inventory/TestHost/setapp.txt" in completed.stdout
+    assert "Summary: 4 succeeded" in completed.stdout
     review_command = shlex.join(
         (
             "git",
@@ -540,8 +540,8 @@ def test_inventory_reports_timeout_on_stderr_and_keeps_going(
     report = execute_inventory(plan, tmp_path / "home")
 
     results = {result.spec.name: result for result in report.results}
-    assert results["brew.bundle"].status is InventoryStatus.FAILED
-    assert results["applications"].status is InventoryStatus.WRITTEN
+    assert results["brew.bundle"].status is Status.FAILED
+    assert results["applications"].status is Status.SUCCEEDED
     assert "[brew.bundle] FAIL timed out after 300s" in capsys.readouterr().err
 
 

@@ -1,4 +1,4 @@
-"""真实子进程验证维护命令的输出、超时和进度边界。"""
+"""Verify output, timeout, and progress boundaries with real child processes."""
 
 import os
 import signal

@@ -16,19 +16,19 @@ from pathlib import Path
 
 from .host_policy import HostPolicyError, mutation_allowed, require_mutation_allowed
 from .mise import canonical_mise_executable, canonical_mise_path
-from .models import ExecutableFinder
+from .models import ExecutableFinder, Status
 from .render import emit_error
 from .runtime_commands import (
-    _atomic_install,
-    _checkout_revision,
-    _command_failure_reason,
-    _download,
-    _emit_command_output,
-    _read_revision,
-    _run_command,
-    _timeout_reason,
+    atomic_install,
+    checkout_revision,
+    command_failure_reason,
+    download_url,
+    emit_command_output,
     guarded_activation,
     inspect_plugin,
+    read_revision,
+    run_command,
+    timeout_reason,
 )
 from .runtime_models import (
     AtomicWriter,
@@ -37,11 +37,15 @@ from .runtime_models import (
     RuntimeReport,
     RuntimeResult,
     RuntimeSpec,
-    RuntimeStatus,
     ShellInitSpec,
     StepCallback,
 )
-from .runtime_render import _announce_step, _document, _next_commands, _render
+from .runtime_render import (
+    announce_runtime_step,
+    render_runtime,
+    runtime_document,
+    runtime_next_commands,
+)
 from .runtime_specs import (
     COMPLETION_SPECS,
     FUNCTION_SPECS,
@@ -62,14 +66,13 @@ __all__ = [
     "RuntimeReport",
     "RuntimeResult",
     "RuntimeSpec",
-    "RuntimeStatus",
     "ShellInitSpec",
     "StepCallback",
-    "_next_commands",
-    "_render",
     "execute_runtime",
     "file_sha256",
     "plan_runtime",
+    "render_runtime",
+    "runtime_next_commands",
     "shim_aware_finder",
 ]
 
@@ -163,17 +166,17 @@ def _generator_result(
     assert spec.target is not None
     if executable := executable_finder(spec.tool):
         spec = replace(spec, command=(executable, *spec.command[1:]))
-        return RuntimeResult(spec, RuntimeStatus.PLANNED, RuntimeAction.GENERATE)
+        return RuntimeResult(spec, Status.PLANNED, RuntimeAction.GENERATE)
     if spec.target.exists() or spec.target.is_symlink():
         return RuntimeResult(
             spec,
-            RuntimeStatus.PLANNED,
+            Status.PLANNED,
             RuntimeAction.REMOVE,
             f"{spec.tool} is not available; remove stale owned output",
         )
     return RuntimeResult(
         spec,
-        RuntimeStatus.SKIPPED,
+        Status.SKIPPED,
         RuntimeAction.GENERATE,
         f"{spec.tool} is not available on PATH",
     )
@@ -202,7 +205,7 @@ def plan_runtime(
             results=(
                 RuntimeResult(
                     spec,
-                    RuntimeStatus.FAILED,
+                    Status.FAILED,
                     RuntimeAction.VALIDATE,
                     _symlinked_directory_reason(symlinked_directory),
                 ),
@@ -242,7 +245,7 @@ def plan_runtime(
             results.append(
                 RuntimeResult(
                     spec,
-                    RuntimeStatus.SKIPPED,
+                    Status.SKIPPED,
                     RuntimeAction.GENERATE,
                     "LLM completion needs package resolution; refresh with runtime without --offline",
                 )
@@ -297,7 +300,7 @@ def plan_runtime(
             results.append(
                 RuntimeResult(
                     spec,
-                    RuntimeStatus.FAILED,
+                    Status.FAILED,
                     action,
                     f"plugin target is a symlink ({os.readlink(target)}); "
                     "remove it before refreshing",
@@ -307,7 +310,7 @@ def plan_runtime(
             results.append(
                 RuntimeResult(
                     spec,
-                    RuntimeStatus.FAILED,
+                    Status.FAILED,
                     action,
                     f"plugin Git metadata is a symlink "
                     f"({os.readlink(git_directory)}); remove it before refreshing",
@@ -317,23 +320,21 @@ def plan_runtime(
             try:
                 current = inspect_plugin(spec, home)
             except (OSError, RuntimeError, subprocess.TimeoutExpired) as error:
-                results.append(
-                    RuntimeResult(spec, RuntimeStatus.FAILED, action, str(error))
-                )
+                results.append(RuntimeResult(spec, Status.FAILED, action, str(error)))
             else:
                 results.append(
                     RuntimeResult(
                         spec,
-                        RuntimeStatus.SKIPPED,
+                        Status.UNCHANGED,
                         action,
                         "pinned revision and tracked files are current",
                     )
                     if current
-                    else RuntimeResult(spec, RuntimeStatus.PLANNED, action)
+                    else RuntimeResult(spec, Status.PLANNED, action)
                     if network
                     else RuntimeResult(
                         spec,
-                        RuntimeStatus.SKIPPED,
+                        Status.SKIPPED,
                         action,
                         "network refresh is disabled",
                     )
@@ -342,7 +343,7 @@ def plan_runtime(
             results.append(
                 RuntimeResult(
                     spec,
-                    RuntimeStatus.SKIPPED,
+                    Status.SKIPPED,
                     action,
                     "network refresh is disabled",
                 ),
@@ -351,18 +352,18 @@ def plan_runtime(
             results.append(
                 RuntimeResult(
                     spec,
-                    RuntimeStatus.FAILED,
+                    Status.FAILED,
                     action,
                     "target exists but is not a Git checkout",
                 ),
             )
         elif git_available:
-            results.append(RuntimeResult(spec, RuntimeStatus.PLANNED, action))
+            results.append(RuntimeResult(spec, Status.PLANNED, action))
         else:
             results.append(
                 RuntimeResult(
                     spec,
-                    RuntimeStatus.SKIPPED,
+                    Status.SKIPPED,
                     action,
                     "git is not available on PATH",
                 ),
@@ -381,20 +382,20 @@ def plan_runtime(
             results.append(
                 RuntimeResult(
                     spec,
-                    RuntimeStatus.SKIPPED,
+                    Status.UNCHANGED,
                     RuntimeAction.DOWNLOAD,
                     "checksum is current",
                 ),
             )
         elif network:
             results.append(
-                RuntimeResult(spec, RuntimeStatus.PLANNED, RuntimeAction.DOWNLOAD),
+                RuntimeResult(spec, Status.PLANNED, RuntimeAction.DOWNLOAD),
             )
         else:
             results.append(
                 RuntimeResult(
                     spec,
-                    RuntimeStatus.SKIPPED,
+                    Status.SKIPPED,
                     RuntimeAction.DOWNLOAD,
                     "network refresh is disabled",
                 ),
@@ -405,11 +406,11 @@ def plan_runtime(
         command=("bat", "cache", "--build"),
     )
     results.append(
-        RuntimeResult(bat_spec, RuntimeStatus.PLANNED, RuntimeAction.RUN)
+        RuntimeResult(bat_spec, Status.PLANNED, RuntimeAction.RUN)
         if executable_finder("bat")
         else RuntimeResult(
             bat_spec,
-            RuntimeStatus.SKIPPED,
+            Status.SKIPPED,
             RuntimeAction.RUN,
             "bat is not available on PATH",
         ),
@@ -423,14 +424,14 @@ def plan_runtime(
     results.append(
         RuntimeResult(
             compdump_spec,
-            RuntimeStatus.PLANNED,
+            Status.PLANNED,
             RuntimeAction.REMOVE,
             "invalidate only if completion outputs change",
         )
         if compdumps
         else RuntimeResult(
             compdump_spec,
-            RuntimeStatus.SKIPPED,
+            Status.SKIPPED,
             RuntimeAction.REMOVE,
             "no zcompdump files exist",
         ),
@@ -447,7 +448,7 @@ def execute_runtime(
     plan: RuntimeReport,
     home: Path,
     *,
-    downloader: Downloader = _download,
+    downloader: Downloader = download_url,
     on_start: StepCallback | None = None,
     capture_output: bool = True,
 ) -> RuntimeReport:
@@ -456,18 +457,18 @@ def execute_runtime(
     results = []
     for planned in plan.results:
         spec = planned.spec
-        if planned.status is not RuntimeStatus.PLANNED:
+        if planned.status is not Status.PLANNED:
             results.append(planned)
             continue
         if spec.name == "zsh.compdump" and not any(
-            result.status is RuntimeStatus.SUCCEEDED
+            result.status is Status.SUCCEEDED
             and result.spec.name.startswith("completion.")
             for result in results
         ):
             results.append(
                 RuntimeResult(
                     spec,
-                    RuntimeStatus.SKIPPED,
+                    Status.UNCHANGED,
                     planned.action,
                     "completion outputs are unchanged",
                 )
@@ -506,11 +507,11 @@ def execute_runtime(
                         "to execute outside generated state",
                     )
             if planned.action is RuntimeAction.GENERATE:
-                completed = _run_command(spec, home, capture_output=True)
+                completed = run_command(spec, home, capture_output=True)
                 exit_code = completed.returncode
-                _emit_command_output(spec, completed.stderr)
+                emit_command_output(spec, completed.stderr)
                 if completed.returncode != 0:
-                    raise RuntimeError(_command_failure_reason(completed))
+                    raise RuntimeError(command_failure_reason(completed))
                 if not completed.stdout:
                     raise RuntimeError("generator produced empty output")
                 assert spec.target is not None
@@ -523,7 +524,7 @@ def execute_runtime(
                     results.append(
                         RuntimeResult(
                             spec,
-                            RuntimeStatus.SKIPPED,
+                            Status.UNCHANGED,
                             planned.action,
                             "generated content is unchanged",
                             exit_code,
@@ -537,7 +538,7 @@ def execute_runtime(
                 ) -> None:
                     temporary.write_text(output)
 
-                _atomic_install(spec.target, write_generated_output)
+                atomic_install(spec.target, write_generated_output)
             elif planned.action in {
                 RuntimeAction.CLONE,
                 RuntimeAction.UPDATE,
@@ -561,21 +562,21 @@ def execute_runtime(
                         command=(*spec.command[:-1], str(staging)),
                     )
                 try:
-                    completed = _run_command(
+                    completed = run_command(
                         command_spec,
                         home,
                         capture_output=capture_output,
                     )
                     exit_code = completed.returncode
                     if capture_output:
-                        _emit_command_output(spec, completed.stdout)
-                        _emit_command_output(spec, completed.stderr)
+                        emit_command_output(spec, completed.stdout)
+                        emit_command_output(spec, completed.stderr)
                     if completed.returncode != 0:
-                        raise RuntimeError(_command_failure_reason(completed))
+                        raise RuntimeError(command_failure_reason(completed))
                     if spec.revision is not None:
                         checkout_directory = staging or target
                         assert checkout_directory is not None
-                        _checkout_revision(
+                        checkout_revision(
                             spec,
                             checkout_directory,
                             home,
@@ -604,7 +605,7 @@ def execute_runtime(
                 ) -> None:
                     temporary.write_bytes(downloaded)
 
-                _atomic_install(spec.target, write_downloaded_content)
+                atomic_install(spec.target, write_downloaded_content)
                 exit_code = None
             elif planned.action is RuntimeAction.REMOVE:
                 if spec.name == "zsh.compdump":
@@ -623,7 +624,7 @@ def execute_runtime(
             urllib.error.URLError,
         ) as error:
             reason = (
-                _timeout_reason(spec, error)
+                timeout_reason(spec, error)
                 if isinstance(error, subprocess.TimeoutExpired)
                 else str(error)
             )
@@ -634,7 +635,7 @@ def execute_runtime(
                 and spec.target is not None
             ):
                 try:
-                    actual_revision = _read_revision(spec, spec.target, home)
+                    actual_revision = read_revision(spec, spec.target, home)
                 except OSError, RuntimeError, subprocess.TimeoutExpired:
                     actual_revision = "unavailable"
                 reason = (
@@ -644,7 +645,7 @@ def execute_runtime(
                 )
             failed = RuntimeResult(
                 spec,
-                RuntimeStatus.FAILED,
+                Status.FAILED,
                 planned.action,
                 reason,
                 exit_code,
@@ -653,7 +654,7 @@ def execute_runtime(
             continue
         succeeded = RuntimeResult(
             spec,
-            RuntimeStatus.SUCCEEDED,
+            Status.SUCCEEDED,
             planned.action,
             exit_code=exit_code,
         )
@@ -707,7 +708,7 @@ def main(argv: list[str] | None = None) -> int:
             report = execute_runtime(
                 report,
                 home,
-                on_start=None if args.as_json else _announce_step,
+                on_start=None if args.as_json else announce_runtime_step,
                 capture_output=args.as_json,
             )
     except HostPolicyError as error:
@@ -722,19 +723,19 @@ def main(argv: list[str] | None = None) -> int:
     if args.as_json:
         print(
             json.dumps(
-                _document(report, apply_allowed=apply_allowed),
+                runtime_document(report, apply_allowed=apply_allowed),
                 indent=2,
                 sort_keys=True,
             ),
         )
         for result in report.results:
-            if result.status is RuntimeStatus.FAILED:
+            if result.status is Status.FAILED:
                 print(
                     f"[{result.spec.name}] FAIL {result.reason}",
                     file=sys.stderr,
                 )
     else:
-        _render(report, apply_allowed=apply_allowed)
+        render_runtime(report, apply_allowed=apply_allowed)
     return 0 if report.ok else 1
 
 

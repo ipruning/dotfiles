@@ -10,8 +10,8 @@ import re
 import subprocess
 import tomllib
 from pathlib import Path
-from typing import override
 
+from .diff import CaseConfigParser
 from .models import Finding, LintReport, Severity
 from .render import finding_document, render_findings
 
@@ -321,14 +321,8 @@ def _structured_data_parser_findings(
     return findings
 
 
-class _CaseConfigParser(configparser.ConfigParser):
-    @override
-    def optionxform(self, optionstr: str) -> str:
-        return optionstr
-
-
 def _config() -> configparser.ConfigParser:
-    return _CaseConfigParser(allow_no_value=True)
+    return CaseConfigParser(allow_no_value=True)
 
 
 def _mackup_findings(repo_root: Path, tracked_paths: set[Path]) -> list[Finding]:

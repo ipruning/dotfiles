@@ -38,7 +38,9 @@ class MackupRunner(Protocol):
     ) -> dict[str, object]: ...
 
 
-class _CaseConfigParser(configparser.ConfigParser):
+class CaseConfigParser(configparser.ConfigParser):
+    """Mackup config parser that keeps option names case-sensitive."""
+
     @override
     def optionxform(self, optionstr: str) -> str:
         return optionstr
@@ -54,7 +56,7 @@ class SubprocessMackupRunner:
         application: str | None,
     ) -> dict[str, object]:
         source_config = repo_root / "mackup/mackup.cfg"
-        config = _CaseConfigParser(allow_no_value=True, interpolation=None)
+        config = CaseConfigParser(allow_no_value=True, interpolation=None)
         try:
             if not config.read(source_config) or not config.has_section("storage"):
                 raise MackupCommandError(f"Invalid Mackup config: {source_config}")

@@ -1,4 +1,4 @@
-"""执行限时进程组，按需保留输出尾部并报告进度。"""
+"""Run time-limited process groups, keeping output tails and reporting progress."""
 
 from __future__ import annotations
 
@@ -12,6 +12,14 @@ import time
 from collections.abc import Callable
 from pathlib import Path
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
+
+# (command, environment, timeout_seconds) -> completed process
+CommandRunner = Callable[
+    [tuple[str, ...], dict[str, str], int],
+    subprocess.CompletedProcess[str],
+]
+
 
 def kill_process_group(
     process: subprocess.Popen[bytes] | subprocess.Popen[str],
@@ -21,7 +29,8 @@ def kill_process_group(
     except ProcessLookupError:
         pass
     except PermissionError:
-        # macOS 对已消失的进程组也可能返回 EPERM；活进程的权限错误保留。
+        # macOS can return EPERM for a group that already exited; keep the
+        # permission error only while the process is still alive.
         if process.poll() is None:
             raise
     process.wait()
@@ -59,10 +68,12 @@ def run_process_group(
     on_progress: Callable[[float], None] | None = None,
     progress_interval_seconds: float = 15,
 ) -> subprocess.CompletedProcess[str]:
-    """保留完整生成输出；维护命令可指定尾部上限，避免日志占满内存。
+    """Run a command in its own process group and return its decoded output.
 
-    超时同时覆盖 stdin 写入和子进程继承的输出管道。超时后不再等待
-    管道 EOF，以免脱离进程组的后代持有管道导致清理无限等待。
+    Generator output is kept whole; maintenance commands may cap it to a tail
+    so logs cannot exhaust memory. The timeout covers stdin writes and the
+    output pipes children inherit. After a timeout, cleanup does not wait for
+    pipe EOF, because descendants that left the group may hold it open forever.
     """
     if output_limit_chars is not None and output_limit_chars < 0:
         raise ValueError("output_limit_chars must be nonnegative")
@@ -146,4 +157,19 @@ def run_process_group(
         process.returncode,
         outputs["stdout"].value() if capture_output else None,
         outputs["stderr"].value() if capture_output else None,
+    )
+
+
+def run_in_repository(
+    command: tuple[str, ...],
+    environment: dict[str, str],
+    timeout_seconds: int,
+) -> subprocess.CompletedProcess[str]:
+    """Run a captured command from the repository root."""
+    return run_process_group(
+        command,
+        capture_output=True,
+        cwd=REPO_ROOT,
+        env=environment,
+        timeout_seconds=timeout_seconds,
     )

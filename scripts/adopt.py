@@ -11,19 +11,12 @@ import subprocess
 import sys
 import tempfile
 from dataclasses import dataclass
-from enum import StrEnum
 from pathlib import Path
 
 from .diff import DriftProtocolError, MackupCommandError, inspect_drift
 from .host_policy import HostPolicyError, mutation_allowed, require_mutation_allowed
-from .models import Drift, DriftKind
+from .models import Drift, DriftKind, Status
 from .render import emit_error
-
-
-class AdoptStatus(StrEnum):
-    PLANNED = "planned"
-    APPLIED = "applied"
-    FAILED = "failed"
 
 
 class AdoptError(RuntimeError):
@@ -34,8 +27,8 @@ class AdoptError(RuntimeError):
 class AdoptResult:
     drift: Drift
     action: str | None
-    status: AdoptStatus
-    error: str | None = None
+    status: Status
+    reason: str | None = None
 
 
 @dataclass(frozen=True)
@@ -46,7 +39,7 @@ class AdoptReport:
 
     @property
     def ok(self) -> bool:
-        return all(result.status is not AdoptStatus.FAILED for result in self.results)
+        return all(result.status is not Status.FAILED for result in self.results)
 
 
 def _next_commands(
@@ -58,7 +51,7 @@ def _next_commands(
         apply_allowed
         and not report.apply
         and report.ok
-        and any(result.status is AdoptStatus.PLANNED for result in report.results)
+        and any(result.status is Status.PLANNED for result in report.results)
     ):
         return (
             shlex.join(["mise", "run", "adopt", "--", report.application, "--apply"]),
@@ -82,19 +75,19 @@ def plan_adopt(repo_root: Path, home: Path, application: str) -> AdoptReport:
             DriftKind.TYPE_CHANGED,
         }:
             results.append(
-                AdoptResult(drift, action="copy", status=AdoptStatus.PLANNED),
+                AdoptResult(drift, action="copy", status=Status.PLANNED),
             )
         elif drift.kind is DriftKind.ONLY_REFERENCE:
             results.append(
-                AdoptResult(drift, action="remove", status=AdoptStatus.PLANNED),
+                AdoptResult(drift, action="remove", status=Status.PLANNED),
             )
         else:
             results.append(
                 AdoptResult(
                     drift,
                     action=None,
-                    status=AdoptStatus.FAILED,
-                    error=drift.error or "drift path is unreadable",
+                    status=Status.FAILED,
+                    reason=drift.error or "drift path is unreadable",
                 ),
             )
     return AdoptReport(application=application, apply=False, results=tuple(results))
@@ -121,7 +114,7 @@ def _dirty_reference_paths(repo_root: Path, plan: AdoptReport) -> list[str]:
             _relative_path(result.drift.reference_path, repo_root, "reference path"),
         )
         for result in plan.results
-        if result.status is AdoptStatus.PLANNED
+        if result.status is Status.PLANNED
     ]
     for relative in relative_paths:
         _relative_path(repo_root / relative, reference_root, "reference path")
@@ -270,10 +263,8 @@ def apply_adopt(repo_root: Path, home: Path, plan: AdoptReport) -> AdoptReport:
             application=plan.application,
             apply=True,
             results=tuple(
-                AdoptResult(
-                    result.drift, result.action, AdoptStatus.FAILED, dirty_error
-                )
-                if result.status is AdoptStatus.PLANNED
+                AdoptResult(result.drift, result.action, Status.FAILED, dirty_error)
+                if result.status is Status.PLANNED
                 else result
                 for result in plan.results
             ),
@@ -289,10 +280,8 @@ def apply_adopt(repo_root: Path, home: Path, plan: AdoptReport) -> AdoptReport:
             application=plan.application,
             apply=True,
             results=tuple(
-                AdoptResult(
-                    result.drift, result.action, AdoptStatus.FAILED, precondition
-                )
-                if result.status is AdoptStatus.PLANNED
+                AdoptResult(result.drift, result.action, Status.FAILED, precondition)
+                if result.status is Status.PLANNED
                 else result
                 for result in plan.results
             ),
@@ -300,7 +289,7 @@ def apply_adopt(repo_root: Path, home: Path, plan: AdoptReport) -> AdoptReport:
 
     results = []
     for planned in plan.results:
-        if planned.status is not AdoptStatus.PLANNED:
+        if planned.status is not Status.PLANNED:
             results.append(planned)
             continue
         drift = planned.drift
@@ -331,13 +320,13 @@ def apply_adopt(repo_root: Path, home: Path, plan: AdoptReport) -> AdoptReport:
                 AdoptResult(
                     drift,
                     action=planned.action,
-                    status=AdoptStatus.FAILED,
-                    error=str(error),
+                    status=Status.FAILED,
+                    reason=str(error),
                 ),
             )
             continue
         results.append(
-            AdoptResult(drift, action=planned.action, status=AdoptStatus.APPLIED),
+            AdoptResult(drift, action=planned.action, status=Status.SUCCEEDED),
         )
     return AdoptReport(application=plan.application, apply=True, results=tuple(results))
 
@@ -349,7 +338,7 @@ def _document(
 ) -> dict[str, object]:
     summary = {
         status.value: sum(result.status is status for result in report.results)
-        for status in AdoptStatus
+        for status in Status
         if any(result.status is status for result in report.results)
     }
     return {
@@ -366,7 +355,7 @@ def _document(
                 "kind": result.drift.kind.value,
                 "action": result.action,
                 "status": result.status.value,
-                "error": result.error,
+                "reason": result.reason,
             }
             for result in report.results
         ],
@@ -381,16 +370,16 @@ def _render(report: AdoptReport, *, apply_allowed: bool = True) -> None:
         print(f"        live: {result.drift.live_path}")
         if result.action:
             print(f"        action: {result.action}")
-        if result.error:
-            print(f"        error: {result.error}", file=sys.stderr)
+        if result.reason:
+            print(f"        reason: {result.reason}", file=sys.stderr)
     summary = {
         status.value: count
-        for status in AdoptStatus
+        for status in Status
         if (count := sum(result.status is status for result in report.results))
     }
     rendered = ", ".join(f"{count} {status}" for status, count in summary.items())
     print(f"Summary: {rendered or 'no changes'}")
-    if not report.apply and summary.get(AdoptStatus.PLANNED.value):
+    if not report.apply and summary.get(Status.PLANNED.value):
         if apply_allowed:
             print(
                 "No files changed. Re-run with --apply to adopt this application's"
@@ -453,9 +442,9 @@ def main(argv: list[str] | None = None) -> int:
             ),
         )
         for result in report.results:
-            if result.status is AdoptStatus.FAILED:
+            if result.status is Status.FAILED:
                 print(
-                    f"[{report.application}] FAIL {result.drift.reference_path}: {result.error}",
+                    f"[{report.application}] FAIL {result.drift.reference_path}: {result.reason}",
                     file=sys.stderr,
                 )
     else:

@@ -69,7 +69,7 @@ def _mise_candidate_paths(
     return tuple(candidates)
 
 
-def _mise_installation_findings(
+def mise_installation_findings(
     home: Path,
     *,
     executable_finder: ExecutableFinder,
@@ -145,7 +145,7 @@ def _mise_installation_findings(
     return [canonical_finding, installations_finding]
 
 
-def _mise_shim_finding(
+def mise_shim_finding(
     home: Path,
     *,
     dotfiles_managed: bool = True,
@@ -210,7 +210,7 @@ def _mise_shim_finding(
     return None
 
 
-def _mise_project_uv_finding(repo_root: Path, home: Path) -> Finding | None:
+def mise_project_uv_finding(repo_root: Path, home: Path) -> Finding | None:
     config_path = repo_root / "mise.toml"
     executable = canonical_mise_executable(home)
     if not config_path.is_file() or executable is None:
@@ -257,7 +257,7 @@ def _mise_project_uv_finding(repo_root: Path, home: Path) -> Finding | None:
     )
 
 
-def _mise_systemd_shim_findings(
+def mise_systemd_shim_findings(
     home: Path,
     *,
     system_unit_directory: Path = Path("/etc/systemd/system"),
@@ -337,7 +337,7 @@ def _mise_systemd_shim_findings(
     return findings
 
 
-def _mise_runtime_binding_finding(
+def mise_runtime_binding_finding(
     generated_function: Path,
     home: Path,
 ) -> Finding | None:

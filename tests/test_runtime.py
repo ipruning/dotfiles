@@ -10,16 +10,16 @@ from pathlib import Path
 
 import pytest
 
+from scripts.models import Status
 from scripts.runtime import (
     RuntimeAction,
     RuntimeReport,
     RuntimeResult,
     RuntimeSpec,
-    RuntimeStatus,
-    _next_commands,
-    _render,
     execute_runtime,
     plan_runtime,
+    render_runtime,
+    runtime_next_commands,
     shim_aware_finder,
 )
 
@@ -381,7 +381,7 @@ def test_runtime_llm_completion_does_not_receive_host_credentials(
     report = execute_runtime(RuntimeReport(False, (llm,), plan.generated_root), home)
 
     assert report.ok, report.results[0].reason
-    assert report.results[0].status is RuntimeStatus.SUCCEEDED
+    assert report.results[0].status is Status.SUCCEEDED
     assert completion.read_text() == "llm completion\n"
 
 
@@ -410,7 +410,7 @@ def test_runtime_timeout_stops_children_before_running_later_steps(
     plan = RuntimeReport(
         apply=False,
         results=tuple(
-            RuntimeResult(step, RuntimeStatus.PLANNED, RuntimeAction.RUN)
+            RuntimeResult(step, Status.PLANNED, RuntimeAction.RUN)
             for step in (spec, later)
         ),
     )
@@ -418,10 +418,10 @@ def test_runtime_timeout_stops_children_before_running_later_steps(
     report = execute_runtime(plan, tmp_path, capture_output=capture_output)
 
     assert report.ok is False
-    assert report.results[0].status is RuntimeStatus.FAILED
+    assert report.results[0].status is Status.FAILED
     assert report.results[0].reason == "timed out after 2s"
     assert (tmp_path / "started").read_text() == "started"
-    assert report.results[1].status is RuntimeStatus.SUCCEEDED
+    assert report.results[1].status is Status.SUCCEEDED
     assert (tmp_path / "completed").read_text() == "completed"
     time.sleep(1.5)
     assert not (tmp_path / "late").exists()
@@ -442,7 +442,7 @@ def test_runtime_rejects_invalid_download_without_replacing_asset(
     )
     plan = RuntimeReport(
         apply=False,
-        results=(RuntimeResult(spec, RuntimeStatus.PLANNED, RuntimeAction.DOWNLOAD),),
+        results=(RuntimeResult(spec, Status.PLANNED, RuntimeAction.DOWNLOAD),),
     )
 
     report = execute_runtime(
@@ -452,7 +452,7 @@ def test_runtime_rejects_invalid_download_without_replacing_asset(
     )
 
     assert report.ok is False
-    assert report.results[0].status is RuntimeStatus.FAILED
+    assert report.results[0].status is Status.FAILED
     assert "checksum mismatch" in (report.results[0].reason or "")
     assert target.read_bytes() == b"known-good"
 
@@ -460,19 +460,19 @@ def test_runtime_rejects_invalid_download_without_replacing_asset(
 def test_runtime_failed_preview_does_not_suggest_apply(tmp_path: Path, capsys) -> None:
     planned = RuntimeResult(
         RuntimeSpec(name="planned", tool=None, target=tmp_path / "planned"),
-        RuntimeStatus.PLANNED,
+        Status.PLANNED,
         RuntimeAction.DOWNLOAD,
     )
     failed = RuntimeResult(
         RuntimeSpec(name="failed", tool=None, target=tmp_path / "failed"),
-        RuntimeStatus.FAILED,
+        Status.FAILED,
         RuntimeAction.CLONE,
         "target is not a Git checkout",
     )
 
     report = RuntimeReport(False, (planned, failed))
-    assert _next_commands(report) == ()
-    _render(report)
+    assert runtime_next_commands(report) == ()
+    render_runtime(report)
     output = capsys.readouterr()
     assert "target is not a Git checkout" in output.err
     assert "Resolve preview failures" in output.out
@@ -515,7 +515,7 @@ def test_runtime_failed_clone_never_publishes_partial_checkout(
             results=(
                 RuntimeResult(
                     spec,
-                    RuntimeStatus.PLANNED,
+                    Status.PLANNED,
                     RuntimeAction.CLONE,
                 ),
             ),
@@ -579,7 +579,7 @@ def test_runtime_successful_clone_atomically_publishes_checkout(
             results=(
                 RuntimeResult(
                     spec,
-                    RuntimeStatus.PLANNED,
+                    Status.PLANNED,
                     RuntimeAction.CLONE,
                 ),
             ),
@@ -651,7 +651,7 @@ def test_runtime_failed_update_verification_reports_state_without_rollback(
             results=(
                 RuntimeResult(
                     spec,
-                    RuntimeStatus.PLANNED,
+                    Status.PLANNED,
                     RuntimeAction.UPDATE,
                 ),
             ),
@@ -1080,7 +1080,7 @@ def test_runtime_refuses_symlinked_git_metadata(tmp_path: Path) -> None:
 
     results = {result.spec.name: result for result in report.results}
     assert report.ok is False
-    assert results["plugin.fzf-tab"].status is RuntimeStatus.FAILED
+    assert results["plugin.fzf-tab"].status is Status.FAILED
     assert "Git metadata is a symlink" in (results["plugin.fzf-tab"].reason or "")
     assert (external_plugin_git / "sentinel").read_text() == "do not touch\n"
 
@@ -1118,7 +1118,7 @@ def test_runtime_rechecks_plugin_git_metadata_before_update(tmp_path: Path) -> N
     report = execute_runtime(plan, home, on_start=replace_git_metadata)
 
     result = next(item for item in report.results if item.spec.name == "plugin.fzf-tab")
-    assert result.status is RuntimeStatus.FAILED
+    assert result.status is Status.FAILED
     assert "Git metadata is a symlink" in (result.reason or "")
     assert (external_git / "sentinel").read_text() == "do not touch\n"
     assert (plugin / ".git").is_symlink()
@@ -1157,7 +1157,7 @@ def test_runtime_rechecks_plugin_gitdir_file_before_update(tmp_path: Path) -> No
     report = execute_runtime(plan, home, on_start=replace_git_metadata)
 
     result = next(item for item in report.results if item.spec.name == "plugin.fzf-tab")
-    assert result.status is RuntimeStatus.FAILED
+    assert result.status is Status.FAILED
     assert "Git metadata is not a directory" in (result.reason or "")
     assert (external_git / "sentinel").read_text() == "do not touch\n"
     assert (plugin / ".git").is_file()
@@ -1198,7 +1198,7 @@ def test_runtime_rechecks_owned_directories_immediately_before_execution(
     report = execute_runtime(plan, home, on_start=replace_owned_directory)
 
     result = next(item for item in report.results if item.spec.name == "function.mise")
-    assert result.status is RuntimeStatus.FAILED
+    assert result.status is Status.FAILED
     assert "directory is a symlink" in (result.reason or "")
     assert not any(outside.iterdir())
 
@@ -1334,7 +1334,7 @@ def test_runtime_repeat_preserves_outputs_and_completion_cache(tmp_path: Path) -
         next(step for step in document["steps"] if step["name"] == "zsh.compdump")[
             "status"
         ]
-        == "skipped"
+        == "unchanged"
     )
 
     _fake_tool(bin_dir, "codex", "printf '# changed completion\\n'\n")
@@ -1369,7 +1369,7 @@ def test_runtime_pinned_plugin_skips_fetch_and_preserves_dirty_checkout(
     current = next(
         item for item in current_plan.results if item.spec.name == "plugin.fzf-tab"
     )
-    assert current.status is RuntimeStatus.SKIPPED
+    assert current.status is Status.UNCHANGED
     assert "current" in (current.reason or "")
     report = execute_runtime(
         RuntimeReport(False, (current,), repo_root / "generated"), home
@@ -1382,7 +1382,7 @@ def test_runtime_pinned_plugin_skips_fetch_and_preserves_dirty_checkout(
     dirty = next(
         item for item in dirty_plan.results if item.spec.name == "plugin.fzf-tab"
     )
-    assert dirty.status is RuntimeStatus.FAILED
+    assert dirty.status is Status.FAILED
     assert "local changes" in (dirty.reason or "")
     dirty_report = execute_runtime(
         RuntimeReport(False, (dirty,), repo_root / "generated"), home

@@ -2,11 +2,10 @@ import json
 import os
 from pathlib import Path
 
-from scripts.models import Drift, DriftKind, FileKind
+from scripts.models import Drift, DriftKind, FileKind, Status
 from scripts.restore import (
     RestoreReport,
     RestoreResult,
-    RestoreStatus,
     _render,
     apply_restore,
     plan_restore,
@@ -33,7 +32,7 @@ def test_restore_defaults_to_a_read_only_application_plan(tmp_path: Path) -> Non
         {
             "action": "link",
             "backup_path": None,
-            "error": None,
+            "reason": None,
             "kind": "only-reference",
             "live_path": str(home / ".hushlogin"),
             "reference_path": str(REPO_ROOT / "reference/.hushlogin"),
@@ -66,9 +65,9 @@ def test_restore_apply_backs_up_live_file_and_links_reference(tmp_path: Path) ->
     assert applied.returncode == 0
     document = json.loads(applied.stdout)
     assert document["apply"] is True
-    assert document["summary"] == {"applied": 1}
+    assert document["summary"] == {"succeeded": 1}
     change = document["changes"][0]
-    assert change["status"] == "applied"
+    assert change["status"] == "succeeded"
     backup_path = Path(change["backup_path"])
     assert backup_path.read_text() == "host-specific\n"
     assert live_path.is_symlink()
@@ -104,7 +103,7 @@ def test_restore_recreates_an_adopted_symlink(tmp_path: Path) -> None:
                     live_kind=FileKind.FILE,
                 ),
                 action="link",
-                status=RestoreStatus.PLANNED,
+                status=Status.PLANNED,
             ),
         ),
     )
@@ -112,7 +111,7 @@ def test_restore_recreates_an_adopted_symlink(tmp_path: Path) -> None:
     applied = apply_restore(repo_root, home, plan)
 
     result = applied.results[0]
-    assert result.status is RestoreStatus.APPLIED
+    assert result.status is Status.SUCCEEDED
     assert result.backup_path is not None
     assert result.backup_path.read_text() == "host-specific\n"
     assert live.is_symlink()
@@ -130,7 +129,7 @@ def test_restore_human_apply_reports_the_backup_location(tmp_path: Path) -> None
     assert completed.returncode == 0
     assert "backup:" in completed.stdout
     assert ".local/state/dotfiles/restore-backups/" in completed.stdout
-    assert "Summary: 1 applied" in completed.stdout
+    assert "Summary: 1 succeeded" in completed.stdout
 
 
 def test_restore_rejects_invalid_scope_without_changing_home(tmp_path: Path) -> None:
@@ -182,14 +181,14 @@ def test_restore_rejects_a_live_parent_that_escapes_home(tmp_path: Path) -> None
     plan = RestoreReport(
         application="tool",
         apply=False,
-        results=(RestoreResult(drift, "link", RestoreStatus.PLANNED),),
+        results=(RestoreResult(drift, "link", Status.PLANNED),),
     )
 
     report = apply_restore(repo_root, home, plan)
 
     assert report.ok is False
-    assert report.results[0].status is RestoreStatus.FAILED
-    assert "live parent is outside" in (report.results[0].error or "")
+    assert report.results[0].status is Status.FAILED
+    assert "live parent is outside" in (report.results[0].reason or "")
     assert list(external.iterdir()) == []
 
 
@@ -218,7 +217,7 @@ def test_restore_rolls_back_live_file_when_symlink_fails(
                     live_kind=FileKind.FILE,
                 ),
                 action="link",
-                status=RestoreStatus.PLANNED,
+                status=Status.PLANNED,
             ),
         ),
     )
@@ -230,7 +229,7 @@ def test_restore_rolls_back_live_file_when_symlink_fails(
     applied = apply_restore(repo_root, home, plan)
 
     result = applied.results[0]
-    assert result.status is RestoreStatus.FAILED
+    assert result.status is Status.FAILED
     assert result.backup_path is None
     assert live.read_text() == "live content\n"
 
@@ -266,8 +265,8 @@ def test_plan_restore_marks_unreadable_drift_failed(
     plan = plan_restore(tmp_path / "repo", tmp_path / "home", "git")
 
     assert plan.ok is False
-    assert plan.results[0].status is RestoreStatus.FAILED
-    assert "permission denied" in (plan.results[0].error or "")
+    assert plan.results[0].status is Status.FAILED
+    assert "permission denied" in (plan.results[0].reason or "")
 
 
 def test_restore_rejects_traversal_segments_in_planned_paths(tmp_path: Path) -> None:
@@ -293,12 +292,12 @@ def test_restore_rejects_traversal_segments_in_planned_paths(tmp_path: Path) -> 
                     live_kind=FileKind.FILE,
                 ),
                 action="link",
-                status=RestoreStatus.PLANNED,
+                status=Status.PLANNED,
             ),
         ),
     )
     applied = apply_restore(repo_root, home, plan)
 
-    assert applied.results[0].status is RestoreStatus.FAILED
-    assert "traverses" in (applied.results[0].error or "")
+    assert applied.results[0].status is Status.FAILED
+    assert "traverses" in (applied.results[0].reason or "")
     assert (home / ".ssh/config").read_text() == "live ssh config\n"

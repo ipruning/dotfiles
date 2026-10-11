@@ -78,7 +78,7 @@ def _private_git_identity_ready(private_config: Path, home: Path) -> bool | None
     return all(identity_states)
 
 
-def _private_git_findings(home: Path) -> list[Finding]:
+def private_git_findings(home: Path) -> list[Finding]:
     gitconfig = home / ".gitconfig"
     private_config = home / ".private.gitconfig"
     include_present: bool | None = False

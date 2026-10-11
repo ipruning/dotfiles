@@ -12,7 +12,7 @@ from .models import ExecutableFinder, Finding, Severity
 SESSION_HEALTH_SNAPSHOT_MAX_AGE = dt.timedelta(minutes=30)
 
 
-def _session_health_findings(
+def session_health_findings(
     executable_finder: ExecutableFinder,
     *,
     now: dt.datetime | None = None,
@@ -187,7 +187,7 @@ def _limit_satisfied(actual: str, expected: str) -> bool:
         return False
 
 
-def _maxfiles_findings(
+def maxfiles_findings(
     executable_finder: ExecutableFinder,
     repo_root: Path,
 ) -> list[Finding]:

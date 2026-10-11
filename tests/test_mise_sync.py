@@ -8,11 +8,11 @@ import pytest
 from scripts.mise_sync import (
     MiseSyncReport,
     MiseSyncResult,
-    MiseSyncStatus,
     MiseSyncStep,
     _sync_steps,
     execute_mise_sync,
 )
+from scripts.models import Status
 from scripts.restore import RestoreReport
 from tests.conftest import REPO_ROOT, run_scripts_module
 
@@ -513,7 +513,7 @@ def test_mise_sync_apply_links_shared_declaration_and_runs_locked_commands(
     document = json.loads(completed.stdout)
     assert document["apply"] is True
     assert document["ok"] is True
-    assert document["summary"] == {"applied": 2, "succeeded": 3}
+    assert document["summary"] == {"succeeded": 5}
     config = home / ".config/mise/config.toml"
     lockfile = home / ".config/mise/mise.lock"
     assert config.is_symlink()
@@ -644,7 +644,7 @@ def test_mise_sync_timeout_stops_children_and_skips_dependent_tools(
     plan = MiseSyncReport(
         apply=False,
         restore=RestoreReport("mise", False, ()),
-        results=tuple(MiseSyncResult(step, MiseSyncStatus.PLANNED) for step in steps),
+        results=tuple(MiseSyncResult(step, Status.PLANNED) for step in steps),
     )
     monkeypatch.setattr("scripts.mise_sync.plan_mise_sync", lambda *_args: plan)
 
@@ -652,9 +652,9 @@ def test_mise_sync_timeout_stops_children_and_skips_dependent_tools(
 
     assert report.ok is False
     assert [result.status for result in report.results] == [
-        MiseSyncStatus.FAILED,
-        MiseSyncStatus.SKIPPED,
-        MiseSyncStatus.SUCCEEDED,
+        Status.FAILED,
+        Status.SKIPPED,
+        Status.SUCCEEDED,
     ]
     assert report.results[0].reason == "timed out after 2s"
     assert (tmp_path / "started").read_text() == "started"

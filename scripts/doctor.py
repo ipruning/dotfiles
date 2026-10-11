@@ -17,12 +17,13 @@ from typing import cast
 
 from .host_policy import HostPolicyError
 from .mise import canonical_mise_environment, canonical_mise_executable
-from .process import run_process_group
+from .models import Severity
+from .process import CommandRunner, run_in_repository
 from .render import emit_error
 
 
 class DoctorStatus(StrEnum):
-    PASS = "pass"
+    OK = "ok"
     WARN = "warn"
     ERROR = "error"
     SKIPPED = "skipped"
@@ -62,26 +63,6 @@ class DoctorReport:
         )
 
 
-CommandRunner = Callable[
-    [tuple[str, ...], dict[str, str], int],
-    subprocess.CompletedProcess[str],
-]
-
-
-def _default_runner(
-    command: tuple[str, ...],
-    environment: dict[str, str],
-    timeout_seconds: int,
-) -> subprocess.CompletedProcess[str]:
-    return run_process_group(
-        command,
-        capture_output=True,
-        cwd=Path(__file__).resolve().parents[1],
-        env=environment,
-        timeout_seconds=timeout_seconds,
-    )
-
-
 def _status_from_report(
     report: dict[str, object] | None,
     *,
@@ -90,7 +71,7 @@ def _status_from_report(
     if exit_code != 0:
         return DoctorStatus.ERROR
     if report is None:
-        return DoctorStatus.PASS
+        return DoctorStatus.OK
     if report.get("ok") is False:
         return DoctorStatus.ERROR
     changes = report.get("changes")
@@ -98,27 +79,16 @@ def _status_from_report(
         return DoctorStatus.WARN
     summary = report.get("summary")
     counts = summary if isinstance(summary, dict) else {}
-    error_count = max(
-        (
-            value
-            for key, value in counts.items()
-            if key in {"error", "errors"} and isinstance(value, int)
-        ),
-        default=0,
-    )
-    warning_count = max(
-        (
-            value
-            for key, value in counts.items()
-            if key in {"warn", "warning", "warnings"} and isinstance(value, int)
-        ),
-        default=0,
-    )
-    if error_count > 0:
+
+    def count(severity: Severity) -> int:
+        value = counts.get(severity.value)
+        return value if isinstance(value, int) else 0
+
+    if count(Severity.ERROR) > 0:
         return DoctorStatus.ERROR
-    if warning_count > 0:
+    if count(Severity.WARN) > 0:
         return DoctorStatus.WARN
-    return DoctorStatus.PASS
+    return DoctorStatus.OK
 
 
 def _parse_report(step: DoctorStep, stdout: str) -> dict[str, object] | None:
@@ -252,7 +222,7 @@ def inspect_doctor(
     home: Path,
     *,
     executable_finder: Callable[[str], str | None] = shutil.which,
-    runner: CommandRunner = _default_runner,
+    runner: CommandRunner = run_in_repository,
     strict: bool = False,
 ) -> DoctorReport:
     """Run the aggregate read-only checks and retain each command's evidence."""
@@ -342,7 +312,7 @@ def _render(report: DoctorReport) -> None:
                 changes = result.report.get("changes")
                 if isinstance(changes, list) and changes:
                     detail = f"{len(changes)} drift entries"
-        if detail is None and result.output and result.status is not DoctorStatus.PASS:
+        if detail is None and result.output and result.status is not DoctorStatus.OK:
             detail = result.output.splitlines()[0]
         print(
             f"{result.status.value.upper():7} {result.step.name}"

@@ -10,7 +10,6 @@ import sys
 import time
 import tomllib
 from dataclasses import dataclass
-from enum import StrEnum
 from pathlib import Path
 from typing import cast
 
@@ -21,22 +20,14 @@ from .mise import (
     canonical_mise_executable,
     canonical_mise_path,
 )
+from .models import Status, status_summary
 from .process import run_process_group
 from .render import emit_error
 from .restore import (
     RestoreReport,
-    RestoreStatus,
     apply_restore,
     plan_restore,
 )
-
-
-class MiseSyncStatus(StrEnum):
-    PLANNED = "planned"
-    SKIPPED = "skipped"
-    SUCCEEDED = "succeeded"
-    FAILED = "failed"
-
 
 PREREQUISITE_TOOLS = ("go", "node", "ruby", "rust")
 
@@ -53,7 +44,7 @@ class MiseSyncStep:
 @dataclass(frozen=True)
 class MiseSyncResult:
     step: MiseSyncStep
-    status: MiseSyncStatus
+    status: Status
     exit_code: int | None = None
     duration_ms: int | None = None
     reason: str | None = None
@@ -77,13 +68,11 @@ class MiseSyncReport:
             and not self.live_alias_overrides
             and not self.additional_global_configs
             and self.configuration_error is None
-            and all(
-                result.status is not MiseSyncStatus.FAILED for result in self.results
-            )
+            and all(result.status is not Status.FAILED for result in self.results)
         )
 
 
-def _tool_declaration(
+def tool_declaration(
     config_path: Path,
     *,
     required: bool,
@@ -127,7 +116,7 @@ def _tool_declaration(
     return frozenset(tool_names), backend_aliases
 
 
-def _loaded_global_configs(home: Path, executable: str) -> tuple[Path, ...]:
+def loaded_global_configs(home: Path, executable: str) -> tuple[Path, ...]:
     command = (executable, "config", "ls", "--json", "--quiet", "-C", str(home))
     try:
         completed = subprocess.run(
@@ -173,7 +162,7 @@ def _loaded_global_configs(home: Path, executable: str) -> tuple[Path, ...]:
     return tuple(dict.fromkeys(paths))
 
 
-def _same_config_file(left: Path, right: Path) -> bool:
+def same_config_file(left: Path, right: Path) -> bool:
     if left == right:
         return True
     try:
@@ -193,20 +182,20 @@ def _mise_tool_safety(
     reference_config = repo_root / "reference/.config/mise/config.toml"
     live_config = (home / ".config/mise/config.toml").absolute()
     try:
-        reference_tools, reference_aliases = _tool_declaration(
+        reference_tools, reference_aliases = tool_declaration(
             reference_config, required=True
         )
         config_paths = (
-            _loaded_global_configs(home, executable) if executable else (live_config,)
+            loaded_global_configs(home, executable) if executable else (live_config,)
         )
         if not any(
-            _same_config_file(config_path, live_config) for config_path in config_paths
+            same_config_file(config_path, live_config) for config_path in config_paths
         ):
             config_paths = (*config_paths, live_config)
         live_tools: set[str] = set()
         live_aliases: dict[str, str] = {}
         for config_path in config_paths:
-            tools, aliases = _tool_declaration(config_path, required=False)
+            tools, aliases = tool_declaration(config_path, required=False)
             live_tools.update(tools)
             live_aliases.update(aliases)
     except ValueError as error:
@@ -215,7 +204,7 @@ def _mise_tool_safety(
         sorted(
             str(config_path)
             for config_path in config_paths
-            if not _same_config_file(config_path, live_config)
+            if not same_config_file(config_path, live_config)
         )
     )
     reference_identities = set(reference_tools)
@@ -315,14 +304,13 @@ def plan_mise_sync(repo_root: Path, home: Path) -> MiseSyncReport:
     if not restore.ok:
         reason = "mise configuration restore is not safe to apply"
         results = tuple(
-            MiseSyncResult(step, MiseSyncStatus.SKIPPED, reason=reason)
-            for step in steps
+            MiseSyncResult(step, Status.SKIPPED, reason=reason) for step in steps
         )
     elif configuration_error:
         results = tuple(
             MiseSyncResult(
                 step,
-                MiseSyncStatus.SKIPPED,
+                Status.SKIPPED,
                 reason="mise tool ownership cannot be inspected safely",
             )
             for step in steps
@@ -331,7 +319,7 @@ def plan_mise_sync(repo_root: Path, home: Path) -> MiseSyncReport:
         results = tuple(
             MiseSyncResult(
                 step,
-                MiseSyncStatus.SKIPPED,
+                Status.SKIPPED,
                 reason="additional global mise configs are active",
             )
             for step in steps
@@ -340,7 +328,7 @@ def plan_mise_sync(repo_root: Path, home: Path) -> MiseSyncReport:
         results = tuple(
             MiseSyncResult(
                 step,
-                MiseSyncStatus.SKIPPED,
+                Status.SKIPPED,
                 reason="live global mise aliases differ from the shared declaration",
             )
             for step in steps
@@ -349,7 +337,7 @@ def plan_mise_sync(repo_root: Path, home: Path) -> MiseSyncReport:
         results = tuple(
             MiseSyncResult(
                 step,
-                MiseSyncStatus.SKIPPED,
+                Status.SKIPPED,
                 reason="live global tools are absent from the shared declaration",
             )
             for step in steps
@@ -357,18 +345,18 @@ def plan_mise_sync(repo_root: Path, home: Path) -> MiseSyncReport:
     elif executable is None:
         reason = f"{canonical_mise_path(home)} is missing, broken, or not executable"
         results = (
-            MiseSyncResult(steps[0], MiseSyncStatus.FAILED, reason=reason),
+            MiseSyncResult(steps[0], Status.FAILED, reason=reason),
             *(
                 MiseSyncResult(
                     step,
-                    MiseSyncStatus.SKIPPED,
+                    Status.SKIPPED,
                     reason="canonical mise is unavailable",
                 )
                 for step in steps[1:]
             ),
         )
     else:
-        results = tuple(MiseSyncResult(step, MiseSyncStatus.PLANNED) for step in steps)
+        results = tuple(MiseSyncResult(step, Status.PLANNED) for step in steps)
     return MiseSyncReport(
         apply=False,
         restore=restore,
@@ -409,7 +397,7 @@ def execute_mise_sync(
         results = tuple(
             MiseSyncResult(
                 result.step,
-                MiseSyncStatus.SKIPPED,
+                Status.SKIPPED,
                 reason="mise configuration restore failed",
             )
             for result in plan.results
@@ -427,14 +415,13 @@ def execute_mise_sync(
     results: list[MiseSyncResult] = []
     for planned in plan.results:
         if planned.step.name == "mise.tools" and any(
-            result.step.name == "mise.runtimes"
-            and result.status is MiseSyncStatus.FAILED
+            result.step.name == "mise.runtimes" and result.status is Status.FAILED
             for result in results
         ):
             results.append(
                 MiseSyncResult(
                     planned.step,
-                    MiseSyncStatus.SKIPPED,
+                    Status.SKIPPED,
                     reason="prerequisite runtime installation failed",
                 ),
             )
@@ -454,7 +441,7 @@ def execute_mise_sync(
             results.append(
                 MiseSyncResult(
                     planned.step,
-                    MiseSyncStatus.FAILED,
+                    Status.FAILED,
                     duration_ms=round((time.monotonic() - started_at) * 1000),
                     reason=reason,
                 ),
@@ -464,7 +451,7 @@ def execute_mise_sync(
             results.append(
                 MiseSyncResult(
                     planned.step,
-                    MiseSyncStatus.FAILED,
+                    Status.FAILED,
                     duration_ms=round((time.monotonic() - started_at) * 1000),
                     reason=str(error),
                 ),
@@ -478,11 +465,7 @@ def execute_mise_sync(
         results.append(
             MiseSyncResult(
                 planned.step,
-                (
-                    MiseSyncStatus.SUCCEEDED
-                    if completed.returncode == 0
-                    else MiseSyncStatus.FAILED
-                ),
+                (Status.SUCCEEDED if completed.returncode == 0 else Status.FAILED),
                 exit_code=completed.returncode,
                 duration_ms=round((time.monotonic() - started_at) * 1000),
                 reason=(
@@ -504,19 +487,9 @@ def execute_mise_sync(
 
 
 def _summary(report: MiseSyncReport) -> dict[str, int]:
-    labels = [result.status.value for result in report.restore.results]
-    labels.extend(result.status.value for result in report.results)
-    return {
-        status: labels.count(status)
-        for status in (
-            "planned",
-            "applied",
-            "succeeded",
-            "skipped",
-            "failed",
-        )
-        if status in labels
-    }
+    return status_summary(
+        result.status for result in (*report.restore.results, *report.results)
+    )
 
 
 def _operation_ok(
@@ -529,7 +502,7 @@ def _operation_ok(
     return (
         report.restore.ok
         and report.configuration_error is None
-        and all(result.status is not MiseSyncStatus.FAILED for result in report.results)
+        and all(result.status is not Status.FAILED for result in report.results)
     )
 
 
@@ -580,7 +553,7 @@ def _document(
                 "backup_path": (
                     str(result.backup_path) if result.backup_path else None
                 ),
-                "error": result.error,
+                "reason": result.reason,
             }
             for result in report.restore.results
         ],
@@ -660,23 +633,23 @@ def _render(report: MiseSyncReport, *, apply_allowed: bool = True) -> None:
                 file=sys.stderr,
             )
     for result in report.restore.results:
-        stream = sys.stderr if result.status is RestoreStatus.FAILED else sys.stdout
+        stream = sys.stderr if result.status is Status.FAILED else sys.stdout
         print(
             f"{result.status.value.upper():9} config {result.drift.live_path}",
             file=stream,
         )
         if result.backup_path:
             print(f"          backup: {result.backup_path}", file=stream)
-        if result.error:
-            print(f"          reason: {result.error}", file=stream)
+        if result.reason:
+            print(f"          reason: {result.reason}", file=stream)
     for result in report.results:
         label = result.status.value.upper()
         detail = (
             _display_command(result.step)
-            if result.status is MiseSyncStatus.PLANNED
+            if result.status is Status.PLANNED
             else result.reason
         )
-        stream = sys.stderr if result.status is MiseSyncStatus.FAILED else sys.stdout
+        stream = sys.stderr if result.status is Status.FAILED else sys.stdout
         print(
             f"{label:9} {result.step.name}{f': {detail}' if detail else ''}",
             file=stream,
@@ -769,13 +742,13 @@ def main(argv: list[str] | None = None) -> int:
                 file=sys.stderr,
             )
         for result in report.restore.results:
-            if result.status is RestoreStatus.FAILED:
+            if result.status is Status.FAILED:
                 print(
-                    f"[mise.config] FAIL {result.drift.live_path}: {result.error}",
+                    f"[mise.config] FAIL {result.drift.live_path}: {result.reason}",
                     file=sys.stderr,
                 )
         for result in report.results:
-            if result.status is MiseSyncStatus.FAILED:
+            if result.status is Status.FAILED:
                 print(
                     f"[{result.step.name}] FAIL {result.reason}",
                     file=sys.stderr,

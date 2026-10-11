@@ -9,20 +9,12 @@ import shlex
 import sys
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from enum import StrEnum
 from pathlib import Path
 
 from .diff import DriftProtocolError, MackupCommandError, inspect_drift
 from .host_policy import HostPolicyError, mutation_allowed, require_mutation_allowed
-from .models import Drift, DriftKind
+from .models import Drift, DriftKind, Status, status_summary
 from .render import emit_error
-
-
-class RestoreStatus(StrEnum):
-    PLANNED = "planned"
-    APPLIED = "applied"
-    SKIPPED = "skipped"
-    FAILED = "failed"
 
 
 class RestoreError(RuntimeError):
@@ -33,9 +25,9 @@ class RestoreError(RuntimeError):
 class RestoreResult:
     drift: Drift
     action: str | None
-    status: RestoreStatus
+    status: Status
     backup_path: Path | None = None
-    error: str | None = None
+    reason: str | None = None
 
 
 @dataclass(frozen=True)
@@ -46,7 +38,7 @@ class RestoreReport:
 
     @property
     def ok(self) -> bool:
-        return all(result.status is not RestoreStatus.FAILED for result in self.results)
+        return all(result.status is not Status.FAILED for result in self.results)
 
 
 def _next_commands(
@@ -58,7 +50,7 @@ def _next_commands(
         apply_allowed
         and not report.apply
         and report.ok
-        and any(result.status is RestoreStatus.PLANNED for result in report.results)
+        and any(result.status is Status.PLANNED for result in report.results)
     ):
         return (
             shlex.join(["mise", "run", "restore", "--", report.application, "--apply"]),
@@ -82,15 +74,15 @@ def plan_restore(repo_root: Path, home: Path, application: str) -> RestoreReport
             DriftKind.TYPE_CHANGED,
         }:
             results.append(
-                RestoreResult(drift, action="link", status=RestoreStatus.PLANNED),
+                RestoreResult(drift, action="link", status=Status.PLANNED),
             )
         elif drift.kind is DriftKind.UNREADABLE:
             results.append(
                 RestoreResult(
                     drift,
                     action=None,
-                    status=RestoreStatus.FAILED,
-                    error=drift.error or "drift path is unreadable",
+                    status=Status.FAILED,
+                    reason=drift.error or "drift path is unreadable",
                 ),
             )
         else:
@@ -98,8 +90,8 @@ def plan_restore(repo_root: Path, home: Path, application: str) -> RestoreReport
                 RestoreResult(
                     drift,
                     action=None,
-                    status=RestoreStatus.SKIPPED,
-                    error="reference path is unavailable",
+                    status=Status.SKIPPED,
+                    reason="reference path is unavailable",
                 ),
             )
     return RestoreReport(application=application, apply=False, results=tuple(results))
@@ -145,7 +137,7 @@ def apply_restore(repo_root: Path, home: Path, plan: RestoreReport) -> RestoreRe
     )
     results = []
     for planned in plan.results:
-        if planned.status is not RestoreStatus.PLANNED:
+        if planned.status is not Status.PLANNED:
             results.append(planned)
             continue
         drift = planned.drift
@@ -196,9 +188,9 @@ def apply_restore(repo_root: Path, home: Path, plan: RestoreReport) -> RestoreRe
                 RestoreResult(
                     drift,
                     action="link",
-                    status=RestoreStatus.FAILED,
+                    status=Status.FAILED,
                     backup_path=backup_path if moved_live else None,
-                    error=str(error),
+                    reason=str(error),
                 ),
             )
             continue
@@ -206,7 +198,7 @@ def apply_restore(repo_root: Path, home: Path, plan: RestoreReport) -> RestoreRe
             RestoreResult(
                 drift,
                 action="link",
-                status=RestoreStatus.APPLIED,
+                status=Status.SUCCEEDED,
                 backup_path=backup_path,
             ),
         )
@@ -220,11 +212,7 @@ def _document(
     *,
     apply_allowed: bool = True,
 ) -> dict[str, object]:
-    summary = {
-        status.value: sum(result.status is status for result in report.results)
-        for status in RestoreStatus
-        if any(result.status is status for result in report.results)
-    }
+    summary = status_summary(result.status for result in report.results)
     return {
         "schema_version": 1,
         "operation": "restore",
@@ -242,7 +230,7 @@ def _document(
                 "backup_path": (
                     str(result.backup_path) if result.backup_path else None
                 ),
-                "error": result.error,
+                "reason": result.reason,
             }
             for result in report.results
         ],
@@ -257,20 +245,13 @@ def _render(report: RestoreReport, *, apply_allowed: bool = True) -> None:
         print(f"        reference: {result.drift.reference_path}")
         if result.backup_path:
             print(f"        backup: {result.backup_path}")
-        if result.error:
-            detail_label = (
-                "error" if result.status is RestoreStatus.FAILED else "reason"
-            )
-            stream = sys.stderr if result.status is RestoreStatus.FAILED else sys.stdout
-            print(f"        {detail_label}: {result.error}", file=stream)
-    summary = {
-        status.value: count
-        for status in RestoreStatus
-        if (count := sum(result.status is status for result in report.results))
-    }
+        if result.reason:
+            stream = sys.stderr if result.status is Status.FAILED else sys.stdout
+            print(f"        reason: {result.reason}", file=stream)
+    summary = status_summary(result.status for result in report.results)
     rendered = ", ".join(f"{count} {status}" for status, count in summary.items())
     print(f"Summary: {rendered or 'no changes'}")
-    if not report.apply and summary.get(RestoreStatus.PLANNED.value):
+    if not report.apply and summary.get(Status.PLANNED.value):
         if apply_allowed:
             print("No files changed. Re-run with --apply to restore this application.")
             print("Next:")
@@ -330,9 +311,9 @@ def main(argv: list[str] | None = None) -> int:
             ),
         )
         for result in report.results:
-            if result.status is RestoreStatus.FAILED:
+            if result.status is Status.FAILED:
                 print(
-                    f"[{report.application}] FAIL {result.drift.live_path}: {result.error}",
+                    f"[{report.application}] FAIL {result.drift.live_path}: {result.reason}",
                     file=sys.stderr,
                 )
     else:

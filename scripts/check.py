@@ -10,20 +10,20 @@ import shutil
 from dataclasses import dataclass
 from pathlib import Path
 
-from .check_git import _private_git_findings
+from .check_git import private_git_findings
 from .check_herdr import inspect_herdr
 from .check_macos import (
-    _maxfiles_findings,
-    _session_health_findings,
+    maxfiles_findings,
+    session_health_findings,
 )
 from .check_mise import (
-    _mise_installation_findings,
-    _mise_project_uv_finding,
-    _mise_runtime_binding_finding,
-    _mise_shim_finding,
-    _mise_systemd_shim_findings,
+    mise_installation_findings,
+    mise_project_uv_finding,
+    mise_runtime_binding_finding,
+    mise_shim_finding,
+    mise_systemd_shim_findings,
 )
-from .check_skillshare import _skillshare_findings, _skillshare_ownership_finding
+from .check_skillshare import skillshare_findings, skillshare_ownership_finding
 from .host_policy import (
     HostPolicy,
     HostPolicyError,
@@ -34,14 +34,8 @@ from .mise import canonical_mise_executable
 from .models import CheckReport, ExecutableFinder, Finding, Severity
 from .profiles import HostProfile, resolve_profile
 from .render import finding_document, render_findings
-from .runtime import (
-    COMPLETION_SPECS,
-    FUNCTION_SPECS,
-    PLUGIN_SPECS,
-    WASM_SPECS,
-    file_sha256,
-    shim_aware_finder,
-)
+from .runtime import file_sha256, shim_aware_finder
+from .runtime_specs import COMPLETION_SPECS, FUNCTION_SPECS, PLUGIN_SPECS, WASM_SPECS
 
 AUDIT_ONLY_NON_APPLICABLE_CHECKS = frozenset(
     {
@@ -441,33 +435,33 @@ def inspect_host(
     )
     if policy_valid:
         findings.extend(
-            _mise_installation_findings(
+            mise_installation_findings(
                 home,
                 executable_finder=executable_finder,
                 scan_host_path=executable_finder is shutil.which,
             ),
         )
-        if mise_shims := _mise_shim_finding(
+        if mise_shims := mise_shim_finding(
             home,
             dotfiles_managed=not host_policy.audit_only,
         ):
             findings.append(mise_shims)
         if executable_finder is shutil.which and (
-            project_uv := _mise_project_uv_finding(repo_root, home)
+            project_uv := mise_project_uv_finding(repo_root, home)
         ):
             findings.append(project_uv)
     if policy_valid and active_system == "Linux":
-        findings.extend(_mise_systemd_shim_findings(home))
-    findings.extend(_private_git_findings(home))
+        findings.extend(mise_systemd_shim_findings(home))
+    findings.extend(private_git_findings(home))
     skillshare_finding = _check_executable(
         "skillshare",
         required=False,
         executable_finder=executable_finder,
     )
     findings.append(skillshare_finding)
-    findings.extend(_skillshare_findings(home))
+    findings.extend(skillshare_findings(home))
     if policy_valid and executable_finder is shutil.which:
-        ownership = _skillshare_ownership_finding(home, skillshare_finding.path)
+        ownership = skillshare_ownership_finding(home, skillshare_finding.path)
         if ownership:
             findings.append(ownership)
     findings.extend((
@@ -528,8 +522,8 @@ def inspect_host(
             profile=active_profile,
         )
     if active_system == "Darwin":
-        findings.extend(_session_health_findings(executable_finder))
-        findings.extend(_maxfiles_findings(executable_finder, repo_root))
+        findings.extend(session_health_findings(executable_finder))
+        findings.extend(maxfiles_findings(executable_finder, repo_root))
     findings.append(
         _check_executable(
             "tv",
@@ -551,7 +545,7 @@ def inspect_host(
             ),
         )
     if policy_valid:
-        mise_binding = _mise_runtime_binding_finding(
+        mise_binding = mise_runtime_binding_finding(
             repo_root / "generated/functions/_mise.zsh",
             home,
         )

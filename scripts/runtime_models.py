@@ -7,15 +7,10 @@ from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
 
+from .models import Status
+
 Downloader = Callable[[str, int], bytes]
 AtomicWriter = Callable[[Path], object]
-
-
-class RuntimeStatus(StrEnum):
-    PLANNED = "planned"
-    SKIPPED = "skipped"
-    SUCCEEDED = "succeeded"
-    FAILED = "failed"
 
 
 class RuntimeAction(StrEnum):
@@ -54,7 +49,7 @@ class ShellInitSpec:
 @dataclass(frozen=True)
 class RuntimeResult:
     spec: RuntimeSpec
-    status: RuntimeStatus
+    status: Status
     action: RuntimeAction
     reason: str | None = None
     exit_code: int | None = None
@@ -72,4 +67,4 @@ class RuntimeReport:
 
     @property
     def ok(self) -> bool:
-        return all(result.status is not RuntimeStatus.FAILED for result in self.results)
+        return all(result.status is not Status.FAILED for result in self.results)

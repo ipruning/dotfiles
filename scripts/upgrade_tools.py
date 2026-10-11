@@ -1,4 +1,4 @@
-"""显式推进共享 mise 版本；普通主机更新只消费 lock。"""
+"""Explicitly advance the shared mise baseline; ordinary host updates only consume the lock."""
 
 from __future__ import annotations
 
@@ -15,19 +15,19 @@ from .mise import (
     canonical_mise_executable,
     canonical_mise_path,
 )
+from .models import Status
 from .update import (
     UpdateReport,
     UpdateResult,
-    UpdateStatus,
     UpdateStep,
-    _document,
-    _run_with_progress,
     inspect_shared_mise_tools,
+    run_with_progress,
+    update_document,
 )
 
 
 def plan_upgrade_tools(repo_root: Path, home: Path) -> UpdateReport:
-    """只推进指向此 checkout 的共享声明，不读取其他项目版本。"""
+    """Advance only the shared declaration this checkout owns; ignore other project versions."""
     executable = canonical_mise_executable(home)
     step = UpdateStep(
         "mise.baseline",
@@ -50,7 +50,7 @@ def plan_upgrade_tools(repo_root: Path, home: Path) -> UpdateReport:
             (
                 UpdateResult(
                     step,
-                    UpdateStatus.SKIPPED,
+                    Status.SKIPPED,
                     reason=f"{canonical_mise_path(home)} is missing, broken, or not executable",
                 ),
             ),
@@ -75,9 +75,7 @@ def plan_upgrade_tools(repo_root: Path, home: Path) -> UpdateReport:
             (
                 UpdateResult(
                     step,
-                    UpdateStatus.FAILED
-                    if mutation_allowed(home)
-                    else UpdateStatus.SKIPPED,
+                    Status.FAILED if mutation_allowed(home) else Status.SKIPPED,
                     reason=str(error),
                 ),
             ),
@@ -88,13 +86,13 @@ def plan_upgrade_tools(repo_root: Path, home: Path) -> UpdateReport:
             (
                 UpdateResult(
                     step,
-                    UpdateStatus.SKIPPED,
+                    Status.SKIPPED,
                     reason="no rolling shared tools are installed",
                 ),
             ),
         )
     step = replace(step, command=(*step.command, *selectors))
-    return UpdateReport(False, (UpdateResult(step, UpdateStatus.PLANNED),))
+    return UpdateReport(False, (UpdateResult(step, Status.PLANNED),))
 
 
 def execute_upgrade_tools(repo_root: Path, home: Path) -> UpdateReport:
@@ -102,11 +100,11 @@ def execute_upgrade_tools(repo_root: Path, home: Path) -> UpdateReport:
     plan = plan_upgrade_tools(repo_root, home)
     results = []
     for planned in plan.results:
-        if planned.status is not UpdateStatus.PLANNED:
+        if planned.status is not Status.PLANNED:
             results.append(planned)
             continue
         try:
-            completed = _run_with_progress(
+            completed = run_with_progress(
                 planned.step,
                 env=canonical_mise_environment(home),
                 progress_interval_seconds=30,
@@ -114,9 +112,7 @@ def execute_upgrade_tools(repo_root: Path, home: Path) -> UpdateReport:
             results.append(
                 UpdateResult(
                     planned.step,
-                    UpdateStatus.SUCCEEDED
-                    if completed.returncode == 0
-                    else UpdateStatus.FAILED,
+                    Status.SUCCEEDED if completed.returncode == 0 else Status.FAILED,
                     exit_code=completed.returncode,
                     reason=None
                     if completed.returncode == 0
@@ -126,9 +122,7 @@ def execute_upgrade_tools(repo_root: Path, home: Path) -> UpdateReport:
                 )
             )
         except (OSError, subprocess.TimeoutExpired) as error:
-            results.append(
-                replace(planned, status=UpdateStatus.FAILED, reason=str(error))
-            )
+            results.append(replace(planned, status=Status.FAILED, reason=str(error)))
     return UpdateReport(True, tuple(results))
 
 
@@ -136,12 +130,19 @@ def main(argv: list[str] | None = None) -> int:
     from .render import emit_error
 
     parser = argparse.ArgumentParser(
-        description="预览或推进共享 mise 版本，随后验证并提交 lock。"
+        description="Preview or advance the shared mise baseline and its lock."
     )
     parser.add_argument(
-        "--apply", action="store_true", help="推进已安装的共享工具版本；默认只预览"
+        "--apply",
+        action="store_true",
+        help="advance installed shared tool versions (default: preview only)",
     )
-    parser.add_argument("--json", action="store_true", dest="as_json")
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        dest="as_json",
+        help="emit the report as JSON on stdout",
+    )
     args = parser.parse_args(argv)
     home = Path.home()
     root = Path(__file__).resolve().parents[1]
@@ -161,10 +162,10 @@ def main(argv: list[str] | None = None) -> int:
             code=error.code,
         )
         return 1
-    document = _document(report, apply_allowed=allowed)
+    document = update_document(report, apply_allowed=allowed)
     document["operation"] = "upgrade-tools"
     document["notes"] = [
-        "共享版本升级只在维护主机执行；验证 config、lock 和两平台产物后提交，再由其他主机消费。"
+        "Advance the shared baseline only on the maintenance host. Run mise run verify, review the config, lock, and locked platform artifacts, and commit; other hosts then install it with mise run update."
     ]
     document["next"] = (
         ["mise run verify", "git diff -- reference/.config/mise"]
@@ -181,9 +182,7 @@ def main(argv: list[str] | None = None) -> int:
             if result.reason:
                 print(
                     result.reason,
-                    file=sys.stderr
-                    if result.status is UpdateStatus.FAILED
-                    else sys.stdout,
+                    file=sys.stderr if result.status is Status.FAILED else sys.stdout,
                 )
         print(document["notes"][0])
         for command in document["next"]:

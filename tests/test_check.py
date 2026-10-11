@@ -305,7 +305,7 @@ def test_mise_installation_scan_finds_an_alternate_later_on_path(
     )
     monkeypatch.setattr(check_mise_module, "MISE_COMMON_LOCATIONS", ())
 
-    findings = check_mise_module._mise_installation_findings(
+    findings = check_mise_module.mise_installation_findings(
         home,
         executable_finder=lambda _command: str(canonical),
         scan_host_path=True,
@@ -315,7 +315,7 @@ def test_mise_installation_scan_finds_an_alternate_later_on_path(
     assert findings[1].path == alternate
 
     alternate.unlink()
-    repaired = check_mise_module._mise_installation_findings(
+    repaired = check_mise_module.mise_installation_findings(
         home,
         executable_finder=lambda _command: str(canonical),
         scan_host_path=True,
@@ -341,7 +341,7 @@ def test_mise_project_uv_reports_valid_and_broken_backend_layouts(
     )
     canonical.chmod(0o755)
 
-    ready = check_mise_module._mise_project_uv_finding(repo_root, home)
+    ready = check_mise_module.mise_project_uv_finding(repo_root, home)
 
     assert ready is not None
     assert ready.code == "mise.project_uv_ready"
@@ -349,7 +349,7 @@ def test_mise_project_uv_reports_valid_and_broken_backend_layouts(
     assert ready.path == Path("/mise/installs/uv/0.11.29/uv")
 
     canonical.write_text("#!/bin/sh\nexit 1\n")
-    broken = check_mise_module._mise_project_uv_finding(repo_root, home)
+    broken = check_mise_module.mise_project_uv_finding(repo_root, home)
 
     assert broken is not None
     assert broken.code == "mise.project_uv_unresolved"
@@ -379,7 +379,7 @@ def test_linux_systemd_check_reports_global_mise_shim_dependencies(
             f"[Service]\n{execution_directive} = "
             "/root/.local/share/mise/shims/pueued --token=private\n"
         )
-        findings = check_mise_module._mise_systemd_shim_findings(
+        findings = check_mise_module.mise_systemd_shim_findings(
             home,
             system_unit_directory=system_units,
         )
@@ -394,7 +394,7 @@ def test_linux_systemd_check_reports_global_mise_shim_dependencies(
     drop_in.write_text(
         "[Service]\nExecStart=/root/.local/bin/mise -C /root/project exec -- pueued\n"
     )
-    repaired = check_mise_module._mise_systemd_shim_findings(
+    repaired = check_mise_module.mise_systemd_shim_findings(
         home,
         system_unit_directory=system_units,
     )
@@ -420,7 +420,7 @@ def test_linux_systemd_read_failure_suppresses_clean_finding(
 
     monkeypatch.setattr(Path, "read_text", read_text)
 
-    findings = check_mise_module._mise_systemd_shim_findings(
+    findings = check_mise_module.mise_systemd_shim_findings(
         home,
         system_unit_directory=system_units,
     )
@@ -447,7 +447,7 @@ def test_linux_systemd_check_scans_global_and_data_user_unit_paths(
         unit = unit_directory / "worker.service"
         unit.write_text("[Service]\nExecStart=/root/.local/share/mise/shims/worker\n")
 
-        findings = check_mise_module._mise_systemd_shim_findings(
+        findings = check_mise_module.mise_systemd_shim_findings(
             home,
             system_unit_directory=system_units,
         )
@@ -617,7 +617,7 @@ def test_skillshare_ownership_reports_independent_mise_and_homebrew_owners(
         "SKILLSHARE_SYSTEM_PATHS",
         (brew_link,),
     )
-    finding = check_skillshare_module._skillshare_ownership_finding(
+    finding = check_skillshare_module.skillshare_ownership_finding(
         home, shim if use_shim else mise_binary
     )
 
@@ -657,7 +657,7 @@ def test_skillshare_health_reads_configuration_without_running_the_cli(
 
     monkeypatch.setattr(check_skillshare_module.subprocess, "run", fail_run)
 
-    findings = check_skillshare_module._skillshare_findings(home)
+    findings = check_skillshare_module.skillshare_findings(home)
     by_code = {finding.code: finding for finding in findings}
 
     assert by_code["skillshare.config_ready"].severity is Severity.OK
@@ -680,7 +680,7 @@ def test_skillshare_health_reports_missing_source_and_target(tmp_path: Path) -> 
         "      mode: copy\n",
     )
 
-    findings = check_skillshare_module._skillshare_findings(home)
+    findings = check_skillshare_module.skillshare_findings(home)
     by_code = {finding.code: finding for finding in findings}
 
     assert by_code["skillshare.source_missing"].severity is Severity.WARN
@@ -696,7 +696,7 @@ def test_skillshare_health_rejects_invalid_configuration_shape(tmp_path: Path) -
         "sources:\n  skills: ~/skills\ntargets:\n  - universal\n",
     )
 
-    findings = check_skillshare_module._skillshare_findings(home)
+    findings = check_skillshare_module.skillshare_findings(home)
 
     assert len(findings) == 1
     assert findings[0].code == "skillshare.config_invalid"
@@ -745,7 +745,7 @@ def test_skillshare_ownership_deduplicates_a_link_to_the_mise_install(
         "SKILLSHARE_SYSTEM_PATHS",
         (),
     )
-    finding = check_skillshare_module._skillshare_ownership_finding(home, local_link)
+    finding = check_skillshare_module.skillshare_ownership_finding(home, local_link)
 
     assert finding is not None
     assert finding.code == "skillshare.ownership_single"
@@ -798,7 +798,7 @@ def test_skillshare_ownership_reports_invalid_mise_inventory(
         ),
     )
 
-    finding = check_skillshare_module._skillshare_ownership_finding(home, None)
+    finding = check_skillshare_module.skillshare_ownership_finding(home, None)
 
     assert finding is not None
     assert finding.severity is Severity.WARN
@@ -1077,7 +1077,7 @@ def test_private_git_probe_failure_is_not_reported_as_missing(
         lambda *_args, **_kwargs: (_ for _ in ()).throw(OSError("git unavailable")),
     )
 
-    findings = check_module._private_git_findings(home)
+    findings = check_module.private_git_findings(home)
     codes = {finding.code for finding in findings}
 
     assert "git.private_include_unavailable" in codes

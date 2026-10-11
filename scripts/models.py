@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections import Counter
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
@@ -18,6 +19,22 @@ class DriftKind(StrEnum):
     ONLY_LIVE = "only-live"
     TYPE_CHANGED = "type-changed"
     UNREADABLE = "unreadable"
+
+
+class Status(StrEnum):
+    """Outcome of one planned or executed step in any maintenance operation."""
+
+    PLANNED = "planned"
+    SUCCEEDED = "succeeded"
+    UNCHANGED = "unchanged"
+    SKIPPED = "skipped"
+    FAILED = "failed"
+
+
+def status_summary(statuses: Iterable[Status]) -> dict[str, int]:
+    """Count statuses in the shared order used by every report summary."""
+    counts = Counter(statuses)
+    return {status.value: counts[status] for status in Status if counts[status]}
 
 
 class Severity(StrEnum):

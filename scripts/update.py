@@ -27,10 +27,10 @@ from .mise import (
     canonical_mise_executable,
     canonical_mise_path,
 )
-from .models import ExecutableFinder
+from .models import ExecutableFinder, Status, status_summary
 from .process import run_process_group
 from .render import emit_error
-from .update_models import UpdateReport, UpdateResult, UpdateStatus, UpdateStep
+from .update_models import UpdateReport, UpdateResult, UpdateStep
 from .update_native import native_updaters, resolve_native_step
 
 StepCallback = Callable[["UpdateStep"], None]
@@ -55,7 +55,7 @@ def _failure_reason(step: UpdateStep, reason: str) -> str:
     return f"{reason}; {step.failure_note}" if step.failure_note else reason
 
 
-def _run_with_progress(
+def run_with_progress(
     step: UpdateStep,
     *,
     env: dict[str, str] | None,
@@ -152,16 +152,16 @@ def _installed_mise_tools(home: Path, mise_executable: str) -> tuple[str, ...]:
 def inspect_shared_mise_tools(
     repo_root: Path, home: Path, executable: str
 ) -> tuple[tuple[str, ...], dict[str, object]]:
-    """核对共享声明的唯一归属，返回已安装工具名称与原始版本请求。"""
-    from .mise_sync import _loaded_global_configs, _same_config_file, _tool_declaration
+    """Verify the shared declaration is the sole live owner; return installed names and raw requests."""
+    from .mise_sync import loaded_global_configs, same_config_file, tool_declaration
 
     reference = repo_root / "reference/.config/mise/config.toml"
     live = home / ".config/mise/config.toml"
     installed_names = set(_installed_mise_tools(home, executable))
     extra_configs = tuple(
         str(path)
-        for path in _loaded_global_configs(home, executable)
-        if not _same_config_file(path, live)
+        for path in loaded_global_configs(home, executable)
+        if not same_config_file(path, live)
     )
     if extra_configs:
         raise RuntimeError(
@@ -179,7 +179,7 @@ def inspect_shared_mise_tools(
         raise RuntimeError(
             "live mise versions or options differ from reference; preview mise-sync"
         )
-    shared, aliases = _tool_declaration(
+    shared, aliases = tool_declaration(
         reference, required=True, document=reference_document
     )
     with reference.with_name("mise.lock").open("rb") as stream:
@@ -264,7 +264,7 @@ def plan_updates(
             results.append(
                 UpdateResult(
                     step=step,
-                    status=UpdateStatus.SKIPPED,
+                    status=Status.SKIPPED,
                     reason="host-selected mise is updated by its host owner",
                 ),
             )
@@ -277,15 +277,13 @@ def plan_updates(
                 step, native_roots[step.name], home, resolved
             )
             if skip_reason is not None:
-                results.append(
-                    UpdateResult(step, UpdateStatus.SKIPPED, reason=skip_reason)
-                )
+                results.append(UpdateResult(step, Status.SKIPPED, reason=skip_reason))
                 continue
             if step.tool == "herdr" and os.environ.get("HERDR_ENV") == "1":
                 results.append(
                     UpdateResult(
                         step,
-                        UpdateStatus.SKIPPED,
+                        Status.SKIPPED,
                         reason=(
                             "running inside a Herdr session; detach and run "
                             f"`{_display_command(step)}` outside Herdr"
@@ -310,9 +308,9 @@ def plan_updates(
                 results.append(
                     UpdateResult(
                         step=step,
-                        status=UpdateStatus.FAILED
+                        status=Status.FAILED
                         if mutation_allowed(home)
-                        else UpdateStatus.SKIPPED,
+                        else Status.SKIPPED,
                         reason=str(error),
                     ),
                 )
@@ -321,7 +319,7 @@ def plan_updates(
                 results.append(
                     UpdateResult(
                         step=step,
-                        status=UpdateStatus.SKIPPED,
+                        status=Status.SKIPPED,
                         reason="no active mise tools are installed",
                     ),
                 )
@@ -330,7 +328,7 @@ def plan_updates(
         results.append(
             UpdateResult(
                 step=step,
-                status=UpdateStatus.PLANNED if available else UpdateStatus.SKIPPED,
+                status=Status.PLANNED if available else Status.SKIPPED,
                 reason=(
                     None
                     if available
@@ -363,10 +361,10 @@ def execute_updates(
             tuple(
                 replace(
                     result,
-                    status=UpdateStatus.SKIPPED,
+                    status=Status.SKIPPED,
                     reason="ownership preflight failed; no updater commands run",
                 )
-                if result.status is UpdateStatus.PLANNED
+                if result.status is Status.PLANNED
                 else result
                 for result in plan.results
             ),
@@ -378,7 +376,7 @@ def execute_updates(
         # mise.tools step would run `mise install` with no tool arguments and
         # install every tool the host's configs declare — the exact outcome the
         # preflight avoids.
-        if planned.status is not UpdateStatus.PLANNED:
+        if planned.status is not Status.PLANNED:
             results.append(planned)
             continue
         if on_start:
@@ -392,7 +390,7 @@ def execute_updates(
                 environment = os.environ.copy()
             if environment is not None:
                 environment.update(planned.step.environment)
-            completed = _run_with_progress(
+            completed = run_with_progress(
                 planned.step,
                 env=environment,
                 progress_interval_seconds=progress_interval_seconds,
@@ -409,7 +407,7 @@ def execute_updates(
             results.append(
                 UpdateResult(
                     step=planned.step,
-                    status=UpdateStatus.FAILED,
+                    status=Status.FAILED,
                     duration_ms=round((time.monotonic() - started_at) * 1000),
                     reason=reason,
                     stdout_tail=error.output if isinstance(error.output, str) else None,
@@ -424,7 +422,7 @@ def execute_updates(
             results.append(
                 UpdateResult(
                     step=planned.step,
-                    status=UpdateStatus.FAILED,
+                    status=Status.FAILED,
                     duration_ms=round((time.monotonic() - started_at) * 1000),
                     reason=reason,
                 ),
@@ -443,9 +441,7 @@ def execute_updates(
             UpdateResult(
                 step=planned.step,
                 status=(
-                    UpdateStatus.SUCCEEDED
-                    if completed.returncode == 0
-                    else UpdateStatus.FAILED
+                    Status.SUCCEEDED if completed.returncode == 0 else Status.FAILED
                 ),
                 exit_code=completed.returncode,
                 duration_ms=round((time.monotonic() - started_at) * 1000),
@@ -458,16 +454,7 @@ def execute_updates(
 
 
 def _summary(report: UpdateReport) -> dict[str, int]:
-    return {
-        status.value: count
-        for status in (
-            UpdateStatus.PLANNED,
-            UpdateStatus.SUCCEEDED,
-            UpdateStatus.SKIPPED,
-            UpdateStatus.FAILED,
-        )
-        if (count := sum(result.status is status for result in report.results))
-    }
+    return status_summary(result.status for result in report.results)
 
 
 def _next_commands(
@@ -479,10 +466,10 @@ def _next_commands(
         return (
             ("mise run update -- --apply",)
             if apply_allowed
-            and any(result.status is UpdateStatus.PLANNED for result in report.results)
+            and any(result.status is Status.PLANNED for result in report.results)
             else ()
         )
-    if not any(result.status is UpdateStatus.SUCCEEDED for result in report.results):
+    if not any(result.status is Status.SUCCEEDED for result in report.results):
         return ()
     return NEXT_COMMANDS
 
@@ -492,14 +479,14 @@ def _notes(report: UpdateReport) -> tuple[str, ...]:
     if not report.apply:
         notes.append(PREVIEW_NOTE)
     if any(
-        result.step.name == "mise.tools" and result.status is not UpdateStatus.SKIPPED
+        result.step.name == "mise.tools" and result.status is not Status.SKIPPED
         for result in report.results
     ):
         notes.append(MISE_TOOLS_NOTE)
     return tuple(notes)
 
 
-def _document(
+def update_document(
     report: UpdateReport,
     *,
     apply_allowed: bool = True,
@@ -529,7 +516,7 @@ def _document(
                 "stdout_tail": result.stdout_tail,
                 "stderr_tail": result.stderr_tail,
                 "retry": _display_command(result.step)
-                if result.status is UpdateStatus.FAILED
+                if result.status is Status.FAILED
                 else None,
             }
             for result in report.results
@@ -566,11 +553,11 @@ def _render(report: UpdateReport, *, apply_allowed: bool = True) -> None:
 
     for result in report.results:
         label = result.status.value.upper()
-        if result.status is UpdateStatus.PLANNED:
+        if result.status is Status.PLANNED:
             print(f"{label:7} {result.step.name}: {_display_command(result.step)}")
-        elif result.status is UpdateStatus.SUCCEEDED:
+        elif result.status is Status.SUCCEEDED:
             print(f"{label:7} {result.step.name}{duration(result)}")
-        elif result.status is UpdateStatus.SKIPPED:
+        elif result.status is Status.SKIPPED:
             print(f"{label:7} {result.step.name}: {result.reason}")
         else:
             print(
@@ -588,7 +575,7 @@ def _render(report: UpdateReport, *, apply_allowed: bool = True) -> None:
         print(f"Note: {note}")
     if not report.apply:
         if not apply_allowed and any(
-            result.status is UpdateStatus.PLANNED for result in report.results
+            result.status is Status.PLANNED for result in report.results
         ):
             print("No commands run. Host policy disables update apply.")
         elif _next_commands(report):
@@ -646,7 +633,7 @@ def main(argv: list[str] | None = None) -> int:
         )
         safety_failed = any(
             result.step.name == "mise.tools"
-            and result.status is UpdateStatus.FAILED
+            and result.status is Status.FAILED
             and result.exit_code is None
             for result in report.results
         )
@@ -661,8 +648,8 @@ def main(argv: list[str] | None = None) -> int:
                 },
             )
         elif args.apply:
-            from .runtime import _document as runtime_document
             from .runtime import execute_runtime, plan_runtime
+            from .runtime_render import runtime_document
 
             runtime = execute_runtime(
                 plan_runtime(Path(__file__).resolve().parents[1], home, network=False),
@@ -683,7 +670,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.as_json:
         print(
             json.dumps(
-                _document(report, apply_allowed=apply_allowed),
+                update_document(report, apply_allowed=apply_allowed),
                 indent=2,
                 sort_keys=True,
             ),

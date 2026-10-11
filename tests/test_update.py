@@ -9,13 +9,13 @@ from pathlib import Path
 
 import pytest
 
+from scripts.models import Status
 from scripts.process import run_process_group
 from scripts.update import (
-    UpdateStatus,
     UpdateStep,
-    _run_with_progress,
     execute_updates,
     plan_updates,
+    run_with_progress,
 )
 
 # These integration tests run alongside the other verify tasks. Give the helper
@@ -310,10 +310,10 @@ def test_update_runs_pi_extensions_even_after_self_update_failure(
     assert [
         (result.step.name, result.status, result.exit_code)
         for result in report.results
-        if result.status is not UpdateStatus.SKIPPED
+        if result.status is not Status.SKIPPED
     ] == [
-        ("pi", UpdateStatus.FAILED, 7),
-        ("pi.extensions", UpdateStatus.SUCCEEDED, 0),
+        ("pi", Status.FAILED, 7),
+        ("pi.extensions", Status.SUCCEEDED, 0),
     ]
     assert log_path.read_text().splitlines() == ["pi update", "pi update --extensions"]
 
@@ -355,7 +355,7 @@ def test_update_leaves_host_selected_mise_self_update_to_its_owner(
     )
     results = {result.step.name: result for result in report.results}
 
-    assert results["mise.self"].status is UpdateStatus.SKIPPED
+    assert results["mise.self"].status is Status.SKIPPED
     assert results["mise.self"].reason == (
         "host-selected mise is updated by its host owner"
     )
@@ -411,7 +411,7 @@ def test_update_confirms_sprite_in_noninteractive_apply(
     sprite_result = next(
         result for result in report.results if result.step.name == "sprite.version"
     )
-    assert sprite_result.status is UpdateStatus.SUCCEEDED
+    assert sprite_result.status is Status.SUCCEEDED
     assert result_path.read_text() == "upgraded"
 
 
@@ -515,7 +515,7 @@ def test_update_executes_reshim_with_canonical_mise_first_on_path(
         return subprocess.CompletedProcess(step.command, 0, "", "")
 
     monkeypatch.setattr("scripts.update.run_process_group", fake_inventory)
-    monkeypatch.setattr("scripts.update._run_with_progress", fake_run)
+    monkeypatch.setattr("scripts.update.run_with_progress", fake_run)
 
     report = execute_updates(
         home,
@@ -595,7 +595,7 @@ def test_update_progress_timeout_kills_the_process_group(tmp_path: Path) -> None
     tool_path.chmod(0o755)
 
     with pytest.raises(subprocess.TimeoutExpired):
-        _run_with_progress(
+        run_with_progress(
             UpdateStep(
                 "timeout",
                 "timeout",
@@ -696,7 +696,7 @@ def test_update_reports_timeout_and_launch_failures_on_stderr(
     def fail_with_timeout(*_args: object, **_kwargs: object) -> None:
         raise subprocess.TimeoutExpired(("amp", "update"), 300)
 
-    monkeypatch.setattr("scripts.update._run_with_progress", fail_with_timeout)
+    monkeypatch.setattr("scripts.update.run_with_progress", fail_with_timeout)
     timeout_report = execute_updates(
         tmp_path,
         executable_finder=lambda tool: (
@@ -708,13 +708,13 @@ def test_update_reports_timeout_and_launch_failures_on_stderr(
     timeout_result = next(
         result for result in timeout_report.results if result.step.name == "amp"
     )
-    assert timeout_result.status is UpdateStatus.FAILED
+    assert timeout_result.status is Status.FAILED
     assert "[amp] FAIL timed out after 300s" in capsys.readouterr().err
 
     def fail_to_launch(*_args: object, **_kwargs: object) -> None:
         raise OSError("permission denied")
 
-    monkeypatch.setattr("scripts.update._run_with_progress", fail_to_launch)
+    monkeypatch.setattr("scripts.update.run_with_progress", fail_to_launch)
     launch_report = execute_updates(
         tmp_path,
         executable_finder=lambda tool: (
@@ -726,7 +726,7 @@ def test_update_reports_timeout_and_launch_failures_on_stderr(
     launch_result = next(
         result for result in launch_report.results if result.step.name == "amp"
     )
-    assert launch_result.status is UpdateStatus.FAILED
+    assert launch_result.status is Status.FAILED
     assert "[amp] FAIL permission denied" in capsys.readouterr().err
 
 
@@ -772,7 +772,7 @@ def test_update_mise_step_passes_only_installed_versions(
     result = next(
         result for result in report.results if result.step.name == "mise.tools"
     )
-    assert result.status is UpdateStatus.PLANNED
+    assert result.status is Status.PLANNED
     assert result.step.command == (
         str(mise),
         "install",
@@ -809,7 +809,7 @@ def test_update_fails_closed_when_mise_inventory_is_invalid(
     result = next(
         result for result in report.results if result.step.name == "mise.tools"
     )
-    assert result.status is UpdateStatus.FAILED
+    assert result.status is Status.FAILED
     assert "invalid JSON" in (result.reason or "")
     assert report.ok is False
 
@@ -838,7 +838,7 @@ def test_update_apply_does_not_execute_a_failed_mise_preflight(
     )
 
     mise_result = next(r for r in report.results if r.step.name == "mise.tools")
-    assert mise_result.status is UpdateStatus.FAILED
+    assert mise_result.status is Status.FAILED
     # A failed inventory must not fall through to `mise upgrade` with no tool
     # arguments, which would upgrade every installed tool.
     assert not any(cmd[:2] == (str(mise), "upgrade") for cmd in ran)
@@ -868,9 +868,9 @@ def test_update_skips_mise_owned_native_self_update(tmp_path: Path) -> None:
         home, executable_finder=lambda tool: str(pi) if tool == "pi" else None
     )
     results = {result.step.name: result for result in report.results}
-    assert results["pi"].status is UpdateStatus.SKIPPED
+    assert results["pi"].status is Status.SKIPPED
     assert "package-manager owned" in (results["pi"].reason or "")
-    assert results["pi.extensions"].status is UpdateStatus.SKIPPED
+    assert results["pi.extensions"].status is Status.SKIPPED
 
 
 def test_update_keeps_unknown_native_owner_read_only(tmp_path: Path) -> None:
@@ -881,7 +881,7 @@ def test_update_keeps_unknown_native_owner_read_only(tmp_path: Path) -> None:
         ),
     )
     result = next(result for result in report.results if result.step.name == "tigris")
-    assert result.status is UpdateStatus.SKIPPED
+    assert result.status is Status.SKIPPED
     assert "no verified native owner" in (result.reason or "")
 
 
@@ -1010,7 +1010,7 @@ def test_upgrade_tools_audit_only_keeps_preview_read_only(tmp_path: Path) -> Non
 def test_failed_report_retry_preserves_quoted_arguments_cwd_and_input(
     tmp_path: Path,
 ) -> None:
-    from scripts.update import UpdateReport, UpdateResult, _document
+    from scripts.update import UpdateReport, UpdateResult, update_document
 
     working = tmp_path / "working space's"
     working.mkdir()
@@ -1029,8 +1029,8 @@ def test_failed_report_retry_preserves_quoted_arguments_cwd_and_input(
         environment=(("FIXTURE", "value with spaces"),),
         stdin_text="line one\nline two\n",
     )
-    report = UpdateReport(True, (UpdateResult(step, UpdateStatus.FAILED, exit_code=7),))
-    retry = json.loads(json.dumps(_document(report)))["steps"][0]["retry"]
+    report = UpdateReport(True, (UpdateResult(step, Status.FAILED, exit_code=7),))
+    retry = json.loads(json.dumps(update_document(report)))["steps"][0]["retry"]
     completed = subprocess.run(
         retry,
         shell=True,

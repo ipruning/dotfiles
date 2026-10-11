@@ -62,7 +62,7 @@ def _configured_skillshare_target(
     return _expand_home(path_value, home), mode
 
 
-def _skillshare_findings(home: Path) -> list[Finding]:
+def skillshare_findings(home: Path) -> list[Finding]:
     config_path = home / ".config/skillshare/config.yaml"
     if not config_path.is_file():
         return [
@@ -310,7 +310,7 @@ def _candidate_skillshare_owners(
     return owners
 
 
-def _skillshare_ownership_finding(
+def skillshare_ownership_finding(
     home: Path,
     executable: Path | None,
 ) -> Finding | None:

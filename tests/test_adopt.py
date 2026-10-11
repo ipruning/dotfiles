@@ -8,7 +8,7 @@ import pytest
 from scripts.adopt import (
     AdoptReport,
     AdoptResult,
-    AdoptStatus,
+    Status,
     _render,
     apply_adopt,
     plan_adopt,
@@ -84,7 +84,7 @@ def test_adopt_defaults_to_a_read_only_application_plan(tmp_path: Path) -> None:
     assert document["changes"] == [
         {
             "action": "remove",
-            "error": None,
+            "reason": None,
             "kind": "only-reference",
             "live_path": str(home / ".hushlogin"),
             "reference_path": str(REPO_ROOT / "reference/.hushlogin"),
@@ -116,12 +116,12 @@ def test_adopt_apply_copies_live_truth_and_removes_dead_reference(
         AdoptResult(
             _drift(repo_root, home, ".gitconfig", DriftKind.MODIFIED),
             action="copy",
-            status=AdoptStatus.PLANNED,
+            status=Status.PLANNED,
         ),
         AdoptResult(
             _drift(repo_root, home, ".fresh", DriftKind.ONLY_LIVE),
             action="copy",
-            status=AdoptStatus.PLANNED,
+            status=Status.PLANNED,
         ),
         AdoptResult(
             _drift(
@@ -132,7 +132,7 @@ def test_adopt_apply_copies_live_truth_and_removes_dead_reference(
                 live_kind=None,
             ),
             action="remove",
-            status=AdoptStatus.PLANNED,
+            status=Status.PLANNED,
         ),
     )
     applied = apply_adopt(repo_root, home, plan)
@@ -158,7 +158,7 @@ def test_adopt_preserves_live_symlinks_instead_of_materializing_targets(
         AdoptResult(
             _drift(repo_root, home, ".linked", DriftKind.ONLY_LIVE),
             action="copy",
-            status=AdoptStatus.PLANNED,
+            status=Status.PLANNED,
         ),
     )
     applied = apply_adopt(repo_root, home, plan)
@@ -180,14 +180,14 @@ def test_adopt_apply_refuses_uncommitted_reference_changes(tmp_path: Path) -> No
         AdoptResult(
             _drift(repo_root, home, ".gitconfig", DriftKind.MODIFIED),
             action="copy",
-            status=AdoptStatus.PLANNED,
+            status=Status.PLANNED,
         ),
     )
     applied = apply_adopt(repo_root, home, plan)
 
     assert applied.ok is False
-    assert all(result.status is AdoptStatus.FAILED for result in applied.results)
-    assert "uncommitted" in (applied.results[0].error or "")
+    assert all(result.status is Status.FAILED for result in applied.results)
+    assert "uncommitted" in (applied.results[0].reason or "")
     assert (
         repo_root / "reference/.gitconfig"
     ).read_text() == "[user]\n  name = Dirty\n"
@@ -233,8 +233,8 @@ def test_adopt_directory_requires_git_recoverable_contents(
 
     assert applied.ok is not has_ignored_data
     if has_ignored_data:
-        assert applied.results[0].status is AdoptStatus.FAILED
-        error = applied.results[0].error or ""
+        assert applied.results[0].status is Status.FAILED
+        error = applied.results[0].reason or ""
         assert "host-private.conf" in error
         assert "automatic_backups" in error
         assert "sentinel" not in error
@@ -269,7 +269,7 @@ def test_adopt_apply_copies_directories_and_confines_paths(tmp_path: Path) -> No
                 live_kind=FileKind.DIRECTORY,
             ),
             action="copy",
-            status=AdoptStatus.PLANNED,
+            status=Status.PLANNED,
         ),
     )
     applied = apply_adopt(repo_root, home, plan)
@@ -289,13 +289,13 @@ def test_adopt_apply_copies_directories_and_confines_paths(tmp_path: Path) -> No
                 live_kind=None,
             ),
             action="remove",
-            status=AdoptStatus.PLANNED,
+            status=Status.PLANNED,
         ),
     )
     swallowed = apply_adopt(repo_root, home, dotdot)
 
     assert swallowed.ok is False
-    assert "traverses" in (swallowed.results[0].error or "")
+    assert "traverses" in (swallowed.results[0].reason or "")
     assert (repo_root / "reference/.config/templates/b.txt").exists()
 
     link_escape_target = tmp_path / "outside-tree"
@@ -314,7 +314,7 @@ def test_adopt_apply_copies_directories_and_confines_paths(tmp_path: Path) -> No
                 live_kind=FileKind.FILE,
             ),
             action="copy",
-            status=AdoptStatus.PLANNED,
+            status=Status.PLANNED,
         ),
     )
     blocked = apply_adopt(repo_root, home, through_link)
@@ -333,7 +333,7 @@ def test_adopt_apply_copies_directories_and_confines_paths(tmp_path: Path) -> No
                 live_kind=FileKind.FILE,
             ),
             action="copy",
-            status=AdoptStatus.PLANNED,
+            status=Status.PLANNED,
         ),
     )
     (home / ".escape").write_text("nope\n")
@@ -370,7 +370,7 @@ def test_adopt_failed_publish_restores_the_previous_directory(
             AdoptResult(
                 _drift(repo_root, home, ".config/example", DriftKind.MODIFIED),
                 action="copy",
-                status=AdoptStatus.PLANNED,
+                status=Status.PLANNED,
             ),
         ),
     )
@@ -410,13 +410,13 @@ def test_adopt_retains_backup_when_publish_rollback_fails(
             AdoptResult(
                 _drift(repo_root, home, ".config/example", DriftKind.MODIFIED),
                 action="copy",
-                status=AdoptStatus.PLANNED,
+                status=Status.PLANNED,
             ),
         ),
     )
 
     assert applied.ok is False
-    assert "previous reference retained at" in (applied.results[0].error or "")
+    assert "previous reference retained at" in (applied.results[0].reason or "")
     backups = list(reference.parent.glob(".*adopt-backup-*/previous"))
     assert len(backups) == 1
     assert (backups[0] / "old.txt").read_text() == "old\n"
@@ -449,13 +449,13 @@ def test_adopt_file_rollback_failure_cleans_staged_copy(
             AdoptResult(
                 _drift(repo_root, home, ".example", DriftKind.MODIFIED),
                 action="copy",
-                status=AdoptStatus.PLANNED,
+                status=Status.PLANNED,
             ),
         ),
     )
 
     assert applied.ok is False
-    assert "previous reference retained at" in (applied.results[0].error or "")
+    assert "previous reference retained at" in (applied.results[0].reason or "")
     assert not list(reference.parent.glob(".adopt-*"))
     backups = list(reference.parent.glob(".*adopt-backup-*/previous"))
     assert len(backups) == 1
@@ -476,13 +476,13 @@ def test_adopt_apply_refuses_renamed_uncommitted_reference(tmp_path: Path) -> No
         AdoptResult(
             _drift(repo_root, home, ".renamed", DriftKind.MODIFIED),
             action="copy",
-            status=AdoptStatus.PLANNED,
+            status=Status.PLANNED,
         ),
     )
     applied = apply_adopt(repo_root, home, plan)
 
     assert applied.ok is False
-    assert "uncommitted" in (applied.results[0].error or "")
+    assert "uncommitted" in (applied.results[0].reason or "")
 
 
 def test_adopt_apply_fails_cleanly_outside_a_git_worktree(tmp_path: Path) -> None:
@@ -496,13 +496,13 @@ def test_adopt_apply_fails_cleanly_outside_a_git_worktree(tmp_path: Path) -> Non
         AdoptResult(
             _drift(repo_root, home, ".gitconfig", DriftKind.ONLY_LIVE),
             action="copy",
-            status=AdoptStatus.PLANNED,
+            status=Status.PLANNED,
         ),
     )
     applied = apply_adopt(repo_root, home, plan)
 
     assert applied.ok is False
-    assert applied.results[0].status is AdoptStatus.FAILED
+    assert applied.results[0].status is Status.FAILED
     assert not (repo_root / "reference/.gitconfig").exists()
 
 
@@ -535,7 +535,7 @@ def test_plan_adopt_marks_unreadable_drift_failed(tmp_path: Path, monkeypatch) -
     plan = plan_adopt(tmp_path / "repo", tmp_path / "home", "git")
 
     assert plan.ok is False
-    assert "permission denied" in (plan.results[0].error or "")
+    assert "permission denied" in (plan.results[0].reason or "")
 
 
 def test_adopt_refuses_live_paths_under_symlinked_parents(tmp_path: Path) -> None:
@@ -551,13 +551,13 @@ def test_adopt_refuses_live_paths_under_symlinked_parents(tmp_path: Path) -> Non
         AdoptResult(
             _drift(repo_root, home, ".config/secret.toml", DriftKind.ONLY_LIVE),
             action="copy",
-            status=AdoptStatus.PLANNED,
+            status=Status.PLANNED,
         ),
     )
     applied = apply_adopt(repo_root, home, plan)
 
     assert applied.ok is False
-    assert "live parent" in (applied.results[0].error or "")
+    assert "live parent" in (applied.results[0].reason or "")
     assert not (repo_root / "reference/.config").exists()
 
     inner = home / "real-dir"
@@ -568,7 +568,7 @@ def test_adopt_refuses_live_paths_under_symlinked_parents(tmp_path: Path) -> Non
         AdoptResult(
             _drift(repo_root, home, ".linkdir2/ok.toml", DriftKind.ONLY_LIVE),
             action="copy",
-            status=AdoptStatus.PLANNED,
+            status=Status.PLANNED,
         ),
     )
     inner_applied = apply_adopt(repo_root, home, inner_plan)

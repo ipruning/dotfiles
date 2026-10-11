@@ -5,8 +5,9 @@ from pathlib import Path
 import pytest
 
 import scripts.clean as clean_module
-from scripts.clean import CleanStatus, execute_clean, plan_clean
+from scripts.clean import execute_clean, plan_clean
 from scripts.host_policy import HostPolicyMutationError
+from scripts.models import Status
 
 
 def _write_mise(home: Path) -> Path:
@@ -38,9 +39,9 @@ def test_clean_preview_runs_only_read_only_commands(tmp_path: Path) -> None:
 
     assert report.apply is False
     assert [result.status for result in report.results] == [
-        CleanStatus.PREVIEWED,
-        CleanStatus.PREVIEWED,
-        CleanStatus.PREVIEWED,
+        Status.PLANNED,
+        Status.PLANNED,
+        Status.PLANNED,
     ]
     assert calls == [
         (str(mise), "prune", "--dry-run", "--tools"),
@@ -70,9 +71,9 @@ def test_clean_apply_uses_owner_commands_and_policy_guard(tmp_path: Path) -> Non
 
     assert report.apply is True
     assert [result.status for result in report.results] == [
-        CleanStatus.SUCCEEDED,
-        CleanStatus.SUCCEEDED,
-        CleanStatus.SUCCEEDED,
+        Status.SUCCEEDED,
+        Status.SUCCEEDED,
+        Status.SUCCEEDED,
     ]
     assert calls == [
         (str(mise), "prune", "--yes", "--tools"),

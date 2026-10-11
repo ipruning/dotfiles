@@ -49,21 +49,21 @@ def inspect_plugin(spec: RuntimeSpec, home: Path) -> bool:
         ),
         environment=(*spec.environment, ("GIT_OPTIONAL_LOCKS", "0")),
     )
-    status = _run_command(status_spec, home, capture_output=True)
+    status = run_command(status_spec, home, capture_output=True)
     if status.returncode != 0:
-        raise RuntimeError(_command_failure_reason(status))
+        raise RuntimeError(command_failure_reason(status))
     if status.stdout.strip():
         raise RuntimeError(
             f"plugin tracked files have local changes: {spec.target}; inspect them before refreshing"
         )
     return (
-        _read_revision(spec, spec.target, home) == spec.revision
+        read_revision(spec, spec.target, home) == spec.revision
         and spec.entrypoint is not None
         and (spec.target / spec.entrypoint).is_file()
     )
 
 
-def _atomic_install(target: Path, writer: AtomicWriter) -> None:
+def atomic_install(target: Path, writer: AtomicWriter) -> None:
     target.parent.mkdir(parents=True, exist_ok=True)
     temporary = target.with_name(f".{target.name}.tmp-{os.getpid()}")
     try:
@@ -108,7 +108,7 @@ def _command_environment(spec: RuntimeSpec, home: Path) -> dict[str, str]:
     return environment
 
 
-def _run_command(
+def run_command(
     spec: RuntimeSpec,
     home: Path,
     *,
@@ -132,7 +132,7 @@ def _run_command(
     )
 
 
-def _timeout_reason(spec: RuntimeSpec, error: subprocess.TimeoutExpired) -> str:
+def timeout_reason(spec: RuntimeSpec, error: subprocess.TimeoutExpired) -> str:
     reason = f"timed out after {spec.timeout_seconds}s"
     detail = error.stderr
     if isinstance(detail, bytes):
@@ -142,18 +142,18 @@ def _timeout_reason(spec: RuntimeSpec, error: subprocess.TimeoutExpired) -> str:
     )
 
 
-def _emit_command_output(spec: RuntimeSpec, output: str | None) -> None:
+def emit_command_output(spec: RuntimeSpec, output: str | None) -> None:
     for line in (output or "").splitlines():
         print(f"[{spec.name}] {line}", file=sys.stderr)
 
 
-def _command_failure_reason(completed: subprocess.CompletedProcess[str]) -> str:
+def command_failure_reason(completed: subprocess.CompletedProcess[str]) -> str:
     reason = f"command exited {completed.returncode}"
     detail = (completed.stderr or "").strip()
     return f"{reason}: {detail}" if detail else reason
 
 
-def _read_revision(
+def read_revision(
     spec: RuntimeSpec,
     directory: Path,
     home: Path,
@@ -162,9 +162,9 @@ def _read_revision(
         spec,
         command=("git", "-C", str(directory), "rev-parse", "HEAD"),
     )
-    verified = _run_command(verify_spec, home, capture_output=True)
+    verified = run_command(verify_spec, home, capture_output=True)
     if verified.returncode != 0:
-        raise RuntimeError(_command_failure_reason(verified))
+        raise RuntimeError(command_failure_reason(verified))
     return verified.stdout.strip()
 
 
@@ -180,21 +180,21 @@ def _set_revision(
         spec,
         command=("git", "-C", str(directory), "checkout", "--detach", revision),
     )
-    checkout = _run_command(checkout_spec, home, capture_output=capture_output)
+    checkout = run_command(checkout_spec, home, capture_output=capture_output)
     if capture_output:
-        _emit_command_output(spec, checkout.stdout)
-        _emit_command_output(spec, checkout.stderr)
+        emit_command_output(spec, checkout.stdout)
+        emit_command_output(spec, checkout.stderr)
     if checkout.returncode != 0:
-        raise RuntimeError(_command_failure_reason(checkout))
+        raise RuntimeError(command_failure_reason(checkout))
 
-    actual_revision = _read_revision(spec, directory, home)
+    actual_revision = read_revision(spec, directory, home)
     if actual_revision != revision:
         raise RuntimeError(
             f"revision mismatch: expected {revision}, received {actual_revision}",
         )
 
 
-def _checkout_revision(
+def checkout_revision(
     spec: RuntimeSpec,
     directory: Path,
     home: Path,
@@ -215,7 +215,7 @@ def _checkout_revision(
         )
 
 
-def _download(source: str, timeout_seconds: int) -> bytes:
+def download_url(source: str, timeout_seconds: int) -> bytes:
     request = urllib.request.Request(source, headers={"User-Agent": "dotfiles-runtime"})
     with urllib.request.urlopen(request, timeout=timeout_seconds) as response:
         return cast("bytes", response.read())
