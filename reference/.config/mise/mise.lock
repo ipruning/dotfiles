@@ -7,6 +7,11 @@ version = "0.38.2"
 backend = "aqua:vercel-labs/agent-browser"
 specifiers = ["latest"]
 
+[tools.agent-browser."platforms.linux-arm64"]
+checksum = "sha256:690c02d952de8497bba4f8cc58b59acbf27dc27b346755869b518f4b411c7f40"
+url = "https://github.com/vercel-labs/agent-browser/releases/download/v0.38.2/agent-browser-linux-arm64"
+url_api = "https://api.github.com/repos/vercel-labs/agent-browser/releases/assets/604194739"
+
 [tools.agent-browser."platforms.linux-x64"]
 checksum = "sha256:993d462f4dcfc19860d93a6521a452eba4502bfc449fe0120303c2ccb998e675"
 url = "https://github.com/vercel-labs/agent-browser/releases/download/v0.38.2/agent-browser-linux-musl-x64"
@@ -132,32 +137,20 @@ url = "https://github.com/agavra/tuicr/releases/download/v0.27.0/tuicr-0.27.0-x8
 url_api = "https://api.github.com/repos/agavra/tuicr/releases/assets/584425453"
 
 [[tools."github:jihuanshe/linear"]]
-version = "0.0.1790870794-g9787d08"
+version = "0.0.1791622245-ge2079c2"
 backend = "github:jihuanshe/linear"
 specifiers = ["latest"]
 
-[tools."github:jihuanshe/linear"."platforms.linux-arm64"]
-checksum = "sha256:e06f4b88e537004b4ecfe6d2e86112ee225182ce0cb03d33948ecf366445ab61"
-url = "https://github.com/jihuanshe/linear/releases/download/0.0.1790870794-g9787d08/linear-aarch64-unknown-linux-gnu.tar.xz"
-url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/603623102"
-provenance = "github-attestations"
-
 [tools."github:jihuanshe/linear"."platforms.linux-x64"]
-checksum = "sha256:347f78d039d6f7c8502f2d06339bd471bd035c1c1eee20fd66bd1def0f2d53cf"
-url = "https://github.com/jihuanshe/linear/releases/download/0.0.1790870794-g9787d08/linear-x86_64-unknown-linux-gnu.tar.xz"
-url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/603623711"
+checksum = "sha256:b6ac85746a753be0abad94913ec9548ef1b18e04fb84373313844c5271b7e39e"
+url = "https://github.com/jihuanshe/linear/releases/download/0.0.1791622245-ge2079c2/linear-x86_64-unknown-linux-gnu.tar.xz"
+url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/627478319"
 provenance = "github-attestations"
 
 [tools."github:jihuanshe/linear"."platforms.macos-arm64"]
-checksum = "sha256:09871b8442b0a5d3945a9f6353adb7510366c96fe8f60955dc11563830f3cfd2"
-url = "https://github.com/jihuanshe/linear/releases/download/0.0.1790870794-g9787d08/linear-aarch64-apple-darwin.tar.xz"
-url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/603623105"
-provenance = "github-attestations"
-
-[tools."github:jihuanshe/linear"."platforms.macos-x64"]
-checksum = "sha256:542ebe271da74baf7444becdec988e2c8ad9102489a1c1cd9353f6c89c4a7eb0"
-url = "https://github.com/jihuanshe/linear/releases/download/0.0.1790870794-g9787d08/linear-x86_64-apple-darwin.tar.xz"
-url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/603623674"
+checksum = "sha256:bc34866f33b1effd2e939e821a7a0568a1d467f77d201188cd1b8fade34af185"
+url = "https://github.com/jihuanshe/linear/releases/download/0.0.1791622245-ge2079c2/linear-aarch64-apple-darwin.tar.xz"
+url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/627477983"
 provenance = "github-attestations"
 
 [[tools."github:larksuite/cli"]]
@@ -220,6 +213,10 @@ specifiers = [
     "1.27.1",
     "latest",
 ]
+
+[tools.go."platforms.linux-arm64"]
+checksum = "sha256:3450b45a3f9ee8568792736a5c5e70a1f2e9b36c35a8f74958c03e51d7d92bec"
+url = "https://dl.google.com/go/go1.27.1.linux-arm64.tar.gz"
 
 [tools.go."platforms.linux-x64"]
 checksum = "sha256:63d339f0da5ab53635a56f2490a7984dfe12dfcff22ad749f63edaf590168445"
@@ -315,6 +312,11 @@ version = "1.22.0"
 backend = "packslip:github.com/jdx/mr-boxington"
 specifiers = ["latest"]
 
+[tools.mr-boxington."platforms.linux-arm64"]
+checksum = "sha256:b7a23503d9efcb31941e1e68b78f8b33643a056f22d39cff745dab6f17edb652"
+url = "https://github.com/jdx/mr-boxington/releases/download/v1.22.0/mbx-aarch64-unknown-linux-gnu.tar.gz"
+signer = "sigstore-oidc:https://github.com/jdx/mr-boxington/.github/workflows/release.yml"
+
 [tools.mr-boxington."platforms.linux-x64"]
 checksum = "sha256:eb3e8c74277dcc8314227ba2cd32ef00a9a362ec8a90cd06ef6580eb48a6b375"
 url = "https://github.com/jdx/mr-boxington/releases/download/v1.22.0/mbx-x86_64-unknown-linux-gnu.tar.gz"
@@ -378,6 +380,11 @@ version = "3.14.8"
 backend = "core:python"
 specifiers = ["latest"]
 
+[tools.python."platforms.linux-arm64"]
+checksum = "sha256:ece2bf3d4b47c80c2403c5f32fa51a9458abaee93c10def8acafb5f45163e77d"
+url = "https://github.com/astral-sh/python-build-standalone/releases/download/20261003/cpython-3.14.8+20261003-aarch64-unknown-linux-gnu-install_only_stripped.tar.gz"
+provenance = "github-attestations"
+
 [tools.python."platforms.linux-x64"]
 checksum = "sha256:b373a4a4e4e70fc05f368c9b53d7738bf37637682b650d96c742805d2da26c32"
 url = "https://github.com/astral-sh/python-build-standalone/releases/download/20261001/cpython-3.14.8+20261001-x86_64-unknown-linux-gnu-install_only_stripped.tar.gz"
@@ -430,6 +437,11 @@ specifiers = ["latest"]
 version = "0.25.3"
 backend = "aqua:runkids/skillshare"
 specifiers = ["latest"]
+
+[tools.skillshare."platforms.linux-arm64"]
+checksum = "sha256:515235c3d86fa94919c024e66620c1980d91176f0f124c252c1829d06e42244d"
+url = "https://github.com/runkids/skillshare/releases/download/v0.25.3/skillshare_0.25.3_linux_arm64.tar.gz"
+url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/621347557"
 
 [tools.skillshare."platforms.linux-x64"]
 checksum = "sha256:b3559040f5e2581b7a24251e9e68c5d6bea62aac9b452fd32c50500db8d76f0a"
@@ -515,6 +527,10 @@ url_api = "https://api.github.com/repos/xdevplatform/xurl/releases/assets/599260
 version = "0.17.0"
 backend = "core:zig"
 specifiers = ["latest"]
+
+[tools.zig."platforms.linux-arm64"]
+checksum = "sha256:9e8d11661d4ae3bd57702a3832781e23ad151dde5798e16a5ccd503f65234ff8"
+url = "https://ziglang.org/download/0.17.0/zig-aarch64-linux-0.17.0.tar.xz"
 
 [tools.zig."platforms.linux-x64"]
 checksum = "sha256:1cbe9df9f27e6b78d14ccbca43b6703a404ef79ef1c463de901d7f088d4e2026"
