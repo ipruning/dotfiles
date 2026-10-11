@@ -12,6 +12,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from .diff import DriftProtocolError, MackupCommandError, inspect_drift
+from .home_paths import path_exists, relative_path, validate_live_parent
 from .host_policy import HostPolicyError, mutation_allowed, require_mutation_allowed
 from .models import Drift, DriftKind, Status, status_summary
 from .render import emit_error
@@ -97,35 +98,6 @@ def plan_restore(repo_root: Path, home: Path, application: str) -> RestoreReport
     return RestoreReport(application=application, apply=False, results=tuple(results))
 
 
-def _relative_path(path: Path, root: Path, label: str) -> Path:
-    try:
-        relative = path.absolute().relative_to(root.absolute())
-    except ValueError as error:
-        raise RestoreError(f"{label} is outside {root}: {path}") from error
-    if ".." in relative.parts:
-        raise RestoreError(f"{label} traverses outside {root}: {path}")
-    return relative
-
-
-def _path_exists(path: Path) -> bool:
-    return path.exists() or path.is_symlink()
-
-
-def _validate_live_parent(live_path: Path, home: Path) -> None:
-    """Refuse live paths whose parent chain escapes home through a symlink.
-
-    Leaf symlinks are relinked, but a symlinked parent directory would place
-    the restored link outside $HOME. Adopt applies the same confinement in the
-    opposite direction.
-    """
-    existing = live_path.parent
-    while not _path_exists(existing):
-        if existing == existing.parent:
-            raise RestoreError(f"live parent has no existing ancestor: {live_path}")
-        existing = existing.parent
-    _relative_path(existing.resolve(), home.resolve(), "live parent")
-
-
 def apply_restore(repo_root: Path, home: Path, plan: RestoreReport) -> RestoreReport:
     """Back up changed live paths and link them to their reference paths."""
     require_mutation_allowed(home)
@@ -144,30 +116,38 @@ def apply_restore(repo_root: Path, home: Path, plan: RestoreReport) -> RestoreRe
         backup_path = None
         moved_live = False
         try:
-            _relative_path(drift.reference_path, reference_root, "reference path")
-            live_relative = _relative_path(drift.live_path, home, "live path")
-            if not _path_exists(drift.reference_path):
+            relative_path(
+                drift.reference_path, reference_root, "reference path", RestoreError
+            )
+            live_relative = relative_path(
+                drift.live_path, home, "live path", RestoreError
+            )
+            if not path_exists(drift.reference_path):
                 raise RestoreError(
                     f"reference path does not exist: {drift.reference_path}"
                 )
-            _relative_path(
+            relative_path(
                 drift.reference_path.parent.resolve(),
                 reference_root.resolve(),
                 "reference parent",
+                RestoreError,
             )
             if drift.reference_path.is_symlink():
                 link_target = Path(os.readlink(drift.reference_path))
             else:
                 resolved_reference = drift.reference_path.resolve()
-                _relative_path(
-                    resolved_reference, reference_root.resolve(), "reference target"
+                relative_path(
+                    resolved_reference,
+                    reference_root.resolve(),
+                    "reference target",
+                    RestoreError,
                 )
                 link_target = drift.reference_path
-            _validate_live_parent(drift.live_path, home)
+            validate_live_parent(drift.live_path, home, RestoreError)
             drift.live_path.parent.mkdir(parents=True, exist_ok=True)
             resolved_parent = drift.live_path.parent.resolve()
-            _relative_path(resolved_parent, home.resolve(), "live parent")
-            if _path_exists(drift.live_path):
+            relative_path(resolved_parent, home.resolve(), "live parent", RestoreError)
+            if path_exists(drift.live_path):
                 backup_path = backup_root / live_relative
                 backup_path.parent.mkdir(parents=True, exist_ok=True)
                 drift.live_path.rename(backup_path)

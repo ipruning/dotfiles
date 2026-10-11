@@ -14,6 +14,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from .diff import DriftProtocolError, MackupCommandError, inspect_drift
+from .home_paths import path_exists, relative_path, validate_live_parent
 from .host_policy import HostPolicyError, mutation_allowed, require_mutation_allowed
 from .models import Drift, DriftKind, Status
 from .render import emit_error
@@ -93,31 +94,21 @@ def plan_adopt(repo_root: Path, home: Path, application: str) -> AdoptReport:
     return AdoptReport(application=application, apply=False, results=tuple(results))
 
 
-def _relative_path(path: Path, root: Path, label: str) -> Path:
-    try:
-        relative = path.absolute().relative_to(root.absolute())
-    except ValueError as error:
-        raise AdoptError(f"{label} is outside {root}: {path}") from error
-    if ".." in relative.parts:
-        raise AdoptError(f"{label} traverses outside {root}: {path}")
-    return relative
-
-
-def _path_exists(path: Path) -> bool:
-    return path.exists() or path.is_symlink()
-
-
 def _dirty_reference_paths(repo_root: Path, plan: AdoptReport) -> list[str]:
     reference_root = repo_root / "reference"
     relative_paths = [
         str(
-            _relative_path(result.drift.reference_path, repo_root, "reference path"),
+            relative_path(
+                result.drift.reference_path, repo_root, "reference path", AdoptError
+            ),
         )
         for result in plan.results
         if result.status is Status.PLANNED
     ]
     for relative in relative_paths:
-        _relative_path(repo_root / relative, reference_root, "reference path")
+        relative_path(
+            repo_root / relative, reference_root, "reference path", AdoptError
+        )
     if not relative_paths:
         return []
     completed = subprocess.run(
@@ -159,32 +150,19 @@ def _dirty_reference_paths(repo_root: Path, plan: AdoptReport) -> list[str]:
 def _validate_reference_parent(reference_path: Path, reference_root: Path) -> None:
     """Confine the nearest existing ancestor before mkdir can follow symlinks."""
     existing = reference_path.parent
-    while not _path_exists(existing):
+    while not path_exists(existing):
         if existing == existing.parent:
             raise AdoptError(
                 f"reference parent has no existing ancestor: {reference_path}"
             )
         existing = existing.parent
-    _relative_path(existing.resolve(), reference_root.resolve(), "reference parent")
-
-
-def _validate_live_parent(live_path: Path, home: Path) -> None:
-    """Refuse live paths whose parent chain escapes home through a symlink.
-
-    Leaf symlinks are mirrored as symlinks, but a symlinked parent directory
-    would make the copy read content from outside $HOME into tracked data.
-    Restore applies the same confinement in the opposite direction.
-    """
-    existing = live_path.parent
-    while not _path_exists(existing):
-        if existing == existing.parent:
-            raise AdoptError(f"live parent has no existing ancestor: {live_path}")
-        existing = existing.parent
-    _relative_path(existing.resolve(), home.resolve(), "live parent")
+    relative_path(
+        existing.resolve(), reference_root.resolve(), "reference parent", AdoptError
+    )
 
 
 def _publish_staged_reference(staged: Path, reference_path: Path) -> None:
-    had_reference = _path_exists(reference_path)
+    had_reference = path_exists(reference_path)
     backup_directory: Path | None = None
     backup: Path | None = None
     if had_reference:
@@ -294,18 +272,21 @@ def apply_adopt(repo_root: Path, home: Path, plan: AdoptReport) -> AdoptReport:
             continue
         drift = planned.drift
         try:
-            _relative_path(drift.reference_path, reference_root, "reference path")
-            _relative_path(drift.live_path, home, "live path")
+            relative_path(
+                drift.reference_path, reference_root, "reference path", AdoptError
+            )
+            relative_path(drift.live_path, home, "live path", AdoptError)
             _validate_reference_parent(drift.reference_path, reference_root)
             if planned.action == "copy":
-                if not _path_exists(drift.live_path):
+                if not path_exists(drift.live_path):
                     raise AdoptError(f"live path does not exist: {drift.live_path}")
-                _validate_live_parent(drift.live_path, home)
+                validate_live_parent(drift.live_path, home, AdoptError)
                 drift.reference_path.parent.mkdir(parents=True, exist_ok=True)
-            _relative_path(
+            relative_path(
                 drift.reference_path.parent.resolve(),
                 reference_root.resolve(),
                 "reference parent",
+                AdoptError,
             )
             if planned.action == "copy":
                 _copy_live_into_reference(drift.live_path, drift.reference_path)
