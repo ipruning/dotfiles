@@ -101,9 +101,8 @@ plutil -lint "$plist" >/dev/null || fail 'install generated an invalid LaunchAge
 if rg -q 'skillshare|\.agents/skills|brrr-helper' "$plist"; then
   fail 'LaunchAgent depends on a Skillshare path'
 fi
-# The runtime may observe Skillshare state (skill-sync readiness guard), but
-# notification delivery must never route through a Skillshare-managed sender.
-if rg -q '\.agents/skills|brrr-helper' "$runtime_cli"; then
+# Notification delivery must never route through a Skillshare-managed sender.
+if rg -q 'skillshare|\.agents/skills|brrr-helper' "$runtime_cli"; then
   fail 'installed runtime depends on a Skillshare-managed sender path'
 fi
 
@@ -156,15 +155,15 @@ with sqlite3.connect(sys.argv[1]) as conn:
         (
             "snapshot-1",
             "2026-01-01T00:00:00Z",
-            "command_process_count",
-            json.dumps({"rows": [{"comm": "alpha", "count": 3}, {"comm": "beta", "count": 2}]}),
+            "condition",
+            json.dumps({"condition": "spawn_failed", "state": "bad", "value": 1}),
         ),
     )
 PY
 env "${test_env[@]}" "$installed_cli" --db "$query_db" query \
-  --event command_process_count --limit 10 --format json >"$test_root/query.json"
-jq -e 'select(length == 2 and .[0].rows == null and .[0].comm == "alpha" and .[1].comm == "beta")' \
-  "$test_root/query.json" >/dev/null || fail 'query did not preserve the flat process-inventory contract'
+  --event condition --limit 10 --format json >"$test_root/query.json"
+jq -e 'select(length == 1 and .[0].condition == "spawn_failed" and .[0].snapshot_status == "ok")' \
+  "$test_root/query.json" >/dev/null || fail 'query did not return the stored condition event'
 env "${test_env[@]}" "$installed_cli" --db "$query_db" compact --format json >"$test_root/custom-compact.json"
 jq -e --arg database "$query_db" \
   '.[0] | select(.database == $database and .service_restarted == false)' \

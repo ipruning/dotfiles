@@ -253,8 +253,8 @@ its last committed run.
 Each service executable owns its interface, installation, removal, tests, and
 generated launchd configuration; its runbook owns operation and recovery:
 
-- [`macos-session-health`](services/macos-session-health/README.md): incident
-  diagnosis and guarded recovery;
+- [`macos-session-health`](services/macos-session-health/README.md): alerts on
+  persistent session symptoms and keeps incident evidence;
 - [`macos-maxfiles`](services/macos-maxfiles/README.md): machine-wide file limit
   lifecycle and rollback;
 - [`cursoruiviewservice-watchdog`](services/cursoruiviewservice-watchdog/README.md):

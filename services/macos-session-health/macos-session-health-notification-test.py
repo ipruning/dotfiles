@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-import argparse
+import datetime as dt
 import json
 import os
-import plistlib
 import runpy
 import sqlite3
 import subprocess
@@ -17,7 +16,6 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
 from unittest import mock
-
 
 MODULE_PATH = Path(__file__).with_name("macos-session-health")
 
@@ -43,7 +41,7 @@ class ReadOnlyReportsTest(unittest.TestCase):
         )
 
     def test_missing_database_is_not_created_by_reports(self) -> None:
-        for command in ("query", "events", "trend", "incident"):
+        for command in ("query", "events", "incident"):
             with self.subTest(command=command):
                 db = self.root / f"missing {command} #?.sqlite3"
                 result = self.cli(db, command, "--format", "json")
@@ -56,34 +54,35 @@ class ReadOnlyReportsTest(unittest.TestCase):
         db = self.root / "reports with spaces #?" / "health #?.sqlite3"
         store = self.module["Store"](db, emit_stdout=False)
         try:
-            for count in (3, 8):
-                snapshot_id = store.create_snapshot("test", [])
-                store.emit(snapshot_id, "fd_top", pid=42, comm="sample", count=count)
-                store.emit(
-                    snapshot_id,
-                    "health_signal",
-                    "warning",
-                    signal="test_signal",
-                    value=count,
-                )
-                store.emit(
-                    snapshot_id,
-                    "macos_passive_log_match",
-                    "error",
-                    category="music_audio_9405",
-                    line="Music OpenOutputUnit failed -9405",
-                )
+            for rss in (40.0, 1800.0):
+                snapshot_id = store.create_snapshot("test")
+                store.emit(snapshot_id, "syspolicyd_resource", pid="503", rss_mb=rss)
                 store.emit(
                     snapshot_id,
                     "spawn_check",
                     name="true",
                     exit=1,
+                    timeout=False,
                     stderr="fork failed",
                 )
                 store.emit(
                     snapshot_id,
-                    "codex_node_repl_inventory",
-                    processes=[{"pid": "42", "ppid": "7"}],
+                    "syspolicyd_log_match",
+                    category="fd_exhausted",
+                    line="syspolicyd[503:1] Too many open files",
+                )
+                store.emit(
+                    snapshot_id,
+                    "condition",
+                    condition="spawn_failed",
+                    state="bad",
+                    value=1,
+                    detail="启动检查失败：true 退出码 1",
+                )
+                store.emit(
+                    snapshot_id,
+                    "evidence_fd_top",
+                    rows=[{"pid": "42", "comm": "sample", "count": 900}],
                 )
                 store.finish_snapshot(snapshot_id, "unhealthy")
         finally:
@@ -92,11 +91,12 @@ class ReadOnlyReportsTest(unittest.TestCase):
         for path in (db, db.relative_to(self.root)):
             with self.subTest(path=path):
                 result = self.cli(
-                    path, "query", "--event", "fd_top", "--format", "json"
+                    path, "query", "--event", "syspolicyd_resource", "--format", "json"
                 )
                 self.assertEqual(result.returncode, 0, result.stderr)
                 self.assertEqual(
-                    [row["count"] for row in json.loads(result.stdout)], [8, 3]
+                    [row["rss_mb"] for row in json.loads(result.stdout)],
+                    [1800.0, 40.0],
                 )
 
                 result = self.cli(path, "events", "--format", "json")
@@ -104,43 +104,36 @@ class ReadOnlyReportsTest(unittest.TestCase):
                 self.assertEqual(
                     {row["event"] for row in json.loads(result.stdout)},
                     {
-                        "fd_top",
-                        "health_signal",
-                        "macos_passive_log_match",
+                        "condition",
+                        "evidence_fd_top",
                         "spawn_check",
-                        "codex_node_repl_inventory",
+                        "syspolicyd_log_match",
+                        "syspolicyd_resource",
                     },
-                )
-
-                result = self.cli(path, "trend", "--format", "json")
-                self.assertEqual(result.returncode, 0, result.stderr)
-                rows = json.loads(result.stdout)
-                self.assertEqual(len(rows), 1)
-                self.assertEqual(rows[0]["identity"], "pid=42 comm=sample")
-                self.assertEqual(
-                    [rows[0][key] for key in ("first", "last", "delta", "samples")],
-                    [3, 8, 5, 2],
                 )
 
                 result = self.cli(path, "incident", "--format", "json")
                 self.assertEqual(result.returncode, 0, result.stderr)
                 report = json.loads(result.stdout)
+                summary = report["snapshot_summary"]
                 self.assertEqual(
-                    report["snapshot_summary"], {"total": 2, "unhealthy": 2, "error": 0}
+                    [summary[key] for key in ("total", "unhealthy", "error")],
+                    [2, 2, 0],
                 )
-                self.assertEqual(report["signal_counts"][0]["signal"], "test_signal")
-                self.assertEqual(report["signal_counts"][0]["count"], 2)
-                self.assertEqual(report["latest_fd_top"][0]["count"], 8)
+                conditions = {row["condition"]: row for row in report["conditions"]}
+                self.assertEqual(conditions["spawn_failed"]["bad_samples"], 2)
+                self.assertEqual(conditions["file_table_high"]["bad_samples"], 0)
                 self.assertEqual(
-                    report["passive_log_matches"][0]["category"], "music_audio_9405"
+                    report["failed_spawn_checks"][0]["stderr"], "fork failed"
                 )
-                self.assertEqual(report["spawn_checks"][0]["stderr"], "fork failed")
                 self.assertEqual(
-                    report["node_repl_inventories"][0]["processes"][0]["pid"], "42"
+                    report["syspolicyd_log_matches"][0]["category"], "fd_exhausted"
                 )
+                self.assertEqual(report["latest_evidence"]["fd_top"][0]["count"], 900)
+
                 markdown = self.cli(path, "incident", "--format", "markdown")
                 self.assertEqual(markdown.returncode, 0, markdown.stderr)
-                self.assertIn("Music OpenOutputUnit failed -9405", markdown.stdout)
+                self.assertIn("Too many open files", markdown.stdout)
                 self.assertIn("fork failed", markdown.stdout)
         self.assertEqual(db.read_bytes(), before)
 
@@ -155,73 +148,10 @@ class ReadOnlyReportsTest(unittest.TestCase):
         finally:
             conn.close()
 
-    def test_empty_app_is_rejected_before_collection_state(self) -> None:
-        for command in ("snapshot", "watch"):
-            for value in ("", "   "):
-                with self.subTest(command=command, value=value):
-                    db = self.root / "must not exist" / "health.sqlite3"
-                    result = self.cli(
-                        db,
-                        "--app",
-                        "/Applications/ChatGPT.app",
-                        "--app",
-                        value,
-                        command,
-                    )
-                    self.assertEqual(result.returncode, 2, result.stderr)
-                    self.assertIn("--app requires a non-empty", result.stderr)
-                    self.assertEqual(result.stdout, "")
-                    self.assertFalse(db.parent.exists())
 
-    def test_default_and_explicit_apps_reach_bundle_collector(self) -> None:
-        # Isolate unrelated host probes and notifications, not argument handling,
-        # Store, or the app-bundle collector being tested.
-        main = self.module["main"]
-        globals_ = main.__globals__
-        expected_defaults = ["/Applications/ChatGPT.app"]
-        for explicit in ([], [str(self.root / "Missing app.app")]):
-            with self.subTest(explicit=explicit):
-                db = self.root / "apps.sqlite3"
-                collected: list[str] = []
+class AlertLifecycleTest(unittest.TestCase):
+    """The notification contract: only persistent symptoms reach the phone."""
 
-                def bundle_snapshot(
-                    args: argparse.Namespace, store: Any, mode: str
-                ) -> str:
-                    collected.extend(args.app)
-                    snapshot_id = store.create_snapshot(mode, args.app)
-                    self.module["collect_app_assess"](
-                        store,
-                        snapshot_id,
-                        args.app,
-                        1,
-                        run_codesign=False,
-                        run_spctl=False,
-                    )
-                    store.finish_snapshot(snapshot_id, "ok")
-                    return "ok"
-
-                argv = [str(MODULE_PATH), "--db", str(db), "--quiet"]
-                for app in explicit:
-                    argv.extend(["--app", app])
-                with (
-                    mock.patch.object(sys, "argv", argv + ["snapshot"]),
-                    mock.patch.dict(globals_, {"snapshot": bundle_snapshot}),
-                ):
-                    self.assertEqual(main(), 0)
-                self.assertEqual(collected, explicit or expected_defaults)
-                with closing(sqlite3.connect(db)) as conn:
-                    bundles = [
-                        json.loads(row[0])["app"]
-                        for row in conn.execute(
-                            "SELECT data_json FROM events WHERE event = 'app_bundle'"
-                        )
-                    ]
-                self.assertEqual(bundles, explicit or expected_defaults)
-                self.assertNotIn(".", bundles)
-                db.unlink()
-
-
-class TrustdResourcesTest(unittest.TestCase):
     def setUp(self) -> None:
         self.module = runpy.run_path(str(MODULE_PATH))
         self.temp_dir = tempfile.TemporaryDirectory()
@@ -229,479 +159,218 @@ class TrustdResourcesTest(unittest.TestCase):
             Path(self.temp_dir.name) / "health.sqlite3", emit_stdout=False
         )
         self.args = SimpleNamespace(
-            command_timeout=1,
-            trustd_cpu_warn=50,
-            trustd_rss_warn_mb=100,
-            trustd_rss_growth_warn_mb_per_minute=1,
-            trustd_rss_error_mb=200,
-        )
-
-    def tearDown(self) -> None:
-        self.store.close()
-        self.temp_dir.cleanup()
-
-    def collect(self, rows: list[tuple[int, str, int]]) -> list[dict[str, Any]]:
-        snapshot_id = self.store.create_snapshot("test", [])
-
-        def run(command: list[str], **_kwargs: Any) -> tuple[int, str, str, bool, int]:
-            if command[0] == "pgrep":
-                return 0, "\n".join(str(row[0]) for row in rows), "", False, 1
-            pid, user, rss_kb = next(row for row in rows if str(row[0]) == command[2])
-            return (
-                0,
-                f"{pid} 1 {user} S 0.0 0.0 {rss_kb} 04-01:00:00 /usr/libexec/trustd",
-                "",
-                False,
-                1,
-            )
-
-        with mock.patch.dict(
-            self.module["collect_trustd_health"].__globals__, {"run_command": run}
-        ):
-            self.module["collect_trustd_health"](self.store, snapshot_id, self.args)
-        signals = list(self.store.current_signals)
-        self.store.finish_snapshot(snapshot_id, "ok")
-        return signals
-
-    def test_rss_rank_changes_do_not_report_restarts(self) -> None:
-        # Ignore the old aggregate baseline on upgrade; it tracks RSS rank.
-        self.store.set_state(
-            "last_process_resource:trustd",
-            json.dumps({"ts": "2000-01-01T00:00:00Z", "pid": "712", "rss_mb": 10}),
-        )
-        self.assertEqual(
-            self.collect([(495, "_trustd", 11264), (712, "alex", 10240)]), []
-        )
-        self.assertEqual(
-            self.collect([(712, "alex", 10240), (495, "_trustd", 9216)]), []
-        )
-        self.assertEqual(
-            self.collect([(495, "_trustd", 9216), (712, "alex", 8192)]), []
-        )
-
-    def test_restart_of_smaller_instance_is_reported(self) -> None:
-        self.collect([(495, "_trustd", 10240), (712, "alex", 5120)])
-        signals = self.collect([(495, "_trustd", 10240), (900, "alex", 5120)])
-        self.assertEqual(len(signals), 1)
-        self.assertEqual(signals[0]["signal"], "process_pid_changed")
-        self.assertEqual(str(signals[0]["pid"]), "900")
-        self.assertEqual(str(signals[0]["value"]), "712")
-
-    def test_growth_of_smaller_instance_is_reported(self) -> None:
-        self.collect([(495, "_trustd", 10240), (712, "alex", 5120)])
-        signals = self.collect([(495, "_trustd", 10240), (712, "alex", 8192)])
-        self.assertEqual(len(signals), 1)
-        self.assertEqual(signals[0]["signal"], "process_rss_growth_high")
-        self.assertEqual(str(signals[0]["pid"]), "712")
-
-    def test_new_user_has_no_previous_process(self) -> None:
-        self.collect([(495, "_trustd", 10240)])
-        self.assertEqual(
-            self.collect([(495, "_trustd", 10240), (712, "alex", 5120)]), []
-        )
-
-
-class NotificationSummaryTest(unittest.TestCase):
-    def setUp(self) -> None:
-        self.module = runpy.run_path(str(MODULE_PATH))
-        self.temp_dir = tempfile.TemporaryDirectory()
-        self.store = self.module["Store"](
-            Path(self.temp_dir.name) / "health.sqlite3", emit_stdout=False
-        )
-        self.args = SimpleNamespace(
-            brrr_notify_cooldown_minutes=10,
+            brrr_retry_minutes=10,
             brrr_thread_id="macos-session-health",
-            brrr_interruption_level="passive",
+            brrr_interruption_level="active",
             brrr_open_url="",
             brrr_timeout=2,
         )
-
-    def tearDown(self) -> None:
-        self.store.close()
-        self.temp_dir.cleanup()
-
-    def notify(self, signals: set[str], status: str = "unhealthy") -> None:
-        snapshot_id = self.store.create_snapshot("test", [])
-        for signal in signals:
-            self.store.emit(
-                snapshot_id,
-                "health_signal",
-                "warning",
-                signal=signal,
-                value=1,
-                detail="test",
-            )
-        self.module["maybe_send_brrr_notification"](
-            self.store, snapshot_id, self.args, status
-        )
-
-    def install_delivery_stub(
-        self, results: list[dict[str, Any]] | None = None
-    ) -> list[dict[str, Any]]:
-        payloads: list[dict[str, Any]] = []
-        queued = list(results or [])
+        self.payloads: list[dict[str, Any]] = []
+        self.delivery_ok = True
 
         def deliver(payload: dict[str, Any], _timeout: float) -> dict[str, Any]:
-            payloads.append(payload)
-            if queued:
-                return queued.pop(0)
+            self.payloads.append(payload)
             return {
-                "exit": 0,
+                "exit": 0 if self.delivery_ok else 1,
                 "timeout": False,
                 "duration_ms": 1,
                 "auth_mode": "bearer",
                 "credential_source": "test",
                 "endpoint": "https://example.test/send",
-                "http_status": 202,
+                "http_status": 202 if self.delivery_ok else 503,
+                "error": "" if self.delivery_ok else "HTTP 503",
             }
 
-        self.module["maybe_send_brrr_notification"].__globals__["deliver_brrr"] = (
-            deliver
-        )
-        return payloads
+        self.module["update_alerts"].__globals__["deliver_brrr"] = deliver
 
-    def test_sorted_signal_summary_and_success_cooldown(self) -> None:
-        payloads = self.install_delivery_stub()
-        self.notify({"spawn_failed"})
-
-        self.assertEqual(len(payloads), 1)
-        self.assertIn("signals=spawn_failed", payloads[0]["message"])
-        self.assertIn("status=unhealthy", payloads[0]["message"])
-        self.assertIn("incident --hours 6 --format markdown", payloads[0]["message"])
-        self.assertIsNotNone(self.store.get_state("last_brrr_notification_sent_at"))
-
-    def observed(self, severity: str | None, *, failed: bool = False) -> None:
-        sid = self.store.create_snapshot("test", [])
-
-        def probe(store: Any, snapshot_id: str) -> None:
-            if severity:
-                store.emit(
-                    snapshot_id,
-                    "health_signal",
-                    severity,
-                    signal="resource_high",
-                    role="test",
-                    pid="42",
-                    value=100,
-                )
-            if failed:
-                raise RuntimeError("probe interrupted")
-
-        try:
-            self.module["collect_observation"](probe, self.store, sid)
-        except RuntimeError:
-            pass
-        self.module["maybe_send_brrr_notification"](self.store, sid, self.args, "ok")
-        self.store.finish_snapshot(sid, "ok")
-
-    def test_unchanged_survives_cooldown_restart_and_failed_recheck(self) -> None:
-        payloads = self.install_delivery_stub()
-        self.observed("warning")
-        self.expire_cooldown()
-        self.observed("warning")
-        self.observed(None, failed=True)
-        self.observed("warning")
-        db = self.store.db_path
+    def tearDown(self) -> None:
         self.store.close()
-        self.store = self.module["Store"](db, emit_stdout=False)
-        self.observed("warning")
-        self.assertEqual(len(payloads), 1)
-        self.observed(None)  # A completed healthy recheck ends the episode.
-        self.observed("warning")
-        self.assertEqual(len(payloads), 2)
-        self.assertIn("status=warning", payloads[0]["message"])
+        self.temp_dir.cleanup()
 
-    def test_failed_command_does_not_rearm_notified_issue(self) -> None:
-        payloads = self.install_delivery_stub()
-        self.observed("warning")
-        self.expire_cooldown()
-        sid = self.store.create_snapshot("test", [])
+    def observe(self, *states: str, condition: str = "spawn_failed") -> None:
+        observation = self.module["observation"]
+        for state in states:
+            snapshot_id = self.store.create_snapshot("test")
+            self.module["update_alerts"](
+                self.store,
+                snapshot_id,
+                {condition: observation(state, 1, f"{condition} detail")},
+                self.args,
+            )
 
-        def probe(store: Any, snapshot_id: str) -> None:
-            store.emit(snapshot_id, "limits", sysctl_exit=1, sysctl_timeout=False)
+    def alert(self, condition: str = "spawn_failed") -> dict[str, Any]:
+        return self.module["load_alert"](self.store, condition)
 
-        self.module["collect_observation"](probe, self.store, sid)
-        self.module["maybe_send_brrr_notification"](self.store, sid, self.args, "ok")
-        self.observed("warning")
-        self.assertEqual(len(payloads), 1)
+    def test_single_bad_sample_does_not_notify(self) -> None:
+        self.observe("bad", "ok")
+        self.assertEqual(self.payloads, [])
 
-    def test_skipped_probe_does_not_clear_and_error_bypasses_warning_cooldown(
+    def test_flapping_condition_never_notifies(self) -> None:
+        # The old design re-armed on every clean recheck, so a probe hovering
+        # around its threshold pushed again on each bad sample.
+        self.observe(*["bad", "ok"] * 10)
+        self.assertEqual(self.payloads, [])
+        self.assertEqual(self.alert()["status"], "ok")
+
+    def test_sustained_condition_notifies_once_then_recovers_once(self) -> None:
+        self.observe("bad", "bad")
+        self.assertEqual(len(self.payloads), 1)
+        self.assertIn("macOS 无法正常启动进程", self.payloads[0]["title"])
+        self.assertEqual(self.payloads[0]["interruption_level"], "active")
+        self.assertIn("incident --hours 1", self.payloads[0]["message"])
+
+        self.observe("bad", "bad", "bad", "unknown", "unknown", "ok", "ok")
+        self.assertEqual(len(self.payloads), 1)
+        self.assertEqual(self.alert()["status"], "firing")
+
+        self.observe("ok")
+        self.assertEqual(len(self.payloads), 2)
+        self.assertIn("已恢复", self.payloads[1]["title"])
+        self.assertEqual(self.payloads[1]["interruption_level"], "passive")
+        self.assertEqual(self.alert()["status"], "ok")
+
+    def test_unknown_observation_neither_advances_nor_resets(self) -> None:
+        self.observe("bad", "unknown", "unknown")
+        self.assertEqual(self.payloads, [])
+        self.observe("bad")
+        self.assertEqual(len(self.payloads), 1)
+
+    def test_each_condition_uses_its_own_threshold(self) -> None:
+        self.observe("bad", "bad", condition="syspolicyd_rss_high")
+        self.assertEqual(self.payloads, [])
+        self.observe("bad", condition="syspolicyd_rss_high")
+        self.assertEqual(len(self.payloads), 1)
+        self.assertEqual(self.alert("syspolicyd_rss_high")["status"], "firing")
+        self.assertEqual(self.alert()["status"], "ok")
+
+    def test_failed_delivery_retries_on_interval_and_recovery_stays_silent(
         self,
     ) -> None:
-        payloads = self.install_delivery_stub()
-        self.observed("warning")
-        self.notify(set(), "ok")  # No probe ran.
-        self.observed("warning")
-        self.assertEqual(len(payloads), 1)
-        self.observed("error")
-        self.assertEqual(len(payloads), 2)
-        self.observed("error")
-        self.assertEqual(len(payloads), 2)
-        self.observed("critical")
-        self.assertEqual(len(payloads), 3)
+        self.delivery_ok = False
+        self.observe("bad", "bad", "bad")
+        self.assertEqual(len(self.payloads), 1)
 
-    def test_one_apps_success_does_not_clear_another_apps_skipped_check(self) -> None:
-        self.install_delivery_stub()
-        apps = [Path(self.temp_dir.name) / f"{name}.app" for name in ("A", "B")]
-        for app in apps:
-            binary = app / "Contents" / "MacOS" / "main"
-            binary.parent.mkdir(parents=True)
-            binary.touch()
-            (app / "Contents" / "Info.plist").write_bytes(
-                plistlib.dumps({"CFBundleExecutable": "main"}))
-        collect = self.module["collect_app_assess"]
-        for index in range(2):
-            sid = self.store.create_snapshot("test", [])
-            if index:
-                (apps[0] / "Contents" / "MacOS" / "main").unlink()
-            with mock.patch.dict(collect.__globals__, {
-                "run_command": lambda cmd, **kw: (1, "", "timeout", True, 1)
-                    if cmd[-1] == str(apps[0]) else (0, "", "", False, 1),
-            }):
-                self.module["collect_observation"](
-                    collect, self.store, sid, [str(app) for app in apps], 1,
-                    run_codesign=True, run_spctl=False)
-            self.module["maybe_send_brrr_notification"](self.store, sid, self.args, "unhealthy")
-            remembered = json.loads(self.store.get_state("brrr_notified_issues"))
-            self.assertTrue(any("app_codesign_timeout" in key for key in remembered))
-            self.store.finish_snapshot(sid, "unhealthy")
+        alert = self.alert()
+        stale = dt.datetime.now(dt.UTC) - dt.timedelta(minutes=11)
+        alert["last_attempt_at"] = stale.isoformat().replace("+00:00", "Z")
+        self.store.set_state("alert:spawn_failed", json.dumps(alert))
+        self.delivery_ok = True
+        self.observe("bad")
+        self.assertEqual(len(self.payloads), 2)
+        self.assertTrue(self.alert()["notified"])
 
-    def test_no_signal_sends_nothing_and_no_recovery(self) -> None:
-        payloads = self.install_delivery_stub()
-        self.notify(set(), status="ok")
-        self.assertEqual(payloads, [])
+    def test_recovery_after_undelivered_alert_sends_nothing(self) -> None:
+        self.delivery_ok = False
+        self.observe("bad", "bad", "ok", "ok", "ok")
+        self.assertEqual(len(self.payloads), 1)
+        self.assertEqual(self.alert()["status"], "ok")
 
-    def test_missing_trusted_roots_remain_inventory_without_pushes(self) -> None:
-        payloads = self.install_delivery_stub()
-        root = Path(self.temp_dir.name)
-        config = root / "config.toml"
-        missing = [root / "deleted-project", root / "deleted-worktree"]
-        config.write_text(
-            "\n".join(
-                f'[projects.{json.dumps(str(path))}]\ntrust_level = "trusted"'
-                for path in missing + [root]
-            ),
-            encoding="utf-8",
-        )
-        args = SimpleNamespace(codex_config=config, codex_trusted_root_check_timeout=1)
-        for _ in range(2):
-            snapshot_id = self.store.create_snapshot("test", [])
-            self.module["collect_codex_trusted_project_roots"](
-                self.store, snapshot_id, args
-            )
-            self.module["maybe_send_brrr_notification"](
-                self.store, snapshot_id, self.args, "ok"
-            )
-            self.assertEqual(self.store.current_signals, [])
-            assert self.store.conn is not None
-            records = {
-                record["root"]: record
-                for (data,) in self.store.conn.execute(
-                    "SELECT data_json FROM events "
-                    "WHERE snapshot_id = ? AND event = 'codex_trusted_project_root'",
-                    (snapshot_id,),
-                )
-                for record in [json.loads(data)]
-            }
-            self.assertEqual(set(records), {str(path) for path in missing + [root]})
-            for path in missing:
-                self.assertFalse(records[str(path)]["root_exists"])
-            self.assertTrue(records[str(root)]["root_exists"])
-            self.store.finish_snapshot(snapshot_id, "ok")
-        self.assertEqual(payloads, [])
-        self.assertIsNone(self.store.get_state("last_brrr_notification_sent_at"))
-
-    def test_existing_trusted_root_with_invalid_git_still_notifies(self) -> None:
-        payloads = self.install_delivery_stub()
-        root = Path(self.temp_dir.name)
-        project = root / "broken-project"
-        project.mkdir()
-        (project / ".git").write_text("gitdir: missing-worktree\n", encoding="utf-8")
-        config = root / "config.toml"
-        config.write_text(
-            f'[projects.{json.dumps(str(project))}]\ntrust_level = "trusted"\n',
-            encoding="utf-8",
-        )
-        snapshot_id = self.store.create_snapshot("test", [])
-        self.module["collect_codex_trusted_project_roots"](
-            self.store,
-            snapshot_id,
-            SimpleNamespace(codex_config=config, codex_trusted_root_check_timeout=1),
-        )
-        self.module["maybe_send_brrr_notification"](
-            self.store, snapshot_id, self.args, "ok"
-        )
-        self.assertEqual(len(payloads), 1)
-        self.assertIn("codex_trusted_root_git_invalid", payloads[0]["message"])
-
-    def zombie_snapshot(
-        self, count: int | None, *, ps_failed: bool = False, other_signal: str = ""
+    def test_collector_crashes_notify_after_three_consecutive_snapshots(
+        self,
     ) -> None:
-        snapshot_id = self.store.create_snapshot("test", [])
-        if count is not None:
-            output = "alex 1 100 S node\n" + "".join(
-                f"alex 100 {200 + i} Z <defunct>\n" for i in range(count)
-            )
-            with mock.patch.dict(
-                self.module["collect_process_counts"].__globals__,
-                {
-                    "run_command": lambda *_args, **_kwargs: (
-                        1 if ps_failed else 0,
-                        output,
-                        "ps failed" if ps_failed else "",
-                        False,
-                        1,
-                    )
-                },
-            ):
-                self.module["collect_process_counts"](self.store, snapshot_id, 15, 1)
-        if other_signal:
-            self.store.emit(
-                snapshot_id, "health_signal", "error", signal=other_signal, value=1
-            )
-        self.module["maybe_send_brrr_notification"](
-            self.store, snapshot_id, self.args, "ok"
-        )
-        self.store.finish_snapshot(snapshot_id, "ok")
+        snapshot = self.module["snapshot"]
+        args = SimpleNamespace(**vars(self.args), retention_days=0)
 
-    def test_live_sshd_session_zombie_is_not_a_signal(self) -> None:
-        payloads = self.install_delivery_stub()
-        snapshot_id = self.store.create_snapshot("test", [])
-        output = (
-            "root 1 100 Ss sshd-session: alex [postauth]\n"
-            "root 100 101 Z <defunct>\n"
-            "alex 100 102 S sshd-session: alex@notty\n"
-            "root 1 110 Ss sshd-session: alex [postauth]\n"
-            "root 110 111 Z <defunct>\n"
-        )
+        def crash(*_args: Any) -> Any:
+            raise RuntimeError("probe exploded")
+
+        with mock.patch.dict(snapshot.__globals__, {"collect_observations": crash}):
+            for _ in range(3):
+                with self.assertRaisesRegex(RuntimeError, "probe exploded"):
+                    snapshot(args, self.store, "test")
+        self.assertEqual(len(self.payloads), 1)
+        self.assertIn("采集器连续崩溃", self.payloads[0]["title"])
+        self.assertIn("probe exploded", self.payloads[0]["message"])
+        statuses = self.store.conn.execute(
+            "SELECT status FROM snapshots ORDER BY started_at"
+        ).fetchall()
+        self.assertEqual([row[0] for row in statuses], ["error"] * 3)
+
+
+class ProbeTest(unittest.TestCase):
+    def setUp(self) -> None:
+        self.module = runpy.run_path(str(MODULE_PATH))
+        self.store = self.module["Store"](None, emit_stdout=False)
+        self.sid = self.store.create_snapshot("test")
+
+    def run_with(self, function: str, result: tuple[Any, ...], **kwargs: Any) -> Any:
+        probe = self.module[function]
         with mock.patch.dict(
-            self.module["collect_process_counts"].__globals__,
-            {"run_command": lambda *_args, **_kwargs: (0, output, "", False, 1)},
+            probe.__globals__, {"run_command": lambda *_a, **_kw: result}
         ):
-            self.module["collect_process_counts"](self.store, snapshot_id, 15, 1)
-        self.module["maybe_send_brrr_notification"](
-            self.store, snapshot_id, self.args, "ok"
+            return probe(self.store, self.sid, **kwargs)
+
+    def test_spawn_timeout_is_bad(self) -> None:
+        observed = self.run_with("probe_spawn", (124, "", "", True, 5000.0), timeout=5)
+        self.assertEqual(observed["state"], "bad")
+        self.assertIn("超时", observed["detail"])
+
+    def test_process_and_file_tables_compare_against_kernel_limits(self) -> None:
+        user = self.module["getpass"].getuser()
+        limits = {
+            "kern.maxproc": 100,
+            "kern.maxprocperuid": 50,
+            "kern.num_files": 79,
+            "kern.maxfiles": 100,
+        }
+        rows = [{"user": user}] * 43 + [{"user": "root"}] * 10
+        probe_process_table = self.module["probe_process_table"]
+        self.assertEqual(probe_process_table(rows, limits, 85)["state"], "bad")
+        self.assertEqual(probe_process_table(rows[:40], limits, 85)["state"], "ok")
+        self.assertEqual(probe_process_table(None, limits, 85)["state"], "unknown")
+        probe_file_table = self.module["probe_file_table"]
+        self.assertEqual(probe_file_table(limits, 80)["state"], "ok")
+        self.assertEqual(
+            probe_file_table({**limits, "kern.num_files": 80}, 80)["state"], "bad"
         )
-        self.assertEqual(payloads, [])
 
-        snapshot_id = self.store.create_snapshot("test", [])
-        output += "root 100 103 Z <defunct>\n"
-        with mock.patch.dict(
-            self.module["collect_process_counts"].__globals__,
-            {"run_command": lambda *_args, **_kwargs: (0, output, "", False, 1)},
-        ):
-            self.module["collect_process_counts"](self.store, snapshot_id, 15, 1)
-        self.module["maybe_send_brrr_notification"](
-            self.store, snapshot_id, self.args, "ok"
-        )
-        self.assertEqual(len(payloads), 1)
-        self.assertIn("zombies_present", payloads[0]["message"])
-
-    def expire_cooldown(self) -> None:
-        self.store.set_state("last_brrr_notification_sent_at", "2000-01-01T00:00:00Z")
-
-    def test_zombie_peak_survives_skipped_probes_and_resets_on_observed_zero(
-        self,
-    ) -> None:
-        payloads = self.install_delivery_stub()
-        self.zombie_snapshot(1)
-        self.expire_cooldown()
-        self.zombie_snapshot(None)
-        self.zombie_snapshot(1)
-        self.assertEqual(len(payloads), 1)
-        self.zombie_snapshot(2)
-        self.assertEqual(len(payloads), 2)
-        self.expire_cooldown()
-        self.zombie_snapshot(1)
-        self.zombie_snapshot(2)
-        self.assertEqual(len(payloads), 2)
-        self.zombie_snapshot(0)
-        self.assertEqual(len(payloads), 2)
-        self.zombie_snapshot(1)
-        self.assertEqual(len(payloads), 3)
-
-    def test_zombie_cooldown_and_failure_do_not_advance_peak(self) -> None:
-        payloads = self.install_delivery_stub()
-        self.zombie_snapshot(1)
-        self.zombie_snapshot(2)
-        self.assertEqual(self.store.get_state("brrr_zombie_notified_peak"), "1")
-        self.expire_cooldown()
-        self.install_delivery_stub(
-            [
-                {
-                    "exit": 1,
-                    "timeout": True,
-                    "auth_mode": "bearer",
-                    "credential_source": "test",
-                }
-            ]
-        )
-        self.zombie_snapshot(2)
-        self.assertEqual(self.store.get_state("brrr_zombie_notified_peak"), "1")
-        retry_payloads = self.install_delivery_stub()
-        self.zombie_snapshot(2)
-        self.assertEqual(len(retry_payloads), 1)
-        self.assertEqual(self.store.get_state("brrr_zombie_notified_peak"), "2")
-        self.assertEqual(len(payloads), 1)
-
-    def test_failed_process_probe_does_not_reset_peak_or_suppress_other_faults(
-        self,
-    ) -> None:
-        payloads = self.install_delivery_stub()
-        self.zombie_snapshot(1)
-        self.expire_cooldown()
-        self.zombie_snapshot(0, ps_failed=True)
-        self.assertEqual(self.store.get_state("brrr_zombie_notified_peak"), "1")
-        self.assertIn("signals=ps_failed", payloads[-1]["message"])
-        self.expire_cooldown()
-        self.zombie_snapshot(1, other_signal="spawn_failed")
-        self.assertIn("signals=spawn_failed", payloads[-1]["message"])
-        self.assertNotIn("zombies_present", payloads[-1]["message"])
-
-    def test_failed_delivery_does_not_start_cooldown(self) -> None:
-        payloads = self.install_delivery_stub(
-            [
-                {
-                    "exit": 1,
-                    "timeout": True,
-                    "duration_ms": 10,
-                    "auth_mode": "bearer",
-                    "credential_source": "test",
-                    "endpoint": "https://example.test/send",
-                    "error": "timed out",
-                }
-            ]
-        )
-        self.notify({"spawn_failed"})
-        self.notify({"spawn_failed"})
-        self.assertEqual(len(payloads), 2)
-
-    def test_notification_channel_signal_does_not_bootstrap_notification(self) -> None:
-        snapshot_id = self.store.create_snapshot("test", [])
-        with mock.patch.dict(
-            self.module["collect_notification_channel_guard"].__globals__,
+    def test_syspolicyd_rss_uses_the_largest_instance(self) -> None:
+        probe = self.module["probe_syspolicyd_rss"]
+        rows = [
             {
-                "brrr_configuration": lambda: {
-                    "configured": False,
-                    "auth_mode": "unconfigured",
-                    "credential_source": "",
-                    "endpoint": "",
-                    "secret": "",
-                }
+                "comm": "/usr/libexec/syspolicyd",
+                "pid": "503",
+                "stat": "Ss",
+                "cpu_percent": 0.0,
+                "rss_mb": 2000.0,
+                "etime": "1",
             },
-        ):
-            self.module["collect_notification_channel_guard"](
-                self.store, snapshot_id, SimpleNamespace()
-            )
-        self.assertIn(
-            "notification_channel_unconfigured",
-            {signal["signal"] for signal in self.store.current_signals},
+            {
+                "comm": "/usr/bin/other",
+                "pid": "9",
+                "stat": "S",
+                "cpu_percent": 0.0,
+                "rss_mb": 9000.0,
+                "etime": "1",
+            },
+        ]
+        self.assertEqual(probe(self.store, self.sid, rows, 1536)["state"], "bad")
+        self.assertEqual(
+            probe(self.store, self.sid, rows[1:], 1536)["state"], "unknown"
         )
-        payloads = self.install_delivery_stub()
-        self.module["maybe_send_brrr_notification"](
-            self.store, snapshot_id, self.args, "unhealthy"
+
+    def scan(self, output: str, *, timed_out: bool = False) -> dict[str, Any]:
+        return self.run_with(
+            "probe_syspolicyd_log",
+            (124 if timed_out else 0, output, "", timed_out, 1.0),
+            timeout=30,
+            last_minutes=5,
+            assessment_failure_limit=100,
+            max_lines=5,
         )
-        self.assertEqual(payloads, [])
+
+    def test_syspolicyd_log_alerts_on_fd_exhaustion_not_routine_failures(
+        self,
+    ) -> None:
+        routine = (
+            "2026-10-11 E syspolicyd[503:1] Failed to generate SecStaticCode"
+            " for <private> error: -67068\n"
+        ) * 15
+        self.assertEqual(self.scan(routine)["state"], "ok")
+        self.assertEqual(self.scan(routine * 7)["state"], "bad")
+        exhausted = "2026-10-11 E syspolicyd[503:1] UNIX error exception: 24\n"
+        self.assertEqual(self.scan(exhausted)["state"], "bad")
+        self.assertEqual(self.scan(exhausted, timed_out=True)["state"], "unknown")
 
 
 class DeliveryTest(unittest.TestCase):
@@ -820,103 +489,6 @@ class LifecyclePartialProgressTest(unittest.TestCase):
             self.assertEqual(uninstall(), 0)
         self.assertFalse(self.wrapper.exists())
         self.assertFalse(self.runtime.exists())
-
-
-class DiagnosticSignalsTest(unittest.TestCase):
-    def setUp(self) -> None:
-        self.module = runpy.run_path(str(MODULE_PATH))
-        self.store = self.module["Store"](None, emit_stdout=False)
-        self.sid = self.store.create_snapshot("test", [])
-
-    def test_idle_audio_service_is_not_failure_but_missing_is(self) -> None:
-        collect = self.module["collect_audio_registrar_health"]
-        for exit_code, output, expected in (
-            (0, "\tstate = not running\n", []),
-            (3, "", ["launch_service_missing", "launch_service_missing"]),
-        ):
-            self.store.current_signals = []
-            with mock.patch.dict(
-                collect.__globals__,
-                {
-                    "run_command": lambda *a, **kw: (exit_code, output, "", False, 1),
-                },
-            ):
-                collect(self.store, self.sid, SimpleNamespace(command_timeout=1))
-            self.assertEqual(
-                [s["signal"] for s in self.store.current_signals], expected
-            )
-
-    def test_lifecycle_logs_are_evidence_and_real_audio_failure_is_error(self) -> None:
-        collect = self.module["collect_passive_log_signals"]
-        lines = "\n".join(
-            [
-                "launchd[1] service inactive: com.apple.audio.AudioComponentRegistrar",
-                "launchd[1] removing service: com.apple.audio.AudioComponentRegistrar",
-                "launchd[1] AudioComponentRegistrar Failed to check-in, peer may have been unloaded",
-            ]
-        )
-        with mock.patch.dict(
-            collect.__globals__,
-            {
-                "run_command": lambda *a, **kw: (0, lines, "", False, 1),
-            },
-        ):
-            self.assertTrue(
-                collect(
-                    self.store,
-                    self.sid,
-                    1,
-                    40,
-                    5,
-                    3,
-                    scan_kind="core",
-                    include_codex_warnings=False,
-                )
-            )
-        self.assertEqual(self.store.current_signals, [])
-        with mock.patch.dict(
-            collect.__globals__,
-            {
-                "run_command": lambda *a, **kw: (
-                    0,
-                    "launchd[1] failed lookup: name = com.apple.audio.AudioComponentRegistrar",
-                    "",
-                    False,
-                    1,
-                ),
-            },
-        ):
-            self.assertFalse(
-                collect(
-                    self.store,
-                    self.sid,
-                    1,
-                    40,
-                    5,
-                    3,
-                    scan_kind="core",
-                    include_codex_warnings=False,
-                )
-            )
-        self.assertEqual(self.store.current_signals[0]["severity"], "error")
-
-    def test_node_count_is_diagnostic_with_process_facts(self) -> None:
-        collect = self.module["collect_codex_process_summary"]
-        output = "42 7 S 0.0 1024 00:10 /Applications/ChatGPT.app/Contents/Resources/cua_node/bin/node_repl"
-        with mock.patch.dict(
-            collect.__globals__,
-            {
-                "run_command": lambda *a, **kw: (0, output, "", False, 1),
-            },
-        ):
-            result = collect(
-                self.store,
-                self.sid,
-                SimpleNamespace(command_timeout=1, codex_node_repl_warn=1),
-                {},
-            )
-        self.assertEqual(result["node_repl_count"], 1)
-        self.assertEqual(self.store.current_signals[0]["severity"], "info")
 
 
 if __name__ == "__main__":

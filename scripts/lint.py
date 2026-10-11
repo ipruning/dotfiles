@@ -63,18 +63,6 @@ OPTIONAL_PATHS = {
     ("reference/.zshrc", "/usr/local/Cellar"),
     ("reference/.zshrc", "/usr/local/share/zsh/site-functions"),
     ("reference/.zshrc", "/usr/local/share/info"),
-    (
-        "services/macos-session-health/macos-session-health",
-        "/Applications/Codex.app/Contents/MacOS/Codex",
-    ),
-    (
-        "services/macos-session-health/macos-session-health",
-        "/Applications/{app_name}.app/Contents/Resources/codex",
-    ),
-    (
-        "services/macos-session-health/macos-session-health",
-        "/Applications/{app_name}.app/Contents/Resources/cua_node/bin/node_repl",
-    ),
     ("shell/zsh/env.zsh", "/usr/local/bin/op"),
 }
 
