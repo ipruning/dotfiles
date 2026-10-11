@@ -32,55 +32,58 @@ shellcheck = "0.11.0"
 uv = "0.12.21"
 
 [env]
+# mise sets VIRTUAL_ENV only once .venv exists. Python tasks call that
+# interpreter directly because mise inserts its PATH entries where the shims
+# directory sits, which can be after /usr/bin (Omarchy's login PATH does this).
 _.python.venv = { path = ".venv" }
 
 [tasks.diff]
 description = "Report configuration drift without changing files"
-run = 'python -m scripts.diff "$@"'
+run = '"${VIRTUAL_ENV:+$VIRTUAL_ENV/bin/}python" -m scripts.diff "$@"'
 
 [tasks.restore]
 description = "Preview or apply one reference application"
-run = 'python -m scripts.restore "$@"'
+run = '"${VIRTUAL_ENV:+$VIRTUAL_ENV/bin/}python" -m scripts.restore "$@"'
 
 [tasks.adopt]
 description = "Preview or adopt one application's live configuration into the reference"
-run = 'python -m scripts.adopt "$@"'
+run = '"${VIRTUAL_ENV:+$VIRTUAL_ENV/bin/}python" -m scripts.adopt "$@"'
 
 [tasks.check]
 description = "Inspect this host's required and optional capabilities"
-run = 'python -m scripts.check "$@"'
+run = '"${VIRTUAL_ENV:+$VIRTUAL_ENV/bin/}python" -m scripts.check "$@"'
 
 [tasks.doctor]
 description = "Aggregate read-only repository and host health checks"
-run = 'python -m scripts.doctor "$@"'
+run = '"${VIRTUAL_ENV:+$VIRTUAL_ENV/bin/}python" -m scripts.doctor "$@"'
 
 [tasks.clean]
 description = "Preview or apply package-manager cleanup"
-run = 'python -m scripts.clean "$@"'
+run = '"${VIRTUAL_ENV:+$VIRTUAL_ENV/bin/}python" -m scripts.clean "$@"'
 
 [tasks.setup-linux-lite]
 description = "Preview or apply the Linux Lite Bash startup block and Git include"
-run = 'python -m scripts.setup_linux_lite "$@"'
+run = '"${VIRTUAL_ENV:+$VIRTUAL_ENV/bin/}python" -m scripts.setup_linux_lite "$@"'
 
 [tasks.update]
 description = "Preview or apply host tool updates"
-run = 'python -m scripts.update "$@"'
+run = '"${VIRTUAL_ENV:+$VIRTUAL_ENV/bin/}python" -m scripts.update "$@"'
 
 [tasks.upgrade-tools]
 description = "Preview or advance the shared mise baseline on the maintenance host"
-run = 'python -m scripts.upgrade_tools "$@"'
+run = '"${VIRTUAL_ENV:+$VIRTUAL_ENV/bin/}python" -m scripts.upgrade_tools "$@"'
 
 [tasks.mise-sync]
 description = "Preview or converge global mise configuration, locked tools, and shims"
-run = 'python -m scripts.mise_sync "$@"'
+run = '"${VIRTUAL_ENV:+$VIRTUAL_ENV/bin/}python" -m scripts.mise_sync "$@"'
 
 [tasks.generate]
 description = "Preview or regenerate generated/ shell integrations, completions, and plugins"
-run = 'python -m scripts.generate "$@"'
+run = '"${VIRTUAL_ENV:+$VIRTUAL_ENV/bin/}python" -m scripts.generate "$@"'
 
 [tasks.inventory]
 description = "Preview or snapshot installed host software into inventory/<host>/"
-run = 'python -m scripts.inventory "$@"'
+run = '"${VIRTUAL_ENV:+$VIRTUAL_ENV/bin/}python" -m scripts.inventory "$@"'
 
 [tasks.zsh-profile]
 description = "Profile Zsh startup time"
@@ -88,11 +91,11 @@ run = 'scripts/zsh-profile "$@"'
 
 [tasks.lint]
 description = "Inspect repository paths, mappings, and symlinks"
-run = 'python -m scripts.lint "$@"'
+run = '"${VIRTUAL_ENV:+$VIRTUAL_ENV/bin/}python" -m scripts.lint "$@"'
 
 [tasks.shell]
 description = "Check shell files with syntax and ShellCheck gates"
-run = 'python -m scripts.shell "$@"'
+run = '"${VIRTUAL_ENV:+$VIRTUAL_ENV/bin/}python" -m scripts.shell "$@"'
 
 [tasks.format]
 description = "Check Python formatting and style"
