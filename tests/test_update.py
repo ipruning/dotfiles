@@ -901,7 +901,12 @@ def test_update_cli_refreshes_runtime_after_independent_failure(tmp_path: Path) 
     assert (tmp_path / "project/generated/functions/_mise.zsh").is_file()
 
 
-def _run_upgrade(tmp_path: Path, *arguments: str, linked: bool = True):
+def _run_upgrade(
+    tmp_path: Path,
+    *arguments: str,
+    linked: bool = True,
+    yazi_linked: bool | None = None,
+):
     source_root = Path(__file__).resolve().parents[1]
     project = tmp_path / "project"
     shutil.copytree(source_root / "scripts", project / "scripts")
@@ -933,6 +938,17 @@ def _run_upgrade(tmp_path: Path, *arguments: str, linked: bool = True):
         live.symlink_to(source)
     else:
         shutil.copy2(source, live)
+    if yazi_linked is not None:
+        _fake_tool(binary, "ya", log)
+        packages = project / "reference/.config/yazi/package.toml"
+        packages.parent.mkdir(parents=True)
+        packages.write_text("[[plugin.deps]]\n")
+        live_packages = home / ".config/yazi/package.toml"
+        live_packages.parent.mkdir(parents=True)
+        if yazi_linked:
+            live_packages.symlink_to(packages)
+        else:
+            shutil.copy2(packages, live_packages)
     env = os.environ.copy()
     env.update(HOME=str(home), PATH=str(binary))
     completed = subprocess.run(
@@ -983,6 +999,23 @@ def test_upgrade_tools_cli_updates_only_installed_shared_tools(tmp_path: Path) -
     assert log.read_text().splitlines() == [
         f"mise upgrade --bump --no-prune -C {tmp_path / 'home'} python@latest"
     ]
+
+
+def test_upgrade_tools_advances_linked_yazi_plugins(tmp_path: Path) -> None:
+    completed, log = _run_upgrade(tmp_path, "--apply", "--json", yazi_linked=True)
+    assert completed.returncode == 0, completed.stderr
+    steps = {step["name"]: step for step in json.loads(completed.stdout)["steps"]}
+    assert steps["yazi.packages"]["status"] == "succeeded"
+    assert "ya pkg upgrade" in log.read_text().splitlines()
+
+
+def test_upgrade_tools_leaves_unlinked_yazi_plugins_alone(tmp_path: Path) -> None:
+    completed, log = _run_upgrade(tmp_path, "--apply", "--json", yazi_linked=False)
+    assert completed.returncode == 0, completed.stderr
+    steps = {step["name"]: step for step in json.loads(completed.stdout)["steps"]}
+    assert steps["yazi.packages"]["status"] == "skipped"
+    assert "does not link" in steps["yazi.packages"]["reason"]
+    assert "ya pkg upgrade" not in log.read_text()
 
 
 def test_upgrade_tools_audit_only_keeps_preview_read_only(tmp_path: Path) -> None:

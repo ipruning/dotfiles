@@ -70,7 +70,7 @@ description = "Preview or apply host tool updates"
 run = '"${VIRTUAL_ENV:+$VIRTUAL_ENV/bin/}python" -m scripts.update "$@"'
 
 [tasks.upgrade-tools]
-description = "Preview or advance the shared mise baseline on the maintenance host"
+description = "Preview or advance the shared mise and Yazi plugin baselines on the maintenance host"
 run = '"${VIRTUAL_ENV:+$VIRTUAL_ENV/bin/}python" -m scripts.upgrade_tools "$@"'
 
 [tasks.mise-sync]

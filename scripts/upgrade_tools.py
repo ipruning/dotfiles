@@ -1,9 +1,10 @@
-"""Explicitly advance the shared mise baseline; ordinary host updates only consume the lock."""
+"""Explicitly advance shared baselines (mise tools, Yazi plugins); `update` only installs them."""
 
 from __future__ import annotations
 
 import argparse
 import json
+import shutil
 import subprocess
 import sys
 from dataclasses import replace
@@ -15,7 +16,7 @@ from .mise import (
     canonical_mise_executable,
     canonical_mise_path,
 )
-from .models import Status
+from .models import ExecutableFinder, Status
 from .update import (
     UpdateReport,
     UpdateResult,
@@ -26,8 +27,49 @@ from .update import (
 )
 
 
-def plan_upgrade_tools(repo_root: Path, home: Path) -> UpdateReport:
-    """Advance only the shared declaration this checkout owns; ignore other project versions."""
+def plan_upgrade_tools(
+    repo_root: Path,
+    home: Path,
+    *,
+    executable_finder: ExecutableFinder = shutil.which,
+) -> UpdateReport:
+    """Advance the shared baselines this checkout owns: mise tools and Yazi plugins."""
+    return UpdateReport(
+        False,
+        (
+            _mise_baseline(repo_root, home),
+            _yazi_packages(repo_root, home, executable_finder),
+        ),
+    )
+
+
+def _yazi_packages(
+    repo_root: Path, home: Path, executable_finder: ExecutableFinder
+) -> UpdateResult:
+    # `ya pkg upgrade` rewrites package.toml revisions; `update` only runs
+    # `ya pkg install`, which deploys the revisions committed here.
+    step = UpdateStep("yazi.packages", "ya", ("ya", "pkg", "upgrade"), 300, cwd=home)
+    executable = executable_finder("ya")
+    if executable is None:
+        return UpdateResult(step, Status.SKIPPED, reason="ya is not available on PATH")
+    live = home / ".config/yazi/package.toml"
+    reference = repo_root / "reference/.config/yazi/package.toml"
+    try:
+        linked = live.samefile(reference)
+    except OSError:
+        linked = False
+    if not linked:
+        return UpdateResult(
+            step,
+            Status.SKIPPED,
+            reason=f"{live} does not link to this checkout; preview mise run restore -- yazi",
+        )
+    return UpdateResult(
+        replace(step, command=(executable, *step.command[1:])), Status.PLANNED
+    )
+
+
+def _mise_baseline(repo_root: Path, home: Path) -> UpdateResult:
     executable = canonical_mise_executable(home)
     step = UpdateStep(
         "mise.baseline",
@@ -45,15 +87,10 @@ def plan_upgrade_tools(repo_root: Path, home: Path) -> UpdateReport:
         cwd=home,
     )
     if executable is None:
-        return UpdateReport(
-            False,
-            (
-                UpdateResult(
-                    step,
-                    Status.SKIPPED,
-                    reason=f"{canonical_mise_path(home)} is missing, broken, or not executable",
-                ),
-            ),
+        return UpdateResult(
+            step,
+            Status.SKIPPED,
+            reason=f"{canonical_mise_path(home)} is missing, broken, or not executable",
         )
     try:
         installed, declaration = inspect_shared_mise_tools(repo_root, home, executable)
@@ -70,29 +107,18 @@ def plan_upgrade_tools(repo_root: Path, home: Path) -> UpdateReport:
             if version == "latest":
                 selectors.append(f"{name}@latest")
     except (OSError, ValueError, RuntimeError) as error:
-        return UpdateReport(
-            False,
-            (
-                UpdateResult(
-                    step,
-                    Status.FAILED if mutation_allowed(home) else Status.SKIPPED,
-                    reason=str(error),
-                ),
-            ),
+        return UpdateResult(
+            step,
+            Status.FAILED if mutation_allowed(home) else Status.SKIPPED,
+            reason=str(error),
         )
     if not selectors:
-        return UpdateReport(
-            False,
-            (
-                UpdateResult(
-                    step,
-                    Status.SKIPPED,
-                    reason="no rolling shared tools are installed",
-                ),
-            ),
+        return UpdateResult(
+            step, Status.SKIPPED, reason="no rolling shared tools are installed"
         )
-    step = replace(step, command=(*step.command, *selectors))
-    return UpdateReport(False, (UpdateResult(step, Status.PLANNED),))
+    return UpdateResult(
+        replace(step, command=(*step.command, *selectors)), Status.PLANNED
+    )
 
 
 def execute_upgrade_tools(repo_root: Path, home: Path) -> UpdateReport:
@@ -130,7 +156,7 @@ def main(argv: list[str] | None = None) -> int:
     from .render import emit_error
 
     parser = argparse.ArgumentParser(
-        description="Preview or advance the shared mise baseline and its lock."
+        description="Preview or advance the shared mise tool baseline and Yazi plugin revisions."
     )
     parser.add_argument(
         "--apply",
@@ -165,10 +191,13 @@ def main(argv: list[str] | None = None) -> int:
     document = update_document(report, apply_allowed=allowed)
     document["operation"] = "upgrade-tools"
     document["notes"] = [
-        "Advance the shared baseline only on the maintenance host. Run mise run verify, review the config, lock, and locked platform artifacts, and commit; other hosts then install it with mise run update."
+        "Advance shared baselines only on the maintenance host. Run mise run verify, review the mise config, lock, locked platform artifacts, and Yazi package.toml, and commit; other hosts then install them with mise run update."
     ]
     document["next"] = (
-        ["mise run verify", "git diff -- reference/.config/mise"]
+        [
+            "mise run verify",
+            "git diff -- reference/.config/mise reference/.config/yazi/package.toml",
+        ]
         if args.apply
         else (["mise run upgrade-tools -- --apply"] if allowed and report.ok else [])
     )

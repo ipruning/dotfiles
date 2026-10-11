@@ -530,16 +530,19 @@ exit code or timeout and output tail. Retry the failing command, then rerun
 
 ### Shared baseline upgrades
 
-Run this only in the checkout where you will review and commit the shared lock:
+Run this only in the checkout where you will review and commit the shared lock.
+It advances the rolling mise tools and, when `~/.config/yazi/package.toml` links
+to this checkout, the Yazi plugin revisions (`ya pkg upgrade`):
 
 ```bash
 mise run upgrade-tools
 mise run upgrade-tools -- --apply
 mise run verify
-git diff -- reference/.config/mise
+git diff -- reference/.config/mise reference/.config/yazi/package.toml
 ```
 
-Other managed hosts consume the committed result with `update` or explicitly
+Other managed hosts consume the committed result with `update` (`mise install
+--locked`, `ya pkg install`) or explicitly
 install missing baseline tools with `mise-sync`. The shared configuration accepts
 new releases without a waiting period (`minimum_release_age = "0s"`). Fixed
 revision tools retain their declared revisions.

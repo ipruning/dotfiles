@@ -241,7 +241,7 @@ def _update_steps(home: Path) -> tuple[UpdateStep, ...]:
             300,
         ),
         UpdateStep("tldr.pages", "tldr", ("tldr", "--update"), 300),
-        UpdateStep("yazi.packages", "ya", ("ya", "pkg", "upgrade"), 300),
+        UpdateStep("yazi.packages", "ya", ("ya", "pkg", "install"), 300),
         *(updater.step for updater in native_updaters(home)),
     )
 
