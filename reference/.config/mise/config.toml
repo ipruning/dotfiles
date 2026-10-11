@@ -16,8 +16,8 @@ zoxide = "aqua:ajeetdsouza/zoxide"
 
 [tools]
 # Declare tools as "latest" (atuin stays on its fork revision). mise.lock records the exact
-# versions: `mise run upgrade-tools -- --apply` bumps it here for review, other hosts consume it with
-# `mise run mise-sync -- --apply`. Do not rewrite these entries into exact versions.
+# versions: `mise run upgrade-tools -- --apply` bumps it here for review; `mise run update` installs
+# those versions on every host. Do not rewrite these entries into exact versions.
 "cargo:https://github.com/ipruning/atuin" = { version = "rev:92d869de2506ece3c8b8474d20d6a1aed5fbe4a7", crate = "atuin", bin = "atuin", locked = true }
 "gem:kamal" = "latest"
 "github:agavra/tuicr" = "latest"

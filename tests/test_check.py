@@ -930,7 +930,11 @@ def test_linux_lite_check_requires_only_git_and_mise_and_reports_legacy_path(
         "executable.starship",
         "executable.zoxide",
     }
-    for command in ("herdr", "atuin", "zoxide"):
+    assert findings["executable.herdr"].severity is Severity.WARN
+    assert findings["executable.herdr"].action == (
+        "Install Herdr with its official installer; see the Herdr section of README.md."
+    )
+    for command in ("atuin", "zoxide"):
         assert findings[f"executable.{command}"].severity is Severity.WARN
         assert findings[f"executable.{command}"].action == (
             "Preview with mise run mise-sync, then apply with "

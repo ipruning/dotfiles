@@ -7,8 +7,8 @@ semantics live in `README.md`.
 
 - `mise.toml` is the task interface. Keep it as a thin adapter to modules under
   `scripts/`.
-- `scripts/` owns inspection plus explicit host update, runtime refresh, and
-  application-scoped restore behavior. Tests exercise public CLI and
+- `scripts/` owns every repository task behind `mise.toml`: read-only
+  inspection and the preview/apply maintenance operations. Tests exercise public CLI and
   `inspect_*` interfaces.
 - `reference/` is comparison data and the source for explicit scoped restore;
   it is never applied automatically.
@@ -85,9 +85,10 @@ semantics live in `README.md`.
 
 Two tiers, in decreasing strictness:
 
-1. Hard floor: Git and mise bootstrap the repository; mise pins every tool the
-   repository itself needs (Python, uv, ShellCheck). Nothing else is required.
-2. Optional host capabilities (atuin, starship, zsh, tv, gum, brightness, ...):
+1. Hard floor: Git and mise bootstrap the repository; `mise.toml` pins every
+   executable the repository itself needs and `uv.lock` pins its Python
+   packages. Nothing else is required.
+2. Optional host capabilities (atuin, starship, zsh, tv, gum, ...):
    guard every use (`command -v`, `[[ -d ]]`, `[[ -r ]]`), degrade gracefully
    when absent, and report the gap as a `check` warning with an install hint.
    Shared personal tools may be declared in the global Mise reference;

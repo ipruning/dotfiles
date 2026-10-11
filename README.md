@@ -89,7 +89,7 @@ export PATH="$HOME/.local/bin:$PATH"
 git clone https://github.com/ipruning/dotfiles.git ~/dotfiles
 cd ~/dotfiles
 mise trust
-mise install --locked actionlint fd jq prek python ripgrep shellcheck uv
+mise install --locked
 mise exec -- uv sync --locked
 mise tasks
 mise run mise-sync
@@ -195,21 +195,12 @@ authoritative command interfaces:
 
 ## Development checks
 
-`mise run verify` is the shared verification gate for local development, prek,
-and GitHub Actions. It includes workflow validation with Actionlint. The CI
+`mise run verify` is the shared verification gate for local development and
+GitHub Actions. It includes workflow validation with Actionlint. The CI
 workflow runs on Linux x64 and macOS ARM64, installs the locked project tools
 and Python dependencies, and rejects changes made by verification.
 
-`mise run prek` runs the hooks in `prek.toml` against all files. Prek uses the
-same provisioned tools; it does not install another copy of Ruff, ty, or pytest.
-Enable the local pre-commit hook explicitly:
-
-```bash
-mise exec -- prek install
-```
-
-Hook installation is optional and is not part of inspection or bootstrap. Amp
-Orbs provision project dependencies through `.agents/setup`; they do not apply
+Amp Orbs provision project dependencies through `.agents/setup`; they do not apply
 the managed-host configuration steps above. `.agents/resume` checks the locked
 environment offline without reinstalling dependencies.
 
@@ -239,7 +230,7 @@ not expose `modules/bin` on Linux. The managed block is placed before Ubuntu's
 non-interactive early return, so direct SSH commands also receive the user and
 mise paths without interactive shell initialization.
 
-The Linux Lite drift profile observes Git, Mise, portable Atuin and Btop
+The Linux Lite drift profile observes Git, Mise, Herdr, portable Atuin and Btop
 configuration, and the availability of Btop, Starship, Atuin, Zoxide, Herdr,
 Skillshare, Hunk, Lazygit, and Lazydocker. Optional capabilities remain
 warnings: inspection never installs a missing tool or restores configuration
@@ -257,9 +248,8 @@ there. The contract is a split between experience and commands:
   is Linux-only.
 - The user bin and mise shim directories load on every platform. The repository
   command directory does not: `.zshenv` prepends `modules/bin` to `PATH` only
-  under `darwin*`, so a Linux host never gains repository commands and can
-  never shadow a system tool — most importantly iproute2 `ss`, whose repository
-  namesake is `skillshare-source`.
+  under `darwin*`, so a Linux host never gains repository commands and they
+  can never shadow a system tool.
 - The repository mise configuration carries no repository bins. Its committed
   lockfile contains URLs and checksums for both `macos-arm64` and `linux-x64`,
   so bootstrap uses the same reviewed tool artifacts on both platforms.
@@ -370,9 +360,8 @@ apply because ownership cannot be established safely.
 This operation deliberately does not pull Git, self-update mise, update the
 lockfile, remove an alternate package-managed mise, or install tools during
 shell startup. A canonical binary older than the repository's hard minimum
-must still be updated directly before any repository task can launch. That
-minimum is a compatibility floor; bootstrap and self-update continue to select
-the latest official release rather than pinning mise to the floor.
+must still be updated directly before any repository task can launch (see
+[Start](#start) for the compatibility floor).
 Backends that support lockfile URLs are artifact-locked; package-manager
 backends such as `gem:`, `go:`, and `npm:` are version-locked but retain their
 upstream package manager's artifact and integrity semantics.
@@ -418,8 +407,8 @@ mise run restore -- atuin
 mise run restore -- atuin --apply
 ```
 
-Skillshare is also part of the shared Mise baseline; `mise upgrade` owns its CLI
-updates on every host. Do not combine that install with Homebrew or
+Skillshare is also part of the shared Mise baseline; its CLI version follows the
+shared lockfile (`update` installs it, `upgrade-tools` advances it). Do not combine that install with Homebrew or
 `skillshare upgrade --cli`. GitHub CLI and Codex are host-owned instead of part
 of the shared baseline. The capability is shared, but its installer is not:
 Omarchy provisions both through its own Mise wrappers, Debian can use the
@@ -587,8 +576,7 @@ revision tools retain their declared revisions.
 
 A hard `min_version` failure happens before Mise can start a task. Bootstrap
 its canonical executable with its existing owner: standalone installs support
-`self-update`; system-owned installs must use their host updater. The hard
-minimum is a compatibility floor, not a version pin.
+`self-update`; system-owned installs must use their host updater.
 
 ## Generated runtime
 
@@ -686,7 +674,7 @@ keeps `.metadata.json` and copied external Skills from diverging by host.
 The default `skillshare sync` operation synchronizes skills. The tracked
 configuration also declares opt-in extras targets under `~/.codex` and
 `~/.claude`; only an explicit extras sync writes those global harness
-directories. In Skillshare 0.23, `sync --all` includes skills, agents, extras,
+directories. `skillshare sync --all` includes skills, agents, extras,
 MCP settings, and hooks; it excludes plugins. Review every included resource,
 not just Skill targets. Amp global guidance is configured in Amp's personal or
 workspace settings and is not synchronized by this repository. Skill targets use merge

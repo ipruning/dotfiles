@@ -375,8 +375,9 @@ def execute_updates(
     for planned in plan.results:
         # Carry through anything the preflight already resolved (SKIPPED, or a
         # FAILED mise inventory). Only PLANNED steps run: executing a FAILED
-        # mise.tools step would run `mise upgrade` with no tool arguments and
-        # upgrade every installed tool — the exact outcome the preflight avoids.
+        # mise.tools step would run `mise install` with no tool arguments and
+        # install every tool the host's configs declare — the exact outcome the
+        # preflight avoids.
         if planned.status is not UpdateStatus.PLANNED:
             results.append(planned)
             continue
@@ -521,7 +522,6 @@ def _document(
                 },
                 "stdin": result.step.stdin_text,
                 "cwd": str(result.step.cwd) if result.step.cwd else None,
-                "attention": None,
                 "status": result.status.value,
                 "exit_code": result.exit_code,
                 "duration_ms": result.duration_ms,

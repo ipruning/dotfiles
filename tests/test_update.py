@@ -224,7 +224,6 @@ def test_update_previews_exact_plan_by_default_without_running_tools(
         "HOMEBREW_NO_INSTALL_CLEANUP": "1",
     }
     assert steps["sprite.version"]["stdin"] == "y\n"
-    assert steps["tigris"]["attention"] is None
     assert not log_path.exists()
 
 
@@ -238,7 +237,6 @@ def test_update_preview_treats_tigris_like_other_updaters(tmp_path: Path) -> Non
     document = json.loads(completed.stdout)
     tigris = next(step for step in document["steps"] if step["name"] == "tigris")
     assert tigris["status"] == "planned"
-    assert tigris["attention"] is None
 
 
 def test_update_apply_runs_curl_installed_self_updaters(tmp_path: Path) -> None:

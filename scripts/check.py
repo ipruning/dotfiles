@@ -478,8 +478,8 @@ def inspect_host(
             "herdr",
             required=False,
             executable_finder=executable_finder,
-            missing_action="Preview with mise run mise-sync, then apply with "
-            "mise run mise-sync -- --apply.",
+            missing_action="Install Herdr with its official installer; see the "
+            "Herdr section of README.md.",
         ),
     ))
     findings.extend(inspect_herdr(home))

@@ -69,8 +69,7 @@ database is an error, not a reason to create an empty database.
 `trustd` resource deltas track each user and executable separately. Changes in
 which instance has the largest RSS do not indicate a restart. A PID change for
 the same identity still emits `process_pid_changed`; RSS growth and limits are
-checked for every sampled instance. The first sample after this upgrade creates
-new per-instance baselines without comparing the previous aggregate baseline.
+checked for every sampled instance.
 
 ## Capture the next failure
 
@@ -81,14 +80,15 @@ per 30 minutes). `incident` includes raw matched log lines, spawn-check exit cod
 and timing, Node REPL inventories, and notification decisions.
 
 When an app bounces, audio fails, or a command cannot spawn, note the local time,
-app, triggering action, and visible symptom before restarting it. From this
-repository, preserve the surrounding hour:
+app, triggering action, and visible symptom before restarting it. Preserve the
+surrounding hour outside the repository:
 
 ```zsh
-mkdir -p outputs
+dir="$HOME/Library/Logs/macos-session-health/incidents"
+mkdir -p "$dir"
 stamp=$(date +%Y%m%d-%H%M%S)
-macos-session-health incident --hours 1 --limit 200 --format json > "outputs/session-$stamp.json"
-macos-session-health incident --hours 1 --limit 200 --format markdown > "outputs/session-$stamp.md"
+macos-session-health incident --hours 1 --limit 200 --format json > "$dir/session-$stamp.json"
+macos-session-health incident --hours 1 --limit 200 --format markdown > "$dir/session-$stamp.md"
 ```
 
 These commands only read the database. Check the report's newest snapshot time:
@@ -177,8 +177,8 @@ collector's `--retention-days` option or
 `MACOS_SESSION_HEALTH_RETENTION_DAYS` to change its current default. Existing
 detailed rows age out normally.
 
-After a storage-format upgrade, reclaim unused SQLite pages without losing
-history. The command stops and restarts only this LaunchAgent around `VACUUM`:
+To reclaim unused SQLite pages without losing history, compact the database.
+The command stops and restarts only this LaunchAgent around `VACUUM`:
 
 ```zsh
 macos-session-health compact --format json

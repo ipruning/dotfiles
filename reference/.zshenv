@@ -18,9 +18,9 @@ _dotfiles_core_path() {
     [[ -d /usr/local/bin ]] && path=(/usr/local/bin $path)
     [[ -d /opt/homebrew/sbin ]] && path=(/opt/homebrew/sbin $path)
     [[ -d /opt/homebrew/bin ]] && path=(/opt/homebrew/bin $path)
-    # Repository command collections are a macOS-only surface. Keeping them
-    # out of the cross-platform mise [env] config means restoring that config
-    # on Linux can never shadow system tools again (iproute2 ss).
+    # Repository commands are a macOS-only surface. Keeping them out of the
+    # cross-platform mise [env] config means restoring that config on Linux can
+    # never shadow system tools.
     [[ -d "$HOME/dotfiles/modules/bin" ]] && path=("$HOME/dotfiles/modules/bin" $path)
   fi
 
