@@ -1,5 +1,5 @@
 {
-  "$schema" : "https:\/\/schema.linearmouse.app\/0.10.4",
+  "$schema" : "https:\/\/schema.linearmouse.app\/0.11.4-beta.3",
   "schemes" : [
     {
       "if" : {
@@ -47,6 +47,21 @@
       },
       "pointer" : {
         "acceleration" : 3,
+        "disableAcceleration" : true
+      }
+    },
+    {
+      "if" : {
+        "device" : {
+          "category" : "mouse",
+          "productID" : "0xc08a",
+          "productName" : "MX Vertical Advanced Ergonomic Mouse",
+          "serialNumber" : "A65C8E997F03240D",
+          "vendorID" : "0x46d"
+        }
+      },
+      "pointer" : {
+        "acceleration" : 2,
         "disableAcceleration" : true
       }
     }
