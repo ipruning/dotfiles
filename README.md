@@ -41,7 +41,7 @@ export PATH="$HOME/.local/bin:$PATH"
 git clone https://github.com/ipruning/dotfiles.git ~/dotfiles
 cd ~/dotfiles
 mise trust
-mise install --locked actionlint fd jq python ripgrep shellcheck tombi uv zizmor
+mise install --locked actionlint fd jq python ripgrep rumdl shellcheck tombi uv zizmor
 mise exec -- uv sync --locked
 mise run mise-sync
 mise run mise-sync -- --apply
@@ -87,7 +87,7 @@ still apply. An invalid policy fails closed. The policy does not govern
 ## Development checks
 
 `mise run verify` is the gate for local work and GitHub Actions (Linux x64 and
-macOS ARM64): Ruff, ty, tombi (TOML), pytest, the macOS service suites, `lint`,
+macOS ARM64): Ruff, ty, tombi (TOML), rumdl (Markdown), pytest, the macOS service suites, `lint`,
 the shell gate, and actionlint plus zizmor for workflows. CI fails if verification changes any file. Amp Orbs
 provision through `.agents/setup` and check offline with `.agents/resume`; they
 never apply host configuration.

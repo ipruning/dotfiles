@@ -6,6 +6,7 @@ actionlint = "aqua:rhysd/actionlint"
 fd = "aqua:sharkdp/fd"
 jq = "aqua:jqlang/jq"
 ripgrep = "aqua:BurntSushi/ripgrep"
+rumdl = "aqua:rvben/rumdl"
 shellcheck = "aqua:koalaman/shellcheck"
 tombi = "aqua:tombi-toml/tombi"
 uv = "aqua:astral-sh/uv"
@@ -26,6 +27,7 @@ fd = "10.5.0"
 jq = "1.8.2"
 python = "3.15.0"
 ripgrep = "15.2.0"
+rumdl = "0.2.79"
 shellcheck = "0.11.0"
 tombi = "1.8.1"
 uv = "0.13.0"
@@ -98,13 +100,15 @@ description = "Check shell files with syntax and ShellCheck gates"
 run = '"${VIRTUAL_ENV:+$VIRTUAL_ENV/bin/}python" -m scripts.shell "$@"'
 
 [tasks.format]
-description = "Check Python and TOML formatting and style"
+description = "Check Python, TOML, and Markdown formatting and style"
 run = [
     "ruff check scripts tests",
     "ruff format --check scripts tests",
     # Offline: verify never fetches TOML schemas.
     "tombi format --check --offline",
     "tombi lint --offline",
+    # Reads .markdownlint-cli2.yaml.
+    "rumdl check .",
 ]
 
 [tasks.test]

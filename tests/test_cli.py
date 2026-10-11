@@ -58,6 +58,7 @@ def test_mise_python_tasks_never_sync_dependencies_implicitly(tmp_path: Path) ->
         "fd": "aqua:sharkdp/fd",
         "jq": "aqua:jqlang/jq",
         "ripgrep": "aqua:BurntSushi/ripgrep",
+        "rumdl": "aqua:rvben/rumdl",
         "shellcheck": "aqua:koalaman/shellcheck",
         "tombi": "aqua:tombi-toml/tombi",
         "uv": "aqua:astral-sh/uv",
