@@ -41,8 +41,8 @@ def test_finding_document_marks_inapplicable_checks_without_a_severity() -> None
     report = FindingReport(
         schema_version=1,
         findings=(
-            Finding("shell", None, "shell.zsh_skipped", "no zsh here"),
-            Finding("shell", Severity.ERROR, "shell.zsh_syntax", "broken"),
+            Finding("repository", None, "syntax.zsh_skipped", "no zsh here"),
+            Finding("repository", Severity.ERROR, "syntax.zsh", "broken"),
         ),
     )
 
@@ -50,19 +50,19 @@ def test_finding_document_marks_inapplicable_checks_without_a_severity() -> None
 
     assert document["findings"] == [
         {
-            "check": "shell",
+            "check": "repository",
             "severity": None,
             "applicable": False,
-            "code": "shell.zsh_skipped",
+            "code": "syntax.zsh_skipped",
             "message": "no zsh here",
             "path": None,
             "action": None,
         },
         {
-            "check": "shell",
+            "check": "repository",
             "severity": "error",
             "applicable": True,
-            "code": "shell.zsh_syntax",
+            "code": "syntax.zsh",
             "message": "broken",
             "path": None,
             "action": None,

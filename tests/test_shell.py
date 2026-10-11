@@ -77,7 +77,7 @@ def test_check_shell_files_reports_bash_syntax_failures_then_passes(
 
     failing = check_shell_files(repo_root, executable_finder=finder)
     syntax_findings = [
-        finding for finding in failing.findings if finding.code == "shell.bash_syntax"
+        finding for finding in failing.findings if finding.code == "syntax.bash"
     ]
     assert syntax_findings
     assert all(
@@ -111,7 +111,7 @@ def test_check_shell_files_reports_shellcheck_warnings(tmp_path: Path) -> None:
     report = check_shell_files(repo_root)
 
     shellcheck_findings = [
-        finding for finding in report.findings if finding.code == "shell.shellcheck"
+        finding for finding in report.findings if finding.code == "shellcheck.violation"
     ]
     assert shellcheck_findings
     assert all(finding.severity is Severity.ERROR for finding in shellcheck_findings)
@@ -130,7 +130,7 @@ def test_check_shell_files_checks_zsh_syntax(tmp_path: Path) -> None:
     report = check_shell_files(repo_root)
 
     assert any(
-        finding.code == "shell.zsh_syntax" and finding.severity is Severity.ERROR
+        finding.code == "syntax.zsh" and finding.severity is Severity.ERROR
         for finding in report.findings
     )
 
@@ -149,8 +149,7 @@ def test_check_shell_files_gates_restored_reference_startup_dotfiles(
     report = check_shell_files(repo_root)
 
     assert any(
-        finding.code == "shell.zsh_syntax"
-        and finding.path == repo_root / "reference/.zshrc"
+        finding.code == "syntax.zsh" and finding.path == repo_root / "reference/.zshrc"
         for finding in report.findings
     )
     assert report.is_ok() is False
@@ -889,7 +888,7 @@ def test_check_shell_files_skips_zsh_loudly_when_zsh_is_absent(
 
     assert report.is_ok() is True
     skipped = [
-        finding for finding in report.findings if finding.code == "shell.zsh_skipped"
+        finding for finding in report.findings if finding.code == "syntax.zsh_skipped"
     ]
     assert skipped
     assert skipped[0].severity is None

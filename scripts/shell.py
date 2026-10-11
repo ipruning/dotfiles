@@ -128,9 +128,9 @@ def check_shell_files(
         if completed.returncode != 0:
             findings.append(
                 Finding(
-                    check="shell",
+                    check="repository",
                     severity=Severity.ERROR,
-                    code="shell.bash_syntax",
+                    code="syntax.bash",
                     message=completed.stderr.strip(),
                     path=file_path,
                 ),
@@ -152,9 +152,9 @@ def check_shell_files(
             detail = completed.stdout.strip() or completed.stderr.strip()
             findings.append(
                 Finding(
-                    check="shell",
+                    check="repository",
                     severity=Severity.ERROR,
-                    code="shell.shellcheck",
+                    code="shellcheck.violation",
                     message=detail,
                 ),
             )
@@ -165,9 +165,9 @@ def check_shell_files(
         # the zsh configuration; skip loudly instead of failing the gate.
         findings.append(
             Finding(
-                check="shell",
+                check="repository",
                 severity=None,
-                code="shell.zsh_skipped",
+                code="syntax.zsh_skipped",
                 message=f"skipped {len(zsh_files)} zsh files: zsh is not installed",
             ),
         )
@@ -182,9 +182,9 @@ def check_shell_files(
             if completed.returncode != 0:
                 findings.append(
                     Finding(
-                        check="shell",
+                        check="repository",
                         severity=Severity.ERROR,
-                        code="shell.zsh_syntax",
+                        code="syntax.zsh",
                         message=completed.stderr.strip(),
                         path=file_path,
                     ),
