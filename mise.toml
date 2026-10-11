@@ -7,7 +7,9 @@ fd = "aqua:sharkdp/fd"
 jq = "aqua:jqlang/jq"
 ripgrep = "aqua:BurntSushi/ripgrep"
 shellcheck = "aqua:koalaman/shellcheck"
+tombi = "aqua:tombi-toml/tombi"
 uv = "aqua:astral-sh/uv"
+zizmor = "aqua:zizmorcore/zizmor"
 
 [settings]
 # Bootstrap is explicit; task, exec, and command-not-found paths must not
@@ -22,14 +24,12 @@ lockfile_platforms = ["macos-arm64", "linux-x64"]
 actionlint = "1.7.12"
 fd = "10.5.0"
 jq = "1.8.2"
-# TODO(upgrade): Move to the latest stable Python once python-build-standalone
-# publishes its linux-x64 and macos-arm64 binaries; 3.14.8 has no locked artifacts.
-# Then update this pin and both mise.lock files and verify locked bootstrap.
-# https://github.com/astral-sh/python-build-standalone/releases
-python = "3.14.7"
+python = "3.15.0"
 ripgrep = "15.2.0"
 shellcheck = "0.11.0"
-uv = "0.12.21"
+tombi = "1.8.1"
+uv = "0.13.0"
+zizmor = "1.30.1"
 
 [env]
 # mise sets VIRTUAL_ENV only once .venv exists. Python tasks call that
@@ -98,10 +98,13 @@ description = "Check shell files with syntax and ShellCheck gates"
 run = '"${VIRTUAL_ENV:+$VIRTUAL_ENV/bin/}python" -m scripts.shell "$@"'
 
 [tasks.format]
-description = "Check Python formatting and style"
+description = "Check Python and TOML formatting and style"
 run = [
     "ruff check scripts tests",
     "ruff format --check scripts tests",
+    # Offline: verify never fetches TOML schemas.
+    "tombi format --check --offline",
+    "tombi lint --offline",
 ]
 
 [tasks.test]
@@ -124,10 +127,10 @@ fi
 description = "Check Python types"
 run = "ty check scripts tests"
 
-[tasks.actionlint]
-description = "Check GitHub Actions workflows"
-run = "actionlint"
+[tasks.workflows]
+description = "Check GitHub Actions workflows for errors and security issues"
+run = ["actionlint", "zizmor --offline .github/workflows"]
 
 [tasks.verify]
 description = "Run all repository verification"
-depends = ["format", "lint", "shell", "typecheck", "test", "test-services", "actionlint"]
+depends = ["format", "lint", "shell", "typecheck", "test", "test-services", "workflows"]

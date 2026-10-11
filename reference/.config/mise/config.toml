@@ -60,8 +60,8 @@ minimum_release_age = "0s"
 # Auto-trust only first-party checkout roots. Third-party repositories under
 # ~/Developer/tries remain subject to per-config review and `mise trust`.
 trusted_config_paths = [
-  "~/Developer/ipruning",
-  "~/Developer/jihuanshe",
+    "~/Developer/ipruning",
+    "~/Developer/jihuanshe",
 ]
 
 [settings.ruby]
@@ -69,5 +69,5 @@ compile = false
 
 [env]
 _.path = [
-  "~/.bun/bin",
+    "~/.bun/bin",
 ]

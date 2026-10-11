@@ -80,14 +80,14 @@ alt-shift-l = "move right"
 
 # App launchers use stable roles: Agent, Business, Chat, Editor, Personal,
 # Research, Shell, Tasks, and Web.
-alt-a = 'exec-and-forget open -a /Applications/Amp.app'
-alt-b = 'exec-and-forget open -a /Applications/Lark.app'
-alt-c = 'exec-and-forget open -a /Applications/Claude.app'
-alt-e = 'exec-and-forget open -a /Applications/Zed.app'
-alt-p = 'exec-and-forget open -a /Applications/WeChat.app'
+alt-a = "exec-and-forget open -a /Applications/Amp.app"
+alt-b = "exec-and-forget open -a /Applications/Lark.app"
+alt-c = "exec-and-forget open -a /Applications/Claude.app"
+alt-e = "exec-and-forget open -a /Applications/Zed.app"
+alt-p = "exec-and-forget open -a /Applications/WeChat.app"
 alt-r = 'exec-and-forget open -a /Applications/Roam\ Research.app'
-alt-s = 'exec-and-forget open -a /Applications/Ghostty.app'
-alt-t = 'exec-and-forget open -a /Applications/Linear.app'
+alt-s = "exec-and-forget open -a /Applications/Ghostty.app"
+alt-t = "exec-and-forget open -a /Applications/Linear.app"
 alt-w = 'exec-and-forget open -a /Applications/Google\ Chrome.app'
 
 # `alt-s` activates Ghostty; `alt-enter` deliberately creates a new window.

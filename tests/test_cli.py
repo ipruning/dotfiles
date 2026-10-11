@@ -59,7 +59,9 @@ def test_mise_python_tasks_never_sync_dependencies_implicitly(tmp_path: Path) ->
         "jq": "aqua:jqlang/jq",
         "ripgrep": "aqua:BurntSushi/ripgrep",
         "shellcheck": "aqua:koalaman/shellcheck",
+        "tombi": "aqua:tombi-toml/tombi",
         "uv": "aqua:astral-sh/uv",
+        "zizmor": "aqua:zizmorcore/zizmor",
     }
     for tool, version in config["tools"].items():
         entries = lockfile["tools"][tool]
