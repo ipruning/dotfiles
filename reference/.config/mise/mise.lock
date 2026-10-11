@@ -123,20 +123,20 @@ url = "https://github.com/agavra/tuicr/releases/download/v0.27.0/tuicr-0.27.0-x8
 url_api = "https://api.github.com/repos/agavra/tuicr/releases/assets/584425453"
 
 [[tools."github:jihuanshe/linear"]]
-version = "0.0.1791622245-ge2079c2"
+version = "0.0.1791725040-gdbb9e2f"
 backend = "github:jihuanshe/linear"
 specifiers = ["latest"]
 
 [tools."github:jihuanshe/linear"."platforms.linux-x64"]
-checksum = "sha256:b6ac85746a753be0abad94913ec9548ef1b18e04fb84373313844c5271b7e39e"
-url = "https://github.com/jihuanshe/linear/releases/download/0.0.1791622245-ge2079c2/linear-x86_64-unknown-linux-gnu.tar.xz"
-url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/627478319"
+checksum = "sha256:bb6d28bf8c00f764a9a7f868c3e5e0d7357b674d27be39b54366c1c38f67353c"
+url = "https://github.com/jihuanshe/linear/releases/download/0.0.1791725040-gdbb9e2f/linear-x86_64-unknown-linux-gnu.tar.xz"
+url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/630819070"
 provenance = "github-attestations"
 
 [tools."github:jihuanshe/linear"."platforms.macos-arm64"]
-checksum = "sha256:bc34866f33b1effd2e939e821a7a0568a1d467f77d201188cd1b8fade34af185"
-url = "https://github.com/jihuanshe/linear/releases/download/0.0.1791622245-ge2079c2/linear-aarch64-apple-darwin.tar.xz"
-url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/627477983"
+checksum = "sha256:9f2c5be348cff773b58cfb8a97cffb2bdc7059d465fd10aaf0cf37fb9385cae9"
+url = "https://github.com/jihuanshe/linear/releases/download/0.0.1791725040-gdbb9e2f/linear-aarch64-apple-darwin.tar.xz"
+url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/630818795"
 provenance = "github-attestations"
 
 [[tools."github:larksuite/cli"]]
@@ -259,19 +259,19 @@ url = "https://github.com/jesseduffield/lazydocker/releases/download/v0.25.2/laz
 url_api = "https://api.github.com/repos/jesseduffield/lazydocker/releases/assets/399711563"
 
 [[tools.lazygit]]
-version = "0.66.0"
+version = "0.66.1"
 backend = "aqua:jesseduffield/lazygit"
 specifiers = ["latest"]
 
 [tools.lazygit."platforms.linux-x64"]
-checksum = "sha256:5b45541155d20bd32bf2cc5ab5b7e3d91c2eebf0fb1242281350edc27d59d2b7"
-url = "https://github.com/jesseduffield/lazygit/releases/download/v0.66.0/lazygit_0.66.0_linux_x86_64.tar.gz"
-url_api = "https://api.github.com/repos/jesseduffield/lazygit/releases/assets/613198391"
+checksum = "sha256:7b3f30c2c06a42cf575280f907e58d7ea08411408b6b62bc926bc91cbc6c3f46"
+url = "https://github.com/jesseduffield/lazygit/releases/download/v0.66.1/lazygit_0.66.1_linux_x86_64.tar.gz"
+url_api = "https://api.github.com/repos/jesseduffield/lazygit/releases/assets/630328438"
 
 [tools.lazygit."platforms.macos-arm64"]
-checksum = "sha256:e9fe2fe1f1bbc1b4c3214b33e8e0d57a4d6e3c2276aa9aa713f9bcbdc223e65c"
-url = "https://github.com/jesseduffield/lazygit/releases/download/v0.66.0/lazygit_0.66.0_darwin_arm64.tar.gz"
-url_api = "https://api.github.com/repos/jesseduffield/lazygit/releases/assets/613198499"
+checksum = "sha256:c66b15f666216142a2f39143f5540c6a572473f03fab014dae07c33cd76e719a"
+url = "https://github.com/jesseduffield/lazygit/releases/download/v0.66.1/lazygit_0.66.1_darwin_arm64.tar.gz"
+url_api = "https://api.github.com/repos/jesseduffield/lazygit/releases/assets/630328410"
 
 [[tools.mr-boxington]]
 version = "1.23.0"
@@ -311,8 +311,8 @@ specifiers = ["latest"]
 allow_low_downloads = "true"
 
 [[tools."npm:agent-device"]]
-version = "0.21.24"
-aube = { path = "locks/npm-agent-device/0.21.24", digest = "sha256:57557f65e03fdceb6191a01d7717b4b8472fad514fa1527d89370c3b466dd275" }
+version = "0.21.25"
+aube = { path = "locks/npm-agent-device/0.21.25", digest = "sha256:bfe02d97a5c92c9ed915755ee45e1d709f2bf7c2f7e99eaf6fb05d1a4339dac7" }
 backend = "npm:agent-device"
 specifiers = ["latest"]
 
@@ -382,19 +382,19 @@ backend = "core:rust"
 specifiers = ["latest"]
 
 [[tools.skillshare]]
-version = "0.25.4"
+version = "0.25.5"
 backend = "aqua:runkids/skillshare"
 specifiers = ["latest"]
 
 [tools.skillshare."platforms.linux-x64"]
-checksum = "sha256:c2b0fa7f2a9655520f06ce97842543df7f11e08f7adbe506461458caa75c7d44"
-url = "https://github.com/runkids/skillshare/releases/download/v0.25.4/skillshare_0.25.4_linux_amd64.tar.gz"
-url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/628299001"
+checksum = "sha256:1defd9938371785da6967fe05933a5a4c3c6443962aa550e2924ccc7138fcfbf"
+url = "https://github.com/runkids/skillshare/releases/download/v0.25.5/skillshare_0.25.5_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/630994988"
 
 [tools.skillshare."platforms.macos-arm64"]
-checksum = "sha256:c954b3779706a4cfdc9561d98bc353185e789f14e77f661dbd68f2f6e55ec4d8"
-url = "https://github.com/runkids/skillshare/releases/download/v0.25.4/skillshare_0.25.4_darwin_arm64.tar.gz"
-url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/628298998"
+checksum = "sha256:3bc2af57e16cce6a4f728e6a0b493162b46139f59bd80c989c8ac9f673854d2d"
+url = "https://github.com/runkids/skillshare/releases/download/v0.25.5/skillshare_0.25.5_darwin_arm64.tar.gz"
+url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/630994945"
 
 [[tools.starship]]
 version = "1.26.0"
