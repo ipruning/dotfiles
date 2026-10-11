@@ -876,7 +876,7 @@ def test_btop_check_reports_platform_owned_install_action(tmp_path: Path) -> Non
     )
     assert linux_finding.severity is Severity.WARN
     assert linux_finding.action == (
-        "Install btop with this host's package manager, such as apt or pacman."
+        "Preview with mise run mise-sync, then apply with mise run mise-sync -- --apply."
     )
 
     macos = inspect_host(

@@ -5,6 +5,7 @@ min_version = { hard = "2026.9.18" }
 # Keep canonical tool identities pinned to explicit backends; [tools] must
 # use these aliases rather than declaring the same full backend separately.
 agent-browser = "aqua:vercel-labs/agent-browser"
+btop = "aqua:aristocratos/btop"
 hunk = "aqua:modem-dev/hunk"
 lazydocker = "aqua:jesseduffield/lazydocker"
 lazygit = "aqua:jesseduffield/lazygit"
@@ -24,6 +25,9 @@ zoxide = "aqua:ajeetdsouza/zoxide"
 "github:jihuanshe/linear" = { version = "latest", minimum_release_age = "0s" }
 "github:larksuite/cli" = "latest"
 "github:lycorp-jp/sim-use" = { version = "latest", os = ["macos"] }
+# Debian ships btop 1.2/1.3, which rewrites the linked reference btop.conf on exit;
+# macOS uses Homebrew's btop.
+btop = { version = "latest", os = ["linux"] }
 "npm:@openai/codex-security" = { version = "latest", allow_low_downloads = "true" }
 "npm:agent-device" = "latest"
 agent-browser = "latest"

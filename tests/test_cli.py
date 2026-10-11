@@ -178,7 +178,11 @@ def test_global_mise_lock_covers_declared_artifact_platforms() -> None:
                 version_only_prefixes,
             ):
                 continue
+            request = config["tools"][tool]
+            systems = request.get("os") if isinstance(request, dict) else None
             for platform_name in config["settings"]["lockfile_platforms"]:
+                if systems and platform_name.split("-")[0] not in systems:
+                    continue
                 platform = entry.get(f"platforms.{platform_name}", {})
                 if not platform.get("url"):
                     missing.append(f"{tool}@{entry['version']}:{platform_name}")

@@ -498,8 +498,8 @@ def inspect_host(
                 "Install btop with Homebrew: brew install btop."
                 if active_system == "Darwin"
                 else (
-                    "Install btop with this host's package manager, such as apt or "
-                    "pacman."
+                    "Preview with mise run mise-sync, then apply with "
+                    "mise run mise-sync -- --apply."
                 )
             ),
         ),
