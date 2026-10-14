@@ -2,6 +2,6 @@
   "name": "mise-npm-install",
   "private": true,
   "dependencies": {
-    "cf": "1.0.0-beta.14"
+    "cf": "1.0.0-beta.17"
   }
 }
