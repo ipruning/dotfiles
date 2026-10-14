@@ -77,7 +77,7 @@ COMPLETION_SPECS = (
     (
         "llm",
         "uvx",
-        ("uvx", "--with", "httpx==0.28.1", "llm==0.33"),
+        ("uvx", "--with", "httpx==0.28.1", "llm==0.36"),
         "_llm",
         (("_LLM_COMPLETE", "zsh_source"),),
     ),
@@ -99,7 +99,7 @@ PLUGIN_SPECS = (
     (
         "fast-syntax-highlighting",
         "https://github.com/zdharma-continuum/fast-syntax-highlighting",
-        "3d574ccf48804b10dca52625df13da5edae7f553",
+        "4672ad5dd9ad68a7effc1476d65afb7c584ce2b3",
         "fast-syntax-highlighting.plugin.zsh",
     ),
 )
@@ -112,8 +112,9 @@ WASM_SPECS = (
     ),
     (
         "zjstatus",
-        "https://github.com/dj95/zjstatus/releases/download/v0.23.0/zjstatus.wasm",
-        "e006901223524239db618021e4cc5d17f82dc4bfae5432895ba41f03f13861ff",
+        # zjstatus 0.25 requires Zellij 0.45 or newer.
+        "https://github.com/dj95/zjstatus/releases/download/v0.25.0/zjstatus.wasm",
+        "282ceab219e56e1908c9fac33907241fe6c3e1ef7d85faab3e5f438cef87b8fe",
     ),
 )
 

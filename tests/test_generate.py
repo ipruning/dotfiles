@@ -367,7 +367,7 @@ def test_generate_llm_completion_does_not_receive_host_credentials(
         "uvx",
         'test "$1" = --with || exit 10\n'
         'test "$2" = httpx==0.28.1 || exit 11\n'
-        'test "$3" = llm==0.33 || exit 12\n'
+        'test "$3" = llm==0.36 || exit 12\n'
         'test -z "${OPENAI_API_KEY+x}" || exit 9\n'
         'test -z "${BRRR_SECRET+x}" || exit 8\n'
         'test "$_LLM_COMPLETE" = zsh_source || exit 7\n'

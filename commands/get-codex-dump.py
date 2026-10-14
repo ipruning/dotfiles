@@ -1,7 +1,9 @@
 #!/usr/bin/env -S uv run --script
 # /// script
 # requires-python = ">=3.11"
-# dependencies = ["typer==0.27.2"]
+# dependencies = [
+#     "typer==0.27.3",
+# ]
 # ///
 import json
 import sys
