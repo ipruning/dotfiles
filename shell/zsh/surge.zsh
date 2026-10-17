@@ -10,44 +10,28 @@ function unset-all-proxy() {
   unset all_proxy
 }
 
-function _surge-api-key() {
-  local conf="$HOME/Library/Application Support/Surge/Profiles/ipruning.conf"
-  if [[ ! -r "$conf" ]]; then
-    print -u2 "surge: profile not found at $conf"
-    return 1
-  fi
-  local key
-  key=$(perl -ne 'print $1 if /http-api = (.*?)@/' "$conf")
-  if [[ -z "$key" ]]; then
-    print -u2 "surge: no http-api key found in $conf"
-    return 1
-  fi
-  echo "$key"
+function _surge-cli() {
+  /Applications/Surge.app/Contents/Applications/surge-cli "$@"
 }
 
 function toggle-enhanced-mode() {
-  local x_key
-  x_key=$(_surge-api-key) || return
-  local current
-  current=$(xh --body GET https://localhost:6171/v1/features/enhanced_mode X-Key:$x_key | jq -r '.enabled')
-  if [[ "$current" == "false" ]]; then
-    xh --quiet POST https://localhost:6171/v1/features/enhanced_mode X-Key:$x_key enabled:=true
+  local enabled
+  enabled=$(_surge-cli --raw feature get enhanced-mode | jq -r '.enabled') || return
+  if [[ "$enabled" == "true" ]]; then
+    _surge-cli feature set enhanced-mode off >/dev/null
   else
-    xh --quiet POST https://localhost:6171/v1/features/enhanced_mode X-Key:$x_key enabled:=false
+    _surge-cli feature set enhanced-mode on >/dev/null
   fi
-  sleep 1
-  echo "Enhanced Mode: $(xh --body GET https://localhost:6171/v1/features/enhanced_mode X-Key:$x_key | jq -r '.enabled')"
+  echo "Enhanced Mode: $(_surge-cli --raw feature get enhanced-mode | jq -r '.enabled')"
 }
 
 function toggle-outbound-mode() {
-  local x_key
-  x_key=$(_surge-api-key) || return
-  local current
-  current=$(xh --body GET https://localhost:6171/v1/outbound X-Key:$x_key | jq -r '.mode')
-  if [[ "$current" == "rule" ]]; then
-    xh --quiet POST https://localhost:6171/v1/outbound X-Key:$x_key mode=direct
+  local mode
+  mode=$(_surge-cli --raw mode get | jq -r '.mode') || return
+  if [[ "$mode" == "rule" ]]; then
+    _surge-cli mode set direct >/dev/null
   else
-    xh --quiet POST https://localhost:6171/v1/outbound X-Key:$x_key mode=rule
+    _surge-cli mode set rule >/dev/null
   fi
-  echo "Outbound Mode: $(xh --body GET https://localhost:6171/v1/outbound X-Key:$x_key | jq -r '.mode')"
+  echo "Outbound Mode: $(_surge-cli --raw mode get | jq -r '.mode')"
 }
