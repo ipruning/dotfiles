@@ -11,7 +11,7 @@ function unset-all-proxy() {
 }
 
 function _surge-api-key() {
-  local conf="$HOME/Library/Application Support/Surge/Profiles/default.conf"
+  local conf="$HOME/Library/Application Support/Surge/Profiles/ipruning.conf"
   if [[ ! -r "$conf" ]]; then
     print -u2 "surge: profile not found at $conf"
     return 1
