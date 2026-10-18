@@ -63,12 +63,12 @@ ln -s "$test_root/unmanaged-command" "$blocked_home/.local/bin/macos-session-hea
 printf 'blocked plist must remain\n' >"$blocked_plist"
 : >"$test_root/launchd-loaded"
 exit_code=0
-env "${test_env[@]}" HOME="$blocked_home" "$python_bin" "$health_cli" install --dry-run \
+env "${test_env[@]}" HOME="$blocked_home" "$python_bin" "$health_cli" install \
   >"$test_root/unmanaged.out" 2>"$test_root/unmanaged.err" || exit_code=$?
 [[ "$exit_code" == 1 && -L "$blocked_home/.local/bin/macos-session-health" ]] \
-  || fail 'install dry-run accepted or replaced an unmanaged symlink'
+  || fail 'install preview accepted or replaced an unmanaged symlink'
 exit_code=0
-env "${test_env[@]}" HOME="$blocked_home" "$python_bin" "$health_cli" uninstall \
+env "${test_env[@]}" HOME="$blocked_home" "$python_bin" "$health_cli" uninstall --apply \
   >"$test_root/unmanaged-uninstall.out" 2>"$test_root/unmanaged-uninstall.err" || exit_code=$?
 [[ "$exit_code" == 1 && -L "$blocked_home/.local/bin/macos-session-health" \
   && "$(cat "$blocked_plist")" == 'blocked plist must remain' \
@@ -82,16 +82,16 @@ mkdir -p "$(dirname "$bad_python")"
 printf '#!/bin/sh\nexit 9\n' >"$bad_python"
 chmod +x "$bad_python"
 exit_code=0
-env "${test_env[@]}" HOME="$bad_python_home" "$python_bin" "$health_cli" install --dry-run \
+env "${test_env[@]}" HOME="$bad_python_home" "$python_bin" "$health_cli" install \
   >"$test_root/bad-python.out" 2>"$test_root/bad-python.err" || exit_code=$?
 [[ "$exit_code" == 1 && ! -e "$bad_python_home/.local/bin/macos-session-health" ]] \
-  || fail 'install dry-run accepted a broken mise Python runtime'
+  || fail 'install preview accepted a broken mise Python runtime'
 
-env "${test_env[@]}" "$python_bin" "$health_cli" install --dry-run >"$test_root/install-dry-run.out"
-rg -q 'ready="True"' "$test_root/install-dry-run.out" || fail 'install dry-run did not report readiness'
-[[ ! -e "$test_home/.local/bin/macos-session-health" ]] || fail 'install dry-run changed the executable path'
+env "${test_env[@]}" "$python_bin" "$health_cli" install >"$test_root/install-preview.out"
+rg -q 'ready="True"' "$test_root/install-preview.out" || fail 'install preview did not report readiness'
+[[ ! -e "$test_home/.local/bin/macos-session-health" ]] || fail 'install preview changed the executable path'
 
-env "${test_env[@]}" "$python_bin" "$health_cli" install >"$test_root/install.out"
+env "${test_env[@]}" "$python_bin" "$health_cli" install --apply >"$test_root/install.out"
 installed_cli="$test_home/.local/bin/macos-session-health"
 runtime_cli="$test_home/Library/Application Support/macos-session-health/macos-session-health"
 plist="$test_home/Library/LaunchAgents/com.ipruning.macos-session-health.plist"
@@ -108,23 +108,23 @@ fi
 
 env "${test_env[@]}" "$installed_cli" status --format json >"$test_root/status.json"
 jq -e --arg source "$test_home/.config/brrr/env" \
-  '.[0] | select(.installed == true and .loaded == true and .pid == 4242 and .notification_backend == "builtin" and .notification_configured == true and .notification_credential_source == $source)' \
+  '.[0] | select(.installed == true and .loaded == true and .pid == 4242 and .notification_configured == true and .notification_credential_source == $source)' \
   "$test_root/status.json" >/dev/null || fail 'status did not expose the self-contained notification backend'
 
 : >"$test_root/bootstrap-fail-once"
 exit_code=0
-env "${test_env[@]}" "$python_bin" "$health_cli" install \
+env "${test_env[@]}" "$python_bin" "$health_cli" install --apply \
   >"$test_root/install-failed.out" 2>"$test_root/install-failed.err" || exit_code=$?
 [[ "$exit_code" == 1 ]] || fail 'failed upgrade returned success'
 [[ ! -f "$test_root/launchd-loaded" ]] || fail 'failed upgrade did not remain unloaded'
 rg -q 'completed=runtime,executable,plist.*state=unloaded.*inspect with.*rerun install' "$test_root/install-failed.err" \
   || fail 'failed upgrade did not report progress and rerun command'
-env "${test_env[@]}" "$python_bin" "$health_cli" install >"$test_root/install-rerun.out"
+env "${test_env[@]}" "$python_bin" "$health_cli" install --apply >"$test_root/install-rerun.out"
 [[ -f "$test_root/launchd-loaded" ]] || fail 'rerun install did not converge'
 
-env "${test_env[@]}" "$installed_cli" notify-test --dry-run >"$test_root/notify.json"
+env "${test_env[@]}" "$installed_cli" notify-test >"$test_root/notify.json"
 jq -e 'select(.exit == 0 and .auth_mode == "bearer" and .payload.thread_id == "macos-session-health")' \
-  "$test_root/notify.json" >/dev/null || fail 'built-in notification dry-run failed'
+  "$test_root/notify.json" >/dev/null || fail 'built-in notification preview failed'
 
 query_db="$test_root/query.sqlite3"
 "$python_bin" - "$query_db" <<'PY'
@@ -164,7 +164,7 @@ env "${test_env[@]}" "$installed_cli" --db "$query_db" query \
   --event condition --limit 10 --format json >"$test_root/query.json"
 jq -e 'select(length == 1 and .[0].condition == "spawn_failed" and .[0].snapshot_status == "ok")' \
   "$test_root/query.json" >/dev/null || fail 'query did not return the stored condition event'
-env "${test_env[@]}" "$installed_cli" --db "$query_db" compact --format json >"$test_root/custom-compact.json"
+env "${test_env[@]}" "$installed_cli" --db "$query_db" compact --format json --apply >"$test_root/custom-compact.json"
 jq -e --arg database "$query_db" \
   '.[0] | select(.database == $database and .service_restarted == false)' \
   "$test_root/custom-compact.json" >/dev/null \
@@ -180,11 +180,18 @@ with sqlite3.connect(sys.argv[1]) as conn:
     conn.executemany("INSERT INTO sample VALUES (?)", [("x" * 1000,)] * 100)
     conn.execute("DELETE FROM sample")
 PY
-env "${test_env[@]}" "$installed_cli" compact --format json >"$test_root/compact.json"
+env "${test_env[@]}" "$installed_cli" compact --format json >"$test_root/compact-preview.json"
+jq -e '.[0] | select(.planned == true and .service_restart == true)' \
+  "$test_root/compact-preview.json" >/dev/null || fail 'compact preview did not report its target'
+[[ -f "$test_root/launchd-loaded" ]] || fail 'compact preview stopped the LaunchAgent'
+env "${test_env[@]}" "$installed_cli" compact --format json --apply >"$test_root/compact.json"
 jq -e '.[0] | select(.compacted == true and .service_restarted == true and .after_bytes <= .before_bytes)' \
   "$test_root/compact.json" >/dev/null || fail 'database compaction did not preserve the service lifecycle'
 
-env "${test_env[@]}" "$installed_cli" uninstall >"$test_root/uninstall.out"
+env "${test_env[@]}" "$installed_cli" uninstall >"$test_root/uninstall-preview.out"
+rg -q 'planned="True"' "$test_root/uninstall-preview.out" || fail 'uninstall preview did not report its targets'
+[[ -e "$installed_cli" && -e "$runtime_cli" && -e "$plist" ]] || fail 'uninstall preview removed lifecycle files'
+env "${test_env[@]}" "$installed_cli" uninstall --apply >"$test_root/uninstall.out"
 [[ ! -e "$installed_cli" && ! -e "$runtime_cli" && ! -e "$plist" ]] \
   || fail 'uninstall left installed lifecycle files'
 

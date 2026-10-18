@@ -114,11 +114,11 @@ test_env=(
 installed_bin="$test_root/usr/local/bin/macos-maxfiles"
 plist="$test_root/Library/LaunchDaemons/com.ipruning.limit.maxfiles.plist"
 
-env "${test_env[@]}" "$cli" install --dry-run >"$test_root/dry-run.out"
-[[ ! -e "$installed_bin" && ! -e "$plist" && ! -e "$state/loaded" ]] || fail 'dry-run mutated state'
+env "${test_env[@]}" "$cli" install >"$test_root/dry-run.out"
+[[ ! -e "$installed_bin" && ! -e "$plist" && ! -e "$state/loaded" ]] || fail 'install preview mutated state'
 
 : >"$state/use-unlimited"
-env "${test_env[@]}" FAKE_INSTALL_MODE=755 "$cli" install >"$test_root/install.out"
+env "${test_env[@]}" FAKE_INSTALL_MODE=755 "$cli" install --apply >"$test_root/install.out"
 rm -f "$state/use-unlimited"
 rg -q '^installed="true" loaded="true"' "$test_root/install.out" || fail 'install did not report verified success'
 [[ -x "$installed_bin" && -f "$plist" && -e "$state/loaded" ]] || fail 'install lifecycle is incomplete'
@@ -141,7 +141,7 @@ baseline="$(shasum -a 256 "$installed_bin" "$plist")"
 
 : >"$state/fail-bootstrap"
 exit_code=0
-env "${test_env[@]}" "$cli" install >"$test_root/bootstrap.out" 2>"$test_root/bootstrap.err" || exit_code=$?
+env "${test_env[@]}" "$cli" install --apply >"$test_root/bootstrap.out" 2>"$test_root/bootstrap.err" || exit_code=$?
 [[ "$exit_code" == 1 && -e "$state/loaded" && "$baseline" == "$(shasum -a 256 "$installed_bin" "$plist")" ]] \
   || fail 'bootstrap failure did not roll back the installed lifecycle'
 [[ "$(stat -f '%Lp' "$installed_bin")" == 700 && "$(stat -f '%Lp' "$plist")" == 600 ]] \
@@ -150,32 +150,35 @@ env "${test_env[@]}" "$cli" install >"$test_root/bootstrap.out" 2>"$test_root/bo
 
 : >"$state/inject-bad-readback"
 exit_code=0
-env "${test_env[@]}" "$cli" install >"$test_root/readback.out" 2>"$test_root/readback.err" || exit_code=$?
+env "${test_env[@]}" "$cli" install --apply >"$test_root/readback.out" 2>"$test_root/readback.err" || exit_code=$?
 [[ "$exit_code" == 1 && -e "$state/loaded" && "$baseline" == "$(shasum -a 256 "$installed_bin" "$plist")" ]] \
   || fail 'readback failure did not roll back the installed lifecycle'
 rg -q 'effective maxfiles verification failed' "$test_root/readback.err" || fail 'readback failure was not diagnosed'
 rm -f "$state/bad-readback"
 
-env "${test_env[@]}" "$cli" uninstall --yes >"$test_root/uninstall.out"
+env "${test_env[@]}" "$cli" uninstall >"$test_root/uninstall-preview.out"
+rg -q '^planned="true"' "$test_root/uninstall-preview.out" || fail 'uninstall preview did not report its targets'
+[[ -x "$installed_bin" && -f "$plist" && -e "$state/loaded" ]] || fail 'uninstall preview mutated state'
+env "${test_env[@]}" "$cli" uninstall --apply >"$test_root/uninstall.out"
 rg -q '^installed="false" loaded="false" effective_until_reboot="true"$' "$test_root/uninstall.out" \
   || fail 'successful uninstall output lost its effective-limit warning'
 [[ ! -e "$installed_bin" && ! -e "$plist" && ! -e "$state/loaded" ]] || fail 'uninstall left managed state'
 
-env "${test_env[@]}" "$cli" install >/dev/null
+env "${test_env[@]}" "$cli" install --apply >/dev/null
 rm -f "$installed_bin"
 ln -s "$cli" "$installed_bin"
 : >"$state/fail-bootstrap"
 exit_code=0
-env "${test_env[@]}" "$cli" install >"$test_root/symlink-rollback.out" 2>"$test_root/symlink-rollback.err" || exit_code=$?
+env "${test_env[@]}" "$cli" install --apply >"$test_root/symlink-rollback.out" 2>"$test_root/symlink-rollback.err" || exit_code=$?
 [[ "$exit_code" == 1 && -L "$installed_bin" && "$(readlink "$installed_bin")" == "$cli" ]] \
   || fail 'failed install did not restore the prior managed-path symlink'
-env "${test_env[@]}" "$cli" install >/dev/null
+env "${test_env[@]}" "$cli" install --apply >/dev/null
 baseline="$(shasum -a 256 "$installed_bin" "$plist")"
 
 : >"$state/fail-bootstrap"
 : >"$state/fail-limit-restore"
 exit_code=0
-env "${test_env[@]}" "$cli" install >"$test_root/limit-rollback.out" 2>"$test_root/limit-rollback.err" || exit_code=$?
+env "${test_env[@]}" "$cli" install --apply >"$test_root/limit-rollback.out" 2>"$test_root/limit-rollback.err" || exit_code=$?
 [[ "$exit_code" == 1 ]] || fail 'unverified limit rollback returned success'
 rg -q 'rollback failed: effective-limits; backups kept at ' "$test_root/limit-rollback.err" \
   || fail 'unverified limit rollback did not retain recovery backups'
@@ -186,7 +189,7 @@ printf '8192 65536\n' >"$state/limits"
 : >"$state/fail-bootstrap"
 : >"$state/fail-restore"
 exit_code=0
-env "${test_env[@]}" "$cli" install >"$test_root/rollback-failed.out" 2>"$test_root/rollback-failed.err" || exit_code=$?
+env "${test_env[@]}" "$cli" install --apply >"$test_root/rollback-failed.out" 2>"$test_root/rollback-failed.err" || exit_code=$?
 [[ "$exit_code" == 1 ]] || fail 'rollback failure returned success'
 backup_dir="$(sed -n 's/.*backups kept at //p' "$test_root/rollback-failed.err" | tail -1)"
 [[ -n "$backup_dir" && -d "$backup_dir" && -f "$backup_dir/executable" && -f "$backup_dir/plist" ]] \
@@ -197,7 +200,7 @@ rm -rf "$backup_dir"
 
 : >"$state/fail-rm-bin"
 exit_code=0
-env "${test_env[@]}" "$cli" uninstall --yes >"$test_root/uninstall-failed.out" 2>"$test_root/uninstall-failed.err" || exit_code=$?
+env "${test_env[@]}" "$cli" uninstall --apply >"$test_root/uninstall-failed.out" 2>"$test_root/uninstall-failed.err" || exit_code=$?
 [[ "$exit_code" == 1 ]] || fail 'removal failure returned success'
 [[ ! -s "$test_root/uninstall-failed.out" ]] || fail 'removal failure printed false success'
 [[ -e "$state/loaded" && "$baseline" == "$(shasum -a 256 "$installed_bin" "$plist")" ]] \

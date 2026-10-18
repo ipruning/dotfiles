@@ -26,7 +26,7 @@ def session_health_findings(
                 "session_health.missing",
                 "macos-session-health is not installed",
                 action=(
-                    "Run services/macos-session-health/macos-session-health install."
+                    "Preview with services/macos-session-health/macos-session-health install, then apply with services/macos-session-health/macos-session-health install --apply."
                 ),
             ),
         ]
@@ -98,13 +98,13 @@ def session_health_findings(
             "session_health.agent_ready"
             if agent_ready
             else "session_health.agent_down",
-            "session-health launch agent is installed and loaded"
+            "session-health LaunchAgent is installed and loaded"
             if agent_ready
-            else "session-health launch agent is not running",
+            else "session-health LaunchAgent is not running",
             action=(
                 None
                 if agent_ready
-                else "Run services/macos-session-health/macos-session-health install."
+                else "Preview with services/macos-session-health/macos-session-health install, then apply with services/macos-session-health/macos-session-health install --apply."
             ),
         ),
     ]
@@ -152,7 +152,7 @@ def session_health_findings(
                 Severity.WARN,
                 "session_health.last_delivery_failed",
                 f"last delivery at {last_delivery_at} failed: {last_delivery_error or 'no error detail'}",
-                action="Run macos-session-health notify-test to send a current test notification.",
+                action="Run macos-session-health notify-test --apply to send a current test notification.",
             ),
         )
     else:
@@ -195,11 +195,11 @@ def maxfiles_findings(
     if executable is None:
         return [
             Finding(
-                "maxfiles.agent",
+                "maxfiles.daemon",
                 Severity.WARN,
                 "maxfiles.missing",
                 "macos-maxfiles is not installed",
-                action="Run services/macos-maxfiles/macos-maxfiles install.",
+                action="Preview with services/macos-maxfiles/macos-maxfiles install, then apply with services/macos-maxfiles/macos-maxfiles install --apply.",
             ),
         ]
     try:
@@ -225,7 +225,7 @@ def maxfiles_findings(
     ) as error:
         return [
             Finding(
-                "maxfiles.agent",
+                "maxfiles.daemon",
                 Severity.WARN,
                 "maxfiles.status_unavailable",
                 f"macos-maxfiles status could not be read: {error}",
@@ -237,7 +237,7 @@ def maxfiles_findings(
     if completed.returncode != 0 and agent_ready:
         return [
             Finding(
-                "maxfiles.agent",
+                "maxfiles.daemon",
                 Severity.WARN,
                 "maxfiles.status_unavailable",
                 f"macos-maxfiles status contradicted exit {completed.returncode}",
@@ -246,16 +246,16 @@ def maxfiles_findings(
         ]
     findings = [
         Finding(
-            "maxfiles.agent",
+            "maxfiles.daemon",
             Severity.OK if agent_ready else Severity.WARN,
-            "maxfiles.agent_ready" if agent_ready else "maxfiles.agent_down",
+            "maxfiles.daemon_ready" if agent_ready else "maxfiles.daemon_down",
             "maxfiles LaunchDaemon is installed and loaded"
             if agent_ready
             else "maxfiles LaunchDaemon is not loaded",
             action=(
                 None
                 if agent_ready
-                else "Run services/macos-maxfiles/macos-maxfiles install."
+                else "Preview with services/macos-maxfiles/macos-maxfiles install, then apply with services/macos-maxfiles/macos-maxfiles install --apply."
             ),
         ),
     ]
@@ -284,7 +284,7 @@ def maxfiles_findings(
                 action=(
                     None
                     if matches
-                    else "Run services/macos-maxfiles/macos-maxfiles install to reapply the limit."
+                    else "Reapply the limit: preview with services/macos-maxfiles/macos-maxfiles install, then apply with services/macos-maxfiles/macos-maxfiles install --apply."
                 ),
             ),
         )

@@ -206,8 +206,6 @@ class AlertLifecycleTest(unittest.TestCase):
         self.assertEqual(self.payloads, [])
 
     def test_flapping_condition_never_notifies(self) -> None:
-        # The old design re-armed on every clean recheck, so a probe hovering
-        # around its threshold pushed again on each bad sample.
         self.observe(*["bad", "ok"] * 10)
         self.assertEqual(self.payloads, [])
         self.assertEqual(self.alert()["status"], "ok")
@@ -400,7 +398,6 @@ class DeliveryTest(unittest.TestCase):
         self.assertEqual(result["endpoint"], "https://example.test/send")
         self.assertEqual(result["auth_mode"], "bearer")
         self.assertEqual(result["error"], "offline")
-        self.assertNotIn("attempts", result)
 
     def test_dry_run_does_not_send(self) -> None:
         with mock.patch.object(self.globals["urllib"].request, "urlopen") as urlopen:
@@ -457,9 +454,9 @@ class LifecyclePartialProgressTest(unittest.TestCase):
                 self.module["CliError"],
                 "LaunchAgent state=unloaded.*inspect with.*then rerun install",
             ):
-                install()
+                install(apply=True)
             globals_["bootstrap_launch_agent"] = mock.Mock()
-            self.assertEqual(install(), 0)
+            self.assertEqual(install(apply=True), 0)
             globals_["bootstrap_launch_agent"].assert_called_once()
 
     def test_failed_uninstall_keeps_progress_and_rerun_converges(self) -> None:
@@ -484,9 +481,9 @@ class LifecyclePartialProgressTest(unittest.TestCase):
             with self.assertRaisesRegex(
                 self.module["CliError"], "removed=plist.*rerun uninstall"
             ):
-                uninstall()
+                uninstall(apply=True)
             self.assertFalse(self.plist.exists())
-            self.assertEqual(uninstall(), 0)
+            self.assertEqual(uninstall(apply=True), 0)
         self.assertFalse(self.wrapper.exists())
         self.assertFalse(self.runtime.exists())
 

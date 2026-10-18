@@ -2,7 +2,7 @@
 
 set -uo pipefail
 
-VERSION="1.0.0"
+VERSION="2.0.0"
 LABEL="com.ipruning.limit.maxfiles"
 SELF_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)/$(basename "${BASH_SOURCE[0]}")"
 TEST_ROOT="${MACOS_MAXFILES_TEST_ROOT:-}"
@@ -49,9 +49,9 @@ Manage the machine-wide macOS launchd maxfiles limit.
 Usage: macos-maxfiles COMMAND
 
 Commands:
-  install [--dry-run]  Install and load the LaunchDaemon
+  install [--apply]    Preview, or install and load the LaunchDaemon
   status [--json]      Show installation and effective limits
-  uninstall --yes      Remove the LaunchDaemon; current limits last until reboot
+  uninstall [--apply]  Preview, or remove the LaunchDaemon; current limits last until reboot
   version              Show the CLI version
 EOF
 }
@@ -241,9 +241,9 @@ transaction_failed() {
 }
 
 install_mode() {
-  local dry_run=0 was_loaded=false old_soft="" old_hard="" limits=""
-  [[ "${1:-}" == --dry-run ]] && { dry_run=1; shift; }
-  (( $# == 0 )) || usage_error "usage: macos-maxfiles install [--dry-run]"
+  local apply=0 was_loaded=false old_soft="" old_hard="" limits=""
+  [[ "${1:-}" == --apply ]] && { apply=1; shift; }
+  (( $# == 0 )) || usage_error "usage: macos-maxfiles install [--apply]"
   [[ "$($UNAME_BIN -s)" == Darwin ]] || die "install is supported only on macOS"
 
   PLIST_TMP="$(mktemp -t macos-maxfiles.plist.XXXXXX)" || die "could not create temporary plist"
@@ -251,7 +251,7 @@ install_mode() {
   "$PLUTIL_BIN" -lint "$PLIST_TMP" >/dev/null || die "generated plist is invalid"
   /bin/bash -n "$SELF_PATH" || die "executable is invalid"
 
-  if (( dry_run == 1 )); then
+  if (( apply == 0 )); then
     printf 'ready="true" executable="%s" plist="%s" soft_limit="%s" hard_limit="%s"\n' \
       "$INSTALL_BIN" "$PLIST_FILE" "$SOFT_LIMIT" "$HARD_LIMIT"
     return
@@ -311,8 +311,13 @@ status_mode() {
 }
 
 uninstall_mode() {
-  local was_loaded=false limits="" old_soft="" old_hard=""
-  [[ "${1:-}" == --yes && $# == 1 ]] || usage_error "usage: macos-maxfiles uninstall --yes"
+  local apply=0 was_loaded=false limits="" old_soft="" old_hard=""
+  [[ "${1:-}" == --apply ]] && { apply=1; shift; }
+  (( $# == 0 )) || usage_error "usage: macos-maxfiles uninstall [--apply]"
+  if (( apply == 0 )); then
+    printf 'planned="true" remove_executable="%s" remove_plist="%s"\n' "$INSTALL_BIN" "$PLIST_FILE"
+    return
+  fi
   authorize_root
   loaded && was_loaded=true
   limits="$(read_limits || true)"; read -r old_soft old_hard <<<"$limits"

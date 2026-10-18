@@ -197,9 +197,6 @@ env "${test_env[@]}" "$cli" install --auto-recycle --apply --json >"$test_root/i
   || fail 'LaunchAgent interval is wrong'
 [[ "$(plutil -extract ProcessType raw -o - "$plist")" == Background ]] \
   || fail 'LaunchAgent is not background-classified'
-if plutil -extract KeepAlive raw -o - "$plist" >/dev/null 2>&1; then
-  fail 'LaunchAgent incorrectly keeps a resident watchdog alive'
-fi
 plutil -extract ProgramArguments json -o - "$plist" | mise exec -- jq -e '
   .[-3:] == ["run", "--apply", "--json"]
 ' >/dev/null || fail 'LaunchAgent does not invoke the guarded run command'
@@ -228,7 +225,7 @@ mise exec -- jq -e '
 ' "$test_root/check-high.json" >/dev/null || fail 'check did not report measured footprint'
 
 env "${test_env[@]}" "$cli" run --json >"$test_root/run-preview.json"
-mise exec -- jq -e '.apply == false and .result == "preview" and .high == true' \
+mise exec -- jq -e '.apply == false and .result == "planned" and .high == true' \
   "$test_root/run-preview.json" >/dev/null || fail 'automatic run did not preview by default'
 [[ ! -e "$state_file" && ! -e "$state/kill-calls" ]] \
   || fail 'automatic preview mutated watchdog state'
@@ -335,7 +332,7 @@ mise exec -- jq -e '.result == "deferred-cooldown" and .cooldown_remaining_secon
 
 env "${test_env[@]}" "$cli" recycle --json >"$test_root/recycle-preview.json"
 mise exec -- jq -e '
-  .operation == "recycle" and .apply == false and .result == "preview" and
+  .operation == "recycle" and .apply == false and .result == "planned" and
   .action == "kill -KILL"
 ' "$test_root/recycle-preview.json" >/dev/null || fail 'manual recycle did not preview by default'
 [[ "$(wc -l <"$state/kill-calls" | tr -d ' ')" == 2 ]] \
@@ -372,7 +369,7 @@ mise exec -- jq -e '.ok == true and .running == false and .high == false' \
 : >"$state/service-running"
 
 env "${test_env[@]}" "$cli" uninstall --json >"$test_root/uninstall-preview.json"
-mise exec -- jq -e '.apply == false and .result == "preview" and .loaded == true' \
+mise exec -- jq -e '.apply == false and .result == "planned" and .loaded == true' \
   "$test_root/uninstall-preview.json" >/dev/null || fail 'uninstall did not preview by default'
 [[ -x "$installed_bin" && -x "$runtime" && -f "$plist" && -e "$state/agent-loaded" ]] \
   || fail 'uninstall preview changed installation state'

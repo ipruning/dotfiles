@@ -552,7 +552,7 @@ def run_mode(apply: bool, output_json: bool) -> int:
                 "responsiveness": responsiveness,
                 "probe_error": probe_error,
                 "required_unresponsive_samples": REQUIRED_UNRESPONSIVE_SAMPLES,
-                "result": "preview",
+                "result": "planned",
             },
             output_json,
         )
@@ -815,7 +815,7 @@ def recycle_mode(apply: bool, output_json: bool) -> int:
             emit(
                 {
                     **record,
-                    "result": "preview",
+                    "result": "planned",
                     "target": service_target(),
                     "action": "kill -KILL",
                 },
@@ -915,7 +915,7 @@ def uninstall_mode(apply: bool, output_json: bool) -> int:
                 "operation": "uninstall",
                 "ok": True,
                 "apply": False,
-                "result": "preview",
+                "result": "planned",
                 "loaded": launch_agent_loaded(),
                 "state_preserved": str(STATE_FILE),
             },

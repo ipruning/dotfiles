@@ -17,29 +17,31 @@ exists, so the daemon and the CLI do not depend on mise shims or a long-lived uv
 script environment.
 
 ```zsh
-services/macos-session-health/macos-session-health install --dry-run
 services/macos-session-health/macos-session-health install
+services/macos-session-health/macos-session-health install --apply
 macos-session-health status --format json
 ```
 
-`uninstall` removes the command wrapper, the runtime copy, and the LaunchAgent.
-It keeps the SQLite state and the logs:
+`install`, `uninstall`, `compact`, and `notify-test` only report their targets
+unless `--apply` is given. `uninstall --apply` removes the command wrapper, the
+runtime copy, and the LaunchAgent. It keeps the SQLite state and the logs:
 
 ```zsh
 macos-session-health uninstall
+macos-session-health uninstall --apply
 ```
 
 Install unloads the agent and then publishes each file atomically. It does not
 roll back a partial update. If a step fails, install reports which files it
 completed and the observed launchd state, keeps the agent unloaded when
-possible, and tells the operator to inspect `status` and rerun install.
+possible, and tells the operator to inspect `status` and rerun `install --apply`.
 Uninstall also keeps the removals that succeeded and asks for a rerun after a
 failure. Running either command again converges to the requested state.
 
 After a partial failure, the installed wrapper may be missing or incomplete.
 Run status and retries from the repository copy at
 `services/macos-session-health/macos-session-health`, and preview a repeated
-install with `install --dry-run` first.
+install with `install` first.
 
 ## What notifies
 
@@ -69,8 +71,7 @@ variables. Run `macos-session-health --help` to list them.
 Nothing else notifies. Routine `SecStaticCode` failures (up to about 15 per
 10 minutes on a healthy host), slow `log show` queries, PID changes, zombies,
 individual processes with many open files, and app-specific inventories are
-not symptoms. In two weeks of version 1 data, those probes produced only
-notifications that needed no action, so version 2.0.0 removed them.
+not symptoms.
 
 ## Evidence
 
@@ -93,9 +94,8 @@ macos-session-health status --format json
 
 The report shows the newest snapshot time, the state of each condition, alert
 and delivery history, collector exceptions, failed spawn checks, `syspolicyd`
-samples and log matches, and the latest evidence bundle. It reports facts and
-does not derive a recovery plan. Use JSON when another program reads the
-report, and use `query --event NAME` or `events` for raw records:
+samples and log matches, and the latest evidence bundle. Use JSON when another
+program reads the report, and use `query --event NAME` or `events` for raw records:
 
 ```zsh
 macos-session-health incident --hours 6 --format json
@@ -139,8 +139,8 @@ explicitly from the observed facts.
 
 ## Notification delivery
 
-The single-file CLI contains its own brrr client and never runs a
-Skillshare-managed sender. Credentials are looked up in this order:
+The single-file CLI contains its own brrr client. Credentials are looked up in
+this order:
 `BRRR_SECRET` in the environment, `BRRR_ENV_FILE`, `~/.config/brrr/env`,
 `~/.config/notify/brrr.env`, and finally the exe.dev brrr proxy.
 
@@ -151,13 +151,14 @@ credential source as a `brrr_notification` event. `status --format json`
 reports the last delivery, the list of firing conditions, and whether
 notifications are configured. `mise run check` reads the same report.
 
-Validate the payload and local credential lookup without sending:
+Validate the payload and local credential lookup, then send:
 
 ```zsh
-macos-session-health notify-test --dry-run
+macos-session-health notify-test
+macos-session-health notify-test --apply
 ```
 
-The dry run uses the invoking shell's credentials. Installation does not copy
+`notify-test` uses the invoking shell's credentials. Installation does not copy
 the shell's `BRRR_SECRET` or `BRRR_ENV_FILE` into the LaunchAgent. For the
 installed agent, put the secret in one of the default files above (or use the
 proxy), then check `status --format json`. That report ignores credential
@@ -166,12 +167,13 @@ overrides from the calling shell.
 ## Storage
 
 Snapshots older than 14 days are deleted (`--retention-days` or
-`MACOS_SESSION_HEALTH_RETENTION_DAYS`). Records from version 1 age out the same
-way. To reclaim unused SQLite pages without losing history, compact the
-database. The command stops and restarts only this LaunchAgent around `VACUUM`:
+`MACOS_SESSION_HEALTH_RETENTION_DAYS`). To reclaim unused SQLite pages without
+losing history, compact the database. `compact --apply` stops and restarts only
+this LaunchAgent around `VACUUM`:
 
 ```zsh
 macos-session-health compact --format json
+macos-session-health compact --format json --apply
 ```
 
 To compact an offline database without stopping the installed LaunchAgent,
@@ -185,7 +187,7 @@ After changing the collector, test it and read its output before reinstalling:
 services/macos-session-health/macos-session-health --version
 services/macos-session-health/macos-session-health-test
 services/macos-session-health/macos-session-health --db /tmp/msh.sqlite3 snapshot
-services/macos-session-health/macos-session-health install
+services/macos-session-health/macos-session-health install --apply
 macos-session-health status --format json
 ```
 

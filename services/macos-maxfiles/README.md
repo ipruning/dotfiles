@@ -1,20 +1,20 @@
 # macos-maxfiles runbook
 
 Use this runbook when managing the machine-wide launchd `maxfiles` limit. The
-single-file CLI installs itself and a generated LaunchDaemon; it does not depend
-on a tracked plist.
+single-file CLI installs itself and a generated LaunchDaemon.
 
 ## Lifecycle
 
 Preview the exact target and paths before authorizing the system-wide change:
 
 ```zsh
-services/macos-maxfiles/macos-maxfiles install --dry-run
 services/macos-maxfiles/macos-maxfiles install
+services/macos-maxfiles/macos-maxfiles install --apply
 macos-maxfiles status --json
 ```
 
-Installation requires sudo. Success means the executable and LaunchDaemon are
+Without `--apply`, `install` and `uninstall` only print their targets.
+`--apply` requires sudo. Success means the executable and LaunchDaemon are
 installed, the daemon is loaded, and `status` reports `limits_satisfied: true`.
 The hard limit reported by launchd may be numeric or `unlimited`.
 
@@ -26,7 +26,8 @@ effective limits. If rollback itself fails, the diagnostic names a retained
 backup directory; keep that directory until the host is repaired.
 
 ```zsh
-macos-maxfiles uninstall --yes
+macos-maxfiles uninstall
+macos-maxfiles uninstall --apply
 ```
 
 Successful uninstall removes the executable and LaunchDaemon. The current
@@ -40,6 +41,6 @@ transaction rollback, and removal path through the public suite:
 
 ```zsh
 services/macos-maxfiles/macos-maxfiles-test
-services/macos-maxfiles/macos-maxfiles install --dry-run
+services/macos-maxfiles/macos-maxfiles install
 macos-maxfiles status --json
 ```

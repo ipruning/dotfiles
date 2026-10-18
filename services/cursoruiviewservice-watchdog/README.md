@@ -5,9 +5,9 @@ This module mitigates unbounded memory growth in Apple's
 text-cursor UI and does not claim to fix the underlying Apple implementation.
 
 It requires macOS and Python 3.11 or newer. The standalone launcher prefers
-Mise's stable `python/latest` path, otherwise it uses `python3` on `PATH`;
+mise's stable `python/latest` path, otherwise it uses `python3` on `PATH`;
 installation records the selected interpreter in the command wrapper and
-LaunchAgent rather than depending on Mise shims.
+LaunchAgent rather than depending on mise shims.
 
 The observed failure on macOS 26.6.1 left one service process alive for more
 than three days with about a 9.4 GB physical footprint and over 8 GB swapped.

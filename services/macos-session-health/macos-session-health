@@ -29,7 +29,7 @@ from pathlib import Path
 from typing import Any
 
 
-VERSION = "2.0.0"
+VERSION = "3.0.0"
 LABEL = "com.ipruning.macos-session-health"
 USER_BIN = Path.home() / ".local" / "bin" / "macos-session-health"
 LAUNCH_AGENT = Path.home() / "Library" / "LaunchAgents" / f"{LABEL}.plist"
@@ -80,7 +80,7 @@ CONDITIONS: dict[str, dict[str, Any]] = {
         "resolve_after": 2,
     },
     "collector_failing": {
-        "title": "session-health 采集器连续崩溃",
+        "title": "macos-session-health 采集器连续崩溃",
         "fire_after": 3,
         "resolve_after": 3,
     },
@@ -316,7 +316,7 @@ def launch_agent_payload(python_bin: Path) -> dict[str, Any]:
     }
 
 
-def install_launch_agent(*, dry_run: bool = False) -> int:
+def install_launch_agent(*, apply: bool = False) -> int:
     if sys.platform != "darwin":
         raise CliError("install is supported only on macOS")
 
@@ -326,7 +326,7 @@ def install_launch_agent(*, dry_run: bool = False) -> int:
         if not replaceable_install():
             raise CliError(f"refusing to replace unmanaged executable: {USER_BIN}")
 
-    if dry_run:
+    if not apply:
         print_records(
             [
                 {
@@ -395,7 +395,7 @@ def install_launch_agent(*, dry_run: bool = False) -> int:
         raise CliError(
             f"install failed after completed={progress}; LaunchAgent state={launchd_state}; "
             f"unload_error={unload_error or 'none'}; inspect with `macos-session-health status`, "
-            f"then rerun install: {install_error}"
+            f"then rerun install --apply: {install_error}"
         ) from install_error
 
     print_records(
@@ -414,12 +414,26 @@ def install_launch_agent(*, dry_run: bool = False) -> int:
     return 0
 
 
-def uninstall_launch_agent() -> int:
+def uninstall_launch_agent(*, apply: bool = False) -> int:
     if sys.platform != "darwin":
         raise CliError("uninstall is supported only on macOS")
     if USER_BIN.exists() or USER_BIN.is_symlink():
         if not replaceable_install():
             raise CliError(f"refusing to remove unmanaged executable: {USER_BIN}")
+    if not apply:
+        print_records(
+            [
+                {
+                    "planned": True,
+                    "executable": USER_BIN,
+                    "runtime": RUNTIME_CLI,
+                    "plist": LAUNCH_AGENT,
+                    "state_preserved": DEFAULT_DB.parent,
+                }
+            ],
+            "logfmt",
+        )
+        return 0
     bootout_launch_agent()
     removed: list[str] = []
     try:
@@ -434,7 +448,7 @@ def uninstall_launch_agent() -> int:
         progress = ",".join(removed) or "none"
         raise CliError(
             f"uninstall failed after removed={progress}; LaunchAgent is unloaded; "
-            f"rerun uninstall: {uninstall_error}",
+            f"rerun uninstall --apply: {uninstall_error}",
         ) from uninstall_error
 
     print_records(
@@ -486,7 +500,7 @@ def runtime_status_health(db_path: Path) -> dict[str, Any]:
 
 
 def latest_brrr_delivery(conn: sqlite3.Connection) -> dict[str, Any]:
-    """Return the last recorded delivery facts without deriving channel state."""
+    """Return the last recorded delivery facts."""
     try:
         row = conn.execute(
             "SELECT ts, data_json FROM events WHERE event = 'brrr_notification'"
@@ -518,7 +532,6 @@ def launch_agent_status(output_format: str) -> int:
         "executable": str(USER_BIN),
         "runtime": str(RUNTIME_CLI),
         "plist": str(LAUNCH_AGENT),
-        "notification_backend": "builtin",
         "notification_configured": notification["configured"],
         "notification_auth_mode": notification["auth_mode"],
         "notification_credential_source": notification["credential_source"],
@@ -528,11 +541,24 @@ def launch_agent_status(output_format: str) -> int:
     return 0 if record["installed"] and record["loaded"] else 1
 
 
-def compact_database(db_path: Path, output_format: str) -> int:
+def compact_database(db_path: Path, output_format: str, *, apply: bool = False) -> int:
     if not db_path.is_file():
         raise CliError(f"database does not exist: {db_path}")
     service_loaded = db_path == DEFAULT_DB and launchd_job().returncode == 0
     before_size = db_path.stat().st_size
+    if not apply:
+        print_records(
+            [
+                {
+                    "planned": True,
+                    "database": str(db_path),
+                    "before_bytes": before_size,
+                    "service_restart": service_loaded,
+                }
+            ],
+            output_format,
+        )
+        return 0
     if service_loaded:
         bootout_launch_agent()
     try:
@@ -569,15 +595,15 @@ def compact_database(db_path: Path, output_format: str) -> int:
 
 def test_brrr_notification(args: argparse.Namespace) -> int:
     payload = {
-        "title": f"{socket.gethostname()}: notification delivery test",
+        "title": f"{socket.gethostname()}：通知测试",
         "subtitle": "macOS session health",
-        "message": "Notification delivery is configured. No action needed.",
+        "message": "通知已配置，无需处理。",
         "thread_id": args.brrr_thread_id,
         "interruption_level": args.brrr_interruption_level,
     }
     if args.brrr_open_url:
         payload["open_url"] = args.brrr_open_url
-    delivery = deliver_brrr(payload, args.brrr_timeout, dry_run=args.dry_run)
+    delivery = deliver_brrr(payload, args.brrr_timeout, dry_run=not args.apply)
     print(json.dumps(delivery, ensure_ascii=False))
     return int(delivery["exit"])
 
@@ -927,7 +953,7 @@ def probe_process_table(
     user_total = sum(1 for row in rows if row["user"] == current_user)
     pressure = [
         (total, limits["kern.maxproc"], "全系统"),
-        (user_total, limits["kern.maxprocperuid"], f"用户 {current_user}"),
+        (user_total, limits["kern.maxprocperuid"], f"用户 {current_user} 的"),
     ]
     for used, limit, scope in pressure:
         if limit and used * 100 >= limit * warn_pct:
@@ -1207,13 +1233,13 @@ def alert_payload(
     host = socket.gethostname()
     if resolved:
         payload = {
-            "title": f"{host}: 已恢复：{spec['title']}",
+            "title": f"{host}：已恢复：{spec['title']}",
             "message": f"自 {alert['since']} 开始的异常已连续 {spec['resolve_after']} 次检查正常。",
             "interruption_level": "passive",
         }
     else:
         payload = {
-            "title": f"{host}: {spec['title']}",
+            "title": f"{host}：{spec['title']}",
             "message": (
                 f"{alert['detail']}（连续 {alert['bad_streak']} 次检查）。"
                 "先保存现场：macos-session-health incident --hours 1 --format markdown"
@@ -1980,15 +2006,18 @@ Run `macos-session-health install` to install or refresh the user LaunchAgent.
 
     subparsers = parser.add_subparsers(dest="command")
     install_parser = subparsers.add_parser(
-        "install", help="Install or refresh the user LaunchAgent."
+        "install", help="Preview, or install or refresh the user LaunchAgent."
     )
     install_parser.add_argument(
-        "--dry-run",
+        "--apply",
         action="store_true",
-        help="Validate the managed paths and runtime without changing the host.",
+        help="Install; without it, validate the managed paths and runtime only.",
     )
-    subparsers.add_parser(
-        "uninstall", help="Unload the LaunchAgent and remove installed files."
+    uninstall_parser = subparsers.add_parser(
+        "uninstall", help="Preview, or unload the LaunchAgent and remove installed files."
+    )
+    uninstall_parser.add_argument(
+        "--apply", action="store_true", help="Remove; without it, list the targets."
     )
     status_parser = subparsers.add_parser(
         "status", help="Show installation, LaunchAgent, and alert state."
@@ -1999,16 +2028,19 @@ Run `macos-session-health install` to install or refresh the user LaunchAgent.
         help="Validate or send one notification through the built-in brrr client.",
     )
     notify_test_parser.add_argument(
-        "--dry-run",
+        "--apply",
         action="store_true",
-        help="Validate configuration and print the payload without sending.",
+        help="Send; without it, validate configuration and print the payload.",
     )
     compact_parser = subparsers.add_parser(
         "compact",
-        help="Stop the LaunchAgent, compact its SQLite database, and restart it.",
+        help="Preview, or stop the LaunchAgent, compact its SQLite database, and restart it.",
     )
     compact_parser.add_argument(
         "--format", choices=["logfmt", "json"], default="logfmt"
+    )
+    compact_parser.add_argument(
+        "--apply", action="store_true", help="Compact; without it, report the target."
     )
     subparsers.add_parser(
         "snapshot",
@@ -2051,15 +2083,15 @@ def main() -> int:
 
     try:
         if args.command == "install":
-            return install_launch_agent(dry_run=args.dry_run)
+            return install_launch_agent(apply=args.apply)
         if args.command == "uninstall":
-            return uninstall_launch_agent()
+            return uninstall_launch_agent(apply=args.apply)
         if args.command == "status":
             return launch_agent_status(args.format)
         if args.command == "notify-test":
             return test_brrr_notification(args)
         if args.command == "compact":
-            return compact_database(args.db, args.format)
+            return compact_database(args.db, args.format, apply=args.apply)
     except CliError as exc:
         print_error(str(exc))
         return 1
