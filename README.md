@@ -17,13 +17,14 @@ Operator/Executor handoff. This README describes how to operate the tasks.
 | Compare reference and live configuration | `mise run diff` | read-only |
 | Install locked tools, plugins, and generated shell state | `mise run update` | `mise run update -- --apply` |
 | Advance the shared baselines (maintenance host) | `mise run upgrade-tools` | `mise run upgrade-tools -- --apply` |
+| Upgrade everything and verify | `mise run upgrade-all` | `mise run upgrade-all -- --apply` |
 | Link mise configuration and install missing baseline tools | `mise run mise-sync` | `mise run mise-sync -- --apply` |
 | Regenerate `generated/` | `mise run generate` | `mise run generate -- --apply` |
 | Diagnose failures | `mise run doctor` | read-only |
 
+`upgrade-all -- --apply` advances the shared mise and Yazi baselines, updates Homebrew formulae and casks plus the other host tools, then runs the full verification gate. Without `--apply`, it previews both update stages. It does not commit or push repository changes.
+
 Every mutating task previews by default and writes only with `--apply`. Discover
-tasks with `mise tasks`, `mise tasks info <task>`, and `mise run <task> --
---help`; aggregate gates such as `verify` have no help. Commands are listed in
 the [command index](commands/README.md) and services in [Services](#services);
 their flags are their own.
 

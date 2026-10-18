@@ -75,6 +75,20 @@ run = '"${VIRTUAL_ENV:+$VIRTUAL_ENV/bin/}python" -m scripts.update "$@"'
 description = "Preview or advance the shared mise and Yazi plugin baselines on the maintenance host"
 run = '"${VIRTUAL_ENV:+$VIRTUAL_ENV/bin/}python" -m scripts.upgrade_tools "$@"'
 
+[tasks.upgrade-all]
+description = "Preview or apply a full software upgrade and verification"
+run = """
+if [ "${1:-}" = "--apply" ]; then
+  mise run upgrade-tools -- --apply
+  mise run update -- --apply
+  mise run verify
+else
+  mise run upgrade-tools
+  mise run update
+  echo "Preview only. Re-run with -- --apply to upgrade and verify."
+fi
+"""
+
 [tasks.mise-sync]
 description = "Preview or converge global mise configuration, locked tools, and shims"
 run = '"${VIRTUAL_ENV:+$VIRTUAL_ENV/bin/}python" -m scripts.mise_sync "$@"'
