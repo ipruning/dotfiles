@@ -1,13 +1,4 @@
 onboarding = false
-# Herdr configuration
-#
-# Previous overrides are retained below for reference but commented out so
-# Herdr 0.8.0 uses its built-in defaults.
-
-# onboarding = false
-
-# [theme]
-# auto_switch = true
 
 # [ui]
 # agent_panel_sort = "priority"

@@ -12,8 +12,7 @@
 Use an available web-search tool when current external information matters.
 Prefer authoritative sources, include source URLs, and state the time boundary.
 If only Codex CLI is available, inspect the installed `codex exec --help` and
-use its supported ephemeral, read-only search interface. The installed Codex
-configuration owns model selection and reasoning effort.
+use its supported ephemeral, read-only search interface.
 
 </0>
 

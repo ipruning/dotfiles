@@ -43,8 +43,7 @@ alt-tab = "workspace-back-and-forth"
 # Enter Service as a Leader: release Alt before the next command.
 alt-slash = "mode service"
 
-# Workspaces follow the focused monitor instead of being pinned to display
-# names, so connecting or disconnecting a display doesn't force a reassignment.
+# summon-workspace brings the workspace to the focused monitor.
 alt-1 = "summon-workspace 1"
 alt-2 = "summon-workspace 2"
 alt-3 = "summon-workspace 3"
