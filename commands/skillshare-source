@@ -278,7 +278,7 @@ def _default_skillshare_target_dir() -> Path:
         "[red]Skillshare config has no usable targets.universal.skills.path[/red]"
     )
     error_console.print(
-        "[dim]Configure that target or pass --target explicitly; no target path was guessed.[/dim]"
+        "[dim]Configure that target or pass --target explicitly.[/dim]"
     )
     raise typer.Exit(1)
 
@@ -306,9 +306,7 @@ def _iter_skill_description_items(source_dir: Path, include_managed: bool):
         }
 
 
-def _installed_skill_description_items(
-    target_dir: Path,
-) -> tuple[list[dict], list[str]]:
+def _iter_installed_skill_description_items(target_dir: Path):
     manifest_path = target_dir / ".skillshare-manifest.json"
     if manifest_path.exists():
         data = json.loads(manifest_path.read_text())
@@ -323,30 +321,19 @@ def _installed_skill_description_items(
             if not entry.name.startswith(".") and (entry / "SKILL.md").exists()
         )
 
-    items = []
-    missing_entries = []
     for rel_dir in rel_dirs:
         skill_file = target_dir / rel_dir / "SKILL.md"
         if not skill_file.exists():
-            missing_entries.append(rel_dir)
             continue
         frontmatter = _skill_frontmatter(skill_file)
         if frontmatter is None:
             continue
-        items.append(
-            {
-                "name": str(frontmatter.get("name") or Path(rel_dir).name),
-                "path": rel_dir,
-                "description": _description_from_frontmatter(frontmatter),
-                "skill_file": skill_file,
-            }
-        )
-    return items, missing_entries
-
-
-def _iter_installed_skill_description_items(target_dir: Path):
-    items, _missing_entries = _installed_skill_description_items(target_dir)
-    yield from items
+        yield {
+            "name": str(frontmatter.get("name") or Path(rel_dir).name),
+            "path": rel_dir,
+            "description": _description_from_frontmatter(frontmatter),
+            "skill_file": skill_file,
+        }
 
 
 @app.command(name="list")
@@ -634,8 +621,6 @@ def descriptions(
                 separators=(",", ":"),
             )
         )
-
-
 
 
 def _check(ok: bool, label: str, detail: str) -> bool:

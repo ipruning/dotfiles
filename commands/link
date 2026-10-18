@@ -38,7 +38,7 @@ UUID_COLOR = "\033[35m"
 CMD_COLOR = "\033[33m"
 RESET = "\033[0m"
 USAGE = """\
-Usage: link.py
+Usage: link
 
 Extract URLs, paths, UUIDs, and resume commands from stdin or a Zellij screen dump.
 """
@@ -48,7 +48,6 @@ Extract URLs, paths, UUIDs, and resume commands from stdin or a Zellij screen du
 ANSI_ESCAPE_RE = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
 HTTP_SUFFIX_RE = re.compile(r"HTTP/\d+\.\d.*$")
 
-# UUID patterns moved to module scope to avoid recompilation
 UUID_PATTERNS: list[re.Pattern[str]] = [
     # Standard dashed UUID (accept any version nibble, include v6/v7)
     re.compile(
@@ -294,14 +293,14 @@ def main(argv: list[str] | None = None) -> None:
         print(USAGE, end="")
         return
     if argv:
-        print(f"link.py: unexpected arguments: {' '.join(argv)}", file=sys.stderr)
+        print(f"link: unexpected arguments: {' '.join(argv)}", file=sys.stderr)
         sys.exit(2)
 
     zellij_text = get_zellij_screen()
     stdin_text = "" if sys.stdin.isatty() else sys.stdin.read()
     if not zellij_text and not stdin_text:
         print(
-            "link.py: no input; pipe text on stdin or run inside Zellij so its screen can be dumped",
+            "link: no input; pipe text on stdin or run inside Zellij so its screen can be dumped",
             file=sys.stderr,
         )
         sys.exit(1)

@@ -60,14 +60,13 @@ def main(user_instructions: str | None = None, dry_run=False) -> None:
         print(instruction)
     else:
         subprocess.run(["pbcopy"], input=instruction.encode("utf-8"))
-        # subprocess.run(["switch-input-source.swift", "com.apple.keylayout.ABC"])
         subprocess.run(["osascript", "-e", generate_apple_script()])
 
 
 if __name__ == "__main__":
     if sys.argv[1:] in (["-h"], ["--help"]):
-        print("Usage: chatgpt.py [USER_INSTRUCTIONS] [--dry_run]")
+        print("Usage: chatgpt [USER_INSTRUCTIONS] [--dry-run]")
         print("Send stdin and/or instructions to ChatGPT in Chrome via clipboard and UI automation on macOS.")
-        print("--dry_run prints the composed message without clipboard or UI changes.")
+        print("--dry-run prints the composed message without clipboard or UI changes.")
     else:
         fire.Fire(main)

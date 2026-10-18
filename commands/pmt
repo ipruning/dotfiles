@@ -24,10 +24,10 @@ def _maybe_read_user_instructions_from_args(args: list[str]) -> str | None:
     Allow passing large multi-line prompts without losing newlines via shell substitution.
 
     Supported forms:
-    - pmt.py @/path/to/prompt.md
-    - pmt.py /path/to/prompt.md   (only when it's the single arg and the file exists)
-    - pmt.py --file /path/to/prompt.md
-    - pmt.py -f /path/to/prompt.md
+    - pmt @/path/to/prompt.md
+    - pmt /path/to/prompt.md   (only when it's the single arg and the file exists)
+    - pmt --file /path/to/prompt.md
+    - pmt -f /path/to/prompt.md
     """
     log = logging.getLogger(__name__)
     if not args:
@@ -70,7 +70,7 @@ def _maybe_read_user_instructions_from_args(args: list[str]) -> str | None:
 
 def main(args: list[str]) -> None:
     if args in (["-h"], ["--help"]):
-        print("Usage: pmt.py [TEXT... | @FILE | FILE | --file FILE]")
+        print("Usage: pmt [TEXT... | @FILE | FILE | --file FILE]")
         print("Wrap instructions and optional stdin context in tags; writes only to stdout.")
         return
 
