@@ -214,6 +214,13 @@ def _update_steps(home: Path) -> tuple[UpdateStep, ...]:
             environment=(("HOMEBREW_NO_INSTALL_CLEANUP", "1"),),
         ),
         UpdateStep(
+            "brew.casks",
+            "brew",
+            ("brew", "upgrade", "--cask"),
+            3600,
+            environment=(("HOMEBREW_NO_INSTALL_CLEANUP", "1"),),
+        ),
+        UpdateStep(
             "mise.self",
             "mise",
             (mise_executable, "self-update", "--yes", "--no-plugins"),

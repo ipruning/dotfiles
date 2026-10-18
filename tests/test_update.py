@@ -166,6 +166,7 @@ def test_update_previews_exact_plan_by_default_without_running_tools(
     ] == [
         ("brew.metadata", "planned", ["brew", "update"]),
         ("brew.packages", "planned", ["brew", "upgrade", "--formula"]),
+        ("brew.casks", "planned", ["brew", "upgrade", "--cask"]),
         (
             "mise.self",
             "planned",
@@ -202,7 +203,7 @@ def test_update_previews_exact_plan_by_default_without_running_tools(
         ),
         ("amp", "planned", [str(tmp_path / "bin/amp"), "update"]),
     ]
-    assert document["summary"] == {"planned": 6, "skipped": 16}
+    assert document["summary"] == {"planned": 7, "skipped": 16}
     assert document["notes"] == [
         (
             "planned means the updater command is available; each updater "
@@ -225,6 +226,9 @@ def test_update_previews_exact_plan_by_default_without_running_tools(
     assert steps["brew.metadata"]["environment"]["PATH_prepend"] == []
     assert steps["brew.metadata"]["environment"]["variables"] == {}
     assert steps["brew.packages"]["environment"]["variables"] == {
+        "HOMEBREW_NO_INSTALL_CLEANUP": "1",
+    }
+    assert steps["brew.casks"]["environment"]["variables"] == {
         "HOMEBREW_NO_INSTALL_CLEANUP": "1",
     }
     assert steps["sprite.version"]["stdin"] == "y\n"
@@ -433,7 +437,7 @@ def test_update_disables_homebrew_automatic_cleanup(
         "#!/bin/sh\n"
         'if [ "$1" = upgrade ]; then\n'
         '  printf "%s\\n" "$HOMEBREW_NO_INSTALL_CLEANUP" '
-        f"> {shlex.quote(str(log_path))}\n"
+        f">> {shlex.quote(str(log_path))}\n"
         "fi\n"
     )
     brew.chmod(0o755)
@@ -445,7 +449,7 @@ def test_update_disables_homebrew_automatic_cleanup(
     )
 
     assert report.ok is True
-    assert log_path.read_text().strip() == "1"
+    assert log_path.read_text().splitlines() == ["1", "1"]
 
 
 def test_update_reports_claude_failure_recovery_without_cleaning(
@@ -475,7 +479,7 @@ def test_update_runs_available_tools_in_order_and_reports_skips(tmp_path: Path) 
     document = json.loads(completed.stdout)
     assert document["apply"] is True
     assert document["ok"] is True
-    assert document["summary"] == {"skipped": 16, "succeeded": 6}
+    assert document["summary"] == {"skipped": 16, "succeeded": 7}
     assert [
         (step["name"], step["status"], step["exit_code"])
         for step in document["steps"]
@@ -483,6 +487,7 @@ def test_update_runs_available_tools_in_order_and_reports_skips(tmp_path: Path) 
     ] == [
         ("brew.metadata", "succeeded", 0),
         ("brew.packages", "succeeded", 0),
+        ("brew.casks", "succeeded", 0),
         ("mise.self", "succeeded", 0),
         ("mise.installed-tools", "succeeded", 0),
         ("mise.shims", "succeeded", 0),
@@ -491,6 +496,7 @@ def test_update_runs_available_tools_in_order_and_reports_skips(tmp_path: Path) 
     assert log_path.read_text().splitlines() == [
         "brew update",
         "brew upgrade --formula",
+        "brew upgrade --cask",
         "mise self-update --yes --no-plugins",
         f"mise install --locked --yes -C {tmp_path / 'home'} python",
         f"mise reshim --force -C {tmp_path / 'home'}",
@@ -552,7 +558,7 @@ def test_update_human_output_announces_commands_before_summary(tmp_path: Path) -
     assert completed.stdout.splitlines()[0].endswith(" && brew update")
     assert "SUCCEEDED brew.metadata" in completed.stdout
     assert ("Next:\n  mise run check\n") in completed.stdout
-    assert "Summary: 6 succeeded, 16 skipped" in completed.stdout
+    assert "Summary: 7 succeeded, 16 skipped" in completed.stdout
 
 
 @pytest.mark.parametrize("capture_output", [False, True])
