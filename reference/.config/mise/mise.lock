@@ -295,6 +295,15 @@ url = "https://nodejs.org/dist/v26.12.0/node-v26.12.0-linux-x64.tar.gz"
 checksum = "sha256:2a154d4a5458930e0a2d6a1ecf64eddf5a2b3e1c13636b609c2ecb042e8c4553"
 url = "https://nodejs.org/dist/v26.12.0/node-v26.12.0-darwin-arm64.tar.gz"
 
+[[tools."npm:@excalidraw/cli"]]
+version = "0.2.0"
+aube = { path = "locks/npm-excalidraw-cli/0.2.0~240bd873", digest = "sha256:a2ac778521b0b4a2c82b19547238a4513ca746e7d616769d9ddd32a4fcca210d" }
+backend = "npm:@excalidraw/cli"
+specifiers = ["latest"]
+
+[tools."npm:@excalidraw/cli".options]
+allow_low_downloads = "true"
+
 [[tools."npm:@openai/codex-security"]]
 version = "0.4.0"
 aube = { path = "locks/npm-openai-codex-security/0.4.0~19b6a9e3", digest = "sha256:cbe488dd3cee48b29502b50bad7034e083e19dd7c48d86b98f7164f55bf1117a" }

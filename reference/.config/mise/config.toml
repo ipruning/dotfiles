@@ -30,6 +30,7 @@ zoxide = "aqua:ajeetdsouza/zoxide"
 btop = { version = "latest", os = ["linux"] }
 "npm:@openai/codex-security" = { version = "latest", allow_low_downloads = "true" }
 "npm:agent-device" = "latest"
+"npm:@excalidraw/cli" = { version = "latest", allow_low_downloads = "true" }
 agent-browser = "latest"
 bun = "latest"
 deno = "latest"
