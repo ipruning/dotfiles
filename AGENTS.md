@@ -140,8 +140,6 @@ Do not add cross-platform installers for optional tools.
 Global harness prompts and skills are owned by the Skillshare source repo.
 This repository may inspect the configured source and store its reference
 configuration, but it must not synchronize or rewrite global harness files.
-Pi's `.pi/agent/AGENTS.md` is the explicit exception: the `agents` Mackup
-mapping owns it, and only an operator-directed scoped restore applies it.
 
 ## Commits
 

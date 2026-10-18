@@ -268,8 +268,6 @@ reports when it is elsewhere.
 The Skillshare source repository owns global harness prompts and skills; this
 repository stores only the portable configuration (`mise run restore --
 skillshare`). Its source lives at `~/.config/skillshare/skills` on every host.
-Pi's `~/.pi/agent/AGENTS.md` is the exception: the `agents` mapping restores it
-only through `mise run restore -- agents --apply`.
 
 One authoring host runs `skillshare update --all`, reviews, and publishes the
 source; other hosts pull it and run `skillshare sync`. This keeps
