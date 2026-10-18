@@ -892,15 +892,15 @@ def test_btop_check_reports_platform_owned_install_action(tmp_path: Path) -> Non
     assert macos_finding.action == "Install btop with Homebrew: brew install btop."
 
 
-def test_linux_lite_check_requires_only_git_and_mise_and_reports_legacy_path(
+def test_linux_lite_check_requires_only_git_and_mise_and_reports_exposed_commands(
     tmp_path: Path,
     monkeypatch,
 ) -> None:
     repo_root = tmp_path / "repo"
     home = tmp_path / "home"
-    legacy_bin = repo_root / "commands"
-    legacy_bin.mkdir(parents=True)
-    monkeypatch.setenv("PATH", f"{legacy_bin}:/usr/bin:/bin")
+    commands_dir = repo_root / "commands"
+    commands_dir.mkdir(parents=True)
+    monkeypatch.setenv("PATH", f"{commands_dir}:/usr/bin:/bin")
 
     report = inspect_host(
         repo_root,
@@ -948,7 +948,7 @@ def test_linux_lite_check_requires_only_git_and_mise_and_reports_legacy_path(
             "mise run mise-sync -- --apply."
         )
     assert findings["shell.repo_commands"].severity is Severity.WARN
-    assert findings["shell.repo_commands"].path == legacy_bin
+    assert findings["shell.repo_commands"].path == commands_dir
 
     monkeypatch.setenv("PATH", "/usr/bin:/bin")
     clean = inspect_host(
@@ -1314,7 +1314,7 @@ def test_maxfiles_probe_flags_limit_drift_and_unloaded_daemon(
         )
 
     drifted = _module_probe_findings(tmp_path, finder, "maxfiles.")
-    assert drifted["maxfiles.agent"].code == "maxfiles.agent_ready"
+    assert drifted["maxfiles.daemon"].code == "maxfiles.daemon_ready"
     assert drifted["maxfiles.limits"].severity is Severity.WARN
     assert drifted["maxfiles.limits"].code == "maxfiles.limits_drift"
     action = drifted["maxfiles.limits"].action
@@ -1346,8 +1346,8 @@ def test_maxfiles_probe_flags_limit_drift_and_unloaded_daemon(
         },
     )
     down = _module_probe_findings(tmp_path, finder, "maxfiles.")
-    assert down["maxfiles.agent"].code == "maxfiles.agent_down"
-    assert down["maxfiles.agent"].severity is Severity.WARN
+    assert down["maxfiles.daemon"].code == "maxfiles.daemon_down"
+    assert down["maxfiles.daemon"].severity is Severity.WARN
     assert "maxfiles.limits" not in down
 
     def absent_finder(command: str) -> str | None:
@@ -1356,7 +1356,7 @@ def test_maxfiles_probe_flags_limit_drift_and_unloaded_daemon(
         )
 
     missing = _module_probe_findings(tmp_path, absent_finder, "maxfiles.")
-    assert missing["maxfiles.agent"].code == "maxfiles.missing"
+    assert missing["maxfiles.daemon"].code == "maxfiles.missing"
 
 
 def test_bash_integration_recognizes_symlinked_checkout(tmp_path: Path) -> None:
@@ -1567,7 +1567,7 @@ def test_dangling_repo_links_are_reported_and_track_target_removal(
     code_user = home / "Library/Application Support/Code/User"
     code_user.mkdir(parents=True)
     (code_user / "keybindings.json").symlink_to(repo_root / "assets/keybindings.json")
-    # XDG app config at depth 4 — the mapped path a shallower scan missed.
+    # XDG app config at depth 4, inside the scan.
     code_xdg = home / ".config/Code/User"
     code_xdg.mkdir(parents=True)
     (code_xdg / "settings.json").symlink_to(repo_root / "reference/removed.json")

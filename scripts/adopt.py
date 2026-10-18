@@ -346,7 +346,7 @@ def _document(
 def render_adopt(report: AdoptReport, *, apply_allowed: bool = True) -> None:
     for result in report.results:
         label = result.status.value.upper()
-        print(f"{label:7} {result.drift.reference_path}")
+        print(f"{label:9} {result.drift.reference_path}")
         print(f"        live: {result.drift.live_path}")
         if result.action:
             print(f"        action: {result.action}")

@@ -9,24 +9,17 @@ import platform
 import shutil
 import subprocess
 import sys
+from collections import Counter
 from collections.abc import Callable
 from dataclasses import dataclass
-from enum import StrEnum
 from pathlib import Path
 from typing import cast
 
 from .host_policy import HostPolicyError
 from .mise import canonical_mise_environment, canonical_mise_executable
-from .models import Severity
+from .models import NOT_APPLICABLE, Severity
 from .process import CommandRunner, run_in_repository
 from .render import emit_error
-
-
-class DoctorStatus(StrEnum):
-    OK = "ok"
-    WARN = "warn"
-    ERROR = "error"
-    SKIPPED = "skipped"
 
 
 @dataclass(frozen=True)
@@ -42,11 +35,16 @@ class DoctorStep:
 @dataclass(frozen=True)
 class DoctorResult:
     step: DoctorStep
-    status: DoctorStatus
+    # None means the owner is not available on this host, as for Finding.
+    severity: Severity | None
     exit_code: int | None = None
     report: dict[str, object] | None = None
     output: str | None = None
     reason: str | None = None
+
+    @property
+    def label(self) -> str:
+        return self.severity.value if self.severity is not None else NOT_APPLICABLE
 
 
 @dataclass(frozen=True)
@@ -57,26 +55,26 @@ class DoctorReport:
     @property
     def ok(self) -> bool:
         return not any(
-            result.status is DoctorStatus.ERROR
-            or (self.strict and result.status is DoctorStatus.WARN)
+            result.severity is Severity.ERROR
+            or (self.strict and result.severity is Severity.WARN)
             for result in self.results
         )
 
 
-def _status_from_report(
+def _severity_from_report(
     report: dict[str, object] | None,
     *,
     exit_code: int,
-) -> DoctorStatus:
+) -> Severity:
     if exit_code != 0:
-        return DoctorStatus.ERROR
+        return Severity.ERROR
     if report is None:
-        return DoctorStatus.OK
+        return Severity.OK
     if report.get("ok") is False:
-        return DoctorStatus.ERROR
+        return Severity.ERROR
     changes = report.get("changes")
     if isinstance(changes, list) and changes:
-        return DoctorStatus.WARN
+        return Severity.WARN
     summary = report.get("summary")
     counts = summary if isinstance(summary, dict) else {}
 
@@ -85,10 +83,10 @@ def _status_from_report(
         return value if isinstance(value, int) else 0
 
     if count(Severity.ERROR) > 0:
-        return DoctorStatus.ERROR
+        return Severity.ERROR
     if count(Severity.WARN) > 0:
-        return DoctorStatus.WARN
-    return DoctorStatus.OK
+        return Severity.WARN
+    return Severity.OK
 
 
 def _parse_report(step: DoctorStep, stdout: str) -> dict[str, object] | None:
@@ -130,11 +128,11 @@ def _run_step(
     except subprocess.TimeoutExpired:
         return DoctorResult(
             step,
-            DoctorStatus.ERROR,
+            Severity.ERROR,
             reason=f"timed out after {step.timeout_seconds}s",
         )
     except OSError as error:
-        return DoctorResult(step, DoctorStatus.ERROR, reason=str(error))
+        return DoctorResult(step, Severity.ERROR, reason=str(error))
 
     output = (
         "\n".join(
@@ -149,21 +147,21 @@ def _run_step(
     except ValueError as error:
         return DoctorResult(
             step,
-            DoctorStatus.ERROR,
+            Severity.ERROR,
             exit_code=completed.returncode,
             output=output,
             reason=str(error),
         )
-    status = _status_from_report(report, exit_code=completed.returncode)
+    severity = _severity_from_report(report, exit_code=completed.returncode)
     return DoctorResult(
         step,
-        status,
+        severity,
         exit_code=completed.returncode,
         report=report,
         output=output,
         reason=(
             None
-            if status is not DoctorStatus.ERROR
+            if severity is not Severity.ERROR
             else f"command exited {completed.returncode}"
         ),
     )
@@ -236,38 +234,28 @@ def inspect_doctor(
             ),
         )
     ]
-    known_tools = {"mise", "skillshare", "brew", "pueue"}
-    present_tools = {
-        result.step.owner for result in results if (result.step.owner in known_tools)
-    }
     missing_names = {
-        "mise": "mise.doctor",
-        "skillshare": "skillshare.doctor",
         "brew": "brew.doctor",
+        "mise": "mise.doctor",
         "pueue": "pueue.status",
     }
-    for tool in sorted(known_tools - present_tools):
-        results.append(
-            DoctorResult(
-                DoctorStep(missing_names[tool], tool, (tool,), 0),
-                DoctorStatus.SKIPPED,
-                reason=(
-                    "skillshare doctor writes configuration and target probes; "
-                    "read-only Skillshare checks are included in dotfiles.check"
-                    if tool == "skillshare" and executable_finder(tool)
-                    else f"{tool} is not available on PATH"
+    present_tools = {result.step.owner for result in results}
+    for tool, name in missing_names.items():
+        if tool not in present_tools:
+            results.append(
+                DoctorResult(
+                    DoctorStep(name, tool, (tool,), 0),
+                    None,
+                    reason=f"{tool} is not available on PATH",
                 ),
-            ),
-        )
+            )
     return DoctorReport(tuple(results), strict=strict)
 
 
 def _summary(report: DoctorReport) -> dict[str, int]:
-    return {
-        status.value: count
-        for status in DoctorStatus
-        if (count := sum(result.status is status for result in report.results))
-    }
+    counts = Counter(result.label for result in report.results)
+    labels = (*(severity.value for severity in Severity), NOT_APPLICABLE)
+    return {label: counts[label] for label in labels if counts[label]}
 
 
 def _document(report: DoctorReport) -> dict[str, object]:
@@ -278,12 +266,13 @@ def _document(report: DoctorReport) -> dict[str, object]:
         "strict": report.strict,
         "system": platform.system(),
         "summary": _summary(report),
-        "checks": [
+        "steps": [
             {
                 "name": result.step.name,
                 "owner": result.step.owner,
                 "command": list(result.step.command),
-                "status": result.status.value,
+                "severity": result.severity.value if result.severity else None,
+                "applicable": result.severity is not None,
                 "exit_code": result.exit_code,
                 "report": result.report,
                 "output": result.output,
@@ -312,10 +301,10 @@ def _render(report: DoctorReport) -> None:
                 changes = result.report.get("changes")
                 if isinstance(changes, list) and changes:
                     detail = f"{len(changes)} drift entries"
-        if detail is None and result.output and result.status is not DoctorStatus.OK:
+        if detail is None and result.output and result.severity is not Severity.OK:
             detail = result.output.splitlines()[0]
         print(
-            f"{result.status.value.upper():7} {result.step.name}"
+            f"{result.label.upper():7} {result.step.name}"
             + (f": {detail}" if detail else "")
         )
     summary = ", ".join(

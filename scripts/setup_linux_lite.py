@@ -264,7 +264,7 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps(document, indent=2, sort_keys=True))
         return 0
     for change in report.changes:
-        print(f"{change.status.value.upper():7} {change.action}")
+        print(f"{change.status.value.upper():9} {change.action}")
     rendered = ", ".join(f"{count} {status}" for status, count in summary.items())
     print(f"Summary: {rendered or 'no changes'}")
     if not report.changes:

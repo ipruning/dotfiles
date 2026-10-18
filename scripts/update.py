@@ -207,7 +207,7 @@ def _update_steps(home: Path) -> tuple[UpdateStep, ...]:
         # mise mid-upgrade leaves partial kegs, stale locks, or half-written
         # tool state, which is worse than waiting out a slow upgrade.
         UpdateStep(
-            "brew.packages",
+            "brew.formulae",
             "brew",
             ("brew", "upgrade", "--formula"),
             3600,
@@ -378,11 +378,7 @@ def execute_updates(
         )
     results = []
     for planned in plan.results:
-        # Carry through anything the preflight already resolved (SKIPPED, or a
-        # FAILED mise inventory). Only PLANNED steps run: executing a FAILED
-        # mise.installed-tools step would run `mise install` with no tool arguments and
-        # install every tool the host's configs declare — the exact outcome the
-        # preflight avoids.
+        # Only PLANNED steps run.
         if planned.status is not Status.PLANNED:
             results.append(planned)
             continue
@@ -562,14 +558,14 @@ def _render(report: UpdateReport, *, apply_allowed: bool = True) -> None:
     for result in report.results:
         label = result.status.value.upper()
         if result.status is Status.PLANNED:
-            print(f"{label:7} {result.step.name}: {_display_command(result.step)}")
+            print(f"{label:9} {result.step.name}: {_display_command(result.step)}")
         elif result.status is Status.SUCCEEDED:
-            print(f"{label:7} {result.step.name}{duration(result)}")
+            print(f"{label:9} {result.step.name}{duration(result)}")
         elif result.status is Status.SKIPPED:
-            print(f"{label:7} {result.step.name}: {result.reason}")
+            print(f"{label:9} {result.step.name}: {result.reason}")
         else:
             print(
-                f"{label:7} {result.step.name}{duration(result)}: {result.reason}",
+                f"{label:9} {result.step.name}{duration(result)}: {result.reason}",
                 file=sys.stderr,
             )
             for output in (result.stdout_tail, result.stderr_tail):

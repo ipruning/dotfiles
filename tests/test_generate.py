@@ -722,7 +722,7 @@ def test_generate_human_preview_shows_commands_and_targets(tmp_path: Path) -> No
 
     assert completed.returncode == 0
     assert (
-        f"PLANNED completion.codex: {bin_dir}/codex completion zsh -> "
+        f"PLANNED   completion.codex: {bin_dir}/codex completion zsh -> "
         f"{repo_root}/generated/completions/_codex"
     ) in completed.stdout
     apply_command = shlex.join(

@@ -228,8 +228,8 @@ def test_valid_policy_selects_mise_and_is_visible_to_check(tmp_path: Path) -> No
 
     assert canonical_mise_path(home) == mise
     assert canonical_mise_executable(home) == str(mise)
-    assert findings["host.policy"].code == "host.policy_audit_only"
-    assert findings["host.policy"].path == policy
+    assert findings["host_policy.mode"].code == "host_policy.audit_only"
+    assert findings["host_policy.mode"].path == policy
     assert findings["mise.canonical"].path == mise
     assert (
         findings["mise.canonical"].message
@@ -320,7 +320,7 @@ def test_invalid_policy_is_diagnosed_without_mise_owner_fallback(
     )
     findings = {finding.check: finding for finding in report.findings}
 
-    assert findings["host.policy"].code == "host.policy_invalid"
+    assert findings["host_policy.mode"].code == "host_policy.invalid"
     assert "mise.canonical" not in findings
     assert report.is_ok() is False
     with pytest.raises(HostPolicyError, match="unknown fields"):
@@ -339,4 +339,4 @@ def test_absent_policy_preserves_managed_defaults(tmp_path: Path) -> None:
         system_name="Linux",
         profile="linux-lite",
     )
-    assert all(finding.check != "host.policy" for finding in report.findings)
+    assert all(finding.check != "host_policy.mode" for finding in report.findings)

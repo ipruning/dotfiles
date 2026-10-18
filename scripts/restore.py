@@ -220,7 +220,7 @@ def _document(
 def render_restore(report: RestoreReport, *, apply_allowed: bool = True) -> None:
     for result in report.results:
         label = result.status.value.upper()
-        print(f"{label:7} {result.drift.live_path}")
+        print(f"{label:9} {result.drift.live_path}")
         print(f"        reference: {result.drift.reference_path}")
         if result.backup_path:
             print(f"        backup: {result.backup_path}")

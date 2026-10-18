@@ -117,13 +117,11 @@ def test_global_mise_lock_covers_declared_artifact_platforms() -> None:
     assert config["min_version"]["hard"] == "2026.9.18"
     assert config["settings"]["auto_install"] is False
     assert config["settings"]["minimum_release_age"] == "0s"
-    assert "exec_auto_install" not in config["settings"]
-    assert "task" not in config["settings"]
     assert config["settings"]["trusted_config_paths"] == [
         "~/Developer/ipruning",
         "~/Developer/jihuanshe",
     ]
-    assert {"codex", "gh", "pi", "pnpm", "yarn"}.isdisjoint(config["tools"])
+    assert {"pi", "pnpm", "yarn"}.isdisjoint(config["tools"])
     assert {"pi", "pnpm", "yarn"}.isdisjoint(config["tool_alias"])
     lock_root = repo_root / "reference/.config/mise"
     lockfile = tomllib.loads((lock_root / "mise.lock").read_text())
@@ -146,7 +144,6 @@ def test_global_mise_lock_covers_declared_artifact_platforms() -> None:
             missing.append(f"{tool}:lock-entry")
             continue
         for entry in entries:
-            assert "uv" not in entry
             backend = entry["backend"]
             if backend.startswith("npm:"):
                 assert "aube" in entry

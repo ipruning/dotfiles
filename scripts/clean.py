@@ -216,7 +216,6 @@ def _document(report: CleanReport, *, apply_allowed: bool) -> dict[str, object]:
         ],
         "notes": [
             "Only mise tool versions and Homebrew package-manager cleanup are included.",
-            "Skillshare trash, configuration drift, generated/, and inventory/ are not cleaned automatically.",
         ],
         "next": (
             ["mise run clean -- --apply"]
@@ -248,10 +247,7 @@ def _render(report: CleanReport, *, apply_allowed: bool) -> None:
             print("Next: mise run clean -- --apply")
         elif not apply_allowed:
             print("No apply step: host policy disables dotfiles mutation.")
-    print(
-        "Scope: mise tool versions and Homebrew cleanup only; "
-        "Skillshare trash/configuration and repository state are untouched."
-    )
+    print("Scope: mise tool versions and Homebrew cleanup only.")
 
 
 def main(argv: list[str] | None = None) -> int:

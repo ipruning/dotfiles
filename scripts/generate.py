@@ -27,13 +27,11 @@ from .generate_commands import (
     timeout_reason,
 )
 from .generate_models import (
-    AtomicWriter,
     Downloader,
     GenerateAction,
     GenerateReport,
     GenerateResult,
     GenerateSpec,
-    ShellInitSpec,
     StepCallback,
 )
 from .generate_render import (
@@ -60,13 +58,11 @@ __all__ = [
     "OWNED_GENERATED_DIRECTORIES",
     "PLUGIN_SPECS",
     "WASM_SPECS",
-    "AtomicWriter",
     "Downloader",
     "GenerateAction",
     "GenerateReport",
     "GenerateResult",
     "GenerateSpec",
-    "ShellInitSpec",
     "StepCallback",
     "execute_generate",
     "file_sha256",

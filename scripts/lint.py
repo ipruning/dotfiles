@@ -496,7 +496,7 @@ def _tracked_file_findings(repo_root: Path, tracked_paths: list[Path]) -> list[F
                 _located_finding(
                     Severity.ERROR,
                     "repository.generated_tracked",
-                    "generated file has no repository regeneration task",
+                    "generated/ output must not be tracked; mise run generate rewrites it",
                     file_path,
                 ),
             )

@@ -138,9 +138,9 @@ def skillshare_findings(home: Path) -> list[Finding]:
                 "skillshare.targets",
                 Severity.WARN,
                 "skillshare.targets_missing",
-                "Skillshare configuration declares no Skill targets",
+                "Skillshare configuration declares no skill targets",
                 config_path,
-                "Declare host-specific targets before synchronizing Skills.",
+                "Declare host-specific targets before synchronizing skills.",
             ),
         )
         return findings
@@ -155,7 +155,7 @@ def skillshare_findings(home: Path) -> list[Finding]:
                     "skillshare.target_invalid",
                     "Skillshare target names must be non-empty strings",
                     config_path,
-                    "Repair the target name before synchronizing Skills.",
+                    "Repair the target name before synchronizing skills.",
                 ),
             )
             continue

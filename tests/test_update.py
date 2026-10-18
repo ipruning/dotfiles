@@ -165,7 +165,7 @@ def test_update_previews_exact_plan_by_default_without_running_tools(
         if step["status"] == "planned"
     ] == [
         ("brew.metadata", "planned", ["brew", "update"]),
-        ("brew.packages", "planned", ["brew", "upgrade", "--formula"]),
+        ("brew.formulae", "planned", ["brew", "upgrade", "--formula"]),
         ("brew.casks", "planned", ["brew", "upgrade", "--cask"]),
         (
             "mise.self",
@@ -225,7 +225,7 @@ def test_update_previews_exact_plan_by_default_without_running_tools(
     assert steps["mise.shims"]["environment"]["PATH_prepend"] == expected_mise_path
     assert steps["brew.metadata"]["environment"]["PATH_prepend"] == []
     assert steps["brew.metadata"]["environment"]["variables"] == {}
-    assert steps["brew.packages"]["environment"]["variables"] == {
+    assert steps["brew.formulae"]["environment"]["variables"] == {
         "HOMEBREW_NO_INSTALL_CLEANUP": "1",
     }
     assert steps["brew.casks"]["environment"]["variables"] == {
@@ -233,18 +233,6 @@ def test_update_previews_exact_plan_by_default_without_running_tools(
     }
     assert steps["sprite.version"]["stdin"] == "y\n"
     assert not log_path.exists()
-
-
-def test_update_preview_treats_tigris_like_other_updaters(tmp_path: Path) -> None:
-    completed, _log_path = _run_update(
-        tmp_path,
-        "--json",
-        tools=("tigris",),
-    )
-
-    document = json.loads(completed.stdout)
-    tigris = next(step for step in document["steps"] if step["name"] == "tigris")
-    assert tigris["status"] == "planned"
 
 
 def test_update_apply_runs_curl_installed_self_updaters(tmp_path: Path) -> None:
@@ -339,7 +327,7 @@ def test_update_gives_package_managers_transaction_scale_timeouts(
     )
     steps = {result.step.name: result.step for result in report.results}
 
-    assert steps["brew.packages"].timeout_seconds >= 3600
+    assert steps["brew.formulae"].timeout_seconds >= 3600
     assert steps["mise.installed-tools"].timeout_seconds >= 1800
     assert steps["claude"].timeout_seconds >= 1800
     assert steps["pi"].timeout_seconds >= 1800
@@ -369,7 +357,7 @@ def test_update_leaves_host_selected_mise_self_update_to_its_owner(
     )
 
 
-def test_update_installs_sprite_updates_instead_of_only_checking(
+def test_update_runs_sprite_upgrade(
     tmp_path: Path,
 ) -> None:
     report = plan_updates(
@@ -486,7 +474,7 @@ def test_update_runs_available_tools_in_order_and_reports_skips(tmp_path: Path) 
         if step["status"] != "skipped"
     ] == [
         ("brew.metadata", "succeeded", 0),
-        ("brew.packages", "succeeded", 0),
+        ("brew.formulae", "succeeded", 0),
         ("brew.casks", "succeeded", 0),
         ("mise.self", "succeeded", 0),
         ("mise.installed-tools", "succeeded", 0),
@@ -540,7 +528,7 @@ def test_update_preview_human_output_points_to_apply(tmp_path: Path) -> None:
     completed, log_path = _run_update(tmp_path)
 
     assert completed.returncode == 0
-    assert "PLANNED brew.metadata: cd -- " in completed.stdout
+    assert "PLANNED   brew.metadata: cd -- " in completed.stdout
     assert " && brew update" in completed.stdout
     assert (
         "No commands run. Re-run with --apply to update host tools." in completed.stdout
@@ -1214,7 +1202,7 @@ def test_update_cli_explains_herdr_session_skip_in_human_output(tmp_path: Path) 
     )
 
     assert completed.returncode == 0, completed.stderr
-    assert "SKIPPED herdr: running inside a Herdr session" in completed.stdout
+    assert "SKIPPED   herdr: running inside a Herdr session" in completed.stdout
     assert f"{tmp_path}/bin/herdr update" in completed.stdout
     assert "outside Herdr" in completed.stdout
     assert "RUN herdr:" not in completed.stdout

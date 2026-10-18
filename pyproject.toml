@@ -6,11 +6,7 @@ readme = "README.md"
 requires-python = ">=3.15"
 dependencies = [
     # Runtime dependencies of scripts/: ruamel-yaml (check) and the pinned
-    # read-only Mackup fork (diff). Pinning Mackup here — locked in uv.lock —
-    # keeps it inside the explicit `uv sync --locked` bootstrap boundary instead
-    # of a runtime uvx fetch. Type-only imports for the standalone commands
-    # scripts live in the dev group so this list stays true to what the package
-    # runs.
+    # read-only Mackup fork (diff).
     "mackup @ git+https://github.com/ipruning/mackup@da1c75dc34e494b6884c0f000af8f93758a778d9",
     "ruamel-yaml>=0.19.1",
 ]

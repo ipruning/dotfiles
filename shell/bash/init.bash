@@ -43,7 +43,6 @@ case $- in
       _dotfiles_prepend_path "$HOME/.local/share/mise/shims"
     fi
     bind '"\C-w": "\e\C-?"'
-    # SSH logins intentionally open an ordinary shell; start Herdr explicitly.
     ;;
   *)
     # Interactive Bash uses mise activation; non-interactive Bash keeps the

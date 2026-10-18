@@ -103,10 +103,7 @@ def _inventory_specs(applications_root: Path) -> tuple[InventorySpec, ...]:
             "setapp",
             "setapp.txt",
             scan_dir=applications_root / "Setapp",
-            # Setapp is optional: an absent or empty Setapp directory is a
-            # legitimate zero-app state that must overwrite a stale snapshot,
-            # not be skipped. Availability is gated on the /Applications root
-            # (below) so a non-macOS host still skips it.
+            # An absent or empty Setapp directory records zero apps.
             allow_empty=True,
         ),
     )
@@ -384,16 +381,16 @@ def _render(
                 if result.spec.command
                 else f"scan {result.spec.scan_dir}"
             )
-            print(f"{label:7} {result.spec.name}: {source} -> {target}")
+            print(f"{label:9} {result.spec.name}: {source} -> {target}")
         elif result.status is Status.SKIPPED:
-            print(f"{label:7} {result.spec.name}: {result.reason}")
+            print(f"{label:9} {result.spec.name}: {result.reason}")
         elif result.status is Status.SUCCEEDED:
-            print(f"{label:7} {result.spec.name}: {target}")
+            print(f"{label:9} {result.spec.name}: {target}")
         elif result.status is Status.UNCHANGED:
-            print(f"{label:7} {result.spec.name}: {target} unchanged")
+            print(f"{label:9} {result.spec.name}: {target} unchanged")
         else:
             print(
-                f"{label:7} {result.spec.name}: {result.reason}",
+                f"{label:9} {result.spec.name}: {result.reason}",
                 file=sys.stderr,
             )
     summary = _summary(report)

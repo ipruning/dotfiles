@@ -27,16 +27,18 @@ repository root is `DOTFILES_ROOT` in shell and `repo_root` in Python.
 
 - **Operations**: `check` inspects the host, `lint` the repository, `diff`
   reference against live. They never change state. Every other task plans by
-  default (`plan_*`) and changes state only with `--apply`.
+  default (`plan_*`) and changes state only with `--apply`; human-facing text
+  calls the plan a preview.
 - **Directions**: `restore` makes live point at reference; `adopt` copies live
-  back into reference. `update` installs locked tool versions; `upgrade-tools`
-  advances the lock; `mise-sync` connects mise configuration and installs
-  missing baseline tools; `generate` rewrites `generated/`.
+  back into reference. `update` installs locked tool versions and runs host
+  self-updaters; `upgrade-tools` advances the lock; `mise-sync` connects mise
+  configuration and installs missing baseline tools; `generate` rewrites
+  `generated/`.
 - **Status** (`scripts.models.Status`), shared by every report: `planned`,
   `succeeded`, `unchanged`, `skipped`, `failed`. Explain a non-success status in
   `reason`. Summaries use `status_summary`.
-- **Severity** (findings only): `ok`, `warn`, `error`. A finding that does not
-  apply has `applicable: false` and renders as `skipped`.
+- **Severity** (findings and `doctor` steps): `ok`, `warn`, `error`. A result
+  that does not apply has `applicable: false` and renders as `skipped`.
 - **JSON lists**: `changes` holds file-level edits a task plans or made
   (`restore`, `adopt`, `setup-linux-lite`); `steps` holds ordered commands or
   generators, whether or not their result is a file (`update`, `generate`,

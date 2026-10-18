@@ -20,8 +20,7 @@ lockfile = true
 lockfile_platforms = ["macos-arm64", "linux-x64"]
 
 [tools]
-# fd, jq, and ripgrep serve the module test suites that verify depends on;
-# every tool in the verify chain must be mise-pinned (see AGENTS.md).
+# fd, jq, and ripgrep serve the module test suites that verify depends on.
 actionlint = "1.7.12"
 fd = "10.5.0"
 jq = "1.8.2"

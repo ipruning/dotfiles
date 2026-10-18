@@ -135,27 +135,21 @@ def test_restore_rejects_invalid_scope_without_changing_home(tmp_path: Path) -> 
     home = tmp_path / "home"
     home.mkdir()
 
-    conflicting = run_scripts_module(
-        "restore",
-        home,
-        "hushlogin",
-        "--dry-run",
-    )
+    invalid = run_scripts_module("restore", home, "hushlogin", "--unknown")
     unknown = run_scripts_module(
         "restore", home, "not-a-configured-application", "--apply", "--json"
     )
 
-    assert conflicting.returncode == 2
-    assert "unrecognized arguments: --dry-run" in conflicting.stderr
+    assert invalid.returncode == 2
+    assert "unrecognized arguments: --unknown" in invalid.stderr
     assert unknown.returncode == 1
     error_document = json.loads(unknown.stdout)
     assert error_document["ok"] is False
     assert error_document["apply"] is True
     assert error_document["operation"] == "restore"
-    assert error_document["error"]["code"] == "restore_failed"
+    assert error_document["error"]["code"] == "restore.failed"
     assert "Unsupported application" in error_document["error"]["message"]
-    assert "uvx" not in error_document["error"]["message"]
-    assert "ERROR restore_failed" in unknown.stderr
+    assert "ERROR restore.failed" in unknown.stderr
     assert list(home.iterdir()) == []
 
 

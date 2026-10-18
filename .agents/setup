@@ -45,4 +45,4 @@ time {
   fi
 }
 
-printf '\nOrb development dependencies are ready; no reference configuration was applied.\n'
+printf '\nOrb development dependencies are ready.\n'

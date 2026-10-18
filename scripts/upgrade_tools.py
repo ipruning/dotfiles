@@ -206,7 +206,7 @@ def main(argv: list[str] | None = None) -> int:
     else:
         for result in report.results:
             print(
-                f"{result.status.value.upper()} {result.step.name}: {' '.join(result.step.command)}"
+                f"{result.status.value.upper():9} {result.step.name}: {' '.join(result.step.command)}"
             )
             if result.reason:
                 print(

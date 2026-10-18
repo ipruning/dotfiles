@@ -92,14 +92,14 @@ def test_plain_render_hides_only_ok_findings_by_default(capsys) -> None:
 
 
 def test_error_document_reports_a_failed_operation() -> None:
-    document = error_document("diff", "diff_failed", "Unsupported application: xyz")
+    document = error_document("diff", "diff.failed", "Unsupported application: xyz")
 
     assert document == {
         "schema_version": 1,
         "operation": "diff",
         "ok": False,
         "error": {
-            "code": "diff_failed",
+            "code": "diff.failed",
             "message": "Unsupported application: xyz",
         },
     }
@@ -109,11 +109,11 @@ def test_emit_error_writes_prose_to_stderr_and_json_to_stdout(capsys) -> None:
     emit_error("adopt", "Unsupported application: xyz", as_json=True, apply=True)
 
     captured = capsys.readouterr()
-    assert "ERROR adopt_failed Unsupported application: xyz" in captured.err
+    assert "ERROR adopt.failed Unsupported application: xyz" in captured.err
     document = json.loads(captured.out)
     assert document["ok"] is False
     assert document["apply"] is True
-    assert document["error"]["code"] == "adopt_failed"
+    assert document["error"]["code"] == "adopt.failed"
 
 
 def test_emit_error_keeps_stdout_empty_without_json(capsys) -> None:
@@ -121,4 +121,4 @@ def test_emit_error_keeps_stdout_empty_without_json(capsys) -> None:
 
     captured = capsys.readouterr()
     assert captured.out == ""
-    assert "ERROR adopt_failed" in captured.err
+    assert "ERROR adopt.failed" in captured.err

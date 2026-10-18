@@ -2,7 +2,8 @@ import json
 import subprocess
 from pathlib import Path
 
-from scripts.doctor import DoctorStatus, inspect_doctor
+from scripts.doctor import inspect_doctor
+from scripts.models import Severity
 
 
 def _write_mise(home: Path) -> Path:
@@ -59,12 +60,9 @@ def test_doctor_aggregates_internal_and_external_checks_without_mutation(
     )
 
     results = {result.step.name: result for result in report.results}
-    assert results["dotfiles.check"].status is DoctorStatus.WARN
-    assert results["dotfiles.diff"].status is DoctorStatus.WARN
-    assert results["mise.doctor"].status is DoctorStatus.OK
-    assert results["skillshare.doctor"].status is DoctorStatus.SKIPPED
-    assert "writes configuration" in (results["skillshare.doctor"].reason or "")
-    assert "rotom.status" not in results
+    assert results["dotfiles.check"].severity is Severity.WARN
+    assert results["dotfiles.diff"].severity is Severity.WARN
+    assert results["mise.doctor"].severity is Severity.OK
     assert report.ok is True
     assert [
         command[command.index("-m") + 1] for command in calls if "-m" in command
@@ -94,15 +92,10 @@ def test_doctor_skips_unavailable_external_owners(tmp_path: Path) -> None:
 
     report = inspect_doctor(home, executable_finder=lambda _tool: None, runner=runner)
 
-    skipped = {
-        result.step.name
-        for result in report.results
-        if result.status is DoctorStatus.SKIPPED
-    }
+    skipped = {result.step.name for result in report.results if result.severity is None}
     assert skipped == {
         "brew.doctor",
         "mise.doctor",
         "pueue.status",
-        "skillshare.doctor",
     }
     assert report.ok is True

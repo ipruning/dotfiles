@@ -108,21 +108,21 @@ def _host_policy_finding(home: Path) -> tuple[Finding | None, HostPolicy | None]
     except HostPolicyError as error:
         return (
             Finding(
-                "host.policy",
+                "host_policy.mode",
                 Severity.ERROR,
-                "host.policy_invalid",
+                "host_policy.invalid",
                 str(error),
                 path,
-                "Fix or remove the invalid host policy before using dotfiles operations.",
+                f"Edit or remove {path} before using dotfiles operations.",
             ),
             None,
         )
     if policy.audit_only:
         return (
             Finding(
-                "host.policy",
+                "host_policy.mode",
                 Severity.OK,
-                "host.policy_audit_only",
+                "host_policy.audit_only",
                 "Host policy permits inspection but disables mutating dotfiles operations",
                 path,
             ),
@@ -130,9 +130,9 @@ def _host_policy_finding(home: Path) -> tuple[Finding | None, HostPolicy | None]
         )
     return (
         Finding(
-            "host.policy",
+            "host_policy.mode",
             Severity.OK,
-            "host.policy_managed",
+            "host_policy.managed",
             "Host policy permits managed dotfiles operations",
             path if path.is_file() else None,
         ),
@@ -373,29 +373,22 @@ def _bash_integration_finding(
     )
 
 
-def _legacy_repo_path_finding(repo_root: Path) -> Finding:
-    legacy_directories = ((repo_root / "commands").resolve(),)
+def _repo_commands_path_finding(repo_root: Path) -> Finding:
+    commands = (repo_root / "commands").resolve()
     active_directories = {
         Path(entry).expanduser().resolve()
         for entry in os.environ.get("PATH", "").split(os.pathsep)
         if entry
     }
-    exposed = next(
-        (
-            directory
-            for directory in legacy_directories
-            if directory in active_directories
-        ),
-        None,
-    )
+    exposed = commands if commands in active_directories else None
     return Finding(
         "shell.repo_commands",
         Severity.WARN if exposed else Severity.OK,
         ("shell.repo_commands_exposed" if exposed else "shell.repo_commands_isolated"),
         (
-            "Linux PATH exposes repository commands from a legacy configuration"
+            "Linux PATH exposes the repository commands/ directory"
             if exposed
-            else "Linux PATH does not expose repository command directories"
+            else "Linux PATH does not expose the repository commands/ directory"
         ),
         exposed,
         (
@@ -512,7 +505,7 @@ def inspect_host(
                 home,
                 mutation_allowed=bool(host_policy and not host_policy.audit_only),
             ),
-            _legacy_repo_path_finding(repo_root),
+            _repo_commands_path_finding(repo_root),
         ))
         if host_policy and host_policy.audit_only:
             findings = _apply_audit_only_applicability(findings)

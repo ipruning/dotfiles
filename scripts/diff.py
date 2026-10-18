@@ -16,10 +16,6 @@ from .models import Drift, DriftKind, DriftReport, FileKind
 from .profiles import HostProfile, profile_applications, resolve_profile
 from .render import emit_error
 
-# The pinned Mackup fork is a locked git dependency (pyproject.toml / uv.lock),
-# so `mise install` provisions it and diff resolves it from the project venv
-# rather than fetching it at runtime.
-
 
 class DriftProtocolError(ValueError):
     """Mackup returned a document that does not satisfy schema version 1."""

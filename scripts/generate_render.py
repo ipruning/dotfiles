@@ -109,7 +109,7 @@ def render_generate(report: GenerateReport, *, apply_allowed: bool = True) -> No
             if result.status in {Status.PLANNED, Status.SKIPPED}
             else result.action.value
         )
-        print(f"{result.status.value.upper():7} {result.spec.name}: {detail}")
+        print(f"{result.status.value.upper():9} {result.spec.name}: {detail}")
         if result.reason:
             print(f"        {result.reason}")
     summary = _summary(report)

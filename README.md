@@ -211,8 +211,7 @@ probes `mise doctor`, `brew doctor`, and `pueue status` when present. It skips
 
 `update --apply` runs, in order and independently of earlier failures:
 
-- `brew update` and `brew upgrade --formula` (casks and desktop apps keep their
-  own updaters; no sudo);
+- `brew update`, `brew upgrade --formula`, and `brew upgrade --cask` (no sudo);
 - `mise self-update` (standalone owner only), `mise install --locked` for
   installed shared tools, and `mise reshim --force`;
 - `gh extension upgrade --all`, `tldr --update`, and `ya pkg install`;

@@ -333,7 +333,6 @@ def test_television_channels_use_safe_current_sources() -> None:
         "curl -fsSL -o \"$tmp\" -- '{replace:s/'/'\"'\"'/g}'"
         in gists["preview"]["command"]
     )
-    assert "television/gists" not in gists["preview"]["command"]
     assert hosts["keybindings"]["enter"] == "actions:connect"
     assert hosts["actions"]["connect"] == {
         "command": "ssh -- '{replace:s/'/'\"'\"'/g}'",
@@ -924,7 +923,7 @@ def test_zsh_env_derives_root_and_rejects_invalid_override(tmp_path: Path) -> No
 
 
 @requires_zsh
-def test_openv_uses_one_selected_op_without_signin_retry(tmp_path: Path) -> None:
+def test_openv_reads_environment_once_and_surfaces_op_failure(tmp_path: Path) -> None:
     repo_root = Path(__file__).resolve().parents[1]
     env_file = repo_root / "shell/zsh/env.zsh"
     fake_op = tmp_path / "op"

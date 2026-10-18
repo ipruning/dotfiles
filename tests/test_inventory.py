@@ -438,7 +438,7 @@ def test_inventory_failed_atomic_publish_keeps_previous_snapshot(
     assert not list(target.parent.glob(f".{target.name}.tmp-*"))
 
 
-def test_inventory_rejects_unparseable_gh_output_without_writing(
+def test_inventory_rejects_unparsable_gh_output_without_writing(
     tmp_path: Path,
 ) -> None:
     _make_applications(tmp_path / "Applications", apps=("Ghostty",), setapp=None)
