@@ -1,4 +1,7 @@
 {
+  "language_models": {
+    "openai_compatible": {}
+  },
   "diff_view_style": "split",
   "proxy": "",
   "edit_predictions": {
@@ -14,7 +17,7 @@
       "effort": "medium",
       "enable_thinking": true,
       "model": "gpt-5.6-sol",
-      "provider": "openai-subscribed",
+      "provider": "openai-subscribed"
     },
     "default_profile": "write",
     "play_sound_when_agent_done": "always",
