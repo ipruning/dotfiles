@@ -21,7 +21,6 @@ def test_inspect_repository_checks_paths_and_mapping_state(
     absolute_path: str,
 ) -> None:
     repo_root = tmp_path / "dotfiles"
-    home = tmp_path / "home"
     (repo_root / "reference").mkdir(parents=True)
     (repo_root / "reference/.example").write_text("configured\n")
     (repo_root / "mackup/applications").mkdir(parents=True)
@@ -32,7 +31,7 @@ def test_inspect_repository_checks_paths_and_mapping_state(
     script = repo_root / "tool.sh"
     script.write_text(f"helper={absolute_path}\n")
 
-    report = inspect_repository(repo_root, home)
+    report = inspect_repository(repo_root)
     findings = {finding.code: finding for finding in report.findings}
 
     assert findings["path.absolute_home"].severity is Severity.ERROR
@@ -40,7 +39,7 @@ def test_inspect_repository_checks_paths_and_mapping_state(
     assert findings["mackup.reference_missing"].severity is Severity.ERROR
 
     (repo_root / "reference/.example").unlink()
-    degraded = inspect_repository(repo_root, home)
+    degraded = inspect_repository(repo_root)
     findings = {finding.code: finding for finding in degraded.findings}
 
     assert findings["mackup.application_empty"].severity is Severity.ERROR
@@ -51,7 +50,6 @@ def test_inspect_repository_ignores_absolute_paths_inside_urls(
     tmp_path: Path,
 ) -> None:
     repo_root = tmp_path / "dotfiles"
-    home = tmp_path / "home"
     (repo_root / "reference").mkdir(parents=True)
     (repo_root / "mackup/applications").mkdir(parents=True)
     (repo_root / "mackup/mackup.cfg").write_text(mackup_cfg())
@@ -61,13 +59,13 @@ def test_inspect_repository_ignores_absolute_paths_inside_urls(
         "docs=https://example.com/Users/guide\n",
     )
 
-    clean = inspect_repository(repo_root, home)
+    clean = inspect_repository(repo_root)
     assert "path.absolute_home" not in {finding.code for finding in clean.findings}
 
     script.write_text(
         "helper=/home/someone/private/tool https://example.com/home/pkg\n",
     )
-    mixed = inspect_repository(repo_root, home)
+    mixed = inspect_repository(repo_root)
     absolute_findings = [
         finding for finding in mixed.findings if finding.code == "path.absolute_home"
     ]
@@ -89,14 +87,13 @@ def test_inspect_repository_rejects_text_based_structured_data_parsers(
     manual_parser: str,
 ) -> None:
     repo_root = tmp_path / "dotfiles"
-    home = tmp_path / "home"
     (repo_root / "reference").mkdir(parents=True)
     (repo_root / "mackup/applications").mkdir(parents=True)
     (repo_root / "mackup/mackup.cfg").write_text(mackup_cfg())
     script = repo_root / "tool.sh"
     script.write_text(f"#!/bin/sh\n{manual_parser}")
 
-    report = inspect_repository(repo_root, home)
+    report = inspect_repository(repo_root)
     findings = [
         finding
         for finding in report.findings
@@ -132,7 +129,7 @@ def test_inspect_repository_skips_ignored_scratch_but_checks_source_changes(
         path.parent.mkdir(parents=True)
         path.write_text(bad_source)
 
-    report = inspect_repository(repo_root, tmp_path / "home")
+    report = inspect_repository(repo_root)
 
     for code in ("path.absolute_home", "repository.structured_data_text_parser"):
         assert {
@@ -149,7 +146,7 @@ def test_inspect_repository_with_relative_root_does_not_scan_its_own_patterns(
     repo_root = Path(__file__).resolve().parents[1]
     monkeypatch.chdir(repo_root)
 
-    report = inspect_repository(Path(), Path.home())
+    report = inspect_repository(Path())
 
     assert "repository.structured_data_text_parser" not in {
         finding.code for finding in report.findings
@@ -160,7 +157,6 @@ def test_inspect_repository_reports_only_tracked_dangling_symlinks(
     tmp_path: Path,
 ) -> None:
     repo_root = tmp_path / "dotfiles"
-    home = tmp_path / "home"
     (repo_root / "reference").mkdir(parents=True)
     (repo_root / "mackup/applications").mkdir(parents=True)
     (repo_root / "mackup/mackup.cfg").write_text(mackup_cfg())
@@ -173,7 +169,7 @@ def test_inspect_repository_reports_only_tracked_dangling_symlinks(
     subprocess.run(["git", "init", "-q", str(repo_root)], check=True)
     subprocess.run(["git", "-C", str(repo_root), "add", "."], check=True)
 
-    dangling = inspect_repository(repo_root, home)
+    dangling = inspect_repository(repo_root)
     symlink_findings = [
         finding
         for finding in dangling.findings
@@ -184,7 +180,7 @@ def test_inspect_repository_reports_only_tracked_dangling_symlinks(
     assert symlink_findings[0].path == tracked_link
 
     (repo_root / "reference/.target").write_text("configured\n")
-    repaired = inspect_repository(repo_root, home)
+    repaired = inspect_repository(repo_root)
 
     assert "repository.dangling_symlink" not in {
         finding.code for finding in repaired.findings
@@ -195,7 +191,6 @@ def test_inspect_repository_rejects_tracked_private_and_generated_files(
     tmp_path: Path,
 ) -> None:
     repo_root = tmp_path / "dotfiles"
-    home = tmp_path / "home"
     (repo_root / "mackup/applications").mkdir(parents=True)
     (repo_root / "reference").mkdir()
     (repo_root / "mackup/mackup.cfg").write_text(mackup_cfg())
@@ -207,7 +202,7 @@ def test_inspect_repository_rejects_tracked_private_and_generated_files(
     subprocess.run(["git", "init", "-q", str(repo_root)], check=True)
     subprocess.run(["git", "-C", str(repo_root), "add", "."], check=True)
 
-    report = inspect_repository(repo_root, home)
+    report = inspect_repository(repo_root)
     codes = {finding.code for finding in report.findings}
 
     assert "repository.private_tracked" in codes
@@ -218,7 +213,6 @@ def test_inspect_repository_rejects_duplicate_mise_alias_identity(
     tmp_path: Path,
 ) -> None:
     repo_root = tmp_path / "dotfiles"
-    home = tmp_path / "home"
     config = repo_root / "reference/.config/mise/config.toml"
     config.parent.mkdir(parents=True)
     config.write_text(
@@ -228,7 +222,7 @@ def test_inspect_repository_rejects_duplicate_mise_alias_identity(
     (repo_root / "mackup/applications").mkdir(parents=True)
     (repo_root / "mackup/mackup.cfg").write_text(mackup_cfg())
 
-    report = inspect_repository(repo_root, home)
+    report = inspect_repository(repo_root)
     finding = next(
         finding
         for finding in report.findings
@@ -240,43 +234,10 @@ def test_inspect_repository_rejects_duplicate_mise_alias_identity(
     assert "aqua:modem-dev/hunk" in finding.message
 
 
-def test_inspect_repository_warns_when_checkout_is_not_home_dotfiles(
-    tmp_path: Path,
-) -> None:
-    home = tmp_path / "home"
-    repo_root = home / "dotfiles"
-    (repo_root / "reference").mkdir(parents=True)
-    (repo_root / "mackup/applications").mkdir(parents=True)
-    (repo_root / "mackup/mackup.cfg").write_text(mackup_cfg())
-    (repo_root / "tool.sh").write_text("plugin=~/dotfiles/generated/plugin.wasm\n")
-
-    installed = inspect_repository(repo_root, home)
-    installed_finding = next(
-        finding
-        for finding in installed.findings
-        if finding.code == "path.dotfiles_root"
-    )
-    assert installed_finding.severity is Severity.OK
-
-    checkout = tmp_path / "checkout"
-    repo_root.rename(checkout)
-    relocated = inspect_repository(checkout, home)
-    relocated_finding = next(
-        finding
-        for finding in relocated.findings
-        if finding.code == "path.dotfiles_root"
-    )
-
-    assert relocated_finding.severity is Severity.WARN
-    assert relocated.is_ok() is True
-    assert relocated.is_ok(strict=True) is False
-
-
 def test_inspect_repository_allows_only_declared_optional_reference_candidates(
     tmp_path: Path,
 ) -> None:
     repo_root = tmp_path / "dotfiles"
-    home = tmp_path / "home"
     (repo_root / "reference").mkdir(parents=True)
     (repo_root / "reference/.required").write_text("configured\n")
     (repo_root / "mackup/applications").mkdir(parents=True)
@@ -288,7 +249,7 @@ def test_inspect_repository_allows_only_declared_optional_reference_candidates(
     )
     (repo_root / "mackup/mackup.cfg").write_text(mackup_cfg("example\n"))
 
-    declared = inspect_repository(repo_root, home)
+    declared = inspect_repository(repo_root)
     assert declared.is_ok() is True
     assert "mackup.reference_missing" not in {
         finding.code for finding in declared.findings
@@ -299,34 +260,38 @@ def test_inspect_repository_allows_only_declared_optional_reference_candidates(
         "[configuration_files]\n.required\n.optional\n"
         "[dotfiles_optional_reference_files]\n.not-mapped\n",
     )
-    invalid = inspect_repository(repo_root, home)
+    invalid = inspect_repository(repo_root)
     codes = {finding.code for finding in invalid.findings}
 
     assert "mackup.reference_missing" in codes
     assert "mackup.optional_reference_unmapped" in codes
 
 
-def test_linux_repository_lint_skips_macos_only_paths(tmp_path: Path) -> None:
+def test_inspect_repository_classifies_host_bound_paths_without_host_state(
+    tmp_path: Path,
+) -> None:
     repo_root = tmp_path / "dotfiles"
-    home = tmp_path / "home"
     (repo_root / "reference").mkdir(parents=True)
     (repo_root / "mackup/applications").mkdir(parents=True)
     (repo_root / "mackup/mackup.cfg").write_text(mackup_cfg())
     (repo_root / "tool.sh").write_text(
         "app=/Applications/ChatGPT.app\n"
         "brew=/opt/homebrew/bin/brew\n"
-        "portable=/usr/local/bin/example\n",
+        "work=~/Developer/missing\n"
+        "root=~/dotfiles/generated/plugin.wasm\n",
     )
 
-    report = inspect_repository(repo_root, home, system_name="Linux")
+    report = inspect_repository(repo_root)
     path_findings = [
         finding for finding in report.findings if finding.code.startswith("path.")
     ]
 
-    assert all(finding.severity is not Severity.WARN for finding in path_findings)
+    assert {finding.severity for finding in path_findings} == {Severity.OK}
     assert {finding.code for finding in path_findings} == {
-        "path.platform_skipped",
+        "path.application",
         "path.toolchain",
+        "path.personal_workspace",
+        "path.dotfiles_root",
     }
 
 
@@ -334,14 +299,13 @@ def test_inspect_repository_checks_paths_under_reference_library(
     tmp_path: Path,
 ) -> None:
     repo_root = tmp_path / "dotfiles"
-    home = tmp_path / "home"
     settings = repo_root / "reference/Library/Application Support/App/settings.json"
     settings.parent.mkdir(parents=True)
     settings.write_text('{"tool": "/Users/someone/private/tool"}\n')
     (repo_root / "mackup/applications").mkdir(parents=True)
     (repo_root / "mackup/mackup.cfg").write_text(mackup_cfg())
 
-    report = inspect_repository(repo_root, home, system_name="Darwin")
+    report = inspect_repository(repo_root)
     finding = next(
         finding for finding in report.findings if finding.code == "path.absolute_home"
     )
@@ -354,14 +318,13 @@ def test_linux_repository_lint_rejects_macos_home_under_reference(
     tmp_path: Path,
 ) -> None:
     repo_root = tmp_path / "dotfiles"
-    home = tmp_path / "home"
     settings = repo_root / "reference/.config/example/settings.json"
     settings.parent.mkdir(parents=True)
     settings.write_text('{"tool": "/Users/someone/private/tool"}\n')
     (repo_root / "mackup/applications").mkdir(parents=True)
     (repo_root / "mackup/mackup.cfg").write_text(mackup_cfg())
 
-    report = inspect_repository(repo_root, home, system_name="Linux")
+    report = inspect_repository(repo_root)
     finding = next(
         finding for finding in report.findings if finding.code == "path.absolute_home"
     )
@@ -372,7 +335,6 @@ def test_linux_repository_lint_rejects_macos_home_under_reference(
 
 def test_inspect_repository_rejects_unselected_mackup_mappings(tmp_path: Path) -> None:
     repo_root = tmp_path / "dotfiles"
-    home = tmp_path / "home"
     (repo_root / "reference").mkdir(parents=True)
     (repo_root / "reference/.example").write_text("configured\n")
     (repo_root / "mackup/applications").mkdir(parents=True)
@@ -384,7 +346,7 @@ def test_inspect_repository_rejects_unselected_mackup_mappings(tmp_path: Path) -
     )
     (repo_root / "mackup/mackup.cfg").write_text(mackup_cfg("example\n"))
 
-    orphaned = inspect_repository(repo_root, home)
+    orphaned = inspect_repository(repo_root)
     orphan_finding = next(
         finding
         for finding in orphaned.findings
@@ -396,7 +358,7 @@ def test_inspect_repository_rejects_unselected_mackup_mappings(tmp_path: Path) -
     assert orphaned.is_ok() is False
 
     (repo_root / "mackup/applications/parked.cfg").unlink()
-    clean = inspect_repository(repo_root, home)
+    clean = inspect_repository(repo_root)
 
     assert "mackup.mapping_unused" not in {finding.code for finding in clean.findings}
 
@@ -406,7 +368,6 @@ def test_inspect_repository_reports_git_inventory_failure(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     repo_root = tmp_path / "dotfiles"
-    home = tmp_path / "home"
     (repo_root / "mackup/applications").mkdir(parents=True)
     (repo_root / "mackup/mackup.cfg").write_text(mackup_cfg())
 
@@ -420,7 +381,7 @@ def test_inspect_repository_reports_git_inventory_failure(
         ),
     )
 
-    report = inspect_repository(repo_root, home)
+    report = inspect_repository(repo_root)
     finding = next(
         finding
         for finding in report.findings

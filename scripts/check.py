@@ -23,6 +23,7 @@ from .check_mise import (
     mise_shim_finding,
     mise_systemd_shim_findings,
 )
+from .check_paths import host_path_findings
 from .check_skillshare import skillshare_findings, skillshare_ownership_finding
 from .generate import file_sha256, shim_aware_finder
 from .generate_specs import COMPLETION_SPECS, FUNCTION_SPECS, PLUGIN_SPECS, WASM_SPECS
@@ -39,6 +40,7 @@ from .render import finding_document, render_findings
 
 AUDIT_ONLY_NON_APPLICABLE_CHECKS = frozenset(
     {
+        "reference.host_paths",
         "shell.bash",
         "shell.plugins",
         "shell.completions",
@@ -498,6 +500,7 @@ def inspect_host(
         ),
     )
     findings.extend(_dangling_repo_link_findings(repo_root, home))
+    findings.extend(host_path_findings(repo_root, home, active_system))
     if active_profile is HostProfile.LINUX_LITE:
         findings.extend((
             _bash_integration_finding(

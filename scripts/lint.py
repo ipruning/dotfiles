@@ -5,10 +5,11 @@ from __future__ import annotations
 import argparse
 import configparser
 import json
-import platform
 import re
 import subprocess
 import tomllib
+from dataclasses import dataclass
+from itertools import starmap
 from pathlib import Path
 
 from .diff import CaseConfigParser
@@ -109,82 +110,28 @@ def _iter_text_files(repo_root: Path, candidates: list[Path]) -> list[Path]:
     return sorted(files)
 
 
-def _expand_homeish(raw: str, home: Path) -> Path | None:
-    if raw.startswith("~/"):
-        return home / raw[2:]
-    if raw.startswith("$HOME/"):
-        return home / raw[6:]
-    if raw.startswith("${HOME}/"):
-        return home / raw[8:]
-    if raw.startswith(("/Users/", "/home/", "/root/")):
-        return Path(raw)
-    return None
+@dataclass(frozen=True)
+class HostBoundPath:
+    """A path in a tracked text file that only resolves on some hosts."""
+
+    kind: str
+    source: Path
+    line: int
+    raw: str
 
 
-def _expanded_path_exists(raw: str, home: Path) -> bool:
-    normalized = raw.replace("\\ ", " ")
-    if normalized.startswith("/Applications/") and ".app/" in normalized:
-        normalized = normalized[: normalized.index(".app/") + len(".app")]
-    expanded = _expand_homeish(normalized, home)
-    return (expanded or Path(normalized)).exists()
+HOST_BOUND_KINDS = frozenset(
+    {"dotfiles_root", "personal_workspace", "toolchain", "application"},
+)
 
 
-def _classify_path(
-    repo_root: Path,
-    home: Path,
-    relative: str,
-    source: Path,
-    line: int,
-    raw: str,
-    system_name: str,
-) -> Finding:
-    if system_name == "Linux" and (raw.startswith(("/Applications/", "/opt/homebrew"))):
-        return _located_finding(
-            None,
-            "path.platform_skipped",
-            "macOS-only path is not evaluated on Linux",
-            source,
-            line=line,
-            value=raw,
-        )
+def _path_kind(relative: str, raw: str) -> str:
     if (relative, raw) in OPTIONAL_PATHS:
-        return _located_finding(
-            Severity.OK,
-            "path.optional_compatibility",
-            "explicitly guarded compatibility path",
-            source,
-            line=line,
-            value=raw,
-        )
+        return "optional_compatibility"
     if raw.startswith(("/Users/", "/home/", "/root/")):
-        if not (raw == str(home) or raw.startswith(f"{home}/")):
-            return _located_finding(
-                Severity.ERROR,
-                "path.absolute_home",
-                f"absolute user path does not match HOME={home}",
-                source,
-                line=line,
-                value=raw,
-            )
-        return _located_finding(
-            Severity.ERROR,
-            "path.absolute_home",
-            "replace the absolute user path with a supported home-relative form",
-            source,
-            line=line,
-            value=raw,
-        )
+        return "absolute_home"
     if raw.startswith(("~/dotfiles", "$HOME/dotfiles", "${HOME}/dotfiles")):
-        expected = (home / "dotfiles").resolve()
-        severity = Severity.OK if repo_root.resolve() == expected else Severity.WARN
-        return _located_finding(
-            severity,
-            "path.dotfiles_root",
-            f"path assumes repository location {expected}",
-            source,
-            line=line,
-            value=raw,
-        )
+        return "dotfiles_root"
     if raw.startswith(
         (
             "~/Developer/",
@@ -195,62 +142,49 @@ def _classify_path(
             "${HOME}/work/",
         ),
     ):
-        return _located_finding(
-            Severity.OK if _expanded_path_exists(raw, home) else Severity.WARN,
-            "path.personal_workspace",
-            "home-relative path binds this config to a personal workspace",
-            source,
-            line=line,
-            value=raw,
-        )
+        return "personal_workspace"
     if raw.startswith(("/opt/homebrew", "/usr/local")):
-        return _located_finding(
-            (
-                Severity.OK
-                if system_name == "Linux" or _expanded_path_exists(raw, home)
-                else Severity.WARN
-            ),
-            "path.toolchain",
-            "machine or architecture-specific toolchain path",
-            source,
-            line=line,
-            value=raw,
-        )
+        return "toolchain"
     if raw.startswith("/Applications/"):
         if "\\" in raw or "{" in raw or raw.endswith("$"):
-            return _located_finding(
-                Severity.OK,
-                "path.application_pattern",
-                "application path pattern used for process matching",
-                source,
-                line=line,
-                value=raw,
-            )
+            return "application_pattern"
+        return "application"
+    return "home_relative"
+
+
+PATH_KIND_MESSAGES = {
+    "optional_compatibility": "explicitly guarded compatibility path",
+    "dotfiles_root": "path assumes the repository at ~/dotfiles",
+    "personal_workspace": "home-relative path binds this config to a personal workspace",
+    "toolchain": "machine or architecture-specific toolchain path",
+    "application_pattern": "application path pattern used for process matching",
+    "application": "macOS application path",
+    "home_relative": "home-relative path",
+}
+
+
+def _classify_path(relative: str, source: Path, line: int, raw: str) -> Finding:
+    kind = _path_kind(relative, raw)
+    if kind == "absolute_home":
         return _located_finding(
-            Severity.OK if _expanded_path_exists(raw, home) else Severity.WARN,
-            "path.application",
-            "macOS application path",
+            Severity.ERROR,
+            "path.absolute_home",
+            "replace the absolute user path with a supported home-relative form",
             source,
             line=line,
             value=raw,
         )
     return _located_finding(
         Severity.OK,
-        "path.home_relative",
-        "home-relative path",
+        f"path.{kind}",
+        PATH_KIND_MESSAGES[kind],
         source,
         line=line,
         value=raw,
     )
 
 
-def _path_findings(
-    repo_root: Path,
-    home: Path,
-    system_name: str,
-    text_files: list[Path],
-) -> list[Finding]:
-    findings: list[Finding] = []
+def _iter_paths(repo_root: Path, text_files: list[Path]):
     for file_path in text_files:
         relative = file_path.relative_to(repo_root).as_posix()
         try:
@@ -263,18 +197,23 @@ def _path_findings(
                 raw = match.group("path").rstrip(".,:")
                 if any(begin <= match.start("path") < end for begin, end in url_spans):
                     continue
-                findings.append(
-                    _classify_path(
-                        repo_root,
-                        home,
-                        relative,
-                        file_path,
-                        line_number,
-                        raw,
-                        system_name,
-                    ),
-                )
-    return findings
+                yield relative, file_path, line_number, raw
+
+
+def _path_findings(repo_root: Path, text_files: list[Path]) -> list[Finding]:
+    return list(starmap(_classify_path, _iter_paths(repo_root, text_files)))
+
+
+def host_bound_paths(repo_root: Path) -> list[HostBoundPath]:
+    """Return tracked paths whose existence depends on the host."""
+    candidates, _finding = _tracked_paths(repo_root, include_untracked=True)
+    return [
+        HostBoundPath(kind, file_path, line, raw)
+        for relative, file_path, line, raw in _iter_paths(
+            repo_root, _iter_text_files(repo_root, candidates)
+        )
+        if (kind := _path_kind(relative, raw)) in HOST_BOUND_KINDS
+    ]
 
 
 def _structured_data_parser_findings(
@@ -593,19 +532,12 @@ def _symlink_findings(tracked_paths: list[Path]) -> list[Finding]:
     ]
 
 
-def inspect_repository(
-    repo_root: Path,
-    home: Path,
-    *,
-    system_name: str | None = None,
-) -> LintReport:
+def inspect_repository(repo_root: Path) -> LintReport:
     """Return repository path, mapping, and symlink invariants."""
     tracked_paths, tracked_finding = _tracked_paths(repo_root)
     candidates, candidate_finding = _tracked_paths(repo_root, include_untracked=True)
     text_files = _iter_text_files(repo_root, candidates)
-    findings = _path_findings(
-        repo_root, home, system_name or platform.system(), text_files
-    )
+    findings = _path_findings(repo_root, text_files)
     findings.extend(_structured_data_parser_findings(repo_root, text_files))
     if finding := tracked_finding or candidate_finding:
         findings.append(finding)
@@ -636,7 +568,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
     repo_root = Path(__file__).resolve().parents[1]
-    report = inspect_repository(repo_root, Path.home())
+    report = inspect_repository(repo_root)
     if args.as_json:
         print(
             json.dumps(

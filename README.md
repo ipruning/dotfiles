@@ -93,9 +93,9 @@ the shell gate, and actionlint plus zizmor for workflows. CI fails if verificati
 provision through `.agents/setup` and check offline with `.agents/resume`; they
 never apply host configuration.
 
-- `lint` inspects repository paths, Mackup mappings, and dangling symlinks. Its
-  `path.*` findings are host-relative, so warning counts differ between hosts on
-  the same commit.
+- `lint` inspects repository paths, Mackup mappings, and dangling symlinks, with
+  the same result on every host. `check` reports workspace, toolchain, and
+  application paths in live reference configurations that miss on this host.
 - `shell` runs `bash -n` and ShellCheck on Bash files, and `zsh -n` where zsh is
   installed (elsewhere those files are reported as not applicable).
 
@@ -260,7 +260,7 @@ generated launchd configuration; its runbook owns operation and recovery:
 - [`cursoruiviewservice-watchdog`](services/cursoruiviewservice-watchdog/README.md):
   bounded recovery from Apple's text-cursor service memory growth.
 
-The macOS shell configuration expects the checkout at `~/dotfiles`; `lint`
+The macOS shell configuration expects the checkout at `~/dotfiles`; `check`
 reports when it is elsewhere.
 
 ## Skillshare

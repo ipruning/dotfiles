@@ -10,6 +10,7 @@ import scripts.check_git as check_git_module
 import scripts.check_mise as check_mise_module
 import scripts.check_skillshare as check_skillshare_module
 from scripts.check import inspect_host
+from scripts.check_paths import host_path_findings
 from scripts.models import Finding, Severity
 
 
@@ -1671,3 +1672,47 @@ def test_repository_link_scan_checks_visible_top_level_symlinks(tmp_path: Path) 
     findings = check_module._dangling_repo_link_findings(repo_root, home)
 
     assert [finding.code for finding in findings] == ["home.dangling_repo_link"]
+
+
+def test_host_paths_warn_only_for_live_configurations(tmp_path: Path) -> None:
+    home = tmp_path / "home"
+    repo_root = home / "dotfiles"
+    live_reference = repo_root / "reference/.config/live/config.toml"
+    unused_reference = repo_root / "reference/.config/unused/config.toml"
+    for reference in (live_reference, unused_reference):
+        reference.parent.mkdir(parents=True)
+        reference.write_text(
+            'trust = ["~/Developer/missing"]\napp = "/Applications/Missing.app"\n'
+        )
+    live = home / ".config/live/config.toml"
+    live.parent.mkdir(parents=True)
+    live.symlink_to(live_reference)
+
+    darwin = host_path_findings(repo_root, home, "Darwin")
+    assert {(finding.code, finding.path) for finding in darwin} == {
+        ("reference.personal_workspace_missing", live_reference),
+        ("reference.application_missing", live_reference),
+    }
+
+    linux = host_path_findings(repo_root, home, "Linux")
+    assert [finding.code for finding in linux] == [
+        "reference.personal_workspace_missing"
+    ]
+
+    (home / "Developer/missing").mkdir(parents=True)
+    resolved = host_path_findings(repo_root, home, "Linux")
+    assert [finding.code for finding in resolved] == ["reference.host_paths_resolved"]
+
+
+def test_host_paths_warn_when_checkout_is_not_home_dotfiles(tmp_path: Path) -> None:
+    home = tmp_path / "home"
+    home.mkdir()
+    repo_root = tmp_path / "checkout"
+    repo_root.mkdir()
+    (repo_root / "tool.sh").write_text("plugin=~/dotfiles/generated/plugin.wasm\n")
+
+    findings = host_path_findings(repo_root, home, "Linux")
+
+    assert [finding.code for finding in findings] == [
+        "reference.repo_location_mismatch"
+    ]
