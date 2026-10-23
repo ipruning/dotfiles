@@ -2,6 +2,6 @@
   "name": "mise-npm-install",
   "private": true,
   "dependencies": {
-    "@openai/codex-security": "0.4.0"
+    "@openai/codex-security": "0.6.0"
   }
 }

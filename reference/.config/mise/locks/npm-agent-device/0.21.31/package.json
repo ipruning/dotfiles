@@ -2,6 +2,6 @@
   "name": "mise-npm-install",
   "private": true,
   "dependencies": {
-    "agent-device": "0.21.28"
+    "agent-device": "0.21.31"
   }
 }
