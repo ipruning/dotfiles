@@ -730,7 +730,7 @@ SHELL_COMMANDS = [
     "zed-image-paste",
 ]
 PYTHON_COMMANDS = [
-    "autocorrect",
+    "autocorrect-text",
     "chatgpt",
     "get-codex-dump",
     "get-transcript",
