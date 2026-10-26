@@ -72,3 +72,6 @@ compile = false
 _.path = [
     "~/.bun/bin",
 ]
+# Surge Enhanced Mode resolves hosts to fake IPs in 198.18.0.0/15, which Tombi
+# (>= 1.8.5) refuses as non-public schema destinations unless trusted here.
+TOMBI_SCHEMA_TRUSTED_HOSTS = "www.schemastore.org,json.schemastore.org"
