@@ -2,6 +2,6 @@
   "name": "mise-npm-install",
   "private": true,
   "dependencies": {
-    "@openai/codex-security": "0.6.0"
+    "cf": "1.0.0-beta.23"
   }
 }
