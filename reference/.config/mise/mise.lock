@@ -3,19 +3,21 @@
 lockfile_version = 3
 
 [[tools.agent-browser]]
-version = "0.39.2"
+version = "0.39.4"
 backend = "aqua:vercel-labs/agent-browser"
 specifiers = ["latest"]
 
 [tools.agent-browser."platforms.linux-x64"]
-checksum = "sha256:60914f5e3e064e54e9d07da2fa235589e7fcf84efe278cd94fc320746b2b81d7"
-url = "https://github.com/vercel-labs/agent-browser/releases/download/v0.39.2/agent-browser-linux-musl-x64"
-url_api = "https://api.github.com/repos/vercel-labs/agent-browser/releases/assets/666913574"
+checksum = "sha256:34a8be7c062a99164fc02322f22ac5f42870206cc7b59bb40ef045958ad3705b"
+checksum_source = "mise-versions"
+url = "https://github.com/vercel-labs/agent-browser/releases/download/v0.39.4/agent-browser-linux-musl-x64"
+url_api = "https://api.github.com/repos/vercel-labs/agent-browser/releases/assets/677167277"
 
 [tools.agent-browser."platforms.macos-arm64"]
-checksum = "sha256:6ae802a41130e49d0515d85db296bc170de4314b4560ca446b6c51091117b7b8"
-url = "https://github.com/vercel-labs/agent-browser/releases/download/v0.39.2/agent-browser-darwin-arm64"
-url_api = "https://api.github.com/repos/vercel-labs/agent-browser/releases/assets/666913569"
+checksum = "sha256:0317ce35172905c775c25b393914bc259701a464877aab9753ec8896f6e38bf7"
+checksum_source = "mise-versions"
+url = "https://github.com/vercel-labs/agent-browser/releases/download/v0.39.4/agent-browser-darwin-arm64"
+url_api = "https://api.github.com/repos/vercel-labs/agent-browser/releases/assets/677167273"
 
 [[tools.btop]]
 version = "1.4.7"
@@ -89,32 +91,21 @@ specifiers = [
 ]
 
 [[tools."github:agavra/tuicr"]]
-version = "0.27.0"
+version = "0.28.0"
 backend = "github:agavra/tuicr"
-specifiers = [
-    "0.27.0",
-    "latest",
-]
-
-[tools."github:agavra/tuicr"."platforms.linux-arm64"]
-checksum = "sha256:6f6bf1604159bc8644cadf73b9bace8441af183a574aa9f8db0a7b142a1c0e16"
-url = "https://github.com/agavra/tuicr/releases/download/v0.27.0/tuicr-0.27.0-aarch64-unknown-linux-gnu.tar.gz"
-url_api = "https://api.github.com/repos/agavra/tuicr/releases/assets/584421927"
+specifiers = ["latest"]
 
 [tools."github:agavra/tuicr"."platforms.linux-x64"]
-checksum = "sha256:851c7671d85fd20dc77d30321b201093af9dcdfe45011ad1d51ae65a229da192"
-url = "https://github.com/agavra/tuicr/releases/download/v0.27.0/tuicr-0.27.0-x86_64-unknown-linux-gnu.tar.gz"
-url_api = "https://api.github.com/repos/agavra/tuicr/releases/assets/584422403"
+checksum = "sha256:d7380398a4545eb2ac00919eff8a10de8959ddfa26e891cfec92eb665d489f50"
+checksum_source = "mise-versions"
+url = "https://github.com/agavra/tuicr/releases/download/v0.28.0/tuicr-0.28.0-x86_64-unknown-linux-gnu.tar.gz"
+url_api = "https://api.github.com/repos/agavra/tuicr/releases/assets/677483494"
 
 [tools."github:agavra/tuicr"."platforms.macos-arm64"]
-checksum = "sha256:170b2e5290435faaf663c9498b1385493df7c336646b74c9336388844e028dcf"
-url = "https://github.com/agavra/tuicr/releases/download/v0.27.0/tuicr-0.27.0-aarch64-apple-darwin.tar.gz"
-url_api = "https://api.github.com/repos/agavra/tuicr/releases/assets/584424400"
-
-[tools."github:agavra/tuicr"."platforms.macos-x64"]
-checksum = "sha256:c93a066b4c0d558ecb09ebad498f12b6c34fd95cad536ec5a05a4fec91be1850"
-url = "https://github.com/agavra/tuicr/releases/download/v0.27.0/tuicr-0.27.0-x86_64-apple-darwin.tar.gz"
-url_api = "https://api.github.com/repos/agavra/tuicr/releases/assets/584425453"
+checksum = "sha256:4138f2d243422aff68b32ec52fb1524cbadffcf6763b34fc180f25f0ac971674"
+checksum_source = "mise-versions"
+url = "https://github.com/agavra/tuicr/releases/download/v0.28.0/tuicr-0.28.0-aarch64-apple-darwin.tar.gz"
+url_api = "https://api.github.com/repos/agavra/tuicr/releases/assets/677485838"
 
 [[tools."github:jihuanshe/linear"]]
 version = "0.0.1791883191-ge35e379"
@@ -177,19 +168,21 @@ checksum = "sha256:dd3908cf20959d798c1e06ebe5b72213f0505ce01373b40ce3110975a6cd9
 url = "https://dl.google.com/go/go1.27.3.darwin-arm64.tar.gz"
 
 [[tools.hunk]]
-version = "0.24.0"
+version = "0.24.1"
 backend = "aqua:modem-dev/hunk"
 specifiers = ["latest"]
 
 [tools.hunk."platforms.linux-x64"]
-checksum = "sha256:7656402a8ebbd5117ad24e12bda1af045fc9c85c3b40e72dbfde4dea79b60c69"
-url = "https://github.com/modem-dev/hunk/releases/download/v0.24.0/hunkdiff-linux-x64.tar.gz"
-url_api = "https://api.github.com/repos/modem-dev/hunk/releases/assets/656237340"
+checksum = "sha256:4b8c98f8d97745499916cc1e1d2f27ffd258c6d6358dd4532f61e41c5eb19692"
+checksum_source = "mise-versions"
+url = "https://github.com/modem-dev/hunk/releases/download/v0.24.1/hunkdiff-linux-x64.tar.gz"
+url_api = "https://api.github.com/repos/modem-dev/hunk/releases/assets/673741222"
 
 [tools.hunk."platforms.macos-arm64"]
-checksum = "sha256:f876f1e86d6ba88e120937eb79f63889762a29fed951236d6de69ce3ff967819"
-url = "https://github.com/modem-dev/hunk/releases/download/v0.24.0/hunkdiff-darwin-arm64.tar.gz"
-url_api = "https://api.github.com/repos/modem-dev/hunk/releases/assets/656237354"
+checksum = "sha256:5f9afd41d825e2f87958b0702e779e52d38207c0b42d5316efe54218f35b4d7d"
+checksum_source = "mise-versions"
+url = "https://github.com/modem-dev/hunk/releases/download/v0.24.1/hunkdiff-darwin-arm64.tar.gz"
+url_api = "https://api.github.com/repos/modem-dev/hunk/releases/assets/673741225"
 
 [[tools.lazydocker]]
 version = "0.25.2"
@@ -235,19 +228,21 @@ url = "https://github.com/jesseduffield/lazygit/releases/download/v0.66.2/lazygi
 url_api = "https://api.github.com/repos/jesseduffield/lazygit/releases/assets/646837816"
 
 [[tools.mr-boxington]]
-version = "1.27.0"
+version = "1.28.0"
 backend = "packslip:github.com/jdx/mr-boxington"
 specifiers = ["latest"]
 
 [tools.mr-boxington."platforms.linux-x64"]
-checksum = "sha256:f530d0870efcf15c845314ffccd049f53eaec9a35e9f42c0dec0e16b3135e31c"
-url = "https://github.com/jdx/mr-boxington/releases/download/v1.27.0/mbx-x86_64-unknown-linux-gnu.tar.gz"
+checksum = "sha256:50ce9360221d9274a73d70c9d2d5285dc2d8353a101de0845e3da5bb0083bcfb"
+url = "https://github.com/jdx/mr-boxington/releases/download/v1.28.0/mbx-x86_64-unknown-linux-gnu.tar.gz"
 signer = "sigstore-oidc:https://github.com/jdx/mr-boxington/.github/workflows/release.yml"
+repository_ids = { repository = "1340721957" }
 
 [tools.mr-boxington."platforms.macos-arm64"]
-checksum = "sha256:b23a6f67c4fe8c5ef5c3f5b7a747de69d5c9ffe4d00c642eb6e835736cd8dc22"
-url = "https://github.com/jdx/mr-boxington/releases/download/v1.27.0/mbx-aarch64-apple-darwin.tar.gz"
+checksum = "sha256:ac73ba0637a443ba9c43354008f6bcd5d9e8a84b703e46f23202025c1f849472"
+url = "https://github.com/jdx/mr-boxington/releases/download/v1.28.0/mbx-aarch64-apple-darwin.tar.gz"
 signer = "sigstore-oidc:https://github.com/jdx/mr-boxington/.github/workflows/release.yml"
+repository_ids = { repository = "1340721957" }
 
 [[tools.node]]
 version = "26.12.1"
@@ -272,8 +267,8 @@ specifiers = ["latest"]
 allow_low_downloads = "true"
 
 [[tools."npm:@openai/codex-security"]]
-version = "0.6.0"
-aube = { path = "locks/npm-openai-codex-security/0.6.0~19b6a9e3", digest = "sha256:6083bf0344fd2f8a285ff5f6c69d97496c0cb6beaeb72036b489a54aa2bdbe21" }
+version = "0.7.0"
+aube = { path = "locks/npm-openai-codex-security/0.7.0~19b6a9e3", digest = "sha256:bb50010801cd1db9c873c1a0daeecd4145d7aa98bc56a4de48fadb6f285b21f3" }
 backend = "npm:@openai/codex-security"
 specifiers = ["latest"]
 
@@ -281,14 +276,14 @@ specifiers = ["latest"]
 allow_low_downloads = "true"
 
 [[tools."npm:agent-device"]]
-version = "0.21.31"
-aube = { path = "locks/npm-agent-device/0.21.31", digest = "sha256:45faef97d3ef90dd18c0403327038f09b8ad48e8bb9c68c629856973c2a997cf" }
+version = "0.21.32"
+aube = { path = "locks/npm-agent-device/0.21.32", digest = "sha256:f28bf210733043e0e4c7b46e5f8eea980399fc71dc385a10a77c1c5bdb331b3c" }
 backend = "npm:agent-device"
 specifiers = ["latest"]
 
 [[tools."npm:cf"]]
-version = "1.0.0-beta.21"
-aube = { path = "locks/npm-cf/1.0.0-beta.21", digest = "sha256:a1db6b994d0d0b902714964cf3a843616cd432d7edd5d13fe51cc5a4314e4634" }
+version = "1.0.0-beta.23"
+aube = { path = "locks/npm-cf/1.0.0-beta.23", digest = "sha256:24e4c8adf30663901642017ea336eba6d782db6735d1487d79fff0d9e27724d7" }
 backend = "npm:cf"
 specifiers = ["latest"]
 
@@ -340,19 +335,21 @@ backend = "core:rust"
 specifiers = ["latest"]
 
 [[tools.skillshare]]
-version = "0.26.3"
+version = "0.27.0"
 backend = "aqua:runkids/skillshare"
 specifiers = ["latest"]
 
 [tools.skillshare."platforms.linux-x64"]
-checksum = "sha256:44a913199ae31fb3ac072d9c547e85de38238f6aea23e50fc5df911ca803983f"
-url = "https://github.com/runkids/skillshare/releases/download/v0.26.3/skillshare_0.26.3_linux_amd64.tar.gz"
-url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/669071089"
+checksum = "sha256:ed1b10ab9e72680bad93068eb7df25dd12499e307d4354804d7be8c946170b77"
+checksum_source = "mise-versions"
+url = "https://github.com/runkids/skillshare/releases/download/v0.27.0/skillshare_0.27.0_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/677870664"
 
 [tools.skillshare."platforms.macos-arm64"]
-checksum = "sha256:3424b7be66d34c01a884277f433658a35c9ff7bbcf66fa54d984ad3a9547429f"
-url = "https://github.com/runkids/skillshare/releases/download/v0.26.3/skillshare_0.26.3_darwin_arm64.tar.gz"
-url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/669071093"
+checksum = "sha256:e7cc81175fa1069ef43e755243c7d480b339cdcedffbe0b79ddc5b198c08285d"
+checksum_source = "mise-versions"
+url = "https://github.com/runkids/skillshare/releases/download/v0.27.0/skillshare_0.27.0_darwin_arm64.tar.gz"
+url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/677870667"
 
 [[tools.starship]]
 version = "1.27.0"
