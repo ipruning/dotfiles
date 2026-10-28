@@ -3,21 +3,20 @@
 lockfile_version = 3
 
 [[tools.agent-browser]]
-version = "0.39.4"
+version = "0.40.0"
 backend = "aqua:vercel-labs/agent-browser"
 specifiers = ["latest"]
 
 [tools.agent-browser."platforms.linux-x64"]
-checksum = "sha256:34a8be7c062a99164fc02322f22ac5f42870206cc7b59bb40ef045958ad3705b"
+checksum = "sha256:aeebf976eb429064efb10179ccdf737ec7d798c019bae7067ce2751c9c6e176a"
 checksum_source = "mise-versions"
-url = "https://github.com/vercel-labs/agent-browser/releases/download/v0.39.4/agent-browser-linux-musl-x64"
-url_api = "https://api.github.com/repos/vercel-labs/agent-browser/releases/assets/677167277"
+url = "https://github.com/vercel-labs/agent-browser/releases/download/v0.40.0/agent-browser-linux-musl-x64"
+url_api = "https://api.github.com/repos/vercel-labs/agent-browser/releases/assets/682935170"
 
 [tools.agent-browser."platforms.macos-arm64"]
-checksum = "sha256:0317ce35172905c775c25b393914bc259701a464877aab9753ec8896f6e38bf7"
-checksum_source = "mise-versions"
-url = "https://github.com/vercel-labs/agent-browser/releases/download/v0.39.4/agent-browser-darwin-arm64"
-url_api = "https://api.github.com/repos/vercel-labs/agent-browser/releases/assets/677167273"
+checksum = "sha256:b064c9107a0431c76d8916e47c2c8ac322f49c2b2720d6c9036ab538ec1ed911"
+url = "https://github.com/vercel-labs/agent-browser/releases/download/v0.40.0/agent-browser-darwin-arm64"
+url_api = "https://api.github.com/repos/vercel-labs/agent-browser/releases/assets/682935174"
 
 [[tools.btop]]
 version = "1.4.7"
@@ -361,14 +360,14 @@ specifiers = ["latest"]
 allow_low_downloads = "true"
 
 [[tools."npm:agent-device"]]
-version = "0.21.32"
-aube = { path = "locks/npm-agent-device/0.21.32", digest = "sha256:f28bf210733043e0e4c7b46e5f8eea980399fc71dc385a10a77c1c5bdb331b3c" }
+version = "0.21.33"
+aube = { path = "locks/npm-agent-device/0.21.33", digest = "sha256:3a8dfbeb2d73902a5e7b23f1a9efc5df65180d48034c844c07593cf0ba6937da" }
 backend = "npm:agent-device"
 specifiers = ["latest"]
 
 [[tools."npm:cf"]]
-version = "1.0.0-beta.23"
-aube = { path = "locks/npm-cf/1.0.0-beta.23", digest = "sha256:24e4c8adf30663901642017ea336eba6d782db6735d1487d79fff0d9e27724d7" }
+version = "1.0.0-beta.24"
+aube = { path = "locks/npm-cf/1.0.0-beta.24", digest = "sha256:b7df518b32ab02ea6859342f6ba2f8d50444ad69cf66acc58fa5be67e0f5edc5" }
 backend = "npm:cf"
 specifiers = ["latest"]
 
@@ -379,28 +378,18 @@ backend = "npm:yarn"
 specifiers = ["1.22.22"]
 
 [[tools.python]]
-version = "3.15.1"
+version = "3.15.2"
 backend = "core:python"
 specifiers = ["latest"]
 
-[tools.python."platforms.linux-arm64"]
-checksum = "sha256:6efe65c43ae0bdebebeab4607f91a0053dd36d5e51cfd69a791d544e9b122be7"
-url = "https://github.com/astral-sh/python-build-standalone/releases/download/20261021/cpython-3.15.1+20261021-aarch64-unknown-linux-gnu-install_only_stripped.tar.gz"
-provenance = "github-attestations"
-
 [tools.python."platforms.linux-x64"]
-checksum = "sha256:01d901e09ca673c99a6c9bd9ec2cfbd58dbe8813d07514c36cb73cfd20b18bd8"
-url = "https://github.com/astral-sh/python-build-standalone/releases/download/20261021/cpython-3.15.1+20261021-x86_64-unknown-linux-gnu-install_only_stripped.tar.gz"
+checksum = "sha256:7b03163a980c607ba8194709d4a4086735a7a9c488cc475b098157306927b36b"
+url = "https://github.com/astral-sh/python-build-standalone/releases/download/20261026/cpython-3.15.2+20261026-x86_64-unknown-linux-gnu-install_only_stripped.tar.gz"
 provenance = "github-attestations"
 
 [tools.python."platforms.macos-arm64"]
-checksum = "sha256:1a4eb4d5aa82400de6eeb94e6fc6d870f5fabc97eb1d801f7eeba8072117b11c"
-url = "https://github.com/astral-sh/python-build-standalone/releases/download/20261021/cpython-3.15.1+20261021-aarch64-apple-darwin-install_only_stripped.tar.gz"
-provenance = "github-attestations"
-
-[tools.python."platforms.macos-x64"]
-checksum = "sha256:b7604b6cfcce467baca5bd607c4fc55928be99310b92b4faf2bdb448f488929e"
-url = "https://github.com/astral-sh/python-build-standalone/releases/download/20261021/cpython-3.15.1+20261021-x86_64-apple-darwin-install_only_stripped.tar.gz"
+checksum = "sha256:1b1b03fca8aa351698403f3d100ee83db7a5d99748fc7707681ac31a6a846ad9"
+url = "https://github.com/astral-sh/python-build-standalone/releases/download/20261026/cpython-3.15.2+20261026-aarch64-apple-darwin-install_only_stripped.tar.gz"
 provenance = "github-attestations"
 
 [[tools.ruby]]
@@ -483,32 +472,20 @@ url = "https://github.com/starship/starship/releases/download/v1.27.0/starship-x
 url_api = "https://api.github.com/repos/starship/starship/releases/assets/650074453"
 
 [[tools.uv]]
-version = "0.13.5"
+version = "0.13.6"
 backend = "aqua:astral-sh/uv"
 specifiers = ["latest"]
 
-[tools.uv."platforms.linux-arm64"]
-checksum = "sha256:4bb69cf95ed13f23713bb7bc09f241896ea0c75b7c557e615a20604b82f9c403"
-url = "https://github.com/astral-sh/uv/releases/download/0.13.5/uv-aarch64-unknown-linux-gnu.tar.gz"
-url_api = "https://api.github.com/repos/astral-sh/uv/releases/assets/664335837"
-provenance = "github-attestations"
-
 [tools.uv."platforms.linux-x64"]
-checksum = "sha256:f68d291c75783122dad58ab77def0e13f3233f358731db5d6d7e8715603b928f"
-url = "https://github.com/astral-sh/uv/releases/download/0.13.5/uv-x86_64-unknown-linux-gnu.tar.gz"
-url_api = "https://api.github.com/repos/astral-sh/uv/releases/assets/664336023"
+checksum = "sha256:f29c3e94ffabd7e6f3ba521dba169a9b7ec12100bf3257087f0f24f6123f3645"
+url = "https://github.com/astral-sh/uv/releases/download/0.13.6/uv-x86_64-unknown-linux-gnu.tar.gz"
+url_api = "https://api.github.com/repos/astral-sh/uv/releases/assets/679980644"
 provenance = "github-attestations"
 
 [tools.uv."platforms.macos-arm64"]
-checksum = "sha256:743f85035a1996ecb350659e01cd9faea9709829be09b1b4b03c73eaf3c9cd73"
-url = "https://github.com/astral-sh/uv/releases/download/0.13.5/uv-aarch64-apple-darwin.tar.gz"
-url_api = "https://api.github.com/repos/astral-sh/uv/releases/assets/664335803"
-provenance = "github-attestations"
-
-[tools.uv."platforms.macos-x64"]
-checksum = "sha256:b0f52b0e3945b4107d89024ea38e625683011fbfc05a0d98f9fa2d6dcee28c66"
-url = "https://github.com/astral-sh/uv/releases/download/0.13.5/uv-x86_64-apple-darwin.tar.gz"
-url_api = "https://api.github.com/repos/astral-sh/uv/releases/assets/664335993"
+checksum = "sha256:60fbd5c8a1ed681845eea28d9d622fcde03c51e91a43465b64a1e17db1ed3472"
+url = "https://github.com/astral-sh/uv/releases/download/0.13.6/uv-aarch64-apple-darwin.tar.gz"
+url_api = "https://api.github.com/repos/astral-sh/uv/releases/assets/679980393"
 provenance = "github-attestations"
 
 [[tools.xurl]]

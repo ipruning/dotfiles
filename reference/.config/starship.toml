@@ -37,7 +37,7 @@ style = "bold yellow"
 when = "test -n \"$SSH_CONNECTION$SSH_CLIENT$SSH_TTY\""
 
 [custom.gh_user]
-# 目录级 mise.toml 用 GH_TOKEN 换了 gh 账号时（如 ~/Developer/jihuanshe），同时设
+# 目录级 mise.toml 用 GH_TOKEN 换了 gh 账号时（如集换社工作目录），同时设
 # GH_ACCOUNT 标明是谁；没设就显示 hosts.yml 里全局 active 的账号。
 command = "if [ -n \"$GH_ACCOUNT\" ]; then printf '%s\\n' \"$GH_ACCOUNT\"; else awk -v host=\"${GH_HOST:-github.com}:\" 'index($0,host){found=1} found&&/user:/{print $2;exit}' \"$HOME/.config/gh/hosts.yml\"; fi"
 format = '[\[$symbol$output\]]($style) '
