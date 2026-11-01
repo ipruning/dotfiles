@@ -15,23 +15,20 @@ targets:
       path: ~/.agents/skills
 
 extras:
-  - name: codex
-    targets:
-      - path: ~/.codex
-        mode: copy
-  - name: claude
-    targets:
-      - path: ~/.claude
-        mode: copy
-  - name: pi
-    source: ~/.config/skillshare/skills/extras/pi
-    file: AGENTS.md
-    targets:
-      - path: ~/.pi/agent
-        mode: copy
+- name: agents
+  source: ~/.config/skillshare/skills/extras/shared
+  file: AGENTS.md
+  targets:
+  - path: ~/.codex
+    mode: copy
+  - path: ~/.claude
+    mode: copy
+    as: CLAUDE.md
+  - path: ~/.pi/agent
+    mode: copy
 
 ignore:
-  - '**/.DS_Store'
-  - '**/.git/**'
+- '**/.DS_Store'
+- '**/.git/**'
 
 preserve_tilde_on_save: true
