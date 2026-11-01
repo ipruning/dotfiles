@@ -27,17 +27,21 @@ zoxide = "aqua:ajeetdsouza/zoxide"
 "github:lycorp-jp/sim-use" = { version = "latest", os = ["macos"] }
 # Debian ships btop 1.2/1.3, which rewrites the linked reference btop.conf on exit;
 # macOS uses Homebrew's btop.
-btop = { version = "latest", os = ["linux"] }
+"npm:@excalidraw/cli" = { version = "latest", allow_low_downloads = "true" }
 "npm:@openai/codex-security" = { version = "latest", allow_low_downloads = "true" }
 "npm:agent-device" = "latest"
-"npm:@excalidraw/cli" = { version = "latest", allow_low_downloads = "true" }
+"npm:cf" = "latest"
+"npm:yarn" = "1.22.22"
 agent-browser = "latest"
+argocd = "2.11.7"
+btop = { version = "latest", os = ["linux"] }
 bun = "latest"
 deno = "latest"
 go = "latest"
 hunk = "latest"
 lazydocker = "latest"
 lazygit = "latest"
+mr-boxington = { version = "latest", workflow = "release.yml@refs/heads/main" }
 node = "latest"
 python = "latest"
 ruby = "latest"
@@ -48,9 +52,6 @@ uv = "latest"
 xurl = "latest"
 zig = "latest"
 zoxide = "latest"
-mr-boxington = { version = "latest", workflow = "release.yml@refs/heads/main" }
-"npm:yarn" = "1.22.22"
-"npm:cf" = "latest"
 
 [settings]
 auto_install = false
@@ -60,18 +61,13 @@ lockfile_platforms = ["macos-arm64", "linux-x64"]
 minimum_release_age = "0s"
 # Auto-trust only first-party checkout roots. Third-party repositories under
 # ~/Developer/tries remain subject to per-config review and `mise trust`.
-trusted_config_paths = [
-    "~/Developer/ipruning",
-    "~/Developer/jihuanshe",
-]
+trusted_config_paths = ["~/Developer/ipruning", "~/Developer/jihuanshe"]
 
 [settings.ruby]
 compile = false
 
 [env]
-_.path = [
-    "~/.bun/bin",
-]
+_.path = ["~/.bun/bin"]
 # Surge Enhanced Mode resolves hosts to fake IPs in 198.18.0.0/15, which Tombi
 # (>= 1.8.5) refuses as non-public schema destinations unless trusted here.
 TOMBI_SCHEMA_TRUSTED_HOSTS = "www.schemastore.org,json.schemastore.org"

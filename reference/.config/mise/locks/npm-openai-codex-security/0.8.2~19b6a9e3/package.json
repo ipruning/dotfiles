@@ -2,6 +2,6 @@
   "name": "mise-npm-install",
   "private": true,
   "dependencies": {
-    "agent-device": "0.21.33"
+    "@openai/codex-security": "0.8.2"
   }
 }
