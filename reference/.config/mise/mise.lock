@@ -4,31 +4,9 @@ lockfile_version = 3
 
 [[tools.agent-browser]]
 version = "0.40.0"
-backend = "aqua:vercel-labs/agent-browser"
+aube = { path = "locks/agent-browser/0.40.0", digest = "sha256:82b33c889d81a32f0ce6dee8d0fbc37c01757c2214c8a6f3f6ace3f83f061053" }
+backend = "npm:agent-browser"
 specifiers = ["latest"]
-
-[tools.agent-browser."platforms.linux-arm64"]
-checksum = "sha256:f33b4dd9bd7707ad952125937f9de18f93548c5d51283b18092fe21ced6b9e53"
-checksum_source = "mise-versions"
-url = "https://github.com/vercel-labs/agent-browser/releases/download/v0.40.0/agent-browser-linux-arm64"
-url_api = "https://api.github.com/repos/vercel-labs/agent-browser/releases/assets/682935171"
-
-[tools.agent-browser."platforms.linux-x64"]
-checksum = "sha256:aeebf976eb429064efb10179ccdf737ec7d798c019bae7067ce2751c9c6e176a"
-checksum_source = "mise-versions"
-url = "https://github.com/vercel-labs/agent-browser/releases/download/v0.40.0/agent-browser-linux-musl-x64"
-url_api = "https://api.github.com/repos/vercel-labs/agent-browser/releases/assets/682935170"
-
-[tools.agent-browser."platforms.macos-arm64"]
-checksum = "sha256:b064c9107a0431c76d8916e47c2c8ac322f49c2b2720d6c9036ab538ec1ed911"
-url = "https://github.com/vercel-labs/agent-browser/releases/download/v0.40.0/agent-browser-darwin-arm64"
-url_api = "https://api.github.com/repos/vercel-labs/agent-browser/releases/assets/682935174"
-
-[tools.agent-browser."platforms.macos-x64"]
-checksum = "sha256:478cba056938c5cde286fbeea3994a8b8144f2e18f054684b93abb80c0340d25"
-checksum_source = "mise-versions"
-url = "https://github.com/vercel-labs/agent-browser/releases/download/v0.40.0/agent-browser-darwin-x64"
-url_api = "https://api.github.com/repos/vercel-labs/agent-browser/releases/assets/682935172"
 
 [[tools.btop]]
 version = "1.4.7"
