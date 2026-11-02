@@ -53,38 +53,56 @@ BRRR_ENV_FILES = (
 # `resolve_after` consecutive good ones; observations that could not be made
 # leave both streaks untouched. Everything else the collector records is
 # evidence for the incident report and never notifies.
+#
+# `title`, `impact`, and `recovered` are the phone notification text. `impact`
+# is formatted with the alert's latest value; the raw measurement stays in the
+# `condition` and `alert` events.
 CONDITIONS: dict[str, dict[str, Any]] = {
     "spawn_failed": {
-        "title": "macOS 无法正常启动进程",
+        "title": "新程序启动失败",
+        "impact": "开 App 和跑命令会失败或卡住。",
+        "recovered": "新程序启动已恢复正常",
         "fire_after": 2,
         "resolve_after": 3,
     },
     "process_table_high": {
         "title": "进程数接近系统上限",
+        "impact": "已用到上限的 {value:.0f}%，用满后新程序打不开。",
+        "recovered": "进程数已回落",
         "fire_after": 3,
         "resolve_after": 3,
     },
     "file_table_high": {
-        "title": "打开文件数接近系统上限",
+        "title": "打开的文件数接近系统上限",
+        "impact": "已用到上限的 {value:.0f}%，用满后程序打不开文件。",
+        "recovered": "打开的文件数已回落",
         "fire_after": 3,
         "resolve_after": 3,
     },
     "syspolicyd_rss_high": {
-        "title": "syspolicyd 内存持续过高",
+        "title": "Gatekeeper 内存占用过高",
+        "impact": "已占用 {gib:.1f} GB 内存。",
+        "recovered": "Gatekeeper 内存已恢复正常",
         "fire_after": 3,
         "resolve_after": 3,
     },
     "syspolicyd_log_errors": {
-        "title": "syspolicyd 正在大量报错",
+        "title": "Gatekeeper 持续报错",
+        "impact": "最近 {log_minutes} 分钟报错 {value} 次。",
+        "recovered": "Gatekeeper 已不再报错",
         "fire_after": 2,
         "resolve_after": 2,
     },
     "collector_failing": {
-        "title": "macos-session-health 采集器连续崩溃",
+        "title": "健康检查脚本出错",
+        "impact": "连续 {bad_streak} 次没检查成功。",
+        "action": "看 macos-session-health 的日志。",
+        "recovered": "健康检查已恢复",
         "fire_after": 3,
         "resolve_after": 3,
     },
 }
+SAVE_INCIDENT_ACTION = "先跑 macos-session-health incident 保存现场。"
 KNOWN_EVENTS = {
     "alert",
     "brrr_notification",
@@ -593,11 +611,15 @@ def compact_database(db_path: Path, output_format: str, *, apply: bool = False) 
     return 0
 
 
+def host_label() -> str:
+    return socket.gethostname().removesuffix(".local")
+
+
 def test_brrr_notification(args: argparse.Namespace) -> int:
     payload = {
-        "title": f"{socket.gethostname()}：通知测试",
+        "title": f"{host_label()}：通知测试",
         "subtitle": "macOS session health",
-        "message": "通知已配置，无需处理。",
+        "message": "这台 Mac 的健康告警会发到这里。",
         "thread_id": args.brrr_thread_id,
         "interruption_level": args.brrr_interruption_level,
     }
@@ -1226,24 +1248,36 @@ def load_alert(store: Store, name: str) -> dict[str, Any]:
     return alert
 
 
+def recovery_message(since: str) -> str:
+    started = parse_iso(since)
+    if started is None:
+        return "异常已结束。"
+    minutes = round((dt.datetime.now(dt.timezone.utc) - started).total_seconds() / 60)
+    return f"从 {started.astimezone():%H:%M} 起异常 {minutes} 分钟。"
+
+
 def alert_payload(
     name: str, alert: dict[str, Any], args: argparse.Namespace, *, resolved: bool
 ) -> dict[str, Any]:
     spec = CONDITIONS[name]
-    host = socket.gethostname()
+    host = host_label()
     if resolved:
         payload = {
-            "title": f"{host}：已恢复：{spec['title']}",
-            "message": f"自 {alert['since']} 开始的异常已连续 {spec['resolve_after']} 次检查正常。",
+            "title": f"{host}：{spec['recovered']}",
+            "message": recovery_message(alert["since"]),
             "interruption_level": "passive",
         }
     else:
+        value = alert["value"]
+        impact = spec["impact"].format(
+            value=value,
+            gib=value / 1024 if isinstance(value, (int, float)) else 0,
+            bad_streak=alert["bad_streak"],
+            log_minutes=args.syspolicyd_log_interval_minutes,
+        )
         payload = {
             "title": f"{host}：{spec['title']}",
-            "message": (
-                f"{alert['detail']}（连续 {alert['bad_streak']} 次检查）。"
-                "先保存现场：macos-session-health incident --hours 1 --format markdown"
-            ),
+            "message": f"{impact}{spec.get('action', SAVE_INCIDENT_ACTION)}",
             "interruption_level": args.brrr_interruption_level,
         }
     payload["subtitle"] = "macOS session health"

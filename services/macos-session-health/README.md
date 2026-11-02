@@ -62,9 +62,11 @@ alert nor clear one.
 | `collector_failing` | the collector raises an exception | 3 | 3 |
 
 A firing condition sends one notification at the `active` interruption level.
-Its message includes the latest fact and the incident command to run. Resolving
-sends one `passive` recovery notification, and only if the alert itself was
-delivered. Nothing repeats while a condition stays bad. Thresholds and the
+Its title names the Mac and the symptom in plain words; the message gives the
+latest value as the user would feel it and asks you to save the incident report.
+The raw measurement stays in the `condition` and `alert` events. Resolving sends
+one `passive` recovery notification, and only if the alert itself was
+delivered; it says when the alert started and how many minutes it lasted. Nothing repeats while a condition stays bad. Thresholds and the
 interruption level have CLI options and `MACOS_SESSION_HEALTH_*` environment
 variables. Run `macos-session-health --help` to list them.
 

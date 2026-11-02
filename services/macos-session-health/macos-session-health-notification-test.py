@@ -164,7 +164,9 @@ class AlertLifecycleTest(unittest.TestCase):
             brrr_interruption_level="active",
             brrr_open_url="",
             brrr_timeout=2,
+            syspolicyd_log_interval_minutes=5,
         )
+        self.host = self.module["host_label"]()
         self.payloads: list[dict[str, Any]] = []
         self.delivery_ok = True
 
@@ -187,14 +189,16 @@ class AlertLifecycleTest(unittest.TestCase):
         self.store.close()
         self.temp_dir.cleanup()
 
-    def observe(self, *states: str, condition: str = "spawn_failed") -> None:
+    def observe(
+        self, *states: str, condition: str = "spawn_failed", value: Any = 1
+    ) -> None:
         observation = self.module["observation"]
         for state in states:
             snapshot_id = self.store.create_snapshot("test")
             self.module["update_alerts"](
                 self.store,
                 snapshot_id,
-                {condition: observation(state, 1, f"{condition} detail")},
+                {condition: observation(state, value, f"{condition} detail")},
                 self.args,
             )
 
@@ -213,9 +217,12 @@ class AlertLifecycleTest(unittest.TestCase):
     def test_sustained_condition_notifies_once_then_recovers_once(self) -> None:
         self.observe("bad", "bad")
         self.assertEqual(len(self.payloads), 1)
-        self.assertIn("macOS 无法正常启动进程", self.payloads[0]["title"])
+        self.assertEqual(self.payloads[0]["title"], f"{self.host}：新程序启动失败")
+        self.assertEqual(
+            self.payloads[0]["message"],
+            "开 App 和跑命令会失败或卡住。先跑 macos-session-health incident 保存现场。",
+        )
         self.assertEqual(self.payloads[0]["interruption_level"], "active")
-        self.assertIn("incident --hours 1", self.payloads[0]["message"])
 
         self.observe("bad", "bad", "bad", "unknown", "unknown", "ok", "ok")
         self.assertEqual(len(self.payloads), 1)
@@ -223,9 +230,52 @@ class AlertLifecycleTest(unittest.TestCase):
 
         self.observe("ok")
         self.assertEqual(len(self.payloads), 2)
-        self.assertIn("已恢复", self.payloads[1]["title"])
+        self.assertEqual(
+            self.payloads[1]["title"], f"{self.host}：新程序启动已恢复正常"
+        )
+        self.assertRegex(
+            self.payloads[1]["message"], r"^从 \d{2}:\d{2} 起异常 \d+ 分钟。$"
+        )
         self.assertEqual(self.payloads[1]["interruption_level"], "passive")
         self.assertEqual(self.alert()["status"], "ok")
+
+    def test_alert_message_states_the_latest_value_and_one_action(self) -> None:
+        cases = [
+            (
+                "process_table_high",
+                92.3,
+                "进程数接近系统上限",
+                "已用到上限的 92%，用满后新程序打不开。",
+            ),
+            (
+                "file_table_high",
+                81.0,
+                "打开的文件数接近系统上限",
+                "已用到上限的 81%，用满后程序打不开文件。",
+            ),
+            (
+                "syspolicyd_rss_high",
+                1843.2,
+                "Gatekeeper 内存占用过高",
+                "已占用 1.8 GB 内存。",
+            ),
+            (
+                "syspolicyd_log_errors",
+                230,
+                "Gatekeeper 持续报错",
+                "最近 5 分钟报错 230 次。",
+            ),
+        ]
+        for condition, value, title, impact in cases:
+            with self.subTest(condition=condition):
+                self.payloads.clear()
+                self.observe("bad", "bad", "bad", condition=condition, value=value)
+                self.assertEqual(len(self.payloads), 1)
+                self.assertEqual(self.payloads[0]["title"], f"{self.host}：{title}")
+                self.assertEqual(
+                    self.payloads[0]["message"],
+                    f"{impact}先跑 macos-session-health incident 保存现场。",
+                )
 
     def test_unknown_observation_neither_advances_nor_resets(self) -> None:
         self.observe("bad", "unknown", "unknown")
@@ -277,8 +327,15 @@ class AlertLifecycleTest(unittest.TestCase):
                 with self.assertRaisesRegex(RuntimeError, "probe exploded"):
                     snapshot(args, self.store, "test")
         self.assertEqual(len(self.payloads), 1)
-        self.assertIn("采集器连续崩溃", self.payloads[0]["title"])
-        self.assertIn("probe exploded", self.payloads[0]["message"])
+        self.assertEqual(self.payloads[0]["title"], f"{self.host}：健康检查脚本出错")
+        self.assertEqual(
+            self.payloads[0]["message"],
+            "连续 3 次没检查成功。看 macos-session-health 的日志。",
+        )
+        fired = self.store.conn.execute(
+            "SELECT data_json FROM events WHERE event = 'alert'"
+        ).fetchone()
+        self.assertIn("probe exploded", json.loads(fired[0])["detail"])
         statuses = self.store.conn.execute(
             "SELECT status FROM snapshots ORDER BY started_at"
         ).fetchall()
