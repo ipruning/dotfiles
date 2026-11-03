@@ -66,6 +66,9 @@ trusted_config_paths = ["~/Developer/ipruning", "~/Developer/jihuanshe"]
 [settings.ruby]
 compile = false
 
+[settings.self_update]
+auto = true
+
 [env]
 _.path = ["~/.bun/bin"]
 # Surge Enhanced Mode resolves hosts to fake IPs in 198.18.0.0/15, which Tombi
