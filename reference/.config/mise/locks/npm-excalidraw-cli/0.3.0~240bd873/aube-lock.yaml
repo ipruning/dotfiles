@@ -9,13 +9,13 @@ importers:
   .:
     dependencies:
       '@excalidraw/cli':
-        specifier: 0.2.0
-        version: 0.2.0
+        specifier: 0.3.0
+        version: 0.3.0
 
 packages:
 
-  '@excalidraw/cli@0.2.0':
-    resolution: {integrity: sha512-Qk1pQt8FMcbW//6XbhOvPSJVngE5NwgmHIb8X++m7ONwfHc01ortmWemDrBAMyolS1amGESmGbNBOK3hVb9otA==}
+  '@excalidraw/cli@0.3.0':
+    resolution: {integrity: sha512-KOKe6TjnxKJBM6M3UXi/7/2lT+rTp94I8MM48tSU1Pq/TsGEbmZgY/tuQwJI8IHCse3oMVvOiC4WSa8zvrpQNg==}
     engines: {node: '>=22'}
     hasBin: true
 
@@ -26,7 +26,7 @@ packages:
 
 snapshots:
 
-  '@excalidraw/cli@0.2.0':
+  '@excalidraw/cli@0.3.0':
     dependencies:
       playwright-core: 1.63.0
 

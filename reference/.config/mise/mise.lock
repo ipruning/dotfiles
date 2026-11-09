@@ -3,8 +3,8 @@
 lockfile_version = 3
 
 [[tools.agent-browser]]
-version = "0.41.1"
-aube = { path = "locks/agent-browser/0.41.1", digest = "sha256:18952d290cc581b3c96e02300ad420ffa4282cd47484c13df616bdddfa987ff0" }
+version = "0.41.2"
+aube = { path = "locks/agent-browser/0.41.2", digest = "sha256:f0fa958e381004270c63bdac4d42e64c5c2e54eb75e9f287a3d64974ae12371a" }
 backend = "npm:agent-browser"
 specifiers = ["latest"]
 
@@ -30,6 +30,7 @@ specifiers = ["latest"]
 
 [tools.btop."platforms.linux-x64"]
 checksum = "sha256:5099054dd6a101bd12eb6ff3702a9a6a3f57aaa27923a0da478ae5b517faf335"
+checksum_source = "mise-versions"
 url = "https://github.com/aristocratos/btop/releases/download/v1.4.7/btop-x86_64-unknown-linux-musl.tar.gz"
 url_api = "https://api.github.com/repos/aristocratos/btop/releases/assets/409963672"
 
@@ -104,36 +105,37 @@ url = "https://github.com/agavra/tuicr/releases/download/v0.28.0/tuicr-0.28.0-aa
 url_api = "https://api.github.com/repos/agavra/tuicr/releases/assets/677485838"
 
 [[tools."github:jihuanshe/linear"]]
-version = "0.0.1793560735-gb5dc628"
+version = "0.0.1794166915-g7a2c108"
 backend = "github:jihuanshe/linear"
 specifiers = ["latest"]
 
 [tools."github:jihuanshe/linear"."platforms.linux-x64"]
-checksum = "sha256:f95c91d762a59ccd3bfdee0ca4f28c96cd365ced5d36a6c85c4c4260d88a8a5d"
-url = "https://github.com/jihuanshe/linear/releases/download/0.0.1793560735-gb5dc628/linear-x86_64-unknown-linux-gnu.tar.xz"
-url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/699281388"
+checksum = "sha256:4e04c82edd94d5b27d3066eddcd7c9e6aadd947c10ba2dbf6304db5586f80aae"
+url = "https://github.com/jihuanshe/linear/releases/download/0.0.1794166915-g7a2c108/linear-x86_64-unknown-linux-gnu.tar.xz"
+url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/724999835"
 provenance = "github-attestations"
 
 [tools."github:jihuanshe/linear"."platforms.macos-arm64"]
-checksum = "sha256:fa7be80f238cefef6223a0245af4b6386e31cba7bd09bb8587a275b9bcc31f50"
-url = "https://github.com/jihuanshe/linear/releases/download/0.0.1793560735-gb5dc628/linear-aarch64-apple-darwin.tar.xz"
-url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/699281061"
+checksum = "sha256:bd7aacda5c0e15409a9fc6c610c0acdeb9425d0c341c672406bc3de00a475ef3"
+url = "https://github.com/jihuanshe/linear/releases/download/0.0.1794166915-g7a2c108/linear-aarch64-apple-darwin.tar.xz"
+url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/724999580"
 provenance = "github-attestations"
 
 [[tools."github:larksuite/cli"]]
-version = "1.0.98"
+version = "1.0.99"
 backend = "github:larksuite/cli"
 specifiers = ["latest"]
 
 [tools."github:larksuite/cli"."platforms.linux-x64"]
-checksum = "sha256:4a12dcb7a0aab25986d8bcd046cb45b08278531a9aac3a12b53cf3d94738fe80"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.98/lark-cli-1.0.98-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/637790335"
+checksum = "sha256:fd29f51030dde6919b6ca9173bc87852d3846f253d198022ea2d9ee63527b945"
+checksum_source = "mise-versions"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.99/lark-cli-1.0.99-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/709904840"
 
 [tools."github:larksuite/cli"."platforms.macos-arm64"]
-checksum = "sha256:ee4a3209bbf8b74ea5c00a07d0da89b79f5e7f6abfd518a8b2d78a7a4f7e3f40"
-url = "https://github.com/larksuite/cli/releases/download/v1.0.98/lark-cli-1.0.98-darwin-arm64.tar.gz"
-url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/637790328"
+checksum = "sha256:f24f4106d1b0b1a4ee9a24ec0953dee6e518476bbe3d9758f78a732477525b21"
+url = "https://github.com/larksuite/cli/releases/download/v1.0.99/lark-cli-1.0.99-darwin-arm64.tar.gz"
+url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/709904828"
 
 [[tools."github:lycorp-jp/sim-use"]]
 version = "0.16.0"
@@ -142,6 +144,7 @@ specifiers = ["latest"]
 
 [tools."github:lycorp-jp/sim-use"."platforms.macos-arm64"]
 checksum = "sha256:1cab866e83cde89bcac5bcd77554a5c687c8b85a27ec1c5e8222ef826411e906"
+checksum_source = "mise-versions"
 url = "https://github.com/lycorp-jp/sim-use/releases/download/v0.16.0/sim-use-v0.16.0.tar.gz"
 url_api = "https://api.github.com/repos/lycorp-jp/sim-use/releases/assets/661202310"
 
@@ -182,43 +185,46 @@ specifiers = ["latest"]
 
 [tools.lazydocker."platforms.linux-x64"]
 checksum = "sha256:0d9dbfc26068b218e7ed84b104748cadc6e3cf733c0afd35465306fb39b9523c"
+checksum_source = "mise-versions"
 url = "https://github.com/jesseduffield/lazydocker/releases/download/v0.25.2/lazydocker_0.25.2_Linux_x86_64.tar.gz"
 url_api = "https://api.github.com/repos/jesseduffield/lazydocker/releases/assets/399711577"
 
 [tools.lazydocker."platforms.macos-arm64"]
 checksum = "sha256:4a54d7b4abdf255b2bce9806641eac5568d5b7fbc820c1b5d3f9e34ea1367d60"
+checksum_source = "mise-versions"
 url = "https://github.com/jesseduffield/lazydocker/releases/download/v0.25.2/lazydocker_0.25.2_Darwin_arm64.tar.gz"
 url_api = "https://api.github.com/repos/jesseduffield/lazydocker/releases/assets/399711580"
 
 [[tools.lazygit]]
-version = "0.66.2"
+version = "0.66.3"
 backend = "aqua:jesseduffield/lazygit"
 specifiers = ["latest"]
 
 [tools.lazygit."platforms.linux-x64"]
-checksum = "sha256:158efc9ddfa1241fab5fb3526bb442c8dc6c4b1904d73213b9e4e93e03c52034"
-url = "https://github.com/jesseduffield/lazygit/releases/download/v0.66.2/lazygit_0.66.2_linux_x86_64.tar.gz"
-url_api = "https://api.github.com/repos/jesseduffield/lazygit/releases/assets/646837723"
+checksum = "sha256:0a23f429a95f0d09db298b3c291536d818de066aa5a85c255806f0490ff6656b"
+checksum_source = "mise-versions"
+url = "https://github.com/jesseduffield/lazygit/releases/download/v0.66.3/lazygit_0.66.3_linux_x86_64.tar.gz"
+url_api = "https://api.github.com/repos/jesseduffield/lazygit/releases/assets/722268995"
 
 [tools.lazygit."platforms.macos-arm64"]
-checksum = "sha256:fadda59ae7665ba556fcbaa704c7eade6e40d016d3f3b25d6327dd1f3f906a0c"
-url = "https://github.com/jesseduffield/lazygit/releases/download/v0.66.2/lazygit_0.66.2_darwin_arm64.tar.gz"
-url_api = "https://api.github.com/repos/jesseduffield/lazygit/releases/assets/646837816"
+checksum = "sha256:6873e6b7a538b521c4d7ff3f76ec49e6dcafa41e6053a6aae33c12f62663e163"
+url = "https://github.com/jesseduffield/lazygit/releases/download/v0.66.3/lazygit_0.66.3_darwin_arm64.tar.gz"
+url_api = "https://api.github.com/repos/jesseduffield/lazygit/releases/assets/722268996"
 
 [[tools.mr-boxington]]
-version = "1.29.1"
+version = "1.29.2"
 backend = "packslip:github.com/jdx/mr-boxington"
 specifiers = ["latest"]
 
 [tools.mr-boxington."platforms.linux-x64"]
-checksum = "sha256:ca95f28c77711845c0455839792ca3f3070bdf007979ab75bf7e10c03b07fe3f"
-url = "https://github.com/jdx/mr-boxington/releases/download/v1.29.1/mbx-x86_64-unknown-linux-gnu.tar.gz"
+checksum = "sha256:73e135d3e9e8b8ddc938b42407179a239917b7f02d3fa5f601f6783e5c0d36d6"
+url = "https://github.com/jdx/mr-boxington/releases/download/v1.29.2/mbx-x86_64-unknown-linux-gnu.tar.gz"
 signer = "sigstore-oidc:https://github.com/jdx/mr-boxington/.github/workflows/release.yml"
 repository_ids = { repository = "1340721957" }
 
 [tools.mr-boxington."platforms.macos-arm64"]
-checksum = "sha256:2c19baafcda87ad948f071c571f57b2cf9eaeee2c971c5536b93ae3a036d5e75"
-url = "https://github.com/jdx/mr-boxington/releases/download/v1.29.1/mbx-aarch64-apple-darwin.tar.gz"
+checksum = "sha256:621ce235d8f241c5a3728ca03d34b9864f466f4e8b3307d8a6d7101a24a71a60"
+url = "https://github.com/jdx/mr-boxington/releases/download/v1.29.2/mbx-aarch64-apple-darwin.tar.gz"
 signer = "sigstore-oidc:https://github.com/jdx/mr-boxington/.github/workflows/release.yml"
 repository_ids = { repository = "1340721957" }
 
@@ -236,8 +242,8 @@ checksum = "sha256:d38bd5e5a2ddce6bbb5ce45e46e208337da4d51fffe611e567fd32073d643
 url = "https://nodejs.org/dist/v26.13.0/node-v26.13.0-darwin-arm64.tar.gz"
 
 [[tools."npm:@excalidraw/cli"]]
-version = "0.2.0"
-aube = { path = "locks/npm-excalidraw-cli/0.2.0~240bd873", digest = "sha256:a2ac778521b0b4a2c82b19547238a4513ca746e7d616769d9ddd32a4fcca210d" }
+version = "0.3.0"
+aube = { path = "locks/npm-excalidraw-cli/0.3.0~240bd873", digest = "sha256:b8d5e7fe83ea68ac3dbb7d91482311a03cef9d40c8f7356f9462f2df51735b4e" }
 backend = "npm:@excalidraw/cli"
 specifiers = ["latest"]
 
@@ -245,8 +251,8 @@ specifiers = ["latest"]
 allow_low_downloads = "true"
 
 [[tools."npm:@openai/codex-security"]]
-version = "0.8.2"
-aube = { path = "locks/npm-openai-codex-security/0.8.2~19b6a9e3", digest = "sha256:d6023b053da831852dfbe9e93c16f2a32881b72a5515f26c6699d4d0d8b60916" }
+version = "0.8.3"
+aube = { path = "locks/npm-openai-codex-security/0.8.3~19b6a9e3", digest = "sha256:5f96c82c1a1fad51296bf942489b7b1538d9f9730898bbed12c4fd9ecefcc531" }
 backend = "npm:@openai/codex-security"
 specifiers = ["latest"]
 
@@ -260,8 +266,8 @@ backend = "npm:agent-device"
 specifiers = ["latest"]
 
 [[tools."npm:cf"]]
-version = "1.0.0-beta.27"
-aube = { path = "locks/npm-cf/1.0.0-beta.27", digest = "sha256:a2a5e19f52cf8ff24fc958990552bfafd837ab6ad989a17a1e8bc91f60f08e50" }
+version = "1.0.0-beta.28"
+aube = { path = "locks/npm-cf/1.0.0-beta.28", digest = "sha256:de27c22b63d747fe4ce2668c8052d892105d15ca801be27a938607f2a6d05bfe" }
 backend = "npm:cf"
 specifiers = ["latest"]
 
@@ -313,20 +319,20 @@ backend = "core:rust"
 specifiers = ["latest"]
 
 [[tools.skillshare]]
-version = "0.28.2"
+version = "0.30.0"
 backend = "aqua:runkids/skillshare"
 specifiers = ["latest"]
 
 [tools.skillshare."platforms.linux-x64"]
-checksum = "sha256:f5a1695b5fdd2b2def44aa6dfb6a3df6ac8bd907770fa6090dc8a37835a7f19b"
+checksum = "sha256:7a63ccc35e5316a601217e4aa729eb3b2c5cdaadda84b673711237074fac5e12"
 checksum_source = "mise-versions"
-url = "https://github.com/runkids/skillshare/releases/download/v0.28.2/skillshare_0.28.2_linux_amd64.tar.gz"
-url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/695463922"
+url = "https://github.com/runkids/skillshare/releases/download/v0.30.0/skillshare_0.30.0_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/726266482"
 
 [tools.skillshare."platforms.macos-arm64"]
-checksum = "sha256:9fd24bec2979eda3df12285e3737af96569f1251c1e743984681966a5691454c"
-url = "https://github.com/runkids/skillshare/releases/download/v0.28.2/skillshare_0.28.2_darwin_arm64.tar.gz"
-url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/695463962"
+checksum = "sha256:f86f7385af70b839fe8507b6d1cd16e9bd1e2f5a48ea482625519ac196fa7a9f"
+url = "https://github.com/runkids/skillshare/releases/download/v0.30.0/skillshare_0.30.0_darwin_arm64.tar.gz"
+url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/726266481"
 
 [[tools.starship]]
 version = "1.27.0"
@@ -335,11 +341,13 @@ specifiers = ["latest"]
 
 [tools.starship."platforms.linux-x64"]
 checksum = "sha256:3b94758850901717eb36aa1b53f8492c1322506ec6d41273bc6151e79ed8e4a1"
+checksum_source = "mise-versions"
 url = "https://github.com/starship/starship/releases/download/v1.27.0/starship-x86_64-unknown-linux-gnu.tar.gz"
 url_api = "https://api.github.com/repos/starship/starship/releases/assets/650074501"
 
 [tools.starship."platforms.macos-arm64"]
 checksum = "sha256:5362da8cb2928f98f3ce0ffda697cf0f8de70081db000dae316d6d3a404f6cf0"
+checksum_source = "mise-versions"
 url = "https://github.com/starship/starship/releases/download/v1.27.0/starship-aarch64-apple-darwin.tar.gz"
 url_api = "https://api.github.com/repos/starship/starship/releases/assets/650074353"
 
@@ -367,26 +375,28 @@ specifiers = ["latest"]
 
 [tools.xurl."platforms.linux-x64"]
 checksum = "sha256:930b93e49d46664b8720fbdab3d16705641ba8c0c232b2f72b739ce635f57e43"
+checksum_source = "mise-versions"
 url = "https://github.com/xdevplatform/xurl/releases/download/v1.3.4/xurl_Linux_x86_64.tar.gz"
 url_api = "https://api.github.com/repos/xdevplatform/xurl/releases/assets/599260767"
 
 [tools.xurl."platforms.macos-arm64"]
 checksum = "sha256:7097f8b124fa0e82a56610b678f19f73f0f383f43bea7c8dc91b90ac13895181"
+checksum_source = "mise-versions"
 url = "https://github.com/xdevplatform/xurl/releases/download/v1.3.4/xurl_Darwin_arm64.tar.gz"
 url_api = "https://api.github.com/repos/xdevplatform/xurl/releases/assets/599260750"
 
 [[tools.zig]]
-version = "0.17.0"
+version = "0.17.1"
 backend = "core:zig"
 specifiers = ["latest"]
 
 [tools.zig."platforms.linux-x64"]
-checksum = "sha256:1cbe9df9f27e6b78d14ccbca43b6703a404ef79ef1c463de901d7f088d4e2026"
-url = "https://ziglang.org/download/0.17.0/zig-x86_64-linux-0.17.0.tar.xz"
+checksum = "sha256:3581863e3cbcfd0fce0efc682ce7e9e93da96668a977791d356a26d2a7e9b17a"
+url = "https://ziglang.org/download/0.17.1/zig-x86_64-linux-0.17.1.tar.xz"
 
 [tools.zig."platforms.macos-arm64"]
-checksum = "sha256:b607e9b9234790a008116ae5bdb71c6243b84b9fb42a53a9e70fde41c06c536a"
-url = "https://ziglang.org/download/0.17.0/zig-aarch64-macos-0.17.0.tar.xz"
+checksum = "sha256:75f1bc7a1e9852f17ec9a0c1895f767c4ec56d46bc8a834920eece1d0359dd8d"
+url = "https://ziglang.org/download/0.17.1/zig-aarch64-macos-0.17.1.tar.xz"
 
 [[tools.zoxide]]
 version = "0.10.0"
@@ -395,10 +405,12 @@ specifiers = ["latest"]
 
 [tools.zoxide."platforms.linux-x64"]
 checksum = "sha256:2d93385b99f3e82cf2701609a1bffcad863fbeb75aa3fe7eb6be4d29be68b1ae"
+checksum_source = "mise-versions"
 url = "https://github.com/ajeetdsouza/zoxide/releases/download/v0.10.0/zoxide-0.10.0-x86_64-unknown-linux-musl.tar.gz"
 url_api = "https://api.github.com/repos/ajeetdsouza/zoxide/releases/assets/466316293"
 
 [tools.zoxide."platforms.macos-arm64"]
 checksum = "sha256:b55ae6f2f5f23d0a6ccb3bd4eeb2af9c7e0a6556e5255c82100e40305129bbb0"
+checksum_source = "mise-versions"
 url = "https://github.com/ajeetdsouza/zoxide/releases/download/v0.10.0/zoxide-0.10.0-aarch64-apple-darwin.tar.gz"
 url_api = "https://api.github.com/repos/ajeetdsouza/zoxide/releases/assets/466316174"
