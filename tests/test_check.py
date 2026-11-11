@@ -1703,6 +1703,24 @@ def test_host_paths_warn_only_for_live_configurations(tmp_path: Path) -> None:
     assert [finding.code for finding in resolved] == ["reference.host_paths_resolved"]
 
 
+def test_host_paths_stop_before_an_escaped_quote(tmp_path: Path) -> None:
+    home = tmp_path / "home"
+    repo_root = home / "dotfiles"
+    reference = repo_root / "reference/.config/live/config.toml"
+    reference.parent.mkdir(parents=True)
+    reference.write_text(
+        'command = "case \\"$PWD/\\" in \\"$HOME/Developer/work/\\"*) echo ;; esac"\n'
+    )
+    live = home / ".config/live/config.toml"
+    live.parent.mkdir(parents=True)
+    live.symlink_to(reference)
+    (home / "Developer/work").mkdir(parents=True)
+
+    findings = host_path_findings(repo_root, home, "Linux")
+
+    assert [finding.code for finding in findings] == ["reference.host_paths_resolved"]
+
+
 def test_host_paths_warn_when_checkout_is_not_home_dotfiles(tmp_path: Path) -> None:
     home = tmp_path / "home"
     home.mkdir()
