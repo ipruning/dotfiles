@@ -2,6 +2,6 @@
   "name": "mise-npm-install",
   "private": true,
   "dependencies": {
-    "agent-browser": "0.41.2"
+    "cf": "1.0.0-beta.29"
   }
 }
