@@ -542,7 +542,7 @@ def inspect_host(
         )
     if policy_valid:
         mise_binding = mise_runtime_binding_finding(
-            repo_root / "generated/functions/_mise.zsh",
+            repo_root / "generated/functions/_mise.bash",
             home,
         )
         if mise_binding:

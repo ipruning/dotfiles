@@ -475,7 +475,7 @@ def test_zshenv_exposes_user_and_mise_commands_without_repo_bins_on_linux(
 
 
 @requires_zsh
-def test_zsh_mise_activation_replaces_the_noninteractive_shim_fallback(
+def test_interactive_zsh_resolves_mise_tools_through_shims_for_humans_and_agents(
     tmp_path: Path,
 ) -> None:
     source_root = Path(__file__).resolve().parents[1]
@@ -483,40 +483,52 @@ def test_zsh_mise_activation_replaces_the_noninteractive_shim_fallback(
     env_file = repo_root / "shell/zsh/env.zsh"
     env_file.parent.mkdir(parents=True)
     shutil.copy2(source_root / "shell/zsh/env.zsh", env_file)
+    zshenv = source_root / "reference/.zshenv"
     home = tmp_path / "home"
     local_bin = home / ".local/bin"
     shims = home / ".local/share/mise/shims"
+    bun_bin = home / ".bun/bin"
     functions = repo_root / "generated/functions"
-    for directory in (local_bin, shims, functions):
+    for directory in (local_bin, shims, bun_bin, functions):
         directory.mkdir(parents=True)
     mise = local_bin / "mise"
     mise.write_text("#!/bin/sh\nexit 0\n")
     mise.chmod(0o755)
+    # A cache left by an earlier `generate` must not bring back activation.
     (functions / "_mise.zsh").write_text("export MISE_TEST_ACTIVATED=1\n")
 
-    completed = subprocess.run(
-        [
-            "zsh",
-            "-dfc",
-            (
-                f'source "{env_file}"; '
-                'print -r -- "${MISE_TEST_ACTIVATED:-0}"; '
-                'print -r -- "${(j.:.)path}"'
-            ),
-        ],
-        env={
-            "HOME": str(home),
-            "PATH": f"{shims}:/usr/bin:/bin",
-        },
-        check=False,
-        capture_output=True,
-        text=True,
-    )
+    def startup_path(extra_environment: dict[str, str]) -> list[str]:
+        completed = subprocess.run(
+            [
+                "zsh",
+                "-dfc",
+                (
+                    f'source "{zshenv}"; source "{env_file}"; '
+                    'print -r -- "${MISE_TEST_ACTIVATED:-0}"; '
+                    'print -r -- "${(j.:.)path}"'
+                ),
+            ],
+            env={
+                "HOME": str(home),
+                "PATH": "/usr/bin:/bin",
+                **extra_environment,
+            },
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        assert completed.returncode == 0, completed.stderr
+        activated, loaded_path = completed.stdout.splitlines()
+        assert activated == "0"
+        return loaded_path.split(":")
 
-    assert completed.returncode == 0
-    activated, loaded_path = completed.stdout.splitlines()
-    assert activated == "1"
-    assert str(shims) not in loaded_path.split(":")
+    human = startup_path({})
+    agent = startup_path({"CLAUDECODE": "1"})
+
+    assert human == agent
+    assert human[0] == str(shims)
+    assert str(bun_bin) in human
+    assert not any("/mise/installs/" in entry for entry in human)
 
 
 def test_bash_init_loads_starship_only_for_interactive_shells(tmp_path: Path) -> None:

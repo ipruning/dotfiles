@@ -3,7 +3,6 @@
 from .generate_models import ShellInitSpec
 
 FUNCTION_SPECS = (
-    ShellInitSpec("mise", "mise", "zsh", ("mise", "activate", "zsh"), "_mise.zsh"),
     ShellInitSpec(
         "starship", "starship", "zsh", ("starship", "init", "zsh"), "_starship.zsh"
     ),
