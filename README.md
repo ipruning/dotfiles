@@ -187,12 +187,12 @@ Tool owners:
 
 | Tool | Owner |
 | --- | --- |
-| Hunk, Lazygit, Lazydocker, Starship, Zoxide, Skillshare | shared mise baseline on every platform |
+| GitHub CLI, Hunk, Lazygit, Lazydocker, Starship, Zoxide, Skillshare | shared mise baseline on every platform; GitHub CLI runs through its shim so directory `[env]` values such as `GH_TOKEN` apply |
 | Atuin | shared baseline, compiled per host from the pinned fork revision; only `config.toml` is restored |
 | btop | Homebrew on macOS; the shared baseline on Linux (Debian's 1.2/1.3 rewrite the linked config) |
 | Herdr | official installer at `~/.local/bin/herdr` (`curl -fsSL https://herdr.dev/install.sh \| sh`) |
 | Pi | official installer under `~/.pi/agent/install` (`curl -fsSL https://pi.dev/install.sh \| sh`); to migrate from mise, remove its declaration, `mise uninstall --all pi`, and `mise reshim` first |
-| GitHub CLI, Codex | the host (Homebrew, APT, Omarchy); version differences are not drift |
+| Codex | the host (Homebrew, APT, Omarchy); version differences are not drift |
 
 ## Host health and doctor
 

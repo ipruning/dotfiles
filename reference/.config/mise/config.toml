@@ -6,6 +6,7 @@ min_version = { hard = "2026.9.18" }
 # use these aliases rather than declaring the same full backend separately.
 agent-browser = "npm:agent-browser"
 btop = "aqua:aristocratos/btop"
+gh = "aqua:cli/cli"
 hunk = "aqua:modem-dev/hunk"
 lazydocker = "aqua:jesseduffield/lazydocker"
 lazygit = "aqua:jesseduffield/lazygit"
@@ -37,6 +38,7 @@ argocd = "2.11.7"
 btop = { version = "latest", os = ["linux"] }
 bun = "latest"
 deno = "latest"
+gh = "latest"
 go = "latest"
 hunk = "latest"
 lazydocker = "latest"

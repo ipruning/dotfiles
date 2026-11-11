@@ -150,6 +150,9 @@ These rules describe the reference Zsh setup; Linux Lite Bash still loads
   programs that need them with `mise exec -- <command>`.
 - In a project with `_.python.venv`, bare `python` is the mise interpreter, not
   the virtualenv. Use `uv run`, `mise exec -- python`, or `.venv/bin/python`.
+- `gh` belongs to the shared mise baseline, so its shim applies directory
+  `[env]` such as the `GH_TOKEN` that selects the account under a workspace;
+  `gh auth git-credential` used by Git resolves the same shim.
 - `.zshenv` puts `~/.bun/bin` on `PATH` for `bun add -g` packages.
 - The global mise config enables `idiomatic_version_file_enable_tools =
   ["pnpm"]`, so a project that pins pnpm only through `package.json`
