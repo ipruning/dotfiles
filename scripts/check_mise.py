@@ -353,7 +353,7 @@ def mise_runtime_binding_finding(
             "generated.function.mise_binding",
             Severity.WARN,
             "generated.function.mise_binding_unreadable",
-            f"Generated mise Zsh initialization cannot be read: {error}",
+            f"Generated mise Bash initialization cannot be read: {error}",
             generated_function,
             "Run mise run generate, then mise run generate -- --apply.",
         )
@@ -364,7 +364,7 @@ def mise_runtime_binding_finding(
             "generated.function.mise_binding",
             Severity.OK,
             "generated.function.mise_binding_ready",
-            "Generated mise Zsh initialization is bound to the canonical executable",
+            "Generated mise Bash initialization is bound to the canonical executable",
             generated_function,
         )
     actual = ", ".join(bindings) if bindings else "no absolute mise executable"
@@ -372,7 +372,7 @@ def mise_runtime_binding_finding(
         "generated.function.mise_binding",
         Severity.WARN,
         "generated.function.mise_binding_mismatch",
-        f"Generated mise Zsh initialization is not bound only to {expected}: {actual}",
+        f"Generated mise Bash initialization is not bound only to {expected}: {actual}",
         generated_function,
         "Run mise run generate, then mise run generate -- --apply.",
     )

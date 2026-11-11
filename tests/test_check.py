@@ -57,7 +57,6 @@ def test_inspect_host_reports_capabilities_and_their_invalid_transition(
             "generated\n",
         )
     runtime_files = (
-        "generated/functions/_mise.zsh",
         "generated/functions/_starship.zsh",
         "generated/functions/_atuin.zsh",
         "generated/functions/_zoxide.zsh",
@@ -77,7 +76,7 @@ def test_inspect_host_reports_capabilities_and_their_invalid_transition(
         runtime_path = repo_root / relative_path
         runtime_path.parent.mkdir(parents=True, exist_ok=True)
         runtime_path.write_text("runtime\n")
-    (repo_root / "generated/functions/_mise.zsh").write_text(
+    (repo_root / "generated/functions/_mise.bash").write_text(
         f"command {canonical_mise}\n",
     )
     zellij_plugins = repo_root / "generated/plugins"
@@ -172,7 +171,7 @@ def test_inspect_host_reports_capabilities_and_their_invalid_transition(
 
     private_gitconfig.unlink()
     source.rmdir()
-    (repo_root / "generated/functions/_mise.zsh").unlink()
+    (repo_root / "generated/functions/_mise.bash").unlink()
     degraded = inspect_host(
         repo_root,
         home,
@@ -184,7 +183,7 @@ def test_inspect_host_reports_capabilities_and_their_invalid_transition(
     assert degraded.is_ok() is True
     assert findings["git.private_file_missing"].severity is Severity.WARN
     assert findings["skillshare.source_missing"].severity is Severity.WARN
-    assert findings["generated.function.mise_missing"].severity is Severity.WARN
+    assert findings["generated.function.mise-bash_missing"].severity is Severity.WARN
     assert degraded.is_ok(strict=True) is False
 
     (home / ".gitconfig").write_text(
@@ -207,7 +206,7 @@ def test_inspect_host_reports_duplicate_mise_and_stale_runtime_binding(
     home = tmp_path / "home"
     canonical = home / ".local/bin/mise"
     alternate = tmp_path / "package-manager/bin/mise"
-    generated = repo_root / "generated/functions/_mise.zsh"
+    generated = repo_root / "generated/functions/_mise.bash"
     for executable in (canonical, alternate):
         executable.parent.mkdir(parents=True)
         executable.write_text("#!/bin/sh\nexit 0\n")
@@ -283,9 +282,9 @@ def test_inspect_host_reports_duplicate_mise_and_stale_runtime_binding(
     stale_runtime = next(
         finding
         for finding in missing.findings
-        if finding.check == "generated.function.mise"
+        if finding.check == "generated.function.mise-bash"
     )
-    assert stale_runtime.code == "generated.function.mise_stale"
+    assert stale_runtime.code == "generated.function.mise-bash_stale"
     assert stale_runtime.severity is Severity.WARN
 
 

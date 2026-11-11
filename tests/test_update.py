@@ -902,7 +902,7 @@ def test_update_cli_refreshes_runtime_after_independent_failure(tmp_path: Path) 
         for step in document["steps"]
     )
     assert "amp update" in log.read_text()
-    assert (tmp_path / "project/generated/functions/_mise.zsh").is_file()
+    assert (tmp_path / "project/generated/functions/_mise.bash").is_file()
 
 
 def _run_upgrade(

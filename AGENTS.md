@@ -135,6 +135,27 @@ If a tool participates in `mise run verify`, it must be pinnable through mise.
 If it is not pinnable, the gate must skip its scope loudly instead of failing.
 Do not add cross-platform installers for optional tools.
 
+## Shell and mise on this host
+
+These rules describe the reference Zsh setup; Linux Lite Bash still loads
+`mise activate`.
+
+- Every Zsh, interactive or not, resolves mise tools through the shims that
+  `.zshenv` puts first on `PATH`; Zsh never loads `mise activate`. `PATH` holds
+  no `mise/installs/<tool>/<version>` directory, so an upgrade or install is
+  visible on the next call in every shell and agent snapshot.
+- Project `[env]` values, `_.file`, `_.path`, and `_.python.venv` reach only
+  processes mise launches: shims, `mise exec --`, and `mise run`. The shell
+  itself does not see them; inspect them with `mise env`, and run non-mise
+  programs that need them with `mise exec -- <command>`.
+- In a project with `_.python.venv`, bare `python` is the mise interpreter, not
+  the virtualenv. Use `uv run`, `mise exec -- python`, or `.venv/bin/python`.
+- `.zshenv` puts `~/.bun/bin` on `PATH` for `bun add -g` packages.
+- The global mise config enables `idiomatic_version_file_enable_tools =
+  ["pnpm"]`, so a project that pins pnpm only through `package.json`
+  `packageManager` gets that version. `auto_install = false` still applies:
+  install a missing version with `mise install pnpm@<version>`.
+
 ## Skillshare boundary
 
 Global harness prompts and skills are owned by the Skillshare source repo.

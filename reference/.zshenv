@@ -7,9 +7,10 @@ typeset -U path
 # Single source of truth for the base executable path.
 #
 # Why here instead of `.zprofile`: many agents, IDEs, and automations execute
-# non-login zsh commands, so `.zprofile` is never read. Shims are enough for
-# non-interactive mise usage; interactive shells remove the fallback before
-# loading full `mise activate` from the cached script sourced by `.zshrc`.
+# non-login zsh commands, so `.zprofile` is never read. Every zsh, interactive
+# or not, resolves mise tools through shims: agents snapshot the interactive
+# PATH once per session, and shims pick up upgrades and per-directory versions
+# at each call, while `mise activate` would pin version directories into PATH.
 _dotfiles_core_path() {
   if [[ ${OSTYPE:-} == darwin* ]]; then
     # Intel Homebrew, Apple Silicon Homebrew. Add bin and sbin when present so
@@ -23,6 +24,10 @@ _dotfiles_core_path() {
     # never shadow system tools.
     [[ -d "$HOME/dotfiles/commands" ]] && path=("$HOME/dotfiles/commands" $path)
   fi
+
+  # Global packages from `bun add -g`. The global mise `[env] _.path` entry for
+  # this directory reaches only mise-launched processes, not the zsh PATH.
+  [[ -d "$HOME/.bun/bin" ]] && path=("$HOME/.bun/bin" $path)
 
   # mise's installer and other per-user executables use this cross-platform
   # location. It must be available before interactive initialization so a

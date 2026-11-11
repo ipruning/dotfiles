@@ -294,7 +294,7 @@ def test_audit_only_full_check_skips_repository_runtime_readiness(
         "shell.plugins",
         "shell.completions",
         "shell.functions",
-        "generated.function.mise",
+        "generated.function.mise-bash",
         "generated.plugin.fzf-tab",
         "zellij.zjstatus.wasm",
     ):

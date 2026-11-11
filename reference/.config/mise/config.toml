@@ -62,6 +62,9 @@ minimum_release_age = "0s"
 # Auto-trust only first-party checkout roots. Third-party repositories under
 # ~/Developer/tries remain subject to per-config review and `mise trust`.
 trusted_config_paths = ["~/Developer/ipruning", "~/Developer/jihuanshe"]
+# Projects that pin pnpm only through package.json `packageManager` (or
+# `devEngines.packageManager`) select that version without a mise config.
+idiomatic_version_file_enable_tools = ["pnpm"]
 
 [settings.ruby]
 compile = false
