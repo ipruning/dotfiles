@@ -3,8 +3,8 @@
 lockfile_version = 3
 
 [[tools.agent-browser]]
-version = "0.42.0"
-aube = { path = "locks/agent-browser/0.42.0", digest = "sha256:83992223a29f0149ce3278656e37d6044258471d6a1eeced3df171eeca25f405" }
+version = "0.43.0"
+aube = { path = "locks/agent-browser/0.43.0", digest = "sha256:26dc6355a3d44f0a01bcc1448870942cea8621cc5402b4fdd77e6a16f7e4f401" }
 backend = "npm:agent-browser"
 specifiers = ["latest"]
 
@@ -88,20 +88,20 @@ backend = "gem:kamal"
 specifiers = ["latest"]
 
 [[tools.gh]]
-version = "2.103.3"
+version = "2.104.0"
 backend = "aqua:cli/cli"
 specifiers = ["latest"]
 
 [tools.gh."platforms.linux-x64"]
-checksum = "sha256:4c806978ffce1cec70853302a56d70ac6da4f19bae7adca4e1a8ab00633dd91d"
-url = "https://github.com/cli/cli/releases/download/v2.103.3/gh_2.103.3_linux_amd64.tar.gz"
-url_api = "https://api.github.com/repos/cli/cli/releases/assets/679195621"
+checksum = "sha256:98cb101ad87dbbd3f6b2f2bfcbd43197ccd07643140121d8a9cfaa91eadbc24e"
+url = "https://github.com/cli/cli/releases/download/v2.104.0/gh_2.104.0_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/cli/cli/releases/assets/740718892"
 provenance = "github-attestations"
 
 [tools.gh."platforms.macos-arm64"]
-checksum = "sha256:d700207eae9ae98fe2b89535c2c087c07823d4628c56364695a5a07ef311c062"
-url = "https://github.com/cli/cli/releases/download/v2.103.3/gh_2.103.3_macOS_arm64.zip"
-url_api = "https://api.github.com/repos/cli/cli/releases/assets/679195704"
+checksum = "sha256:23b12706219b9892e44236f988444a24adcf29284e16b35e03ba5b863fb6eb8e"
+url = "https://github.com/cli/cli/releases/download/v2.104.0/gh_2.104.0_macOS_arm64.zip"
+url_api = "https://api.github.com/repos/cli/cli/releases/assets/740719079"
 provenance = "github-attestations"
 
 [[tools."github:agavra/tuicr"]]
@@ -122,20 +122,20 @@ url = "https://github.com/agavra/tuicr/releases/download/v0.28.0/tuicr-0.28.0-aa
 url_api = "https://api.github.com/repos/agavra/tuicr/releases/assets/677485838"
 
 [[tools."github:jihuanshe/linear"]]
-version = "0.0.1794224300-gbc520ad"
+version = "0.0.1794403865-g7dce07a"
 backend = "github:jihuanshe/linear"
 specifiers = ["latest"]
 
 [tools."github:jihuanshe/linear"."platforms.linux-x64"]
-checksum = "sha256:83d1a510f7fc7f9dff730b79477f697a367ffe7fd82afc47bde60f25af999f4b"
-url = "https://github.com/jihuanshe/linear/releases/download/0.0.1794224300-gbc520ad/linear-x86_64-unknown-linux-gnu.tar.xz"
-url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/727271632"
+checksum = "sha256:8f7ada74c698982f743bc457ea05093f7ef3a52ff11f2699d839803a09912bbb"
+url = "https://github.com/jihuanshe/linear/releases/download/0.0.1794403865-g7dce07a/linear-x86_64-unknown-linux-gnu.tar.xz"
+url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/735641265"
 provenance = "github-attestations"
 
 [tools."github:jihuanshe/linear"."platforms.macos-arm64"]
-checksum = "sha256:3a4b36195071b6789081db88901e7ffdbceb04cc5899e5c9c5b3c07e5a1de99b"
-url = "https://github.com/jihuanshe/linear/releases/download/0.0.1794224300-gbc520ad/linear-aarch64-apple-darwin.tar.xz"
-url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/727271277"
+checksum = "sha256:446ea04a3f1b9c861d92d70e195c9589e37f5909fa48b29217f2522ba444abe8"
+url = "https://github.com/jihuanshe/linear/releases/download/0.0.1794403865-g7dce07a/linear-aarch64-apple-darwin.tar.xz"
+url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/735640884"
 provenance = "github-attestations"
 
 [[tools."github:larksuite/cli"]]
@@ -179,21 +179,20 @@ checksum = "sha256:91a44a2b8a716600ad94a4f143e156116620db8828086a6e3602291be9bd0
 url = "https://dl.google.com/go/go1.27.4.darwin-arm64.tar.gz"
 
 [[tools.hunk]]
-version = "0.24.1"
+version = "0.25.0"
 backend = "aqua:modem-dev/hunk"
 specifiers = ["latest"]
 
 [tools.hunk."platforms.linux-x64"]
-checksum = "sha256:4b8c98f8d97745499916cc1e1d2f27ffd258c6d6358dd4532f61e41c5eb19692"
+checksum = "sha256:fc3301151a9b35400b0223d73041cea85fb18972d6dc5c97a2bbdc427fad2afe"
 checksum_source = "mise-versions"
-url = "https://github.com/modem-dev/hunk/releases/download/v0.24.1/hunkdiff-linux-x64.tar.gz"
-url_api = "https://api.github.com/repos/modem-dev/hunk/releases/assets/673741222"
+url = "https://github.com/modem-dev/hunk/releases/download/v0.25.0/hunkdiff-linux-x64.tar.gz"
+url_api = "https://api.github.com/repos/modem-dev/hunk/releases/assets/736456200"
 
 [tools.hunk."platforms.macos-arm64"]
-checksum = "sha256:5f9afd41d825e2f87958b0702e779e52d38207c0b42d5316efe54218f35b4d7d"
-checksum_source = "mise-versions"
-url = "https://github.com/modem-dev/hunk/releases/download/v0.24.1/hunkdiff-darwin-arm64.tar.gz"
-url_api = "https://api.github.com/repos/modem-dev/hunk/releases/assets/673741225"
+checksum = "sha256:2a577909b478242bc75982be30bc2c5ebf9a0044fc38aad94b111ab7e9a992e0"
+url = "https://github.com/modem-dev/hunk/releases/download/v0.25.0/hunkdiff-darwin-arm64.tar.gz"
+url_api = "https://api.github.com/repos/modem-dev/hunk/releases/assets/736456199"
 
 [[tools.lazydocker]]
 version = "0.25.2"
@@ -246,17 +245,17 @@ signer = "sigstore-oidc:https://github.com/jdx/mr-boxington/.github/workflows/re
 repository_ids = { repository = "1340721957" }
 
 [[tools.node]]
-version = "26.13.0"
+version = "26.13.1"
 backend = "core:node"
 specifiers = ["latest"]
 
 [tools.node."platforms.linux-x64"]
-checksum = "sha256:5848553868b402d3fabb5b09270649977780a390f832155721025a08b5104455"
-url = "https://nodejs.org/dist/v26.13.0/node-v26.13.0-linux-x64.tar.gz"
+checksum = "sha256:518674de2b621728a5e4486f5fb3b7d2900bb3cc4aa97969edaa463db99f9778"
+url = "https://nodejs.org/dist/v26.13.1/node-v26.13.1-linux-x64.tar.gz"
 
 [tools.node."platforms.macos-arm64"]
-checksum = "sha256:d38bd5e5a2ddce6bbb5ce45e46e208337da4d51fffe611e567fd32073d6439f6"
-url = "https://nodejs.org/dist/v26.13.0/node-v26.13.0-darwin-arm64.tar.gz"
+checksum = "sha256:aec2514ea1ceb2ba52455e9ec65986f6749a06dd759e5db2a72e6889668c9735"
+url = "https://nodejs.org/dist/v26.13.1/node-v26.13.1-darwin-arm64.tar.gz"
 
 [[tools."npm:@excalidraw/cli"]]
 version = "0.3.0"
@@ -268,8 +267,8 @@ specifiers = ["latest"]
 allow_low_downloads = "true"
 
 [[tools."npm:@openai/codex-security"]]
-version = "0.9.1"
-aube = { path = "locks/npm-openai-codex-security/0.9.1~19b6a9e3", digest = "sha256:aa8c011f95da42766cc137df2a9eadb766bef8d5218e771cd96a488d3a6641eb" }
+version = "0.10.0"
+aube = { path = "locks/npm-openai-codex-security/0.10.0~19b6a9e3", digest = "sha256:a5585f8d3248e0875a573eef44b6feb5ac91e224b9f97cda1868eb83b26e5b79" }
 backend = "npm:@openai/codex-security"
 specifiers = ["latest"]
 
@@ -277,14 +276,14 @@ specifiers = ["latest"]
 allow_low_downloads = "true"
 
 [[tools."npm:agent-device"]]
-version = "0.21.36"
-aube = { path = "locks/npm-agent-device/0.21.36", digest = "sha256:b35d953fc1bb3ea01dce34f063119a4f886c254fd9e662ea543c6bbd4af34195" }
+version = "0.21.37"
+aube = { path = "locks/npm-agent-device/0.21.37", digest = "sha256:649306b37a466fef3747fb44c9e4aaa60d5a2594d280277c75969bde8a36e2e7" }
 backend = "npm:agent-device"
 specifiers = ["latest"]
 
 [[tools."npm:cf"]]
-version = "1.0.0-beta.29"
-aube = { path = "locks/npm-cf/1.0.0-beta.29", digest = "sha256:1fcc7eeddc72453055d401f8597b31fadf663738928f5e151f98ae96c70a5ac8" }
+version = "1.0.0-beta.31"
+aube = { path = "locks/npm-cf/1.0.0-beta.31", digest = "sha256:063c8bc20b406a538acb6f9a15fb0932a54ea75ce4e2ce9c92e98a126db60f6c" }
 backend = "npm:cf"
 specifiers = ["latest"]
 
@@ -331,25 +330,25 @@ url = "https://github.com/jdx/ruby/releases/download/4.0.9-1/ruby-4.0.9.macos.ta
 provenance = "github-attestations"
 
 [[tools.rust]]
-version = "1.99.1"
+version = "1.100.0"
 backend = "core:rust"
 specifiers = ["latest"]
 
 [[tools.skillshare]]
-version = "0.30.4"
+version = "0.30.6"
 backend = "aqua:runkids/skillshare"
 specifiers = ["latest"]
 
 [tools.skillshare."platforms.linux-x64"]
-checksum = "sha256:6bc738e1117d3b59f1b3401d2153e972f3c09eb6c6cc24fdd23a20b0e8b86484"
+checksum = "sha256:d8ddea82f0a2679e68c2dfdcecb3353ee02a1ae12d4b209b8e0a7839b72607e9"
 checksum_source = "mise-versions"
-url = "https://github.com/runkids/skillshare/releases/download/v0.30.4/skillshare_0.30.4_linux_amd64.tar.gz"
-url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/732302318"
+url = "https://github.com/runkids/skillshare/releases/download/v0.30.6/skillshare_0.30.6_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/736344293"
 
 [tools.skillshare."platforms.macos-arm64"]
-checksum = "sha256:f320081e9f9d0469a66b6932fd731373ab312668834670a7a9790298b137a99f"
-url = "https://github.com/runkids/skillshare/releases/download/v0.30.4/skillshare_0.30.4_darwin_arm64.tar.gz"
-url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/732302245"
+checksum = "sha256:55b981c0cc17f31cc5e8e629c9ebe0af450c45e8f06aa7d2fea252d3e7b1fde1"
+url = "https://github.com/runkids/skillshare/releases/download/v0.30.6/skillshare_0.30.6_darwin_arm64.tar.gz"
+url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/736344392"
 
 [[tools.starship]]
 version = "1.27.0"
@@ -369,20 +368,20 @@ url = "https://github.com/starship/starship/releases/download/v1.27.0/starship-a
 url_api = "https://api.github.com/repos/starship/starship/releases/assets/650074353"
 
 [[tools.uv]]
-version = "0.13.7"
+version = "0.13.8"
 backend = "aqua:astral-sh/uv"
 specifiers = ["latest"]
 
 [tools.uv."platforms.linux-x64"]
-checksum = "sha256:c5221ff41b7892bfc223543883600125f6a47fe845093e0f5bdff4f359196d83"
-url = "https://github.com/astral-sh/uv/releases/download/0.13.7/uv-x86_64-unknown-linux-gnu.tar.gz"
-url_api = "https://api.github.com/repos/astral-sh/uv/releases/assets/704009823"
+checksum = "sha256:5acfd9177cfecf0bf87578f059728215ccc884388988f55f7a65041b57387d91"
+url = "https://github.com/astral-sh/uv/releases/download/0.13.8/uv-x86_64-unknown-linux-gnu.tar.gz"
+url_api = "https://api.github.com/repos/astral-sh/uv/releases/assets/740313966"
 provenance = "github-attestations"
 
 [tools.uv."platforms.macos-arm64"]
-checksum = "sha256:81b811b57e4624df7ed3aac148e0359100d9962f3d9dce00aec533dc2e086731"
-url = "https://github.com/astral-sh/uv/releases/download/0.13.7/uv-aarch64-apple-darwin.tar.gz"
-url_api = "https://api.github.com/repos/astral-sh/uv/releases/assets/704009442"
+checksum = "sha256:6b71028a6b904f2ae3340ef52e595512de807d06c0a20eaef2f692581b246558"
+url = "https://github.com/astral-sh/uv/releases/download/0.13.8/uv-aarch64-apple-darwin.tar.gz"
+url_api = "https://api.github.com/repos/astral-sh/uv/releases/assets/740313603"
 provenance = "github-attestations"
 
 [[tools.xurl]]
