@@ -105,21 +105,20 @@ url_api = "https://api.github.com/repos/cli/cli/releases/assets/740719079"
 provenance = "github-attestations"
 
 [[tools."github:agavra/tuicr"]]
-version = "0.28.0"
+version = "0.29.0"
 backend = "github:agavra/tuicr"
 specifiers = ["latest"]
 
 [tools."github:agavra/tuicr"."platforms.linux-x64"]
-checksum = "sha256:d7380398a4545eb2ac00919eff8a10de8959ddfa26e891cfec92eb665d489f50"
+checksum = "sha256:14d2977a50f976376441d0ff8cf0c5d0f81d6f2b6f4f1b105ddff55c52ffcdd6"
 checksum_source = "mise-versions"
-url = "https://github.com/agavra/tuicr/releases/download/v0.28.0/tuicr-0.28.0-x86_64-unknown-linux-gnu.tar.gz"
-url_api = "https://api.github.com/repos/agavra/tuicr/releases/assets/677483494"
+url = "https://github.com/agavra/tuicr/releases/download/v0.29.0/tuicr-0.29.0-x86_64-unknown-linux-gnu.tar.gz"
+url_api = "https://api.github.com/repos/agavra/tuicr/releases/assets/748371659"
 
 [tools."github:agavra/tuicr"."platforms.macos-arm64"]
-checksum = "sha256:4138f2d243422aff68b32ec52fb1524cbadffcf6763b34fc180f25f0ac971674"
-checksum_source = "mise-versions"
-url = "https://github.com/agavra/tuicr/releases/download/v0.28.0/tuicr-0.28.0-aarch64-apple-darwin.tar.gz"
-url_api = "https://api.github.com/repos/agavra/tuicr/releases/assets/677485838"
+checksum = "sha256:3f4677eded21a470c3a14fee01c3a6d04146194a05d7d346a42fc7e612743b84"
+url = "https://github.com/agavra/tuicr/releases/download/v0.29.0/tuicr-0.29.0-aarch64-apple-darwin.tar.gz"
+url_api = "https://api.github.com/repos/agavra/tuicr/releases/assets/748377554"
 
 [[tools."github:jihuanshe/linear"]]
 version = "0.0.1794403865-g7dce07a"
@@ -282,8 +281,8 @@ backend = "npm:agent-device"
 specifiers = ["latest"]
 
 [[tools."npm:cf"]]
-version = "1.0.0-beta.31"
-aube = { path = "locks/npm-cf/1.0.0-beta.31", digest = "sha256:063c8bc20b406a538acb6f9a15fb0932a54ea75ce4e2ce9c92e98a126db60f6c" }
+version = "1.0.0-beta.32"
+aube = { path = "locks/npm-cf/1.0.0-beta.32", digest = "sha256:2e3dadefb70115b42405918f04224530d5d0f323829974922abda3f9802aacb1" }
 backend = "npm:cf"
 specifiers = ["latest"]
 
@@ -335,20 +334,20 @@ backend = "core:rust"
 specifiers = ["latest"]
 
 [[tools.skillshare]]
-version = "0.30.6"
+version = "0.30.8"
 backend = "aqua:runkids/skillshare"
 specifiers = ["latest"]
 
 [tools.skillshare."platforms.linux-x64"]
-checksum = "sha256:d8ddea82f0a2679e68c2dfdcecb3353ee02a1ae12d4b209b8e0a7839b72607e9"
+checksum = "sha256:5bd99d0677171d619009f49464aabcb3fadd86b7e87b85eb66b40476b9cffe5e"
 checksum_source = "mise-versions"
-url = "https://github.com/runkids/skillshare/releases/download/v0.30.6/skillshare_0.30.6_linux_amd64.tar.gz"
-url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/736344293"
+url = "https://github.com/runkids/skillshare/releases/download/v0.30.8/skillshare_0.30.8_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/748224851"
 
 [tools.skillshare."platforms.macos-arm64"]
-checksum = "sha256:55b981c0cc17f31cc5e8e629c9ebe0af450c45e8f06aa7d2fea252d3e7b1fde1"
-url = "https://github.com/runkids/skillshare/releases/download/v0.30.6/skillshare_0.30.6_darwin_arm64.tar.gz"
-url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/736344392"
+checksum = "sha256:73f0b0b7114cf42cefda795107a06252bbb9e10751d6addb174cd8b9a5a979c7"
+url = "https://github.com/runkids/skillshare/releases/download/v0.30.8/skillshare_0.30.8_darwin_arm64.tar.gz"
+url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/748224850"
 
 [[tools.starship]]
 version = "1.27.0"
