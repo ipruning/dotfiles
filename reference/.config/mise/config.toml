@@ -85,6 +85,12 @@ trusted_config_paths = ["~/Developer/ipruning", "~/Developer/jihuanshe"]
 # Projects that pin pnpm only through package.json `packageManager` (or
 # `devEngines.packageManager`) select that version without a mise config.
 idiomatic_version_file_enable_tools = ["pnpm"]
+# Resolve private first-party github: tools directly on GitHub instead of
+# sending their repository names to mise-versions.
+versions_host_exclude = ["ipruning/*", "jihuanshe/*"]
+# Keep each task's last output so a failure hidden by a captured output style
+# can be read with `mise tasks log <task>` instead of rerunning it.
+task.logs = true
 
 [settings.ruby]
 compile = false
