@@ -174,6 +174,36 @@ def test_global_mise_lock_covers_declared_artifact_platforms() -> None:
                     "dependencies"
                 ]
                 assert dependencies[package]["specifier"] == entry["version"]
+            if "uv" in entry:
+                assert backend.startswith(("pypi:", "pipx:"))
+                pointer = entry["uv"]
+                assert set(pointer) == {"path", "digest"}
+                relative = Path(pointer["path"])
+                assert not relative.is_absolute()
+                assert ".." not in relative.parts
+                assert "\\" not in pointer["path"]
+                sidecar_root = (lock_root / "locks").resolve()
+                sidecar = (lock_root / relative).resolve()
+                assert sidecar.is_relative_to(sidecar_root)
+                graph = sidecar / "uv.lock"
+                manifest = sidecar / "pyproject.toml"
+                for path in (graph, manifest):
+                    assert path.is_file()
+                    assert path.resolve().is_relative_to(sidecar_root)
+                assert pointer["digest"] == (
+                    "sha256:" + hashlib.sha256(graph.read_bytes()).hexdigest()
+                )
+                package = backend.split(":", 1)[1]
+                assert tomllib.loads(manifest.read_text())["project"][
+                    "dependencies"
+                ] == [
+                    f"{package}=={entry['version']}",
+                ]
+                assert any(
+                    item["name"] == package and item["version"] == entry["version"]
+                    for item in tomllib.loads(graph.read_text())["package"]
+                )
+                continue
             if backend in version_only_backends or backend.startswith(
                 version_only_prefixes,
             ):
