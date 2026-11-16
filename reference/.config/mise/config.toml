@@ -10,10 +10,12 @@ gh = "aqua:cli/cli"
 hunk = "aqua:modem-dev/hunk"
 lazydocker = "aqua:jesseduffield/lazydocker"
 lazygit = "aqua:jesseduffield/lazygit"
+pnpm = "aqua:pnpm/pnpm"
 skillshare = "aqua:runkids/skillshare"
 starship = "aqua:starship/starship"
 uv = "aqua:astral-sh/uv"
 xurl = "github:xdevplatform/xurl"
+yarn = "aqua:yarnpkg/berry"
 zoxide = "aqua:ajeetdsouza/zoxide"
 
 [tools]
@@ -27,12 +29,14 @@ deno = "latest"
 go = "latest"
 mr-boxington = { version = "latest", workflow = "release.yml@refs/heads/main" }
 node = "latest"
+pnpm = "latest"
 python = "latest"
 ruby = "latest"
 # Route Cargo through Mr Boxington for shared compilation caching;
 # requires the mr-boxington tool declared above.
 rust = { version = "latest", mr_boxington = true }
 uv = "latest"
+yarn = "latest"
 zig = "latest"
 
 # Shell and terminal

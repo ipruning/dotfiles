@@ -371,7 +371,7 @@ def test_mise_sync_blocks_a_previous_backend_without_its_new_alias(
     home.mkdir()
     _write_live_config(home)
     (home / ".config/mise/config.toml").write_text(
-        '[tools]\n"aqua:yarnpkg/berry" = "latest"\n'
+        '[tools]\n"github:astral-sh/uv" = "latest"\n'
     )
     _write_mise(home, tmp_path / "mise.log")
 
@@ -380,7 +380,7 @@ def test_mise_sync_blocks_a_previous_backend_without_its_new_alias(
     assert completed.returncode == 1
     document = json.loads(completed.stdout)
     assert document["safety"]["apply_blocked"] is True
-    assert document["safety"]["live_only_tools"] == ["aqua:yarnpkg/berry"]
+    assert document["safety"]["live_only_tools"] == ["github:astral-sh/uv"]
 
 
 @pytest.mark.parametrize(
@@ -416,9 +416,9 @@ def test_mise_sync_blocks_a_previous_backend_without_its_new_alias(
         (
             (
                 '[tool_alias]\nnode = "aqua:evil/thing"\n\n'
-                '[tools]\n"aqua:yarnpkg/berry" = "latest"\n'
+                '[tools]\n"github:astral-sh/uv" = "latest"\n'
             ),
-            ["aqua:yarnpkg/berry"],
+            ["github:astral-sh/uv"],
             "node",
             "aqua:evil/thing",
         ),

@@ -365,6 +365,23 @@ aube = { path = "locks/npm-cf/1.0.0-beta.32", digest = "sha256:2e3dadefb70115b42
 backend = "npm:cf"
 specifiers = ["latest"]
 
+[[tools.pnpm]]
+version = "12.21.0"
+backend = "aqua:pnpm/pnpm"
+specifiers = ["latest"]
+
+[tools.pnpm."platforms.linux-x64"]
+checksum = "sha256:84c4773bcf4a217f4083cd7b2a91e4cee6103cf42426c1282ef37d308f55a410"
+url = "https://github.com/pnpm/pnpm/releases/download/v12.21.0/pnpm-linux-x64.tar.gz"
+url_api = "https://api.github.com/repos/pnpm/pnpm/releases/assets/744357264"
+provenance = "github-attestations"
+
+[tools.pnpm."platforms.macos-arm64"]
+checksum = "sha256:5c4d73018e00dd602531ce714625594fb693cbe110e6719df2b043b0ae62ab1a"
+url = "https://github.com/pnpm/pnpm/releases/download/v12.21.0/pnpm-darwin-arm64.tar.gz"
+url_api = "https://api.github.com/repos/pnpm/pnpm/releases/assets/744357270"
+provenance = "github-attestations"
+
 [[tools."pypi:google-colab-cli"]]
 version = "0.8.0"
 backend = "pypi:google-colab-cli"
@@ -512,6 +529,19 @@ checksum = "sha256:7097f8b124fa0e82a56610b678f19f73f0f383f43bea7c8dc91b90ac13895
 checksum_source = "mise-versions"
 url = "https://github.com/xdevplatform/xurl/releases/download/v1.3.4/xurl_Darwin_arm64.tar.gz"
 url_api = "https://api.github.com/repos/xdevplatform/xurl/releases/assets/599260750"
+
+[[tools.yarn]]
+version = "4.18.1"
+backend = "aqua:yarnpkg/berry"
+specifiers = ["latest"]
+
+[tools.yarn."platforms.linux-x64"]
+checksum = "sha256:a28ad591febb769f939c11f82f89bacad0b0fac0c884d3b78fa2aaaee970907e"
+url = "https://repo.yarnpkg.com/4.18.1/packages/yarnpkg-cli/bin/yarn.js"
+
+[tools.yarn."platforms.macos-arm64"]
+checksum = "sha256:a28ad591febb769f939c11f82f89bacad0b0fac0c884d3b78fa2aaaee970907e"
+url = "https://repo.yarnpkg.com/4.18.1/packages/yarnpkg-cli/bin/yarn.js"
 
 [[tools.zig]]
 version = "0.17.1"

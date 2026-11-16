@@ -121,12 +121,16 @@ def test_global_mise_lock_covers_declared_artifact_platforms() -> None:
         "~/Developer/ipruning",
         "~/Developer/jihuanshe",
     ]
-    assert {"pi", "pnpm", "yarn"}.isdisjoint(config["tools"])
-    assert {"pi", "pnpm", "yarn"}.isdisjoint(config["tool_alias"])
+    assert "pi" not in config["tools"]
+    assert "pi" not in config["tool_alias"]
+    assert config["tools"]["pnpm"] == "latest"
+    assert config["tool_alias"]["pnpm"] == "aqua:pnpm/pnpm"
+    assert config["tools"]["yarn"] == "latest"
+    assert config["tool_alias"]["yarn"] == "aqua:yarnpkg/berry"
     lock_root = repo_root / "reference/.config/mise"
     lockfile = tomllib.loads((lock_root / "mise.lock").read_text())
     assert lockfile["lockfile_version"] == 3
-    assert {"pi", "pnpm", "yarn"}.isdisjoint(lockfile["tools"])
+    assert "pi" not in lockfile["tools"]
     version_only_backends = {"core:rust"}
     version_only_prefixes = (
         "cargo:",
