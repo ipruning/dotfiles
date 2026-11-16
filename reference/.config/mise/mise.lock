@@ -365,12 +365,6 @@ aube = { path = "locks/npm-cf/1.0.0-beta.32", digest = "sha256:2e3dadefb70115b42
 backend = "npm:cf"
 specifiers = ["latest"]
 
-[[tools."npm:yarn"]]
-version = "1.22.22"
-aube = { path = "locks/npm-yarn/1.22.22", digest = "sha256:fb0a6374649a0fec5fe1999a7cc726567ee94d03802994a1a86b7d2264d470bc" }
-backend = "npm:yarn"
-specifiers = ["1.22.22"]
-
 [[tools."pypi:google-colab-cli"]]
 version = "0.8.0"
 backend = "pypi:google-colab-cli"
