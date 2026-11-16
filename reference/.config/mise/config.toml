@@ -22,7 +22,6 @@ zoxide = "aqua:ajeetdsouza/zoxide"
 # locked versions of tools already present; mise-sync also installs missing tools.
 
 # Language runtimes and package tools
-"npm:yarn" = "1.22.22"
 bun = "latest"
 deno = "latest"
 go = "latest"
