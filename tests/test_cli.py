@@ -51,8 +51,8 @@ def test_mise_python_tasks_never_sync_dependencies_implicitly(tmp_path: Path) ->
         "macos-arm64",
         "linux-x64",
     ]
-    assert config["min_version"]["hard"] == "2026.9.18"
-    assert lockfile["lockfile_version"] == 3
+    assert config["min_version"]["hard"] == "2026.11.1"
+    assert lockfile["lockfile_version"] == 4
     assert config["tool_alias"] == {
         "actionlint": "aqua:rhysd/actionlint",
         "fd": "aqua:sharkdp/fd",
@@ -114,7 +114,7 @@ def test_global_mise_lock_covers_declared_artifact_platforms() -> None:
     config = tomllib.loads(
         (repo_root / "reference/.config/mise/config.toml").read_text(),
     )
-    assert config["min_version"]["hard"] == "2026.9.18"
+    assert config["min_version"]["hard"] == "2026.11.1"
     assert config["settings"]["auto_install"] is False
     assert config["settings"]["minimum_release_age"] == "0s"
     assert config["settings"]["trusted_config_paths"] == [
@@ -129,7 +129,7 @@ def test_global_mise_lock_covers_declared_artifact_platforms() -> None:
     assert config["tool_alias"]["yarn"] == "aqua:yarnpkg/berry"
     lock_root = repo_root / "reference/.config/mise"
     lockfile = tomllib.loads((lock_root / "mise.lock").read_text())
-    assert lockfile["lockfile_version"] == 3
+    assert lockfile["lockfile_version"] == 4
     assert "pi" not in lockfile["tools"]
     version_only_backends = {"core:rust"}
     version_only_prefixes = (

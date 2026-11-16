@@ -1,5 +1,5 @@
 # Use the current mise lockfile format and native dependency sidecars.
-min_version = { hard = "2026.9.18" }
+min_version = { hard = "2026.11.1" }
 
 [tool_alias]
 # Keep canonical tool identities pinned to explicit backends; [tools] must
@@ -57,7 +57,7 @@ lazygit = "latest"
 "github:lycorp-jp/sim-use" = { version = "latest", os = ["macos"] }
 "npm:@excalidraw/cli" = { version = "latest", allow_low_downloads = "true" }
 "npm:@openai/codex-security" = { version = "latest", allow_low_downloads = "true" }
-"npm:agent-device" = "latest"
+"npm:agent-device" = "0.21.36"
 agent-browser = "latest"
 skillshare = "latest"
 

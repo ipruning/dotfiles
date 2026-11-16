@@ -48,9 +48,9 @@ mise run mise-sync
 mise run mise-sync -- --apply
 ```
 
-- The installer takes the latest mise; `min_version` (2026.9.18) in both mise
-  configs is only a compatibility floor for version-3 lockfiles and npm
-  sidecars. Keep the standalone binary at `~/.local/bin/mise` as the single
+- The installer takes the latest mise; `min_version` (2026.11.1) in both mise
+  configs is only a compatibility floor for version-4 lockfiles, npm sidecars,
+  and npm provenance pins. Keep the standalone binary at `~/.local/bin/mise` as the single
   owner (it supports `mise self-update`); a second copy from Homebrew or apt can
   bind shell activation to the wrong binary.
 - Name the repository tools explicitly. A bare `mise install --locked` also

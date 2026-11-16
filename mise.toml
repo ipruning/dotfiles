@@ -1,5 +1,5 @@
 # Use the current mise lockfile format and native dependency sidecars.
-min_version = { hard = "2026.9.18" }
+min_version = { hard = "2026.11.1" }
 
 [tool_alias]
 actionlint = "aqua:rhysd/actionlint"
