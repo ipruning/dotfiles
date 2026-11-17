@@ -1,397 +1,139 @@
-import configparser
 import json
-import subprocess
+import time
 from pathlib import Path
-from typing import cast, override
 
 import pytest
 
-from scripts.diff import (
-    DriftProtocolError,
-    MackupCommandError,
-    SubprocessMackupRunner,
-    inspect_drift,
-    main,
-)
-from scripts.profiles import HostProfile
+from scripts.diff import inspect_drift, main
+from scripts.mappings import MappingError
+from scripts.models import DriftKind
 from tests.conftest import mackup_cfg
 
 
-def _drift_document(kind: str, error: str | None = None) -> dict[str, object]:
-    return {
-        "schema_version": 1,
-        "operation": "diff",
-        "changes": [
-            {
-                "application": "git",
-                "reference_path": "reference/.gitconfig",
-                "live_path": "/home/someone/.gitconfig",
-                "kind": kind,
-                "reference_kind": "file",
-                "live_kind": None if kind == "unreadable" else "file",
-                "error": error,
-            },
-        ],
-        "summary": {kind: 1},
+def setup_mapping(repo: Path, name: str, mapping: str) -> None:
+    root = repo / "mackup"
+    (root / "applications").mkdir(parents=True, exist_ok=True)
+    (root / "mackup.cfg").write_text(mackup_cfg(f"{name}\n"))
+    (root / "applications" / f"{name}.cfg").write_text(mapping)
+    (repo / "reference").mkdir(exist_ok=True)
+
+
+def test_drift_compares_files_directories_and_symlinks(tmp_path: Path) -> None:
+    repo, home = tmp_path / "repo", tmp_path / "home"
+    setup_mapping(repo, "Example-App", "[configuration_files]\ndata\nmanaged\n")
+    reference = repo / "reference"
+    for root in (reference, home):
+        (root / "data").mkdir(parents=True, exist_ok=True)
+        (root / "data/same").write_text("same")
+        (root / "data/changed").write_text(root.name)
+    (reference / "data/only-reference").touch()
+    (home / "data/only-live").touch()
+    (reference / "data/changed-type").touch()
+    (home / "data/changed-type").symlink_to("absent")
+    (reference / "data/changed-link").symlink_to("first")
+    (home / "data/changed-link").symlink_to("second")
+    (reference / "managed").touch()
+    (home / "managed").symlink_to(reference / "managed")
+
+    report = inspect_drift(repo, home, "Example-App")
+
+    assert report.ok
+    assert {change.live_path.name: change.kind for change in report.changes} == {
+        "changed": DriftKind.MODIFIED,
+        "changed-link": DriftKind.MODIFIED,
+        "changed-type": DriftKind.TYPE_CHANGED,
+        "only-live": DriftKind.ONLY_LIVE,
+        "only-reference": DriftKind.ONLY_REFERENCE,
     }
+    assert report.summary["modified"] == 2
 
 
-class StubMackupRunner:
-    def inspect(
-        self,
-        repo_root: Path,
-        home: Path,
-        application: str | None,
-    ) -> dict[str, object]:
-        assert application == "git"
-        return {
-            "schema_version": 1,
-            "operation": "diff",
-            "changes": [
-                {
-                    "application": "git",
-                    "reference_path": str(repo_root / "reference/.gitconfig"),
-                    "live_path": str(home / ".gitconfig"),
-                    "kind": "modified",
-                    "reference_kind": "file",
-                    "live_kind": "file",
-                    "error": None,
-                },
-            ],
-            "summary": {"modified": 1},
-        }
-
-
-class MultiApplicationRunner:
-    def inspect(
-        self,
-        repo_root: Path,
-        home: Path,
-        application: str | None,
-    ) -> dict[str, object]:
-        assert application is None
-        return {
-            "schema_version": 1,
-            "operation": "diff",
-            "changes": [
-                {
-                    "application": "git",
-                    "reference_path": str(repo_root / "reference/.gitconfig"),
-                    "live_path": str(home / ".gitconfig"),
-                    "kind": "modified",
-                    "reference_kind": "file",
-                    "live_kind": "file",
-                    "error": None,
-                },
-                {
-                    "application": "atuin",
-                    "reference_path": str(
-                        repo_root / "reference/.config/atuin/config.toml"
-                    ),
-                    "live_path": str(home / ".config/atuin/config.toml"),
-                    "kind": "only-reference",
-                    "reference_kind": "file",
-                    "live_kind": None,
-                    "error": None,
-                },
-                {
-                    "application": "mise",
-                    "reference_path": str(
-                        repo_root / "reference/.config/mise/config.toml"
-                    ),
-                    "live_path": str(home / ".config/mise/config.toml"),
-                    "kind": "only-reference",
-                    "reference_kind": "file",
-                    "live_kind": None,
-                    "error": None,
-                },
-                {
-                    "application": "herdr",
-                    "reference_path": str(
-                        repo_root / "reference/.config/herdr/config.toml"
-                    ),
-                    "live_path": str(home / ".config/herdr/config.toml"),
-                    "kind": "only-reference",
-                    "reference_kind": "file",
-                    "live_kind": None,
-                    "error": None,
-                },
-                {
-                    "application": "btop",
-                    "reference_path": str(
-                        repo_root / "reference/.config/btop/btop.conf"
-                    ),
-                    "live_path": str(home / ".config/btop/btop.conf"),
-                    "kind": "only-reference",
-                    "reference_kind": "file",
-                    "live_kind": None,
-                    "error": None,
-                },
-                {
-                    "application": "hushlogin",
-                    "reference_path": str(repo_root / "reference/.hushlogin"),
-                    "live_path": str(home / ".hushlogin"),
-                    "kind": "only-reference",
-                    "reference_kind": "file",
-                    "live_kind": None,
-                    "error": None,
-                },
-                {
-                    "application": "uv",
-                    "reference_path": str(repo_root / "reference/.config/uv/uv.toml"),
-                    "live_path": str(home / ".config/uv/uv.toml"),
-                    "kind": "only-reference",
-                    "reference_kind": "file",
-                    "live_kind": None,
-                    "error": None,
-                },
-                {
-                    "application": "aerospace",
-                    "reference_path": str(
-                        repo_root / "reference/.config/aerospace/aerospace.toml",
-                    ),
-                    "live_path": str(home / ".config/aerospace/aerospace.toml"),
-                    "kind": "only-reference",
-                    "reference_kind": "file",
-                    "live_kind": None,
-                    "error": None,
-                },
-            ],
-            "summary": {"modified": 1, "only-reference": 8},
-        }
-
-
-def test_inspect_drift_returns_typed_location_only_report(tmp_path: Path) -> None:
-    repo_root = tmp_path / "repo"
-    home = tmp_path / "home"
-
-    report = inspect_drift(
-        repo_root,
-        home,
-        application="git",
-        runner=StubMackupRunner(),
-    )
-
-    assert report.schema_version == 1
-    assert report.operation == "diff"
-    assert report.summary == {"modified": 1}
-    assert report.changes[0].application == "git"
-    assert report.changes[0].kind.value == "modified"
-    assert report.changes[0].live_path == home / ".gitconfig"
-    assert report.ok is True
-
-
-def test_linux_lite_profile_excludes_macos_drift_by_default(tmp_path: Path) -> None:
-    report = inspect_drift(
-        tmp_path / "repo",
-        tmp_path / "home",
-        profile="auto",
-        system_name="Linux",
-        runner=MultiApplicationRunner(),
-    )
-
-    assert report.profile is HostProfile.LINUX_LITE
-    assert [change.application for change in report.changes] == [
-        "git",
-        "atuin",
-        "mise",
-        "herdr",
-        "btop",
-    ]
-    assert report.summary == {"modified": 1, "only-reference": 4}
-
-    full = inspect_drift(
-        tmp_path / "repo",
-        tmp_path / "home",
-        profile="full",
-        system_name="Linux",
-        runner=MultiApplicationRunner(),
-    )
-    assert full.profile is HostProfile.FULL
-    assert [change.application for change in full.changes] == [
-        "git",
-        "atuin",
-        "mise",
-        "herdr",
-        "btop",
-        "hushlogin",
-        "uv",
-        "aerospace",
-    ]
-
-
-class InvalidSchemaRunner:
-    def inspect(
-        self,
-        repo_root: Path,
-        home: Path,
-        application: str | None,
-    ) -> dict[str, object]:
-        return {
-            "schema_version": 2,
-            "operation": "diff",
-            "changes": [],
-            "summary": {},
-        }
-
-
-def test_inspect_drift_rejects_unknown_schema(tmp_path: Path) -> None:
-    with pytest.raises(DriftProtocolError, match="schema_version"):
-        inspect_drift(tmp_path, tmp_path, runner=InvalidSchemaRunner())
-
-
-class InvalidFileKindRunner(StubMackupRunner):
-    @override
-    def inspect(
-        self,
-        repo_root: Path,
-        home: Path,
-        application: str | None,
-    ) -> dict[str, object]:
-        document = super().inspect(repo_root, home, "git")
-        changes = document["changes"]
-        assert isinstance(changes, list)
-        change = cast("dict[str, object]", changes[0])
-        assert isinstance(change, dict)
-        change["live_kind"] = "socket"
-        return document
-
-
-def test_inspect_drift_rejects_unknown_file_kind(tmp_path: Path) -> None:
-    with pytest.raises(DriftProtocolError, match="unknown file kind"):
-        inspect_drift(tmp_path, tmp_path, runner=InvalidFileKindRunner())
-
-
-def test_diff_cli_reports_ordinary_drift_as_success_and_unreadable_as_failure(
-    monkeypatch,
-    capsys,
+@pytest.mark.parametrize("xdg_directory", ["custom", ""])
+def test_profile_and_xdg_paths(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, xdg_directory: str
 ) -> None:
-    documents = iter(
-        [
-            _drift_document("modified"),
-            _drift_document("unreadable", error="permission denied"),
-        ],
+    repo, home = tmp_path / "repo", tmp_path / "home"
+    setup_mapping(repo, "zed", "[xdg_configuration_files]\nzed/settings.json\n")
+    monkeypatch.setenv(
+        "XDG_CONFIG_HOME", str(home / xdg_directory) if xdg_directory else ""
+    )
+    reference = repo / "reference/.config/zed/settings.json"
+    reference.parent.mkdir(parents=True)
+    reference.touch()
+
+    assert not inspect_drift(repo, home, system_name="Linux").changes
+    explicit = inspect_drift(repo, home, "zed", system_name="Linux")
+    assert explicit.changes[0].reference_path == reference
+    assert (
+        explicit.changes[0].live_path
+        == home / (xdg_directory or ".config") / "zed/settings.json"
     )
 
-    def run(command: list[str], **_kwargs) -> subprocess.CompletedProcess[str]:
-        return subprocess.CompletedProcess(command, 0, json.dumps(next(documents)), "")
 
-    monkeypatch.setattr("scripts.diff.subprocess.run", run)
-
-    assert main(["--profile", "full"]) == 0
-    assert "1 modified" in capsys.readouterr().out
-
-    assert main(["--profile", "full"]) == 1
-    assert "permission denied" in capsys.readouterr().err
+def test_empty_mapping_cannot_report_a_clean_scan(tmp_path: Path) -> None:
+    setup_mapping(tmp_path, "git", "[application]\nname = Git\n")
+    with pytest.raises(MappingError, match="No configuration paths"):
+        inspect_drift(tmp_path, tmp_path / "home", "git")
 
 
-def test_subprocess_runner_surfaces_mackup_failure_modes(
-    tmp_path: Path,
-    monkeypatch,
+def test_invalid_mapping_path_is_reported(tmp_path: Path) -> None:
+    setup_mapping(tmp_path, "git", "[configuration_files]\n../outside\n")
+    with pytest.raises(MappingError, match="Invalid relative path"):
+        inspect_drift(tmp_path, tmp_path / "home", "git")
+    with pytest.raises(MappingError, match="Unsupported application"):
+        inspect_drift(tmp_path, tmp_path / "home", "missing")
+
+
+def test_empty_applications_cannot_report_a_clean_scan(tmp_path: Path) -> None:
+    setup_mapping(tmp_path, "git", "[configuration_files]\n.gitconfig\n")
+    (tmp_path / "mackup/mackup.cfg").write_text(mackup_cfg())
+    with pytest.raises(MappingError, match="No applications selected"):
+        inspect_drift(tmp_path, tmp_path / "home")
+
+
+def test_diff_timeout_reports_an_incomplete_scan(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    repo_root = tmp_path / "repo"
-    home = tmp_path / "home"
-    (repo_root / "mackup/applications").mkdir(parents=True)
-    config_path = repo_root / "mackup/mackup.cfg"
-    config_path.write_text(mackup_cfg())
-    responses: dict[str, tuple[int, str, str]] = {}
+    setup_mapping(tmp_path, "git", "[configuration_files]\n.gitconfig\n")
+    monkeypatch.setattr("scripts.diff.DRIFT_TIMEOUT_SECONDS", 0.02)
 
-    def run(command: list[str], **_kwargs) -> subprocess.CompletedProcess[str]:
-        code, stdout, stderr = responses["next"]
-        return subprocess.CompletedProcess(command, code, stdout, stderr)
+    def slow_read(_path: Path) -> None:
+        time.sleep(0.5)
 
-    monkeypatch.setattr("scripts.diff.subprocess.run", run)
-    runner = SubprocessMackupRunner()
-
-    responses["next"] = (1, "", "mackup exploded")
-    with pytest.raises(MackupCommandError, match="mackup exploded"):
-        runner.inspect(repo_root, home, None)
-
-    responses["next"] = (
-        7,
-        '{"schema_version":1,"operation":"diff","changes":[],"summary":{}}',
-        "mackup failed after reporting",
-    )
-    with pytest.raises(MackupCommandError, match="failed after reporting"):
-        runner.inspect(repo_root, home, None)
-
-    unreadable = _drift_document("unreadable", error="permission denied")
-    responses["next"] = (1, json.dumps(unreadable), "")
-    assert runner.inspect(repo_root, home, None) == unreadable
-
-    responses["next"] = (1, json.dumps(_drift_document("modified")), "")
-    with pytest.raises(MackupCommandError, match="Mackup exited 1"):
-        runner.inspect(repo_root, home, None)
-
-    responses["next"] = (0, "not json", "")
-    with pytest.raises(MackupCommandError, match="invalid JSON"):
-        runner.inspect(repo_root, home, None)
-
-    responses["next"] = (0, "[]", "")
-    with pytest.raises(MackupCommandError, match="non-object"):
-        runner.inspect(repo_root, home, None)
-
-    config_path.write_text("[applications_to_sync]\n")
-    responses["next"] = (0, "{}", "")
-    with pytest.raises(MackupCommandError, match="Invalid Mackup config"):
-        runner.inspect(repo_root, home, None)
+    monkeypatch.setattr("scripts.diff.read_mapping_config", slow_read)
+    with pytest.raises(MappingError, match="inspection timed out"):
+        inspect_drift(tmp_path, tmp_path / "home")
 
 
-def test_subprocess_runner_preserves_application_name_case(
-    tmp_path: Path,
-    monkeypatch,
+def test_diff_cli_reports_unreadable_files_without_exposing_contents(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    repo_root = tmp_path / "repo"
-    home = tmp_path / "home"
-    (repo_root / "mackup/applications").mkdir(parents=True)
-    (repo_root / "mackup/mackup.cfg").write_text(mackup_cfg("Example-App\n"))
-    captured: dict[str, str] = {}
+    repo, home = tmp_path / "repo", tmp_path / "home"
+    setup_mapping(repo, "git", "[configuration_files]\n.gitconfig\n")
+    home.mkdir()
+    (repo / "reference/.gitconfig").write_text("reference data")
+    live = home / ".gitconfig"
+    live.write_text("live data")
+    monkeypatch.setattr("scripts.diff.__file__", str(repo / "scripts/diff.py"))
+    monkeypatch.setenv("HOME", str(home))
 
-    def run(command: list[str], **_kwargs) -> subprocess.CompletedProcess[str]:
-        config_path = Path(command[command.index("--config-file") + 1])
-        captured["runtime_config"] = config_path.read_text()
-        return subprocess.CompletedProcess(
-            command,
-            0,
-            '{"schema_version":1,"operation":"diff","changes":[],"summary":{}}',
-            "",
-        )
+    assert main(["--json", "--profile", "linux-lite"]) == 0
+    captured = capsys.readouterr().out
+    document = json.loads(captured)
+    assert document["profile"] == "linux-lite"
+    assert document["summary"] == {"modified": 1}
+    assert "reference data" not in captured and "live data" not in captured
 
-    monkeypatch.setattr("scripts.diff.subprocess.run", run)
+    read_bytes = Path.read_bytes
 
-    SubprocessMackupRunner().inspect(repo_root, home, None)
+    def deny(path: Path) -> bytes:
+        if path == live:
+            raise PermissionError("permission denied")
+        return read_bytes(path)
 
-    assert "Example-App" in captured["runtime_config"]
-    assert "example-app" not in captured["runtime_config"]
-
-
-def test_inspect_drift_uses_current_checkout_as_reference_storage(
-    tmp_path: Path,
-    monkeypatch,
-) -> None:
-    repo_root = tmp_path / "checkout"
-    home = tmp_path / "home"
-    (repo_root / "mackup/applications").mkdir(parents=True)
-    (repo_root / "mackup/mackup.cfg").write_text(mackup_cfg())
-    captured: dict[str, str] = {}
-
-    def run(command: list[str], **_kwargs) -> subprocess.CompletedProcess[str]:
-        config_path = Path(command[command.index("--config-file") + 1])
-        config = configparser.ConfigParser(allow_no_value=True)
-        config.read(config_path)
-        captured["config_path"] = str(config_path)
-        captured["storage_path"] = config.get("storage", "path")
-        return subprocess.CompletedProcess(
-            command,
-            0,
-            '{"schema_version":1,"operation":"diff","changes":[],"summary":{}}',
-            "",
-        )
-
-    monkeypatch.setattr("scripts.diff.subprocess.run", run)
-
-    report = inspect_drift(repo_root, home)
-
-    assert report.ok is True
-    assert captured["storage_path"] == str(repo_root)
-    assert captured["config_path"] != str(repo_root / "mackup/mackup.cfg")
+    monkeypatch.setattr(Path, "read_bytes", deny)
+    assert main(["--json", "git"]) == 1
+    document = json.loads(capsys.readouterr().out)
+    assert document["ok"] is False
+    assert document["summary"] == {"unreadable": 1}
+    assert document["changes"][0]["error"] == "permission denied"

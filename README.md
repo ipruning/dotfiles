@@ -58,8 +58,8 @@ mise run mise-sync -- --apply
 - `settings.auto_install = false` makes these two install commands the only
   bootstrap boundary: later task, exec, and command-not-found paths fail instead
   of downloading. Do not split that gate into narrower settings.
-- `uv sync --locked` installs the Python dependencies, including the pinned
-  Mackup fork. Python tasks use `.venv`'s interpreter directly, because mise
+- `uv sync --locked` installs the Python dependencies. Python tasks use
+  `.venv`'s interpreter directly, because mise
   inserts its PATH entries where the shims directory sits (after `/usr/bin` on
   Omarchy).
 - On Linux, `diff` and `check` select the `linux-lite` profile; macOS selects
@@ -93,7 +93,7 @@ the shell gate, and actionlint plus zizmor for workflows. CI fails if verificati
 provision through `.agents/setup` and check offline with `.agents/resume`; they
 never apply host configuration.
 
-- `lint` inspects repository paths, Mackup mappings, and dangling symlinks, with
+- `lint` inspects repository paths, mappings, and dangling symlinks, with
   the same result on every host. `check` reports workspace, toolchain, and
   application paths in live reference configurations that miss on this host.
 - `shell` runs `bash -n` and ShellCheck on Bash files, and `zsh -n` where zsh is
@@ -101,10 +101,10 @@ never apply host configuration.
 
 ## Configuration drift
 
-`diff` compares profile-relevant files under `reference/` with their `$HOME`
-paths by location and file kind, never contents. Drift exits 0; an incomplete
-inspection exits non-zero. It runs the locked Mackup fork against
-`mackup/applications/` without touching either side.
+`diff` compares profile-relevant paths under `reference/` with their `$HOME`
+counterparts using `mackup/applications/`. It reports locations and file kinds
+and compares the bytes of matching regular files. Drift exits 0. An incomplete
+inspection exits non-zero.
 
 ```bash
 mise run diff

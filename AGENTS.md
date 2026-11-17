@@ -12,7 +12,7 @@ documentation; do not invent synonyms.
 | --- | --- | --- |
 | `scripts/` | task | Every `mise run <task>`. `mise.toml` stays a thin adapter: task `foo-bar` runs `python -m scripts.foo_bar`; companion modules are named `<task>_*.py`. |
 | `reference/` | reference | Desired configuration files. Compared with live files, applied only by an explicit scoped `restore`. |
-| `mackup/` | mapping | Application-to-path mapping consumed by the pinned Mackup fork. |
+| `mackup/` | mapping | Application-to-path mapping used by the repository's configuration tasks. |
 | `shell/` | shell fragment | Zsh and Bash files sourced by the reference startup files. |
 | `commands/` | command | Independent user commands on the macOS `PATH`, indexed in `commands/README.md`. |
 | `services/` | service | Self-installing tools that own their installation, launchd/systemd files, tests, and runbook. |
@@ -42,8 +42,7 @@ repository root is `DOTFILES_ROOT` in shell and `repo_root` in Python.
 - **JSON lists**: `changes` holds file-level edits a task plans or made
   (`restore`, `adopt`, `setup-linux-lite`); `steps` holds ordered commands or
   generators, whether or not their result is a file (`update`, `generate`,
-  `inventory`, `clean`, `mise-sync`). `diff` keeps `changes` from the Mackup
-  protocol to mean observed drift.
+  `inventory`, `clean`, `mise-sync`). In `diff`, `changes` holds observed drift.
 
 ## Working rules
 

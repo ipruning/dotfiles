@@ -3,240 +3,173 @@
 from __future__ import annotations
 
 import argparse
-import configparser
 import json
 import os
-import subprocess
+import signal
+import stat
 import sys
-import tempfile
+from collections import Counter
+from collections.abc import Generator, Iterator
+from contextlib import contextmanager
 from pathlib import Path
-from typing import Protocol, cast, override
+from threading import current_thread, main_thread
 
+from .mappings import (
+    MappingError,
+    application_config_path,
+    read_application_mapping,
+    read_mapping_config,
+    selected_applications,
+)
 from .models import Drift, DriftKind, DriftReport, FileKind
 from .profiles import HostProfile, profile_applications, resolve_profile
 from .render import emit_error
 
-
-class DriftProtocolError(ValueError):
-    """Mackup returned a document that does not satisfy schema version 1."""
+DRIFT_TIMEOUT_SECONDS = 180
 
 
-class MackupCommandError(RuntimeError):
-    """Mackup could not complete the requested inspection."""
+@contextmanager
+def _scan_timeout() -> Generator[None]:
+    if current_thread() is not main_thread() or any(
+        signal.getitimer(signal.ITIMER_REAL)
+    ):
+        yield
+        return
 
-
-class MackupRunner(Protocol):
-    def inspect(
-        self,
-        repo_root: Path,
-        home: Path,
-        application: str | None,
-    ) -> dict[str, object]: ...
-
-
-class CaseConfigParser(configparser.ConfigParser):
-    """Mackup config parser that keeps option names case-sensitive."""
-
-    @override
-    def optionxform(self, optionstr: str) -> str:
-        return optionstr
-
-
-class SubprocessMackupRunner:
-    """Run the pinned Mackup fork installed in the project environment."""
-
-    def inspect(
-        self,
-        repo_root: Path,
-        home: Path,
-        application: str | None,
-    ) -> dict[str, object]:
-        source_config = repo_root / "mackup/mackup.cfg"
-        config = CaseConfigParser(allow_no_value=True, interpolation=None)
-        try:
-            if not config.read(source_config) or not config.has_section("storage"):
-                raise MackupCommandError(f"Invalid Mackup config: {source_config}")
-            config.set("storage", "path", str(repo_root))
-            with tempfile.TemporaryDirectory(prefix="dotfiles-mackup-") as temp_dir:
-                runtime_config = Path(temp_dir) / "mackup.cfg"
-                with runtime_config.open("w") as config_file:
-                    config.write(config_file)
-                mackup_bin = Path(sys.executable).parent / "mackup"
-                command = [
-                    str(mackup_bin),
-                    "--config-file",
-                    str(runtime_config),
-                    "--applications-dir",
-                    str(repo_root / "mackup/applications"),
-                    "--json",
-                    "diff",
-                ]
-                if application:
-                    command.append(application)
-                environment = os.environ.copy()
-                environment["HOME"] = str(home)
-                completed = subprocess.run(
-                    command,
-                    cwd=repo_root,
-                    env=environment,
-                    check=False,
-                    capture_output=True,
-                    text=True,
-                    # Bound a wedged Mackup so diff (and adopt/restore, which
-                    # call inspect_drift) cannot hang forever.
-                    timeout=180,
-                )
-        except subprocess.TimeoutExpired as error:
-            raise MackupCommandError("Mackup diff timed out after 180s") from error
-        except (configparser.Error, OSError) as error:
-            raise MackupCommandError(
-                f"Unable to prepare Mackup config {source_config}: {error}",
-            ) from error
-        if completed.returncode not in {0, 1} or (
-            completed.returncode == 1 and not completed.stdout.strip()
-        ):
-            detail = completed.stderr.strip() or f"Mackup exited {completed.returncode}"
-            raise MackupCommandError(detail)
-        try:
-            document = json.loads(completed.stdout)
-        except json.JSONDecodeError as error:
-            raise MackupCommandError(
-                f"Mackup returned invalid JSON: {error}",
-            ) from error
-        if not isinstance(document, dict):
-            raise MackupCommandError("Mackup returned a non-object JSON document")
-        if completed.returncode == 1:
-            changes = document.get("changes")
-            reports_unreadable = isinstance(changes, list) and any(
-                isinstance(change, dict) and change.get("kind") == "unreadable"
-                for change in changes
-            )
-            if not reports_unreadable:
-                detail = completed.stderr.strip() or "Mackup exited 1"
-                raise MackupCommandError(detail)
-        return cast("dict[str, object]", document)
-
-
-def _file_kind(value: object, field: str) -> FileKind | None:
-    if value is None:
-        return None
-    if not isinstance(value, str):
-        raise DriftProtocolError(f"{field} must be a string or null")
-    try:
-        return FileKind(value)
-    except ValueError as error:
-        raise DriftProtocolError(f"{field} has unknown file kind {value}") from error
-
-
-def _string_or_none(value: object, field: str) -> str | None:
-    if value is None or isinstance(value, str):
-        return value
-    raise DriftProtocolError(f"{field} must be a string or null")
-
-
-def _parse_document(document: dict[str, object]) -> DriftReport:
-    if document.get("schema_version") != 1:
-        raise DriftProtocolError("unsupported Mackup diff schema_version")
-    if document.get("operation") != "diff":
-        raise DriftProtocolError("Mackup document operation must be diff")
-    raw_changes = document.get("changes")
-    raw_summary = document.get("summary")
-    if not isinstance(raw_changes, list):
-        raise DriftProtocolError("changes must be a list")
-    if not isinstance(raw_summary, dict):
-        raise DriftProtocolError("summary must map strings to integers")
-    summary: dict[str, int] = {}
-    for key, value in raw_summary.items():
-        if not isinstance(key, str) or not isinstance(value, int):
-            raise DriftProtocolError("summary must map strings to integers")
-        summary[key] = value
-
-    changes: list[Drift] = []
-    for index, raw_change in enumerate(raw_changes):
-        if not isinstance(raw_change, dict):
-            raise DriftProtocolError(f"changes[{index}] must be an object")
-        typed_change = cast("dict[str, object]", raw_change)
-        try:
-            application = typed_change["application"]
-            reference_path = typed_change["reference_path"]
-            live_path = typed_change["live_path"]
-            raw_kind = typed_change["kind"]
-        except KeyError as error:
-            raise DriftProtocolError(
-                f"changes[{index}] is missing {error.args[0]}",
-            ) from error
-        if not isinstance(application, str):
-            raise DriftProtocolError(
-                f"changes[{index}] identity fields must be strings",
-            )
-        if not isinstance(reference_path, str):
-            raise DriftProtocolError(
-                f"changes[{index}] identity fields must be strings",
-            )
-        if not isinstance(live_path, str) or not isinstance(raw_kind, str):
-            raise DriftProtocolError(
-                f"changes[{index}] identity fields must be strings",
-            )
-        try:
-            kind = DriftKind(raw_kind)
-        except ValueError as error:
-            raise DriftProtocolError(
-                f"changes[{index}] has unknown kind {raw_kind}",
-            ) from error
-        changes.append(
-            Drift(
-                application=application,
-                reference_path=Path(reference_path),
-                live_path=Path(live_path),
-                kind=kind,
-                reference_kind=_file_kind(
-                    typed_change.get("reference_kind"),
-                    "reference_kind",
-                ),
-                live_kind=_file_kind(
-                    typed_change.get("live_kind"),
-                    "live_kind",
-                ),
-                error=_string_or_none(typed_change.get("error"), "error"),
-            ),
+    def timed_out(_signum: int, _frame: object) -> None:
+        raise MappingError(
+            f"Configuration drift inspection timed out after {DRIFT_TIMEOUT_SECONDS}s"
         )
-    return DriftReport(
-        schema_version=1,
-        operation="diff",
-        changes=tuple(changes),
-        summary=summary,
-        profile=HostProfile.FULL,
-    )
+
+    previous_handler = signal.signal(signal.SIGALRM, timed_out)
+    try:
+        signal.setitimer(signal.ITIMER_REAL, DRIFT_TIMEOUT_SECONDS)
+        yield
+    finally:
+        signal.setitimer(signal.ITIMER_REAL, 0)
+        signal.signal(signal.SIGALRM, previous_handler)
 
 
+def _kind(path: Path) -> FileKind | None:
+    try:
+        mode = path.lstat().st_mode
+    except FileNotFoundError:
+        return None
+    if stat.S_ISLNK(mode):
+        return FileKind.LINK
+    if stat.S_ISREG(mode):
+        return FileKind.FILE
+    if stat.S_ISDIR(mode):
+        return FileKind.DIRECTORY
+    return FileKind.UNSUPPORTED
+
+
+def _compare(
+    application: str, reference: Path, live: Path, *, require_links: bool
+) -> Iterator[Drift]:
+    reference_kind = live_kind = None
+    try:
+        reference_kind = _kind(reference)
+        live_kind = _kind(live)
+        if (
+            reference_kind in {FileKind.FILE, FileKind.DIRECTORY}
+            and live_kind is FileKind.LINK
+        ):
+            try:
+                if live.samefile(reference):
+                    return
+            except FileNotFoundError:
+                pass
+        if reference_kind != live_kind:
+            if reference_kind is None:
+                kind = DriftKind.ONLY_LIVE
+            elif live_kind is None:
+                kind = DriftKind.ONLY_REFERENCE
+            else:
+                kind = DriftKind.TYPE_CHANGED
+        elif reference_kind is FileKind.DIRECTORY:
+            names = {path.name for path in reference.iterdir()} | {
+                path.name for path in live.iterdir()
+            }
+            for name in sorted(names):
+                yield from _compare(
+                    application,
+                    reference / name,
+                    live / name,
+                    require_links=require_links,
+                )
+            return
+        elif (
+            reference_kind is FileKind.FILE
+            and (require_links or reference.read_bytes() != live.read_bytes())
+        ) or (
+            reference_kind is FileKind.LINK and reference.readlink() != live.readlink()
+        ):
+            kind = DriftKind.MODIFIED
+        else:
+            return
+    except OSError as error:
+        yield Drift(
+            application,
+            reference,
+            live,
+            DriftKind.UNREADABLE,
+            reference_kind,
+            live_kind,
+            str(error),
+        )
+    else:
+        yield Drift(application, reference, live, kind, reference_kind, live_kind)
+
+
+@_scan_timeout()
 def inspect_drift(
     repo_root: Path,
     home: Path,
     application: str | None = None,
     profile: str | HostProfile = HostProfile.AUTO,
     system_name: str | None = None,
-    runner: MackupRunner | None = None,
+    *,
+    require_links: bool = False,
 ) -> DriftReport:
-    """Return typed, location-only drift from the pinned Mackup fork."""
-    active_runner = runner or SubprocessMackupRunner()
-    report = _parse_document(active_runner.inspect(repo_root, home, application))
+    """Compare mapped paths and return their locations and kinds."""
     active_profile = resolve_profile(profile, system_name)
-    selected_applications = profile_applications(active_profile)
-    changes = report.changes
-    if application is None and selected_applications is not None:
-        changes = tuple(
-            change for change in changes if change.application in selected_applications
-        )
-    summary = {
-        kind.value: sum(change.kind is kind for change in changes)
-        for kind in DriftKind
-        if any(change.kind is kind for change in changes)
-    }
+    profile_apps = profile_applications(active_profile)
+    mapping_root = repo_root / "mackup"
+    config = read_mapping_config(mapping_root / "mackup.cfg")
+    references = repo_root / "reference"
+    if not references.is_dir():
+        raise MappingError(f"Reference directory is unavailable: {references}")
+    names = [application] if application else selected_applications(config)
+    if not names:
+        raise MappingError(f"No applications selected in {mapping_root / 'mackup.cfg'}")
+    changes = []
+    for name in sorted(names):
+        if not application and profile_apps is not None and name not in profile_apps:
+            continue
+        path = application_config_path(mapping_root / "applications", name)
+        if not path.is_file():
+            raise MappingError(f"Unsupported application: {name}")
+        mapping = read_application_mapping(path)
+        pairs = {(references / path, home / path) for path in mapping.home_paths}
+        if mapping.xdg_paths:
+            xdg = Path(os.environ.get("XDG_CONFIG_HOME") or home / ".config")
+            if not xdg.is_relative_to(home) or ".." in xdg.parts:
+                raise MappingError(f"XDG_CONFIG_HOME must be within {home}: {xdg}")
+            pairs.update(
+                (references / ".config" / path, xdg / path)
+                for path in mapping.xdg_paths
+            )
+        for reference, live in sorted(
+            pairs, key=lambda pair: (str(pair[0]), str(pair[1]))
+        ):
+            changes.extend(_compare(name, reference, live, require_links=require_links))
+    counts = Counter(change.kind for change in changes)
     return DriftReport(
-        schema_version=report.schema_version,
-        operation=report.operation,
-        changes=changes,
-        summary=summary,
+        schema_version=1,
+        operation="diff",
+        changes=tuple(changes),
+        summary={kind.value: counts[kind] for kind in DriftKind if counts[kind]},
         profile=active_profile,
     )
 
@@ -253,10 +186,8 @@ def _as_json(report: DriftReport) -> dict[str, object]:
                 "reference_path": str(change.reference_path),
                 "live_path": str(change.live_path),
                 "kind": change.kind.value,
-                "reference_kind": (
-                    change.reference_kind.value if change.reference_kind else None
-                ),
-                "live_kind": change.live_kind.value if change.live_kind else None,
+                "reference_kind": change.reference_kind,
+                "live_kind": change.live_kind,
                 "error": change.error,
             }
             for change in report.changes
@@ -270,9 +201,7 @@ def main(argv: list[str] | None = None) -> int:
         description="Report configuration drift without changing files.",
     )
     parser.add_argument(
-        "application",
-        nargs="?",
-        help="limit the report to one configured application",
+        "application", nargs="?", help="limit the report to one configured application"
     )
     parser.add_argument(
         "--json",
@@ -290,12 +219,9 @@ def main(argv: list[str] | None = None) -> int:
     repo_root = Path(__file__).resolve().parents[1]
     try:
         report = inspect_drift(
-            repo_root,
-            Path.home(),
-            args.application,
-            profile=args.profile,
+            repo_root, Path.home(), args.application, profile=args.profile
         )
-    except (DriftProtocolError, MackupCommandError) as error:
+    except MappingError as error:
         emit_error("diff", str(error), as_json=args.as_json)
         return 1
     if args.as_json:

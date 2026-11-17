@@ -130,20 +130,10 @@ wheels = [
 ]
 
 [[package]]
-name = "docopt-ng"
-version = "0.9.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/e4/50/8d6806cf13138127692ae6ff79ddeb4e25eb3b0bcc3c1bd033e7e04531a9/docopt_ng-0.9.0.tar.gz", hash = "sha256:91c6da10b5bb6f2e9e25345829fb8278c78af019f6fc40887ad49b060483b1d7", size = 32264, upload-time = "2023-05-30T20:46:25.064Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/6c/4a/c3b77fc1a24510b08918b43a473410c0168f6e657118807015f1f1edceea/docopt_ng-0.9.0-py3-none-any.whl", hash = "sha256:bfe4c8b03f9fca424c24ee0b4ffa84bf7391cb18c29ce0f6a8227a3b01b81ff9", size = 16689, upload-time = "2023-05-30T20:46:45.294Z" },
-]
-
-[[package]]
 name = "dotfiles"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
-    { name = "mackup" },
     { name = "ruamel-yaml" },
 ]
 
@@ -162,10 +152,7 @@ dev = [
 ]
 
 [package.metadata]
-requires-dist = [
-    { name = "mackup", git = "https://github.com/ipruning/mackup?rev=da1c75dc34e494b6884c0f000af8f93758a778d9" },
-    { name = "ruamel-yaml", specifier = ">=0.19.1" },
-]
+requires-dist = [{ name = "ruamel-yaml", specifier = ">=0.19.1" }]
 
 [package.metadata.requires-dev]
 dev = [
@@ -222,14 +209,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/61/ce/b5bb93d4d9fc7a067f69140b3bb3782f6ad6360bc76e99b6e3d386cb1320/loguru-0.8.0.tar.gz", hash = "sha256:fb3e4623288e37700a0577f6e0ce776cc1860b5d95c657d67f07a2476b304867", size = 71232, upload-time = "2026-11-11T18:50:26.248Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/c8/00/9ee7c8da7342b1a5524bca9d036f89e7d1d1e5a6345c9623763eeeac941f/loguru-0.8.0-py3-none-any.whl", hash = "sha256:e0fba09d6f76ba2d2f4bd1757122942f5a670c702e988b5efaeab99dacba0069", size = 69409, upload-time = "2026-11-11T18:50:24.148Z" },
-]
-
-[[package]]
-name = "mackup"
-version = "0.11.2+ipruning.2"
-source = { git = "https://github.com/ipruning/mackup?rev=da1c75dc34e494b6884c0f000af8f93758a778d9#da1c75dc34e494b6884c0f000af8f93758a778d9" }
-dependencies = [
-    { name = "docopt-ng" },
 ]
 
 [[package]]

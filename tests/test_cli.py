@@ -9,8 +9,6 @@ from pathlib import Path
 
 from ruamel.yaml import YAML
 
-import scripts.diff as diff_module
-
 
 def _run_module(
     module: str,
@@ -278,41 +276,6 @@ def test_check_cli_reports_optional_linux_lite_gaps_as_json(tmp_path: Path) -> N
     assert "executable.skillshare.missing" in codes
     assert "shell.bash_missing" in codes
     assert "shell.repo_commands_isolated" in codes
-
-
-def test_diff_cli_renders_profile_and_exit_status_at_the_mackup_boundary(
-    monkeypatch,
-    capsys,
-) -> None:
-    def inspect(
-        _runner,
-        _repo_root: Path,
-        _home: Path,
-        _application: str | None,
-    ) -> dict[str, object]:
-        return {
-            "schema_version": 1,
-            "operation": "diff",
-            "changes": [],
-            "summary": {},
-        }
-
-    monkeypatch.setattr(diff_module.SubprocessMackupRunner, "inspect", inspect)
-
-    exit_code = diff_module.main(["--profile", "linux-lite", "--json"])
-    captured = capsys.readouterr()
-    document = json.loads(captured.out)
-
-    assert exit_code == 0
-    assert captured.err == ""
-    assert document == {
-        "changes": [],
-        "ok": True,
-        "operation": "diff",
-        "profile": "linux-lite",
-        "schema_version": 1,
-        "summary": {},
-    }
 
 
 def test_readme_bootstrap_installs_exactly_the_repository_tools() -> None:

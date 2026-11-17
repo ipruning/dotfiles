@@ -13,8 +13,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import cast
 
-from .diff import DriftProtocolError, MackupCommandError
 from .host_policy import HostPolicyError, mutation_allowed, require_mutation_allowed
+from .mappings import MappingError
 from .mise import (
     canonical_mise_environment,
     canonical_mise_executable,
@@ -704,7 +704,7 @@ def main(argv: list[str] | None = None) -> int:
             code=error.code,
         )
         return 1
-    except (DriftProtocolError, MackupCommandError) as error:
+    except MappingError as error:
         emit_error("mise-sync", str(error), as_json=args.as_json, apply=args.apply)
         return 1
     if args.as_json:
