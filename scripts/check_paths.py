@@ -38,11 +38,12 @@ def _missing_reference_path(
         return None
     if _expanded(bound.raw, home).exists():
         return None
+    location = f"{live}:{bound.line}" if bound.line is not None else str(live)
     return Finding(
         "reference.host_paths",
         Severity.WARN,
         f"reference.{bound.kind}_missing",
-        f"{live}:{bound.line} refers to {bound.raw}, which does not exist on this host",
+        f"{location} refers to {bound.raw}, which does not exist on this host",
         bound.source,
         "Create the path on this host or remove it from the reference.",
     )
