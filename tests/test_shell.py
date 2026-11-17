@@ -5,6 +5,7 @@ import time
 import tomllib
 from pathlib import Path
 from typing import Any
+from uuid import UUID
 
 import pytest
 
@@ -230,6 +231,52 @@ exit 1
         '"^T" tv-smart-autocomplete',
         '"^R" atuin-search',
     ]
+
+
+@requires_zsh
+def test_zsh_atuin_session_has_a_uuid7_timestamp_and_is_unique_per_shell(
+    tmp_path: Path,
+) -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    env_file = tmp_path / "shell/zsh/env.zsh"
+    env_file.parent.mkdir(parents=True)
+    shutil.copy2(repo_root / "shell/zsh/env.zsh", env_file)
+    functions_dir = tmp_path / "generated/functions"
+    functions_dir.mkdir(parents=True)
+    (functions_dir / "_atuin.zsh").write_text(
+        'if [[ -z ${ATUIN_SESSION:-} || ${ATUIN_SHLVL:-} != "$SHLVL" ]]; then\n'
+        '  export ATUIN_SESSION=$(atuin uuid) ATUIN_SHLVL="$SHLVL"\n'
+        "fi\n"
+    )
+    command = """
+command -p openssl version >/dev/null || exit 77
+atuin() { print shim; }
+source "$1"
+print -r -- "$ATUIN_SESSION"
+source "$1"
+print -r -- "$ATUIN_SESSION"
+export TEST_ATUIN_SCRIPT=$1
+zsh -dfc 'atuin() { print shim; }; source "$TEST_ATUIN_SCRIPT"; print -r -- "$ATUIN_SESSION"'
+exit $?
+"""
+    start = time.time_ns() // 1_000_000
+    completed = subprocess.run(
+        ["zsh", "-dfc", command, "zsh", str(env_file)],
+        env={"HOME": str(tmp_path), "PATH": os.environ["PATH"]},
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if completed.returncode == 77:
+        pytest.skip("system openssl is unavailable")
+    assert completed.returncode == 0, completed.stderr
+    parent, reused, child = completed.stdout.splitlines()
+    assert reused == parent and child != parent
+    for session in (parent, child):
+        value = UUID(hex=session)
+        assert session == value.hex
+        assert value.version == 7
+        assert start <= value.time <= time.time_ns() // 1_000_000
 
 
 def _television_channel(name: str) -> dict[str, Any]:
