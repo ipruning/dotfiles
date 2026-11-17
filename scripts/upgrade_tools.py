@@ -16,12 +16,12 @@ from .mise import (
     canonical_mise_executable,
     canonical_mise_path,
 )
+from .mise_sync import loaded_global_configs
 from .models import ExecutableFinder, Status
 from .update import (
     UpdateReport,
     UpdateResult,
     UpdateStep,
-    inspect_shared_mise_tools,
     run_with_progress,
     update_document,
 )
@@ -76,9 +76,9 @@ def _mise_baseline(repo_root: Path, home: Path) -> UpdateResult:
         "mise",
         (
             str(canonical_mise_path(home)),
-            "upgrade",
+            "lock",
+            "--global",
             "--bump",
-            "--no-prune",
             "-C",
             str(home),
         ),
@@ -93,37 +93,43 @@ def _mise_baseline(repo_root: Path, home: Path) -> UpdateResult:
             reason=f"{canonical_mise_path(home)} is missing, broken, or not executable",
         )
     try:
-        installed, declaration = inspect_shared_mise_tools(repo_root, home, executable)
-        source = repo_root / "reference/.config/mise/config.toml"
-        if not (home / ".config/mise/config.toml").samefile(source):
+        reference = repo_root / "reference/.config/mise/config.toml"
+        live = home / ".config/mise/config.toml"
+        if not live.samefile(reference) or not live.with_name("mise.lock").samefile(
+            reference.with_name("mise.lock")
+        ):
             raise ValueError(
-                "live global mise config must link to this checkout; preview mise-sync"
+                "live global mise config and lock must link to this checkout; preview mise-sync"
             )
-        selectors = []
-        for name in installed:
-            request = declaration[name]
-            version = request.get("version") if isinstance(request, dict) else request
-            # Exact pins and refs are deliberate holds; `--bump` would rewrite them.
-            if version == "latest":
-                selectors.append(f"{name}@latest")
+        configs = loaded_global_configs(home, executable)
+        if configs != (live,):
+            raise ValueError(
+                "mise must load the shared config at its live path; preview mise-sync"
+            )
     except (OSError, ValueError, RuntimeError) as error:
         return UpdateResult(
             step,
             Status.FAILED if mutation_allowed(home) else Status.SKIPPED,
             reason=str(error),
         )
-    if not selectors:
-        return UpdateResult(
-            step, Status.SKIPPED, reason="no rolling shared tools are installed"
-        )
-    return UpdateResult(
-        replace(step, command=(*step.command, *selectors)), Status.PLANNED
-    )
+    return UpdateResult(step, Status.PLANNED)
 
 
 def execute_upgrade_tools(repo_root: Path, home: Path) -> UpdateReport:
     require_mutation_allowed(home)
     plan = plan_upgrade_tools(repo_root, home)
+    if not plan.ok:
+        return UpdateReport(
+            True,
+            tuple(
+                replace(
+                    result, status=Status.SKIPPED, reason="ownership preflight failed"
+                )
+                if result.status is Status.PLANNED
+                else result
+                for result in plan.results
+            ),
+        )
     results = []
     for planned in plan.results:
         if planned.status is not Status.PLANNED:
@@ -161,7 +167,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--apply",
         action="store_true",
-        help="advance installed shared tool versions (default: preview only)",
+        help="advance the shared lock and Yazi plugin revisions (default: preview only)",
     )
     parser.add_argument(
         "--json",

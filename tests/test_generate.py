@@ -30,6 +30,66 @@ def _fake_tool(bin_dir: Path, name: str, body: str = "exit 0\n") -> None:
     tool_path.chmod(0o755)
 
 
+def test_generated_zsh_history_and_search_follow_mise_global_link(
+    tmp_path: Path,
+) -> None:
+    if not (zsh := shutil.which("zsh")):
+        pytest.skip("zsh is unavailable")
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    _fake_tool(
+        bin_dir,
+        "atuin",
+        """if [ "$1" = init ]; then
+  /bin/cat <<'SCRIPT'
+__atuin_search_cmd() {
+    /bin/sh -c "PATH='$PATH' ATUIN_SESSION='' atuin search -i"
+}
+atuin history start
+__atuin_search_cmd
+SCRIPT
+else printf 'path %s %s\\n' "$1" "$2"; fi
+""",
+    )
+    installs = tmp_path / "installs/cargo-https-github-com-ipruning-atuin"
+    for version in ("old", "new"):
+        version_bin = installs / version / "bin"
+        version_bin.mkdir(parents=True)
+        _fake_tool(version_bin, "atuin", f'printf \'{version} %s %s\\n\' "$1" "$2"\n')
+    repo = tmp_path / "repo"
+    plan = plan_generate(
+        repo,
+        tmp_path,
+        executable_finder={"atuin": str(bin_dir / "atuin")}.get,
+        network=False,
+    )
+    assert execute_generate(plan, tmp_path).ok
+    generated = repo / "generated/functions/_atuin.zsh"
+
+    def history_and_search(use_shim: str = "0") -> list[str]:
+        return subprocess.run(
+            [zsh, "-fc", 'source "$1"', "zsh", str(generated)],
+            env={
+                "HOME": str(tmp_path),
+                "MISE_DATA_DIR": str(tmp_path),
+                "PATH": str(bin_dir),
+                "DOTFILES_ATUIN_USE_SHIM": use_shim,
+            },
+            check=True,
+            text=True,
+            capture_output=True,
+        ).stdout.splitlines()
+
+    link = installs / "global"
+    assert history_and_search() == ["path history start", "path search -i"]
+    link.symlink_to("old")
+    assert history_and_search() == ["old history start", "old search -i"]
+    link.unlink()
+    link.symlink_to("new")
+    assert history_and_search() == ["new history start", "new search -i"]
+    assert history_and_search("1") == ["path history start", "path search -i"]
+
+
 def _git_plugin(target: Path) -> str:
     target.mkdir(parents=True, exist_ok=True)
     git = shutil.which("git")

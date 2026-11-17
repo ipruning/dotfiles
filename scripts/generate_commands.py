@@ -17,7 +17,35 @@ from .process import run_process_group
 
 
 def guarded_activation(spec: GenerateSpec, output: str) -> str:
-    """Keep cached activation bound to its selected executable at consumption."""
+    """Bind generated shell integrations to their tool owners."""
+    if spec.name == "function.atuin" and "atuin history " in output:
+        # The tmux popup runs in a separate shell. Pass its selected PATH
+        # explicitly, as Atuin does for the regular shell PATH.
+        output = output.replace(
+            "__atuin_search_cmd() {\n",
+            '__atuin_search_cmd() {\n    local PATH="$PATH"\n    _dotfiles_atuin_path\n',
+        )
+        return """\
+_dotfiles_atuin_path() {
+  local data_dir=${MISE_DATA_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/mise}
+  local bin="$data_dir/installs/cargo-https-github-com-ipruning-atuin/global/bin"
+  if [[ ${DOTFILES_ATUIN_USE_SHIM:-0} != 1 && $bin == /* && -x $bin/atuin ]]; then
+    PATH="$bin:$PATH"
+  fi
+}
+_dotfiles_atuin() {
+  local PATH="$PATH"
+  _dotfiles_atuin_path
+  command atuin "$@"
+}
+""" + (
+            output
+            .replace("atuin history ", "_dotfiles_atuin history ")
+            .replace("atuin search --cmd-only ", "_dotfiles_atuin search --cmd-only ")
+            .replace("atuin __internal ", "_dotfiles_atuin __internal ")
+            .replace("atuin ai ", "_dotfiles_atuin ai ")
+            .replace("PATH='$PATH' ATUIN_SESSION=", "PATH=${(qq)PATH} ATUIN_SESSION=")
+        )
     if spec.tool != "mise" or not spec.name.startswith("function."):
         return output
     executable = spec.command[0]
