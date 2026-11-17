@@ -76,7 +76,7 @@ COMPLETION_SPECS = (
     (
         "llm",
         "uvx",
-        ("uvx", "--with", "httpx==0.28.1", "llm==0.36"),
+        ("uvx", "--with", "httpx==0.28.1", "llm==0.38"),
         "_llm",
         (("_LLM_COMPLETE", "zsh_source"),),
     ),
