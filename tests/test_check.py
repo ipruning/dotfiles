@@ -1703,6 +1703,49 @@ def test_host_paths_warn_only_for_live_configurations(tmp_path: Path) -> None:
     assert [finding.code for finding in resolved] == ["reference.host_paths_resolved"]
 
 
+def test_host_paths_use_toml_values_across_lines(tmp_path: Path) -> None:
+    home = tmp_path / "home"
+    repo_root = home / "dotfiles"
+    reference = repo_root / "reference/.config/live/config.toml"
+    reference.parent.mkdir(parents=True)
+    reference.write_text(
+        "# ~/Developer/comment-example\n"
+        "command = '''\n"
+        "# ~/Developer/in-multiline-value\n"
+        "''' # ~/Developer/inline-example\n"
+        '[nested]\npaths = ["~/Developer/in-array"]\n'
+        '"~/Developer/in-key" = "label"\n'
+    )
+    live = home / ".config/live/config.toml"
+    live.parent.mkdir(parents=True)
+    live.symlink_to(reference)
+
+    findings = host_path_findings(repo_root, home, "Linux")
+
+    assert [finding.message for finding in findings] == [
+        f"{live} refers to ~/Developer/in-multiline-value, which does not exist on this host",
+        f"{live} refers to ~/Developer/in-array, which does not exist on this host",
+        f"{live} refers to ~/Developer/in-key, which does not exist on this host",
+    ]
+
+
+def test_host_paths_report_invalid_live_toml(tmp_path: Path) -> None:
+    home = tmp_path / "home"
+    repo_root = home / "dotfiles"
+    reference = repo_root / "reference/config.toml"
+    reference.parent.mkdir(parents=True)
+    reference.write_text('paths = ["~/Developer/example"\n')
+
+    findings = host_path_findings(repo_root, home, "Linux")
+    assert [finding.code for finding in findings] == ["reference.host_paths_resolved"]
+
+    (home / "config.toml").symlink_to(reference)
+    findings = host_path_findings(repo_root, home, "Linux")
+    assert [(finding.code, finding.path) for finding in findings] == [
+        ("reference.host_paths_toml_invalid", reference),
+    ]
+
+
 def test_host_paths_stop_before_an_escaped_quote(tmp_path: Path) -> None:
     home = tmp_path / "home"
     repo_root = home / "dotfiles"
