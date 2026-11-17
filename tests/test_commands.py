@@ -679,12 +679,7 @@ def test_amp_ghostty_passes_quoted_commands_as_argv(
         assert executed.stdout.rstrip("\n") == str(directory.resolve())
     script = script_log.read_text()
     assert str(directory.resolve()) not in script
-    assert 'click menu item "New Tab"' in script
-    assert (
-        "if candidateId is not in existingIds then return terminal id candidateId"
-        in (script)
-    )
-    assert script.index("my waitForNewTerminal(existingIds)") < script.index(
+    assert script.index("set ampTerminal to focused terminal of newTab") < script.index(
         "my sendCommand(item 1 of argv, ampTerminal)"
     )
     assert "split ampTerminal direction right" in script
