@@ -51,7 +51,7 @@ zoxide = "latest"
 # Git and code review
 "github:agavra/tuicr" = "latest"
 gh = "latest"
-golangci-lint = "2.14.0"
+golangci-lint = "latest"
 hunk = "latest"
 lazygit = "latest"
 

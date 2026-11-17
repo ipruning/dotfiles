@@ -121,20 +121,20 @@ url = "https://github.com/agavra/tuicr/releases/download/v0.29.0/tuicr-0.29.0-aa
 url_api = "https://api.github.com/repos/agavra/tuicr/releases/assets/748377554"
 
 [[tools."github:jihuanshe/linear"]]
-version = "0.0.1794765057-g4fa6be7"
+version = "0.0.1794775036-g9ba37ee"
 backend = "github:jihuanshe/linear"
 specifiers = ["latest"]
 
 [tools."github:jihuanshe/linear"."platforms.linux-x64"]
-checksum = "sha256:2a6a1e6cf209bd5a3b0a3c9800e28c08604d966168fe338a2807e18852169c5c"
-url = "https://github.com/jihuanshe/linear/releases/download/0.0.1794765057-g4fa6be7/linear-x86_64-unknown-linux-gnu.tar.xz"
-url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/751826926"
+checksum = "sha256:2df15b70640652eb530fe2a4329cd5628ec7f82abfda1e90a8fdf3e25b3a3201"
+url = "https://github.com/jihuanshe/linear/releases/download/0.0.1794775036-g9ba37ee/linear-x86_64-unknown-linux-gnu.tar.xz"
+url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/752281782"
 provenance = "github-attestations"
 
 [tools."github:jihuanshe/linear"."platforms.macos-arm64"]
-checksum = "sha256:bd18df9962422c22061fc7cadead9463958dfc95a50ce6c058720ecd4b0e6052"
-url = "https://github.com/jihuanshe/linear/releases/download/0.0.1794765057-g4fa6be7/linear-aarch64-apple-darwin.tar.xz"
-url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/751826566"
+checksum = "sha256:0c2587c91b2ce378e595081f84dcee7d547b7bf7fc690a39acb469eeaa9fff0f"
+url = "https://github.com/jihuanshe/linear/releases/download/0.0.1794775036-g9ba37ee/linear-aarch64-apple-darwin.tar.xz"
+url_api = "https://api.github.com/repos/jihuanshe/linear/releases/assets/752281315"
 provenance = "github-attestations"
 
 [[tools."github:larksuite/cli"]]
@@ -178,20 +178,20 @@ checksum = "sha256:91a44a2b8a716600ad94a4f143e156116620db8828086a6e3602291be9bd0
 url = "https://dl.google.com/go/go1.27.4.darwin-arm64.tar.gz"
 
 [[tools.golangci-lint]]
-version = "2.14.0"
+version = "2.15.0"
 backend = "aqua:golangci/golangci-lint"
-specifiers = ["2.14.0"]
+specifiers = ["latest"]
 
 [tools.golangci-lint."platforms.linux-x64"]
-checksum = "sha256:ab90aeb7b066f92a33415b638a50fe5344bbb75a0d32ad30cc248d88f81032ab"
-url = "https://github.com/golangci/golangci-lint/releases/download/v2.14.0/golangci-lint-2.14.0-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/golangci/golangci-lint/releases/assets/585813815"
+checksum = "sha256:9b7fe6a6bf6334b98decf8d86b11415ea7889afdabdd1959fdce23af2a9ebcea"
+url = "https://github.com/golangci/golangci-lint/releases/download/v2.15.0/golangci-lint-2.15.0-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/golangci/golangci-lint/releases/assets/647132535"
 provenance = "github-attestations"
 
 [tools.golangci-lint."platforms.macos-arm64"]
-checksum = "sha256:5ef5f36a7147e91dc58ef9ef4d11bb7bad5ead0c76eb6c01327a73c641d1dcc3"
-url = "https://github.com/golangci/golangci-lint/releases/download/v2.14.0/golangci-lint-2.14.0-darwin-arm64.tar.gz"
-url_api = "https://api.github.com/repos/golangci/golangci-lint/releases/assets/585813591"
+checksum = "sha256:d1e409481a8ca846c4bc97e781eb5cb1bd5c23353a0b3977a1cbda1b1b6447d5"
+url = "https://github.com/golangci/golangci-lint/releases/download/v2.15.0/golangci-lint-2.15.0-darwin-arm64.tar.gz"
+url_api = "https://api.github.com/repos/golangci/golangci-lint/releases/assets/647132534"
 provenance = "github-attestations"
 
 [[tools.hunk]]
@@ -292,16 +292,22 @@ specifiers = ["latest"]
 allow_low_downloads = "true"
 
 [[tools."npm:agent-device"]]
-version = "0.21.37"
-aube = { path = "locks/npm-agent-device/0.21.37", digest = "sha256:649306b37a466fef3747fb44c9e4aaa60d5a2594d280277c75969bde8a36e2e7" }
+version = "0.21.39"
+aube = { path = "locks/npm-agent-device/0.21.39", digest = "sha256:0ff57601a2df97649ba0632e966d1df99d821777c101c945c6a86223f30d57a4" }
 backend = "npm:agent-device"
 specifiers = ["latest"]
 
+[tools."npm:agent-device".provenance]
+repository = "github.com/callstack/agent-device"
+
 [[tools."npm:cf"]]
-version = "1.0.0-beta.32"
-aube = { path = "locks/npm-cf/1.0.0-beta.32", digest = "sha256:2e3dadefb70115b42405918f04224530d5d0f323829974922abda3f9802aacb1" }
+version = "1.0.0-rc.1"
+aube = { path = "locks/npm-cf/1.0.0-rc.1", digest = "sha256:15841947060a7d1d971a9f8ea6e88be30007933cad6b256051abfd313bb87b33" }
 backend = "npm:cf"
 specifiers = ["latest"]
+
+[tools."npm:cf".provenance]
+repository = "github.com/cloudflare/cf"
 
 [[tools.pnpm]]
 version = "12.21.0"
@@ -368,20 +374,20 @@ backend = "core:rust"
 specifiers = ["latest"]
 
 [[tools.skillshare]]
-version = "0.30.8"
+version = "0.30.10"
 backend = "aqua:runkids/skillshare"
 specifiers = ["latest"]
 
 [tools.skillshare."platforms.linux-x64"]
-checksum = "sha256:5bd99d0677171d619009f49464aabcb3fadd86b7e87b85eb66b40476b9cffe5e"
+checksum = "sha256:6ea2273277bda18668f01efc9098a1c677442822f88d77d920dda51cfaaef230"
 checksum_source = "mise-versions"
-url = "https://github.com/runkids/skillshare/releases/download/v0.30.8/skillshare_0.30.8_linux_amd64.tar.gz"
-url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/748224851"
+url = "https://github.com/runkids/skillshare/releases/download/v0.30.10/skillshare_0.30.10_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/758265295"
 
 [tools.skillshare."platforms.macos-arm64"]
-checksum = "sha256:73f0b0b7114cf42cefda795107a06252bbb9e10751d6addb174cd8b9a5a979c7"
-url = "https://github.com/runkids/skillshare/releases/download/v0.30.8/skillshare_0.30.8_darwin_arm64.tar.gz"
-url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/748224850"
+checksum = "sha256:b321e7fdbcabd2aab1f3cda37f9f6774a22c7ec41ef55cc902111011435c23fe"
+url = "https://github.com/runkids/skillshare/releases/download/v0.30.10/skillshare_0.30.10_darwin_arm64.tar.gz"
+url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/758265289"
 
 [[tools.starship]]
 version = "1.27.0"
