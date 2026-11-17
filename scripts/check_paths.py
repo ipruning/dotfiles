@@ -51,13 +51,26 @@ def _missing_reference_path(
 
 def host_path_findings(repo_root: Path, home: Path, system_name: str) -> list[Finding]:
     """Report live configurations and repository paths that miss on this host."""
-    bound_paths = host_bound_paths(repo_root)
+    bound_paths, unreadable_toml = host_bound_paths(repo_root)
     findings = [
         finding
         for bound in bound_paths
         if bound.kind != "dotfiles_root"
         and (finding := _missing_reference_path(repo_root, home, system_name, bound))
     ]
+    for source in unreadable_toml:
+        live = _live_counterpart(repo_root, home, source)
+        if live is not None and (live.exists() or live.is_symlink()):
+            findings.append(
+                Finding(
+                    "reference.host_paths",
+                    Severity.WARN,
+                    "reference.host_paths_toml_invalid",
+                    f"Unable to read valid TOML from {source} for the host path check",
+                    source,
+                    "Inspect the reference TOML and run mise run check again.",
+                )
+            )
     expected_root = (home / "dotfiles").resolve()
     if repo_root.resolve() != expected_root and any(
         bound.kind == "dotfiles_root" for bound in bound_paths

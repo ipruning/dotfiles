@@ -193,7 +193,8 @@ def _toml_strings(value: object) -> Iterator[str]:
     if isinstance(value, str):
         yield value
     elif isinstance(value, dict):
-        for item in value.values():
+        for key, item in value.items():
+            yield from _toml_strings(key)
             yield from _toml_strings(item)
     elif isinstance(value, list):
         for item in value:
@@ -210,15 +211,19 @@ def _path_tokens(line: str) -> Iterator[str]:
 
 
 def _iter_paths(
-    repo_root: Path, text_files: list[Path], *, toml_values: bool = False
+    repo_root: Path,
+    text_files: list[Path],
+    *,
+    unreadable_toml: list[Path] | None = None,
 ) -> Iterator[tuple[str, Path, int | None, str]]:
     for file_path in text_files:
         relative = file_path.relative_to(repo_root).as_posix()
-        if toml_values and file_path.suffix.lower() == ".toml":
+        if unreadable_toml is not None and file_path.suffix.lower() == ".toml":
             try:
                 with file_path.open("rb") as stream:
                     document = tomllib.load(stream)
             except OSError, UnicodeError, tomllib.TOMLDecodeError:
+                unreadable_toml.append(file_path)
                 continue
             for value in _toml_strings(document):
                 for line in value.splitlines():
@@ -238,16 +243,20 @@ def _path_findings(repo_root: Path, text_files: list[Path]) -> list[Finding]:
     return list(starmap(_classify_path, _iter_paths(repo_root, text_files)))
 
 
-def host_bound_paths(repo_root: Path) -> list[HostBoundPath]:
-    """Return tracked paths whose existence depends on the host."""
+def host_bound_paths(repo_root: Path) -> tuple[list[HostBoundPath], list[Path]]:
+    """Return host-bound paths and TOML files that could not be parsed."""
     candidates, _finding = _tracked_paths(repo_root, include_untracked=True)
-    return [
+    unreadable_toml: list[Path] = []
+    paths = [
         HostBoundPath(kind, file_path, line, raw)
         for relative, file_path, line, raw in _iter_paths(
-            repo_root, _iter_text_files(repo_root, candidates), toml_values=True
+            repo_root,
+            _iter_text_files(repo_root, candidates),
+            unreadable_toml=unreadable_toml,
         )
         if (kind := _path_kind(relative, raw)) in HOST_BOUND_KINDS
     ]
+    return paths, unreadable_toml
 
 
 def _structured_data_parser_findings(
