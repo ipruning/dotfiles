@@ -177,6 +177,23 @@ url = "https://dl.google.com/go/go1.27.4.linux-amd64.tar.gz"
 checksum = "sha256:91a44a2b8a716600ad94a4f143e156116620db8828086a6e3602291be9bd0bb4"
 url = "https://dl.google.com/go/go1.27.4.darwin-arm64.tar.gz"
 
+[[tools.golangci-lint]]
+version = "2.14.0"
+backend = "aqua:golangci/golangci-lint"
+specifiers = ["2.14.0"]
+
+[tools.golangci-lint."platforms.linux-x64"]
+checksum = "sha256:ab90aeb7b066f92a33415b638a50fe5344bbb75a0d32ad30cc248d88f81032ab"
+url = "https://github.com/golangci/golangci-lint/releases/download/v2.14.0/golangci-lint-2.14.0-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/golangci/golangci-lint/releases/assets/585813815"
+provenance = "github-attestations"
+
+[tools.golangci-lint."platforms.macos-arm64"]
+checksum = "sha256:5ef5f36a7147e91dc58ef9ef4d11bb7bad5ead0c76eb6c01327a73c641d1dcc3"
+url = "https://github.com/golangci/golangci-lint/releases/download/v2.14.0/golangci-lint-2.14.0-darwin-arm64.tar.gz"
+url_api = "https://api.github.com/repos/golangci/golangci-lint/releases/assets/585813591"
+provenance = "github-attestations"
+
 [[tools.hunk]]
 version = "0.25.0"
 backend = "aqua:modem-dev/hunk"
