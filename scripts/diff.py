@@ -64,7 +64,9 @@ def _kind(path: Path) -> FileKind | None:
     return FileKind.UNSUPPORTED
 
 
-def _compare(application: str, reference: Path, live: Path) -> Iterator[Drift]:
+def _compare(
+    application: str, reference: Path, live: Path, *, require_links: bool
+) -> Iterator[Drift]:
     reference_kind = live_kind = None
     try:
         reference_kind = _kind(reference)
@@ -90,11 +92,16 @@ def _compare(application: str, reference: Path, live: Path) -> Iterator[Drift]:
                 path.name for path in live.iterdir()
             }
             for name in sorted(names):
-                yield from _compare(application, reference / name, live / name)
+                yield from _compare(
+                    application,
+                    reference / name,
+                    live / name,
+                    require_links=require_links,
+                )
             return
         elif (
             reference_kind is FileKind.FILE
-            and reference.read_bytes() != live.read_bytes()
+            and (require_links or reference.read_bytes() != live.read_bytes())
         ) or (
             reference_kind is FileKind.LINK and reference.readlink() != live.readlink()
         ):
@@ -122,6 +129,8 @@ def inspect_drift(
     application: str | None = None,
     profile: str | HostProfile = HostProfile.AUTO,
     system_name: str | None = None,
+    *,
+    require_links: bool = False,
 ) -> DriftReport:
     """Compare mapped paths and return their locations and kinds."""
     active_profile = resolve_profile(profile, system_name)
@@ -142,14 +151,19 @@ def inspect_drift(
         if not path.is_file():
             raise MappingError(f"Unsupported application: {name}")
         mapping = read_application_mapping(path)
-        paths = set(mapping.home_paths)
+        pairs = {(references / path, home / path) for path in mapping.home_paths}
         if mapping.xdg_paths:
-            xdg = Path(os.environ.get("XDG_CONFIG_HOME", str(home / ".config")))
+            xdg = Path(os.environ.get("XDG_CONFIG_HOME") or home / ".config")
             if not xdg.is_relative_to(home) or ".." in xdg.parts:
                 raise MappingError(f"XDG_CONFIG_HOME must be within {home}: {xdg}")
-            paths.update(xdg.relative_to(home) / path for path in mapping.xdg_paths)
-        for path in sorted(paths, key=str):
-            changes.extend(_compare(name, references / path, home / path))
+            pairs.update(
+                (references / ".config" / path, xdg / path)
+                for path in mapping.xdg_paths
+            )
+        for reference, live in sorted(
+            pairs, key=lambda pair: (str(pair[0]), str(pair[1]))
+        ):
+            changes.extend(_compare(name, reference, live, require_links=require_links))
     counts = Counter(change.kind for change in changes)
     return DriftReport(
         schema_version=1,

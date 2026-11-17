@@ -48,18 +48,32 @@ def test_drift_compares_files_directories_and_symlinks(tmp_path: Path) -> None:
     assert report.summary["modified"] == 2
 
 
-def test_profile_and_xdg_paths(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+@pytest.mark.parametrize("xdg_directory", ["custom", ""])
+def test_profile_and_xdg_paths(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, xdg_directory: str
+) -> None:
     repo, home = tmp_path / "repo", tmp_path / "home"
     setup_mapping(repo, "zed", "[xdg_configuration_files]\nzed/settings.json\n")
-    monkeypatch.setenv("XDG_CONFIG_HOME", str(home / "custom"))
-    reference = repo / "reference/custom/zed/settings.json"
+    monkeypatch.setenv(
+        "XDG_CONFIG_HOME", str(home / xdg_directory) if xdg_directory else ""
+    )
+    reference = repo / "reference/.config/zed/settings.json"
     reference.parent.mkdir(parents=True)
     reference.touch()
 
     assert not inspect_drift(repo, home, system_name="Linux").changes
     explicit = inspect_drift(repo, home, "zed", system_name="Linux")
     assert explicit.changes[0].reference_path == reference
-    assert explicit.changes[0].live_path == home / "custom/zed/settings.json"
+    assert (
+        explicit.changes[0].live_path
+        == home / (xdg_directory or ".config") / "zed/settings.json"
+    )
+
+
+def test_empty_mapping_cannot_report_a_clean_scan(tmp_path: Path) -> None:
+    setup_mapping(tmp_path, "git", "[application]\nname = Git\n")
+    with pytest.raises(MappingError, match="No configuration paths"):
+        inspect_drift(tmp_path, tmp_path / "home", "git")
 
 
 def test_invalid_mapping_path_is_reported(tmp_path: Path) -> None:

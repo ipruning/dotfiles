@@ -66,6 +66,7 @@ def plan_restore(repo_root: Path, home: Path, application: str) -> RestoreReport
         home,
         application=application,
         profile="full",
+        require_links=True,
     )
     results = []
     for drift in drift_report.changes:

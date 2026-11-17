@@ -55,10 +55,12 @@ def read_application_mapping(path: Path) -> ApplicationMapping:
                 raise MappingError(f"Invalid relative path in {path}: {item}")
         return items
 
+    home_paths = paths("configuration_files")
+    xdg_paths = paths("xdg_configuration_files")
+    if not (home_paths or xdg_paths):
+        raise MappingError(f"No configuration paths in {path}")
     return ApplicationMapping(
-        paths("configuration_files"),
-        paths("xdg_configuration_files"),
-        paths("dotfiles_optional_reference_files"),
+        home_paths, xdg_paths, paths("dotfiles_optional_reference_files")
     )
 
 

@@ -77,6 +77,22 @@ def test_restore_apply_backs_up_live_file_and_links_reference(tmp_path: Path) ->
     assert json.loads(converged.stdout)["changes"] == []
 
 
+def test_restore_links_an_identical_live_copy(tmp_path: Path) -> None:
+    home = tmp_path / "home"
+    home.mkdir()
+    reference = REPO_ROOT / "reference/.hushlogin"
+    live = home / ".hushlogin"
+    live.write_bytes(reference.read_bytes())
+
+    plan = plan_restore(REPO_ROOT, home, "hushlogin")
+    assert len(plan.results) == 1
+    applied = apply_restore(REPO_ROOT, home, plan)
+    assert applied.ok
+    assert live.is_symlink() and live.samefile(reference)
+    backup = applied.results[0].backup_path
+    assert backup is not None and backup.read_bytes() == reference.read_bytes()
+
+
 def test_restore_recreates_an_adopted_symlink(tmp_path: Path) -> None:
     repo_root = tmp_path / "repo"
     home = tmp_path / "home"
