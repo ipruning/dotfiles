@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-import configparser
 import json
 import re
 import subprocess
@@ -12,7 +11,13 @@ from dataclasses import dataclass
 from itertools import starmap
 from pathlib import Path
 
-from .diff import CaseConfigParser
+from .mappings import (
+    MappingError,
+    application_config_path,
+    read_application_mapping,
+    read_mapping_config,
+    selected_applications,
+)
 from .models import Finding, LintReport, Severity
 from .render import finding_document, render_findings
 
@@ -57,7 +62,6 @@ SKIP_SUFFIXES = {
 # inventory/ snapshots quote live host state (Brewfile source paths, app
 # names); they are data to diff, not path references this repository maintains.
 SKIP_PREFIXES = ("generated/", "inventory/")
-OPTIONAL_REFERENCE_SECTION = "dotfiles_optional_reference_files"
 OPTIONAL_PATHS = {
     ("reference/.zshenv", "/usr/local/sbin"),
     ("reference/.zshrc", "/usr/local/Homebrew"),
@@ -248,10 +252,6 @@ def _structured_data_parser_findings(
     return findings
 
 
-def _config() -> configparser.ConfigParser:
-    return CaseConfigParser(allow_no_value=True)
-
-
 def _mackup_findings(repo_root: Path, tracked_paths: set[Path]) -> list[Finding]:
     config_path = repo_root / "mackup/mackup.cfg"
     if not config_path.is_file():
@@ -263,13 +263,14 @@ def _mackup_findings(repo_root: Path, tracked_paths: set[Path]) -> list[Finding]
                 config_path,
             ),
         ]
-    config = _config()
-    config.read(config_path)
-    applications = (
-        list(config.options("applications_to_sync"))
-        if config.has_section("applications_to_sync")
-        else []
-    )
+    try:
+        applications = selected_applications(read_mapping_config(config_path))
+    except MappingError as error:
+        return [
+            _located_finding(
+                Severity.ERROR, "mackup.config_invalid", str(error), config_path
+            )
+        ]
 
     def reference_exists(candidate: Path) -> bool:
         if not tracked_paths:
@@ -295,7 +296,15 @@ def _mackup_findings(repo_root: Path, tracked_paths: set[Path]) -> list[Finding]
                     ),
                 )
     for application in applications:
-        app_path = repo_root / "mackup/applications" / f"{application}.cfg"
+        try:
+            app_path = application_config_path(applications_dir, application)
+        except MappingError as error:
+            findings.append(
+                _located_finding(
+                    Severity.ERROR, "mackup.config_invalid", str(error), config_path
+                )
+            )
+            continue
         if not app_path.is_file():
             findings.append(
                 _located_finding(
@@ -306,27 +315,19 @@ def _mackup_findings(repo_root: Path, tracked_paths: set[Path]) -> list[Finding]
                 ),
             )
             continue
-        app_config = _config()
-        app_config.read(app_path)
-        candidates: list[Path] = []
-        if app_config.has_section("configuration_files"):
-            candidates.extend(
-                repo_root / "reference" / item
-                for item in app_config.options("configuration_files")
+        try:
+            mapping = read_application_mapping(app_path)
+        except MappingError as error:
+            findings.append(
+                _located_finding(
+                    Severity.ERROR, "mackup.mapping_invalid", str(error), app_path
+                )
             )
-        if app_config.has_section("xdg_configuration_files"):
-            candidates.extend(
-                repo_root / "reference/.config" / item
-                for item in app_config.options("xdg_configuration_files")
-            )
-        optional_candidates = (
-            {
-                repo_root / "reference" / item
-                for item in app_config.options(OPTIONAL_REFERENCE_SECTION)
-            }
-            if app_config.has_section(OPTIONAL_REFERENCE_SECTION)
-            else set()
-        )
+            continue
+        reference = repo_root / "reference"
+        candidates = [reference / item for item in mapping.home_paths]
+        candidates.extend(reference / ".config" / item for item in mapping.xdg_paths)
+        optional_candidates = {reference / item for item in mapping.optional_paths}
         candidate_set = set(candidates)
         for candidate in sorted(optional_candidates - candidate_set):
             findings.append(

@@ -7,7 +7,7 @@ if ("/opt/homebrew/bin" | path exists) {
 }
 
 # 👇 Cached shell integrations
-# Mackup links this file from the live XDG config path, so resolving the link
+# Restore links this file from the live XDG config path, so resolving the link
 # locates this checkout without assuming that it lives at ~/dotfiles.
 const repo_root = (
   $nu.config-path | path expand | path dirname | path dirname | path dirname | path dirname

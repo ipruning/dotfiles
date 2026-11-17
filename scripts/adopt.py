@@ -12,9 +12,10 @@ import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 
-from .diff import DriftProtocolError, MackupCommandError, inspect_drift
+from .diff import inspect_drift
 from .home_paths import path_exists, relative_path, validate_live_parent
 from .host_policy import HostPolicyError, mutation_allowed, require_mutation_allowed
+from .mappings import MappingError
 from .models import Drift, DriftKind, Status
 from .render import emit_error
 
@@ -408,7 +409,7 @@ def main(argv: list[str] | None = None) -> int:
             code=error.code,
         )
         return 1
-    except (DriftProtocolError, MackupCommandError) as error:
+    except MappingError as error:
         emit_error("adopt", str(error), as_json=args.as_json, apply=args.apply)
         return 1
     if args.apply:
