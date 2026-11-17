@@ -164,9 +164,7 @@ do not race an older compiler), installs the whole locked baseline, and rebuilds
 shims with `~/.local/bin` first on `PATH`. A tool declared only in the live
 config blocks apply until you decide whether it joins the baseline, moves to its
 project, or is removed. On an audit-only host the preview is a counterfactual
-comparison, not a verdict. On macOS 27 the tool step disables Cargo release
-stripping, because stripped proc-macro libraries fail to load until stable Rust
-ships LLVM 22.1.8; remove the override once the locked Atuin builds without it.
+comparison, not a verdict.
 
 `update` installs the locked versions of tools already present. `upgrade-tools`
 refreshes the shared lock on every configured platform with `mise lock --global

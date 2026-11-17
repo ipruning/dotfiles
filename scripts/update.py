@@ -14,7 +14,6 @@ import tomllib
 from collections.abc import Callable
 from dataclasses import replace
 from pathlib import Path
-from typing import cast
 
 from .host_policy import (
     HostPolicyError,
@@ -151,8 +150,8 @@ def _installed_mise_tools(home: Path, mise_executable: str) -> tuple[str, ...]:
 
 def inspect_shared_mise_tools(
     repo_root: Path, home: Path, executable: str
-) -> tuple[tuple[str, ...], dict[str, object]]:
-    """Verify the shared declaration is the sole live owner; return installed names and raw requests."""
+) -> tuple[str, ...]:
+    """Verify the shared declaration is the sole live owner and return installed tools."""
     from .mise_sync import loaded_global_configs, same_config_file, tool_declaration
 
     reference = repo_root / "reference/.config/mise/config.toml"
@@ -188,14 +187,13 @@ def inspect_shared_mise_tools(
         live_lock = tomllib.load(stream)
     if reference_lock != live_lock:
         raise RuntimeError("live mise lock differs from reference; preview mise-sync")
-    installed = tuple(
+    return tuple(
         sorted(
             name
             for name in shared
             if name in installed_names or aliases.get(name) in installed_names
         )
     )
-    return installed, cast(dict[str, object], reference_document.get("tools", {}))
 
 
 def _update_steps(home: Path) -> tuple[UpdateStep, ...]:
@@ -306,7 +304,7 @@ def plan_updates(
         if available and step.name == "mise.installed-tools":
             assert mise_executable is not None
             try:
-                installed, _declaration = inspect_shared_mise_tools(
+                installed = inspect_shared_mise_tools(
                     repo_root or Path(__file__).resolve().parents[1],
                     home,
                     mise_executable,

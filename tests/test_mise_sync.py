@@ -10,7 +10,6 @@ from scripts.mise_sync import (
     MiseSyncResult,
     MiseSyncStep,
     execute_mise_sync,
-    sync_steps,
 )
 from scripts.models import Status
 from scripts.restore import RestoreReport
@@ -121,38 +120,6 @@ def test_mise_sync_previews_configuration_tools_and_shims_without_writing(
     assert document["next"] == ["mise run mise-sync -- --apply"]
     assert not log_path.exists()
     assert not (home / ".config/mise/config.toml").is_symlink()
-
-
-def test_mise_sync_disables_release_stripping_only_for_macos_27_tool_builds(
-    tmp_path: Path,
-) -> None:
-    macos_27_steps = sync_steps(
-        tmp_path,
-        system_name="Darwin",
-        system_version="27.0",
-    )
-    assert dict(macos_27_steps[0].environment) == {}
-    assert dict(macos_27_steps[1].environment) == {
-        "CARGO_PROFILE_RELEASE_STRIP": "none",
-    }
-    assert dict(macos_27_steps[2].environment) == {}
-
-    assert all(
-        not step.environment
-        for step in sync_steps(
-            tmp_path,
-            system_name="Darwin",
-            system_version="26.5",
-        )
-    )
-    assert all(
-        not step.environment
-        for step in sync_steps(
-            tmp_path,
-            system_name="Linux",
-            system_version="27.0",
-        )
-    )
 
 
 def test_mise_sync_recognizes_the_primary_config_through_a_symlinked_home(

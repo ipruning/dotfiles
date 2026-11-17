@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import platform
 import subprocess
 import sys
 import time
@@ -228,37 +227,9 @@ def _mise_tool_safety(
     )
 
 
-def _cargo_build_environment(
-    *,
-    system_name: str | None = None,
-    system_version: str | None = None,
-) -> tuple[tuple[str, str], ...]:
-    active_system = system_name or platform.system()
-    active_version = system_version or platform.mac_ver()[0]
-    try:
-        major_version = int(active_version.split(".", 1)[0])
-    except ValueError:
-        return ()
-    if active_system != "Darwin" or major_version < 27:
-        return ()
-    # TODO: Remove this compatibility override after stable Rust includes LLVM
-    # 22.1.8 or newer. Verify removal by building the locked Atuin revision on
-    # macOS 27 and rerunning mise-sync; rust-lang/rust#157750 tracks the fix.
-    return (("CARGO_PROFILE_RELEASE_STRIP", "none"),)
-
-
-def sync_steps(
-    home: Path,
-    *,
-    system_name: str | None = None,
-    system_version: str | None = None,
-) -> tuple[MiseSyncStep, ...]:
+def sync_steps(home: Path) -> tuple[MiseSyncStep, ...]:
     executable = str(canonical_mise_path(home))
     path_prepend = (canonical_mise_path(home).parent,)
-    cargo_build_environment = _cargo_build_environment(
-        system_name=system_name,
-        system_version=system_version,
-    )
     return (
         MiseSyncStep(
             "mise.runtimes",
@@ -279,7 +250,6 @@ def sync_steps(
             (executable, "install", "--locked", "--yes", "-C", str(home)),
             3600,
             path_prepend,
-            cargo_build_environment,
         ),
         MiseSyncStep(
             "mise.shims",
