@@ -379,5 +379,19 @@ fi
 
 # 👇 atuin
 if command -v atuin >/dev/null 2>&1 && [[ -f "$GENERATED_FUNCTIONS_DIR/_atuin.zsh" ]]; then
+  if [[ -z ${ATUIN_SESSION:-} || ${ATUIN_SHLVL:-} != "$SHLVL" ]]; then
+    () {
+      local random_hex
+      zmodload zsh/datetime 2>/dev/null || return 0
+      random_hex=$(command -p openssl rand -hex 10 2>/dev/null) || return 0
+      [[ ${#random_hex} == 20 && $random_hex != *[^0-9a-f]* ]] || return 0
+      # UUIDv7 uses 48 bits of Unix milliseconds, followed by random bits
+      # with the version and variant set. Atuin reads the session timestamp.
+      local -i unix_ms=$(( EPOCHREALTIME * 1000 ))
+      printf -v ATUIN_SESSION '%012x7%s%x%s' "$unix_ms" "$random_hex[1,3]" \
+        "$(( (16#${random_hex[4]} & 3) | 8 ))" "$random_hex[5,19]"
+      export ATUIN_SESSION ATUIN_SHLVL="$SHLVL"
+    }
+  fi
   source "$GENERATED_FUNCTIONS_DIR/_atuin.zsh"
 fi
