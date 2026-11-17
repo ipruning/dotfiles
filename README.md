@@ -168,13 +168,15 @@ comparison, not a verdict. On macOS 27 the tool step disables Cargo release
 stripping, because stripped proc-macro libraries fail to load until stable Rust
 ships LLVM 22.1.8; remove the override once the locked Atuin builds without it.
 
-`update` installs the locked versions of tools already present; `upgrade-tools`
-runs `mise upgrade --bump` for tools declared as `latest` (exact pins and refs
-are held) and `ya pkg upgrade` when `~/.config/yazi/package.toml` links to this
-checkout:
+`update` installs the locked versions of tools already present. `upgrade-tools`
+refreshes the shared lock on every configured platform with `mise lock --global
+--bump`, including tools absent on the maintenance host. Exact pins and refs
+stay fixed. It also runs `ya pkg upgrade` when `~/.config/yazi/package.toml`
+links to this checkout. Run `update` to install the refreshed versions:
 
 ```bash
 mise run upgrade-tools -- --apply
+mise run update -- --apply
 mise run verify
 git diff -- reference/.config/mise reference/.config/yazi/package.toml
 ```
@@ -239,7 +241,10 @@ restores pinned Zsh plugins and Zellij WASM assets. Unchanged outputs report
 `unchanged`; clean plugins at their pinned commit skip fetching; dirty plugin
 checkouts are reported, not reset; generator errors keep existing files.
 `--offline` skips network assets and LLM completion resolution, so a first setup
-needs an online `generate`. Open a new shell after files change.
+needs an online `generate`. Open a new shell after files change. The generated
+Atuin integration for Zsh uses the shared mise version and the shell's Atuin
+configuration. Set `DOTFILES_ATUIN_USE_SHIM=1` in your shell environment if
+Atuin needs a project's mise version or `[env]` values.
 
 ## Host inventory
 

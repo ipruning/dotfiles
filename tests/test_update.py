@@ -910,6 +910,7 @@ def _run_upgrade(
     *arguments: str,
     linked: bool = True,
     yazi_linked: bool | None = None,
+    alternate_config: bool = False,
 ):
     source_root = Path(__file__).resolve().parents[1]
     project = tmp_path / "project"
@@ -938,10 +939,19 @@ def _run_upgrade(
     )
     live = home / ".config/mise/config.toml"
     live.unlink()
+    live_lock = live.with_name("mise.lock")
+    live_lock.unlink()
+    live_lock.symlink_to(source.with_name("mise.lock"))
     if linked:
         live.symlink_to(source)
     else:
         shutil.copy2(source, live)
+    if alternate_config:
+        alternate = home / "alternate/config.toml"
+        alternate.parent.mkdir()
+        alternate.symlink_to(source)
+        mise = binary / "mise"
+        mise.write_text(mise.read_text().replace(str(live), str(alternate)))
     if yazi_linked is not None:
         _fake_tool(binary, "ya", log)
         packages = project / "reference/.config/yazi/package.toml"
@@ -975,33 +985,46 @@ def test_upgrade_tools_cli_previews_shared_scope_without_updating(
     assert document["operation"] == "upgrade-tools"
     assert document["apply"] is False
     assert document["steps"][0]["command"][1:] == [
-        "upgrade",
+        "lock",
+        "--global",
         "--bump",
-        "--no-prune",
         "-C",
         str(tmp_path / "home"),
-        "python@latest",
     ]
     assert not log.exists()
 
 
 def test_upgrade_tools_cli_requires_shared_config_link(tmp_path: Path) -> None:
-    completed, log = _run_upgrade(tmp_path, "--apply", "--json", linked=False)
+    completed, log = _run_upgrade(
+        tmp_path, "--apply", "--json", linked=False, yazi_linked=True
+    )
     assert completed.returncode == 1
     document = json.loads(completed.stdout)
     assert document["steps"][0]["status"] == "failed"
     assert "must link" in document["steps"][0]["reason"]
+    assert document["steps"][1]["status"] == "skipped"
     assert not log.exists()
 
 
-def test_upgrade_tools_cli_updates_only_installed_shared_tools(tmp_path: Path) -> None:
+def test_upgrade_tools_cli_rejects_an_alternate_config_path(tmp_path: Path) -> None:
+    completed, log = _run_upgrade(tmp_path, "--apply", "--json", alternate_config=True)
+    assert completed.returncode == 1
+    step = json.loads(completed.stdout)["steps"][0]
+    assert step["status"] == "failed"
+    assert "live path" in step["reason"]
+    assert not log.exists()
+
+
+def test_upgrade_tools_cli_refreshes_shared_lock_without_installing(
+    tmp_path: Path,
+) -> None:
     completed, log = _run_upgrade(tmp_path, "--apply", "--json")
     assert completed.returncode == 0, completed.stderr
     document = json.loads(completed.stdout)
     assert document["apply"] is True
     assert document["ok"] is True
     assert log.read_text().splitlines() == [
-        f"mise upgrade --bump --no-prune -C {tmp_path / 'home'} python@latest"
+        f"mise lock --global --bump -C {tmp_path / 'home'}"
     ]
 
 

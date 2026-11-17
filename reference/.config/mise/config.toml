@@ -20,9 +20,9 @@ yarn = "aqua:yarnpkg/berry"
 zoxide = "aqua:ajeetdsouza/zoxide"
 
 [tools]
-# mise.lock records exact versions and dependencies. upgrade-tools advances
-# installed "latest" tools; explicit versions and refs stay fixed. update installs
-# locked versions of tools already present; mise-sync also installs missing tools.
+# mise.lock records exact versions and dependencies. upgrade-tools refreshes
+# the lock for all configured platforms. update installs locked versions of
+# tools already present; mise-sync also installs missing tools.
 
 # Language runtimes and package tools
 bun = "latest"
