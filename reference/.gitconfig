@@ -103,6 +103,10 @@ helper = !gh auth git-credential
 helper =
 helper = !gh auth git-credential
 
+[credential "https://ampcode.com/"]
+helper =
+helper = !amp git-credential-helper
+
 # Last so private values (identity, signing, per-org includeIf) win any collision.
 [include]
 path = ~/.private.gitconfig
