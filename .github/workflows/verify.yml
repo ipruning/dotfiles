@@ -23,7 +23,7 @@ jobs:
           persist-credentials: false
       - name: Configure the Python dependency cache
         run: echo "UV_CACHE_DIR=$RUNNER_TEMP/uv-cache" >> "$GITHUB_ENV"
-      - uses: jdx/mise-action@6612f0ef07ed2a736cd1e00a94a065522dd41195 # v5.2.5
+      - uses: jdx/mise-action@236a21c3b91f5db6d4e174b348674a0f0caac06d # v5.2.9
         with:
           minimum_release_age: 0s
           install_args: --locked
