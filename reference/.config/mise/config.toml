@@ -7,6 +7,7 @@ min_version = { hard = "2026.11.1" }
 agent-browser = "npm:agent-browser"
 btop = "aqua:aristocratos/btop"
 gh = "aqua:cli/cli"
+golangci-lint = "aqua:golangci/golangci-lint"
 hunk = "aqua:modem-dev/hunk"
 lazydocker = "aqua:jesseduffield/lazydocker"
 lazygit = "aqua:jesseduffield/lazygit"
@@ -50,6 +51,7 @@ zoxide = "latest"
 # Git and code review
 "github:agavra/tuicr" = "latest"
 gh = "latest"
+golangci-lint = "2.14.0"
 hunk = "latest"
 lazygit = "latest"
 
