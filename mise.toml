@@ -107,9 +107,9 @@ description = "Check Python, TOML, and Markdown formatting and style"
 run = [
     "ruff check scripts tests",
     "ruff format --check scripts tests",
-    # Offline: verify never fetches TOML schemas.
-    "tombi format --check --offline",
-    "tombi lint --offline",
+    # Keep offline checks independent of each host's cached schemas.
+    "tombi format --check --offline --no-cache",
+    "tombi lint --offline --no-cache",
     # Reads .markdownlint-cli2.yaml.
     "rumdl check .",
 ]
