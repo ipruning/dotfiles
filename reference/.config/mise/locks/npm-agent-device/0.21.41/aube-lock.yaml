@@ -9,13 +9,13 @@ importers:
   .:
     dependencies:
       agent-device:
-        specifier: 0.21.39
-        version: 0.21.39
+        specifier: 0.21.41
+        version: 0.21.41
 
 packages:
 
-  agent-device@0.21.39:
-    resolution: {integrity: sha512-flgrilleoUU9WNd9BlU8h5KMt8zv0nKWBkqJbzk/bb2NBRA+7H1FGja+RIAuapb7HXdsjK4EPnYFP37N9S8nMA==}
+  agent-device@0.21.41:
+    resolution: {integrity: sha512-VQMYEXzcNBwCPLrWHDM0ic1pWD+GroWukj0jHCzS9zob9eeHSVYJTVSgydLaDn2c2aMH3NuCHr1vLvZ2Bgl7Uw==}
     engines: {node: '>=22.12'}
     hasBin: true
     peerDependencies:
@@ -26,4 +26,4 @@ packages:
 
 snapshots:
 
-  agent-device@0.21.39: {}
+  agent-device@0.21.41: {}

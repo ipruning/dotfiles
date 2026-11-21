@@ -35,29 +35,29 @@ url = "https://github.com/aristocratos/btop/releases/download/v1.4.8/btop-x86_64
 url_api = "https://api.github.com/repos/aristocratos/btop/releases/assets/674452462"
 
 [[tools.bun]]
-version = "1.4.4"
+version = "1.4.5"
 backend = "core:bun"
 specifiers = ["latest"]
 
 [tools.bun."platforms.linux-x64"]
-checksum = "sha256:bf8ccbfb2b0b80159e0f9a6d15c55317add8077534dbc6130a3edb52fccb395c"
-url = "https://github.com/oven-sh/bun/releases/download/bun-v1.4.4/bun-linux-x64.zip"
+checksum = "sha256:94559b3b528995a49452f9f2404cec74f2efd7d06e0a000a8cd214b02c3666eb"
+url = "https://github.com/oven-sh/bun/releases/download/bun-v1.4.5/bun-linux-x64.zip"
 
 [tools.bun."platforms.linux-x64-baseline"]
-checksum = "sha256:e0446eb55995772eb9894bebae9a6be368d985a8b9271ee124486f9946eedd76"
-url = "https://github.com/oven-sh/bun/releases/download/bun-v1.4.4/bun-linux-x64-baseline.zip"
+checksum = "sha256:dcb23a18a1c2fff12d57bcef696dbbb42eb67fde29f43816ecb595459a24c463"
+url = "https://github.com/oven-sh/bun/releases/download/bun-v1.4.5/bun-linux-x64-baseline.zip"
 
 [tools.bun."platforms.linux-x64-musl"]
-checksum = "sha256:a5a8ccc5e74dcb883fe974f125a7bdb3b41e5195ed1b870e73f17effd3eb2b2d"
-url = "https://github.com/oven-sh/bun/releases/download/bun-v1.4.4/bun-linux-x64-musl.zip"
+checksum = "sha256:9b6bdba1fa0914b6adfe48e4438212e2c106d9199b77ba642a9b8a3968a49a59"
+url = "https://github.com/oven-sh/bun/releases/download/bun-v1.4.5/bun-linux-x64-musl.zip"
 
 [tools.bun."platforms.linux-x64-musl-baseline"]
-checksum = "sha256:6e9c37098b293920aed28bfb51ab240e26d23bfdd9bbfecb3ad428ac166549bc"
-url = "https://github.com/oven-sh/bun/releases/download/bun-v1.4.4/bun-linux-x64-musl-baseline.zip"
+checksum = "sha256:96fb94108eed872ff623ed39007d6b5699a83a5d0086fcfba84921c18145e3e6"
+url = "https://github.com/oven-sh/bun/releases/download/bun-v1.4.5/bun-linux-x64-musl-baseline.zip"
 
 [tools.bun."platforms.macos-arm64"]
-checksum = "sha256:c240d7f0ccb90c263a849fcdb09b7ee62630d921348ed6aafda86b9d577bc510"
-url = "https://github.com/oven-sh/bun/releases/download/bun-v1.4.4/bun-darwin-aarch64.zip"
+checksum = "sha256:b5d6bc2e13caf14e57c89661e89efd073ff16165b41bfe43882616410609cd10"
+url = "https://github.com/oven-sh/bun/releases/download/bun-v1.4.5/bun-darwin-aarch64.zip"
 
 [[tools."cargo:https://github.com/ipruning/atuin"]]
 version = "rev:92d869de2506ece3c8b8474d20d6a1aed5fbe4a7"
@@ -88,20 +88,20 @@ backend = "gem:kamal"
 specifiers = ["latest"]
 
 [[tools.gh]]
-version = "2.104.0"
+version = "2.105.0"
 backend = "aqua:cli/cli"
 specifiers = ["latest"]
 
 [tools.gh."platforms.linux-x64"]
-checksum = "sha256:98cb101ad87dbbd3f6b2f2bfcbd43197ccd07643140121d8a9cfaa91eadbc24e"
-url = "https://github.com/cli/cli/releases/download/v2.104.0/gh_2.104.0_linux_amd64.tar.gz"
-url_api = "https://api.github.com/repos/cli/cli/releases/assets/740718892"
+checksum = "sha256:79e7ab5db738c48777b696e374f8b428f0647debfb424f44d2f426370407fe2f"
+url = "https://github.com/cli/cli/releases/download/v2.105.0/gh_2.105.0_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/cli/cli/releases/assets/761188566"
 provenance = "github-attestations"
 
 [tools.gh."platforms.macos-arm64"]
-checksum = "sha256:23b12706219b9892e44236f988444a24adcf29284e16b35e03ba5b863fb6eb8e"
-url = "https://github.com/cli/cli/releases/download/v2.104.0/gh_2.104.0_macOS_arm64.zip"
-url_api = "https://api.github.com/repos/cli/cli/releases/assets/740719079"
+checksum = "sha256:2a5d03103ae444927383b93d9ffd65579a26e2eb900ce1cf11f55258d5319ded"
+url = "https://github.com/cli/cli/releases/download/v2.105.0/gh_2.105.0_macOS_arm64.zip"
+url_api = "https://api.github.com/repos/cli/cli/releases/assets/761188673"
 provenance = "github-attestations"
 
 [[tools."github:agavra/tuicr"]]
@@ -154,15 +154,15 @@ url = "https://github.com/larksuite/cli/releases/download/v1.0.100/lark-cli-1.0.
 url_api = "https://api.github.com/repos/larksuite/cli/releases/assets/731445041"
 
 [[tools."github:lycorp-jp/sim-use"]]
-version = "0.16.0"
+version = "0.16.1"
 backend = "github:lycorp-jp/sim-use"
 specifiers = ["latest"]
 
 [tools."github:lycorp-jp/sim-use"."platforms.macos-arm64"]
-checksum = "sha256:1cab866e83cde89bcac5bcd77554a5c687c8b85a27ec1c5e8222ef826411e906"
+checksum = "sha256:7669a9329b6f68aee4d2ff03d492c184446123733ae7009e3e246e6aa462022d"
 checksum_source = "mise-versions"
-url = "https://github.com/lycorp-jp/sim-use/releases/download/v0.16.0/sim-use-v0.16.0.tar.gz"
-url_api = "https://api.github.com/repos/lycorp-jp/sim-use/releases/assets/661202310"
+url = "https://github.com/lycorp-jp/sim-use/releases/download/v0.16.1/sim-use-v0.16.1.tar.gz"
+url_api = "https://api.github.com/repos/lycorp-jp/sim-use/releases/assets/766082072"
 
 [[tools.go]]
 version = "1.27.4"
@@ -274,8 +274,8 @@ checksum = "sha256:aec2514ea1ceb2ba52455e9ec65986f6749a06dd759e5db2a72e6889668c9
 url = "https://nodejs.org/dist/v26.13.1/node-v26.13.1-darwin-arm64.tar.gz"
 
 [[tools."npm:@excalidraw/cli"]]
-version = "1.0.0"
-aube = { path = "locks/npm-excalidraw-cli/1.0.0~240bd873", digest = "sha256:e4f85c3dcf0c7922cbd946a4ad9c189adb8594a457d2b0e6a5ef8176444c5591" }
+version = "1.1.2"
+aube = { path = "locks/npm-excalidraw-cli/1.1.2~240bd873", digest = "sha256:ffddc0e3e5c60fb5baa70e86cbcf6cf54c27fc1ab6e7d45749831cef17a420fd" }
 backend = "npm:@excalidraw/cli"
 specifiers = ["latest"]
 
@@ -283,8 +283,8 @@ specifiers = ["latest"]
 allow_low_downloads = "true"
 
 [[tools."npm:@openai/codex-security"]]
-version = "0.10.0"
-aube = { path = "locks/npm-openai-codex-security/0.10.0~19b6a9e3", digest = "sha256:a5585f8d3248e0875a573eef44b6feb5ac91e224b9f97cda1868eb83b26e5b79" }
+version = "0.10.1"
+aube = { path = "locks/npm-openai-codex-security/0.10.1~19b6a9e3", digest = "sha256:401db5f457b76211036ef8efcb474370449dcf7ec178facdb833c0c7c4b17337" }
 backend = "npm:@openai/codex-security"
 specifiers = ["latest"]
 
@@ -292,22 +292,16 @@ specifiers = ["latest"]
 allow_low_downloads = "true"
 
 [[tools."npm:agent-device"]]
-version = "0.21.39"
-aube = { path = "locks/npm-agent-device/0.21.39", digest = "sha256:0ff57601a2df97649ba0632e966d1df99d821777c101c945c6a86223f30d57a4" }
+version = "0.21.41"
+aube = { path = "locks/npm-agent-device/0.21.41", digest = "sha256:a04309933e15fcc5cbabc9b9282051a2cb0d95b8fae807da69d37d0f1a313468" }
 backend = "npm:agent-device"
 specifiers = ["latest"]
 
-[tools."npm:agent-device".provenance]
-repository = "github.com/callstack/agent-device"
-
 [[tools."npm:cf"]]
-version = "1.0.0-rc.1"
-aube = { path = "locks/npm-cf/1.0.0-rc.1", digest = "sha256:15841947060a7d1d971a9f8ea6e88be30007933cad6b256051abfd313bb87b33" }
+version = "1.0.0-rc.2"
+aube = { path = "locks/npm-cf/1.0.0-rc.2", digest = "sha256:bc955e67b6558cc025421faf38480396e3ce820492251a7e1108b18b1329da47" }
 backend = "npm:cf"
 specifiers = ["latest"]
-
-[tools."npm:cf".provenance]
-repository = "github.com/cloudflare/cf"
 
 [[tools.pnpm]]
 version = "12.21.0"
@@ -330,7 +324,7 @@ provenance = "github-attestations"
 version = "0.8.0"
 backend = "pypi:google-colab-cli"
 specifiers = ["latest"]
-uv = { path = "locks/pypi-google-colab-cli/0.8.0", digest = "sha256:826bf0978299551032dc4f0c8ba1bcb33de9da0f104657aa2a02fa3825452d57" }
+uv = { path = "locks/pypi-google-colab-cli/0.8.0", digest = "sha256:7b2ef2a44433cc21042e24a1b17cbcb9fe69c51ef9f437afc20cf5cedb75b02e" }
 
 [[tools.python]]
 version = "3.15.2"
@@ -348,7 +342,7 @@ url = "https://github.com/astral-sh/python-build-standalone/releases/download/20
 provenance = "github-attestations"
 
 [[tools.ruby]]
-version = "4.0.9"
+version = "4.0.10"
 backend = "core:ruby"
 specifiers = ["latest"]
 
@@ -359,13 +353,13 @@ ruby_build_repo = "https://github.com/rbenv/ruby-build.git"
 ruby_install = "false"
 
 [tools.ruby."platforms.linux-x64"]
-checksum = "sha256:7e74db7ddb8f44f534fa4937d98b6d1691e053c5c190af6d130464b0467e87c4"
-url = "https://github.com/jdx/ruby/releases/download/4.0.9-1/ruby-4.0.9.x86_64_linux.tar.gz"
+checksum = "sha256:ca54d2d9204f9f9724f7aa1620b30538723da3a9365d9195951b82fa6765fd4e"
+url = "https://github.com/jdx/ruby/releases/download/4.0.10-1/ruby-4.0.10.x86_64_linux.tar.gz"
 provenance = "github-attestations"
 
 [tools.ruby."platforms.macos-arm64"]
-checksum = "sha256:6eca5d2aaf6bb6c805daa31b4139a3c974526f41dae990ab0cef0ee3db8ea5d1"
-url = "https://github.com/jdx/ruby/releases/download/4.0.9-1/ruby-4.0.9.macos.tar.gz"
+checksum = "sha256:624211a09a77f20e7a7f6f743c4b6e0727e10240027ae40c8f369748459b9c9b"
+url = "https://github.com/jdx/ruby/releases/download/4.0.10-1/ruby-4.0.10.macos.tar.gz"
 provenance = "github-attestations"
 
 [[tools.rust]]
@@ -374,20 +368,21 @@ backend = "core:rust"
 specifiers = ["latest"]
 
 [[tools.skillshare]]
-version = "0.30.11"
+version = "0.30.12"
 backend = "aqua:runkids/skillshare"
 specifiers = ["latest"]
 
 [tools.skillshare."platforms.linux-x64"]
-checksum = "sha256:0c908145dd517925cd0c27e0abde7f69f64fd457ca3fef34db0ccb7bc2350eb0"
+checksum = "sha256:2bf59ba09e1e68f5a162eabb6f0b866a6f2d448d2c55fac984577390e2ffc48c"
 checksum_source = "mise-versions"
-url = "https://github.com/runkids/skillshare/releases/download/v0.30.11/skillshare_0.30.11_linux_amd64.tar.gz"
-url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/760271482"
+url = "https://github.com/runkids/skillshare/releases/download/v0.30.12/skillshare_0.30.12_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/764436179"
 
 [tools.skillshare."platforms.macos-arm64"]
-checksum = "sha256:422626655c82922fc20a9bb14de29f05a2128f037d68bd625268477bd8d33fdc"
-url = "https://github.com/runkids/skillshare/releases/download/v0.30.11/skillshare_0.30.11_darwin_arm64.tar.gz"
-url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/760271486"
+checksum = "sha256:360d95f6f262a2b1c9b83266c8189e759eb325b01128e8930145412aacbb982a"
+checksum_source = "mise-versions"
+url = "https://github.com/runkids/skillshare/releases/download/v0.30.12/skillshare_0.30.12_darwin_arm64.tar.gz"
+url_api = "https://api.github.com/repos/runkids/skillshare/releases/assets/764436177"
 
 [[tools.starship]]
 version = "1.27.0"

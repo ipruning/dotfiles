@@ -2,6 +2,6 @@
   "name": "mise-npm-install",
   "private": true,
   "dependencies": {
-    "@excalidraw/cli": "1.0.0"
+    "@excalidraw/cli": "1.1.2"
   }
 }
