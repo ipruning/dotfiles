@@ -1,4 +1,5 @@
 {
+  "context_servers": {},
   "language_models": {
     "openai_compatible": {}
   },
