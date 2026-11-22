@@ -1,0 +1,7 @@
+{
+  "name": "mise-npm-install",
+  "private": true,
+  "dependencies": {
+    "@roam-research/roam-cli": "0.11.1"
+  }
+}

@@ -59,6 +59,7 @@ lazygit = "latest"
 "github:lycorp-jp/sim-use" = { version = "latest", os = ["macos"] }
 "npm:@excalidraw/cli" = { version = "latest", allow_low_downloads = "true" }
 "npm:@openai/codex-security" = { version = "latest", allow_low_downloads = "true" }
+"npm:@roam-research/roam-cli" = { version = "latest", os = ["macos"], allow_low_downloads = "true" }
 "npm:agent-device" = "latest"
 agent-browser = "latest"
 skillshare = "latest"

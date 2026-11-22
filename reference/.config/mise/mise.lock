@@ -291,6 +291,15 @@ specifiers = ["latest"]
 [tools."npm:@openai/codex-security".options]
 allow_low_downloads = "true"
 
+[[tools."npm:@roam-research/roam-cli"]]
+version = "0.11.1"
+aube = { path = "locks/npm-roam-research-roam-cli/0.11.1~49653eac", digest = "sha256:04dbf8226bb5dba2ef2d4b7afde9933341950485187600c5427caa0b0de1d45b" }
+backend = "npm:@roam-research/roam-cli"
+specifiers = ["latest"]
+
+[tools."npm:@roam-research/roam-cli".options]
+allow_low_downloads = "true"
+
 [[tools."npm:agent-device"]]
 version = "0.21.41"
 aube = { path = "locks/npm-agent-device/0.21.41", digest = "sha256:a04309933e15fcc5cbabc9b9282051a2cb0d95b8fae807da69d37d0f1a313468" }
