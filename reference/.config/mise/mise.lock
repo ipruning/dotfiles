@@ -291,6 +291,9 @@ specifiers = ["latest"]
 [tools."npm:@openai/codex-security".options]
 allow_low_downloads = "true"
 
+[tools."npm:@openai/codex-security".provenance]
+repository = "github.com/openai/codex-security"
+
 [[tools."npm:@roam-research/roam-cli"]]
 version = "0.11.1"
 aube = { path = "locks/npm-roam-research-roam-cli/0.11.1~49653eac", digest = "sha256:04dbf8226bb5dba2ef2d4b7afde9933341950485187600c5427caa0b0de1d45b" }
@@ -306,11 +309,17 @@ aube = { path = "locks/npm-agent-device/0.21.41", digest = "sha256:a04309933e15f
 backend = "npm:agent-device"
 specifiers = ["latest"]
 
+[tools."npm:agent-device".provenance]
+repository = "github.com/callstack/agent-device"
+
 [[tools."npm:cf"]]
 version = "1.0.0-rc.2"
 aube = { path = "locks/npm-cf/1.0.0-rc.2", digest = "sha256:bc955e67b6558cc025421faf38480396e3ce820492251a7e1108b18b1329da47" }
 backend = "npm:cf"
 specifiers = ["latest"]
+
+[tools."npm:cf".provenance]
+repository = "github.com/cloudflare/cf"
 
 [[tools.pnpm]]
 version = "12.21.0"
