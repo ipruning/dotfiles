@@ -133,10 +133,8 @@ export FZF_DEFAULT_OPTS=" \
 --multi \
 --style minimal \
 --bind 'ctrl-y:accept' \
---color=bg+:#313244,bg:#1e1e2e,spinner:#f5e0dc,hl:#f38ba8 \
---color=fg:#cdd6f4,header:#f38ba8,info:#cba6f7,pointer:#f5e0dc \
---color=marker:#b4befe,fg+:#cdd6f4,prompt:#cba6f7,hl+:#f38ba8 \
---color=selected-bg:#45475a"
+--color=base16,fg:-1,bg:-1,fg+:-1,bg+:0,selected-bg:8 \
+--color=hl:1,hl+:1,header:1,info:5,prompt:5,spinner:5,pointer:5,marker:4"
 
 # 👇 fzf-tab
 if [[ -f "$PLUGINS_DIR"/fzf-tab/fzf-tab.plugin.zsh ]]; then
