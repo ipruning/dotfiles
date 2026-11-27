@@ -215,11 +215,20 @@ def main(argv: list[str] | None = None) -> int:
         default=HostProfile.AUTO.value,
         help="host profile that selects which applications to inspect",
     )
+    parser.add_argument(
+        "--require-links",
+        action="store_true",
+        help="report regular files whose bytes match reference but are not symlinked to it",
+    )
     args = parser.parse_args(argv)
     repo_root = Path(__file__).resolve().parents[1]
     try:
         report = inspect_drift(
-            repo_root, Path.home(), args.application, profile=args.profile
+            repo_root,
+            Path.home(),
+            args.application,
+            profile=args.profile,
+            require_links=args.require_links,
         )
     except MappingError as error:
         emit_error("diff", str(error), as_json=args.as_json)

@@ -137,3 +137,23 @@ def test_diff_cli_reports_unreadable_files_without_exposing_contents(
     assert document["ok"] is False
     assert document["summary"] == {"unreadable": 1}
     assert document["changes"][0]["error"] == "permission denied"
+
+
+def test_diff_cli_require_links_reports_unlinked_matching_file(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo, home = tmp_path / "repo", tmp_path / "home"
+    setup_mapping(repo, "git", "[configuration_files]\n.gitconfig\n")
+    home.mkdir()
+    (repo / "reference/.gitconfig").write_text("same content")
+    (home / ".gitconfig").write_text("same content")
+    monkeypatch.setattr("scripts.diff.__file__", str(repo / "scripts/diff.py"))
+    monkeypatch.setenv("HOME", str(home))
+
+    assert main(["--json", "git"]) == 0
+    assert json.loads(capsys.readouterr().out)["summary"] == {}
+
+    assert main(["--json", "--require-links", "git"]) == 0
+    document = json.loads(capsys.readouterr().out)
+    assert document["summary"] == {"modified": 1}
+    assert document["changes"][0]["live_path"] == str(home / ".gitconfig")
