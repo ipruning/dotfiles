@@ -85,8 +85,9 @@ def test_mise_sync_previews_configuration_tools_and_shims_without_writing(
     assert document["operation"] == "mise-sync"
     assert document["apply"] is False
     assert document["ok"] is True
-    assert document["summary"] == {"planned": 5}
+    assert document["summary"] == {"planned": 6}
     assert [change["status"] for change in document["changes"]] == [
+        "planned",
         "planned",
         "planned",
     ]
@@ -480,14 +481,22 @@ def test_mise_sync_apply_links_shared_declaration_and_runs_locked_commands(
     document = json.loads(completed.stdout)
     assert document["apply"] is True
     assert document["ok"] is True
-    assert document["summary"] == {"succeeded": 5}
+    assert document["summary"] == {"succeeded": 6}
     config = home / ".config/mise/config.toml"
     lockfile = home / ".config/mise/mise.lock"
+    locks = home / ".config/mise/locks"
     assert config.is_symlink()
     assert config.resolve() == REPO_ROOT / "reference/.config/mise/config.toml"
     assert lockfile.is_symlink()
     assert lockfile.resolve() == REPO_ROOT / "reference/.config/mise/mise.lock"
-    assert all(Path(change["backup_path"]).is_file() for change in document["changes"])
+    assert locks.is_symlink()
+    assert locks.resolve() == REPO_ROOT / "reference/.config/mise/locks"
+    backed_up = {
+        change["live_path"]: change["backup_path"] for change in document["changes"]
+    }
+    assert Path(backed_up[str(config)]).is_file()
+    assert Path(backed_up[str(lockfile)]).is_file()
+    assert backed_up[str(locks)] is None
     invocations = log_path.read_text().splitlines()
     assert invocations[0].split("|", 1)[0] == (
         f"install --locked --yes -C {home} go node ruby rust"

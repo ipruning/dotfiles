@@ -99,7 +99,9 @@ task.logs = true
 compile = false
 
 [settings.self_update]
-auto = true
+# Self-updates run explicitly via `mise run update` so read-only checks and
+# `--json` outputs are never mutated or polluted by background release notices.
+auto = false
 
 [env]
 _.path = ["~/.bun/bin"]
