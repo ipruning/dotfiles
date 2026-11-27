@@ -2,9 +2,6 @@ command_chaining = true
 ctrl_n_shortcuts = true
 exit_mode = "return-query"
 history_filter = [
-    # original
-    "^secret-cmd",
-    "^innocuous-cmd .*--secret=.+",
     "^#.*",
     "^\\s",
     # AI/SaaS key prefixes (not covered by built-in secrets_filter)
@@ -25,7 +22,6 @@ history_filter = [
     # generic patterns
     "\\b\\w*(API_KEY|SECRET_KEY|ACCESS_TOKEN|AUTH_TOKEN)\\w*=[\"']?\\S+",
     "--(api[-_]?key|token|secret|password)[= ]\\S+",
-    "\\b([a-z]+\\s){11,}[a-z]+\\b",
 ]
 
 [stats]
