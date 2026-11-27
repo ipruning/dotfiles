@@ -25,6 +25,7 @@ from .mise import (
     canonical_mise_environment,
     canonical_mise_executable,
     canonical_mise_path,
+    mise_github_environment,
 )
 from .models import ExecutableFinder, Status, status_summary
 from .process import run_process_group
@@ -386,7 +387,11 @@ def execute_updates(
         try:
             environment = None
             if planned.step.path_prepend:
-                environment = canonical_mise_environment(home)
+                environment = (
+                    mise_github_environment(home)
+                    if planned.step.name == "mise.installed-tools"
+                    else canonical_mise_environment(home)
+                )
             elif planned.step.environment:
                 environment = os.environ.copy()
             if environment is not None:

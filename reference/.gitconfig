@@ -96,6 +96,7 @@ stm = "!sh -c 'git status --porcelain | grep \"^ M\" | cut -c 4-'"
 insteadOf = git@github.com:
 
 [credential "https://github.com"]
+useHttpPath = true
 helper =
 helper = !gh auth git-credential
 

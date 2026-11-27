@@ -12,9 +12,9 @@ from pathlib import Path
 
 from .host_policy import HostPolicyError, mutation_allowed, require_mutation_allowed
 from .mise import (
-    canonical_mise_environment,
     canonical_mise_executable,
     canonical_mise_path,
+    mise_github_environment,
 )
 from .mise_sync import loaded_global_configs
 from .models import ExecutableFinder, Status
@@ -147,7 +147,7 @@ def execute_upgrade_tools(repo_root: Path, home: Path) -> UpdateReport:
         try:
             completed = run_with_progress(
                 planned.step,
-                env=canonical_mise_environment(home),
+                env=mise_github_environment(home),
                 progress_interval_seconds=30,
             )
             results.append(

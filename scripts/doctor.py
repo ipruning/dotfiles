@@ -72,6 +72,11 @@ def _severity_from_report(
         return Severity.OK
     if report.get("ok") is False:
         return Severity.ERROR
+    data = report.get("data")
+    if isinstance(data, dict) and (
+        data.get("logged_in") is False or data.get("refresh_valid") is False
+    ):
+        return Severity.WARN
     changes = report.get("changes")
     if isinstance(changes, list) and changes:
         return Severity.WARN
@@ -200,6 +205,8 @@ def _external_steps(
     # Its read-only configuration checks are already part of scripts.check.
     for name, tool, arguments, timeout, json_output in (
         ("brew.doctor", "brew", ("doctor",), 300, False),
+        ("gh.auth", "gh", ("auth", "status"), 30, False),
+        ("jh.auth", "jh", ("auth", "status", "--output", "json"), 15, True),
         ("pueue.status", "pueue", ("status",), 30, False),
     ):
         executable = executable_finder(tool)
@@ -236,6 +243,8 @@ def inspect_doctor(
     ]
     missing_names = {
         "brew": "brew.doctor",
+        "gh": "gh.auth",
+        "jh": "jh.auth",
         "mise": "mise.doctor",
         "pueue": "pueue.status",
     }
@@ -249,6 +258,14 @@ def inspect_doctor(
                     reason=f"{tool} is not available on PATH",
                 ),
             )
+    if os.environ.get("MISE_GITHUB_TOKEN"):
+        results.append(
+            DoctorResult(
+                DoctorStep("env.mise-github-token", "env", (), 0),
+                Severity.WARN,
+                reason="static MISE_GITHUB_TOKEN is set in environment; remove if stale so mise tasks resolve gh tokens dynamically",
+            ),
+        )
     return DoctorReport(tuple(results), strict=strict)
 
 
@@ -301,6 +318,8 @@ def _render(report: DoctorReport) -> None:
                 changes = result.report.get("changes")
                 if isinstance(changes, list) and changes:
                     detail = f"{len(changes)} drift entries"
+            if result.step.name == "jh.auth" and result.severity is Severity.WARN:
+                detail = "not logged in or refresh token expired"
         if detail is None and result.output and result.severity is not Severity.OK:
             detail = result.output.splitlines()[0]
         print(

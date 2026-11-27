@@ -1107,6 +1107,42 @@ def test_upgrade_tools_text_mode_prints_failure_stderr(tmp_path: Path) -> None:
     assert "HTTP 401 Bad credentials" in failed.stderr
 
 
+def test_upgrade_tools_resolves_dynamic_gh_token_when_unset(tmp_path: Path) -> None:
+    completed, _ = _run_upgrade(tmp_path, "--json")
+    assert completed.returncode == 0
+    bin_dir = tmp_path / "home/.local/bin"
+    gh_bin = bin_dir / "gh"
+    gh_bin.write_text(
+        "#!/bin/sh\n"
+        'if [ "$1" = "auth" ] && [ "$2" = "token" ] && [ "$4" = "alex-jhs" ]; then echo "dyn-alex-token"; exit 0; fi\n'
+        "exit 1\n"
+    )
+    gh_bin.chmod(0o755)
+    seen = tmp_path / "seen-token.txt"
+    mise_bin = bin_dir / "mise"
+    head, body = mise_bin.read_text().split("\n", 1)
+    mise_bin.write_text(
+        f'{head}\nif [ "$1" = "lock" ]; then printf "%s" "$MISE_GITHUB_TOKEN" > "{seen}"; exit 0; fi\n{body}'
+    )
+    mise_bin.chmod(0o755)
+    env = {
+        k: v
+        for k, v in os.environ.items()
+        if k not in {"MISE_GITHUB_TOKEN", "GH_TOKEN"}
+    }
+    env.update(HOME=str(tmp_path / "home"), PATH=str(bin_dir))
+    result = subprocess.run(
+        [sys.executable, "-m", "scripts.upgrade_tools", "--apply", "--json"],
+        cwd=tmp_path / "project",
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    assert seen.read_text() == "dyn-alex-token"
+
+
 def test_failed_report_retry_preserves_quoted_arguments_cwd_and_input(
     tmp_path: Path,
 ) -> None:

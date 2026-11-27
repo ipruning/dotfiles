@@ -2,6 +2,8 @@ import json
 import subprocess
 from pathlib import Path
 
+import pytest
+
 from scripts.doctor import inspect_doctor
 from scripts.models import Severity
 
@@ -47,6 +49,16 @@ def test_doctor_aggregates_internal_and_external_checks_without_mutation(
             )
         if command[0] == str(mise):
             return subprocess.CompletedProcess(command, 0, "No problems found\n", "")
+        if command[0].endswith("/jh"):
+            return subprocess.CompletedProcess(
+                command,
+                0,
+                json.dumps({
+                    "ok": True,
+                    "data": {"logged_in": True, "refresh_valid": True},
+                }),
+                "",
+            )
         if command[0].endswith("skillshare"):
             raise AssertionError(
                 "Skillshare diagnostics must not run during inspection"
@@ -63,6 +75,8 @@ def test_doctor_aggregates_internal_and_external_checks_without_mutation(
     assert results["dotfiles.check"].severity is Severity.WARN
     assert results["dotfiles.diff"].severity is Severity.WARN
     assert results["mise.doctor"].severity is Severity.OK
+    assert results["gh.auth"].severity is Severity.OK
+    assert results["jh.auth"].severity is Severity.OK
     assert report.ok is True
     assert [
         command[command.index("-m") + 1] for command in calls if "-m" in command
@@ -95,7 +109,55 @@ def test_doctor_skips_unavailable_external_owners(tmp_path: Path) -> None:
     skipped = {result.step.name for result in report.results if result.severity is None}
     assert skipped == {
         "brew.doctor",
+        "gh.auth",
+        "jh.auth",
         "mise.doctor",
         "pueue.status",
     }
     assert report.ok is True
+
+
+def test_doctor_flags_expired_gh_jh_and_static_mise_token(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    home = tmp_path / "home"
+    home.mkdir()
+    monkeypatch.setenv("MISE_GITHUB_TOKEN", "synthetic-stale-token")
+
+    def runner(
+        command: tuple[str, ...],
+        _environment: dict[str, str],
+        _timeout_seconds: int,
+    ) -> subprocess.CompletedProcess[str]:
+        if "-m" in command:
+            return subprocess.CompletedProcess(
+                command, 0, json.dumps({"ok": True, "summary": {}}), ""
+            )
+        if command[0].endswith("/gh"):
+            return subprocess.CompletedProcess(
+                command, 1, "", "HTTP 401: Bad credentials\n"
+            )
+        if command[0].endswith("/jh"):
+            return subprocess.CompletedProcess(
+                command,
+                0,
+                json.dumps({
+                    "ok": True,
+                    "data": {"logged_in": True, "refresh_valid": False},
+                }),
+                "",
+            )
+        return subprocess.CompletedProcess(command, 0, "ok\n", "")
+
+    report = inspect_doctor(
+        home,
+        executable_finder=lambda tool: (
+            f"/tools/{tool}" if tool in {"gh", "jh"} else None
+        ),
+        runner=runner,
+    )
+    results = {result.step.name: result for result in report.results}
+    assert results["gh.auth"].severity is Severity.ERROR
+    assert results["jh.auth"].severity is Severity.WARN
+    assert results["env.mise-github-token"].severity is Severity.WARN
+    assert report.ok is False

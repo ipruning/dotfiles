@@ -204,8 +204,9 @@ YAML without running the CLI (`skillshare status` and `doctor` may migrate or
 write, so run them explicitly). On macOS it reads `macos-session-health status`.
 
 `doctor` aggregates `check`, `diff`, a `mise-sync` preview, and `lint`, then
-probes `mise doctor`, `brew doctor`, and `pueue status` when present. It skips
-`skillshare doctor`, which writes. `clean` previews `mise prune` (unused tool
+probes `mise doctor`, `brew doctor`, `gh auth status`, `jh auth status`, and
+`pueue status` when present, and warns if a static `MISE_GITHUB_TOKEN` is set in
+the environment. It skips `skillshare doctor`, which writes. `clean` previews `mise prune` (unused tool
 versions and missing tracked configs), `brew autoremove`, and `brew cleanup`,
 and runs them only with `--apply`.
 
