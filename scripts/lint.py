@@ -69,7 +69,6 @@ OPTIONAL_PATHS = {
     ("reference/.zshrc", "/usr/local/Cellar"),
     ("reference/.zshrc", "/usr/local/share/zsh/site-functions"),
     ("reference/.zshrc", "/usr/local/share/info"),
-    ("shell/zsh/env.zsh", "/usr/local/bin/op"),
 }
 
 
