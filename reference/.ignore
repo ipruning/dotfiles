@@ -1,21 +1,14 @@
-# cache
-.cache/
-.eslintcache
-.mypy_cache/
-.parcel-cache/
-.pytest_cache/
-.ruff_cache/
-__pycache__/
-
-# macos
-.DS_Store
-
 # git
 .git/
 
-# typescript
-node_modules/
+# cache
+.cache/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.rumdl_cache/
+__pycache__/
 
-# python
+# dependencies and virtualenvs
+node_modules/
 .venv/
-uv.lock
