@@ -109,6 +109,7 @@ inspection exits non-zero.
 ```bash
 mise run diff
 mise run diff -- git --json
+mise run diff -- --require-links
 ```
 
 `restore` and `adopt` are application-scoped mirrors; there is no restore-all.
@@ -204,8 +205,9 @@ write, so run them explicitly). On macOS it reads `macos-session-health status`.
 
 `doctor` aggregates `check`, `diff`, a `mise-sync` preview, and `lint`, then
 probes `mise doctor`, `brew doctor`, and `pueue status` when present. It skips
-`skillshare doctor`, which writes. `clean` previews `mise prune --tools`,
-`brew autoremove`, and `brew cleanup`, and runs them only with `--apply`.
+`skillshare doctor`, which writes. `clean` previews `mise prune` (unused tool
+versions and missing tracked configs), `brew autoremove`, and `brew cleanup`,
+and runs them only with `--apply`.
 
 ## Host updates
 
