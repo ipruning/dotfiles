@@ -48,5 +48,12 @@ use = "yazi-rs/plugins:git"
 rev = "1ef5fe0"
 hash = "347cc6b190eb0c2fd60513cc7ae37412"
 
-[flavor]
-deps = []
+[[flavor.deps]]
+use = "yazi-rs/flavors:catppuccin-mocha"
+rev = "38c08d8"
+hash = "57d33c9c6107017bf8afc8df186356c5"
+
+[[flavor.deps]]
+use = "yazi-rs/flavors:catppuccin-latte"
+rev = "38c08d8"
+hash = "f4044a93fcd86ac34f170f9f69d40a2"
