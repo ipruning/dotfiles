@@ -2,7 +2,7 @@
 .DS_Store
 
 # opensync
-.pi/opensync-debug.jsonl
+**/.pi/opensync-debug.jsonl
 
 # Claude Code
 **/.claude/settings.local.json

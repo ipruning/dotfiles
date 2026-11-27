@@ -9,6 +9,7 @@
 __pycache__/
 .pytest_cache/
 .ruff_cache/
+.rumdl_cache/
 .venv/
 
 # Local output of mise run generate
@@ -17,6 +18,5 @@ __pycache__/
 # Amp portal metadata is local to each orb
 /.amp/portals/*
 
-# Application-managed backups and logs written into linked config directories
-/reference/.config/karabiner/automatic_backups/
+# Application-managed logs written into linked config directories
 /reference/.config/btop/btop.log
