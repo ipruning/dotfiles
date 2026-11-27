@@ -1,3 +1,0 @@
-# Supply-chain defense: only install packages published ≥7 days ago (unit: minutes)
-# https://pnpm.io/settings#minimumreleaseage-
-# minimum-release-age=10080
