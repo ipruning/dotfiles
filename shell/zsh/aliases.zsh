@@ -12,12 +12,7 @@ alias du="du -h"
 
 alias grep="grep --color=auto"
 
-# BSD ls (macOS default) doesn't accept --color=auto
-if [[ $OSTYPE == darwin* ]]; then
-  alias ls="ls -G"
-else
-  alias ls="ls --color=auto"
-fi
+alias ls="ls --color=auto"
 
 alias q="exit"
 
