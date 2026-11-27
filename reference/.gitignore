@@ -3,3 +3,6 @@
 
 # opensync
 .pi/opensync-debug.jsonl
+
+# Claude Code
+**/.claude/settings.local.json

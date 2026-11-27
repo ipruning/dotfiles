@@ -20,16 +20,6 @@ format = "[$symbol]($style)"
 style = "bold red"
 symbol = "SU "
 
-[username]
-format = "[$user]($style)"
-style_root = "bold red"
-style_user = "bold yellow"
-
-[hostname]
-ssh_only = true
-format = "[$hostname]($style) "
-style = "bold yellow"
-
 [custom.ssh_user_host]
 command = "printf '%s@%s' \"$USER\" \"$(hostname -s)\""
 format = "[$output]($style) "
@@ -44,21 +34,6 @@ format = '[\[$symbol$output\]]($style) '
 require_repo = true
 style = "bold dimmed yellow"
 when = "[ -f ~/.config/gh/hosts.yml ]"
-
-# [custom.git_user]
-# command = "git config --get user.name"
-# format = '[\[$symbol$output\]]($style) '
-# require_repo = true
-# style = "bold dimmed yellow"
-# when = true
-
-# [custom.git_email]
-# command = "git config --get user.email"
-# format = '[$symbol$output]($style) '
-# require_repo = true
-# style = "bold dimmed yellow"
-# symbol = ""
-# when = true
 
 [custom.modal_profile]
 command = "awk -F'[][]' '/^\\[[^]]+\\]$/{if (section && active==\"true\" && !found) { if (env != \"\") { print section \" \" env } else { print section }; found=1; exit } section=$2; active=\"\"; env=\"\"} /^[[:space:]]*active[[:space:]]*=[[:space:]]*/ {v=$0; sub(/^[[:space:]]*active[[:space:]]*=[[:space:]]*/, \"\", v); gsub(/[[:space:]]/, \"\", v); if (v == \"true\") active=\"true\"} /^[[:space:]]*environment[[:space:]]*=[[:space:]]*/ {env=$0; sub(/^[[:space:]]*environment[[:space:]]*=[[:space:]]*/, \"\", env); gsub(/[[:space:]]/, \"\", env); gsub(/^\\\"|\\\"$/, \"\", env)} END {if (!found && section && active==\"true\") { if (env != \"\") { print section \" \" env } else { print section }}}' ~/.modal.toml"
@@ -87,9 +62,6 @@ min_time = 10_000
 min_time_to_notify = 3600_000
 show_notifications = false
 show_milliseconds = false
-
-[[battery.display]]
-threshold = 20
 
 [[battery.display]]
 threshold = 30
