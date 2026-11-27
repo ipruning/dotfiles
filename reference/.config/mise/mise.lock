@@ -4,24 +4,20 @@ lockfile_version = 4
 
 [[tools.agent-browser]]
 version = "0.45.0"
-aube = { path = "locks/agent-browser/0.45.0", digest = "sha256:57d8e184ac8ee6ca389ea457c407664f9c43b630fbda156349844f802c778abc" }
-backend = "npm:agent-browser"
+backend = "aqua:vercel-labs/agent-browser"
 specifiers = ["latest"]
 
-[[tools.argocd]]
-version = "2.11.7"
-backend = "aqua:argoproj/argo-cd"
-specifiers = ["2.11.7"]
+[tools.agent-browser."platforms.linux-x64"]
+checksum = "sha256:2f546d64dcf5faca94b8b98effa78233ffe25de1d7b78c8392ac444e6e9858b3"
+checksum_source = "mise-versions"
+url = "https://github.com/vercel-labs/agent-browser/releases/download/v0.45.0/agent-browser-linux-musl-x64"
+url_api = "https://api.github.com/repos/vercel-labs/agent-browser/releases/assets/793079822"
 
-[tools.argocd."platforms.linux-x64"]
-checksum = "sha256:64db335c5b1b6b63ab5d6530894429a803897d2ab8293272ad6e8e166e677b35"
-url = "https://github.com/argoproj/argo-cd/releases/download/v2.11.7/argocd-linux-amd64"
-url_api = "https://api.github.com/repos/argoproj/argo-cd/releases/assets/181531702"
-
-[tools.argocd."platforms.macos-arm64"]
-checksum = "sha256:6f68dbf63c603fec79e87b70a54e726542d2434d5f66564ce87a1117a580e95c"
-url = "https://github.com/argoproj/argo-cd/releases/download/v2.11.7/argocd-darwin-arm64"
-url_api = "https://api.github.com/repos/argoproj/argo-cd/releases/assets/181531703"
+[tools.agent-browser."platforms.macos-arm64"]
+checksum = "sha256:bdd665cddefcc61488e0ffe383d7aee33d47b7a6b5b36dc75ae10d1e827826f7"
+checksum_source = "mise-versions"
+url = "https://github.com/vercel-labs/agent-browser/releases/download/v0.45.0/agent-browser-darwin-arm64"
+url_api = "https://api.github.com/repos/vercel-labs/agent-browser/releases/assets/793079824"
 
 [[tools.btop]]
 version = "1.4.8"

@@ -4,7 +4,7 @@ min_version = { hard = "2026.11.1" }
 [tool_alias]
 # Keep canonical tool identities pinned to explicit backends; [tools] must
 # use these aliases rather than declaring the same full backend separately.
-agent-browser = "npm:agent-browser"
+agent-browser = "aqua:vercel-labs/agent-browser"
 btop = "aqua:aristocratos/btop"
 gh = "aqua:cli/cli"
 golangci-lint = "aqua:golangci/golangci-lint"
@@ -69,7 +69,6 @@ skillshare = "latest"
 "github:larksuite/cli" = "latest"
 "npm:cf" = "latest"
 "pypi:google-colab-cli" = "latest"
-argocd = "2.11.7"
 lazydocker = "latest"
 xurl = "latest"
 
