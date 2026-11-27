@@ -280,10 +280,11 @@ source; other hosts pull it and run `skillshare sync`. This keeps
 
 `skillshare sync` writes skills; `sync --all` also writes agents, extras
 (`~/.codex`, `~/.claude`), MCP settings, and hooks, but not plugins. Before any
-sync, preview everything:
+sync, preview without `--force` (`--force` plans pruning external symlinks such
+as Surge or Omarchy built-in skills):
 
 ```bash
-skillshare sync --all --global --dry-run --force --json
+skillshare sync --all --global --dry-run --json
 ```
 
 Targets merge, so `local > 0` with `pruned == 0` keeps local entries; only

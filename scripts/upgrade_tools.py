@@ -228,6 +228,10 @@ def main(argv: list[str] | None = None) -> int:
                     result.reason,
                     file=sys.stderr if result.status is Status.FAILED else sys.stdout,
                 )
+            if result.status is Status.FAILED:
+                detail = (result.stderr_tail or result.stdout_tail or "").strip()
+                if detail:
+                    print(detail, file=sys.stderr)
         print(document["notes"][0])
         for command in document["next"]:
             print(command)

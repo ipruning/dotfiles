@@ -1084,6 +1084,29 @@ def test_upgrade_tools_audit_only_keeps_preview_read_only(tmp_path: Path) -> Non
     assert not (tmp_path / "upgrade.log").exists()
 
 
+def test_upgrade_tools_text_mode_prints_failure_stderr(tmp_path: Path) -> None:
+    completed, _ = _run_upgrade(tmp_path, "--json")
+    assert completed.returncode == 0
+    mise_bin = tmp_path / "home/.local/bin/mise"
+    head, body = mise_bin.read_text().split("\n", 1)
+    mise_bin.write_text(
+        f'{head}\nif [ "$1" = "lock" ]; then echo "HTTP 401 Bad credentials" >&2; exit 1; fi\n{body}'
+    )
+    mise_bin.chmod(0o755)
+    env = os.environ.copy()
+    env.update(HOME=str(tmp_path / "home"), PATH=str(tmp_path / "home/.local/bin"))
+    failed = subprocess.run(
+        [sys.executable, "-m", "scripts.upgrade_tools", "--apply"],
+        cwd=tmp_path / "project",
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert failed.returncode == 1
+    assert "HTTP 401 Bad credentials" in failed.stderr
+
+
 def test_failed_report_retry_preserves_quoted_arguments_cwd_and_input(
     tmp_path: Path,
 ) -> None:

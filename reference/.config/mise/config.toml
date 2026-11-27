@@ -38,7 +38,6 @@ ruby = "latest"
 rust = { version = "latest", mr_boxington = true }
 uv = "latest"
 yarn = "latest"
-zig = "latest"
 
 # Shell and terminal
 "cargo:https://github.com/ipruning/atuin" = { version = "rev:92d869de2506ece3c8b8474d20d6a1aed5fbe4a7", crate = "atuin", bin = "atuin", locked = true }
