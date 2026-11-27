@@ -1,4 +1,6 @@
 {
-	"themeMode": "fixed",
-	"theme": "catppuccin"
+	"themeMode": "system",
+	"theme": "catppuccin",
+	"darkTheme": "catppuccin",
+	"lightTheme": "catppuccin-latte"
 }
