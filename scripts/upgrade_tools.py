@@ -95,11 +95,20 @@ def _mise_baseline(repo_root: Path, home: Path) -> UpdateResult:
     try:
         reference = repo_root / "reference/.config/mise/config.toml"
         live = home / ".config/mise/config.toml"
-        if not live.samefile(reference) or not live.with_name("mise.lock").samefile(
-            reference.with_name("mise.lock")
+        reference_locks = reference.with_name("locks")
+        live_locks = live.with_name("locks")
+        locks_linked = not reference_locks.exists() or (
+            live_locks.exists() and live_locks.samefile(reference_locks)
+        )
+        if (
+            not live.samefile(reference)
+            or not live.with_name("mise.lock").samefile(
+                reference.with_name("mise.lock")
+            )
+            or not locks_linked
         ):
             raise ValueError(
-                "live global mise config and lock must link to this checkout; preview mise-sync"
+                "live global mise config, lock, and locks must link to this checkout; preview mise-sync"
             )
         configs = loaded_global_configs(home, executable)
         if configs != (live,):

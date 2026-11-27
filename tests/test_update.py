@@ -909,6 +909,7 @@ def _run_upgrade(
     tmp_path: Path,
     *arguments: str,
     linked: bool = True,
+    locks_linked: bool = True,
     yazi_linked: bool | None = None,
     alternate_config: bool = False,
 ):
@@ -920,6 +921,8 @@ def _run_upgrade(
     shutil.copy2(
         source_root / "reference/.config/mise/mise.lock", source.with_name("mise.lock")
     )
+    source_locks = source.with_name("locks")
+    source_locks.mkdir()
     source.write_text(
         '[tools]\npython = "latest"\nzig = "0.16.0"\n'
         '"cargo:https://github.com/ipruning/atuin" = { version = "rev:abc" }\n'
@@ -942,6 +945,11 @@ def _run_upgrade(
     live_lock = live.with_name("mise.lock")
     live_lock.unlink()
     live_lock.symlink_to(source.with_name("mise.lock"))
+    live_locks = live.with_name("locks")
+    if locks_linked:
+        live_locks.symlink_to(source_locks, target_is_directory=True)
+    else:
+        live_locks.mkdir()
     if linked:
         live.symlink_to(source)
     else:
@@ -1003,6 +1011,15 @@ def test_upgrade_tools_cli_requires_shared_config_link(tmp_path: Path) -> None:
     assert document["steps"][0]["status"] == "failed"
     assert "must link" in document["steps"][0]["reason"]
     assert document["steps"][1]["status"] == "skipped"
+    assert not log.exists()
+
+
+def test_upgrade_tools_cli_requires_shared_locks_link(tmp_path: Path) -> None:
+    completed, log = _run_upgrade(tmp_path, "--apply", "--json", locks_linked=False)
+    assert completed.returncode == 1
+    document = json.loads(completed.stdout)
+    assert document["steps"][0]["status"] == "failed"
+    assert "must link" in document["steps"][0]["reason"]
     assert not log.exists()
 
 
