@@ -23,14 +23,14 @@ extras:
   file: AGENTS.md
   targets:
   - path: ~/.codex
-    mode: copy
+    mode: symlink
   - path: ~/.claude
-    mode: copy
+    mode: symlink
     as: CLAUDE.md
   - path: ~/.pi/agent
-    mode: copy
+    mode: symlink
   - path: ~/.gemini/config
-    mode: copy
+    mode: symlink
 
 ignore:
 - '**/.DS_Store'
