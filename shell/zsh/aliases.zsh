@@ -23,7 +23,7 @@ alias q="exit"
 
 alias rsyncssh="rsync -Pr --rsh=ssh"
 
-alias cdr='cd $(git rev-parse --show-toplevel)'
+alias cdr='cd "$(git rev-parse --show-toplevel)"'
 
 # 👇 macOS
 if [[ $OSTYPE == darwin* ]]; then
@@ -80,6 +80,3 @@ alias -g NE='2>/dev/null'
 alias -g NUL='>/dev/null 2>&1'
 
 alias -g JQ='| jq'
-
-alias -g C='| c'
-alias -g P='p |'

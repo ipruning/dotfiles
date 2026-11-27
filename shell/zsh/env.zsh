@@ -243,11 +243,18 @@ bindkey "^F" forward-char
 if [[ "$TERM_PROGRAM" == "vscode" && -n ${commands[cursor]:-} ]]; then
   export EDITOR="${commands[cursor]} --wait"
   export VISUAL="$EDITOR"
-fi
-
-if [[ ( "$TERM_PROGRAM" == "zed" || "$TERM_PROGRAM" == "ghostty" ) && -n ${commands[zed]:-} ]]; then
+elif [[ ( "$TERM_PROGRAM" == "zed" || "$TERM_PROGRAM" == "ghostty" ) && -n ${commands[zed]:-} ]]; then
   export EDITOR="${commands[zed]} --wait"
   export VISUAL="$EDITOR"
+elif [[ -z ${EDITOR:-} ]]; then
+  for _editor in nvim vim vi; do
+    if [[ -n ${commands[$_editor]:-} ]]; then
+      export EDITOR="${commands[$_editor]}"
+      export VISUAL="${VISUAL:-$EDITOR}"
+      break
+    fi
+  done
+  unset _editor
 fi
 
 # 👇 Functions
