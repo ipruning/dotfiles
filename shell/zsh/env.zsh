@@ -17,7 +17,7 @@ export XDG_CONFIG_HOME="$HOME/.config"
 
 # 👇 zsh Theme
 if command -v starship >/dev/null 2>&1 && [[ -f "$GENERATED_FUNCTIONS_DIR/_starship.zsh" ]]; then
-  source "$GENERATED_FUNCTIONS_DIR/_starship.zsh"
+  source "$GENERATED_FUNCTIONS_DIR/_starship.zsh" || eval "$(starship init zsh)"
 fi
 
 # 👇 zsh options

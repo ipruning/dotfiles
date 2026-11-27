@@ -32,7 +32,7 @@ FUNCTION_SPECS = (
         "starship-bash",
         "starship",
         "bash",
-        ("starship", "init", "bash"),
+        ("starship", "init", "bash", "--print-full-init"),
         "_starship.bash",
     ),
     ShellInitSpec(

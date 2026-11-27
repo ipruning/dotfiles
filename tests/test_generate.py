@@ -1502,3 +1502,46 @@ fi
     )
     assert missing.returncode == 0, missing.stderr
     assert missing.stdout.strip() == ("absent" if shell == "nu" else "1:absent")
+
+
+def test_guarded_activation_drops_baked_path_and_guards_starship_binary():
+    from scripts.generate_commands import guarded_activation
+    from scripts.generate_models import GenerateSpec
+
+    mise = guarded_activation(
+        GenerateSpec(
+            "function.mise-bash", "mise", command=("/bin/mise", "activate", "bash")
+        ),
+        "export __MISE_ORIG_PATH='/baked/orig'\n"
+        "export PATH='/repo/.venv/bin:/old/install/bin'\n"
+        'if [ -z "${__MISE_ORIG_PATH:-}" ]; then\n'
+        '\texport __MISE_ORIG_PATH="$PATH"\n'
+        "fi\n",
+    )
+    assert "/baked/orig" not in mise and "/repo/.venv" not in mise
+    assert '\texport __MISE_ORIG_PATH="$PATH"\n' in mise
+
+    nu = guarded_activation(
+        GenerateSpec(
+            "function.mise-nu", "mise", command=("/bin/mise", "activate", "nu")
+        ),
+        "def --env update-env [] {\n"
+        "  $env.PATH = ($var.value | split row (char esep))\n"
+        "}\n"
+        "export-env {\n"
+        "  $env.__MISE_ORIG_PATH = r#'/baked/orig'#\n"
+        "$env.PATH = (r#'/repo/.venv/bin'# | split row (char esep))\n"
+        "}\n",
+    )
+    assert "/baked/orig" not in nu and "/repo/.venv" not in nu
+    assert "$env.PATH = ($var.value" in nu
+
+    starship = guarded_activation(
+        GenerateSpec(
+            "function.starship", "starship", command=("starship", "init", "zsh")
+        ),
+        "PROMPT='$('/opt/starship/1.0/starship' prompt --keymap=x)'\n",
+    )
+    assert starship.startswith(
+        "if [ ! -x /opt/starship/1.0/starship ]; then return 1; fi\n"
+    )

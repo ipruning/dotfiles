@@ -20,7 +20,7 @@ export PATH
 case $- in
   *i*)
     if command -v starship >/dev/null 2>&1 && [ -f "$_dotfiles_functions_dir/_starship.bash" ]; then
-      . "$_dotfiles_functions_dir/_starship.bash"
+      . "$_dotfiles_functions_dir/_starship.bash" || eval "$(starship init bash)"
     fi
     alias ..='cd ..'
     alias ...='cd ../..'

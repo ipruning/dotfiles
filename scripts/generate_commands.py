@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import shlex
 import subprocess
 import sys
@@ -14,6 +15,11 @@ from typing import cast
 
 from .generate_models import AtomicWriter, GenerateSpec
 from .process import run_process_group
+
+_BAKED_MISE_PATH = re.compile(
+    r"(export (PATH|__MISE_ORIG_PATH)='|\s*\$env\.(PATH|__MISE_ORIG_PATH) = \(?r#')"
+)
+_STARSHIP_BINARY = re.compile(r"(/[^\s'\"()]+/starship)'? (?:prompt|time)\b")
 
 
 def guarded_activation(spec: GenerateSpec, output: str) -> str:
@@ -46,9 +52,22 @@ _dotfiles_atuin() {
             .replace("atuin ai ", "_dotfiles_atuin ai ")
             .replace("PATH='$PATH' ATUIN_SESSION=", "PATH=${(qq)PATH} ATUIN_SESSION=")
         )
+    if spec.tool == "starship" and (binary := _STARSHIP_BINARY.search(output)):
+        # The prompt calls this versioned path directly to avoid a mise shim
+        # on every prompt; fail the source when an upgrade has removed it so
+        # the shell falls back to a live `starship init`.
+        return f"if [ ! -x {shlex.quote(binary[1])} ]; then return 1; fi\n" + output
     if spec.tool != "mise" or not spec.name.startswith("function."):
         return output
     executable = spec.command[0]
+    # `mise activate` snapshots the generating process's PATH. Sourcing that
+    # snapshot would seed every shell with this repository's virtualenv and
+    # stale install directories; the activation hook recomputes PATH at load.
+    output = "".join(
+        line
+        for line in output.splitlines(keepends=True)
+        if not _BAKED_MISE_PATH.match(line)
+    )
     if spec.name == "function.mise-nu":
         # mise's Nushell template has no load-time PATH capture, so supply the
         # one the Bash/Zsh templates perform when sourced.
