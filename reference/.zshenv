@@ -44,6 +44,11 @@ _dotfiles_core_path() {
 
 _dotfiles_core_path
 
+# Non-interactive tools read these too; on macOS, tools that honor XDG would
+# otherwise fall back to ~/Library/Application Support.
+export XDG_CONFIG_HOME="$HOME/.config"
+export HOMEBREW_NO_ANALYTICS=1
+
 # Optional machine/private environment. Materialize it deliberately from
 # `reference/.zshenv.private.tpl.zsh`; repository tasks never inject secrets.
 # Missing private env must not break PATH bootstrap or non-interactive shells.

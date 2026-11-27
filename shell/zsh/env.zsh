@@ -12,9 +12,6 @@ typeset -gx DOTFILES_ROOT
 GENERATED_FUNCTIONS_DIR="$DOTFILES_ROOT/generated/functions"
 PLUGINS_DIR="$DOTFILES_ROOT/generated/plugins"
 
-# 👇 XDG Config Home
-export XDG_CONFIG_HOME="$HOME/.config"
-
 # 👇 zsh Theme
 if command -v starship >/dev/null 2>&1 && [[ -f "$GENERATED_FUNCTIONS_DIR/_starship.zsh" ]]; then
   source "$GENERATED_FUNCTIONS_DIR/_starship.zsh" || eval "$(starship init zsh)"
@@ -99,9 +96,6 @@ openv() {
 openv-longbridge() {
   openv qikdfxnulzghidg6iu7jf3sboq
 }
-
-# 👇 Brew
-export HOMEBREW_NO_ANALYTICS=1
 
 # 👇 OrbStack
 if [[ -f "$HOME/.orbstack/shell/init.zsh" ]]; then
