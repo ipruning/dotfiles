@@ -81,4 +81,6 @@ ZSH_SHELL_DIR="$DOTFILES_ROOT/shell/zsh"
   done
 }
 
+unset GENERATED_COMPLETIONS_DIR completion_paths ZSH_SHELL_DIR config_files file
+
 :

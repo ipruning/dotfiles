@@ -9,7 +9,6 @@ else
 fi
 typeset -gx DOTFILES_ROOT
 
-GENERATED_COMPLETIONS_DIR="$DOTFILES_ROOT/generated/completions"
 GENERATED_FUNCTIONS_DIR="$DOTFILES_ROOT/generated/functions"
 PLUGINS_DIR="$DOTFILES_ROOT/generated/plugins"
 
@@ -191,3 +190,5 @@ if command -v atuin >/dev/null 2>&1 && [[ -f "$GENERATED_FUNCTIONS_DIR/_atuin.zs
   fi
   source "$GENERATED_FUNCTIONS_DIR/_atuin.zsh"
 fi
+
+unset GENERATED_FUNCTIONS_DIR PLUGINS_DIR
