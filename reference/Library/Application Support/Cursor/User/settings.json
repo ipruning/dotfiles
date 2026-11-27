@@ -40,7 +40,7 @@
     "editor.defaultFormatter": "charliermarsh.ruff"
   },
   "[sql]": {
-    "editor.defaultFormatter": "dorzey.vscode-sqlfluff"
+    "editor.defaultFormatter": "sqlfluff.vscode-sqlfluff"
   },
   "[typst-code]": {
     "editor.wordSeparators": "`~!@#$%^&*()=+[{]}\\|;:'\",.<>/?"
@@ -293,6 +293,7 @@
   },
   "notebook.formatOnSave.enabled": true,
   "path-autocomplete.triggerOutsideStrings": true,
+  "python-envs.terminal.autoActivationType": "off",
   "python.languageServer": "None",
   "python.terminal.activateEnvironment": false,
   "redhat.telemetry.enabled": false,
