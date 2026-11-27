@@ -71,6 +71,7 @@ ZSH_SHELL_DIR="$DOTFILES_ROOT/shell/zsh"
 [[ -d "$ZSH_SHELL_DIR" ]] && {
   config_files=(
     "$ZSH_SHELL_DIR/aliases.zsh"
+    "$ZSH_SHELL_DIR/zle.zsh"
     "$ZSH_SHELL_DIR/env.zsh"
     "$ZSH_SHELL_DIR/env.private.zsh"
     "$ZSH_SHELL_DIR/completions.zsh"  # after env.zsh so fzf-tab plugin is loaded first

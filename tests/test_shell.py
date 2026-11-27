@@ -1008,3 +1008,37 @@ def test_openv_reads_environment_once_and_surfaces_op_failure(tmp_path: Path) ->
     assert completed.returncode == 1
     assert log.read_text().splitlines() == ["environment read example"]
     assert "auth failed" in completed.stderr
+
+
+@requires_zsh
+def test_zsh_zle_binds_custom_word_motion_and_editing_widgets(tmp_path: Path) -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    zle_file = repo_root / "shell/zsh/zle.zsh"
+    completed = subprocess.run(
+        [
+            "zsh",
+            "-dfc",
+            (
+                f'source "{zle_file}"; '
+                'bindkey -M emacs "^X^E"; '
+                'bindkey -M emacs "^X^Y"; '
+                'bindkey -M emacs "\\e[1;5C"; '
+                'bindkey -M emacs "\\e[1;5D"; '
+                "zle -lL backward-word forward-word"
+            ),
+        ],
+        env={"HOME": str(tmp_path), "PATH": "/usr/bin:/bin"},
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert completed.returncode == 0, completed.stderr
+    assert completed.stdout.splitlines() == [
+        '"^X^E" edit-command-line',
+        '"^X^Y" copy-command',
+        '"^[[1;5C" forward-word',
+        '"^[[1;5D" backward-word',
+        "zle -N backward-word _dotfiles_zle_backward_word",
+        "zle -N forward-word _dotfiles_zle_forward_word",
+    ]
