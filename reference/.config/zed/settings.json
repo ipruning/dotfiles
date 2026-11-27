@@ -45,7 +45,11 @@
     "JSONC": ["**/.zed/**/*.json", "**/zed/**/*.json", "**/.vscode/**/*.json"],
   },
   "format_on_save": "on",
-  "icon_theme": "Catppuccin Mocha",
+  "icon_theme": {
+    "mode": "system",
+    "light": "Catppuccin Latte",
+    "dark": "Catppuccin Mocha",
+  },
   "indent_guides": {
     "coloring": "indent_aware",
     "enabled": true,
@@ -105,7 +109,11 @@
       "breadcrumbs": false,
     },
   },
-  "theme": "Catppuccin Mocha",
+  "theme": {
+    "mode": "system",
+    "light": "Catppuccin Latte",
+    "dark": "Catppuccin Mocha",
+  },
   "ui_font_family": "MonoLisaCode",
   "ui_font_size": 15.0,
   "ui_font_weight": 500,

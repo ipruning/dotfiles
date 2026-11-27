@@ -475,6 +475,7 @@
     "vscode-mogami.concurrency": 8,
     "vscode-mogami.enableCodeLens": true,
     "vscode-mogami.usePrivateSource": false,
+    "window.autoDetectColorScheme": true,
     "window.commandCenter": false,
     "window.zoomLevel": -1,
     "workbench.colorCustomizations": {
@@ -489,6 +490,8 @@
         "*.pdf": "latex-workshop-pdf-hook"
     },
     "workbench.iconTheme": "catppuccin-mocha",
+    "workbench.preferredDarkColorTheme": "Catppuccin Mocha",
+    "workbench.preferredLightColorTheme": "Catppuccin Latte",
     "workbench.secondarySideBar.defaultVisibility": "hidden",
     "workbench.settings.editor": "json",
     "workbench.startupEditor": "none",
