@@ -1,0 +1,92 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+
+  .:
+    dependencies:
+      agent-browser:
+        specifier: 0.45.0
+        version: 0.45.0
+
+packages:
+
+  '@agent-browser/cli-darwin-arm64@0.45.0':
+    resolution: {integrity: sha512-5oXJso0waXDJ4JhRlf0HMFWPfzCVGCDsAmQKrN05cDluqCCUj55ImWK0XEtiFkjwdJDpHJIJV3f6OOJD+K85Bg==}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@agent-browser/cli-darwin-x64@0.45.0':
+    resolution: {integrity: sha512-ILY9co+hxsupMFvKsh+qi3+5I2QiDM44eEgf/3S8scKpP4rVX/vXEk6gScJQ9fw4qQyg37A58JLqbVSZbKUsbw==}
+    cpu: [x64]
+    os: [darwin]
+
+  '@agent-browser/cli-linux-arm64-gnu@0.45.0':
+    resolution: {integrity: sha512-CpYFt3QaKtnKoytgXHt/pdQjN5ZSC179YrXXhLATEGxNhyJgfuSyHGPrAtfSJ1EKDEWwhcf7Lm1yn7UKBiT8XQ==}
+    cpu: [arm64]
+    os: [linux]
+    libc: [glibc]
+
+  '@agent-browser/cli-linux-arm64-musl@0.45.0':
+    resolution: {integrity: sha512-LN9wXyxic18Lotfdm0K3KN/Q5dHkYJgXL+ppx4PyGMe2p0mGdOmvQsrNLF+e2iyk9+KLWWN8Y7DnJ9kejrGs3w==}
+    cpu: [arm64]
+    os: [linux]
+    libc: [musl]
+
+  '@agent-browser/cli-linux-x64-gnu@0.45.0':
+    resolution: {integrity: sha512-3Ep+BDxFHLEqPElw/68w1OWJNs+/ucQ9RvJ47O2weqsXCLvjiDF2pmVhteXcMgbH0hUI3QK6+LG3/2ZIuC2jBQ==}
+    cpu: [x64]
+    os: [linux]
+    libc: [glibc]
+
+  '@agent-browser/cli-linux-x64-musl@0.45.0':
+    resolution: {integrity: sha512-Tv3kZpTPFUZ7HFJj4yv5RX7ZkYaopnV9ARanKqpNI2H+hyHpV1Nb9icVLyshZdUCMRyU5rem6+YD5ZIXjv2HOg==}
+    cpu: [x64]
+    os: [linux]
+    libc: [musl]
+
+  '@agent-browser/cli-win32-x64-msvc@0.45.0':
+    resolution: {integrity: sha512-rxOyErhSwNpEh9o+fJke8NCGrVRJ0j3BtdsX7HV5qpHq2OE0UDPgkIZFPaz+bzjRLCmqTNXLh20NAFqWDYXoRQ==}
+    cpu: [x64, arm64]
+    os: [win32]
+
+  agent-browser@0.45.0:
+    resolution: {integrity: sha512-lzdtbRwTthLy/2FyxYBWpiI7rg6CGojoVjym1UP59hWwdTYDGSO13XwzQiEvYaInvDstHmNC5UBW7rXp6vMXMA==}
+    engines: {node: '>=22.0.0'}
+    hasBin: true
+
+snapshots:
+
+  '@agent-browser/cli-darwin-arm64@0.45.0':
+    optional: true
+
+  '@agent-browser/cli-darwin-x64@0.45.0':
+    optional: true
+
+  '@agent-browser/cli-linux-arm64-gnu@0.45.0':
+    optional: true
+
+  '@agent-browser/cli-linux-arm64-musl@0.45.0':
+    optional: true
+
+  '@agent-browser/cli-linux-x64-gnu@0.45.0':
+    optional: true
+
+  '@agent-browser/cli-linux-x64-musl@0.45.0':
+    optional: true
+
+  '@agent-browser/cli-win32-x64-msvc@0.45.0':
+    optional: true
+
+  agent-browser@0.45.0:
+    optionalDependencies:
+      '@agent-browser/cli-darwin-arm64': 0.45.0
+      '@agent-browser/cli-darwin-x64': 0.45.0
+      '@agent-browser/cli-linux-arm64-gnu': 0.45.0
+      '@agent-browser/cli-linux-arm64-musl': 0.45.0
+      '@agent-browser/cli-linux-x64-gnu': 0.45.0
+      '@agent-browser/cli-linux-x64-musl': 0.45.0
+      '@agent-browser/cli-win32-x64-msvc': 0.45.0
