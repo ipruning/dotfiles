@@ -1,15 +1,11 @@
 [core]
 excludesfile = ~/.gitignore
-ignorecase = false
 # Hunk is optional on Linux hosts; retain ordinary paging when it is absent.
 pager = "sh -c 'if command -v hunk >/dev/null 2>&1; then exec hunk pager; elif command -v less >/dev/null 2>&1; then exec less; else exec cat; fi'"
 quotePath = false
 
 [init]
 defaultBranch = main
-
-[protocol]
-version = 2 # https://blog.github.com/changelog/2018-11-08-git-protocol-v2-support/
 
 [log]
 date = iso
@@ -26,7 +22,10 @@ autoSetupRemote = true
 rebase = true
 
 [fetch]
-recurseSubmodules = true # still requires: git clone --recursive ...
+prune = true
+
+[submodule]
+recurse = true
 
 [rebase]
 autoStash = true
@@ -41,7 +40,6 @@ enabled = true
 tool = hunk
 colorMoved = default
 algorithm = histogram
-indentHeuristic = true
 
 [difftool]
 prompt = false
@@ -71,18 +69,17 @@ log-graphstat = "log --pretty='format:%C(auto)%h%d%n%s%n%C(auto)%C(blue)%an <%ae
 diff-conflicts = "diff --name-only --diff-filter=U"
 diff-unmerged = "!sh -c 'git diff --name-only -z --diff-filter=U | xargs -0 -n1 ${EDITOR:-vi}' -"
 
-blame = "blame -w -C -C -C"
+bl = "blame -w -C -C -C"
 
 view-it = "!sh -c 'git log -p --follow -- \"$1\"' -"
 
 untracked = "ls-files --others --exclude-standard"
-stage = "add -A"
-unstage = "reset HEAD --"
+unstage = "restore --staged --"
 
 pr = "!sh -c 'set -e; if [ $# -ne 2 ]; then \
   echo \"Usage: git pr <number> <branch>\"; exit 2; fi; \
   case \"$1\" in \"\"|*[!0-9]*|0*) echo \"PR number must be a decimal positive integer\"; exit 2;; esac; \
-  git fetch origin --prune; \
+  git fetch origin; \
   git fetch origin \"pull/$1/head:refs/heads/$2\"; \
   git switch -- \"$2\"; \
   git rebase --autostash origin/main' -"

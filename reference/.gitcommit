@@ -13,7 +13,7 @@
 #    breaking: Changes that should result in a new major version release.
 #    build:    Changes that affect the build system or external dependencies
 #    ci:       Changes to our CI configuration files and scripts
-#    doc:      Documentation only changes
+#    docs:     Documentation only changes
 #    feat:     A new feature
 #    fix:      A bug fix
 #    perf:     A code change that improves performance
@@ -34,7 +34,7 @@
 #
 # REFERENCE:
 #   https://www.conventionalcommits.org/
-#   https://web.git.kernel.org/pub/scm/git/git.git/tree/Documentation/SubmittingPatches?h=v2.36.1#n181
+#   https://web.git.kernel.org/pub/scm/git/git.git/tree/Documentation/SubmittingPatches
 #   https://en.wikipedia.org/wiki/Imperative_mood
 #   https://git-scm.com/docs/git-interpret-trailers
 #   https://alchemists.io/articles/git_trailers
