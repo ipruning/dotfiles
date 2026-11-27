@@ -1,2 +1,4 @@
 --style=plain
---theme="catppuccin-mocha"
+--theme=auto:system
+--theme-light="Catppuccin Latte"
+--theme-dark="Catppuccin Mocha"

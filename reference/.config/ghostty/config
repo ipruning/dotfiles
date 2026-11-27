@@ -1,4 +1,4 @@
-theme = Catppuccin Mocha
+theme = light:Catppuccin Latte,dark:Catppuccin Mocha
 
 font-family = MonoLisaCode
 font-family = Maple Mono NF CN
