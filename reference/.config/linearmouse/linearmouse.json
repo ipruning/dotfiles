@@ -12,6 +12,7 @@
         }
       },
       "pointer" : {
+        "acceleration" : 2,
         "disableAcceleration" : true
       }
     },
