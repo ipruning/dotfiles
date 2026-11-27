@@ -65,8 +65,8 @@ def _steps(
             CleanStep(
                 "mise.prune",
                 "mise",
-                (mise, "prune", "--dry-run", "--tools"),
-                (mise, "prune", "--yes", "--tools"),
+                (mise, "prune", "--dry-run"),
+                (mise, "prune", "--yes"),
                 600,
             ),
         )

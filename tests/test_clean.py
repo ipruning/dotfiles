@@ -44,7 +44,7 @@ def test_clean_preview_runs_only_read_only_commands(tmp_path: Path) -> None:
         Status.PLANNED,
     ]
     assert calls == [
-        (str(mise), "prune", "--dry-run", "--tools"),
+        (str(mise), "prune", "--dry-run"),
         ("/tools/brew", "autoremove", "--dry-run"),
         ("/tools/brew", "cleanup", "--dry-run"),
     ]
@@ -76,7 +76,7 @@ def test_clean_apply_uses_owner_commands_and_policy_guard(tmp_path: Path) -> Non
         Status.SUCCEEDED,
     ]
     assert calls == [
-        (str(mise), "prune", "--yes", "--tools"),
+        (str(mise), "prune", "--yes"),
         ("/tools/brew", "autoremove"),
         ("/tools/brew", "cleanup"),
     ]
