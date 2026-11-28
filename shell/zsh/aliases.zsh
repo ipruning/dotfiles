@@ -16,16 +16,12 @@ alias ls="ls --color=auto"
 
 alias q="exit"
 
-alias rsyncssh="rsync -Pr --rsh=ssh"
+alias rsyncssh="rsync -Pr"
 
 alias cdr='cd "$(git rev-parse --show-toplevel)"'
 
 # 👇 macOS
 if [[ $OSTYPE == darwin* ]]; then
-  alias jr="jump-to-repo"
-
-  alias js="jump-to-session"
-
   alias surge="/Applications/Surge.app/Contents/Applications/surge-cli"
 fi
 
@@ -50,11 +46,10 @@ mcd () {
 y () {
   local tmp cwd
   tmp="$(mktemp -t "yazi-cwd.XXXXXX")" || return
-  yazi "$@" --cwd-file="$tmp"
-  if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
-    builtin cd -- "$cwd"
-  fi
-  rm -f -- "$tmp"
+  command yazi "$@" --cwd-file="$tmp"
+  IFS= read -r -d '' cwd < "$tmp" || true
+  [ "$cwd" != "$PWD" ] && [ -d "$cwd" ] && builtin cd -- "$cwd"
+  command rm -f -- "$tmp"
 }
 
 note() {

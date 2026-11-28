@@ -1,40 +1,3 @@
-function jump-to-session() {
-  local zellij_path
-  zellij_path="$(command -v zellij)" || { print -u2 "zellij not found"; return 1; }
-
-  if [[ -n "$ZELLIJ" ]]; then
-    return 0
-  fi
-
-  local zj_sessions
-  zj_sessions=$("$zellij_path" list-sessions --no-formatting --short)
-  if [[ -z "$zj_sessions" ]]; then
-    "$zellij_path"
-    return
-  fi
-
-  local selected_session
-  selected_session=$(echo "$zj_sessions" | tv --no-preview) || return
-  [[ -n "$selected_session" ]] && "$zellij_path" attach "$selected_session"
-}
-
-function jump-to-repo() {
-  local repo_path zellij_path
-  repo_path=$(tv git-repos)
-  [[ -z "$repo_path" ]] && return
-
-  cd "${repo_path}"
-  if [[ -n "$ZELLIJ" ]]; then
-    return 0
-  fi
-
-  zellij_path="$(command -v zellij)" || { print -u2 "zellij not found"; return 1; }
-  local repo_name
-  repo_name=$(basename "${repo_path}")
-  "$zellij_path" attach "${repo_name}" 2>/dev/null \
-    || "$zellij_path" --session "${repo_name}" --new-session-with-layout dev
-}
-
 function pf() {
   emulate -L zsh
   setopt local_options noglob
@@ -76,5 +39,5 @@ function serve() {
   ip="${ip:-127.0.0.1}"
 
   echo "Serving on ${ip}:${port} ..."
-  uv run python -m http.server "${port}"
+  uv run --no-project python -m http.server "${port}"
 }

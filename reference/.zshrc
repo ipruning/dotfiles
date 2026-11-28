@@ -42,14 +42,6 @@ if [[ ${OSTYPE:-} == darwin* ]]; then
   fi
 fi
 
-if [[ $OSTYPE == linux* ]]; then
-  if [[ -r /opt/clash/script/common.sh && -r /opt/clash/script/clashctl.sh ]]; then
-    builtin source /opt/clash/script/common.sh
-    builtin source /opt/clash/script/clashctl.sh
-    watch_proxy
-  fi
-fi
-
 GENERATED_COMPLETIONS_DIR="$DOTFILES_ROOT/generated/completions"
 
 completion_paths=()

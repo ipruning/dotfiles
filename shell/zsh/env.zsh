@@ -145,24 +145,10 @@ if [[ -f "$PLUGINS_DIR"/fast-syntax-highlighting/fast-syntax-highlighting.plugin
   source "$PLUGINS_DIR"/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
 fi
 
-# 👇 mysql
-if [[ -n ${HOMEBREW_PREFIX:-} && -d "$HOMEBREW_PREFIX/opt/mysql-client/lib/pkgconfig" ]]; then
-  export PKG_CONFIG_PATH="$HOMEBREW_PREFIX/opt/mysql-client/lib/pkgconfig:$PKG_CONFIG_PATH"
-fi
-
 # 👇 try-rs
 if command -v try-rs >/dev/null 2>&1 && [[ -f "$GENERATED_FUNCTIONS_DIR/_try-rs.zsh" ]]; then
   source "$GENERATED_FUNCTIONS_DIR/_try-rs.zsh"
 fi
-
-# 👇 Herdr (temporarily disabled for terminal launch debugging)
-# TODO: Re-enable this block after debugging no longer requires a raw Ghostty
-# shell. HERDR_ENV remains the recursion boundary when restored.
-# if [[ "$TERM_PROGRAM" == "ghostty" && -z ${SSH_TTY:-} && -z ${HERDR_ENV:-} && \
-#   ${HERDR_GHOSTTY_AUTOSTART:-1} != 0 ]] && \
-#   herdr --version >/dev/null 2>&1; then
-#   exec herdr
-# fi
 
 # 👇 atuin
 if command -v atuin >/dev/null 2>&1 && [[ -f "$GENERATED_FUNCTIONS_DIR/_atuin.zsh" ]]; then
