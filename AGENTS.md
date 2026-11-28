@@ -93,11 +93,42 @@ These rules describe the reference Zsh setup; Linux Lite Bash uses
 - `gh` belongs to the shared mise baseline, so its shim applies directory
   `[env]` such as the `GH_TOKEN` that selects the account under a workspace;
   `gh auth git-credential` used by Git resolves the same shim.
+- `~/.private.gitconfig` rewrites `jihuanshe` remotes via
+  `url."https://alex-jhs@github.com/jihuanshe/".insteadOf`, while company Git
+  identity relies on
+  `includeIf "hasconfig:remote.*.url:https://github.com/jihuanshe/**"` loading
+  `~/.jihuanshe.gitconfig`. Because `git remote -v` displays the rewritten URL
+  with `alex-jhs@`, always write the raw URL without a username
+  (`https://github.com/jihuanshe/...`) when setting a `jihuanshe` remote (read
+  the raw value with `git config --get remote.origin.url`), or `includeIf` will
+  not match and commits will fall back to the local machine identity.
 - `.zshenv` puts `~/.bun/bin` on `PATH` for `bun add -g` packages.
 - The global mise config enables `idiomatic_version_file_enable_tools =
   ["pnpm"]`, so a project that pins pnpm only through `package.json`
   `packageManager` gets that version. `auto_install = false` still applies:
   install a missing version with `mise install pnpm@<version>`.
+
+## Multi-host rollout verification
+
+After pushing structural dotfiles changes, verify on `hetzner-hio1-ccx23`
+(Debian root, `/root/dotfiles`), `hetzner-hel1-ex63`, `mac-mini`, and `ser9pro`
+(Omarchy, `audit-only`):
+
+- On each host, run `git pull --ff-only`, install any newly pinned tools from
+  `mise.toml` (`mise install <tools>`), and run `mise exec -- uv sync --locked`
+  before `mise run check`/`diff`/`verify`. Managed hosts also preview and apply
+  `mise run mise-sync -- --apply` so `mise doctor` stays clean.
+- Reconcile drift manually without adding migration scripts to the repository:
+  restore stale copies (`restore`), adopt genuine personal preferences (`adopt`
+  and commit), and move host-specific overrides into private files (such as
+  `~/.zshenv.private.zsh`).
+- After renaming or moving repository paths, grep unlinked host copies (such as
+  `~/.z*`, `~/.bashrc`, `~/.config/zed`) for `dotfiles/<old-path>` references;
+  `diff` alone misses them because `linux-lite` skips Zsh and Zed.
+- On `audit-only` hosts (`ser9pro`), keep configs host-owned with minimal
+  in-place edits rather than replacing files with symlinks.
+- When waiting on parallel SSH commands across hosts, wait by PID instead of
+  `pgrep -f ssh` (which matches interactive SSH sessions).
 
 ## Skillshare boundary
 
