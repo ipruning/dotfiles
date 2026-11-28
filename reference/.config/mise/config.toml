@@ -40,7 +40,7 @@ uv = "latest"
 yarn = "latest"
 
 # Shell and terminal
-"cargo:https://github.com/ipruning/atuin" = { version = "rev:525e31fec619061a901368e0648f4bd767272f34", crate = "atuin", bin = "atuin", locked = true }
+"cargo:https://github.com/ipruning/atuin" = { version = "rev:7d6edb62b87d253893206043162ef662b34884ae", crate = "atuin", bin = "atuin", locked = true }
 # Debian ships btop 1.2/1.3, which rewrites the linked reference btop.conf on exit;
 # macOS uses Homebrew's btop.
 btop = { version = "latest", os = ["linux"] }
