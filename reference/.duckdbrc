@@ -1,11 +1,7 @@
-SET enable_progress_bar = TRUE;
-
-.headers on
-.mode duckbox
 .nullvalue '∅'
 .prompt '🦆 ' '… '
-.timer on
 -- Keep ad-hoc queries from starving the machine (DuckDB defaults: 80% of RAM, all cores, spill to ./.tmp).
 SET memory_limit = '8GB';
 SET threads = 4;
 SET temp_directory = '~/.cache/duckdb';
+.timer on
