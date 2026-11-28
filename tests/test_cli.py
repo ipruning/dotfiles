@@ -114,7 +114,11 @@ def test_global_mise_lock_covers_declared_artifact_platforms() -> None:
     )
     assert config["min_version"]["hard"] == "2026.11.1"
     assert config["settings"]["auto_install"] is False
-    assert config["settings"]["minimum_release_age"] == "0s"
+    assert config["settings"]["minimum_release_age"] == "3d"
+    assert config["settings"]["minimum_release_age_excludes"] == [
+        "cargo:https://github.com/ipruning/atuin",
+        "github:jihuanshe/linear",
+    ]
     assert config["settings"]["trusted_config_paths"] == [
         "~/Developer/ipruning",
         "~/Developer/jihuanshe",

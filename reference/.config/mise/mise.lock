@@ -56,9 +56,9 @@ checksum = "sha256:b5d6bc2e13caf14e57c89661e89efd073ff16165b41bfe43882616410609c
 url = "https://github.com/oven-sh/bun/releases/download/bun-v1.4.5/bun-darwin-aarch64.zip"
 
 [[tools."cargo:https://github.com/ipruning/atuin"]]
-version = "rev:92d869de2506ece3c8b8474d20d6a1aed5fbe4a7"
+version = "rev:525e31fec619061a901368e0648f4bd767272f34"
 backend = "cargo:https://github.com/ipruning/atuin"
-specifiers = ["rev:92d869de2506ece3c8b8474d20d6a1aed5fbe4a7"]
+specifiers = ["rev:525e31fec619061a901368e0648f4bd767272f34"]
 
 [tools."cargo:https://github.com/ipruning/atuin".options]
 bin = "atuin"
