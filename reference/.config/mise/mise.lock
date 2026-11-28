@@ -161,6 +161,26 @@ checksum_source = "mise-versions"
 url = "https://github.com/lycorp-jp/sim-use/releases/download/v0.16.1/sim-use-v0.16.1.tar.gz"
 url_api = "https://api.github.com/repos/lycorp-jp/sim-use/releases/assets/766082072"
 
+[[tools."github:s2-streamstore/s2"]]
+version = "0.50.0"
+backend = "github:s2-streamstore/s2"
+specifiers = ["latest"]
+
+[tools."github:s2-streamstore/s2".options]
+version_prefix = "s2-cli-v"
+
+[tools."github:s2-streamstore/s2"."platforms.linux-x64"]
+checksum = "sha256:aa2ba1917bb513cb6192a64f962e72d567e641970447107f7044e6b73823c9fe"
+checksum_source = "mise-versions"
+url = "https://github.com/s2-streamstore/s2/releases/download/s2-cli-v0.50.0/s2-x86_64-unknown-linux-gnu.zip"
+url_api = "https://api.github.com/repos/s2-streamstore/s2/releases/assets/789613282"
+
+[tools."github:s2-streamstore/s2"."platforms.macos-arm64"]
+checksum = "sha256:89873af5cf85d5c10fe9ad7f1127558495c389290208cefdf69588556b5a6939"
+checksum_source = "mise-versions"
+url = "https://github.com/s2-streamstore/s2/releases/download/s2-cli-v0.50.0/s2-aarch64-apple-darwin.zip"
+url_api = "https://api.github.com/repos/s2-streamstore/s2/releases/assets/789613226"
+
 [[tools.gitleaks]]
 version = "8.30.1"
 backend = "aqua:gitleaks/gitleaks"
@@ -190,6 +210,11 @@ url = "https://dl.google.com/go/go1.27.4.linux-amd64.tar.gz"
 [tools.go."platforms.macos-arm64"]
 checksum = "sha256:91a44a2b8a716600ad94a4f143e156116620db8828086a6e3602291be9bd0bb4"
 url = "https://dl.google.com/go/go1.27.4.darwin-arm64.tar.gz"
+
+[[tools."go:github.com/scopedb/scopedb-cli/cmd/scope"]]
+version = "0.3.0"
+backend = "go:github.com/scopedb/scopedb-cli/cmd/scope"
+specifiers = ["latest"]
 
 [[tools.golangci-lint]]
 version = "2.15.0"

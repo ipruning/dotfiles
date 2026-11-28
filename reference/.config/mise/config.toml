@@ -69,6 +69,9 @@ skillshare = "latest"
 "gem:kamal" = "latest"
 "github:jihuanshe/linear" = "latest"
 "github:larksuite/cli" = "latest"
+# The repository also releases the SDK, Lite, and a Helm chart.
+"github:s2-streamstore/s2" = { version = "latest", version_prefix = "s2-cli-v" }
+"go:github.com/scopedb/scopedb-cli/cmd/scope" = "latest"
 "npm:cf" = "latest"
 "pypi:google-colab-cli" = "latest"
 lazydocker = "latest"
