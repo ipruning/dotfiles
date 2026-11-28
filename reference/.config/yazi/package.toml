@@ -19,11 +19,6 @@ rev = "1ef5fe0"
 hash = "14558d2829c0aa05e99c57de8f74d199"
 
 [[plugin.deps]]
-use = "wylie102/duckdb"
-rev = "3f8c863"
-hash = "87b9233a74325e95011670ed20bbd0d4"
-
-[[plugin.deps]]
 use = "Rolv-Apneseth/starship"
 rev = "ea92cf4"
 hash = "9776f378459072b6c2875eae5addc49d"

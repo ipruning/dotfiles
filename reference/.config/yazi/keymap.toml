@@ -30,12 +30,12 @@ desc = "Jump to a file/directory via fzf"
 
 [[mgr.prepend_keymap]]
 on = ["g", "s", "g"]
-run = "shell --confirm --block lazygit"
+run = "shell --block lazygit"
 desc = "Run lazygit"
 
 [[mgr.prepend_keymap]]
 on = ["g", "s", "e"]
-run = """shell --confirm --block 'nvim "$PWD"'"""
+run = """shell --block 'nvim "$PWD"'"""
 desc = "Run nvim"
 
 [[mgr.prepend_keymap]]
@@ -50,7 +50,7 @@ desc = "Copies path from git root"
 
 [[mgr.prepend_keymap]]
 on = ["n"]
-run = 'shell "$SHELL" --confirm --block'
+run = 'shell "$SHELL" --block'
 desc = "Run shell"
 
 [[mgr.prepend_keymap]]
@@ -61,13 +61,3 @@ desc = "Maximize or restore the preview pane"
 [[mgr.prepend_keymap]]
 on = "M"
 run = "plugin mount"
-
-[[mgr.prepend_keymap]]
-on = ["g", "o"]
-run = "plugin duckdb -open"
-desc = "open with duckdb"
-
-[[mgr.prepend_keymap]]
-on = ["g", "u"]
-run = "plugin duckdb -ui"
-desc = "open with duckdb ui"
