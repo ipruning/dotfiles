@@ -20,7 +20,7 @@ are authoritative for options.
 | --- | --- | --- | --- |
 | [amp-ghostty](amp-ghostty) | Open a three-pane development layout | macOS, Ghostty 1.4+ with macos-applescript enabled, Automation permission, osascript, amp, lazygit, yazi | Interactive/UI; creates a tab and splits; sends commands to new terminals, leaves clipboard unchanged, and focuses the amp pane |
 | [autocorrect-text](autocorrect-text) | Format Chinese plain text, not Markdown | autocorrect-py | Read files/stdin; write stdout |
-| [c](c) | Copy stdin | pbcopy, xclip, or putclip | Write clipboard |
+| [c](c) | Copy stdin | pbcopy, wl-copy, xclip, or putclip | Write clipboard |
 | [chatgpt](chatgpt) | Send a composed message to ChatGPT in Chrome | fire; macOS, Chrome, Accessibility permission, pbcopy, osascript | Write clipboard; UI/network submission; --dry-run writes stdout only |
 | [d](d) | Open Docker manager | lazydocker, Docker access; delegated options: `lazydocker --help` | Interactive; can mutate Docker resources |
 | [dateutc](dateutc) | Print UTC timestamp | date | Read-only; stdout |
@@ -30,7 +30,7 @@ are authoritative for options.
 | [`link`](link) | Select links, paths, UUIDs, or resume commands from text | loguru, rich, fzf; optional Zellij screen; macOS open or pbcopy for selected action | Read stdin/screen; interactive selection then open a path/URL or copy a UUID/command to clipboard |
 | [mkbir](mkbir) | Create a bird-named folder | mkdir, rmdir, mktemp, mv; sleep on lock contention | Write folder and ~/.bird_count; temporary counter lock/file |
 | [o](o) | Open a path or URL | macOS open or Linux xdg-open | Interactive/UI; may launch an application |
-| [p](p) | Print clipboard text | pbpaste, xclip, or getclip | Read clipboard; stdout |
+| [p](p) | Print clipboard text | pbpaste, wl-paste, xclip, or getclip | Read clipboard; stdout |
 | [pi-session-export](pi-session-export) | Convert Pi exports to raw and turns JSONL | Python standard library | Read input; write output JSONL files/directories |
 | [pi-tmux](pi-tmux) | Create/attach the current directory's Pi session | git, tmux, zsh, pi | Interactive; create sessions/windows or attach/switch |
 | [pmt](pmt) | Compose tagged instructions/context | Python standard library | Read files/stdin; write stdout |

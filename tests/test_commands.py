@@ -761,6 +761,8 @@ def _discovery_environment(tmp_path: Path) -> tuple[dict[str, str], Path]:
         "tmux",
         "viddy",
         "vim",
+        "wl-copy",
+        "wl-paste",
         "xdg-open",
         "xclip",
         "zellij",
@@ -1076,3 +1078,48 @@ def test_command_index_covers_every_executable() -> None:
     ]
     for command in commands:
         assert f"]({command})" in index
+
+
+def test_clipboard_commands_prefer_wayland_when_available(tmp_path: Path) -> None:
+    fake_bin = tmp_path / "bin"
+    fake_bin.mkdir()
+    log = tmp_path / "clip.log"
+    for tool in ("wl-copy", "wl-paste", "xclip"):
+        _write_executable(
+            fake_bin / tool,
+            '#!/bin/bash\nprintf \'%s\\n\' "${0##*/} $*" >>"$CLIP_LOG"\n',
+        )
+    base_env = {"PATH": str(fake_bin), "CLIP_LOG": str(log)}
+
+    copy_wayland = subprocess.run(
+        ["/bin/bash", BIN / "c"],
+        input="hello",
+        env={**base_env, "WAYLAND_DISPLAY": "wayland-0"},
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    paste_wayland = subprocess.run(
+        ["/bin/bash", BIN / "p"],
+        env={**base_env, "WAYLAND_DISPLAY": "wayland-0"},
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    copy_x11 = subprocess.run(
+        ["/bin/bash", BIN / "c"],
+        input="hello",
+        env=base_env,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert copy_wayland.returncode == 0, copy_wayland.stderr
+    assert paste_wayland.returncode == 0, paste_wayland.stderr
+    assert copy_x11.returncode == 0, copy_x11.stderr
+    assert log.read_text().splitlines() == [
+        "wl-copy ",
+        "wl-paste --no-newline",
+        "xclip -selection clipboard",
+    ]

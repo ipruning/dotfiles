@@ -3,7 +3,7 @@
 set -euo pipefail
 if [[ $# -eq 1 && ( $1 == -h || $1 == --help ) ]]; then
   echo 'Usage: p'
-  echo 'Print clipboard text using pbpaste, xclip, or getclip.'
+  echo 'Print clipboard text using pbpaste, wl-paste, xclip, or getclip.'
   exit 0
 fi
 if (( $# != 0 )); then
@@ -12,11 +12,15 @@ if (( $# != 0 )); then
 fi
 if command -v pbpaste >/dev/null 2>&1; then
   exec pbpaste -Prefer txt
+elif [[ -n ${WAYLAND_DISPLAY:-} ]] && command -v wl-paste >/dev/null 2>&1; then
+  exec wl-paste --no-newline
 elif command -v xclip >/dev/null 2>&1; then
   exec xclip -selection clipboard -o
+elif command -v wl-paste >/dev/null 2>&1; then
+  exec wl-paste --no-newline
 elif command -v getclip >/dev/null 2>&1; then
   exec getclip
 else
-  echo "no clipboard tool found (pbpaste/xclip/getclip)" >&2
+  echo "no clipboard tool found (pbpaste/wl-paste/xclip/getclip)" >&2
   exit 1
 fi
