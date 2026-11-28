@@ -19,7 +19,7 @@ are authoritative for options.
 | Command / source | Purpose | Dependencies beyond Bash or Python/uv | Normal effects |
 | --- | --- | --- | --- |
 | [amp-ghostty](amp-ghostty) | Open a three-pane development layout | macOS, Ghostty 1.4+ with macos-applescript enabled, Automation permission, osascript, amp, lazygit, yazi | Interactive/UI; creates a tab and splits; sends commands to new terminals, leaves clipboard unchanged, and focuses the amp pane |
-| [autocorrect-text](autocorrect-text) | Format Chinese plain text, not Markdown | autocorrect-py | Read files/stdin; write stdout |
+| [autocorrect-text](autocorrect-text) | Format Chinese plain text, not Markdown | autocorrect | Read files/stdin; write stdout |
 | [c](c) | Copy stdin | pbcopy, wl-copy, xclip, or putclip | Write clipboard |
 | [chatgpt](chatgpt) | Send a composed message to ChatGPT in Chrome | macOS, Chrome, Accessibility permission, pbcopy, osascript | Write clipboard; UI/network submission; --dry-run writes stdout only |
 | [d](d) | Open Docker manager | lazydocker, Docker access; delegated options: `lazydocker --help` | Interactive; can mutate Docker resources |

@@ -1,7 +1,6 @@
 #!/usr/bin/env -S uv run --script
 # /// script
 # requires-python = ">=3.11"
-# dependencies = ["autocorrect-py==2.14.0"]
 # ///
 """Format Chinese plain text. This command is not Markdown-safe."""
 
@@ -9,12 +8,11 @@ from __future__ import annotations
 
 import argparse
 import re
+import subprocess
 import sys
 import unicodedata
 from dataclasses import dataclass
 from pathlib import Path
-
-import autocorrect_py
 
 _CJK_PUNCT = set("，。！？：；「」『』《》【】（）")
 _BLANK_SEP_RE = re.compile(r"(\n[ \t]*\n+)")
@@ -78,6 +76,29 @@ class Options:
     all_text: bool = False
 
 
+def _run_autocorrect(text: str) -> str:
+    try:
+        completed = subprocess.run(
+            ["autocorrect", "--stdin", "--type", "txt"],
+            input=text,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except FileNotFoundError:
+        raise SystemExit(
+            "autocorrect CLI is not installed on PATH "
+            "(install via Homebrew: brew install autocorrect)."
+        ) from None
+    if completed.returncode != 0:
+        detail = completed.stderr.strip() or f"exit status {completed.returncode}"
+        raise SystemExit(f"autocorrect failed: {detail}")
+    output = completed.stdout
+    if not text.endswith("\n") and output.endswith("\n"):
+        return output[:-1]
+    return output
+
+
 def format_text(text: str, options: Options) -> str:
     output: list[str] = []
     for part in _BLANK_SEP_RE.split(text):
@@ -88,7 +109,7 @@ def format_text(text: str, options: Options) -> str:
         ):
             output.append(part)
         else:
-            formatted = autocorrect_py.format(part) if options.autocorrect else part
+            formatted = _run_autocorrect(part) if options.autocorrect else part
             output.append(_convert_quotes(formatted, options.ascii_double))
     return "".join(output)
 

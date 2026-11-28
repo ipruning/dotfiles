@@ -24,28 +24,6 @@ wheels = [
 ]
 
 [[package]]
-name = "autocorrect-py"
-version = "2.14.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/39/d9/ee3442377fdc687fb4a5212c242240bbeb34311ccc41de45badc813b5b01/autocorrect_py-2.14.0.tar.gz", hash = "sha256:05f2ceaf9daca7cdbcc1648c20561e98123b540ba80688bb33e67fbe0ed942e4", size = 110016, upload-time = "2025-04-26T11:55:10.403Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/de/4b/0a6f6f483a199d8ece027418474d65b2620722d30ae9fec443a1442176f9/autocorrect_py-2.14.0-cp37-abi3-macosx_10_7_x86_64.whl", hash = "sha256:fc7aa8b20e6c14bf0832e007efc9cba5e3c8b0d29adf77358caef67dbdc68570", size = 1722503, upload-time = "2025-04-26T11:54:50.53Z" },
-    { url = "https://files.pythonhosted.org/packages/3b/a6/a7d7c4eb2eaa2a47e222abf617aaa4e1c9f6e3b7b36405ab9d92439bc042/autocorrect_py-2.14.0-cp37-abi3-macosx_11_0_arm64.whl", hash = "sha256:da433ed2b6b7fede2f72c6fa5bb9021ddd6dbc207b7f77a33ee2df816b82eab9", size = 1625904, upload-time = "2025-04-26T11:54:52.228Z" },
-    { url = "https://files.pythonhosted.org/packages/89/13/2fa26c4910f0b559a6a4d8616d81f18fd03646207b70822fabc55be85b53/autocorrect_py-2.14.0-cp37-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:b574653590d9acf6bf8c77b1fcbd459d08e7849bfb9fae21a7bef32648ca42b1", size = 1758698, upload-time = "2025-04-26T11:54:53.721Z" },
-    { url = "https://files.pythonhosted.org/packages/aa/0b/231db13940b8c714256f7971382a71bd878bc172325a73d005708551fc50/autocorrect_py-2.14.0-cp37-abi3-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:8b83b24363ab6be049e7ed509a85a2ad47d83dcd7df6a3f4b01a77f4eb3c46ba", size = 1740205, upload-time = "2025-04-26T11:54:55.855Z" },
-    { url = "https://files.pythonhosted.org/packages/11/ad/f9916fb4626eb7f182fcc5d788e78e3d83f7c6875dd4feb0e14b3305557b/autocorrect_py-2.14.0-cp37-abi3-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:ea1dc22d1d25780324b730b71360e9537c596a84a1bf7ce0cec7166956fe3822", size = 1868304, upload-time = "2025-04-26T11:54:56.998Z" },
-    { url = "https://files.pythonhosted.org/packages/4c/73/e08761cdde740ef0e347a65c621e8270687bf6dbd0a8824f91879d895964/autocorrect_py-2.14.0-cp37-abi3-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:c1abe772a2340d34d3f47b82f22a056f44ac99d368e3382864d747955a4ccf90", size = 2108594, upload-time = "2025-04-26T11:54:58.293Z" },
-    { url = "https://files.pythonhosted.org/packages/68/6a/0d1e4cf1e14b70fec5a2df0e409462df693d71c0e3a1f776e1d9c2cd145d/autocorrect_py-2.14.0-cp37-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:44756d59f7c5fb6c3d14897de15e6c775bb68093804b7fab37f5973dc07bedd4", size = 1869870, upload-time = "2025-04-26T11:54:59.412Z" },
-    { url = "https://files.pythonhosted.org/packages/aa/f3/f54e8fedb38398029ec2be3885cd4b95505764971fbd78fe6a52b0035263/autocorrect_py-2.14.0-cp37-abi3-manylinux_2_5_i686.manylinux1_i686.whl", hash = "sha256:4dc87f684784d02180e1eb2abcbb2ca8967c46aac406f6e9b37b77d0196c1c23", size = 1839092, upload-time = "2025-04-26T11:55:00.649Z" },
-    { url = "https://files.pythonhosted.org/packages/65/14/e76ba3f2709a81f8ab50cae8a3142ea3b2beaee8b737a0f443e11ef565a9/autocorrect_py-2.14.0-cp37-abi3-musllinux_1_2_aarch64.whl", hash = "sha256:560e939ca1aec81832fe970f1d80723d4d13f3e1385320170c187edb88e4857c", size = 1927264, upload-time = "2025-04-26T11:55:01.857Z" },
-    { url = "https://files.pythonhosted.org/packages/36/77/8a40e6353a17fa397f7664d6fc1a46ab63475d4cbf0722e519d3a1060143/autocorrect_py-2.14.0-cp37-abi3-musllinux_1_2_armv7l.whl", hash = "sha256:9d2113e29ced9615b9e1ab5931e7314c91199e606d161cb075e014e495f6329e", size = 2000673, upload-time = "2025-04-26T11:55:03.793Z" },
-    { url = "https://files.pythonhosted.org/packages/6d/8a/4f3a69f4da816f8f8f874beabf062c5097f19d52e794cf1b957181cc931c/autocorrect_py-2.14.0-cp37-abi3-musllinux_1_2_i686.whl", hash = "sha256:86c43b2ce86afe522fa883b3d3c3a981cfefb4833705deed0453d4ec5869bbbb", size = 1955098, upload-time = "2025-04-26T11:55:05.346Z" },
-    { url = "https://files.pythonhosted.org/packages/3a/f5/3245f461713a33e09b5be339ab34e515e73a87f860289b72a4d70a80d481/autocorrect_py-2.14.0-cp37-abi3-musllinux_1_2_x86_64.whl", hash = "sha256:e30f36fb0d8c60f06ae5615d87ee3da79174dc42955a9e8c6a6f60cf92b43d2d", size = 2039624, upload-time = "2025-04-26T11:55:06.646Z" },
-    { url = "https://files.pythonhosted.org/packages/42/ad/dae4d8b1d405efe2f9b84796ad6c1005ffe181f6a01c323299d50a9c8888/autocorrect_py-2.14.0-cp37-abi3-win32.whl", hash = "sha256:9b42e2e436c252ef7095ba51c23687dcf0fd7522bb528d996d789950a51647ea", size = 1367592, upload-time = "2025-04-26T11:55:08.164Z" },
-    { url = "https://files.pythonhosted.org/packages/4b/de/def0e8cfac068891c988c9bc7fed1e768a15c15abb28a44636de3d3278f4/autocorrect_py-2.14.0-cp37-abi3-win_amd64.whl", hash = "sha256:bbcad5a7343ae15a5a307ccf810213dee019cdcebb10150a2f6c22cdaa61c751", size = 1587447, upload-time = "2025-04-26T11:55:09.331Z" },
-]
-
-[[package]]
 name = "certifi"
 version = "2026.11.20"
 source = { registry = "https://pypi.org/simple" }
@@ -139,7 +117,6 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
-    { name = "autocorrect-py" },
     { name = "loguru" },
     { name = "pytest" },
     { name = "rich" },
@@ -155,7 +132,6 @@ requires-dist = [{ name = "ruamel-yaml", specifier = ">=0.19.1" }]
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "autocorrect-py", specifier = ">=2.14.0" },
     { name = "loguru", specifier = ">=0.7.3" },
     { name = "pytest", specifier = ">=9.1.1" },
     { name = "rich", specifier = ">=15.0.0" },

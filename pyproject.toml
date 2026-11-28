@@ -11,7 +11,6 @@ dev = [
     # Import targets so editors can resolve the standalone commands scripts.
     # Each is a PEP 723 `uv run --script` with its own inline runtime deps; ty
     # does not check commands, and scripts/ never imports these.
-    "autocorrect-py>=2.14.0",
     "loguru>=0.7.3",
     "pytest>=9.1.1",
     "rich>=15.0.0",

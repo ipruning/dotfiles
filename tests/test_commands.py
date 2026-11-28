@@ -1123,3 +1123,46 @@ def test_clipboard_commands_prefer_wayland_when_available(tmp_path: Path) -> Non
         "wl-paste --no-newline",
         "xclip -selection clipboard",
     ]
+
+
+def test_autocorrect_text_uses_cli_and_converts_quotes(tmp_path: Path) -> None:
+    fake_bin = tmp_path / "bin"
+    fake_bin.mkdir()
+    _write_executable(
+        fake_bin / "autocorrect",
+        "#!/bin/bash\n"
+        'if [ "$1" = "--stdin" ] && [ "$2" = "--type" ] && [ "$3" = "txt" ]; then\n'
+        '  sed "s/Hello世界/Hello 世界/g"\n'
+        "  printf '\\n'\n"
+        "else\n"
+        "  exit 2\n"
+        "fi\n",
+    )
+    sample = (
+        "English paragraph stays untouched.\n\n"
+        "Hello世界\uff0c这是\u201c测试\u201d与\u2018it\u2019s\u2019。"
+    )
+    completed = subprocess.run(
+        [sys.executable, BIN / "autocorrect-text"],
+        input=sample,
+        env={"PATH": f"{fake_bin}:/usr/bin:/bin"},
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert completed.returncode == 0, completed.stderr
+    assert completed.stdout == (
+        "English paragraph stays untouched.\n\n"
+        "Hello 世界\uff0c这是「测试」与『it\u2019s』。"
+    )
+
+    missing = subprocess.run(
+        [sys.executable, BIN / "autocorrect-text"],
+        input="中文测试",
+        env={"PATH": str(tmp_path / "empty")},
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert missing.returncode != 0
+    assert "autocorrect CLI is not installed" in missing.stderr
