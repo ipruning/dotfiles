@@ -42,7 +42,7 @@ export PATH="$HOME/.local/bin:$PATH"
 git clone https://github.com/ipruning/dotfiles.git ~/dotfiles
 cd ~/dotfiles
 mise trust
-mise install --locked actionlint fd jq python ripgrep rumdl shellcheck tombi uv zizmor
+mise install --locked actionlint fd gitleaks jq python ripgrep rumdl shellcheck tombi uv zizmor
 mise exec -- uv sync --locked
 mise run mise-sync
 mise run mise-sync -- --apply

@@ -4,6 +4,7 @@ min_version = { hard = "2026.11.1" }
 [tool_alias]
 actionlint = "aqua:rhysd/actionlint"
 fd = "aqua:sharkdp/fd"
+gitleaks = "aqua:gitleaks/gitleaks"
 jq = "aqua:jqlang/jq"
 ripgrep = "aqua:BurntSushi/ripgrep"
 rumdl = "aqua:rvben/rumdl"
@@ -23,6 +24,7 @@ lockfile_platforms = ["macos-arm64", "linux-x64"]
 # fd, jq, and ripgrep serve the module test suites that verify depends on.
 actionlint = "1.7.12"
 fd = "10.5.2"
+gitleaks = "8.30.1"
 jq = "1.8.2"
 python = "3.15.2"
 ripgrep = "16.0.0"
@@ -134,10 +136,14 @@ fi
 description = "Check Python types"
 run = "ty check scripts tests"
 
+[tasks.secrets]
+description = "Scan tracked files in HEAD for hardcoded secrets"
+run = "gitleaks git --no-banner --redact --log-opts=-1"
+
 [tasks.workflows]
 description = "Check GitHub Actions workflows for errors and security issues"
 run = ["actionlint", "zizmor --offline .github/workflows"]
 
 [tasks.verify]
 description = "Run all repository verification"
-depends = ["format", "lint", "shell", "typecheck", "test", "test-services", "workflows"]
+depends = ["format", "lint", "secrets", "shell", "typecheck", "test", "test-services", "workflows"]

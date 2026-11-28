@@ -54,6 +54,7 @@ def test_mise_python_tasks_never_sync_dependencies_implicitly(tmp_path: Path) ->
     assert config["tool_alias"] == {
         "actionlint": "aqua:rhysd/actionlint",
         "fd": "aqua:sharkdp/fd",
+        "gitleaks": "aqua:gitleaks/gitleaks",
         "jq": "aqua:jqlang/jq",
         "ripgrep": "aqua:BurntSushi/ripgrep",
         "rumdl": "aqua:rvben/rumdl",
