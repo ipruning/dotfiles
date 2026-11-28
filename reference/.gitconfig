@@ -23,18 +23,27 @@ rebase = true
 
 [fetch]
 prune = true
+pruneTags = true
 
 [submodule]
 recurse = true
 
 [rebase]
 autoStash = true
+updateRefs = true
 
 [merge]
 conflictstyle = zdiff3
 
 [rerere]
 enabled = true
+autoUpdate = true
+
+[branch]
+sort = -committerdate
+
+[tag]
+sort = version:refname
 
 [diff]
 tool = hunk
@@ -57,11 +66,6 @@ process = git-lfs filter-process
 reflogExpire = 200.days.ago
 reflogExpireUnreachable = 90.days.ago
 
-[gitbutler]
-aiOpenAIModelName = gpt-5.4
-aiOpenAIKeyOption = bringYourOwn
-aiModelProvider = lmstudio
-
 [alias]
 log-graph = "log --graph --decorate --all --date-order --date='format:%Y-%m-%d %H:%M:%S' --pretty='format:%C(cyan)%h%Creset %C(black bold)%ad%Creset%C(auto)%d %s' -n 42"
 log-graphstat = "log --pretty='format:%C(auto)%h%d%n%s%n%C(auto)%C(blue)%an <%ae>%C(reset), %C(auto)%C(dim)%ad%n' --graph --stat"
@@ -82,9 +86,10 @@ pr = "!sh -c 'set -e; if [ $# -ne 2 ]; then \
   git fetch origin; \
   git fetch origin \"pull/$1/head:refs/heads/$2\"; \
   git switch -- \"$2\"; \
-  git rebase --autostash origin/main' -"
+  default_branch=$(git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null || echo origin/main); \
+  git rebase \"$default_branch\"' -"
 
-push-it = "!sh -c 'git push --force-with-lease origin HEAD' -"
+push-it = "!sh -c 'git push --force-with-lease --force-if-includes origin HEAD' -"
 
 cc = "!sh -c 'git log --format=format: --name-only | grep -v \"^$\" | sort | uniq -c | sort -rg | head -42'"
 stm = "!sh -c 'git status --porcelain | grep \"^ M\" | cut -c 4-'"
