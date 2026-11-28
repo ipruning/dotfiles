@@ -1,15 +1,11 @@
 #!/usr/bin/env -S uv run --script
 # /// script
 # requires-python = ">=3.11"
-# dependencies = [
-#     "fire==0.7.1",
-# ]
 # ///
 
+import argparse
 import subprocess
 import sys
-
-import fire
 
 
 def wrap_with_tags(content: str, tag: str) -> str:
@@ -63,10 +59,41 @@ def main(user_instructions: str | None = None, dry_run=False) -> None:
         subprocess.run(["osascript", "-e", generate_apple_script()])
 
 
+def _build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        prog="chatgpt",
+        description=(
+            "Send stdin and/or instructions to ChatGPT in Chrome via clipboard "
+            "and UI automation on macOS."
+        ),
+        add_help=False,
+    )
+    parser.add_argument(
+        "-h",
+        "--help",
+        action="store_true",
+        help="Show this help message and exit.",
+    )
+    parser.add_argument(
+        "user_instructions",
+        nargs="?",
+        default=None,
+        help="Optional instruction text to wrap and send.",
+    )
+    parser.add_argument(
+        "--dry-run",
+        "--dry_run",
+        action="store_true",
+        dest="dry_run",
+        help="Print the composed message without clipboard or UI changes.",
+    )
+    return parser
+
+
 if __name__ == "__main__":
-    if sys.argv[1:] in (["-h"], ["--help"]):
-        print("Usage: chatgpt [USER_INSTRUCTIONS] [--dry-run]")
-        print("Send stdin and/or instructions to ChatGPT in Chrome via clipboard and UI automation on macOS.")
-        print("--dry-run prints the composed message without clipboard or UI changes.")
+    parser = _build_parser()
+    args = parser.parse_args()
+    if args.help:
+        sys.stdout.write(parser.format_help().replace("usage:", "Usage:", 1))
     else:
-        fire.Fire(main)
+        main(args.user_instructions, dry_run=args.dry_run)

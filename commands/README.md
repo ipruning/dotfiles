@@ -21,7 +21,7 @@ are authoritative for options.
 | [amp-ghostty](amp-ghostty) | Open a three-pane development layout | macOS, Ghostty 1.4+ with macos-applescript enabled, Automation permission, osascript, amp, lazygit, yazi | Interactive/UI; creates a tab and splits; sends commands to new terminals, leaves clipboard unchanged, and focuses the amp pane |
 | [autocorrect-text](autocorrect-text) | Format Chinese plain text, not Markdown | autocorrect-py | Read files/stdin; write stdout |
 | [c](c) | Copy stdin | pbcopy, wl-copy, xclip, or putclip | Write clipboard |
-| [chatgpt](chatgpt) | Send a composed message to ChatGPT in Chrome | fire; macOS, Chrome, Accessibility permission, pbcopy, osascript | Write clipboard; UI/network submission; --dry-run writes stdout only |
+| [chatgpt](chatgpt) | Send a composed message to ChatGPT in Chrome | macOS, Chrome, Accessibility permission, pbcopy, osascript | Write clipboard; UI/network submission; --dry-run writes stdout only |
 | [d](d) | Open Docker manager | lazydocker, Docker access; delegated options: `lazydocker --help` | Interactive; can mutate Docker resources |
 | [dateutc](dateutc) | Print UTC timestamp | date | Read-only; stdout |
 | [g](g) | Open Git manager | lazygit, Git; delegated options: `lazygit --help` | Interactive; can mutate Git state/files |
