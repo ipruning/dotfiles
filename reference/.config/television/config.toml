@@ -195,8 +195,5 @@ fallback_channel = "files"
 
 [shell_integration.keybindings]
 # controls which key binding should trigger tv
-# for shell autocomplete
+# for shell autocomplete (Atuin takes over ctrl-r after tv initializes)
 "smart_autocomplete" = "ctrl-t"
-# controls which keybinding should trigger tv
-# for command history
-"command_history" = "ctrl-r"

@@ -1,4 +1,6 @@
 import os
+import re
+import shlex
 import shutil
 import subprocess
 import time
@@ -321,6 +323,7 @@ def test_television_preview_placeholders_use_shell_safe_quoting() -> None:
         if not isinstance(preview, dict) or "command" not in preview:
             continue
         command = preview["command"]
+        shlex.split(re.sub(r"\{[^}]+\}", "ENTRY", command))
         if "{" in command:
             assert shell_quote_transform in command, path
 

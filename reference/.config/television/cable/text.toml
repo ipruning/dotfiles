@@ -9,8 +9,7 @@ display = "[{split:\\::..2}]\t{split:\\::2}"
 output = "{split:\\::..2}"
 
 [preview]
-command = '''bat -n --color=always '{split:\::0|replace:s/'/'"'"'/g}'''
-env = { BAT_THEME = "ansi" }
+command = "bat -n --color=always '{split:\\::0|replace:s/'/'\"'\"'/g}'"
 offset = '{split:\::1}'
 
 [ui]

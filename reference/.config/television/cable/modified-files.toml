@@ -1,7 +1,7 @@
 [metadata]
 name = "modified-files"
 description = "Find modified files"
-requirements = ["bat", "fd"]
+requirements = ["bat", "git"]
 
 [source]
 command = """
