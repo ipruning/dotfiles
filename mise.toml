@@ -25,12 +25,12 @@ actionlint = "1.7.12"
 fd = "10.5.2"
 jq = "1.8.2"
 python = "3.15.2"
-ripgrep = "15.2.0"
-rumdl = "0.3.4"
+ripgrep = "16.0.0"
+rumdl = "0.3.6"
 shellcheck = "0.11.0"
 tombi = "1.11.3"
-uv = "0.13.9"
-zizmor = "1.32.0"
+uv = "0.13.10"
+zizmor = "1.33.1"
 
 [env]
 # mise sets VIRTUAL_ENV only once .venv exists. Python tasks call that
