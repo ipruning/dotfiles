@@ -25,8 +25,8 @@ from .check_mise import (
 )
 from .check_paths import host_path_findings
 from .check_skillshare import skillshare_findings, skillshare_ownership_finding
-from .generate import file_sha256, shim_aware_finder
-from .generate_specs import COMPLETION_SPECS, FUNCTION_SPECS, PLUGIN_SPECS, WASM_SPECS
+from .generate import shim_aware_finder
+from .generate_specs import COMPLETION_SPECS, FUNCTION_SPECS, PLUGIN_SPECS
 from .host_policy import (
     HostPolicy,
     HostPolicyError,
@@ -54,7 +54,7 @@ AUDIT_ONLY_NON_APPLICABLE_CHECKS = frozenset(
         "executable.lazydocker",
     },
 )
-AUDIT_ONLY_NON_APPLICABLE_PREFIXES = ("generated.", "zellij.")
+AUDIT_ONLY_NON_APPLICABLE_PREFIXES = ("generated.",)
 
 
 def _apply_audit_only_applicability(findings: list[Finding]) -> list[Finding]:
@@ -564,11 +564,16 @@ def inspect_host(
         if finding:
             findings.append(finding)
     for name, tool, _command, filename, _environment in COMPLETION_SPECS:
+        tool_available = (
+            policy_valid and canonical_mise_executable(home) is not None
+            if tool == "mise"
+            else owned_tool_finder(tool) is not None
+        )
         finding = _owned_generated_capability(
             f"generated.completion.{name}",
             repo_root / "generated/completions" / filename,
             f"Generated {name} completion",
-            tool_available=owned_tool_finder(tool) is not None,
+            tool_available=tool_available,
         )
         if finding:
             findings.append(finding)
@@ -582,9 +587,7 @@ def inspect_host(
             ),
         )
     generated_plugins = repo_root / "generated/plugins"
-    owned_plugins = {name for name, _source, _revision, _entrypoint in PLUGIN_SPECS} | {
-        f"{name}.wasm" for name, _source, _sha256 in WASM_SPECS
-    }
+    owned_plugins = {name for name, _source, _revision, _entrypoint in PLUGIN_SPECS}
     if generated_plugins.is_dir():
         for plugin_path in sorted(generated_plugins.iterdir()):
             if plugin_path.name in owned_plugins or plugin_path.name == ".gitkeep":
@@ -597,37 +600,6 @@ def inspect_host(
                     f"Generated plugin {plugin_path.name} has no repository owner",
                     plugin_path,
                     "Remove it explicitly if obsolete, or declare it in scripts/generate_specs.py.",
-                ),
-            )
-    for name, _source, sha256 in WASM_SPECS:
-        plugin_name = f"{name}.wasm"
-        plugin_path = generated_plugins / plugin_name
-        actual_sha256 = file_sha256(plugin_path)
-        if actual_sha256 == sha256:
-            findings.append(
-                Finding(
-                    f"zellij.{plugin_name}",
-                    Severity.OK,
-                    f"zellij.{plugin_name}_ready",
-                    f"Zellij plugin {plugin_name} matches its pinned checksum",
-                    plugin_path,
-                ),
-            )
-        else:
-            code = "missing" if actual_sha256 is None else "checksum_mismatch"
-            message = (
-                f"Zellij plugin {plugin_name} is missing"
-                if actual_sha256 is None
-                else f"Zellij plugin {plugin_name} does not match its pinned checksum"
-            )
-            findings.append(
-                Finding(
-                    f"zellij.{plugin_name}",
-                    Severity.WARN,
-                    f"zellij.{plugin_name}_{code}",
-                    message,
-                    plugin_path,
-                    "Run mise run generate, then mise run generate -- --apply.",
                 ),
             )
     if active_system == "Darwin":

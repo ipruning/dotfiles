@@ -3,14 +3,12 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import os
 import shutil
 import subprocess
 import sys
 import tempfile
-import urllib.error
 from dataclasses import replace
 from pathlib import Path
 
@@ -18,7 +16,6 @@ from .generate_commands import (
     atomic_install,
     checkout_revision,
     command_failure_reason,
-    download_url,
     emit_command_output,
     guarded_activation,
     inspect_plugin,
@@ -27,7 +24,6 @@ from .generate_commands import (
     timeout_reason,
 )
 from .generate_models import (
-    Downloader,
     GenerateAction,
     GenerateReport,
     GenerateResult,
@@ -45,7 +41,6 @@ from .generate_specs import (
     FUNCTION_SPECS,
     OWNED_GENERATED_DIRECTORIES,
     PLUGIN_SPECS,
-    WASM_SPECS,
 )
 from .host_policy import HostPolicyError, mutation_allowed, require_mutation_allowed
 from .mise import canonical_mise_executable, canonical_mise_path
@@ -57,15 +52,12 @@ __all__ = [
     "FUNCTION_SPECS",
     "OWNED_GENERATED_DIRECTORIES",
     "PLUGIN_SPECS",
-    "WASM_SPECS",
-    "Downloader",
     "GenerateAction",
     "GenerateReport",
     "GenerateResult",
     "GenerateSpec",
     "StepCallback",
     "execute_generate",
-    "file_sha256",
     "generate_next_commands",
     "plan_generate",
     "render_generate",
@@ -88,19 +80,6 @@ def _symlinked_directory_reason(directory: Path) -> str:
         f"generated directory is a symlink ({directory.readlink()}); "
         "remove it before refreshing"
     )
-
-
-def file_sha256(path: Path) -> str | None:
-    if not path.is_file():
-        return None
-    digest = hashlib.sha256()
-    try:
-        with path.open("rb") as file:
-            for chunk in iter(lambda: file.read(1024 * 1024), b""):
-                digest.update(chunk)
-    except OSError:
-        return None
-    return digest.hexdigest()
 
 
 def _mise_shims_dir() -> Path:
@@ -230,24 +209,20 @@ def plan_generate(
         )
         results.append(_generator_result(spec, executable_finder=generator_finder))
     for name, tool, command, filename, environment in COMPLETION_SPECS:
+        resolved_command = command
+        generator_finder = executable_finder
+        if tool == "mise":
+            mise_executable = canonical_mise_executable(home)
+            resolved_command = (str(canonical_mise_path(home)), *command[1:])
+            generator_finder = {tool: mise_executable}.get
         spec = GenerateSpec(
             name=f"completion.{name}",
             tool=tool,
             target=completions_dir / filename,
-            command=command,
+            command=resolved_command,
             environment=environment,
         )
-        if name == "llm" and not network:
-            results.append(
-                GenerateResult(
-                    spec,
-                    Status.SKIPPED,
-                    GenerateAction.GENERATE,
-                    "LLM completion needs package resolution; run generate without --offline",
-                )
-            )
-            continue
-        results.append(_generator_result(spec, executable_finder=executable_finder))
+        results.append(_generator_result(spec, executable_finder=generator_finder))
     git_available = executable_finder("git") is not None
     for name, source, revision, entrypoint in PLUGIN_SPECS:
         target = plugins_dir / name
@@ -364,38 +339,6 @@ def plan_generate(
                     "git is not available on PATH",
                 ),
             )
-    for name, source, sha256 in WASM_SPECS:
-        target = plugins_dir / f"{name}.wasm"
-        spec = GenerateSpec(
-            name=f"wasm.{name}",
-            tool=None,
-            target=target,
-            source=source,
-            sha256=sha256,
-            timeout_seconds=60,
-        )
-        if file_sha256(target) == sha256:
-            results.append(
-                GenerateResult(
-                    spec,
-                    Status.UNCHANGED,
-                    GenerateAction.DOWNLOAD,
-                    "checksum is current",
-                ),
-            )
-        elif network:
-            results.append(
-                GenerateResult(spec, Status.PLANNED, GenerateAction.DOWNLOAD),
-            )
-        else:
-            results.append(
-                GenerateResult(
-                    spec,
-                    Status.SKIPPED,
-                    GenerateAction.DOWNLOAD,
-                    "network refresh is disabled",
-                ),
-            )
     bat_spec = GenerateSpec(
         name="bat.cache",
         tool="bat",
@@ -444,7 +387,6 @@ def execute_generate(
     plan: GenerateReport,
     home: Path,
     *,
-    downloader: Downloader = download_url,
     on_start: StepCallback | None = None,
     capture_output: bool = True,
 ) -> GenerateReport:
@@ -584,25 +526,6 @@ def execute_generate(
                 finally:
                     if staging is not None:
                         shutil.rmtree(staging, ignore_errors=True)
-            elif planned.action is GenerateAction.DOWNLOAD:
-                assert spec.source is not None
-                assert spec.sha256 is not None
-                assert spec.target is not None
-                content = downloader(spec.source, spec.timeout_seconds)
-                digest = hashlib.sha256(content).hexdigest()
-                if digest != spec.sha256:
-                    raise RuntimeError(
-                        f"checksum mismatch: expected {spec.sha256}, received {digest}",
-                    )
-
-                def write_downloaded_content(
-                    temporary: Path,
-                    downloaded: bytes = content,
-                ) -> None:
-                    temporary.write_bytes(downloaded)
-
-                atomic_install(spec.target, write_downloaded_content)
-                exit_code = None
             elif planned.action is GenerateAction.REMOVE:
                 if spec.name == "zsh.compdump":
                     for file_path in home.glob(".zcompdump*"):
@@ -617,7 +540,6 @@ def execute_generate(
             OSError,
             RuntimeError,
             subprocess.TimeoutExpired,
-            urllib.error.URLError,
         ) as error:
             reason = (
                 timeout_reason(spec, error)

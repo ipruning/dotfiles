@@ -8,10 +8,8 @@ import re
 import shlex
 import subprocess
 import sys
-import urllib.request
 from dataclasses import replace
 from pathlib import Path
-from typing import cast
 
 from .generate_models import AtomicWriter, GenerateSpec
 from .process import run_process_group
@@ -121,20 +119,6 @@ def atomic_install(target: Path, writer: AtomicWriter) -> None:
 
 
 def _command_environment(spec: GenerateSpec, home: Path) -> dict[str, str]:
-    if spec.name == "completion.llm":
-        # LLM completion generation only needs a resolver path and temporary
-        # directory. Do not expose the user's API keys or other shell state to
-        # the downloaded package environment.
-        environment = {
-            "HOME": str(home),
-            "PATH": os.environ.get("PATH", os.defpath),
-        }
-        for name in ("TMPDIR", "TMP", "TEMP", "LANG", "LC_ALL"):
-            if value := os.environ.get(name):
-                environment[name] = value
-        environment.update(dict(spec.environment))
-        return environment
-
     environment = os.environ.copy()
     environment["HOME"] = str(home)
     environment.update(dict(spec.environment))
@@ -260,11 +244,3 @@ def checkout_revision(
         raise RuntimeError(
             f"pinned plugin entrypoint is missing: {directory / spec.entrypoint}"
         )
-
-
-def download_url(source: str, timeout_seconds: int) -> bytes:
-    request = urllib.request.Request(
-        source, headers={"User-Agent": "dotfiles-generate"}
-    )
-    with urllib.request.urlopen(request, timeout=timeout_seconds) as response:
-        return cast("bytes", response.read())

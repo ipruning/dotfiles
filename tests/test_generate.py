@@ -1,4 +1,3 @@
-import hashlib
 import json
 import os
 import shlex
@@ -181,6 +180,7 @@ def test_generate_previews_owned_refresh_by_default_without_writing(
     assert steps["function.starship"]["status"] == "planned"
     assert steps["function.atuin"]["status"] == "planned"
     assert steps["completion.codex"]["action"] == "generate"
+    assert steps["completion.mise"]["action"] == "generate"
     assert steps["completion.op"]["status"] == "skipped"
     assert steps["plugin.fzf-tab"]["action"] == "clone"
     assert (
@@ -189,12 +189,10 @@ def test_generate_previews_owned_refresh_by_default_without_writing(
     )
     assert steps["plugin.zsh-autosuggestions"]["action"] == "clone"
     assert steps["plugin.fast-syntax-highlighting"]["action"] == "clone"
-    assert steps["wasm.zellij-sessionizer"]["action"] == "download"
-    assert steps["wasm.zjstatus"]["action"] == "download"
     assert steps["bat.cache"]["status"] == "planned"
     assert steps["zsh.compdump"]["status"] == "skipped"
     assert steps["zsh.compdump"]["target"] == str(home / ".zcompdump*")
-    assert document["summary"] == {"planned": 13, "skipped": 14}
+    assert document["summary"] == {"planned": 12, "skipped": 12}
     assert not (repo_root / "generated").exists()
 
 
@@ -287,11 +285,11 @@ def test_generate_offline_apply_generates_and_removes_owned_shell_files(
     results = {step["name"]: step for step in document["steps"]}
     assert results["function.mise-bash"]["status"] == "succeeded"
     assert results["completion.codex"]["status"] == "succeeded"
+    assert results["completion.mise"]["status"] == "succeeded"
     assert results["completion.op"]["action"] == "remove"
     assert results["completion.op"]["status"] == "succeeded"
     assert results["plugin.fzf-tab"]["status"] == "skipped"
-    assert results["wasm.zjstatus"]["status"] == "skipped"
-    assert document["summary"] == {"skipped": 18, "succeeded": 9}
+    assert document["summary"] == {"skipped": 14, "succeeded": 10}
     assert (
         (repo_root / "generated/functions/_mise.bash")
         .read_text()
@@ -370,76 +368,6 @@ def test_generate_removes_atuin_function_when_host_tool_is_unavailable(
     assert not (functions / "_atuin.zsh").exists()
 
 
-@pytest.mark.parametrize("existing", [False, True])
-def test_generate_offline_skips_llm_without_running_uvx_or_replacing_output(
-    tmp_path: Path,
-    existing: bool,
-) -> None:
-    repo_root = tmp_path / "dotfiles"
-    home = tmp_path / "home"
-    bin_dir = tmp_path / "bin"
-    completion = repo_root / "generated/completions/_llm"
-    home.mkdir()
-    bin_dir.mkdir()
-    original_mtime: int | None = None
-    if existing:
-        completion.parent.mkdir(parents=True)
-        completion.write_text("existing completion\n")
-        original_mtime = completion.stat().st_mtime_ns
-    invocation = tmp_path / "uvx-invoked"
-    _fake_tool(
-        bin_dir, "uvx", f"printf invoked > {shlex.quote(str(invocation))}\nexit 9\n"
-    )
-
-    completed = _run_runtime(repo_root, home, bin_dir, "--offline", "--apply", "--json")
-
-    assert completed.returncode == 0, completed.stderr
-    steps = {step["name"]: step for step in json.loads(completed.stdout)["steps"]}
-    assert steps["completion.llm"]["status"] == "skipped"
-    assert "package resolution" in steps["completion.llm"]["reason"]
-    assert not invocation.exists()
-    if existing:
-        assert completion.read_text() == "existing completion\n"
-        assert completion.stat().st_mtime_ns == original_mtime
-    else:
-        assert not completion.exists()
-
-
-def test_generate_llm_completion_does_not_receive_host_credentials(
-    tmp_path: Path,
-    monkeypatch,
-) -> None:
-    repo_root = tmp_path / "dotfiles"
-    home = tmp_path / "home"
-    bin_dir = tmp_path / "bin"
-    completion = repo_root / "generated/completions/_llm"
-    home.mkdir()
-    bin_dir.mkdir()
-    monkeypatch.setenv("OPENAI_API_KEY", "test-openai-key")
-    monkeypatch.setenv("BRRR_SECRET", "test-brrr-secret")
-    _fake_tool(
-        bin_dir,
-        "uvx",
-        'test "$1" = --with || exit 10\n'
-        'test "$2" = httpx==0.28.1 || exit 11\n'
-        'test "$3" = llm==0.38 || exit 12\n'
-        'test -z "${OPENAI_API_KEY+x}" || exit 9\n'
-        'test -z "${BRRR_SECRET+x}" || exit 8\n'
-        'test "$_LLM_COMPLETE" = zsh_source || exit 7\n'
-        "printf 'llm completion\\n'\n",
-    )
-
-    monkeypatch.setenv("PATH", str(bin_dir))
-    plan = plan_generate(repo_root, home, network=True)
-    llm = next(item for item in plan.results if item.spec.name == "completion.llm")
-    # Keep network assets outside this generator's test boundary.
-    report = execute_generate(GenerateReport(False, (llm,), plan.generated_root), home)
-
-    assert report.ok, report.results[0].reason
-    assert report.results[0].status is Status.SUCCEEDED
-    assert completion.read_text() == "llm completion\n"
-
-
 @pytest.mark.parametrize("capture_output", [False, True])
 def test_generate_timeout_stops_children_before_running_later_steps(
     tmp_path: Path, capture_output: bool
@@ -482,41 +410,11 @@ def test_generate_timeout_stops_children_before_running_later_steps(
     assert not (tmp_path / "late").exists()
 
 
-def test_generate_rejects_invalid_download_without_replacing_asset(
-    tmp_path: Path,
-) -> None:
-    target = tmp_path / "plugin.wasm"
-    target.write_bytes(b"known-good")
-    expected = hashlib.sha256(b"new-valid").hexdigest()
-    spec = GenerateSpec(
-        name="wasm.test",
-        tool=None,
-        target=target,
-        source="https://example.invalid/plugin.wasm",
-        sha256=expected,
-    )
-    plan = GenerateReport(
-        apply=False,
-        results=(GenerateResult(spec, Status.PLANNED, GenerateAction.DOWNLOAD),),
-    )
-
-    report = execute_generate(
-        plan,
-        tmp_path,
-        downloader=lambda _source, _timeout: b"corrupt",
-    )
-
-    assert report.ok is False
-    assert report.results[0].status is Status.FAILED
-    assert "checksum mismatch" in (report.results[0].reason or "")
-    assert target.read_bytes() == b"known-good"
-
-
 def test_generate_failed_preview_does_not_suggest_apply(tmp_path: Path, capsys) -> None:
     planned = GenerateResult(
         GenerateSpec(name="planned", tool=None, target=tmp_path / "planned"),
         Status.PLANNED,
-        GenerateAction.DOWNLOAD,
+        GenerateAction.GENERATE,
     )
     failed = GenerateResult(
         GenerateSpec(name="failed", tool=None, target=tmp_path / "failed"),

@@ -296,7 +296,6 @@ def test_audit_only_full_check_skips_repository_runtime_readiness(
         "shell.functions",
         "generated.function.mise-bash",
         "generated.plugin.fzf-tab",
-        "zellij.zjstatus.wasm",
     ):
         assert findings[check].applicable is False
         assert findings[check].action is None

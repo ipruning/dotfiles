@@ -35,7 +35,6 @@ def generate_document(
                 "command": list(result.spec.command),
                 "source": result.spec.source,
                 "revision": result.spec.revision,
-                "sha256": result.spec.sha256,
                 "reason": result.reason,
                 "exit_code": result.exit_code,
             }
@@ -89,8 +88,6 @@ def _step_detail(spec: GenerateSpec, action: GenerateAction) -> str:
         return f"{command} -> {spec.target}"
     if command:
         return f"{command}{revision}"
-    if action is GenerateAction.DOWNLOAD:
-        return f"download {spec.source} -> {spec.target}"
     if action is GenerateAction.REMOVE:
         return f"remove {spec.target}"
     return str(spec.target or action)

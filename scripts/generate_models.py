@@ -9,7 +9,6 @@ from pathlib import Path
 
 from .models import Status
 
-Downloader = Callable[[str, int], bytes]
 AtomicWriter = Callable[[Path], object]
 
 
@@ -18,7 +17,6 @@ class GenerateAction(StrEnum):
     CLONE = "clone"
     UPDATE = "update"
     RUN = "run"
-    DOWNLOAD = "download"
     REMOVE = "remove"
     VALIDATE = "validate"
 
@@ -31,7 +29,6 @@ class GenerateSpec:
     command: tuple[str, ...] = ()
     source: str | None = None
     revision: str | None = None
-    sha256: str | None = None
     entrypoint: str | None = None
     environment: tuple[tuple[str, str], ...] = ()
     timeout_seconds: int = 120

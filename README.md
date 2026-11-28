@@ -238,10 +238,10 @@ directory, exit code, and output tail.
 startup only loads it.
 
 `generate` writes shell integrations and completions with the host's mise, and
-restores pinned Zsh plugins and Zellij WASM assets. Unchanged outputs report
+restores pinned Zsh plugins. Unchanged outputs report
 `unchanged`; clean plugins at their pinned commit skip fetching; dirty plugin
 checkouts are reported, not reset; generator errors keep existing files.
-`--offline` skips network assets and LLM completion resolution, so a first setup
+`--offline` skips network plugin refreshes, so a first setup
 needs an online `generate`. Open a new shell after files change. The generated
 Atuin integration for Zsh uses the shared mise version and the shell's Atuin
 configuration. Set `DOTFILES_ATUIN_USE_SHIM=1` in your shell environment if

@@ -1,4 +1,3 @@
-import hashlib
 import json
 from datetime import UTC, datetime
 from pathlib import Path
@@ -16,7 +15,6 @@ from scripts.models import Finding, Severity
 
 def test_inspect_host_reports_capabilities_and_their_invalid_transition(
     tmp_path: Path,
-    monkeypatch,
 ) -> None:
     repo_root = tmp_path / "repo"
     home = tmp_path / "home"
@@ -68,6 +66,10 @@ def test_inspect_host_reports_capabilities_and_their_invalid_transition(
         "generated/functions/_mise.nu",
         "generated/functions/_zoxide.nu",
         "generated/completions/_codex",
+        "generated/completions/_hunk",
+        "generated/completions/_lazygit",
+        "generated/completions/_mise",
+        "generated/completions/_uv",
         "generated/plugins/fzf-tab/fzf-tab.plugin.zsh",
         "generated/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh",
         "generated/plugins/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh",
@@ -79,18 +81,6 @@ def test_inspect_host_reports_capabilities_and_their_invalid_transition(
     (repo_root / "generated/functions/_mise.bash").write_text(
         f"command {canonical_mise}\n",
     )
-    zellij_plugins = repo_root / "generated/plugins"
-    wasm_digest = hashlib.sha256(b"wasm").hexdigest()
-    monkeypatch.setattr(
-        check_module,
-        "WASM_SPECS",
-        (
-            ("zellij-sessionizer", "https://example.invalid/one", wasm_digest),
-            ("zjstatus", "https://example.invalid/two", wasm_digest),
-        ),
-    )
-    for plugin_name in ("zellij-sessionizer.wasm", "zjstatus.wasm"):
-        (zellij_plugins / plugin_name).write_bytes(b"wasm")
 
     tools = tmp_path / "tools"
     tools.mkdir()
@@ -456,36 +446,6 @@ def test_linux_systemd_check_scans_global_and_data_user_unit_paths(
         assert findings[0].code == "mise.systemd_shim_dependency"
         assert findings[0].path == unit
         unit.unlink()
-
-
-def test_inspect_host_rejects_wasm_with_wrong_checksum(
-    tmp_path: Path,
-    monkeypatch,
-) -> None:
-    repo_root = tmp_path / "repo"
-    home = tmp_path / "home"
-    target = repo_root / "generated/plugins/example.wasm"
-    target.parent.mkdir(parents=True)
-    target.write_bytes(b"corrupt")
-    expected = hashlib.sha256(b"expected").hexdigest()
-    monkeypatch.setattr(
-        check_module,
-        "WASM_SPECS",
-        (("example", "https://example.invalid/example", expected),),
-    )
-
-    report = inspect_host(
-        repo_root,
-        home,
-        executable_finder=lambda _command: None,
-        system_name="Darwin",
-        profile="full",
-    )
-    findings = {finding.code: finding for finding in report.findings}
-
-    finding = findings["zellij.example.wasm_checksum_mismatch"]
-    assert finding.severity is Severity.WARN
-    assert finding.path == target
 
 
 def test_inspect_host_reports_symlinked_generated_directories(tmp_path: Path) -> None:
@@ -1491,7 +1451,7 @@ def test_inspect_host_reports_stale_owned_completion_when_tool_is_missing(
 ) -> None:
     repo_root = tmp_path / "repo"
     home = tmp_path / "home"
-    stale = repo_root / "generated/completions/_bootdev"
+    stale = repo_root / "generated/completions/_hunk"
     stale.parent.mkdir(parents=True)
     stale.write_text("stale\n")
 
@@ -1504,7 +1464,7 @@ def test_inspect_host_reports_stale_owned_completion_when_tool_is_missing(
     )
     findings = {finding.code: finding for finding in report.findings}
 
-    finding = findings["generated.completion.bootdev_stale"]
+    finding = findings["generated.completion.hunk_stale"]
     assert finding.severity is Severity.WARN
     assert finding.path == stale
 
