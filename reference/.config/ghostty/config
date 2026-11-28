@@ -7,14 +7,13 @@ font-size = 12
 font-style = Medium
 
 confirm-close-surface = false
-cursor-style = block
 cursor-style-blink = false
 macos-option-as-alt = right
 notify-on-command-finish = unfocused
 notify-on-command-finish-action = no-bell,notify
 notify-on-command-finish-after = 30s
 resize-overlay = never
-shell-integration-features = no-cursor, sudo, title, ssh-env, ssh-terminfo, path
+shell-integration-features = no-cursor, sudo, ssh-env, ssh-terminfo
 undo-timeout = 1m
 window-padding-x = 14
 window-padding-y = 14

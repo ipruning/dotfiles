@@ -1,13 +1,13 @@
 format = """\
 $sudo\
-${custom.ssh_user_host}\
+$username\
+$hostname\
 $directory\
 $git_branch\
 $git_status\
 $cmd_duration\
 $battery\
-$custom\
-$shell
+$custom
 $character\
 """
 add_newline = false
@@ -20,11 +20,14 @@ format = "[$symbol]($style)"
 style = "bold red"
 symbol = "SU "
 
-[custom.ssh_user_host]
-command = "printf '%s@%s' \"$USER\" \"$(hostname -s)\""
-format = "[$output]($style) "
+[username]
+format = "[$user]($style)@"
+style_root = "bold red"
+style_user = "bold yellow"
+
+[hostname]
+format = "[$hostname]($style) "
 style = "bold yellow"
-when = "test -n \"$SSH_CONNECTION$SSH_CLIENT$SSH_TTY\""
 
 [custom.gh_user]
 # 集换社工作目录由 ~/Developer/jihuanshe/mise.toml 的 GH_TOKEN 换成 alex-jhs，
@@ -59,9 +62,6 @@ format = "[$branch]($style) "
 [cmd_duration]
 format = "[$duration]($style) "
 min_time = 10_000
-min_time_to_notify = 3600_000
-show_notifications = false
-show_milliseconds = false
 
 [[battery.display]]
 threshold = 30
