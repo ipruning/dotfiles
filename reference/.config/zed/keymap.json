@@ -9,32 +9,7 @@
   {
     "context": "MessageEditor > Editor",
     "bindings": {
-      "enter": "editor::Newline",
-      "cmd-enter": "agent::Chat",
       "cmd-w": "workspace::ToggleRightDock",
-    },
-  },
-  {
-    "context": "MessageEditor > Editor && !showing_completions && !showing_code_actions",
-    "bindings": {
-      "enter": "editor::Newline",
-      "cmd-enter": "agent::Chat",
-    },
-  },
-  {
-    "context": "EditMessageEditor > Editor && !showing_completions && !showing_code_actions",
-    "bindings": {
-      "escape": "menu::Cancel",
-      "enter": "editor::Newline",
-      "cmd-enter": "menu::Confirm",
-    },
-  },
-  {
-    "context": "AgentFeedbackMessageEditor > Editor && !showing_completions && !showing_code_actions",
-    "bindings": {
-      "escape": "menu::Cancel",
-      "enter": "editor::Newline",
-      "cmd-enter": "menu::Confirm",
     },
   },
   {

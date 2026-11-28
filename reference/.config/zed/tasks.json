@@ -19,12 +19,7 @@
     "show_command": false,
     "allow_concurrent_runs": true,
     "use_new_terminal": true,
-    "shell": {
-      "with_arguments": {
-        "program": "/bin/bash",
-        "args": ["--noediting", "--norc", "--noprofile"],
-      },
-    },
+    "shell": { "program": "/bin/sh" },
   },
   {
     "label": "file_finder",
@@ -34,12 +29,7 @@
     "show_command": false,
     "allow_concurrent_runs": true,
     "use_new_terminal": true,
-    "shell": {
-      "with_arguments": {
-        "program": "/bin/bash",
-        "args": ["--noediting", "--norc", "--noprofile"],
-      },
-    },
+    "shell": { "program": "/bin/sh" },
   },
   {
     "label": "file_finder_modified",
@@ -49,12 +39,7 @@
     "show_command": false,
     "allow_concurrent_runs": true,
     "use_new_terminal": true,
-    "shell": {
-      "with_arguments": {
-        "program": "/bin/bash",
-        "args": ["--noediting", "--norc", "--noprofile"],
-      },
-    },
+    "shell": { "program": "/bin/sh" },
   },
   {
     "label": "project_finder",
@@ -64,12 +49,7 @@
     "show_command": false,
     "allow_concurrent_runs": true,
     "use_new_terminal": true,
-    "shell": {
-      "with_arguments": {
-        "program": "/bin/bash",
-        "args": ["--noediting", "--norc", "--noprofile"],
-      },
-    },
+    "shell": { "program": "/bin/sh" },
   },
   {
     "label": "yazi",
@@ -79,12 +59,7 @@
     "show_command": false,
     "allow_concurrent_runs": true,
     "use_new_terminal": true,
-    "shell": {
-      "with_arguments": {
-        "program": "/bin/bash",
-        "args": ["--noediting", "--norc", "--noprofile"],
-      },
-    },
+    "shell": { "program": "/bin/sh" },
     "env": {
       "EDITOR": "zed --wait",
       "VISUAL": "zed --wait",
@@ -99,7 +74,7 @@
     "show_command": false,
     "allow_concurrent_runs": true,
     "use_new_terminal": true,
-    "shell": { "with_arguments": { "program": "/bin/bash", "args": ["--noediting", "--norc", "--noprofile"] } },
+    "shell": { "program": "/bin/sh" },
     "env": { "EDITOR": "zed --wait", "VISUAL": "zed --wait" },
   },
   {
@@ -110,12 +85,7 @@
     "show_command": false,
     "allow_concurrent_runs": true,
     "use_new_terminal": true,
-    "shell": {
-      "with_arguments": {
-        "program": "/bin/bash",
-        "args": ["--noediting", "--norc", "--noprofile"],
-      },
-    },
+    "shell": { "program": "/bin/sh" },
   },
   {
     "label": "lazydocker",
@@ -125,12 +95,7 @@
     "show_command": false,
     "allow_concurrent_runs": true,
     "use_new_terminal": true,
-    "shell": {
-      "with_arguments": {
-        "program": "/bin/bash",
-        "args": ["--noediting", "--norc", "--noprofile"],
-      },
-    },
+    "shell": { "program": "/bin/sh" },
   },
   {
     "label": "gitu",
@@ -140,12 +105,7 @@
     "show_command": false,
     "allow_concurrent_runs": true,
     "use_new_terminal": true,
-    "shell": {
-      "with_arguments": {
-        "program": "/bin/bash",
-        "args": ["--noediting", "--norc", "--noprofile"],
-      },
-    },
+    "shell": { "program": "/bin/sh" },
   },
   {
     "label": "pi-tmux",
@@ -164,12 +124,7 @@
     "show_command": false,
     "allow_concurrent_runs": true,
     "use_new_terminal": true,
-    "shell": {
-      "with_arguments": {
-        "program": "/bin/bash",
-        "args": ["--noediting", "--norc", "--noprofile"],
-      },
-    },
+    "shell": { "program": "/bin/sh" },
   },
   {
     "label": "zellij",
@@ -179,23 +134,13 @@
     "show_command": false,
     "allow_concurrent_runs": true,
     "use_new_terminal": true,
-    "shell": {
-      "with_arguments": {
-        "program": "/bin/bash",
-        "args": ["--noediting", "--norc", "--noprofile"],
-      },
-    },
+    "shell": { "program": "/bin/sh" },
   },
   {
     "label": "run",
     "command": "file=\"$ZED_FILE\"; ext=\"${file##*.}\"; case \"$ext\" in bash) exec bash \"$file\" ;; sh) exec sh \"$file\" ;; py) exec mise exec -- uv run \"$file\" ;; js|jsx|mjs|cjs|ts|tsx) exec mise exec -- bun run \"$file\" ;; *) echo \"Unsupported file type: .$ext\" >&2; exit 2 ;; esac",
     "allow_concurrent_runs": true,
     "use_new_terminal": true,
-    "shell": {
-      "with_arguments": {
-        "program": "/bin/bash",
-        "args": ["--noediting", "--norc", "--noprofile"],
-      },
-    },
+    "shell": { "program": "/bin/sh" },
   },
 ]

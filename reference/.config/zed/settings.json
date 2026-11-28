@@ -1,10 +1,5 @@
 {
-  "context_servers": {},
-  "language_models": {
-    "openai_compatible": {}
-  },
   "diff_view_style": "split",
-  "proxy": "",
   "edit_predictions": {
     "provider": "zed",
   },
@@ -59,6 +54,12 @@
   },
   "languages": {
     "Markdown": {
+      "formatter": {
+        "language_server": {
+          "name": "rumdl",
+        },
+      },
+      "language_servers": ["rumdl", "..."],
       "soft_wrap": "prefer_line",
     },
     "Python": {
@@ -70,14 +71,7 @@
           },
         },
       ],
-      "language_servers": ["ty", "ruff", "!basedpyright", "!pylsp"],
-    },
-  },
-  "lsp": {
-    "markdownlint": {
-      "settings": {
-        "MD013": false,
-      },
+      "language_servers": ["ty", "ruff", "!basedpyright"],
     },
   },
   "preferred_line_length": 120,
