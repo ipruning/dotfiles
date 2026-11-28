@@ -110,7 +110,7 @@ run = [
     # Keep offline checks independent of each host's cached schemas.
     "tombi format --check --offline --no-cache",
     "tombi lint --offline --no-cache",
-    # Reads .markdownlint-cli2.yaml.
+    # Reads [tool.rumdl] in pyproject.toml.
     "rumdl check .",
 ]
 

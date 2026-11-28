@@ -74,6 +74,9 @@ ignore = ["E501", "PERF401", "PLW0717", "PLW1514"]
 # Test doubles mirror the signatures they replace.
 "tests/**" = ["ARG"]
 
+[tool.rumdl]
+disable = ["MD013", "MD033", "MD036", "MD040", "MD041", "MD060"]
+
 [tool.tombi.format.rules]
 indent-style = "space"
 indent-width = 4
